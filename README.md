@@ -6,8 +6,8 @@
 [![Tests][tests-icon]][tests-url]
 [![License][license-icon]][license-url]
 
-*Kyco* is the main controller of Kytos Project. We use *python-openflow* library
-to parse low level OpenFlow messages.
+*Kyco* is the main component of Kytos Project. Kytos Controller (Kyco) uses
+*python-openflow* library to parse low level OpenFlow messages.
 
 This code is part of *Kytos* project and was developed to be used with *Kytos*
 controller.

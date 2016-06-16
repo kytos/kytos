@@ -1,10 +1,11 @@
-import logging
 import os
-import daemon
-import lockfile
-import signal
-import time
 import sys
+import time
+import signal
+import logging
+import lockfile
+
+from daemon import DaemonContext
 
 log = logging.getLogger(__name__)
 
@@ -38,10 +39,9 @@ class KycoDaemon(object):
     """Daemonize and run the kyco daemon."""
 
     def __init__(self, options):
-        self.options    = options
-        #context_class   = NoDaemonContext if self.options.nodaemon else daemon.DaemonContext
-        context_class   = NoDaemonContext
-        self.context    = self._build_context(options, context_class)
+        self.options = options
+        context_class = DaemonContext if options.daemon else NoDaemonContext
+        self.context = self._build_context(options, context_class)
 
     def _build_context(self, options, context_class):
         signal_map = {
@@ -57,14 +57,14 @@ class KycoDaemon(object):
             umask = 0o022,
             pidfile = pidfile,
             signal_map = signal_map,
-            files_preserve = [pidfile.path]
-        )
+            files_preserve = [pidfile.path])
 
     def run(self):
+        # setup_logging(self.options)
+        # TODO: Print nice message if daemon is_open.
         with self.context:
-            # setup_logging(self.options)
             while True:
-                print(self.context.pidfile)
+                print(self.context)
                 time.sleep(2)
 
     def _handle_shutdown(self, sig_num, stack_frame):

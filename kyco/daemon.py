@@ -86,11 +86,3 @@ class KycoDaemon(object):
         """Reconfigure requested by SIGHUP."""
         # asyncio reconfigure task on call later ?
         pass
-
-
-if __name__ == '__main__':
-    #options = parse_options()
-    options = None
-    #setup_environment(options)
-    kyco = KycoDaemon(options)
-    kyco.run()

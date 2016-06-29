@@ -3,9 +3,9 @@ import sys
 import time
 import signal
 import logging
-import lockfile
 
 from daemon import DaemonContext
+from daemon.pidfile import PIDLockFile
 
 log = logging.getLogger(__name__)
 
@@ -49,11 +49,9 @@ class KycoDaemon(object):
             signal.SIGINT:  self._handle_graceful_shutdown,
             signal.SIGTERM: self._handle_shutdown,
         }
-        #pidfile = lockfile.FileLock(options.pid_file)
-        pidfile = lockfile.FileLock('/var/run/kyco/kyco.pid')
+        pidfile = PIDLockFile(self.options.pidfile)
         return context_class(
-            #working_directory = options.working_dir,
-            working_directory = '/opt/kytos',
+            working_directory = self.options.workdir,
             umask = 0o022,
             pidfile = pidfile,
             signal_map = signal_map,

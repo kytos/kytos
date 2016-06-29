@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
 from kyco.daemon import KycoDaemon
-from kyco.cmdline import KycoCmdLine
+from kyco.config import KycoConfig
 
 def main():
-    cmd = KycoCmdLine()
-    cmd.parse_args()
-
-    daemon = KycoDaemon(cmd.args)
+    config = KycoConfig()
+    daemon = KycoDaemon(config.args)
     daemon.run()
 
 if __name__ == '__main__':

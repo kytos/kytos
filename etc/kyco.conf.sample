@@ -1,0 +1,21 @@
+[daemon]
+
+# Full path of the working directory to which the process should change on
+# daemon start. Since a filesystem cannot be unmounted if a process has its
+# current working directory on that filesystem, this should either be left at
+# default or set to a directory that is a sensible “home directory” for the
+# daemon while it is running. Default is /var/lib/kyco.
+workdir = /var/lib/kyco
+
+# PID file to write. When the controller starts, it will save the his pid on
+# this file.
+pidfile = /var/run/kyco.pid
+
+# This controller can be started in two modes: 'daemon' mode or 'interactive'
+# mode. On daemon mode, the process will detach from terminal when starts,
+# running in background. When running on 'interactive' mode, you will receive a
+# console right after the controller starts. Default is 'interactive' mode.
+daemon = False
+
+# Run the controller in debug mode or not. Default is False.
+debug = False

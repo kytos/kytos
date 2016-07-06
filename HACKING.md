@@ -82,7 +82,7 @@ directory, the virtualenvironment will be automaticaly loaded. If you are using
 bash, then you need to run the `workon` command to activate the environment:
 
 ```shell
-workon python-openflow
+workon kyco
 ```
 
 See more virtualenvwrapper commands on:

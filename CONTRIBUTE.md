@@ -101,7 +101,7 @@ contributor should place a pull request to the `develop` branch.
 
 Before you submit your pull request consider the following guidelines:
 
-* Search [GitHub](https://github.com/kytos/python-openflow/pulls) for an open or
+* Search [GitHub](https://github.com/kytos/kyco/pulls) for an open or
   closed Pull Request that relates to your submission. You don't want to
   duplicate effort;
 * Please sign our [CLA](#cla) before sending pull requests. We cannot accept
@@ -128,7 +128,7 @@ python3 setup.py test
 git push origin my-fix-branch
 ```
 
-* In GitHub, send a pull request to `python-openflow:develop`.
+* In GitHub, send a pull request to `kyco:develop`.
 * If we suggest changes then:
   * Make the required updates.
   * Re-run the test suite to ensure tests are still passing.
@@ -271,12 +271,6 @@ wish to implement and then write the code to pass this test.
 More info about the tests can be found on the
 [HACKING.md](HACKING.md#tdd-test-driven-development) file.
 
-### Use the raw packet files
-
-We provide some files with raw packets to be used as input with the parser
-library. Use theses files to test your features. To use our raw packet files,
-please take a look inside `raw` directory.
-
 ## <a name="cla"></a> Signing the CLA
 
 Please sign our Contributor License Agreement (CLA) before sending pull
@@ -293,11 +287,11 @@ There is also our dev mailing list:
 **of-ng-dev** (at) **ncc** (dot) **unesp** (dot) **br**
 
 
-[github]: github.com/kytos/python-openflow
-[issues]: https://github.com/kytos/python-openflow/issues
-[fork]: https://github.com/of-ng/python-openflow/fork
-[pr]: https://github.com/of-ng/python-openflow/compare
-[readme]: https://github.com/github/python-openflow#readme
+[github]: github.com/kytos/kyco
+[issues]: https://github.com/kytos/kyco/issues
+[fork]: https://github.com/of-ng/kyco/fork
+[pr]: https://github.com/of-ng/kyco/compare
+[readme]: https://github.com/github/kyco
 [github-gist]: http://gist.github.com/
 [github-issues]: https://guides.github.com/features/issues/
 [semver]: http://semver.org/

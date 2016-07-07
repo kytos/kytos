@@ -38,23 +38,28 @@ def start_logger():
 
 
 class KycoApp(metaclass=ABCMeta):
-    _listeners = {'msg_in_event': None,
-                  'msg_out_event': None,
-                  'apps_event': None}
     def __init__(self):
-        # Get all methods from the instance
-        # check which one has a attribute named 'event_type'
-        # register this method on the '_listeners' dict
-        # of the instance
-        pass
+		"""
+			Go through all of the instance methods and selects those that have 
+			the events attribute, then creates a dict containing the event_name
+			and the list of methods that are responsible for handling such event
+		"""
+    	self._listeners = {}
+
+		handler_methods = [getattr(self,method_name) for method_name in 
+						   dir(self) if callable(getattr(self,method_name))
+						   and hasattr(method_name,'events')]
+		
+		for method in handler_methods:
+			for event_name in method.events:
+				if event_name not in self._listeners:
+					self._listeners[event_name] = []
+				self._listeners[event_name].append(method)
+
 
     @abstractmethod
     def setUp(self):
         pass
-
-
-
-
 
 
 class ListenAppEvents(object):

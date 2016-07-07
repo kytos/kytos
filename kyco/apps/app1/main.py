@@ -1,16 +1,17 @@
 """First app...."""
 import time
 import logging
-from utils import APP_MSG
+from kyco.utils import APP_MSG
 
-from kyco.apps import KycoApp
+from kyco.utils import listen_to
+from kyco.utils import KycoApp
 
 log = logging.getLogger('kytos[A]')
 
 
 class App1(KycoApp):
 
-    def __init__(self):
+    def setUp(self):
         self.app_id = 1
         self.name = 'first_app'
         self.counted_value = 0
@@ -18,6 +19,7 @@ class App1(KycoApp):
         self.processed_messages = 0
         self.events_buffer = None
 
+    @listen_to('KycoMessageIn')
     def handle_event(self, event):
         addr = event[0]
         data = event[1]

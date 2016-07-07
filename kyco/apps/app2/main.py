@@ -1,7 +1,7 @@
 """Second app...."""
 import time
 import logging
-from utils import APP_MSG
+from kyco.utils import APP_MSG
 
 log = logging.getLogger('kytos[A]')
 

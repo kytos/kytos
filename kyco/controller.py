@@ -86,10 +86,10 @@ class Controller(object):
         app.add_to_app_events_buffer = self.buffers.app_events.put
         self.apps.append(app)
 
-        for event_type, listener in app._listeners.items():
-            if event_type not in self_events_listeners:
+        for event_type, listeners in app._listeners.items():
+            if event_type not in self.events_listeners:
                 self._events_listeners[event_type] = []
-            self._events_listeners[event_type].append(listener)
+            self._events_listeners[event_type].extend(listeners)
 
     def load_apps(self):
         for app_name in os.listdir(APPS_DIR):

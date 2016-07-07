@@ -4,7 +4,6 @@ import importlib
 import os
 import sys
 
-from configparser import SafeConfigParser
 from threading import Thread
 
 from kyco.apps.app1 import App1 as _A1
@@ -20,12 +19,6 @@ from kyco.utils import start_logger
 
 
 log = start_logger()
-
-config = SafeConfigParser()
-config.read('kyco_config.ini')
-HOST = config.get('TCP', 'HOST')
-PORT = config.getint('TCP', 'PORT')
-APPS_DIR = os.path.join(os.getcwd(), 'apps')
 
 
 class Controller(object):
@@ -95,7 +88,3 @@ class Controller(object):
         for app_name in os.listdir(APPS_DIR):
             if os.path.isdir(os.path.join(APPS_DIR, app_name)):
                 self.load_app(app_name)
-
-if __name__ == '__main__':
-    controller = Controller()
-    controller.start()

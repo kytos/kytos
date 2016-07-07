@@ -1,5 +1,9 @@
 """Testing for contoller"""
 
+import importlib
+import os
+import sys
+
 from configparser import SafeConfigParser
 from threading import Thread
 
@@ -21,6 +25,7 @@ config = SafeConfigParser()
 config.read('kyco_config.ini')
 HOST = config.get('TCP', 'HOST')
 PORT = config.getint('TCP', 'PORT')
+APPS_DIR = os.path.join(os.getcwd(), 'apps')
 
 
 class Controller(object):
@@ -68,22 +73,28 @@ class Controller(object):
         #       but there we have a while True...
         for _, thread in self._threads.items():
             thread.join()
-    def load_apps(self):
-        # TODO: FIX APP Loading....
-        app1 = _A1()
-        app2 = _A2()
-        apps = {
-            app1: [0, 2],
-            app2: [1]
-        }
-        for app in apps:
-            app.output_buffer = self.buffers.msg_out_events.put
-            app.events_buffer = self.buffers.app_events.put
-            for event in apps[app]:
-                if event not in self._events_listeners:
-                    self._events_listeners[event] = []
-                self._events_listeners[event].append(app)
 
+    def install_app(self):
+        pass
+
+    def load_app(self, app_name):
+        path = os.path.join(APPS_DIR, app_name, 'main.py')
+        module = importlib.machinery.SourceFileLoader(app_name, path)
+        app = module.load_module().Main()
+
+        app.add_to_msg_out_events_buffer = self.buffers.msg_out_events.put
+        app.add_to_app_events_buffer = self.buffers.app_events.put
+        self.apps.append(app)
+
+        for event_type, listener in app._listeners.items():
+            if event_type not in self_events_listeners:
+                self._events_listeners[event_type] = []
+            self._events_listeners[event_type].append(listener)
+
+    def load_apps(self):
+        for app_name in os.listdir(APPS_DIR):
+            if os.path.isdir(os.path.join(APPS_DIR, app_name)):
+                self.load_app(app_name)
 
 if __name__ == '__main__':
     controller = Controller()

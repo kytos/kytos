@@ -2,6 +2,8 @@
 
 import logging
 
+from inspect import getargspec
+
 APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
 
 
@@ -28,3 +30,21 @@ def start_logger():
     app_log.addHandler(app_console_handler)
 
     return controller_log
+
+
+class KycoApp(object):
+    _listeners = {'msg_in_event': None,
+                  'msg_out_event': None,
+                  'apps_event': None}
+
+
+class ListenAppEvents(object):
+
+    def __init__(self, listener):
+        self.listener = listener
+        print(getargspec(listener))
+        # print(dir(listener.__module__))
+        # listener.__class__._listeners['apps_event'] = listener
+
+    def __call__(self, *args, **kwargs):
+        self.listener(*args, **kwargs)

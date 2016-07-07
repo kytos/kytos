@@ -3,10 +3,12 @@ import time
 import logging
 from utils import APP_MSG
 
+from kyco.apps import KycoApp
+
 log = logging.getLogger('kytos[A]')
 
 
-class App1(object):
+class App1(KycoApp):
 
     def __init__(self):
         self.app_id = 1

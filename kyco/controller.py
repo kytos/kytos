@@ -12,9 +12,9 @@ Basic usage:
     controller.start()
 """
 
-import importlib
 import os
 
+from importlib.machinery import SourceFileLoader
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
@@ -29,6 +29,9 @@ from kyco.utils import start_logger
 
 log = start_logger()
 
+HOST = '127.0.0.1'
+PORT = 6633
+NAPPS_DIR = '/tmp/kyco_apps/'
 
 class Controller(object):
     """This is the main class of Kyco.
@@ -107,14 +110,14 @@ class Controller(object):
 
     def load_napp(self, napp_name):
         path = os.path.join(NAPPS_DIR, napp_name, 'main.py')
-        module = importlib.machinery.SourceFileLoader(napp_name, path)
+        module = SourceFileLoader(napp_name, path)
         napp = module.load_module().Main()
 
         napp.add_to_msg_out_events_buffer = self.buffers.msg_out_events.put
         napp.add_to_app_events_buffer = self.buffers.app_events.put
-        self.napps.append(napp)
+        self.napps[napp_name] = napp
 
-        for event_type, listeners in app._listeners.items():
+        for event_type, listeners in napp._listeners.items():
             if event_type not in self.events_listeners:
                 self._events_listeners[event_type] = []
             self._events_listeners[event_type].extend(listeners)

@@ -3,18 +3,27 @@ import logging
 from queue import Queue
 from threading import Event as Semaphore
 
+from kyco.core.events import KycoRawEvent
+from kyco.core.events import KycoMsgEvent
+from kyco.core.events import KycoAppEvent
+
 __all__ = ['KycoBuffers']
 
 log = logging.getLogger('Kyco')
 
 
 class KycoEventBuffer(object):
-    def __init__(self, name):
+    """Class that """
+    def __init__(self, name, event_base_class):
         self.name = name
         self._queue = Queue()
         self._semaphore = Semaphore()
+        self._event_base_class = event_base_class
 
     def put(self, new_event):
+        if not isinstance(new_event, self._event_base_class):
+            # TODO: Specific exception
+            raise Exception("This event can not be added to this buffer")
         log.debug('Added new event to %s event buffer', self.name)
         self._queue.put(new_event)
         self._semaphore.set()
@@ -45,7 +54,7 @@ class KycoEventBuffer(object):
 
 class KycoBuffers(object):
     def __init__(self):
-        self.raw_events = KycoEventBuffer('raw_event')
-        self.msg_in_events = KycoEventBuffer('msg_in_event')
-        self.msg_out_events = KycoEventBuffer('msg_out_event')
-        self.app_events = KycoEventBuffer('app_event')
+        self.raw_events = KycoEventBuffer('raw_event', KycoRawEvent)
+        self.msg_in_events = KycoEventBuffer('msg_in_event', KycoMsgEvent)
+        self.msg_out_events = KycoEventBuffer('msg_out_event', KycoMsgEvent)
+        self.app_events = KycoEventBuffer('app_event', KycoAppEvent)

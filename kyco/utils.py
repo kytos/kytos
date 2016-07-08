@@ -4,9 +4,9 @@ import logging
 
 from abc import abstractmethod, ABCMeta
 
+log = logging.getLogger('kytos[A]')
 
 APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
-
 
 def start_logger():
     """Starts the loggers, both the Kyco and the KycoNApp"""
@@ -45,6 +45,7 @@ class KycoNApp(metaclass=ABCMeta):
         process.
         """
         self._listeners = {}
+        self.events_buffer = None
 
         handler_methods = [getattr(self, method_name) for method_name in
                            dir(self) if callable(getattr(self, method_name))
@@ -56,6 +57,7 @@ class KycoNApp(metaclass=ABCMeta):
                     self._listeners[event_name] = []
                 self._listeners[event_name].append(method)
         self.setUp()
+        log.info("Instance of {} created.", self.name)
 
     @abstractmethod
     def setUp(self):

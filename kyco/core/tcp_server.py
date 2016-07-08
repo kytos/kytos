@@ -10,9 +10,9 @@ from threading import current_thread
 # TODO: Fix version scheme
 from pyof.v0x01.common.header import Header
 
-from kyco.events import KycoRawConnectionUp
-from kyco.events import KycoRawConnectionDown
-from kyco.events import KycoRawOpenFlowMessageIn
+from kyco.core.events import KycoRawConnectionUp
+from kyco.core.events import KycoRawConnectionDown
+from kyco.core.events import KycoRawOpenFlowMessageIn
 
 __all__ = ['KycoServer', 'KycoOpenFlowRequestHandler']
 

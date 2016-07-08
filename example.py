@@ -10,6 +10,6 @@ if __name__ == '__main__':
 
     HOST = config.get('TCP', 'HOST')
     PORT = config.getint('TCP', 'PORT')
-    APPS_DIR = os.path.join(os.getcwd(), 'apps')
+    NAPPS_DIR = os.path.join(os.getcwd(), 'apps')
     controller = Controller()
     controller.start()

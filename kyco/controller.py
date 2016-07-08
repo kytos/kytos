@@ -1,13 +1,22 @@
-"""Testing for contoller"""
+# -*- coding: utf-8 -*-
+"""Kyco - Kytos Contoller
+
+This module contains the main class of Kyco, which is
+:class:`~.controller.Controller`.
+
+Basic usage:
+
+.. code-block:: python3
+
+    controller = Controller()
+    controller.start()
+"""
 
 import importlib
 import os
-import sys
 
 from threading import Thread
 
-from kyco.apps.app1 import App1 as _A1
-from kyco.apps.app2 import App2 as _A2
 from kyco.core.buffers import KycoBuffers
 from kyco.core.event_handlers import raw_event_handler
 from kyco.core.event_handlers import msg_in_event_handler
@@ -22,14 +31,28 @@ log = start_logger()
 
 
 class Controller(object):
+    """This is the main class of Kyco.
+
+    The main responsabilities of this object is:
+        - start a thread with :class:`~.core.tcp_server.KycoServer`;
+        - manage KycoNApps (install, load and unload);
+        - keep the buffers (instance of :class:`~core.buffers.KycoBuffers`);
+        - manage which event should be sent to NApps methods;
+        - manage the buffers handlers, considering one thread per handler.
+    """
     def __init__(self):
-        self.apps = {}
+        self.napps = {}
         self._events_listeners = {}
         self.buffers = KycoBuffers()
         self._kyco_server = None
         self._threads = {}
 
     def start(self):
+        """Start the controller.
+
+        Starts a thread with the KycoServer (TCP Server).
+        Starts a thread for each buffer handler.
+        Load the installed apps."""
         log.info("Starting Kyco - Kytos Controller")
         self._server = KycoServer((HOST, PORT), KycoOpenFlowRequestHandler,
                                   self.buffers.raw_events.put)
@@ -56,9 +79,20 @@ class Controller(object):
             thread.start()
 
         log.info("Loading kyco apps...")
-        self.load_apps()
+        self.load_napps()
 
     def stop(self):
+        """Stops the controller.
+
+        This method should:
+            - announce on the network that the controller will shutdown;
+            - stop receiving incoming packages;
+            - call the 'shutdown' method of each KycoNApp that is running;
+            - finish reading the events on all buffers;
+            - stop each running handler;
+            - stop all running threads;
+            - stop the KycoServer;
+            """
         self._server.socket.close()
         self._server.shutdown()
         # TODO: This is not working... How to kill the handlers threads?
@@ -67,24 +101,25 @@ class Controller(object):
         for _, thread in self._threads.items():
             thread.join()
 
-    def install_app(self):
+    def install_napp(self, napp_name):
+        """Install the requested NApp by its name"""
         pass
 
-    def load_app(self, app_name):
-        path = os.path.join(APPS_DIR, app_name, 'main.py')
-        module = importlib.machinery.SourceFileLoader(app_name, path)
-        app = module.load_module().Main()
+    def load_napp(self, napp_name):
+        path = os.path.join(NAPPS_DIR, napp_name, 'main.py')
+        module = importlib.machinery.SourceFileLoader(napp_name, path)
+        napp = module.load_module().Main()
 
-        app.add_to_msg_out_events_buffer = self.buffers.msg_out_events.put
-        app.add_to_app_events_buffer = self.buffers.app_events.put
-        self.apps.append(app)
+        napp.add_to_msg_out_events_buffer = self.buffers.msg_out_events.put
+        napp.add_to_app_events_buffer = self.buffers.app_events.put
+        self.napps.append(napp)
 
         for event_type, listeners in app._listeners.items():
             if event_type not in self.events_listeners:
                 self._events_listeners[event_type] = []
             self._events_listeners[event_type].extend(listeners)
 
-    def load_apps(self):
-        for app_name in os.listdir(APPS_DIR):
-            if os.path.isdir(os.path.join(APPS_DIR, app_name)):
-                self.load_app(app_name)
+    def load_napps(self):
+        for napp_name in os.listdir(NAPPS_DIR):
+            if os.path.isdir(os.path.join(NAPPS_DIR, napp_name)):
+                self.load_napp(napp_name)

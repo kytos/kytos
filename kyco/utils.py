@@ -62,6 +62,12 @@ class KycoNApp(metaclass=ABCMeta):
         """Replaces the 'init' method for the KycoApp subclass"""
         pass
 
+    @abstractmethod
+    def shutdown(self):
+        """This method will be called before the app is unloaded of
+        before the controller is stopped"""
+        pass
+
 
 class listen_to(object):
     """Decorator for Event Listeners methods.

@@ -10,9 +10,9 @@ from threading import current_thread
 # TODO: Fix version scheme
 from pyof.v0x01.common.header import Header
 
-from kyco.events import KycoRawConnectionUp
-from kyco.events import KycoRawConnectionDown
-from kyco.events import KycoRawOpenFlowMessageIn
+from kyco.core.events import KycoRawConnectionUp
+from kyco.core.events import KycoRawConnectionDown
+from kyco.core.events import KycoRawOpenFlowMessageIn
 
 __all__ = ['KycoServer', 'KycoOpenFlowRequestHandler']
 
@@ -20,6 +20,11 @@ log = logging.getLogger('Kyco')
 
 
 class KycoServer(ThreadingMixIn, TCPServer):
+    """This is a TCP Server that will be listening on the specifiec port
+    (defaults to 6633) for any package that comes from the network and then
+    stabilishes the socket connection to the devices (switches) when needed,
+    considering a thread per connection and keeping the connection alive.
+    """
     # daemon_threads = True
     allow_reuse_address = True
     main_threads = {}

@@ -205,9 +205,10 @@ class ListenTo(object):
 
 
 class ExampleApp(KycoNApp):
-    def setUp(self):
+    # TODO: REMOVE
+    def set_up(self):
         self.nome = "APP"
 
-    @listen_to('KycoMessageIn', 'KycoMessageOut', 'NewAppLoaded')
-    def test(self, event):
+    @ListenTo('KycoMessageIn', 'KycoMessageOut', 'NewAppLoaded')
+    def my_handler_test(self, event):
         print(event)

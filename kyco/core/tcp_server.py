@@ -4,7 +4,6 @@ import logging
 from socketserver import ThreadingMixIn
 from socketserver import BaseRequestHandler
 from socketserver import TCPServer
-from struct import unpack
 from threading import current_thread
 
 # TODO: Fix version scheme
@@ -74,15 +73,13 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         header_length = 8
         while True:
             raw_header = None
+            header = Header()
             buff = b''
 
             raw_header = self.request.recv(header_length)
-            print(len(raw_header))
-            buff += raw_header
             log.debug("New message from {}:{} at thread "
                       "{}".format(self.ip, self.port, curr_thread.name))
 
-            header = Header()
             header.unpack(raw_header)
             # Just to close the sock with CTRL+C or CTRL+D
             # if header == 255 or header == 4:
@@ -96,6 +93,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
                 log.debug('Reading the buffer')
                 buff += self.request.recv(message_size)
 
+            # TODO: Do we need other informations from the network packet?
             context = {'connection': (self.ip, self.port),
                        'header': header,
                        'buff': buff}

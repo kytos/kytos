@@ -37,7 +37,8 @@ class Main(KycoCoreNApp):
             event (KycoRawOpenFlowMessageIn): RawOpenFlow Messag to be unpacked
         """
         message = new_message_from_header(raw_event.context.header)
-        message.unpack(raw_event.context.buffer)
+        if len(raw_event.context.buffer) > 0:
+            message.unpack(raw_event.context.buffer)
 
         # TODO: Do we need other informations from the network packet?
         context = {'connection': raw_event.context.connection,

@@ -98,3 +98,11 @@ class KycoAppUnloaded(KycoCoreEvent):
 
 class KycoServerDown(KycoCoreEvent):
     pass
+
+
+class KycoMessageIn(KycoMsgEvent):
+    pass
+
+
+class KycoMessageOut(KycoMsgEvent):
+    pass

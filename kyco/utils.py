@@ -153,7 +153,7 @@ class KycoNApp(metaclass=ABCMeta):
         pass
 
 
-class listen_to(object):
+class ListenTo(object):
     """Decorator for Event Listeners methods.
 
     This decorator should be used on methods, inside an APP, to define which

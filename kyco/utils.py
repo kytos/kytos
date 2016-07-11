@@ -100,7 +100,11 @@ class KycoCoreNApp(metaclass=ABCMeta):
 
 class KycoNApp(metaclass=ABCMeta):
     """Base class for any KycoNApp to be developed."""
-    def __init__(self):
+
+    msg_out_buffer = False
+    app_buffer = False
+
+    def __init__(self, **kwargs):
         """Go through all of the instance methods and selects those that have
         the events attribute, then creates a dict containing the event_name
         and the list of methods that are responsible for handling such event.
@@ -120,12 +124,26 @@ class KycoNApp(metaclass=ABCMeta):
                 if event_name not in self._listeners:
                     self._listeners[event_name] = []
                 self._listeners[event_name].append(method)
-        self.setUp()
+
+        if self.msg_out_buffer:
+            if 'add_to_msg_out_buffer' not in kwargs:
+                raise KycoNAppMissingInitArgument('add_to_msg_out_buffer')
+            self.add_to_msg_out_buffer = kwargs['add_to_msg_out_buffer']
+
+        if self.app_buffer:
+            if 'add_to_app_buffer' not in kwargs:
+                raise KycoNAppMissingInitArgument('add_to_app_buffer')
+            self.add_to_app_buffer = kwargs['add_to_app_buffer']
+
+        self.set_up(**kwargs)
         log.info("Instance of {} created.", self.name)
 
     @abstractmethod
-    def setUp(self):
-        """Replaces the 'init' method for the KycoApp subclass"""
+    def set_up(self, **kwargs):
+        """'Replaces' the 'init' method for the KycoApp subclass.
+
+        The setUp method is automatically called by the __init__ method.
+        Users shouldn't call this method."""
         pass
 
     @abstractmethod

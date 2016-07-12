@@ -72,11 +72,17 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         curr_thread = current_thread()
         header_length = 8
         while True:
-            raw_header = None
             header = Header()
             buff = b''
 
-            raw_header = self.request.recv(header_length)
+            raw_header = self.request.recv(8)
+            if not raw_header:
+                log.debug("Client %s:%s disconnected", self.ip, self.port)
+                break
+
+            while len(raw_header) < header_length:
+                raw_header += self.request.recv(header_length - len(raw_header))
+
             log.debug("New message from {}:{} at thread "
                       "{}".format(self.ip, self.port, curr_thread.name))
 

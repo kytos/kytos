@@ -13,6 +13,7 @@ Basic usage:
 """
 
 import os
+import time
 
 from importlib.machinery import SourceFileLoader
 from threading import Thread
@@ -82,6 +83,7 @@ class Controller(object):
         self._threads = thrds
         for _, thread in self._threads.items():
             thread.start()
+        time.sleep(0.1)
 
         log.info("Loading kyco apps...")
         self.load_napps()
@@ -105,6 +107,10 @@ class Controller(object):
         #       but there we have a while True...
         for _, thread in self._threads.items():
             thread.join()
+
+        for _, thread in self._threads.items():
+            while thread.is_alive():
+                pass
 
     def install_napp(self, napp_name):
         """Install the requested NApp by its name"""

@@ -24,6 +24,8 @@ from kyco.core.event_handlers import msg_out_event_handler
 from kyco.core.event_handlers import app_event_handler
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler
 from kyco.core.tcp_server import KycoServer
+from kyco.utils import KycoCoreNApp
+from kyco.utils import KycoNApp
 from kyco.utils import start_logger
 
 
@@ -111,10 +113,17 @@ class Controller(object):
     def load_napp(self, napp_name):
         path = os.path.join(NAPPS_DIR, napp_name, 'main.py')
         module = SourceFileLoader(napp_name, path)
-        napp = module.load_module().Main()
+        napp_main_class = module.load_module().Main
 
-        napp.add_to_msg_out_events_buffer = self.buffers.msg_out_events.put
-        napp.add_to_app_events_buffer = self.buffers.app_events.put
+        args = {'add_to_msg_out_buffer': self.buffers.msg_out_events.put,
+                'add_to_app_buffer': self.buffers.app_events.put}
+
+        if issubclass(napp_main_class, KycoCoreNApp):
+            if napp_main_class.msg_in_buffer:
+                args['add_to_msg_in_buffer'] = self.buffers.msg_in_events.put
+
+        napp = napp_main_class(**args)
+
         self.napps[napp_name] = napp
 
         for event_type, listeners in napp._listeners.items():

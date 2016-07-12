@@ -1,9 +1,10 @@
+import time
 from socket import socket
 from socketserver import BaseRequestHandler
 from threading import Thread
 from unittest import TestCase
 
-from pyof.v0x01.symmetric.echo_request import EchoRequest
+from pyof.v0x01.symmetric.vendor_header import VendorHeader
 
 from kyco.core.buffers import KycoEventBuffer
 from kyco.core.events import KycoRawEvent
@@ -36,21 +37,22 @@ class TestKycoServer(TestCase):
         self.thread = Thread(name='TCP Server',
                              target=self.server.serve_forever)
         self.thread.start()
+        time.sleep(0.1)
 
     def test_one_connection(self):
-        message = EchoRequest(xid=1)
+        message = VendorHeader(xid=1, vendor=5)
         client = socket()
-        # client.settimeout(1)
         client.connect((HOST, PORT))
         client.send(message.pack())
         self.assertEqual(client.recv(14), b'hello received')
         client.close()
-        # client.close()
 
     def tearDown(self):
         self.server.socket.close()
         self.server.shutdown()
         self.thread.join()
+        while self.thread.is_alive():
+            pass
 
 
 class TestKycoOpenFlowHandler(TestCase):
@@ -62,20 +64,18 @@ class TestKycoOpenFlowHandler(TestCase):
         self.thread = Thread(name='TCP Server',
                              target=self.server.serve_forever)
         self.thread.start()
+        time.sleep(0.3)
 
     def test_one_connection(self):
-        message = EchoRequest(xid=1)
+        message = VendorHeader(xid=1, vendor=5)
         client = socket()
-        # client.settimeout(1)
         client.connect((HOST, PORT))
         client.send(message.pack())
-        # client.send(message.pack())
-        # client.send(message.pack())
-        # self.assertEqual(client.recv(14), b'hello received')
         client.close()
-        # client.close()
 
     def tearDown(self):
         self.server.socket.close()
         self.server.shutdown()
         self.thread.join()
+        while self.thread.is_alive():
+            pass

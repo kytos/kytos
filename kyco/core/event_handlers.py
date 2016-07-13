@@ -1,5 +1,6 @@
 """Handlers of KycoBuffers"""
 import logging
+import re
 
 from struct import unpack
 from threading import Thread
@@ -42,6 +43,10 @@ def msg_in_event_handler(listeners, msg_in_buffer):
                   "#######################################################\n")
         log.debug("%s: %s", event.context, event.content)
 
+        for key in listeners:
+            if re.match(key, type(event).__name__):
+                for listener in listeners[key]:
+                    Thread(target=listener, args=[event]).start()
 
 def msg_out_event_handler(listeners, msg_out_buffer):
     log.info("Message Out Event Handler started")

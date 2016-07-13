@@ -48,7 +48,8 @@ def msg_in_event_handler(listeners, msg_in_buffer):
                 for listener in listeners[key]:
                     Thread(target=listener, args=[event]).start()
 
-def msg_out_event_handler(listeners, msg_out_buffer):
+
+def msg_out_event_handler(listeners, connection_pool, msg_out_buffer):
     log.info("Message Out Event Handler started")
     while True:
         event = msg_out_buffer.get()
@@ -57,10 +58,14 @@ def msg_out_event_handler(listeners, msg_out_buffer):
                   "#######################################################\n")
         log.debug("%s: %s", event.context, event.content)
 
-        # apps = self._events_listeners[0]
-        # executor = ThreadPoolExecutor(max_workers=len(apps))
-        # self.executors.append(executor)
-        # [executor.submit(app.handle_event, message_event) for app in apps]
+        print(connection_pool)
+        send_to_switch(connection_pool[event.content.get('connection')],
+                       event.content.get('message').pack())
+
+        for key in listeners:
+            if re.match(key, type(event).__name__):
+                for listener in listeners[key]:
+                    Thread(target=listener, args=[event]).start()
 
 
 def app_event_handler(listeners, app_buffer):
@@ -71,7 +76,12 @@ def app_event_handler(listeners, app_buffer):
                   "                 AppEvent handler called\n"
                   "#######################################################\n")
         log.debug("%s: %s", event.context, event.content)
-        # apps = self._events_listeners[0]
-        # executor = ThreadPoolExecutor(max_workers=len(apps))
-        # self.executors.append(executor)
-        # [executor.submit(app.handle_event, message_event) for app in apps]
+
+
+def send_to_switch(connection, message):
+    """
+     Args:
+        connection (socket/request): socket connection to switch
+        message (binary OpenFlowMessage)
+    """
+    connection.send(message)

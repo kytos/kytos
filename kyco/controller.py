@@ -80,6 +80,7 @@ class Controller(object):
                  'msg_out_event_handler': Thread(name='MsgOutEvent Handler',
                                                  target=msg_out_event_handler,
                                                  args=[self._events_listeners,
+                                                       self.connection_pool,
                                                        self.buffers.msg_out_events]),
                  'app_event_handler': Thread(name='AppEvent Handler',
                                              target=app_event_handler,

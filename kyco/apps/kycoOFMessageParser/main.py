@@ -34,20 +34,26 @@ class Main(KycoCoreNApp):
         """Handle a RawEvent and generate a KycoMessageIn event.
 
         Args:
-            event (KycoRawOpenFlowMessageIn): RawOpenFlow Messag to be unpacked
+            event (KycoRawOpenFlowMessageIn): RawOpenFlowMessage to be unpacked
         """
+        log.debug('RawOpenFlowMessage received by KycoOFMessageParser APP')
         message = new_message_from_header(raw_event.content.get('header'))
 
-        if len(raw_event.content.get('buffer')) > 0:
-            message.unpack(raw_event.content.get('buffer'))
+        buffer = raw_event.content.get('buffer')
+        if buffer and len(buffer) > 0:
+            message.unpack(buffer)
+
+        log.debug('RawOpenFlowMessage unpacked')
 
         # TODO: Do we need other informations from the network packet?
         content = {'connection': raw_event.content.get('connection'),
                    'message': message}
 
         event = KycoMessageIn(content)
+        log.debug('OpenFlowMessageIn event generated')
 
         self.add_to_msg_in_buffer(event)
+        log.debug('OpenFlowMessageIn event added to msg_in buffer')
 
     def shutdown(self):
         pass

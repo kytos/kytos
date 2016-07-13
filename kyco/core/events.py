@@ -106,3 +106,11 @@ class KycoMessageIn(KycoMsgEvent):
 
 class KycoMessageOut(KycoMsgEvent):
     pass
+
+
+class KycoMessageInHello(KycoMessageIn):
+    pass
+
+
+class KycoMessageOutHello(KycoMessageOut):
+    pass

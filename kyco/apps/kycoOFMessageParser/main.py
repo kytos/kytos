@@ -11,10 +11,11 @@ and put it into the MessageInBuffer of the Controller."""
 
 import logging
 
+from pyof.v0x01.common.header import Type
 from pyof.v0x01.common.utils import new_message_from_header
 
 # from kyco.utils import APP_MSG
-from kyco.core.events import KycoMessageIn
+from kyco.core import events
 from kyco.utils import KycoCoreNApp
 from kyco.utils import ListenTo
 
@@ -49,7 +50,11 @@ class Main(KycoCoreNApp):
         content = {'connection': raw_event.content.get('connection'),
                    'message': message}
 
-        event = KycoMessageIn(content)
+        if message.header.message_type == Type.OFPT_HELLO:
+            event = events.KycoMessageInHello(content)
+        else:
+            event = events.KycoMessageIn(content)
+
         log.debug('OpenFlowMessageIn event generated')
 
         self.add_to_msg_in_buffer(event)

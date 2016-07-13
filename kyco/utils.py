@@ -204,13 +204,3 @@ class ListenTo(object):
             return handler(*args)
         wrapped_func.events = self.events
         return wrapped_func
-
-
-class ExampleApp(KycoNApp):
-    # TODO: REMOVE
-    def set_up(self):
-        self.nome = "APP"
-
-    @ListenTo('KycoMessageIn', 'KycoMessageOut', 'NewAppLoaded')
-    def my_handler_test(self, event):
-        print(event)

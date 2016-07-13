@@ -67,18 +67,22 @@ class Controller(object):
                                       target=self._server.serve_forever),
                  'raw_event_handler': Thread(name='RawEvent Handler',
                                              target=raw_event_handler,
-                                             args=[self.buffers.raw_events,
+                                             args=[self._events_listeners,
+                                                   self.buffers.raw_events,
                                                    self.buffers.msg_in_events,
                                                    self.buffers.app_events]),
                  'msg_in_event_handler': Thread(name='MsgInEvent Handler',
                                                 target=msg_in_event_handler,
-                                                args=[self.buffers.msg_in_events]),
+                                                args=[self._events_listeners,
+                                                      self.buffers.msg_in_events]),
                  'msg_out_event_handler': Thread(name='MsgOutEvent Handler',
                                                  target=msg_out_event_handler,
-                                                 args=[self.buffers.msg_out_events]),
+                                                 args=[self._events_listeners,
+                                                       self.buffers.msg_out_events]),
                  'app_event_handler': Thread(name='AppEvent Handler',
                                              target=app_event_handler,
-                                             args=[self.buffers.app_events])}
+                                             args=[self._events_listeners,
+                                                   self.buffers.app_events])}
 
         self._threads = thrds
         for _, thread in self._threads.items():
@@ -133,11 +137,12 @@ class Controller(object):
         self.napps[napp_name] = napp
 
         for event_type, listeners in napp._listeners.items():
-            if event_type not in self.events_listeners:
+            if event_type not in self._events_listeners:
                 self._events_listeners[event_type] = []
             self._events_listeners[event_type].extend(listeners)
 
     def load_napps(self):
         for napp_name in os.listdir(NAPPS_DIR):
             if os.path.isdir(os.path.join(NAPPS_DIR, napp_name)):
+                log.info("Loading app %s", napp_name)
                 self.load_napp(napp_name)

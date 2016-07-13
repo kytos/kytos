@@ -56,8 +56,9 @@ class KycoCoreNApp(metaclass=ABCMeta):
         self.events_buffer = None
 
         handler_methods = [getattr(self, method_name) for method_name in
-                           dir(self) if callable(getattr(self, method_name))
-                           and hasattr(method_name, 'events')]
+                           dir(self) if method_name[0] != '_' and
+                           callable(getattr(self, method_name)) and
+                           hasattr(getattr(self, method_name), 'events')]
 
         for method in handler_methods:
             for event_name in method.events:
@@ -116,8 +117,9 @@ class KycoNApp(metaclass=ABCMeta):
         self.events_buffer = None
 
         handler_methods = [getattr(self, method_name) for method_name in
-                           dir(self) if callable(getattr(self, method_name))
-                           and hasattr(method_name, 'events')]
+                           dir(self) if method_name[0] != '_' and
+                           callable(getattr(self, method_name)) and
+                           hasattr(getattr(self, method_name), 'events')]
 
         for method in handler_methods:
             for event_name in method.events:

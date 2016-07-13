@@ -63,7 +63,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
         content = {'connection': (self.ip, self.port),
-                   'socket': self.request}
+                   'request': self.request}
         event = KycoRawConnectionUp(content)
         self.server.controller_put_raw_event(event)
         log.debug("New connection {}:{}".format(self.ip, self.port))

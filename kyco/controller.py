@@ -47,11 +47,12 @@ class Controller(object):
         - manage the buffers handlers, considering one thread per handler.
     """
     def __init__(self):
-        self.napps = {}
         self._events_listeners = {}
-        self.buffers = KycoBuffers()
         self._kyco_server = None
         self._threads = {}
+        self.buffers = KycoBuffers()
+        self.connection_pool = {}
+        self.napps = {}
 
     def start(self):
         """Start the controller.
@@ -68,6 +69,7 @@ class Controller(object):
                  'raw_event_handler': Thread(name='RawEvent Handler',
                                              target=raw_event_handler,
                                              args=[self._events_listeners,
+                                                   self.connection_pool,
                                                    self.buffers.raw_events,
                                                    self.buffers.msg_in_events,
                                                    self.buffers.app_events]),

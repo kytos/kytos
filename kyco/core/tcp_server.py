@@ -73,7 +73,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         header_length = 8
         while True:
             header = Header()
-            buff = b''
+            buffer = b''
 
             raw_header = self.request.recv(8)
             if not raw_header:
@@ -97,12 +97,12 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             message_size = header.length - header_length
             if message_size > 0:
                 log.debug('Reading the buffer')
-                buff += self.request.recv(message_size)
+                buffer += self.request.recv(message_size)
 
             # TODO: Do we need other informations from the network packet?
             content = {'connection': (self.ip, self.port),
                        'header': header,
-                       'buff': buff}
+                       'buffer': buffer}
             event = KycoRawOpenFlowMessageIn(content)
             self.server.controller_put_raw_event(event)
 

@@ -5,6 +5,7 @@ from threading import Thread
 from unittest import TestCase
 
 from pyof.v0x01.symmetric.vendor_header import VendorHeader
+from pyof.v0x01.symmetric.hello import Hello
 
 from kyco.controller import Controller
 from kyco.core.buffers import KycoEventBuffer
@@ -33,6 +34,20 @@ class TestKycoController(TestCase):
         client = socket()
         client.connect((HOST, PORT))
         client.send(message.pack())
+        client.close()
+
+    def test_hello(self):
+        message = Hello(xid=3)
+        client = socket()
+        client.connect((HOST, PORT))
+        client.send(message.pack())
+        feedback = b''
+        while len(feedback) < 8:
+            feedback = client.recv(8)
+        response_message = Hello()
+        response_message.unpack(feedback)
+        self.assertEqual(message.header.xid, response_message.header.xid)
+        self.assertEqual(message, response_message)
         client.close()
 
     def tearDown(self):

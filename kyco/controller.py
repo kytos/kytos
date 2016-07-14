@@ -19,6 +19,7 @@ from importlib.machinery import SourceFileLoader
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
+from kyco.core.events import KycoNullEvent
 from kyco.core.event_handlers import raw_event_handler
 from kyco.core.event_handlers import msg_in_event_handler
 from kyco.core.event_handlers import msg_out_event_handler
@@ -47,8 +48,8 @@ class Controller(object):
         - manage the buffers handlers, considering one thread per handler.
     """
     def __init__(self):
-        self._events_listeners = {}
-        self._kyco_server = None
+        self.events_listeners = {}
+        self.server = None
         self._threads = {}
         self.buffers = KycoBuffers()
         self.connection_pool = {}
@@ -61,36 +62,36 @@ class Controller(object):
         Starts a thread for each buffer handler.
         Load the installed apps."""
         log.info("Starting Kyco - Kytos Controller")
-        self._server = KycoServer((HOST, PORT), KycoOpenFlowRequestHandler,
-                                  self.buffers.raw_events.put)
+        self.server = KycoServer((HOST, PORT), KycoOpenFlowRequestHandler,
+                                 self.buffers.raw_events.put)
 
         thrds = {'tcp_server': Thread(name='TCP server',
-                                      target=self._server.serve_forever),
+                                      target=self.server.serve_forever),
                  'raw_event_handler': Thread(name='RawEvent Handler',
                                              target=raw_event_handler,
-                                             args=[self._events_listeners,
+                                             args=[self.events_listeners,
                                                    self.connection_pool,
                                                    self.buffers.raw_events,
                                                    self.buffers.msg_in_events,
                                                    self.buffers.app_events]),
                  'msg_in_event_handler': Thread(name='MsgInEvent Handler',
                                                 target=msg_in_event_handler,
-                                                args=[self._events_listeners,
+                                                args=[self.events_listeners,
                                                       self.buffers.msg_in_events]),
                  'msg_out_event_handler': Thread(name='MsgOutEvent Handler',
                                                  target=msg_out_event_handler,
-                                                 args=[self._events_listeners,
+                                                 args=[self.events_listeners,
                                                        self.connection_pool,
                                                        self.buffers.msg_out_events]),
                  'app_event_handler': Thread(name='AppEvent Handler',
                                              target=app_event_handler,
-                                             args=[self._events_listeners,
+                                             args=[self.events_listeners,
                                                    self.buffers.app_events])}
 
         self._threads = thrds
         for _, thread in self._threads.items():
             thread.start()
-        time.sleep(0.1)
+            time.sleep(0.01)
 
         log.info("Loading kyco apps...")
         self.load_napps()
@@ -106,13 +107,17 @@ class Controller(object):
             - stop each running handler;
             - stop all running threads;
             - stop the KycoServer;
-            """
-        self._server.socket.close()
-        self._server.shutdown()
+        """
+        log.info("Stopping Kyco")
+        self.server.socket.close()
+        self.server.shutdown()
         # TODO: This is not working... How to kill the handlers threads?
         #       the join() wait the method to end,
         #       but there we have a while True...
+        self.buffers.send_stop_signal()
+
         for _, thread in self._threads.items():
+            log.info("Stopping thread: %s", thread.name)
             thread.join()
 
         for _, thread in self._threads.items():
@@ -140,9 +145,9 @@ class Controller(object):
         self.napps[napp_name] = napp
 
         for event_type, listeners in napp._listeners.items():
-            if event_type not in self._events_listeners:
-                self._events_listeners[event_type] = []
-            self._events_listeners[event_type].extend(listeners)
+            if event_type not in self.events_listeners:
+                self.events_listeners[event_type] = []
+            self.events_listeners[event_type].extend(listeners)
 
     def load_napps(self):
         for napp_name in os.listdir(NAPPS_DIR):

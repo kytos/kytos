@@ -40,6 +40,11 @@ class KycoAppEvent(KycoEvent):
         self.context = 'apps'
 
 
+class KycoNullEvent(KycoEvent):
+    def __init__(self):
+        super().__init__({})
+
+
 # Core Generated Events
 
 class KycoRawEvent(KycoCoreEvent):

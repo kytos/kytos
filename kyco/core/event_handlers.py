@@ -5,6 +5,7 @@ import re
 from struct import unpack
 from threading import Thread
 
+from kyco.core.events import KycoNullEvent
 from kyco.core.events import KycoRawOpenFlowMessageIn
 from kyco.core.events import KycoRawConnectionUp
 log = logging.getLogger('Kyco')
@@ -18,10 +19,10 @@ def raw_event_handler(listeners,
     log.info("Raw Event Handler started")
     while True:
         event = raw_buffer.get()
-        log.debug("\n#######################################################\n"
-                  "                 RawEvent handler called\n"
-                  "#######################################################\n")
-        log.debug('KycoRawEvent read...')
+        if isinstance(event, KycoNullEvent):
+            log.debug("RawEvent handler stopped")
+            break
+        log.debug("RawEvent handler called")
 
         if type(event) is KycoRawConnectionUp:
             connection_id = event.content.get('connection')
@@ -38,10 +39,10 @@ def msg_in_event_handler(listeners, msg_in_buffer):
     log.info("Message In Event Handler started")
     while True:
         event = msg_in_buffer.get()
-        log.debug("\n#######################################################\n"
-                  "                 MsgInEvent handler called\n"
-                  "#######################################################\n")
-        log.debug("%s: %s", event.context, event.content)
+        if isinstance(event, KycoNullEvent):
+            log.debug("MsgInEvent handler stopped")
+            break
+        log.debug("MsgInEvent handler called")
 
         for key in listeners:
             if re.match(key, type(event).__name__):
@@ -53,12 +54,11 @@ def msg_out_event_handler(listeners, connection_pool, msg_out_buffer):
     log.info("Message Out Event Handler started")
     while True:
         event = msg_out_buffer.get()
-        log.debug("\n#######################################################\n"
-                  "                 MsgOutEvent handler called\n"
-                  "#######################################################\n")
-        log.debug("%s: %s", event.context, event.content)
+        if isinstance(event, KycoNullEvent):
+            log.debug("MsgOutEvent handler stopped")
+            break
+        log.debug("MsgOutEvent handler called")
 
-        print(connection_pool)
         send_to_switch(connection_pool[event.content.get('connection')],
                        event.content.get('message').pack())
 
@@ -72,10 +72,10 @@ def app_event_handler(listeners, app_buffer):
     log.info("App Event Handler started")
     while True:
         event = app_buffer.get()
-        log.debug("\n#######################################################\n"
-                  "                 AppEvent handler called\n"
-                  "#######################################################\n")
-        log.debug("%s: %s", event.context, event.content)
+        if isinstance(event, KycoNullEvent):
+            log.debug("AppEvent handler stopped")
+            break
+        log.debug("AppEvent handler called\n")
 
 
 def send_to_switch(connection, message):

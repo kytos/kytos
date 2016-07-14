@@ -4,6 +4,7 @@ from socketserver import BaseRequestHandler
 from threading import Thread
 from unittest import TestCase
 
+from pyof.v0x01.common.header import Header
 from pyof.v0x01.symmetric.vendor_header import VendorHeader
 from pyof.v0x01.symmetric.hello import Hello
 
@@ -26,8 +27,6 @@ class TestKycoController(TestCase):
                              target=self.controller.start)
         self.thread.start()
         time.sleep(1)
-        print("sleeping")
-        time.sleep(1)
 
     def test_one_connection(self):
         message = VendorHeader(xid=1, vendor=5)
@@ -44,9 +43,10 @@ class TestKycoController(TestCase):
         feedback = b''
         while len(feedback) < 8:
             feedback = client.recv(8)
+        response_header = Header()
+        response_header.unpack(feedback)
         response_message = Hello()
-        response_message.unpack(feedback)
-        self.assertEqual(message.header.xid, response_message.header.xid)
+        response_message.header = response_header
         self.assertEqual(message, response_message)
         client.close()
 

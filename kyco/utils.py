@@ -4,6 +4,7 @@ import logging
 
 from abc import abstractmethod, ABCMeta
 
+from kyco.core.events import KycoNullEvent
 from kyco.core.exceptions import KycoNAppMissingInitArgument
 
 log = logging.getLogger('kytos[A]')
@@ -201,6 +202,8 @@ class ListenTo(object):
     def __call__(self, handler):
         """Just return the handler method with the events attribute"""
         def wrapped_func(*args):
+            if isinstance(args[0], KycoNullEvent):
+                return None
             return handler(*args)
         wrapped_func.events = self.events
         return wrapped_func

@@ -26,12 +26,12 @@ class Main(KycoCoreNApp):
     def set_up(self, **kwargs):
         self.app_id = kwargs['app_id'] if 'app_id' in kwargs else 0
 
-    @ListenTo('KycoRawOpenFlowMessageIn')
+    @ListenTo('KycoRawOpenFlowMessage')
     def handle_raw_message_in(self, raw_event):
         """Handle a RawEvent and generate a KycoMessageIn event.
 
         Args:
-            event (KycoRawOpenFlowMessageIn): RawOpenFlowMessage to be unpacked
+            event (KycoRawOpenFlowMessage): RawOpenFlowMessage to be unpacked
         """
         log.debug('RawOpenFlowMessage received by KycoOFMessageParser APP')
         message = new_message_from_header(raw_event.content.get('header'))
@@ -61,7 +61,7 @@ class Main(KycoCoreNApp):
         """Handle a RawEvent and generate a KycoMessageIn event.
 
         Args:
-            event (KycoRawOpenFlowMessageIn): RawOpenFlowMessage to be unpacked
+            event (KycoRawOpenFlowMessage): RawOpenFlowMessage to be unpacked
         """
         # log.debug('RawOpenFlowMessage received by KycoOFMessageParser APP')
 

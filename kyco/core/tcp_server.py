@@ -11,7 +11,7 @@ from pyof.v0x01.common.header import Header
 
 from kyco.core.events import KycoRawConnectionUp
 from kyco.core.events import KycoRawConnectionDown
-from kyco.core.events import KycoRawOpenFlowMessageIn
+from kyco.core.events import KycoRawOpenFlowMessage
 
 __all__ = ['KycoServer', 'KycoOpenFlowRequestHandler']
 
@@ -103,7 +103,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             content = {'connection': (self.ip, self.port),
                        'header': header,
                        'buffer': buffer}
-            event = KycoRawOpenFlowMessageIn(content)
+            event = KycoRawOpenFlowMessage(content)
             self.server.controller_put_raw_event(event)
 
     def finish(self):

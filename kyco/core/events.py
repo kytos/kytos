@@ -77,7 +77,7 @@ class KycoSwitchDown(KycoCoreEvent):
     pass
 
 
-class KycoRawOpenFlowMessageIn(KycoRawEvent):
+class KycoRawOpenFlowMessage(KycoRawEvent):
     """New OpenFlowMessage received
 
     This event contains the header of the message and also the body in binary

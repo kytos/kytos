@@ -6,7 +6,7 @@ from struct import unpack
 from threading import Thread
 
 from kyco.core.events import KycoNullEvent
-from kyco.core.events import KycoRawOpenFlowMessageIn
+from kyco.core.events import KycoRawOpenFlowMessage
 from kyco.core.events import KycoRawConnectionUp
 log = logging.getLogger('Kyco')
 
@@ -30,8 +30,8 @@ def raw_event_handler(listeners,
             connection_pool[connection_id] = connection_request
 
         # log.debug("%s: %s", event.context, event.content)
-        if isinstance(event, KycoRawOpenFlowMessageIn):
-            for listener in listeners['KycoRawOpenFlowMessageIn']:
+        if isinstance(event, KycoRawOpenFlowMessage):
+            for listener in listeners['KycoRawOpenFlowMessage']:
                 Thread(target=listener, args=[event]).start()
 
 

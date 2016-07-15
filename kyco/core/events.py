@@ -119,3 +119,15 @@ class KycoMessageInHello(KycoMessageIn):
 
 class KycoMessageOutHello(KycoMessageOut):
     pass
+
+
+class KycoMessageInEchoRequest(KycoMessageIn):
+    pass
+
+
+class KycoMessageOutEchoReply(KycoMessageOut):
+    pass
+
+
+class KycoMessageOutFeaturesRequest(KycoMessageOut):
+    pass

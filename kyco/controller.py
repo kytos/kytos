@@ -91,7 +91,6 @@ class Controller(object):
         self._threads = thrds
         for _, thread in self._threads.items():
             thread.start()
-            time.sleep(0.01)
 
         log.info("Loading kyco apps...")
         self.load_napps()

@@ -154,3 +154,11 @@ class Controller(object):
             if os.path.isdir(os.path.join(NAPPS_DIR, napp_name)):
                 log.info("Loading app %s", napp_name)
                 self.load_napp(napp_name)
+
+    def unload_napp(self, napp_name):
+        napp = self.napps.pop(napp_name)
+        napp.shutdown()
+
+    def unload_all_napps(self):
+        for napp_name in self.napps:
+            self.unload_napp(napp_name)

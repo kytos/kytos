@@ -1,3 +1,4 @@
+"""Test of KycoServer and KycoOpenFlowHandler"""
 import time
 from socket import socket
 from socketserver import BaseRequestHandler
@@ -17,15 +18,16 @@ PORT = 6633
 
 
 class HandlerForTest(BaseRequestHandler):
+    "Basic Handler to test KycoServer"
     def setup(self):
         pass
 
     def handle(self):
-        self.request.send(b'hello received')
+        self.request.send(b'message received')
         self.request.close()
 
     def finish(self):
-        self.request.close()
+        pass
 
 
 class TestKycoServer(TestCase):
@@ -37,6 +39,9 @@ class TestKycoServer(TestCase):
         self.thread = Thread(name='TCP Server',
                              target=self.server.serve_forever)
         self.thread.start()
+        # Sleep time to wait the starting process
+        # TODO: How to avoid the necessity of this?
+        #       Do we need to avoid it? Or the Daemon will handle this timing?
         time.sleep(0.1)
 
     def test_one_connection(self):
@@ -44,7 +49,8 @@ class TestKycoServer(TestCase):
         client = socket()
         client.connect((HOST, PORT))
         client.send(message.pack())
-        self.assertEqual(client.recv(14), b'hello received')
+        message = client.recv(16)
+        self.assertEqual(message, b'message received')
         client.close()
 
     def tearDown(self):
@@ -64,7 +70,10 @@ class TestKycoOpenFlowHandler(TestCase):
         self.thread = Thread(name='TCP Server',
                              target=self.server.serve_forever)
         self.thread.start()
-        time.sleep(0.3)
+        # Sleep time to wait the starting process
+        # TODO: How to avoid the necessity of this?
+        #       Do we need to avoid it? Or the Daemon will handle this timing?
+        time.sleep(0.1)
 
     def test_one_connection(self):
         message = VendorHeader(xid=1, vendor=5)

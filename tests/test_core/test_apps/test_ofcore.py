@@ -4,10 +4,14 @@ import time
 from socket import socket
 from threading import Thread
 from unittest import TestCase
+from unittest import skip
 
 from pyof.v0x01.common.header import Header
 from pyof.v0x01.common.header import Type
 from pyof.v0x01.symmetric.hello import Hello
+from pyof.v0x01.symmetric.echo_request import EchoRequest
+
+from random import randint
 
 from kyco.controller import Controller
 
@@ -60,9 +64,47 @@ class TestOFCoreApp(TestCase):
             response = client.recv(8)
         response_header = Header()
         response_header.unpack(response)
-        self.assertEqual(response_header.message_type, Type.OFPT_Hello)
+
+        self.assertEqual(response_header.message_type, Type.OFPT_HELLO)
         self.assertEqual(response_header.xid, 3)
+
+        response = b''
+        # len() < 8 here because we just expect a Hello as response
+        while len(response) < 8:
+            response = client.recv(8)
+        header = Header()
+        header.unpack(response)
+
+        self.assertEqual(header.message_type, Type.OFPT_FEATURES_REQUEST)
+
         client.close()
+
+    def test_echo_reply(self):
+        """Testing a echo request/reply interaction between controller and
+        (mock)switch
+        """
+
+        client = socket()
+        # Client (Switch) connecting to the controlller
+        client.connect((HOST, PORT))
+
+        # Test of Echo Request
+
+        echo_msg = EchoRequest(randint(1, 10))
+
+        client.send(echo_msg.pack())
+
+        response = b''
+        # len() < 8 here because we just expect a Hello as response
+        while len(response) < 8:
+            response = client.recv(8)
+        response_header = Header()
+        response_header.unpack(response)
+
+        self.assertEqual(response_header.message_type, Type.OFPT_ECHO_REPLY)
+
+        client.close()
+
 
     def tearDown(self):
         self.controller.stop()

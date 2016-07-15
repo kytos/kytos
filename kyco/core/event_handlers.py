@@ -2,12 +2,15 @@
 import logging
 import re
 
-from struct import unpack
 from threading import Thread
 
 from kyco.core.events import KycoNullEvent
+from kyco.core.events import KycoRawEvent
 from kyco.core.events import KycoRawOpenFlowMessage
 from kyco.core.events import KycoRawConnectionUp
+from kyco.core.events import KycoRawConnectionDown
+from kyco.core.exceptions import KycoWrongEventType
+
 log = logging.getLogger('Kyco')
 
 
@@ -24,15 +27,23 @@ def raw_event_handler(listeners,
             break
         log.debug("RawEvent handler called")
 
-        if type(event) is KycoRawConnectionUp:
+        if not issubclass(type(event), KycoRawEvent):
+            message = 'RawEventHandler expects a KycoRawEvent.'
+            raise KycoWrongEventType(message, event)
+
+        if isinstance(event, KycoRawConnectionUp):
             connection_id = event.content.get('connection')
             connection_request = event.content.get('request')
             connection_pool[connection_id] = connection_request
 
-        # log.debug("%s: %s", event.context, event.content)
-        if isinstance(event, KycoRawOpenFlowMessage):
-            for listener in listeners['KycoRawOpenFlowMessage']:
-                Thread(target=listener, args=[event]).start()
+        if isinstance(event, KycoRawConnectionDown):
+            connection_id = event.content.get('connection')
+            connection_pool.pop(connection_id)
+
+        for key in listeners:
+            if re.match(key, type(event).__name__):
+                for listener in listeners[key]:
+                    Thread(target=listener, args=[event]).start()
 
 
 def msg_in_event_handler(listeners, msg_in_buffer):

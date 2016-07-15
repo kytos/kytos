@@ -13,7 +13,6 @@ Basic usage:
 """
 
 import os
-import time
 
 from importlib.machinery import SourceFileLoader
 from threading import Thread
@@ -35,25 +34,30 @@ log = start_logger()
 
 HOST = '127.0.0.1'
 PORT = 6633
-NAPPS_DIR = '/tmp/kyco_apps/'
+CONTROLLER_DIR = os.path.dirname(os.path.abspath(__file__))
+CORE_NAPPS_DIR = os.path.join(CONTROLLER_DIR, 'core/apps')
+NAPPS_DIR = os.path.join(CONTROLLER_DIR, 'apps')
+
 
 class Controller(object):
     """This is the main class of Kyco.
 
-    The main responsabilities of this object is:
+    The main responsabilities of this class is:
         - start a thread with :class:`~.core.tcp_server.KycoServer`;
+        - manage KycoCoreNApps (load and unload);
         - manage KycoNApps (install, load and unload);
         - keep the buffers (instance of :class:`~core.buffers.KycoBuffers`);
         - manage which event should be sent to NApps methods;
         - manage the buffers handlers, considering one thread per handler.
     """
     def __init__(self):
-        self.events_listeners = {}
-        self.server = None
         self._threads = {}
         self.buffers = KycoBuffers()
         self.connection_pool = {}
+        self.core_napps = {}
+        self.events_listeners = {}
         self.napps = {}
+        self.server = None
 
     def start(self):
         """Start the controller.
@@ -92,6 +96,9 @@ class Controller(object):
         for _, thread in self._threads.items():
             thread.start()
 
+        log.info("Loading kyco core apps...")
+        self.load_core_napps()
+
         log.info("Loading kyco apps...")
         self.load_napps()
 
@@ -115,6 +122,9 @@ class Controller(object):
         #       but there we have a while True...
         self.buffers.send_stop_signal()
 
+        self.unload_napps()
+        self.unload_core_napps()
+
         for _, thread in self._threads.items():
             log.info("Stopping thread: %s", thread.name)
             thread.join()
@@ -122,6 +132,42 @@ class Controller(object):
         for _, thread in self._threads.items():
             while thread.is_alive():
                 pass
+
+    def load_core_napp(self, napp_name):
+        path = os.path.join(CORE_NAPPS_DIR, napp_name, 'main.py')
+        module = SourceFileLoader(napp_name, path)
+        napp_main_class = module.load_module().Main
+
+        args = {'add_to_msg_out_buffer': self.buffers.msg_out_events.put,
+                'add_to_app_buffer': self.buffers.app_events.put}
+
+        if napp_main_class.msg_in_buffer:
+            args['add_to_msg_in_buffer'] = self.buffers.msg_in_events.put
+
+        napp = napp_main_class(**args)
+
+        self.core_napps[napp_name] = napp
+
+        for event_type, listeners in napp._listeners.items():
+            if event_type not in self.events_listeners:
+                self.events_listeners[event_type] = []
+            self.events_listeners[event_type].extend(listeners)
+
+    def load_core_napps(self):
+        for napp_name in os.listdir(CORE_NAPPS_DIR):
+            if os.path.isdir(os.path.join(CORE_NAPPS_DIR, napp_name)):
+                log.info("Loading core app %s", napp_name)
+                self.load_core_napp(napp_name)
+
+    def unload_core_napp(self, napp_name):
+        napp = self.core_napps.pop(napp_name)
+        napp.shutdown()
+
+    def unload_core_napps(self):
+        # list() is used here to avoid the error:
+        # 'RuntimeError: dictionary changed size during iteration'
+        for napp_name in list(self.core_napps):
+            self.unload_core_napp(napp_name)
 
     def install_napp(self, napp_name):
         """Install the requested NApp by its name"""
@@ -158,6 +204,8 @@ class Controller(object):
         napp = self.napps.pop(napp_name)
         napp.shutdown()
 
-    def unload_all_napps(self):
-        for napp_name in self.napps:
+    def unload_napps(self):
+        # list() is used here to avoid the error:
+        # 'RuntimeError: dictionary changed size during iteration'
+        for napp_name in list(self.napps):
             self.unload_napp(napp_name)

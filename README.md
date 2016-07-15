@@ -16,9 +16,21 @@ For more information about, please visit our [Kytos web site][kytos-url].
 
 ## Installing
 
+You can install this package from source or via pip. If you have cloned this
+repository and want to install it via `setuptools`, please run, from the cloned
+directory:
+
+```shell
+sudo python3 setup.py install
+```
+
+Or, to install via pip, please execute:
+
+```shell
+sudo pip3 install kyco
+```
 
 ## Usage
-
 
 ## Main Highlights
 

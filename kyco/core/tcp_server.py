@@ -4,7 +4,6 @@ import logging
 from socketserver import ThreadingMixIn
 from socketserver import BaseRequestHandler
 from socketserver import TCPServer
-from struct import unpack
 from threading import current_thread
 
 # TODO: Fix version scheme
@@ -63,9 +62,9 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
     def setup(self):
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
-        context = {'connection': (self.ip, self.port),
+        content = {'connection': (self.ip, self.port),
                    'socket': self.request}
-        event = KycoRawConnectionUp(context)
+        event = KycoRawConnectionUp(content)
         self.server.controller_put_raw_event(event)
         log.debug("New connection {}:{}".format(self.ip, self.port))
 
@@ -73,16 +72,20 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         curr_thread = current_thread()
         header_length = 8
         while True:
-            raw_header = None
-            buff = b''
+            header = Header()
+            buffer = b''
 
-            raw_header = self.request.recv(header_length)
-            print(len(raw_header))
-            buff += raw_header
+            raw_header = self.request.recv(8)
+            if not raw_header:
+                log.debug("Client %s:%s disconnected", self.ip, self.port)
+                break
+
+            while len(raw_header) < header_length:
+                raw_header += self.request.recv(header_length - len(raw_header))
+
             log.debug("New message from {}:{} at thread "
                       "{}".format(self.ip, self.port, curr_thread.name))
 
-            header = Header()
             header.unpack(raw_header)
             # Just to close the sock with CTRL+C or CTRL+D
             # if header == 255 or header == 4:
@@ -94,17 +97,18 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             message_size = header.length - header_length
             if message_size > 0:
                 log.debug('Reading the buffer')
-                buff += self.request.recv(message_size)
+                buffer += self.request.recv(message_size)
 
-            context = {'connection': (self.ip, self.port),
+            # TODO: Do we need other informations from the network packet?
+            content = {'connection': (self.ip, self.port),
                        'header': header,
-                       'buff': buff}
-            event = KycoRawOpenFlowMessageIn(context)
+                       'buffer': buffer}
+            event = KycoRawOpenFlowMessageIn(content)
             self.server.controller_put_raw_event(event)
 
     def finish(self):
         log.debug("Connection lost from {}:{}".format(self.ip, self.port))
-        context = {'connection': (self.ip, self.port)}
-        event = KycoRawConnectionDown(context)
+        content = {'connection': (self.ip, self.port)}
+        event = KycoRawConnectionDown(content)
         self.server.controller_put_raw_event(event)
 

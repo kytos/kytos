@@ -13,6 +13,7 @@ Basic usage:
 """
 
 import os
+import time
 
 from importlib.machinery import SourceFileLoader
 from threading import Thread
@@ -24,6 +25,8 @@ from kyco.core.event_handlers import msg_out_event_handler
 from kyco.core.event_handlers import app_event_handler
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler
 from kyco.core.tcp_server import KycoServer
+from kyco.utils import KycoCoreNApp
+from kyco.utils import KycoNApp
 from kyco.utils import start_logger
 
 
@@ -64,22 +67,27 @@ class Controller(object):
                                       target=self._server.serve_forever),
                  'raw_event_handler': Thread(name='RawEvent Handler',
                                              target=raw_event_handler,
-                                             args=[self.buffers.raw_events,
+                                             args=[self._events_listeners,
+                                                   self.buffers.raw_events,
                                                    self.buffers.msg_in_events,
                                                    self.buffers.app_events]),
                  'msg_in_event_handler': Thread(name='MsgInEvent Handler',
                                                 target=msg_in_event_handler,
-                                                args=[self.buffers.msg_in_events]),
+                                                args=[self._events_listeners,
+                                                      self.buffers.msg_in_events]),
                  'msg_out_event_handler': Thread(name='MsgOutEvent Handler',
                                                  target=msg_out_event_handler,
-                                                 args=[self.buffers.msg_out_events]),
+                                                 args=[self._events_listeners,
+                                                       self.buffers.msg_out_events]),
                  'app_event_handler': Thread(name='AppEvent Handler',
                                              target=app_event_handler,
-                                             args=[self.buffers.app_events])}
+                                             args=[self._events_listeners,
+                                                   self.buffers.app_events])}
 
         self._threads = thrds
         for _, thread in self._threads.items():
             thread.start()
+        time.sleep(0.1)
 
         log.info("Loading kyco apps...")
         self.load_napps()
@@ -104,6 +112,10 @@ class Controller(object):
         for _, thread in self._threads.items():
             thread.join()
 
+        for _, thread in self._threads.items():
+            while thread.is_alive():
+                pass
+
     def install_napp(self, napp_name):
         """Install the requested NApp by its name"""
         pass
@@ -111,18 +123,26 @@ class Controller(object):
     def load_napp(self, napp_name):
         path = os.path.join(NAPPS_DIR, napp_name, 'main.py')
         module = SourceFileLoader(napp_name, path)
-        napp = module.load_module().Main()
+        napp_main_class = module.load_module().Main
 
-        napp.add_to_msg_out_events_buffer = self.buffers.msg_out_events.put
-        napp.add_to_app_events_buffer = self.buffers.app_events.put
+        args = {'add_to_msg_out_buffer': self.buffers.msg_out_events.put,
+                'add_to_app_buffer': self.buffers.app_events.put}
+
+        if issubclass(napp_main_class, KycoCoreNApp):
+            if napp_main_class.msg_in_buffer:
+                args['add_to_msg_in_buffer'] = self.buffers.msg_in_events.put
+
+        napp = napp_main_class(**args)
+
         self.napps[napp_name] = napp
 
         for event_type, listeners in napp._listeners.items():
-            if event_type not in self.events_listeners:
+            if event_type not in self._events_listeners:
                 self._events_listeners[event_type] = []
             self._events_listeners[event_type].extend(listeners)
 
     def load_napps(self):
         for napp_name in os.listdir(NAPPS_DIR):
             if os.path.isdir(os.path.join(NAPPS_DIR, napp_name)):
+                log.info("Loading app %s", napp_name)
                 self.load_napp(napp_name)

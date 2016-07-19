@@ -4,9 +4,12 @@ import logging
 
 from abc import abstractmethod, ABCMeta
 
+from kyco.core.exceptions import KycoNAppMissingInitArgument
+
 log = logging.getLogger('kytos[A]')
 
 APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
+
 
 def start_logger():
     """Starts the loggers, both the Kyco and the KycoNApp"""
@@ -34,9 +37,14 @@ def start_logger():
     return controller_log
 
 
-class KycoNApp(metaclass=ABCMeta):
+class KycoCoreNApp(metaclass=ABCMeta):
     """Base class for any KycoNApp to be developed."""
-    def __init__(self):
+
+    msg_in_buffer = False
+    msg_out_buffer = False
+    app_buffer = False
+
+    def __init__(self, **kwargs):
         """Go through all of the instance methods and selects those that have
         the events attribute, then creates a dict containing the event_name
         and the list of methods that are responsible for handling such event.
@@ -48,20 +56,40 @@ class KycoNApp(metaclass=ABCMeta):
         self.events_buffer = None
 
         handler_methods = [getattr(self, method_name) for method_name in
-                           dir(self) if callable(getattr(self, method_name))
-                           and hasattr(method_name, 'events')]
+                           dir(self) if method_name[0] != '_' and
+                           callable(getattr(self, method_name)) and
+                           hasattr(getattr(self, method_name), 'events')]
 
         for method in handler_methods:
             for event_name in method.events:
                 if event_name not in self._listeners:
                     self._listeners[event_name] = []
                 self._listeners[event_name].append(method)
-        self.setUp()
+
+        if self.msg_in_buffer:
+            if 'add_to_msg_in_buffer' not in kwargs:
+                raise KycoNAppMissingInitArgument('add_to_msg_in_buffer')
+            self.add_to_msg_in_buffer = kwargs['add_to_msg_in_buffer']
+
+        if self.msg_out_buffer:
+            if 'add_to_msg_out_buffer' not in kwargs:
+                raise KycoNAppMissingInitArgument('add_to_msg_out_buffer')
+            self.add_to_msg_out_buffer = kwargs['add_to_msg_out_buffer']
+
+        if self.app_buffer:
+            if 'add_to_app_buffer' not in kwargs:
+                raise KycoNAppMissingInitArgument('add_to_app_buffer')
+            self.add_to_app_buffer = kwargs['add_to_app_buffer']
+
+        self.set_up(**kwargs)
         log.info("Instance of {} created.", self.name)
 
     @abstractmethod
-    def setUp(self):
-        """Replaces the 'init' method for the KycoApp subclass"""
+    def set_up(self, **kwargs):
+        """'Replaces' the 'init' method for the KycoApp subclass.
+
+        The setUp method is automatically called by the __init__ method.
+        Users shouldn't call this method."""
         pass
 
     @abstractmethod
@@ -71,7 +99,63 @@ class KycoNApp(metaclass=ABCMeta):
         pass
 
 
-class listen_to(object):
+class KycoNApp(metaclass=ABCMeta):
+    """Base class for any KycoNApp to be developed."""
+
+    msg_out_buffer = False
+    app_buffer = False
+
+    def __init__(self, **kwargs):
+        """Go through all of the instance methods and selects those that have
+        the events attribute, then creates a dict containing the event_name
+        and the list of methods that are responsible for handling such event.
+
+        At the end, the setUp method is called as a complement of the init
+        process.
+        """
+        self._listeners = {}
+        self.events_buffer = None
+
+        handler_methods = [getattr(self, method_name) for method_name in
+                           dir(self) if method_name[0] != '_' and
+                           callable(getattr(self, method_name)) and
+                           hasattr(getattr(self, method_name), 'events')]
+
+        for method in handler_methods:
+            for event_name in method.events:
+                if event_name not in self._listeners:
+                    self._listeners[event_name] = []
+                self._listeners[event_name].append(method)
+
+        if self.msg_out_buffer:
+            if 'add_to_msg_out_buffer' not in kwargs:
+                raise KycoNAppMissingInitArgument('add_to_msg_out_buffer')
+            self.add_to_msg_out_buffer = kwargs['add_to_msg_out_buffer']
+
+        if self.app_buffer:
+            if 'add_to_app_buffer' not in kwargs:
+                raise KycoNAppMissingInitArgument('add_to_app_buffer')
+            self.add_to_app_buffer = kwargs['add_to_app_buffer']
+
+        self.set_up(**kwargs)
+        log.info("Instance of {} created.", self.name)
+
+    @abstractmethod
+    def set_up(self, **kwargs):
+        """'Replaces' the 'init' method for the KycoApp subclass.
+
+        The setUp method is automatically called by the __init__ method.
+        Users shouldn't call this method."""
+        pass
+
+    @abstractmethod
+    def shutdown(self):
+        """This method will be called before the app is unloaded of
+        before the controller is stopped"""
+        pass
+
+
+class ListenTo(object):
     """Decorator for Event Listeners methods.
 
     This decorator should be used on methods, inside an APP, to define which
@@ -120,12 +204,3 @@ class listen_to(object):
             return handler(*args)
         wrapped_func.events = self.events
         return wrapped_func
-
-
-class ExampleApp(KycoNApp):
-    def setUp(self):
-        self.nome = "APP"
-
-    @listen_to('KycoMessageIn', 'KycoMessageOut', 'NewAppLoaded')
-    def test(self, event):
-        print(event)

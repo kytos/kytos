@@ -29,6 +29,8 @@ class KycoEventBuffer(object):
                 raise Exception("This event can not be added to this buffer")
             log.debug('Added new event to %s event buffer', self.name)
             self._queue.put(new_event)
+            log.debug('[buffer: %s] Added: %s', self.name,
+                      type(new_event).__name__)
             self._semaphore.set()
 
         if isinstance(new_event, KycoNullEvent):
@@ -37,8 +39,9 @@ class KycoEventBuffer(object):
 
     def get(self):
         self._semaphore.wait()
-        log.debug('Removing event from %s event buffer', self.name)
         event = self._queue.get()
+        log.debug('[buffer: %s] Removed: %s', self.name,
+                  type(event).__name__)
         if self._queue.empty():
             self._semaphore.clear()
         return event

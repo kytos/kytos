@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 
-from kyco.daemon import KycoDaemon
+#from kyco.daemon import KycoDaemon
 from kyco.config import KycoConfig
+from kyco.controller import Controller
 
 def main():
     config = KycoConfig()
-    daemon = KycoDaemon(config.args)
-    daemon.run()
+#    daemon = KycoDaemon(config.args)
+#    daemon.run()
+
+    controller = Controller(config.args)
+    controller.start()
 
 if __name__ == '__main__':
     main()

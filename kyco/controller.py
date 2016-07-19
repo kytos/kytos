@@ -32,12 +32,6 @@ from kyco.utils import start_logger
 
 log = start_logger()
 
-HOST = '127.0.0.1'
-PORT = 6633
-CONTROLLER_DIR = os.path.dirname(os.path.abspath(__file__))
-CORE_NAPPS_DIR = os.path.join(CONTROLLER_DIR, 'core/apps')
-NAPPS_DIR = os.path.join(CONTROLLER_DIR, 'apps')
-
 
 class Controller(object):
     """This is the main class of Kyco.
@@ -50,7 +44,7 @@ class Controller(object):
         - manage which event should be sent to NApps methods;
         - manage the buffers handlers, considering one thread per handler.
     """
-    def __init__(self):
+    def __init__(self, config):
         self._threads = {}
         self.buffers = KycoBuffers()
         self.connection_pool = {}
@@ -58,6 +52,7 @@ class Controller(object):
         self.events_listeners = {}
         self.napps = {}
         self.server = None
+        self.config = config
 
     def start(self):
         """Start the controller.
@@ -66,7 +61,8 @@ class Controller(object):
         Starts a thread for each buffer handler.
         Load the installed apps."""
         log.info("Starting Kyco - Kytos Controller")
-        self.server = KycoServer((HOST, PORT), KycoOpenFlowRequestHandler,
+        self.server = KycoServer((self.config.listen, int(self.config.port)),
+                                 KycoOpenFlowRequestHandler,
                                  self.buffers.raw_events.put)
 
         thrds = {'tcp_server': Thread(name='TCP server',

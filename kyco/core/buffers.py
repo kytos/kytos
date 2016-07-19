@@ -3,9 +3,10 @@ import logging
 from queue import Queue
 from threading import Event as Semaphore
 
-from kyco.core.events import KycoRawEvent
-from kyco.core.events import KycoMsgEvent
 from kyco.core.events import KycoAppEvent
+from kyco.core.events import KycoMsgEvent
+from kyco.core.events import KycoNullEvent
+from kyco.core.events import KycoRawEvent
 
 __all__ = ['KycoBuffers']
 
@@ -19,19 +20,28 @@ class KycoEventBuffer(object):
         self._queue = Queue()
         self._semaphore = Semaphore()
         self._event_base_class = event_base_class
+        self._reject_new_events = False
 
     def put(self, new_event):
-        if not isinstance(new_event, self._event_base_class):
-            # TODO: Specific exception
-            raise Exception("This event can not be added to this buffer")
-        log.debug('Added new event to %s event buffer', self.name)
-        self._queue.put(new_event)
-        self._semaphore.set()
+        if not self._reject_new_events:
+            if not isinstance(new_event, self._event_base_class) and not isinstance(new_event, KycoNullEvent):
+                # TODO: Raise a more proper exception
+                raise Exception("This event can not be added to this buffer")
+            log.debug('Added new event to %s event buffer', self.name)
+            self._queue.put(new_event)
+            log.debug('[buffer: %s] Added: %s', self.name,
+                      type(new_event).__name__)
+            self._semaphore.set()
+
+        if isinstance(new_event, KycoNullEvent):
+            log.info('%s buffer in stop mode. Rejecting new events.', self.name)
+            self._reject_new_events = True
 
     def get(self):
         self._semaphore.wait()
-        log.debug('Removing event from %s event buffer', self.name)
         event = self._queue.get()
+        log.debug('[buffer: %s] Removed: %s', self.name,
+                  type(event).__name__)
         if self._queue.empty():
             self._semaphore.clear()
         return event
@@ -58,3 +68,12 @@ class KycoBuffers(object):
         self.msg_in_events = KycoEventBuffer('msg_in_event', KycoMsgEvent)
         self.msg_out_events = KycoEventBuffer('msg_out_event', KycoMsgEvent)
         self.app_events = KycoEventBuffer('app_event', KycoAppEvent)
+
+    def send_stop_signal(self):
+        log.info('Stop signal received by Kyco buffers.')
+        log.info('Sending KycoNullEvent to all apps.')
+        event = KycoNullEvent()
+        self.raw_events.put(event)
+        self.msg_in_events.put(event)
+        self.msg_out_events.put(event)
+        self.app_events.put(event)

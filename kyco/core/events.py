@@ -40,6 +40,11 @@ class KycoAppEvent(KycoEvent):
         self.context = 'apps'
 
 
+class KycoNullEvent(KycoEvent):
+    def __init__(self):
+        super().__init__({})
+
+
 # Core Generated Events
 
 class KycoRawEvent(KycoCoreEvent):
@@ -72,7 +77,7 @@ class KycoSwitchDown(KycoCoreEvent):
     pass
 
 
-class KycoRawOpenFlowMessageIn(KycoRawEvent):
+class KycoRawOpenFlowMessage(KycoRawEvent):
     """New OpenFlowMessage received
 
     This event contains the header of the message and also the body in binary
@@ -105,4 +110,28 @@ class KycoMessageIn(KycoMsgEvent):
 
 
 class KycoMessageOut(KycoMsgEvent):
+    pass
+
+
+class KycoMessageInHello(KycoMessageIn):
+    pass
+
+
+class KycoMessageOutHello(KycoMessageOut):
+    pass
+
+
+class KycoMessageInEchoRequest(KycoMessageIn):
+    pass
+
+
+class KycoMessageOutEchoReply(KycoMessageOut):
+    pass
+
+
+class KycoMessageOutFeaturesRequest(KycoMessageOut):
+    pass
+
+
+class KycoMessageOutSetConfig(KycoMessageOut):
     pass

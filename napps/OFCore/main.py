@@ -20,6 +20,7 @@ from kyco.core import events
 from kyco.utils import KycoCoreNApp
 from kyco.utils import ListenTo
 
+# TODO: Check python pep for decorators name
 
 log = logging.getLogger('kytos[A]')
 

@@ -131,3 +131,7 @@ class KycoMessageOutEchoReply(KycoMessageOut):
 
 class KycoMessageOutFeaturesRequest(KycoMessageOut):
     pass
+
+
+class KycoMessageOutSetConfig(KycoMessageOut):
+    pass

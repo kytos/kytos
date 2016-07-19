@@ -3,7 +3,7 @@
 # Full path of the working directory to which the process should change on
 # daemon start. Since a filesystem cannot be unmounted if a process has its
 # current working directory on that filesystem, this should either be left at
-# default or set to a directory that is a sensible “home directory” for the
+# default or set to a directory that is a sensible home directory for the
 # daemon while it is running. Default is /var/lib/kyco.
 workdir = /var/lib/kyco
 
@@ -19,3 +19,14 @@ daemon = False
 
 # Run the controller in debug mode or not. Default is False.
 debug = False
+
+# Logging config file. Please specify the full path of logging config file.
+logging = /etc/kyco/logging.ini
+
+listen = 0.0.0.0
+
+port = 6633
+#
+## [napps]
+#
+napps = /var/lib/kyco/napps

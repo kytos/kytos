@@ -53,6 +53,8 @@ class KycoConfig():
     def parse_args(self):
         defaults = {'pidfile': '/var/run/kyco.pid',
                     'workdir': '/var/lib/kyco',
+                    'conf': '/etc/kyco/kyco.conf',
+                    'logging': '/etc/kyco/logging.ini',
                     'daemon': False,
                     'debug': False}
 

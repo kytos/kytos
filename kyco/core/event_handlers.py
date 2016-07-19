@@ -14,81 +14,84 @@ from kyco.core.exceptions import KycoWrongEventType
 log = logging.getLogger('Kyco')
 
 
-def raw_event_handler(listeners,
-                      connection_pool,
-                      raw_buffer,
-                      msg_in_buffer,
+def notify_listeners(listeners, event):
+    for key in listeners:
+        if re.match(key, type(event).__name__):
+            for listener in listeners[key]:
+                Thread(target=listener, args=[event]).start()
+
+
+def raw_event_handler(listeners, connection_pool, raw_buffer, msg_in_buffer,
                       app_buffer):
     log.info("Raw Event Handler started")
     while True:
         event = raw_buffer.get()
+        log.debug("RawEvent handler called")
+
         if isinstance(event, KycoNullEvent):
             log.debug("RawEvent handler stopped")
             break
-        log.debug("RawEvent handler called")
 
         if not issubclass(type(event), KycoRawEvent):
             message = 'RawEventHandler expects a KycoRawEvent.'
             raise KycoWrongEventType(message, event)
 
+        # TODO: This should not be here
         if isinstance(event, KycoRawConnectionUp):
-            connection_id = event.content.get('connection')
-            connection_request = event.content.get('request')
+            connection_id = event.content['connection']
+            connection_request = event.content['request']
             connection_pool[connection_id] = connection_request
 
+        # TODO: This should not be here
         if isinstance(event, KycoRawConnectionDown):
-            connection_id = event.content.get('connection')
+            connection_id = event.content['connection']
             connection_pool.pop(connection_id)
 
-        for key in listeners:
-            if re.match(key, type(event).__name__):
-                for listener in listeners[key]:
-                    Thread(target=listener, args=[event]).start()
+        notify_listeners(listeners, event)
 
 
 def msg_in_event_handler(listeners, msg_in_buffer):
     log.info("Message In Event Handler started")
     while True:
         event = msg_in_buffer.get()
+        log.debug("MsgInEvent handler called")
+
         if isinstance(event, KycoNullEvent):
             log.debug("MsgInEvent handler stopped")
             break
-        log.debug("MsgInEvent handler called")
 
-        for key in listeners:
-            if re.match(key, type(event).__name__):
-                for listener in listeners[key]:
-                    Thread(target=listener, args=[event]).start()
+        notify_listeners(listeners, event)
 
 
 def msg_out_event_handler(listeners, connection_pool, msg_out_buffer):
     log.info("Message Out Event Handler started")
     while True:
         event = msg_out_buffer.get()
+        log.debug("MsgOutEvent handler called")
         if isinstance(event, KycoNullEvent):
             log.debug("MsgOutEvent handler stopped")
             break
-        log.debug("MsgOutEvent handler called")
 
-        send_to_switch(connection_pool[event.content.get('connection')],
-                       event.content.get('message').pack())
+        connection = event.content['connection']
+        message = event.content['message']
 
-        for key in listeners:
-            if re.match(key, type(event).__name__):
-                for listener in listeners[key]:
-                    Thread(target=listener, args=[event]).start()
+        send_to_switch(connection_pool[connetion], message.pack())
+        notify_listeners(listeners, event)
 
 
 def app_event_handler(listeners, app_buffer):
     log.info("App Event Handler started")
     while True:
         event = app_buffer.get()
+        log.debug("AppEvent handler called")
         if isinstance(event, KycoNullEvent):
             log.debug("AppEvent handler stopped")
             break
-        log.debug("AppEvent handler called\n")
+
+        notify_listeners(listeners, event)
 
 
+# TODO: Create a Switch class and a method send()
 def send_to_switch(connection, message):
     """
      Args:

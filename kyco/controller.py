@@ -107,9 +107,6 @@ class Controller(object):
         log.info("Stopping Kyco")
         self.server.socket.close()
         self.server.shutdown()
-        # TODO: This is not working... How to kill the handlers threads?
-        #       the join() wait the method to end,
-        #       but there we have a while True...
         self.buffers.send_stop_signal()
 
         self.unload_napps()

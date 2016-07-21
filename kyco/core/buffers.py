@@ -5,7 +5,7 @@ from threading import Event as Semaphore
 
 from kyco.core.events import KycoAppEvent
 from kyco.core.events import KycoMsgEvent
-from kyco.core.events import KycoNullEvent
+from kyco.core.events import KycoShutdownEvent
 from kyco.core.events import KycoRawEvent
 
 __all__ = ['KycoBuffers']
@@ -24,7 +24,7 @@ class KycoEventBuffer(object):
 
     def put(self, new_event):
         if not self._reject_new_events:
-            if not isinstance(new_event, self._event_base_class) and not isinstance(new_event, KycoNullEvent):
+            if not isinstance(new_event, self._event_base_class) and not isinstance(new_event, KycoShutdownEvent):
                 # TODO: Raise a more proper exception
                 raise Exception("This event can not be added to this buffer")
             log.debug('Added new event to %s event buffer', self.name)
@@ -33,7 +33,7 @@ class KycoEventBuffer(object):
                       type(new_event).__name__)
             self._semaphore.set()
 
-        if isinstance(new_event, KycoNullEvent):
+        if isinstance(new_event, KycoShutdownEvent):
             log.info('%s buffer in stop mode. Rejecting new events.', self.name)
             self._reject_new_events = True
 
@@ -71,8 +71,8 @@ class KycoBuffers(object):
 
     def send_stop_signal(self):
         log.info('Stop signal received by Kyco buffers.')
-        log.info('Sending KycoNullEvent to all apps.')
-        event = KycoNullEvent()
+        log.info('Sending KycoShutdownEvent to all apps.')
+        event = KycoShutdownEvent()
         self.raw_events.put(event)
         self.msg_in_events.put(event)
         self.msg_out_events.put(event)

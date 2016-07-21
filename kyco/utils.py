@@ -4,7 +4,7 @@ import logging
 
 from abc import abstractmethod, ABCMeta
 
-from kyco.core.events import KycoNullEvent
+from kyco.core.events import KycoEvent
 from kyco.core.exceptions import KycoNAppMissingInitArgument
 
 log = logging.getLogger('kytos[A]')

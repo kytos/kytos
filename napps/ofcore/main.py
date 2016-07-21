@@ -31,16 +31,24 @@ class Main(KycoCoreNApp):
     operations.
 
     """
+    # TODO: Remove this
     msg_in_buffer = True
     msg_out_buffer = True
     app_buffer = True
-    name = 'KycoOFCore App'
 
-    def set_up(self, **kwargs):
-        self.app_id = kwargs['app_id'] if 'app_id' in kwargs else 0
+    # TODO: App information goes to app_name.json
+    name = 'core.openflow'
+
+    def setup(self, **kwargs):
+        """ This is like an __init__.
+
+        Network apps should not override the __init__ method.
+        setup() method is called during napp instantiation.
+        """
+        pass
 
     @ListenTo('KycoRawOpenFlowMessage')
-    def handle_raw_message_in(self, raw_event):
+    def handle_raw_message_in(self, event):
         """Handle a RawEvent and generate a KycoMessageIn event.
 
         Args:
@@ -50,26 +58,29 @@ class Main(KycoCoreNApp):
 
         # creates an empty OpenFlow Message based on the message_type defined
         # on the unpacked header.
-        connection = raw_event.content['connection']
-        message = new_message_from_header(raw_event.content['header'])
+        message = new_message_from_header(event.content['header'])
 
-        buffer = raw_event.content['buffer']
+        # TODO: Rename this buffer var
+        buffer = event.content['buffer']
+
         # The unpack will happen only to those messages with body beyond header
         if buffer and len(buffer) > 0:
             message.unpack(buffer)
         log.debug('RawOpenFlowMessage unpacked')
 
-        content = {'connection': connection, 'message': message}
+        content = {'message': message}
 
         # Now we create a new MessageInEvent based on the message_type
         if message.header.message_type == Type.OFPT_HELLO:
-            event = events.KycoMessageInHello(content)
+            new_event = events.KycoMessageInHello(content)
         elif message.header.message_type == Type.OFPT_ECHO_REQUEST:
-            event = events.KycoMessageInEchoRequest(content)
+            new_event = events.KycoMessageInEchoRequest(content)
         else:
-            event = events.KycoMessageIn(content)
+            new_event = events.KycoMessageIn(content)
 
-        self.add_to_msg_in_buffer(event)
+        new_event.connection = event.connection
+
+        self.add_to_msg_in_buffer(new_event)
 
     @ListenTo('KycoMessageInHello')
     def handle_hello(self, message_event):

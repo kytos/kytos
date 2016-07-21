@@ -75,7 +75,7 @@ def msg_out_event_handler(listeners, connection_pool, msg_out_buffer):
         connection = event.content['connection']
         message = event.content['message']
 
-        send_to_switch(connection_pool[connetion], message.pack())
+        send_to_switch(connection_pool[connection], message.pack())
         notify_listeners(listeners, event)
 
 

@@ -7,6 +7,7 @@ from unittest import TestCase
 
 from pyof.v0x01.symmetric.vendor_header import VendorHeader
 
+from kyco.config import KycoConfig
 from kyco.controller import Controller
 
 
@@ -17,7 +18,8 @@ PORT = 6633
 class TestKycoController(TestCase):
 
     def setUp(self):
-        self.controller = Controller()
+        config = KycoConfig()
+        self.controller = Controller(config.args)
         self.thread = Thread(name='Controller',
                              target=self.controller.start)
         self.thread.start()

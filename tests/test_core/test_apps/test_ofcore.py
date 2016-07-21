@@ -2,6 +2,7 @@
 
 import os
 import time
+from random import randint
 from socket import socket
 from threading import Thread
 from unittest import TestCase
@@ -57,7 +58,28 @@ class TestOFCoreApp(TestCase):
         self.assertEqual(message, response_message)
         client.close()
 
-    def test_handshake_process(self):
+    def test_short_handshake_process(self):
+        """Testing basic OF switch handshake process."""
+        client = socket()
+        # Client (Switch) connecting to the controlller
+        client.connect((self.config.listen, self.config.port))
+
+        # -- STEP 1: Sending Hello message
+        client.send(Hello(xid=3).pack())
+
+        # -- STEP 2: Whait for Hello response
+        binary_packet = b''
+        while len(binary_packet) < 8:
+            binary_packet = client.recv(8)
+        header = Header()
+        header.unpack(binary_packet)
+        # Check Hello is ok (same xid)
+        self.assertEqual(header.message_type, Type.OFPT_HELLO)
+        self.assertEqual(header.xid, 3)
+        client.close()
+
+    @skip
+    def test_full_handshake_process(self):
         """Testing basic OF switch handshake process."""
         client = socket()
         # Client (Switch) connecting to the controlller

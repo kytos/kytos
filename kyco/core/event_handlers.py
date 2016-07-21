@@ -38,14 +38,12 @@ def raw_event_handler(listeners, connection_pool, raw_buffer, msg_in_buffer,
 
         # TODO: This should not be here
         if isinstance(event, KycoRawConnectionUp):
-            connection_id = event.content['connection']
             connection_request = event.content['request']
-            connection_pool[connection_id] = connection_request
+            connection_pool[event.connection] = connection_request
 
         # TODO: This should not be here
         if isinstance(event, KycoRawConnectionDown):
-            connection_id = event.content['connection']
-            connection_pool.pop(connection_id)
+            connection_pool.pop(event.connection)
 
         notify_listeners(listeners, event)
 
@@ -72,10 +70,9 @@ def msg_out_event_handler(listeners, connection_pool, msg_out_buffer):
             log.debug("MsgOutEvent handler stopped")
             break
 
-        connection = event.content['connection']
         message = event.content['message']
 
-        send_to_switch(connection_pool[connection], message.pack())
+        send_to_switch(connection_pool[event.connection], message.pack())
         notify_listeners(listeners, event)
 
 

@@ -62,9 +62,9 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
     def setup(self):
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
-        content = {'connection': (self.ip, self.port),
-                   'request': self.request}
+        content = {'request': self.request}
         event = KycoRawConnectionUp(content)
+        event.connection = (self.ip, self.port)
         self.server.controller_put_raw_event(event)
         log.debug("New connection {}:{}".format(self.ip, self.port))
 
@@ -100,15 +100,15 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
                 buffer += self.request.recv(message_size)
 
             # TODO: Do we need other informations from the network packet?
-            content = {'connection': (self.ip, self.port),
-                       'header': header,
-                       'buffer': buffer}
+            content = {'header': header, 'buffer': buffer}
             event = KycoRawOpenFlowMessage(content)
+            event.connection = (self.ip, self.port)
             self.server.controller_put_raw_event(event)
 
     def finish(self):
         log.debug("Connection lost from {}:{}".format(self.ip, self.port))
-        content = {'connection': (self.ip, self.port)}
+        content = {}
         event = KycoRawConnectionDown(content)
+        event.connection = (self.ip, self.port)
         self.server.controller_put_raw_event(event)
 

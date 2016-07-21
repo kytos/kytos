@@ -1,17 +1,17 @@
-"""
-Here you can control the config parameters to run kyco controller.
+"""Here you can control the config parameters to run kyco controller.
 
 Basically you can use a config file (-c option) and use arguments on command
 line. If you specify a config file, then and option configured inside this file
 will be overridden by the option on command line.
 """
 
-import sys
+import os
 
 from configparser import ConfigParser
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
+
 
 class KycoConfig():
     def __init__(self):
@@ -39,6 +39,18 @@ class KycoConfig():
                             action='store_true',
                             help="Run in daemon mode")
 
+        parser.add_argument('-l', '--listen',
+                            action='store',
+                            help="IP/Interface to be listened")
+
+        parser.add_argument('-n', '--napps',
+                            action='store',
+                            help="Specify the napps directory")
+
+        parser.add_argument('-P', '--port',
+                            action='store',
+                            help="Port to be listened")
+
         parser.add_argument('-p', '--pidfile',
                             action='store',
                             help="Specify the PID file to save.")
@@ -51,10 +63,16 @@ class KycoConfig():
         self.parse_args()
 
     def parse_args(self):
+        napps = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                             'napps')
+
         defaults = {'pidfile': '/var/run/kyco.pid',
                     'workdir': '/var/lib/kyco',
+                    'napps': napps,
                     'conf': '/etc/kyco/kyco.conf',
                     'logging': '/etc/kyco/logging.ini',
+                    'listen': '0.0.0.0',
+                    'port': 6633,
                     'daemon': False,
                     'debug': False}
 

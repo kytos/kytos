@@ -18,7 +18,6 @@ from importlib.machinery import SourceFileLoader
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
-from kyco.core.events import KycoNullEvent
 from kyco.core.event_handlers import raw_event_handler
 from kyco.core.event_handlers import msg_in_event_handler
 from kyco.core.event_handlers import msg_out_event_handler

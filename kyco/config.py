@@ -40,12 +40,12 @@ class KycoConfig():
                             help="Run in daemon mode")
 
         parser.add_argument('-p', '--pidfile',
-                            action='store_true',
+                            action='store',
                             help="Specify the PID file to save.")
 
         parser.add_argument('-w', '--workdir',
-                            action='store_true',
-                            help="Specify the working directory to use.")
+                            action='store',
+                            help="Specify the working directory")
 
         self.conf_parser, self.parser = conf_parser, parser
         self.parse_args()

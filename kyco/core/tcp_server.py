@@ -71,7 +71,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
 
     def handle(self):
         curr_thread = current_thread()
-        header_length = 8
+        header_len = 8
         while True:
             header = Header()
             binary_data = b''
@@ -82,11 +82,11 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
                 log.debug("Client %s:%s disconnected", self.ip, self.port)
                 break
 
-            while len(raw_header) < header_length:
-                raw_header += self.request.recv(header_length - len(raw_header))
+            while len(raw_header) < header_len:
+                raw_header += self.request.recv(header_len - len(raw_header))
 
-            log.debug("New message from {}:{} at thread "
-                      "{}".format(self.ip, self.port, curr_thread.name))
+            log.debug("New message from %s:%s at thread %s", self.ip,
+                      self.port, curr_thread.name)
 
             header.unpack(raw_header)
             # Just to close the sock with CTRL+C or CTRL+D
@@ -96,7 +96,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             #     break
 
             # This is just for now, will be changed soon....
-            message_size = header.length - header_length
+            message_size = header.length - header_len
             if message_size > 0:
                 log.debug('Reading the binary_data')
                 binary_data += self.request.recv(message_size)
@@ -108,7 +108,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             self.server.controller_put_raw_event(event)
 
     def finish(self):
-        log.debug("Connection lost from {}:{}".format(self.ip, self.port))
+        log.debug("Connection lost from %s:%s", self.ip, self.port)
         content = {}
         event = KycoRawConnectionDown(content)
         event.connection = (self.ip, self.port)

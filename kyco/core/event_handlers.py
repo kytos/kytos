@@ -90,9 +90,11 @@ def app_event_handler(listeners, app_buffer):
 
 # TODO: Create a Switch class and a method send()
 def send_to_switch(connection, message):
-    """
-     Args:
+    """ Send a message to through the given connection
+
+    Args:
         connection (socket/request): socket connection to switch
         message (binary OpenFlowMessage)
+
     """
     connection.send(message)

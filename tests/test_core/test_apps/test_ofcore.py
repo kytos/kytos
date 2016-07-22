@@ -162,7 +162,6 @@ class TestOFCoreApp(TestCase):
 
         client.close()
 
-    @skip
     def test_echo_reply(self):
         """Testing a echo request/reply interaction between controller and
         (mock)switch

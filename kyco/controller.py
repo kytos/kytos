@@ -18,6 +18,8 @@ from importlib.machinery import SourceFileLoader
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
+from kyco.core.event_handlers import connection_lost_handler
+from kyco.core.event_handlers import new_connection_handler
 from kyco.core.event_handlers import raw_event_handler
 from kyco.core.event_handlers import msg_in_event_handler
 from kyco.core.event_handlers import msg_out_event_handler
@@ -43,7 +45,8 @@ class Controller(object):
         self._threads = {}
         self.buffers = KycoBuffers()
         self.connection_pool = {}
-        self.events_listeners = {}
+        self.events_listeners = {'KycoNewConnection': new_connection_handler,
+                                 'KycoConnectionLost': connection_lost_handler}
         self.napps = {}
         self.server = None
         self.config = config

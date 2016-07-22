@@ -62,7 +62,7 @@ class KycoRawEvent(KycoCoreEvent):
     pass
 
 
-class KycoRawConnectionUp(KycoRawEvent):
+class KycoRawNewConnection(KycoRawEvent):
     """A new connection was stabilished"""
     pass
 
@@ -72,7 +72,7 @@ class KycoSwitchUp(KycoCoreEvent):
     pass
 
 
-class KycoRawConnectionDown(KycoRawEvent):
+class KycoConnectionLost(KycoRawEvent):
     """A connection was lost"""
     pass
 

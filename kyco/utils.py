@@ -39,6 +39,15 @@ def start_logger():
     return controller_log
 
 
+def run_on_thread(method):
+    """Decorator to run the method inside a thread"""
+    def threaded_method(*args):
+        """Ensure the handler method runs inside a new thread"""
+        thread = Thread(target=method, args=args)
+        thread.start()
+    return threaded_method
+
+
 class ListenTo(object):
     """Decorator for Event Listener methods.
 
@@ -88,12 +97,12 @@ class ListenTo(object):
     def __call__(self, handler):
         """Just return the handler method on a thread with the event attribute
         """
-        def wrapped_handler(*args):
-            """Ensure the handler method runs inside a new thread"""
-            thread = Thread(target=handler, args=args)
-            thread.start()
-        wrapped_handler.events = self.events
-        return wrapped_handler
+        @run_on_thread
+        def threaded_handler(*args)
+            handler(*args)
+
+        threaded_handler.events = self.events
+        return threaded_handler
 
 
 class KycoNApp(Thread, metaclass=ABCMeta):

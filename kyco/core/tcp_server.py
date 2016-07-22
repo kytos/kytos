@@ -1,6 +1,7 @@
 """Basic TCP Server that will listen to port 6633."""
 import logging
 
+from datetime import datetime
 from socketserver import ThreadingMixIn
 from socketserver import BaseRequestHandler
 from socketserver import TCPServer
@@ -73,9 +74,10 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         header_length = 8
         while True:
             header = Header()
-            buffer = b''
+            binary_data = b''
 
             raw_header = self.request.recv(8)
+            timestamp = datetime.now()
             if not raw_header:
                 log.debug("Client %s:%s disconnected", self.ip, self.port)
                 break
@@ -96,13 +98,13 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             # This is just for now, will be changed soon....
             message_size = header.length - header_length
             if message_size > 0:
-                log.debug('Reading the buffer')
-                buffer += self.request.recv(message_size)
+                log.debug('Reading the binary_data')
+                binary_data += self.request.recv(message_size)
 
             # TODO: Do we need other informations from the network packet?
-            content = {'header': header, 'buffer': buffer}
-            event = KycoRawOpenFlowMessage(content)
-            event.connection = (self.ip, self.port)
+            content = {'header': header, 'binary_data': binary_data}
+            connection = (self.ip, self.port)
+            event = KycoRawOpenFlowMessage(content, connection, timestamp)
             self.server.controller_put_raw_event(event)
 
     def finish(self):
@@ -111,4 +113,3 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         event = KycoRawConnectionDown(content)
         event.connection = (self.ip, self.port)
         self.server.controller_put_raw_event(event)
-

@@ -47,6 +47,8 @@ def run_on_thread(method):
         thread.start()
     return threaded_method
 
+# TODO: Check python pep for decorators name
+
 
 class ListenTo(object):
     """Decorator for Event Listener methods.

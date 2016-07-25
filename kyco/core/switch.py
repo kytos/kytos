@@ -34,3 +34,9 @@ class KycoSwitch(object):
 
         self.socket = None
 
+    def is_connected(self):
+        try:
+            self.send(b'')
+            return True
+        except:
+            return False

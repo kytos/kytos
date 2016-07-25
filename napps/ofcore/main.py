@@ -31,20 +31,20 @@ class Main(KycoCoreNApp):
     operations.
 
     """
-    # TODO: Remove this
-    msg_in_buffer = True
-    msg_out_buffer = True
-    app_buffer = True
 
-    # TODO: App information goes to app_name.json
-    name = 'core.openflow'
+    def setup(self):
+        """'Replaces' the 'init' method for the KycoApp subclass.
 
-    def setup(self, **kwargs):
-        """ This is like an __init__.
+        The setup method is automatically called by the run method.
+        Users shouldn't call this method directly."""
+        # TODO: App information goes to app_name.json
+        self.name = 'core.openflow'
 
-        Network apps should not override the __init__ method.
-        setup() method is called during napp instantiation.
-        """
+    def execute(self):
+        """Method to be runned once on app 'start' or in a loop.
+
+        The execute method is called by the run method of KycoNApp class.
+        Users shouldn't call this method directly."""
         pass
 
     @ListenTo('KycoRawOpenFlowMessage')
@@ -83,7 +83,7 @@ class Main(KycoCoreNApp):
         self.add_to_msg_in_buffer(new_event)
 
     @ListenTo('KycoMessageInHello')
-    def handle_hello(self, message_event):
+    def handle_hello(self, event):
         """Handle a Hello MessageIn Event and sends a Hello to the client.
 
         Args:
@@ -91,15 +91,15 @@ class Main(KycoCoreNApp):
         """
         log.debug('[%s] Handling KycoMessageInHello', self.name)
 
-        connection = message_event.content['connection']
-        message = message_event.content['message']
+        message = event.content['message']
         message_out = Hello(xid=message.header.xid)
-        content = {'connection': connection, 'message': message_out}
+        content = {'message': message_out}
         event_out = events.KycoMessageOutHello(content)
+        event_out.connection = event.connection
         self.add_to_msg_out_buffer(event_out)
 
     @ListenTo('KycoMessageInFeaturesReply')
-    def handle_features_reply(self, message_event):
+    def handle_features_reply(self, event):
         """Handle received FeaturesReply event.
 
         Reads the FeaturesReply Event sent by the client, save this data and
@@ -115,12 +115,12 @@ class Main(KycoCoreNApp):
         log.debug('[%s] Handling KycoMessageInFeaturesReply Event', self.name)
 
         # Processing the FeaturesReply Message
-        connection = message_event.content['connection']
-        message = message_event.content['message']
+        connection = event.connection
+        message = event.content['message']
         # TODO: save this features data in some switch-like object
 
     @ListenTo('KycoMessageInEchoRequest')
-    def handle_echo_request_event(self, message_event):
+    def handle_echo_request_event(self, event):
         """Handle EchoRequest Event by Generating an EchoReply Answer
 
         Args:
@@ -128,25 +128,27 @@ class Main(KycoCoreNApp):
         """
         log.debug("Echo Request message read")
 
-        connection = message_event.content['connection']
-        echo_request = message_event.content['message']
+        echo_request = event.content['message']
         echo_reply = EchoReply(xid=echo_request.header.xid)
-        content = {'connection': connection, 'message': echo_reply}
+        content = {'message': echo_reply}
         event_out = events.KycoMessageOutEchoReply(content)
+        event_out.connection = event.connection
         self.add_to_msg_out_buffer(event_out)
 
     def send_barrier_request(self, connection):
         """Sends a BarrierRequest Message to the client"""
         message_out = BarrierRequest(xid=randint(1, 100))
-        content = {'connection': connection, 'message': message_out}
+        content = {'message': message_out}
         event_out = events.KycoMessageOutBarrierRequest(content)
+        event_out.connection = connection
         self.add_to_msg_out_buffer(event_out)
 
     def send_features_request(self, connection):
         """Sends a FeaturesRequest message to the client."""
         features_request = FeaturesRequest(xid=randint(1, 100))
-        content = {'connection': connection, 'message': features_request}
+        content = {'message': features_request}
         event_out = events.KycoMessageOutFeaturesRequest(content)
+        event_out.connection = connection
         self.add_to_msg_out_buffer(event_out)
 
     def send_flow_delete(self, connection):
@@ -159,8 +161,9 @@ class Main(KycoCoreNApp):
         # TODO: How to decide the priority
         # TODO: How to decide the out_port
         # TODO: How to decide the flags
-        content = {'connection': connection, 'message': message_out}
+        content = {'message': message_out}
         features_request_out = events.KycoMessageOutFeaturesRequest(content)
+        features_request_out.connection = connection
         self.add_to_msg_out_buffer(features_request_out)
 
     def send_switch_config(self, connection):
@@ -170,8 +173,9 @@ class Main(KycoCoreNApp):
                                 flags=ConfigFlags.OFPC_FRAG_NORMAL,
                                 miss_send_len=128)
         # TODO: Define the miss_send_len value
-        content = {'connection': connection, 'message': message_out}
+        content = {'message': message_out}
         event_out = events.KycoMessageOutSetConfig(content)
+        event_out.connection = connection
         self.add_to_msg_out_buffer(event_out)
 
     def shutdown(self):

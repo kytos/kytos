@@ -26,7 +26,8 @@ class TestOFCoreApp(TestCase):
 
     def setUp(self):
         self.config = KycoConfig()
-        self.controller = Controller(self.config.args)
+        self.config = self.config.args
+        self.controller = Controller(self.config)
         self.thread = Thread(name='Controller',
                              target=self.controller.start)
         self.thread.start()
@@ -161,7 +162,6 @@ class TestOFCoreApp(TestCase):
 
         client.close()
 
-    @skip
     def test_echo_reply(self):
         """Testing a echo request/reply interaction between controller and
         (mock)switch

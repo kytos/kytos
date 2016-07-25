@@ -24,7 +24,6 @@ from kyco.core.event_handlers import msg_out_event_handler
 from kyco.core.event_handlers import app_event_handler
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler
 from kyco.core.tcp_server import KycoServer
-from kyco.utils import KycoNApp
 from kyco.utils import start_logger
 
 log = start_logger()

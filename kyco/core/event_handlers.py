@@ -4,7 +4,7 @@ import re
 
 from threading import Thread
 
-from kyco.core.events import KycoNullEvent
+from kyco.core.events import KycoShutdownEvent
 from kyco.core.events import KycoRawEvent
 from kyco.core.events import KycoRawOpenFlowMessage
 from kyco.core.events import KycoRawConnectionUp
@@ -28,7 +28,7 @@ def raw_event_handler(listeners, connection_pool, raw_buffer, msg_in_buffer,
         event = raw_buffer.get()
         log.debug("RawEvent handler called")
 
-        if isinstance(event, KycoNullEvent):
+        if isinstance(event, KycoShutdownEvent):
             log.debug("RawEvent handler stopped")
             break
 
@@ -38,14 +38,12 @@ def raw_event_handler(listeners, connection_pool, raw_buffer, msg_in_buffer,
 
         # TODO: This should not be here
         if isinstance(event, KycoRawConnectionUp):
-            connection_id = event.content['connection']
             connection_request = event.content['request']
-            connection_pool[connection_id] = connection_request
+            connection_pool[event.connection] = connection_request
 
         # TODO: This should not be here
         if isinstance(event, KycoRawConnectionDown):
-            connection_id = event.content['connection']
-            connection_pool.pop(connection_id)
+            connection_pool.pop(event.connection)
 
         notify_listeners(listeners, event)
 
@@ -56,7 +54,7 @@ def msg_in_event_handler(listeners, msg_in_buffer):
         event = msg_in_buffer.get()
         log.debug("MsgInEvent handler called")
 
-        if isinstance(event, KycoNullEvent):
+        if isinstance(event, KycoShutdownEvent):
             log.debug("MsgInEvent handler stopped")
             break
 
@@ -68,14 +66,13 @@ def msg_out_event_handler(listeners, connection_pool, msg_out_buffer):
     while True:
         event = msg_out_buffer.get()
         log.debug("MsgOutEvent handler called")
-        if isinstance(event, KycoNullEvent):
+        if isinstance(event, KycoShutdownEvent):
             log.debug("MsgOutEvent handler stopped")
             break
 
-        connection = event.content['connection']
         message = event.content['message']
 
-        send_to_switch(connection_pool[connection], message.pack())
+        send_to_switch(connection_pool[event.connection], message.pack())
         notify_listeners(listeners, event)
 
 
@@ -84,7 +81,7 @@ def app_event_handler(listeners, app_buffer):
     while True:
         event = app_buffer.get()
         log.debug("AppEvent handler called")
-        if isinstance(event, KycoNullEvent):
+        if isinstance(event, KycoShutdownEvent):
             log.debug("AppEvent handler stopped")
             break
 

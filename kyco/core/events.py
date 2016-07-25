@@ -40,7 +40,7 @@ class KycoAppEvent(KycoEvent):
         self.context = 'apps'
 
 
-class KycoNullEvent(KycoEvent):
+class KycoShutdownEvent(KycoEvent):
     def __init__(self):
         super().__init__({})
 

@@ -19,7 +19,6 @@ from importlib.machinery import SourceFileLoader
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
-from kyco.core.events import KycoCoreNapp
 from kyco.core.events import KycoShutdownEvent
 from kyco.core.events import KycoSwitchUp
 from kyco.core.events import KycoSwitchDown
@@ -31,6 +30,7 @@ from kyco.core.switch import KycoSwitch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler
 from kyco.core.tcp_server import KycoServer
 from kyco.utils import start_logger
+from kyco.utils import KycoCoreNApp
 
 log = start_logger()
 
@@ -361,4 +361,5 @@ class Controller(object):
         # This is caused by looping over an dictionary while removing
         # items from it.
         for napp_name in list(self.napps):
-            self.unload_napp(napp_name)
+            if not isinstance(self.napps[napp_name], KycoCoreNApp):
+                self.unload_napp(napp_name)

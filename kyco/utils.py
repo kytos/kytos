@@ -100,7 +100,7 @@ class ListenTo(object):
         """Just return the handler method on a thread with the event attribute
         """
         @run_on_thread
-        def threaded_handler(*args)
+        def threaded_handler(*args):
             handler(*args)
 
         threaded_handler.events = self.events

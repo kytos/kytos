@@ -215,6 +215,12 @@ class Controller(object):
         connection.send(message)
 
     def load_napp(self, napp_name):
+        """Load a single app.
+
+        Load a single NAPP based on its name.
+        Args:
+            napp_name (str): Name of the NApp to be loaded.
+        """
         path = os.path.join(self.config.napps, napp_name, 'main.py')
         module = SourceFileLoader(napp_name, path)
 
@@ -232,10 +238,18 @@ class Controller(object):
             self.events_listeners[event_type].extend(listeners)
 
     def install_napp(self, napp_name):
-        """Install the requested NApp by its name"""
+        """Install the requested NApp by its name.
+
+        Downloads the NApps from the NApp network and install it.
+        TODO: Download or git-clone?
+
+        Args:
+            napp_name (str): Name of the NApp to be installed.
+        """
         pass
 
     def load_napps(self):
+        """Load all NApps installed on the NApps dir"""
         napps_dir = self.config.napps
         for napp_name in os.listdir(napps_dir):
             if os.path.isdir(os.path.join(napps_dir, napp_name)):
@@ -243,11 +257,19 @@ class Controller(object):
                 self.load_napp(napp_name)
 
     def unload_napp(self, napp_name):
+        """Unload a specific NApp based on its name.
+
+        Args:
+            napp_name (str): Name of the NApp to be unloaded.
+        """
         napp = self.napps.pop(napp_name)
         napp.shutdown()
 
     def unload_napps(self):
+        """Unload all loaded NApps that are not core NApps."""
         # list() is used here to avoid the error:
         # 'RuntimeError: dictionary changed size during iteration'
+        # This is caused by looping over an dictionary while removing
+        # items from it.
         for napp_name in list(self.napps):
             self.unload_napp(napp_name)

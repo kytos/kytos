@@ -75,57 +75,6 @@ def app_event_handler(listeners, app_buffer):
         notify_listeners(listeners, event)
 
 
-def new_connection_handler(connection_pool, add_to_app_buffer, event):
-    """Handle a NewConnection event.
-
-    This method will read the event and store the connection (socket) data into
-    the correct switch object on the controller.
-
-    At last, it will create and send a SwitchUp event to the app buffer.
-
-    Args:
-        connection_pool (list): For now here is where we store sockets.
-        app_buffer (KycoBuffer): The buffer that will receive the new event.
-        event (KycoNewConnection): The received event with the needed infos.
-    """
-
-    log.info("Handling KycoNewConnection event")
-
-    # Saving the socket reference
-    connection_request = event.content['request']
-    connection_pool[event.connection] = connection_request
-
-    new_event = KycoSwitchUp(content={}, connection=event.connection,
-                             timestamp=event.timestamp)
-
-    add_to_app_buffer(new_event)
-
-
-def connection_lost_handler(connection_pool, add_to_app_buffer, event):
-    """Handle a ConnectionLost event.
-
-    This method will read the event and change the switch that has been
-    disconnected.
-
-    At last, it will create and send a SwitchDown event to the app buffer.
-
-    Args:
-        connection_pool (list): For now here is where we store sockets.
-        app_buffer (KycoBuffer): The buffer that will receive the new event.
-        event (KycoConnectionLost): Received event with the needed infos.
-    """
-
-    log.info("Handling KycoConnectionLost event")
-
-    # For now we just remove the connection from the connection_pool dict
-    connection_pool.pop(event.connection)
-
-    new_event = KycoSwitchDown(content={}, connection=event.connection,
-                               timestamp=event.timestamp)
-
-    add_to_app_buffer(new_event)
-
-
 # TODO: Create a Switch class and a method send()
 def send_to_switch(connection, message):
     """ Send a message to through the given connection

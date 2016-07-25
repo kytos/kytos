@@ -197,6 +197,18 @@ class Controller(object):
             # Sending the event to the listeners
             self.notify_listeners(event)
 
+    def send_to_switch(self, dpid, message):
+        """ Send a message to through the given connection
+
+        Args:
+            dpid: dpid of the switch that will receive the message
+            message (bytes); binary OpenFlow Message
+        """
+        try:
+            self.switches[dpid].send(message)
+        except:
+            raise Exception('Error while sending a message to switch %s', dpid)
+
     def add_new_switch(self, switch):
         """Adds a new switch on the controller.
 
@@ -275,17 +287,6 @@ class Controller(object):
                                    timestamp=event.timestamp)
 
         self.buffers.app_events.put(new_event)
-
-    def send_to_switch(connection, message):
-        """ Send a message to through the given connection
-
-        Args:
-            connection (socket/request): socket connection to switch
-            message (binary OpenFlowMessage)
-
-        """
-        # TODO: Create a Switch class and a method send()
-        connection.send(message)
 
     def load_napp(self, napp_name):
         """Load a single app.

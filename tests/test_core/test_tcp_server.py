@@ -31,9 +31,9 @@ class TestKycoServer(TestCase):
 
     def setUp(self):
         self.config = KycoConfig()
-        self.config = self.config.args
+        self.options = self.config.options
         self.buffer = KycoEventBuffer('test', KycoRawEvent)
-        self.server = KycoServer((self.config.listen, self.config.port),
+        self.server = KycoServer((self.options.listen, self.options.port),
                                  HandlerForTest, self.buffer.put)
         self.thread = Thread(name='TCP Server',
                              target=self.server.serve_forever)
@@ -46,7 +46,7 @@ class TestKycoServer(TestCase):
     def test_one_connection(self):
         message = VendorHeader(xid=1, vendor=5)
         client = socket()
-        client.connect((self.config.listen, self.config.port))
+        client.connect((self.options.listen, self.options.port))
         client.send(message.pack())
         message = client.recv(16)
         self.assertEqual(message, b'message received')
@@ -64,9 +64,9 @@ class TestKycoOpenFlowHandler(TestCase):
 
     def setUp(self):
         self.config = KycoConfig()
-        self.config = self.config.args
+        self.options = self.config.options
         self.buffer = KycoEventBuffer('test', KycoRawEvent)
-        self.server = KycoServer((self.config.listen, self.config.port),
+        self.server = KycoServer((self.options.listen, self.options.port),
                                  KycoOpenFlowRequestHandler, self.buffer.put)
         self.thread = Thread(name='TCP Server',
                              target=self.server.serve_forever)
@@ -79,7 +79,7 @@ class TestKycoOpenFlowHandler(TestCase):
     def test_one_connection(self):
         message = VendorHeader(xid=1, vendor=5)
         client = socket()
-        client.connect((self.config.listen, self.config.port))
+        client.connect((self.options.listen, self.options.port))
         client.send(message.pack())
         client.close()
 

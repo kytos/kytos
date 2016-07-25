@@ -39,14 +39,14 @@ class Controller(object):
         - manage which event should be sent to NApps methods;
         - manage the buffers handlers, considering one thread per handler.
     """
-    def __init__(self, config):
+    def __init__(self, options):
         self._threads = {}
         self.buffers = KycoBuffers()
         self.connection_pool = {}
         self.events_listeners = {}
         self.napps = {}
         self.server = None
-        self.config = config
+        self.options = options
 
     def start(self):
         """Start the controller.
@@ -55,7 +55,7 @@ class Controller(object):
         Starts a thread for each buffer handler.
         Load the installed apps."""
         log.info("Starting Kyco - Kytos Controller")
-        self.server = KycoServer((self.config.listen, int(self.config.port)),
+        self.server = KycoServer((self.options.listen, int(self.options.port)),
                                  KycoOpenFlowRequestHandler,
                                  self.buffers.raw_events.put)
 
@@ -118,7 +118,7 @@ class Controller(object):
                 pass
 
     def load_napp(self, napp_name):
-        path = os.path.join(self.config.napps, napp_name, 'main.py')
+        path = os.path.join(self.options.napps, napp_name, 'main.py')
         module = SourceFileLoader(napp_name, path)
 
         # TODO: Think a better way to export this
@@ -139,7 +139,7 @@ class Controller(object):
         pass
 
     def load_napps(self):
-        napps_dir = self.config.napps
+        napps_dir = self.options.napps
         for napp_name in os.listdir(napps_dir):
             if os.path.isdir(os.path.join(napps_dir, napp_name)):
                 log.info("Loading app %s", napp_name)

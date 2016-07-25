@@ -76,14 +76,14 @@ class KycoConfig():
                     'daemon': False,
                     'debug': False}
 
-        args, argv = self.conf_parser.parse_known_args()
+        options, argv = self.conf_parser.parse_known_args()
 
-        if args.conf:
+        if options.conf:
             config = ConfigParser()
-            config.read([args.conf])
+            config.read([options.conf])
             defaults = dict(config.items("daemon"))
 
         self.parser.set_defaults(**defaults)
         if 'test' in argv:
             argv.pop(argv.index('test'))
-        self.args = self.parser.parse_args(argv)
+        self.options = self.parser.parse_args(argv)

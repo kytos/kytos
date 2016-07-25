@@ -11,9 +11,8 @@ log = logging.getLogger('Kyco')
 class KycoSwitch(object):
     """This is the main class related to Switches modeled on Kyco."""
 
-    def __init__(self, switch_id, socket=None):
-        self.switch_id = switch_id
-        self.old_ids = []
+    def __init__(self, dpid, socket=None):
+        self.dpid = dpid
         self.socket = socket
 
     def send(self, data):
@@ -22,15 +21,20 @@ class KycoSwitch(object):
             raise Exception("This switch is not connected")
         self.socket.send(data)
 
+    def save_connection(self, socket):
+        if self.socket:
+            # TODO: raise proper exception
+            message = "The switch {} already have an alive socket connection"
+            raise Exception(message.format(self.dpid))
+        self.socket = socket
+
     def disconnect(self):
         try:
             self.socket.close()
         except:
             pass
 
-        self.old_ids.append(self.switch_id)
         self.socket = None
-        self.switch_id = None
 
 
 class KycoSwitches(object):

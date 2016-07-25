@@ -45,8 +45,8 @@ class Controller(object):
         self._threads = {}
         self.buffers = KycoBuffers()
         self.connection_pool = {}
-        self.events_listeners = {'KycoNewConnection': new_connection_handler,
-                                 'KycoConnectionLost': connection_lost_handler}
+        self.events_listeners = {'KycoNewConnection': [new_connection_handler],
+                                 'KycoConnectionLost': [connection_lost_handler]}
         self.napps = {}
         self.server = None
         self.config = config

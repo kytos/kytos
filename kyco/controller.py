@@ -19,6 +19,8 @@ from importlib.machinery import SourceFileLoader
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
+from kyco.core.events import KycoCoreNapp
+from kyco.core.events import KycoShutdownEvent
 from kyco.core.events import KycoSwitchUp
 from kyco.core.events import KycoSwitchDown
 from kyco.core.event_handlers import raw_event_handler
@@ -123,6 +125,93 @@ class Controller(object):
             while thread.is_alive():
                 pass
 
+    def notify_listeners(self, event):
+        for key in self.listeners:
+            if re.match(key, type(event).__name__):
+                for listener in self.listeners[key]:
+                    listener(event)
+
+    def raw_event_handler(self):
+        """Handle raw events.
+
+        This handler listen to the raw_buffer, get every event added to this
+        buffer and sends it to the listeners listening to this event.
+        """
+
+        log.info("Raw Event Handler started")
+        while True:
+            event = self.buffers.raw_buffer.get()
+
+            if isinstance(event, KycoShutdownEvent):
+                log.debug("RawEvent handler stopped")
+                break
+
+            log.debug("RawEvent handler called")
+            # Sending the event to the listeners
+            self.notify_listeners(event)
+
+    def msg_in_event_handler(self):
+        """Handle msg_in events.
+
+        This handler listen to the msg_in_buffer, get every event added to this
+        buffer and sends it to the listeners listening to this event.
+        """
+
+        log.info("Message In Event Handler started")
+        while True:
+            event = self.buffers.msg_in_buffer.get()
+
+            if isinstance(event, KycoShutdownEvent):
+                log.debug("MsgInEvent handler stopped")
+                break
+
+            log.debug("MsgInEvent handler called")
+            # Sending the event to the listeners
+            self.notify_listeners(event)
+
+    def msg_out_event_handler(self):
+        """Handle msg_out events.
+
+        This handler listen to the msg_out_buffer, get every event added to
+        this buffer and sends it to the listeners listening to this event.
+        """
+
+        log.info("Message Out Event Handler started")
+        while True:
+            event = self.buffers.msg_out_buffer.get()
+
+            if isinstance(event, KycoShutdownEvent):
+                log.debug("MsgOutEvent handler stopped")
+                break
+
+            log.debug("MsgOutEvent handler called")
+            dpid = event.connection
+            message = event.content['message']
+
+            # Sending the OpenFlow message to the switch
+            self.send_to_switch(dpid, message.pack())
+
+            # Sending the event to the listeners
+            self.notify_listeners(event)
+
+    def app_event_handler(self):
+        """Handle app events.
+
+        This handler listen to the app_buffer, get every event added to this
+        buffer and sends it to the listeners listening to this event.
+        """
+
+        log.info("App Event Handler started")
+        while True:
+            event = self.app_buffer.get()
+
+            if isinstance(event, KycoShutdownEvent):
+                log.debug("AppEvent handler stopped")
+                break
+
+            log.debug("AppEvent handler called")
+            # Sending the event to the listeners
+            self.notify_listeners(event)
 
     def add_new_switch(self, switch):
         """Adds a new switch on the controller.

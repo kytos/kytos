@@ -26,7 +26,8 @@ class KycoEventBuffer(object):
         if not self._reject_new_events:
             if not isinstance(new_event, self._event_base_class) and not isinstance(new_event, KycoShutdownEvent):
                 # TODO: Raise a more proper exception
-                raise Exception("This event can not be added to this buffer")
+                msg = "{} event can not be added to {} buffer"
+                raise Exception(msg.format(type(new_event).__name__, self.name))
             log.debug('Added new event to %s event buffer', self.name)
             self._queue.put(new_event)
             log.debug('[buffer: %s] Added: %s', self.name,

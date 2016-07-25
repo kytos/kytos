@@ -22,10 +22,6 @@ from kyco.core.buffers import KycoBuffers
 from kyco.core.events import KycoShutdownEvent
 from kyco.core.events import KycoSwitchUp
 from kyco.core.events import KycoSwitchDown
-from kyco.core.event_handlers import raw_event_handler
-from kyco.core.event_handlers import msg_in_event_handler
-from kyco.core.event_handlers import msg_out_event_handler
-from kyco.core.event_handlers import app_event_handler
 from kyco.core.switch import KycoSwitch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler
 from kyco.core.tcp_server import KycoServer
@@ -71,25 +67,13 @@ class Controller(object):
         thrds = {'tcp_server': Thread(name='TCP server',
                                       target=self.server.serve_forever),
                  'raw_event_handler': Thread(name='RawEvent Handler',
-                                             target=raw_event_handler,
-                                             args=[self.events_listeners,
-                                                   self.connection_pool,
-                                                   self.buffers.raw_events,
-                                                   self.buffers.msg_in_events,
-                                                   self.buffers.app_events]),
+                                             target=self.raw_event_handler),
                  'msg_in_event_handler': Thread(name='MsgInEvent Handler',
-                                                target=msg_in_event_handler,
-                                                args=[self.events_listeners,
-                                                      self.buffers.msg_in_events]),
+                                                target=self.msg_in_event_handler),
                  'msg_out_event_handler': Thread(name='MsgOutEvent Handler',
-                                                 target=msg_out_event_handler,
-                                                 args=[self.events_listeners,
-                                                       self.connection_pool,
-                                                       self.buffers.msg_out_events]),
+                                                 target=self.msg_out_event_handler),
                  'app_event_handler': Thread(name='AppEvent Handler',
-                                             target=app_event_handler,
-                                             args=[self.events_listeners,
-                                                   self.buffers.app_events])}
+                                             target=self.app_event_handler)}
 
         self._threads = thrds
         for thread in self._threads.values():
@@ -126,9 +110,9 @@ class Controller(object):
                 pass
 
     def notify_listeners(self, event):
-        for key in self.listeners:
+        for key in self.events_listeners:
             if re.match(key, type(event).__name__):
-                for listener in self.listeners[key]:
+                for listener in self.events_listeners[key]:
                     listener(event)
 
     def raw_event_handler(self):
@@ -140,7 +124,7 @@ class Controller(object):
 
         log.info("Raw Event Handler started")
         while True:
-            event = self.buffers.raw_buffer.get()
+            event = self.buffers.raw_events.get()
 
             if isinstance(event, KycoShutdownEvent):
                 log.debug("RawEvent handler stopped")
@@ -159,7 +143,7 @@ class Controller(object):
 
         log.info("Message In Event Handler started")
         while True:
-            event = self.buffers.msg_in_buffer.get()
+            event = self.buffers.msg_in_events.get()
 
             if isinstance(event, KycoShutdownEvent):
                 log.debug("MsgInEvent handler stopped")
@@ -178,7 +162,7 @@ class Controller(object):
 
         log.info("Message Out Event Handler started")
         while True:
-            event = self.buffers.msg_out_buffer.get()
+            event = self.buffers.msg_out_events.get()
 
             if isinstance(event, KycoShutdownEvent):
                 log.debug("MsgOutEvent handler stopped")
@@ -203,7 +187,7 @@ class Controller(object):
 
         log.info("App Event Handler started")
         while True:
-            event = self.app_buffer.get()
+            event = self.buffers.app_events.get()
 
             if isinstance(event, KycoShutdownEvent):
                 log.debug("AppEvent handler stopped")

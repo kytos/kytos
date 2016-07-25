@@ -10,7 +10,7 @@ from threading import current_thread
 # TODO: Fix version scheme
 from pyof.v0x01.common.header import Header
 
-from kyco.core.events import KycoRawNewConnection
+from kyco.core.events import KycoNewConnection
 from kyco.core.events import KycoConnectionLost
 from kyco.core.events import KycoRawOpenFlowMessage
 
@@ -65,7 +65,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         self.port = self.client_address[1]
         content = {'request': self.request}
         connection = (self.ip, self.port)
-        event = KycoRawNewConnection(content, connection)
+        event = KycoNewConnection(content, connection)
         self.server.controller_put_raw_event(event)
         log.debug("New connection {}:{}".format(self.ip, self.port))
 

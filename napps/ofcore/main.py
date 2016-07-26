@@ -81,7 +81,7 @@ class Main(KycoCoreNApp):
         self.add_to_msg_in_buffer(new_event)
 
     @ListenTo('KycoMessageInHello')
-    def handle_hello(self, event):
+    def hello_in(self, event):
         """Handle a Hello MessageIn Event and sends a Hello to the client.
 
         Args:
@@ -95,8 +95,23 @@ class Main(KycoCoreNApp):
         event_out = events.KycoMessageOutHello(content, event.connection)
         self.add_to_msg_out_buffer(event_out)
 
+    @ListenTo('KycoMessageOutHello')
+    def send_features_request(self, event):
+        """Send a FeaturesRequest to the switch after a Hello.
+
+        Args:
+            event (KycoMessageOutHello): KycoMessageOutHello
+        """
+        log.debug('[%s] Sending a FeaturesRequest after responding to a Hello',
+                  self.name)
+
+        content = {'message': FeaturesRequest()}
+        event_out = events.KycoMessageOutFeaturesRequest(content,
+                                                         event.connection)
+        self.add_to_msg_out_buffer(event_out)
+
     @ListenTo('KycoMessageInFeaturesReply')
-    def handle_features_reply(self, event):
+    def features_reply_in(self, event):
         """Handle received FeaturesReply event.
 
         Reads the FeaturesReply Event sent by the client, save this data and
@@ -112,7 +127,6 @@ class Main(KycoCoreNApp):
         log.debug('[%s] Handling KycoMessageInFeaturesReply Event', self.name)
 
         # Processing the FeaturesReply Message
-        connection = event.connection
         message = event.content['message']
         # TODO: save this features data in some switch-like object
 
@@ -132,15 +146,9 @@ class Main(KycoCoreNApp):
         self.add_to_msg_out_buffer(event_out)
 
     def send_barrier_request(self, connection):
-        """Sends a BarrierRequest Message to the client"""
+        """Send a BarrierRequest Message to the client"""
         content = {'message': BarrierRequest()}
         event_out = events.KycoMessageOutBarrierRequest(content, connection)
-        self.add_to_msg_out_buffer(event_out)
-
-    def send_features_request(self, connection):
-        """Sends a FeaturesRequest message to the client."""
-        content = {'message': FeaturesRequest()}
-        event_out = events.KycoMessageOutFeaturesRequest(content, connection)
         self.add_to_msg_out_buffer(event_out)
 
     def send_flow_delete(self, connection):

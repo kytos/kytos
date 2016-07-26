@@ -75,16 +75,6 @@ class KycoConnectionLost(KycoRawEvent):
     pass
 
 
-class KycoSwitchUp(KycoCoreEvent):
-    """A connection with a switch was stabilished"""
-    pass
-
-
-class KycoSwitchDown(KycoCoreEvent):
-    """A connection with a switch was lost"""
-    pass
-
-
 class KycoRawOpenFlowMessage(KycoRawEvent):
     """New OpenFlowMessage received
 
@@ -93,23 +83,33 @@ class KycoRawOpenFlowMessage(KycoRawEvent):
     pass
 
 
-class KycoAppInstalled(KycoCoreEvent):
+class KycoSwitchUp(KycoAppEvent):
+    """A connection with a switch was stabilished"""
     pass
 
 
-class KycoAppLoaded(KycoCoreEvent):
+class KycoSwitchDown(KycoAppEvent):
+    """A connection with a switch was lost"""
     pass
 
 
-class KycoAppUninstalled(KycoCoreEvent):
+class KycoAppInstalled(KycoAppEvent):
     pass
 
 
-class KycoAppUnloaded(KycoCoreEvent):
+class KycoAppLoaded(KycoAppEvent):
     pass
 
 
-class KycoServerDown(KycoCoreEvent):
+class KycoAppUninstalled(KycoAppEvent):
+    pass
+
+
+class KycoAppUnloaded(KycoAppEvent):
+    pass
+
+
+class KycoServerDown(KycoAppEvent):
     pass
 
 

@@ -160,7 +160,7 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         self.setup()
         self.execute()
 
-    @ListenTo('KycoShutdownEvent')
+    @listen_to('KycoShutdownEvent')
     def _shutdown_handler(self, event):
         self.shutdown()
 

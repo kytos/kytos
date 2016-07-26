@@ -21,7 +21,6 @@ from kyco.core import events
 from kyco.utils import KycoCoreNApp
 from kyco.utils import ListenTo
 
-# TODO: Check python pep for decorators name
 
 log = logging.getLogger('kytos[A]')
 
@@ -60,12 +59,11 @@ class Main(KycoCoreNApp):
         # on the unpacked header.
         message = new_message_from_header(event.content['header'])
 
-        # TODO: Rename this buffer var
-        buffer = event.content['buffer']
+        binary_data = event.content['binary_data']
 
         # The unpack will happen only to those messages with body beyond header
-        if buffer and len(buffer) > 0:
-            message.unpack(buffer)
+        if binary_data and len(binary_data) > 0:
+            message.unpack(binary_data)
         log.debug('RawOpenFlowMessage unpacked')
 
         content = {'message': message}
@@ -94,8 +92,7 @@ class Main(KycoCoreNApp):
         message = event.content['message']
         message_out = Hello(xid=message.header.xid)
         content = {'message': message_out}
-        event_out = events.KycoMessageOutHello(content)
-        event_out.connection = event.connection
+        event_out = events.KycoMessageOutHello(content, event.connection)
         self.add_to_msg_out_buffer(event_out)
 
     @ListenTo('KycoMessageInFeaturesReply')
@@ -131,24 +128,19 @@ class Main(KycoCoreNApp):
         echo_request = event.content['message']
         echo_reply = EchoReply(xid=echo_request.header.xid)
         content = {'message': echo_reply}
-        event_out = events.KycoMessageOutEchoReply(content)
-        event_out.connection = event.connection
+        event_out = events.KycoMessageOutEchoReply(content, event.connection)
         self.add_to_msg_out_buffer(event_out)
 
     def send_barrier_request(self, connection):
         """Sends a BarrierRequest Message to the client"""
-        message_out = BarrierRequest(xid=randint(1, 100))
-        content = {'message': message_out}
-        event_out = events.KycoMessageOutBarrierRequest(content)
-        event_out.connection = connection
+        content = {'message': BarrierRequest()}
+        event_out = events.KycoMessageOutBarrierRequest(content, connection)
         self.add_to_msg_out_buffer(event_out)
 
     def send_features_request(self, connection):
         """Sends a FeaturesRequest message to the client."""
-        features_request = FeaturesRequest(xid=randint(1, 100))
-        content = {'message': features_request}
-        event_out = events.KycoMessageOutFeaturesRequest(content)
-        event_out.connection = connection
+        content = {'message': FeaturesRequest()}
+        event_out = events.KycoMessageOutFeaturesRequest(content, connection)
         self.add_to_msg_out_buffer(event_out)
 
     def send_flow_delete(self, connection):
@@ -162,8 +154,8 @@ class Main(KycoCoreNApp):
         # TODO: How to decide the out_port
         # TODO: How to decide the flags
         content = {'message': message_out}
-        features_request_out = events.KycoMessageOutFeaturesRequest(content)
-        features_request_out.connection = connection
+        features_request_out = events.KycoMessageOutFeaturesRequest(content,
+                                                                    connection)
         self.add_to_msg_out_buffer(features_request_out)
 
     def send_switch_config(self, connection):
@@ -174,8 +166,7 @@ class Main(KycoCoreNApp):
                                 miss_send_len=128)
         # TODO: Define the miss_send_len value
         content = {'message': message_out}
-        event_out = events.KycoMessageOutSetConfig(content)
-        event_out.connection = connection
+        event_out = events.KycoMessageOutSetConfig(content, connection)
         self.add_to_msg_out_buffer(event_out)
 
     def shutdown(self):

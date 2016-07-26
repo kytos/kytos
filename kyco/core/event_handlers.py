@@ -5,10 +5,10 @@ import re
 from threading import Thread
 
 from kyco.core.events import KycoShutdownEvent
-from kyco.core.events import KycoRawEvent
-from kyco.core.events import KycoRawOpenFlowMessage
-from kyco.core.events import KycoRawConnectionUp
-from kyco.core.events import KycoRawConnectionDown
+from kyco.core.events import KycoSwitchDown
+from kyco.core.events import KycoSwitchUp
+from kyco.core.events import KycoNewConnection
+from kyco.core.events import KycoConnectionLost
 from kyco.core.exceptions import KycoWrongEventType
 
 log = logging.getLogger('Kyco')
@@ -31,19 +31,6 @@ def raw_event_handler(listeners, connection_pool, raw_buffer, msg_in_buffer,
         if isinstance(event, KycoShutdownEvent):
             log.debug("RawEvent handler stopped")
             break
-
-        if not issubclass(type(event), KycoRawEvent):
-            message = 'RawEventHandler expects a KycoRawEvent.'
-            raise KycoWrongEventType(message, event)
-
-        # TODO: This should not be here
-        if isinstance(event, KycoRawConnectionUp):
-            connection_request = event.content['request']
-            connection_pool[event.connection] = connection_request
-
-        # TODO: This should not be here
-        if isinstance(event, KycoRawConnectionDown):
-            connection_pool.pop(event.connection)
 
         notify_listeners(listeners, event)
 
@@ -90,9 +77,11 @@ def app_event_handler(listeners, app_buffer):
 
 # TODO: Create a Switch class and a method send()
 def send_to_switch(connection, message):
-    """
-     Args:
+    """ Send a message to through the given connection
+
+    Args:
         connection (socket/request): socket connection to switch
         message (binary OpenFlowMessage)
+
     """
     connection.send(message)

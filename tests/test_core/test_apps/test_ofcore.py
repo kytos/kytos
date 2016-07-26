@@ -26,8 +26,8 @@ class TestOFCoreApp(TestCase):
 
     def setUp(self):
         self.config = KycoConfig()
-        self.config = self.config.args
-        self.controller = Controller(self.config)
+        self.options = self.config.options
+        self.controller = Controller(self.options)
         self.thread = Thread(name='Controller',
                              target=self.controller.start)
         self.thread.start()
@@ -42,7 +42,7 @@ class TestOFCoreApp(TestCase):
         Connect a client, send a OF Hello message and receive another back."""
         message = Hello(xid=3)
         client = socket()
-        client.connect((self.config.listen, self.config.port))
+        client.connect((self.options.listen, self.options.port))
         client.send(message.pack())
         response = b''
         # len() < 8 here because we just expect a Hello as response
@@ -59,7 +59,7 @@ class TestOFCoreApp(TestCase):
         """Testing basic OF switch handshake process."""
         client = socket()
         # Client (Switch) connecting to the controlller
-        client.connect((self.config.listen, self.config.port))
+        client.connect((self.options.listen, self.options.port))
 
         # -- STEP 1: Sending Hello message
         client.send(Hello(xid=3).pack())
@@ -80,7 +80,7 @@ class TestOFCoreApp(TestCase):
         """Testing basic OF switch handshake process."""
         client = socket()
         # Client (Switch) connecting to the controlller
-        client.connect((self.config.listen, self.config.port))
+        client.connect((self.options.listen, self.options.port))
 
         # -- STEP 1: Sending Hello message
         client.send(Hello(xid=3).pack())
@@ -169,7 +169,7 @@ class TestOFCoreApp(TestCase):
 
         client = socket()
         # Client (Switch) connecting to the controlller
-        client.connect((self.config.listen, self.config.port))
+        client.connect((self.options.listen, self.options.port))
 
         # Test of Echo Request
 

@@ -19,7 +19,7 @@ class TestKycoController(TestCase):
 
     def setUp(self):
         config = KycoConfig()
-        self.controller = Controller(config.args)
+        self.controller = Controller(config.options)
         self.thread = Thread(name='Controller',
                              target=self.controller.start)
         self.thread.start()

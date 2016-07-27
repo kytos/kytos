@@ -9,12 +9,10 @@ from pyof.v0x01.common.header import Type
 from pyof.v0x01.common.utils import new_message_from_header
 from pyof.v0x01.controller2switch.barrier_request import BarrierRequest
 from pyof.v0x01.controller2switch.common import ConfigFlags
-from pyof.v0x01.controller2switch.features_request import FeaturesRequest
 from pyof.v0x01.controller2switch.flow_mod import FlowMod
 from pyof.v0x01.controller2switch.flow_mod import FlowModCommand
 from pyof.v0x01.controller2switch.flow_mod import FlowModFlags
 from pyof.v0x01.controller2switch.set_config import SetConfig
-from pyof.v0x01.symmetric.hello import Hello
 from pyof.v0x01.symmetric.echo_reply import EchoReply
 
 from kyco.core import events
@@ -79,56 +77,6 @@ class Main(KycoCoreNApp):
         new_event.connection = event.connection
 
         self.add_to_msg_in_buffer(new_event)
-
-    @ListenTo('KycoMessageInHello')
-    def hello_in(self, event):
-        """Handle a Hello MessageIn Event and sends a Hello to the client.
-
-        Args:
-            event (KycoMessageInHello): KycoMessageInHelloEvent
-        """
-        log.debug('[%s] Handling KycoMessageInHello', self.name)
-
-        message = event.content['message']
-        message_out = Hello(xid=message.header.xid)
-        content = {'message': message_out}
-        event_out = events.KycoMessageOutHello(content, event.connection)
-        self.add_to_msg_out_buffer(event_out)
-
-    @ListenTo('KycoMessageOutHello')
-    def send_features_request(self, event):
-        """Send a FeaturesRequest to the switch after a Hello.
-
-        Args:
-            event (KycoMessageOutHello): KycoMessageOutHello
-        """
-        log.debug('[%s] Sending a FeaturesRequest after responding to a Hello',
-                  self.name)
-
-        content = {'message': FeaturesRequest()}
-        event_out = events.KycoMessageOutFeaturesRequest(content,
-                                                         event.connection)
-        self.add_to_msg_out_buffer(event_out)
-
-    @ListenTo('KycoMessageInFeaturesReply')
-    def features_reply_in(self, event):
-        """Handle received FeaturesReply event.
-
-        Reads the FeaturesReply Event sent by the client, save this data and
-        sends three new messages to the client:
-            - SetConfig Message;
-            - FlowMod Message with a FlowDelete command;
-            - BarrierRequest Message;
-        This is the end of the Handshake workflow of the OpenFlow Protocol.
-
-        Args:
-            event (KycoMessageInFeaturesReply):
-        """
-        log.debug('[%s] Handling KycoMessageInFeaturesReply Event', self.name)
-
-        # Processing the FeaturesReply Message
-        message = event.content['message']
-        # TODO: save this features data in some switch-like object
 
     @ListenTo('KycoMessageInEchoRequest')
     def handle_echo_request_event(self, event):

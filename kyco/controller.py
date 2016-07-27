@@ -16,9 +16,14 @@ import os
 import re
 
 from importlib.machinery import SourceFileLoader
+from pyof.v0x01.symmetric.hello import Hello
+from pyof.v0x01.controller2switch.features_request import FeaturesRequest
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
+from kyco.core.events import KycoMessageOutFeaturesRequest
+from kyco.core.events import KycoMessageOutHello
+from kyco.core.events import KycoNewConnection
 from kyco.core.events import KycoShutdownEvent
 from kyco.core.events import KycoSwitchUp
 from kyco.core.events import KycoSwitchDown
@@ -348,3 +353,72 @@ class Controller(object):
         for napp_name in list(self.napps):
             if not isinstance(self.napps[napp_name], KycoCoreNApp):
                 self.unload_napp(napp_name)
+
+    def hello_in(self, event):
+        """Handle a Hello MessageIn Event and sends a Hello to the client.
+
+        Args:
+            event (KycoMessageInHello): KycoMessageInHelloEvent
+        """
+        log.debug('Handling KycoMessageInHello')
+
+        message = event.content['message']
+        # TODO: Evaluate the OpenFlow version that will be used...
+        message_out = Hello(xid=message.header.xid)
+        content = {'message': message_out}
+        event_out = KycoMessageOutHello(content=content,
+                                        connection_id=event.connection_id)
+        self.buffers.msg_out_events.put(event_out)
+
+    def send_features_request(self, event):
+        """Send a FeaturesRequest to the switch after a Hello.
+
+        We consider here that the Hello is sent just during the Handshake
+        processes, which means that, at this point, we do not have the switch
+        `dpid`, just the `connection_id`.
+
+        Args:
+            event (KycoMessageOutHello): KycoMessageOutHello
+        """
+        log.debug('Sending a FeaturesRequest after responding to a Hello')
+
+        content = {'message': FeaturesRequest()}
+        event_out = KycoMessageOutFeaturesRequest(content=content,
+                                                  connection_id=event.connection_id)
+        self.buffers.msg_out_events.put(event_out)
+
+    def features_reply_in(self, event):
+        """Handle received FeaturesReply event.
+
+        Reads the FeaturesReply Event sent by the client, save this data and
+        sends three new messages to the client:
+            - SetConfig Message;
+            - FlowMod Message with a FlowDelete command;
+            - BarrierRequest Message;
+        This is the end of the Handshake workflow of the OpenFlow Protocol.
+
+        Args:
+            event (KycoMessageInFeaturesReply):
+        """
+        log.debug('Handling KycoMessageInFeaturesReply Event')
+
+        # Processing the FeaturesReply Message
+        message = event.content['message']
+        if event.dpid is not None:
+            # In this case, the switch has already been instantiated and this
+            # is just a update of switch features.
+            self.switches.features = message
+        else:
+            # This is the first features_reply for the switch, which means
+            # that we are on the Handshake process and so we need to create a
+            # new switch as save it on the controller.
+            connection = self.connections[event.connection_id]
+            switch = KycoSwitch(dpid=str(message.datapath_id),
+                                socket=connection['socket'],
+                                connection_id=event.connection_id,
+                                ofp_version=message.header.version,
+                                features=message)
+            self.add_new_switch(switch)
+
+        new_event = KycoSwitchUp(dpid=switch.dpid, content={})
+        self.buffers.app_events.put(new_event)

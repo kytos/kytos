@@ -20,6 +20,9 @@ from pyof.v0x01.symmetric.echo_request import EchoRequest
 from kyco.config import KycoConfig
 from kyco.controller import Controller
 
+from tests.helper import new_controller
+from tests.helper import new_client
+from tests.helper import new_handshaked_client
 
 class TestOFCoreApp(TestCase):
     """Tests of Kyco OFCore App functionalities"""
@@ -27,22 +30,15 @@ class TestOFCoreApp(TestCase):
     def setUp(self):
         self.config = KycoConfig()
         self.options = self.config.options
-        self.controller = Controller(self.options)
-        self.thread = Thread(name='Controller',
-                             target=self.controller.start)
-        self.thread.start()
-        # Sleep time to wait the starting process
-        # TODO: How to avoid the necessity of this?
-        #       Do we need to avoid it? Or the Daemon will handle this timing?
-        time.sleep(0.1)
+        self.controller, self.thread = new_controller(self.options)
 
     def test_client(self):
         """Testing basic client operations.
 
-        Connect a client, send a OF Hello message and receive another back."""
+        Connect a client, send a OF Hello message and receive another back.
+        """
+        client = new_client(self.options)
         message = Hello(xid=3)
-        client = socket()
-        client.connect((self.options.listen, self.options.port))
         client.send(message.pack())
         response = b''
         # len() < 8 here because we just expect a Hello as response
@@ -55,11 +51,9 @@ class TestOFCoreApp(TestCase):
         self.assertEqual(message, response_message)
         client.close()
 
-    def test_short_handshake_process(self):
-        """Testing basic OF switch handshake process."""
-        client = socket()
-        # Client (Switch) connecting to the controlller
-        client.connect((self.options.listen, self.options.port))
+    def test_handshake(self):
+        """Testing OF switch handshake process"""
+        client = new_client(self.options)
 
         # -- STEP 1: Sending Hello message
         client.send(Hello(xid=3).pack())
@@ -73,6 +67,26 @@ class TestOFCoreApp(TestCase):
         # Check Hello is ok (same xid)
         self.assertEqual(header.message_type, Type.OFPT_HELLO)
         self.assertEqual(header.xid, 3)
+
+        # -- STEP 3: Wait for features_request message
+        binary_packet = b''
+        # len() < 8 here because we just expect a Hello as response
+        while len(binary_packet) < 8:
+            binary_packet = client.recv(8)
+        header = Header()
+        header.unpack(binary_packet)
+        # Check if the message is a features_request
+        self.assertEqual(header.message_type, Type.OFPT_FEATURES_REQUEST)
+
+        # -- STEP 4: Send features_reply to the controller
+        # reading features_reply from binary raw file saved with wireshark
+        basedir = os.path.dirname(os.path.abspath(__file__))
+        raw_dir = os.path.join(basedir, '..', 'raw')
+        file = open(os.path.join(raw_dir, 'features_reply.cap'), 'rb')
+        message = file.read()
+        file.close()
+        client.send(message)
+
         client.close()
 
     @skip
@@ -163,20 +177,15 @@ class TestOFCoreApp(TestCase):
         client.close()
 
     def test_echo_reply(self):
-        """Testing a echo request/reply interaction between controller and
-        (mock)switch
-        """
+        """Testing a echo request/reply interaction"""
 
-        client = socket()
-        # Client (Switch) connecting to the controlller
-        client.connect((self.options.listen, self.options.port))
+        client = new_handshaked_client(self.options)
 
         # Test of Echo Request
-
         echo_msg = EchoRequest(randint(1, 10))
-
         client.send(echo_msg.pack())
 
+        # Wait for Echo Reply
         response = b''
         # len() < 8 here because we just expect a Hello as response
         while len(response) < 8:

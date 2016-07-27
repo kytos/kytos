@@ -177,11 +177,15 @@ class Controller(object):
                 break
 
             log.debug("MsgOutEvent handler called")
-            dpid = event.connection
+            dpid = event.dpid
+            connection_id = event.connection_id
             message = event.content['message']
 
-            # Sending the OpenFlow message to the switch
-            self.send_to_switch(dpid, message.pack())
+            if dpid is not None:
+                # Sending the OpenFlow message to the switch
+                self.send_to_switch(dpid, message.pack())
+            else:
+                self.send_to_connection(connection_id, message.pack())
 
             # Sending the event to the listeners
             self.notify_listeners(event)

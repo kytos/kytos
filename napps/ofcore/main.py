@@ -100,13 +100,13 @@ class Main(KycoCoreNApp):
         event_out = events.KycoMessageOutEchoReply(event.dpid, content)
         self.add_to_msg_out_buffer(event_out)
 
-    def send_barrier_request(self, connection):
+    def send_barrier_request(self, dpid):
         """Send a BarrierRequest Message to the client"""
         content = {'message': BarrierRequest()}
-        event_out = events.KycoMessageOutBarrierRequest(content, connection)
+        event_out = events.KycoMessageOutBarrierRequest(dpid, content)
         self.add_to_msg_out_buffer(event_out)
 
-    def send_flow_delete(self, connection):
+    def send_flow_delete(self, dpid):
         """Sends a FlowMod message with FlowDelete command"""
         # Sending a 'FlowDelete' (FlowMod) message to the client
         message_out = FlowMod(xid=randint(1, 100), match=Match(),
@@ -117,11 +117,11 @@ class Main(KycoCoreNApp):
         # TODO: How to decide the out_port
         # TODO: How to decide the flags
         content = {'message': message_out}
-        features_request_out = events.KycoMessageOutFeaturesRequest(content,
-                                                                    connection)
+        features_request_out = events.KycoMessageOutFeaturesRequest(dpid,
+                                                                    content)
         self.add_to_msg_out_buffer(features_request_out)
 
-    def send_switch_config(self, connection):
+    def send_switch_config(self, dpid):
         """Sends a SwitchConfig message to the client"""
         # Sending a SetConfig message to the client.
         message_out = SetConfig(xid=randint(1, 65000),
@@ -129,7 +129,7 @@ class Main(KycoCoreNApp):
                                 miss_send_len=128)
         # TODO: Define the miss_send_len value
         content = {'message': message_out}
-        event_out = events.KycoMessageOutSetConfig(content, connection)
+        event_out = events.KycoMessageOutSetConfig(dpid, content)
         self.add_to_msg_out_buffer(event_out)
 
     def shutdown(self):

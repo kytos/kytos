@@ -49,13 +49,16 @@ class Controller(object):
     def __init__(self, options):
         self._threads = {}
         self.buffers = KycoBuffers()
-        self.connection_pool = {}
-        self.events_listeners = {'KycoNewConnection': [self.new_connection_handler],
-                                 'KycoConnectionLost': [self.connection_lost_handler]}
-        self.switches = {}
-        self.napps = {}
-        self.server = None
+        self.connections = {}  # (ip, port): {socket:socket, dpid:dpid}
+        self.events_listeners = {'KycoNewConnection': [self.new_connection],
+                                 'KycoConnectionLost': [self.connection_lost],
+                                 'KycoMessageInHello': [self.hello_in],
+                                 'KycoMessageOutHello': [self.send_features_request],
+                                 'KycoMessageInFeaturesReply': [self.features_reply_in]}
+        self.napps = {}  # napp_name: napp (instance)
         self.options = options
+        self.server = None
+        self.switches = {}  # dpid: KycoSwitch()
 
     def start(self):
         """Start the controller.
@@ -202,35 +205,73 @@ class Controller(object):
             # Sending the event to the listeners
             self.notify_listeners(event)
 
-    def send_to_switch(self, dpid, message):
-        """ Send a message to through the given connection
+    def new_connection(self, event):
+        """Handle a KycoNewConnection event.
+
+        This method will read the event and store the connection (socket) into
+        the connections attribute on the controller.
+
+        At last, it will create and send a SwitchUp event to the app buffer.
 
         Args:
-            dpid: dpid of the switch that will receive the message
-            message (bytes); binary OpenFlow Message
+            event (KycoNewConnection): The received event with the needed infos
         """
-        try:
-            self.switches[dpid].send(message)
-        except:
-            raise Exception('Error while sending a message to switch %s', dpid)
+
+        log.info("Handling KycoNewConnection event")
+
+        socket = event.content['request']
+        connection_id = event.connection_id
+
+        self.add_new_connection(connection_id, socket)
+
+    def add_new_connection(self, connection_id, connection_socket):
+        """Stores a new socket connection on the controller.
+
+        If the connection already exists ((ip,port)), an exception is raised.
+        Args:
+            connection_id (tuple): Tuple with ip and port (ip, port)
+            connection_socket (socket): Socket of that connection
+        """
+        self.connections[connection_id] = {'socket': connection_socket,
+                                           'dpid': None}
 
     def add_new_switch(self, switch):
         """Adds a new switch on the controller.
 
-        If the switch already exists (dpid), then an exception is raised.
         Args:
             switch (KycoSwitch): A KycoSwitch object
         """
 
-        if switch.dpid in self.switches:
-            if self.switches[switch.dpid].is_connected():
-                error_message = ("Kyco already have a connected switch with "
-                                 "dpid {}")
-                raise Exception(error_message.format(switch.dpid))
+        self.switches[switch.dpid] = switch
+        self.connections[switch.connection_id]['socket'] = switch.socket
+        self.connections[switch.connection_id]['dpid'] = switch.dpid
+
+    def connection_lost(self, event):
+        """Handle a ConnectionLost event.
+
+        This method will read the event and change the switch that has been
+        disconnected.
+
+        At last, it will create and send a SwitchDown event to the app buffer.
+
+        Args:
+            event (KycoConnectionLost): Received event with the needed infos
+        """
+        log.info("Handling KycoConnectionLost event")
+        connection_id = event.connection_id
+        if connection_id is not None and connection_id in self.connections:
+            dpid = self.connections[event.connection_id]['dpid']
+            if dpid is None:
+                try:
+                    self.connection[connection_id]['socket'].close()
+                except:
+                    pass
             else:
-                self.switches[switch.dpid].save_connection(switch.socket)
-        else:
-            self.switches[switch.dpid] = switch
+                self.disconnect_switch(dpid)
+
+        dpid = event.dpid
+        if event.dpid is not None:
+            self.disconnect_switch(event.dpid)
 
     def disconnect_switch(self, dpid):
         """End the connection with a switch.
@@ -242,56 +283,44 @@ class Controller(object):
 
         if dpid not in self.switches:
             raise Exception("Switch {} not found on Kyco".format(dpid))
-        self.switches[dpid].disconnect()
 
-    def new_connection_handler(self, event):
-        """Handle a KycoNewConnection event.
-
-        This method will read the event and store the connection (socket) data
-        into the correct switch object on the controller.
-
-        At last, it will create and send a SwitchUp event to the app buffer.
-
-        Args:
-            event (KycoNewConnection): The received event with the needed infos
-        """
-
-        log.info("Handling KycoNewConnection event")
-
-        socket = event.content['request']
-        dpid = event.connection
-        switch = KycoSwitch(dpid, socket)
-
+        switch = self.switches[dpid]
+        connection_id = switch.connection_id
+        switch.disconnect()
         try:
-            self.add_new_switch(switch)
-        except Exception as e:
-            log.error('Error while handling a new connection')
-            raise e
+            self.connections[connection_id]['socket'].close()
+        except:
+            pass
+        self.connections.pop(connection_id, None)
 
-        new_event = KycoSwitchUp(content={}, connection=dpid,
-                                 timestamp=event.timestamp)
+        new_event = KycoSwitchDown(dpid=dpid)
 
         self.buffers.app_events.put(new_event)
 
-    def connection_lost_handler(self, event):
-        """Handle a ConnectionLost event.
-
-        This method will read the event and change the switch that has been
-        disconnected.
-
-        At last, it will create and send a SwitchDown event to the app buffer.
+    def send_to_connection(self, connection_id, message):
+        """Send a packed OF message to the client identified by connection_id
 
         Args:
-            event (KycoConnectionLost): Received event with the needed infos
+            connection_id (tuple): tuple(ip, port)
+            message (bytes): packed openflow message (binary)
         """
+        try:
+            self.connections[connection_id]['socket'].send(message)
+        except:
+            raise Exception('Error while sending a message to %s',
+                            connection_id)
 
-        log.info("Handling KycoConnectionLost event")
+    def send_to_switch(self, dpid, message):
+        """ Send a packed OF message to the client switch identified dpid
 
-        self.disconnect_switch(event.connection)
-        new_event = KycoSwitchDown(content={}, connection=event.connection,
-                                   timestamp=event.timestamp)
-
-        self.buffers.app_events.put(new_event)
+        Args:
+            dpid: dpid of the switch that will receive the message
+            message (bytes): packed openflow message (binary)
+        """
+        try:
+            self.switches[dpid].send(message)
+        except:
+            raise Exception('Error while sending a message to switch %s', dpid)
 
     def load_napp(self, napp_name):
         """Load a single app.

@@ -68,13 +68,20 @@ class Main(KycoCoreNApp):
 
         # Now we create a new MessageInEvent based on the message_type
         if message.header.message_type == Type.OFPT_HELLO:
-            new_event = events.KycoMessageInHello(content)
+            new_event = events.KycoMessageInHello(content=content)
+        elif message.header.message_type == Type.OFPT_FEATURES_REPLY:
+            new_event = events.KycoMessageInFeaturesReply(content=content)
         elif message.header.message_type == Type.OFPT_ECHO_REQUEST:
-            new_event = events.KycoMessageInEchoRequest(content)
+            new_event = events.KycoMessageInEchoRequest(content=content)
         else:
-            new_event = events.KycoMessageIn(content)
+            new_event = events.KycoMessageIn(content=content)
 
-        new_event.connection = event.connection
+        if event.dpid is not None:
+            new_event.dpid = event.dpid
+        else:
+            # This case will probably happen only on Hello and FeaturesReply
+            # messages
+            new_event.connection_id = event.connection_id
 
         self.add_to_msg_in_buffer(new_event)
 

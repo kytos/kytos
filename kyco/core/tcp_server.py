@@ -67,12 +67,13 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         connection_id = (self.ip, self.port)
         event = KycoNewConnection(content=content, connection_id=connection_id)
         self.server.controller_put_raw_event(event)
-        log.debug("New connection {}:{}".format(self.ip, self.port))
+        log.debug("New connection from %s:%s", self.ip, self.port)
 
     def handle(self):
         curr_thread = current_thread()
         header_len = 8
         while True:
+            # TODO: How to consider the OpenFlow version here?
             header = Header()
             binary_data = b''
 
@@ -88,13 +89,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
                       self.port, curr_thread.name)
 
             header.unpack(raw_header)
-            # Just to close the sock with CTRL+C or CTRL+D
-            # if header == 255 or header == 4:
-            #     log.info('Closing connection')
-            #     self.request.close()
-            #     break
 
-            # This is just for now, will be changed soon....
             message_size = header.length - header_len
             if message_size > 0:
                 log.debug('Reading the binary_data')

@@ -4,14 +4,14 @@ import logging
 from random import randint
 
 from pyof.v0x01.common.flow_match import Match
-from pyof.v0x01.common.flow_match import FlowWildCards
+# from pyof.v0x01.common.flow_match import FlowWildCards
 from pyof.v0x01.common.header import Type
 from pyof.v0x01.common.utils import new_message_from_header
 from pyof.v0x01.controller2switch.barrier_request import BarrierRequest
 from pyof.v0x01.controller2switch.common import ConfigFlags
 from pyof.v0x01.controller2switch.flow_mod import FlowMod
 from pyof.v0x01.controller2switch.flow_mod import FlowModCommand
-from pyof.v0x01.controller2switch.flow_mod import FlowModFlags
+# from pyof.v0x01.controller2switch.flow_mod import FlowModFlags
 from pyof.v0x01.controller2switch.set_config import SetConfig
 from pyof.v0x01.symmetric.echo_reply import EchoReply
 
@@ -51,10 +51,11 @@ class Main(KycoCoreNApp):
         Args:
             event (KycoRawOpenFlowMessage): RawOpenFlowMessage to be unpacked
         """
-        log.debug('RawOpenFlowMessage received by KycoOFMessageParser APP')
+        log.debug('RawOpenFlowMessage received by RawOFMessage handler')
 
         # creates an empty OpenFlow Message based on the message_type defined
         # on the unpacked header.
+        # TODO: Deal with openFlow version prior to message instantiation
         message = new_message_from_header(event.content['header'])
 
         binary_data = event.content['binary_data']
@@ -94,6 +95,8 @@ class Main(KycoCoreNApp):
         """
         log.debug("Echo Request message read")
 
+        log.warning(event.dpid)
+        log.warning(event.connection_id)
         echo_request = event.content['message']
         echo_reply = EchoReply(xid=echo_request.header.xid)
         content = {'message': echo_reply}

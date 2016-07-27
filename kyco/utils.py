@@ -145,7 +145,8 @@ class KycoNApp(Thread, metaclass=ABCMeta):
             raise KycoNAppMissingInitArgument('add_to_app_buffer')
         self.add_to_app_buffer = kwargs['add_to_app_buffer']
 
-        log.info("%s App instantiated", self.name)
+        # TODO: Load NApp data based on its json file
+        self.name = None
 
     def run(self):
         """This method will call the setup and the execute methos.

@@ -97,7 +97,7 @@ class Main(KycoCoreNApp):
         echo_request = event.content['message']
         echo_reply = EchoReply(xid=echo_request.header.xid)
         content = {'message': echo_reply}
-        event_out = events.KycoMessageOutEchoReply(content, event.connection)
+        event_out = events.KycoMessageOutEchoReply(event.dpid, content)
         self.add_to_msg_out_buffer(event_out)
 
     def send_barrier_request(self, connection):

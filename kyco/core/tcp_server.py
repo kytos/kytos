@@ -63,9 +63,9 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
     def setup(self):
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
-        content = {'request': self.request}
-        connection = (self.ip, self.port)
-        event = KycoNewConnection(content, connection)
+        content = {'request': self.request}  # request = socket
+        connection_id = (self.ip, self.port)
+        event = KycoNewConnection(content=content, connection_id=connection_id)
         self.server.controller_put_raw_event(event)
         log.debug("New connection {}:{}".format(self.ip, self.port))
 
@@ -77,7 +77,6 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             binary_data = b''
 
             raw_header = self.request.recv(8)
-            timestamp = datetime.now()
             if not raw_header:
                 log.debug("Client %s:%s disconnected", self.ip, self.port)
                 break
@@ -103,13 +102,13 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
 
             # TODO: Do we need other informations from the network packet?
             content = {'header': header, 'binary_data': binary_data}
-            connection = (self.ip, self.port)
-            event = KycoRawOpenFlowMessage(content, connection, timestamp)
+            connection_id = (self.ip, self.port)
+            event = KycoRawOpenFlowMessage(content=content,
+                                           connection_id=connection_id)
             self.server.controller_put_raw_event(event)
 
     def finish(self):
         log.debug("Connection lost from %s:%s", self.ip, self.port)
-        content = {}
-        connection = (self.ip, self.port)
-        event = KycoConnectionLost(content, connection)
+        connection_id = (self.ip, self.port)
+        event = KycoConnectionLost(connection_id=connection_id)
         self.server.controller_put_raw_event(event)

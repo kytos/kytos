@@ -19,7 +19,7 @@ from pyof.v0x01.symmetric.echo_reply import EchoReply
 
 from kyco.core import events
 from kyco.utils import KycoCoreNApp
-from kyco.utils import ListenTo
+from kyco.utils import listen_to
 
 
 log = logging.getLogger('kytos[A]')
@@ -46,7 +46,7 @@ class Main(KycoCoreNApp):
         Users shouldn't call this method directly."""
         pass
 
-    @ListenTo('KycoRawOpenFlowMessage')
+    @listen_to('KycoRawOpenFlowMessage')
     def handle_raw_message_in(self, event):
         """Handle a RawEvent and generate a KycoMessageIn event.
 
@@ -80,7 +80,7 @@ class Main(KycoCoreNApp):
 
         self.add_to_msg_in_buffer(new_event)
 
-    @ListenTo('KycoMessageInHello')
+    @listen_to('KycoMessageInHello')
     def handle_hello(self, event):
         """Handle a Hello MessageIn Event and sends a Hello to the client.
 
@@ -95,7 +95,7 @@ class Main(KycoCoreNApp):
         event_out = events.KycoMessageOutHello(content, event.connection)
         self.add_to_msg_out_buffer(event_out)
 
-    @ListenTo('KycoMessageInFeaturesReply')
+    @listen_to('KycoMessageInFeaturesReply')
     def handle_features_reply(self, event):
         """Handle received FeaturesReply event.
 
@@ -116,7 +116,7 @@ class Main(KycoCoreNApp):
         message = event.content['message']
         # TODO: save this features data in some switch-like object
 
-    @ListenTo('KycoMessageInEchoRequest')
+    @listen_to('KycoMessageInEchoRequest')
     def handle_echo_request_event(self, event):
         """Handle EchoRequest Event by Generating an EchoReply Answer
 

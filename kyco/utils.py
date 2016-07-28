@@ -50,7 +50,7 @@ def run_on_thread(method):
 # TODO: Check python pep for decorators name
 
 
-class ListenTo(object):
+def listen_to(event, *events):
     """Decorator for Event Listener methods.
 
     This decorator should be used on methods, inside an APP, to define which
@@ -79,32 +79,35 @@ class ListenTo(object):
             def my_handler_of_message_out(self, event):
                 # Do stuff here...
 
+            @listen_to('KycoMessageInHello', 'KycoMessageOutHello')
+            def my_handler_of_hello_messages(self, event):
+                # Do stuff here...
+
+            @listen_to('KycoMessage*Hello')
+            def my_other_handler_of_hello_messages(self, event):
+                # Do stuff here...
+
+            @listen_to('KycoMessage*Hello')
+            def my_handler_of_hello_messages(self, event):
+                # Do stuff here...
+
             @listen_to('KycoMessage*')
             def my_stats_handler_of_any_message(self, event):
                 # Do stuff here...
     """
-    def __init__(self, event, *events):
-        """Initial setup of handler methods.
 
-        This will be called when the class is created.
-        It need to have at least one event type (as string).
-
-        Args:
-            event (str): String with the name of a event to be listened to.
-            events (str): other events to be listened to.
-        """
-        self.events = [event]
-        self.events.extend(events)
-
-    def __call__(self, handler):
+    def decorator(handler):
         """Just return the handler method on a thread with the event attribute
         """
         @run_on_thread
         def threaded_handler(*args):
             handler(*args)
 
-        threaded_handler.events = self.events
+        threaded_handler.events = [event]
+        threaded_handler.events.extend(events)
         return threaded_handler
+
+    return decorator
 
 
 class KycoNApp(Thread, metaclass=ABCMeta):
@@ -157,7 +160,7 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         self.setup()
         self.execute()
 
-    @ListenTo('KycoShutdownEvent')
+    @listen_to('KycoShutdownEvent')
     def _shutdown_handler(self, event):
         self.shutdown()
 

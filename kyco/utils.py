@@ -5,7 +5,6 @@ import logging
 from abc import abstractmethod, ABCMeta
 from threading import Thread
 
-from kyco.core.events import KycoEvent
 from kyco.core.exceptions import KycoNAppMissingInitArgument
 
 log = logging.getLogger('kytos[A]')
@@ -121,7 +120,7 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         At the end, the setUp method is called as a complement of the init
         process.
         """
-        Thread.__init__(self,daemon=False)
+        Thread.__init__(self, daemon=False)
         self._listeners = {}
 
         handler_methods = [getattr(self, method_name) for method_name in
@@ -148,7 +147,8 @@ class KycoNApp(Thread, metaclass=ABCMeta):
             raise KycoNAppMissingInitArgument('add_to_app_buffer')
         self.add_to_app_buffer = kwargs['add_to_app_buffer']
 
-        log.info("%s App instantiated", self.name)
+        # TODO: Load NApp data based on its json file
+        self.name = None
 
     def run(self):
         """This method will call the setup and the execute methos.

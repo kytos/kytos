@@ -63,21 +63,21 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
     def setup(self):
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
-        content = {'request': self.request}
-        connection = (self.ip, self.port)
-        event = KycoNewConnection(content, connection)
+        content = {'request': self.request}  # request = socket
+        connection_id = (self.ip, self.port)
+        event = KycoNewConnection(content=content, connection_id=connection_id)
         self.server.controller_put_raw_event(event)
-        log.debug("New connection {}:{}".format(self.ip, self.port))
+        log.debug("New connection from %s:%s", self.ip, self.port)
 
     def handle(self):
         curr_thread = current_thread()
         header_len = 8
         while True:
+            # TODO: How to consider the OpenFlow version here?
             header = Header()
             binary_data = b''
 
             raw_header = self.request.recv(8)
-            timestamp = datetime.now()
             if not raw_header:
                 log.debug("Client %s:%s disconnected", self.ip, self.port)
                 break
@@ -89,13 +89,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
                       self.port, curr_thread.name)
 
             header.unpack(raw_header)
-            # Just to close the sock with CTRL+C or CTRL+D
-            # if header == 255 or header == 4:
-            #     log.info('Closing connection')
-            #     self.request.close()
-            #     break
 
-            # This is just for now, will be changed soon....
             message_size = header.length - header_len
             if message_size > 0:
                 log.debug('Reading the binary_data')
@@ -103,13 +97,13 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
 
             # TODO: Do we need other informations from the network packet?
             content = {'header': header, 'binary_data': binary_data}
-            connection = (self.ip, self.port)
-            event = KycoRawOpenFlowMessage(content, connection, timestamp)
+            connection_id = (self.ip, self.port)
+            event = KycoRawOpenFlowMessage(content=content,
+                                           connection_id=connection_id)
             self.server.controller_put_raw_event(event)
 
     def finish(self):
         log.debug("Connection lost from %s:%s", self.ip, self.port)
-        content = {}
-        connection = (self.ip, self.port)
-        event = KycoConnectionLost(content, connection)
+        connection_id = (self.ip, self.port)
+        event = KycoConnectionLost(connection_id=connection_id)
         self.server.controller_put_raw_event(event)

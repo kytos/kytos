@@ -17,7 +17,7 @@ from pyof.v0x01.symmetric.echo_reply import EchoReply
 
 from kyco.core import events
 from kyco.utils import KycoCoreNApp
-from kyco.utils import ListenTo
+from kyco.utils import listen_to
 
 
 log = logging.getLogger('kytos[A]')
@@ -44,7 +44,7 @@ class Main(KycoCoreNApp):
         Users shouldn't call this method directly."""
         pass
 
-    @ListenTo('KycoRawOpenFlowMessage')
+    @listen_to('KycoRawOpenFlowMessage')
     def handle_raw_message_in(self, event):
         """Handle a RawEvent and generate a KycoMessageIn event.
 
@@ -86,7 +86,7 @@ class Main(KycoCoreNApp):
 
         self.add_to_msg_in_buffer(new_event)
 
-    @ListenTo('KycoMessageInEchoRequest')
+    @listen_to('KycoMessageInEchoRequest')
     def handle_echo_request_event(self, event):
         """Handle EchoRequest Event by Generating an EchoReply Answer
 

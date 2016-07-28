@@ -79,9 +79,9 @@ def new_handshaked_client(options):
     # -- STEP 4: Send features_reply to the controller
     basedir = os.path.dirname(os.path.abspath(__file__))
     raw_dir = os.path.join(basedir, 'raw')
-    file = open(os.path.join(raw_dir, 'features_reply.cap'), 'rb')
-    message = file.read()
-    file.close()
+    message = None
+    with open(os.path.join(raw_dir, 'features_reply.cap'), 'rb') as file:
+        message = file.read()
     client.send(message)
 
     return client

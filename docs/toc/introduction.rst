@@ -12,11 +12,13 @@ Source code structure
 This project is packed as a python package (``python-openflow``), and contains
 the following directory structure:
 
-* ``kyco/``: contains the core code of the controller.
+* ``kyco/``: Contains the core code of the controller.
 
 * ``docs/``: We use sphinx_ to document our code, including this page that you
   are reading. On this directory we save only the ``.rst`` files and
   documentation source code.
+
+* ``naps/``: Contains some core NApps of Kytos project.
 
 * ``tests/``: Here we use unit tests to keep our code working with automatic
   checks.

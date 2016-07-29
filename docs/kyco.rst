@@ -5,11 +5,3 @@ kyco package
     :members:
     :undoc-members:
     :show-inheritance:
-
-Subpackages
------------
-
-.. toctree::
-
-    kyco.apps
-

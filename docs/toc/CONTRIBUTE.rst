@@ -81,8 +81,8 @@ information you might be able to provide:
 -  **Include system details** like what library or operating system you’re
    using and their versions;
 -  **Paste error output** or logs in your issue or in a
-  `Gist <http://gist.github.com/>`__. When pasting them in the issue, wrap it
-  with three backticks: **\`\`\`** so that it renders nicely, like ``this``;
+   `Gist <http://gist.github.com/>`__. When pasting them in the issue, wrap it
+   with three backticks: **\`\`\`** so that it renders nicely, like ``this``;
 -  **Use Tags** Please, remember to tag your issue according to the version and
    the issue type;
 -  **Steps to reproduce** - please inform all the steps to reproduce the error;

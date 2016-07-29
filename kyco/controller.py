@@ -8,7 +8,10 @@ Basic usage:
 
 .. code-block:: python3
 
-    controller = Controller()
+    from kyco.config import KycoConfig
+    from kyco.controller import Controller
+    config = KycoConfig()
+    controller = Controller(config.options)
     controller.start()
 """
 
@@ -42,18 +45,11 @@ class Controller(object):
     The main responsabilities of this class is:
         - start a thread with :class:`~.core.tcp_server.KycoServer`;
         - manage KycoNApps (install, load and unload);
-        - keep the buffers (instance of :class:`~core.buffers.KycoBuffers`);
+        - keep the buffers (instance of :class:`~.core.buffers.KycoBuffers`);
         - manage which event should be sent to NApps methods;
         - manage the buffers handlers, considering one thread per handler.
 
     Attributes:
-        _threads (dict): keep the main threads of the controller (buffers and
-            tcp handlers)
-        buffers (KycoBuffers): KycoBuffer object with Controller buffers
-        connections (dict): keep track of the socket connections labeled by its
-            (ip, port) information. If there is a switch attached (handshaked)
-            to that connection, than its reference (dpid) is also stored on the
-            dict, allowing to find an switch by the (ip, port) reference
         events_listeners (dict): The key of the dict is a KycoEvent (or a
             string that represent a regex to match agains KycoEvents) and the
             value is a list of methods that will receive the referenced event
@@ -66,8 +62,15 @@ class Controller(object):
             the switch dpid, while the value is a KycoSwitch object.
     """
     def __init__(self, options):
+        #: dict: keep the main threads of the controller (buffers and handler)
         self._threads = {}
+        #: KycoBuffers: KycoBuffer object with Controller buffers
         self.buffers = KycoBuffers()
+        #: dict: keep track of the socket connections labeled by (ip, port).
+        #
+        #    If there is a switch attached (handshaked) to that connection, than
+        #    its reference (dpid) is also stored on the dict, allowing to find
+        #    an switch by the (ip, port) reference
         self.connections = {}  # (ip, port): {socket:socket, dpid:dpid}
         self.events_listeners = {'KycoNewConnection': [self.new_connection],
                                  'KycoConnectionLost': [self.connection_lost],
@@ -460,9 +463,11 @@ class Controller(object):
 
         Reads the FeaturesReply Event sent by the client, save this data and
         sends three new messages to the client:
-            - SetConfig Message;
-            - FlowMod Message with a FlowDelete command;
-            - BarrierRequest Message;
+
+            * SetConfig Message;
+            * FlowMod Message with a FlowDelete command;
+            * BarrierRequest Message;
+
         This is the end of the Handshake workflow of the OpenFlow Protocol.
 
         Args:

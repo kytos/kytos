@@ -312,3 +312,6 @@ napoleon_include_special_with_doc = False  # Sphinx's default
 # PEP), we should document __init__ and the option below appends its docstring
 # to the class'.
 autoclass_content = 'both'
+
+# Order methods before attributes/properties on a class
+autodoc_member_order = 'groupwise'

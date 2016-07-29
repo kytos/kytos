@@ -75,6 +75,9 @@ setup(name='Kyco - Kytos Controller',
       test_suite='tests',
       scripts=['bin/kyco'],
       packages=find_packages(exclude=['tests']),
+      install_requires=[
+          'python-openflow>=1,<2'
+      ],
       cmdclass={
           'lint': Linter,
           'quick_lint': FastLinter

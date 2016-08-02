@@ -49,24 +49,15 @@ transfers from/to CERN.
 Always updated
 ~~~~~~~~~~~~~~
 
-To avoid code repetition this project utilizes an incremental
-architecture.
-
-This means that the first version (1.0.0 = v0x01) was coded from the
-full OpenFlow 1.0.2 Protocol. The 1.1 version (v0x02) imports the 1.0
-version and then do the necessary changes to make it compatible with the
-OpenFlow 1.1.0 Protocol, and the next version follows the same logic.
-
-Using incremental code makes the implementation of new versions of
-OpenFlow protocol faster. Our main goal is to follow the specifications
-since the very beginning.
+``Kyco`` will be able to handle switches that use different OpenFlow versions
+at the same time, negociating the OpenFlow version with each one individually.
 
 Easy to learn
 ~~~~~~~~~~~~~
 
 Python is an easy language to learn and we aim at writing code in a
-"pythonic way". We also provide a well documented API. Thus, learning to
-make your controller using this library is a trivial task.
+"pythonic way". We also provide a well documented API. Thus, building new
+NetworkApps (NApps) to ``Kyco`` is a easy and simple process.
 
 Born to be free
 ~~~~~~~~~~~~~~~
@@ -79,20 +70,21 @@ more eyes observe the code, the better it will be. This project can
 receive support from many vendors, but will never follow a particular
 vendor direction.
 
-*python-openflow* will always be free software.
+*kyco* will always be free software.
 
 Authors
 -------
 
 This is a collaborative project between SPRACE (From São Paulo State
-University, Unesp) and Caltech (California Institute of Technology). For
-a complete list of authors, please open ``AUTHORS.md`` file.
+University, Unesp) and Caltech (California Institute of Technology). For a
+complete list of authors, please open `AUTHORS.rst <docs/toc/AUTHORS.rst` file.
 
 Contributing
 ------------
 
 If you want to contribute to this project, please read
-`CONTRIBUTE.md <CONTRIBUTE.md>`__ and `HACKING.md <HACKING.md>`__ files.
+`CONTRIBUTE.rst <docs/toc/CONTRIBUTE.rst>`__ and
+`HACKING.md <docs/toc/HACKING.md>`__ files.
 
 License
 -------

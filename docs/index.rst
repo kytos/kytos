@@ -1,12 +1,4 @@
-Welcome to Kyco - Kytos Controller - documentation!
-============================================================
-
-*kyco* is a modular multiversion OpenFlow Controller. So if you
- ..... TODO .....
-
-This project is part of *Kytos* project.
-
-For more information about, please visit our |kytos-site|_.
+.. include:: ../README.rst
 
 Here you will find an extensive documentation of the project. If you wanna fix
 or improve this documentation, please read our |contrib|_ and feel free to
@@ -21,7 +13,9 @@ Table of Contents
   toc/introduction
   toc/install
   toc/usage
-
+  toc/CONTRIBUTE
+  toc/HACKING
+  toc/AUTHORS
 
 API Reference
 -------------
@@ -29,11 +23,10 @@ API Reference
 .. toctree::
    :maxdepth: 9
    :titlesonly:
-   :caption: Table of Contents
+   :caption: Documentation of classes and methods.
    :name: mastertoc
 
    modules
-
 
 Indices and tables
 ------------------
@@ -45,4 +38,4 @@ Indices and tables
 .. |kytos-site| replace:: Kytos web site
 .. _kytos-site: http://kytos.io/
 .. |contrib| replace:: contributing instructions
-.. _contrib: https://github.com/kytos/kyco/blob/develop/CONTRIBUTE.md
+.. _contrib: https://github.com/kytos/kyco/blob/develop/docs/toc/CONTRIBUTE.rst

@@ -39,25 +39,30 @@ def start_logger():
 
 
 def run_on_thread(method):
-    """Decorator to run the method inside a thread"""
+    """Decorator to run the decorated method inside a new thread
+
+    Returns:
+        Decorated method that will run inside a new thread.
+        When the decorated method is called, it will not return the created
+        thread to the caller.
+    """
     def threaded_method(*args):
         """Ensure the handler method runs inside a new thread"""
         thread = Thread(target=method, args=args)
         thread.start()
     return threaded_method
 
-# TODO: Check python pep for decorators name
-
 
 def listen_to(event, *events):
     """Decorator for Event Listener methods.
 
-    This decorator should be used on methods, inside an APP, to define which
+    This decorator was built to be used on NAPPs methods to define which
     type of event the method will handle. With this, we will be able to
     'schedule' the app/method to receive an event when a new event is
-    registered on the controller buffers. The decorator also guarantee that
-    the method (handler) will be called from inside a new thread, avoiding
-    this method to block its caller.
+    registered on the controller buffers.
+    By using the run_on_thread decorator, we also guarantee that the method
+    (handler) will be called from inside a new thread, avoiding this method to
+    block its caller.
 
     The decorator will add an attribute to the method called 'events', that
     will be a list of the events that the method will handle.
@@ -94,12 +99,16 @@ def listen_to(event, *events):
             def my_stats_handler_of_any_message(self, event):
                 # Do stuff here...
     """
-
     def decorator(handler):
-        """Just return the handler method on a thread with the event attribute
+        """Decorate the handler method.
+
+        Returns:
+            A method with a `events` attribute (list of events to be listened)
+            and also decorated to run on a new thread.
         """
         @run_on_thread
         def threaded_handler(*args):
+            """Decorating the handler to run from a new thread"""
             handler(*args)
 
         threaded_handler.events = [event]

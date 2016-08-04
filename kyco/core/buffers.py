@@ -20,23 +20,26 @@ class KycoEventBuffer(object):
         self._event_base_class = event_base_class
         self._reject_new_events = False
 
-    def put(self, new_event):
+    def put(self, event):
         if not self._reject_new_events:
-            if not isinstance(new_event, self._event_base_class) and not isinstance(new_event, KycoShutdownEvent):
+            if not isinstance(event, self._event_base_class) and \
+                    not isinstance(event, KycoShutdownEvent):
                 # TODO: Raise a more proper exception
                 msg = "{} event can not be added to {} buffer"
-                raise Exception(msg.format(type(new_event).__name__, self.name))
-            log.debug('Added new event to %s event buffer', self.name)
-            self._queue.put(new_event)
+                raise Exception(msg.format(type(event).__name__, self.name))
+
+            self._queue.put(event)
             log.debug('[buffer: %s] Added: %s', self.name,
                       type(event).__name__)
 
-        if isinstance(new_event, KycoShutdownEvent):
-            log.info('%s buffer in stop mode. Rejecting new events.', self.name)
+        if isinstance(event, KycoShutdownEvent):
+            log.info('[buffer: %s] Stop mode enabled. Rejecting new events.',
+                     self.name)
             self._reject_new_events = True
 
     def get(self):
         event = self._queue.get()
+
         log.debug('[buffer: %s] Removed: %s', self.name,
                   type(event).__name__)
 

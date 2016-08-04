@@ -369,8 +369,8 @@ class Controller(object):
         try:
             self.connections[connection_id]['socket'].send(message)
         except:
-            raise Exception('Error while sending a message to %s',
-                            connection_id)
+            # TODO: Raise a ConnectionLost event?
+            pass
 
     def send_to_switch(self, dpid, message):
         """ Send a packed OF message to the client switch identified dpid

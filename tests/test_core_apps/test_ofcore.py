@@ -21,6 +21,7 @@ from tests.helper import new_handshaked_client
 from tests.helper import TestConfig
 
 
+
 class TestOFCoreApp(TestCase):
     """Tests of Kyco OFCore App functionalities"""
 
@@ -28,6 +29,15 @@ class TestOFCoreApp(TestCase):
         config = TestConfig()
         self.options = config.options['daemon']
         self.controller, self.thread = new_controller()
+
+    def test_abrupt_client_disconnection_on_hello(self):
+        """Test client disconnection after first hello message."""
+        client = new_client(self.options)
+        message = Hello(xid=3)
+        client.send(message.pack())
+        client.close()
+        # TODO: How to finish this test getting controller exceptions?
+        #       related to #58
 
     def test_client(self):
         """Testing basic client operations.
@@ -46,6 +56,7 @@ class TestOFCoreApp(TestCase):
         response_message = Hello()
         response_message.header = response_header
         self.assertEqual(message, response_message)
+
         client.close()
 
     def test_handshake(self):

@@ -4,7 +4,6 @@ import os
 import time
 from random import randint
 from socket import socket
-from threading import Thread
 from unittest import TestCase
 from unittest import skip
 
@@ -24,6 +23,7 @@ from tests.helper import new_controller
 from tests.helper import new_client
 from tests.helper import new_handshaked_client
 
+
 class TestOFCoreApp(TestCase):
     """Tests of Kyco OFCore App functionalities"""
 
@@ -31,6 +31,15 @@ class TestOFCoreApp(TestCase):
         self.config = KycoConfig()
         self.options = self.config.options
         self.controller, self.thread = new_controller(self.options)
+
+    def test_abrupt_client_disconnection_on_hello(self):
+        """Test client disconnection after first hello message."""
+        client = new_client(self.options)
+        message = Hello(xid=3)
+        client.send(message.pack())
+        client.close()
+        # TODO: How to finish this test getting controller exceptions?
+        #       related to #58
 
     def test_client(self):
         """Testing basic client operations.
@@ -49,6 +58,7 @@ class TestOFCoreApp(TestCase):
         response_message = Hello()
         response_message.header = response_header
         self.assertEqual(message, response_message)
+
         client.close()
 
     def test_handshake(self):

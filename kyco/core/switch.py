@@ -60,47 +60,6 @@ class KycoSwitch(object):
         self.firstseen = datetime.now(timezone.utc)
         self.lastseen = datetime.now(timezone.utc)
 
-    def send(self, data):
-        """Sends data to the switch.
-
-        Args:
-            data (bytes): bytes data to be sent to the switch throught its
-                socket connection.
-        Raises:
-            # TODO: raise proper exceptions on the code
-            ......: If the switch connection was connection.
-            ......: If the passed `data` is not a bytes object
-        """
-        if not isinstance(data, bytes):
-            raise Exception("You can only send bytes data to the switch")
-
-        if not self.socket:
-            raise Exception("This switch is not connected")
-
-        self.socket.send(data)
-
-    def save_connection(self, socket, connection_id):
-        """Save a new connection to the existing switch.
-
-        Args:
-            socket (socket): Socket connection to the switch
-            connection_id (tuple): Tuple with ip and port from the switch
-        Raises:
-            # TODO: raise proper exceptions
-            ...: The passed attribute is not a socket connection
-            ...: This switch is already connected to a socket
-        """
-        if not isinstance(socket, Socket):
-            raise Exception("The passed argument is not a python socket")
-
-        if self.is_connected():
-            error_message = ("Kyco already have a connected switch with "
-                             "dpid {}")
-            raise Exception(error_message.format(self.dpid))
-
-        self.socket = socket
-        self.connection_id = connection_id
-
     def disconnect(self):
         """Disconnect the switch.
 
@@ -135,6 +94,47 @@ class KycoSwitch(object):
                 return True
         except:
             return False
+
+    def save_connection(self, socket, connection_id):
+        """Save a new connection to the existing switch.
+
+        Args:
+            socket (socket): Socket connection to the switch
+            connection_id (tuple): Tuple with ip and port from the switch
+        Raises:
+            # TODO: raise proper exceptions
+            ...: The passed attribute is not a socket connection
+            ...: This switch is already connected to a socket
+        """
+        if not isinstance(socket, Socket):
+            raise Exception("The passed argument is not a python socket")
+
+        if self.is_connected():
+            error_message = ("Kyco already have a connected switch with "
+                             "dpid {}")
+            raise Exception(error_message.format(self.dpid))
+
+        self.socket = socket
+        self.connection_id = connection_id
+
+    def send(self, data):
+        """Sends data to the switch.
+
+        Args:
+            data (bytes): bytes data to be sent to the switch throught its
+                socket connection.
+        Raises:
+            # TODO: raise proper exceptions on the code
+            ......: If the switch connection was connection.
+            ......: If the passed `data` is not a bytes object
+        """
+        if not isinstance(data, bytes):
+            raise Exception("You can only send bytes data to the switch")
+
+        if not self.socket:
+            raise Exception("This switch is not connected")
+
+        self.socket.send(data)
 
     def update_lastseen(self):
         self.lastseen = datetime.now(timezone.utc)

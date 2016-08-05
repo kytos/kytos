@@ -1,6 +1,7 @@
 # -*- coding: utf-8 *-*
 """Module with main classes related to Switches"""
 import logging
+from datetime import datetime, timezone
 from socket import socket as Socket
 
 __all__ = ('KycoSwitch',)
@@ -56,6 +57,8 @@ class KycoSwitch(object):
         self.connection_id = connection_id  # (ip, port)
         self.ofp_version = ofp_version
         self.features = features
+        self.firstseen = datetime.now(timezone.utc)
+        self.lastseen = datetime.now(timezone.utc)
 
     def send(self, data):
         """Sends data to the switch.
@@ -128,6 +131,10 @@ class KycoSwitch(object):
                 return False
             else:
                 self.send(b'')
+                self.update_lastseen()
                 return True
         except:
             return False
+
+    def update_lastseen(self):
+        self.lastseen = datetime.now(timezone.utc)

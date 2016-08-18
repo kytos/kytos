@@ -63,16 +63,16 @@ class KycoEventBuffer(object):
 
 class KycoBuffers(object):
     def __init__(self):
-        self.raw_events = KycoEventBuffer('raw_event', KycoRawEvent)
-        self.msg_in_events = KycoEventBuffer('msg_in_event', KycoMsgEvent)
-        self.msg_out_events = KycoEventBuffer('msg_out_event', KycoMsgEvent)
-        self.app_events = KycoEventBuffer('app_event', KycoAppEvent)
+        self.raw = KycoEventBuffer('raw_event', KycoRawEvent)
+        self.msg_in = KycoEventBuffer('msg_in_event', KycoMsgEvent)
+        self.msg_out = KycoEventBuffer('msg_out_event', KycoMsgEvent)
+        self.app = KycoEventBuffer('app_event', KycoAppEvent)
 
     def send_stop_signal(self):
         log.info('Stop signal received by Kyco buffers.')
         log.info('Sending KycoShutdownEvent to all apps.')
         event = KycoShutdownEvent()
-        self.raw_events.put(event)
-        self.msg_in_events.put(event)
-        self.msg_out_events.put(event)
-        self.app_events.put(event)
+        self.raw.put(event)
+        self.msg_in.put(event)
+        self.msg_out.put(event)
+        self.app.put(event)

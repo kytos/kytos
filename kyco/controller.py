@@ -101,7 +101,7 @@ class Controller(object):
         log.info("Starting Kyco - Kytos Controller")
         self.server = KycoServer((self.options.listen, int(self.options.port)),
                                  KycoOpenFlowRequestHandler,
-                                 self.buffers.raw_events.put)
+                                 self.buffers.raw.put)
 
         thrds = {'tcp_server': Thread(name='TCP server',
                                       target=self.server.serve_forever),
@@ -175,7 +175,7 @@ class Controller(object):
         """
         log.info("Raw Event Handler started")
         while True:
-            event = self.buffers.raw_events.get()
+            event = self.buffers.raw.get()
 
             if isinstance(event, KycoShutdownEvent):
                 log.debug("RawEvent handler stopped")
@@ -209,7 +209,7 @@ class Controller(object):
         """
         log.info("Message In Event Handler started")
         while True:
-            event = self.buffers.msg_in_events.get()
+            event = self.buffers.msg_in.get()
 
             if isinstance(event, KycoShutdownEvent):
                 log.debug("MsgInEvent handler stopped")
@@ -227,7 +227,7 @@ class Controller(object):
         """
         log.info("Message Out Event Handler started")
         while True:
-            event = self.buffers.msg_out_events.get()
+            event = self.buffers.msg_out.get()
 
             if isinstance(event, KycoShutdownEvent):
                 log.debug("MsgOutEvent handler stopped")
@@ -257,7 +257,7 @@ class Controller(object):
         """
         log.info("App Event Handler started")
         while True:
-            event = self.buffers.app_events.get()
+            event = self.buffers.app.get()
 
             if isinstance(event, KycoShutdownEvent):
                 log.debug("AppEvent handler stopped")
@@ -357,7 +357,7 @@ class Controller(object):
 
         new_event = KycoSwitchDown(dpid=dpid)
 
-        self.buffers.app_events.put(new_event)
+        self.buffers.app.put(new_event)
 
     def send_to_connection(self, connection_id, message):
         """Send a packed OF message to the client identified by connection_id
@@ -454,7 +454,7 @@ class Controller(object):
         content = {'message': message_out}
         event_out = KycoMessageOutHello(content=content,
                                         connection_id=event.connection_id)
-        self.buffers.msg_out_events.put(event_out)
+        self.buffers.msg_out.put(event_out)
 
     def send_features_request(self, event):
         """Send a FeaturesRequest to the switch after a Hello.
@@ -471,7 +471,7 @@ class Controller(object):
         content = {'message': FeaturesRequest()}
         event_out = KycoMessageOutFeaturesRequest(content=content,
                                                   connection_id=event.connection_id)
-        self.buffers.msg_out_events.put(event_out)
+        self.buffers.msg_out.put(event_out)
 
     def features_reply_in(self, event):
         """Handle received FeaturesReply event.
@@ -509,4 +509,4 @@ class Controller(object):
             self.add_new_switch(switch)
 
         new_event = KycoSwitchUp(dpid=switch.dpid, content={})
-        self.buffers.app_events.put(new_event)
+        self.buffers.app.put(new_event)

@@ -84,7 +84,7 @@ class Main(KycoCoreNApp):
             # messages
             new_event.connection_id = event.connection_id
 
-        self.add_to_msg_in_buffer(new_event)
+        self.controller.buffers.msg_in.put(new_event)
 
     @listen_to('KycoMessageInEchoRequest')
     def handle_echo_request_event(self, event):
@@ -101,13 +101,13 @@ class Main(KycoCoreNApp):
         echo_reply = EchoReply(xid=echo_request.header.xid)
         content = {'message': echo_reply}
         event_out = events.KycoMessageOutEchoReply(event.dpid, content)
-        self.add_to_msg_out_buffer(event_out)
+        self.controller.buffers.msg_out.put(event_out)
 
     def send_barrier_request(self, dpid):
         """Send a BarrierRequest Message to the client"""
         content = {'message': BarrierRequest()}
         event_out = events.KycoMessageOutBarrierRequest(dpid, content)
-        self.add_to_msg_out_buffer(event_out)
+        self.controller.buffers.msg_out.put(event_out)
 
     def send_flow_delete(self, dpid):
         """Sends a FlowMod message with FlowDelete command"""
@@ -122,7 +122,7 @@ class Main(KycoCoreNApp):
         content = {'message': message_out}
         features_request_out = events.KycoMessageOutFeaturesRequest(dpid,
                                                                     content)
-        self.add_to_msg_out_buffer(features_request_out)
+        self.controller.buffers.msg_out.put(features_request_out)
 
     def send_switch_config(self, dpid):
         """Sends a SwitchConfig message to the client"""
@@ -133,7 +133,7 @@ class Main(KycoCoreNApp):
         # TODO: Define the miss_send_len value
         content = {'message': message_out}
         event_out = events.KycoMessageOutSetConfig(dpid, content)
-        self.add_to_msg_out_buffer(event_out)
+        self.controller.buffers.msg_out.put(event_out)
 
     def shutdown(self):
         pass

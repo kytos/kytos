@@ -394,12 +394,7 @@ class Controller(object):
         path = os.path.join(self.options.napps, napp_name, 'main.py')
         module = SourceFileLoader(napp_name, path)
 
-        # TODO: Think a better way to export this
-        buffers = {'add_to_msg_out_buffer': self.buffers.msg_out_events.put,
-                   'add_to_msg_in_buffer': self.buffers.msg_in_events.put,
-                   'add_to_app_buffer': self.buffers.app_events.put}
-
-        napp = module.load_module().Main(**buffers)
+        napp = module.load_module().Main(controller=self)
         self.napps[napp_name] = napp
 
         for event_type, listeners in napp._listeners.items():

@@ -5,8 +5,6 @@ import logging
 from abc import abstractmethod, ABCMeta
 from threading import Thread
 
-from kyco.core.exceptions import KycoNAppMissingInitArgument
-
 log = logging.getLogger('kytos[A]')
 
 APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
@@ -121,7 +119,7 @@ def listen_to(event, *events):
 class KycoNApp(Thread, metaclass=ABCMeta):
     """Base class for any KycoNApp to be developed."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, controller, **kwargs):
         """Go through all of the instance methods and selects those that have
         the events attribute, then creates a dict containing the event_name
         and the list of methods that are responsible for handling such event.
@@ -131,6 +129,7 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         """
         Thread.__init__(self, daemon=False)
         self._listeners = {}
+        self.controller = controller
 
         handler_methods = [getattr(self, method_name) for method_name in
                            dir(self) if method_name[0] != '_' and
@@ -143,18 +142,6 @@ class KycoNApp(Thread, metaclass=ABCMeta):
                 if event_name not in self._listeners:
                     self._listeners[event_name] = []
                 self._listeners[event_name].append(method)
-
-        if 'add_to_msg_in_buffer' not in kwargs:
-            raise KycoNAppMissingInitArgument('add_to_msg_in_buffer')
-        self.add_to_msg_in_buffer = kwargs['add_to_msg_in_buffer']
-
-        if 'add_to_msg_out_buffer' not in kwargs:
-            raise KycoNAppMissingInitArgument('add_to_msg_out_buffer')
-        self.add_to_msg_out_buffer = kwargs['add_to_msg_out_buffer']
-
-        if 'add_to_app_buffer' not in kwargs:
-            raise KycoNAppMissingInitArgument('add_to_app_buffer')
-        self.add_to_app_buffer = kwargs['add_to_app_buffer']
 
         # TODO: Load NApp data based on its json file
         self.name = None

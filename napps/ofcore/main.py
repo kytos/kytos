@@ -95,8 +95,6 @@ class Main(KycoCoreNApp):
         """
         log.debug("Echo Request message read")
 
-        log.warning(event.dpid)
-        log.warning(event.connection_id)
         echo_request = event.content['message']
         echo_reply = EchoReply(xid=echo_request.header.xid)
         content = {'message': echo_reply}

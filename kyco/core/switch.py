@@ -49,7 +49,6 @@ class KycoSwitch(object):
         ofp_version (string): Current talked OpenFlow version
         features (FeaturesReply): FeaturesReply (from python-openflow) instance
     """
-
     def __init__(self, dpid, socket, connection_id, ofp_version='0x01',
                  features=None):
         self.dpid = dpid
@@ -93,6 +92,7 @@ class KycoSwitch(object):
                 self.update_lastseen()
                 return True
         except:
+            self.socket = None
             return False
 
     def save_connection(self, socket, connection_id):

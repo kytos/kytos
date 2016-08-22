@@ -11,7 +11,38 @@ from pyof.v0x01.symmetric.hello import Hello
 
 from kyco.controller import Controller
 
-__all__ = ('new_controller', 'new_client', 'new_handshaked_client')
+__all__ = ('do_handshake', 'new_controller', 'new_client',
+           'new_handshaked_client')
+
+
+def do_handshake(client):
+    # -- STEP 1: Sending Hello message
+    client.send(Hello(xid=3).pack())
+
+    # -- STEP 2: Whait for Hello response
+    binary_packet = b''
+    while len(binary_packet) < 8:
+        binary_packet = client.recv(8)
+    header = Header()
+    header.unpack(binary_packet)
+
+    # -- STEP 3: Wait for features_request message
+    binary_packet = b''
+    # len() < 8 here because we just expect a Hello as response
+    while len(binary_packet) < 8:
+        binary_packet = client.recv(8)
+    header = Header()
+    header.unpack(binary_packet)
+
+    # -- STEP 4: Send features_reply to the controller
+    basedir = os.path.dirname(os.path.abspath(__file__))
+    raw_dir = os.path.join(basedir, 'raw')
+    message = None
+    with open(os.path.join(raw_dir, 'features_reply.cap'), 'rb') as file:
+        message = file.read()
+    client.send(message)
+
+    return client
 
 
 def new_controller(options):
@@ -57,31 +88,4 @@ def new_handshaked_client(options):
             done
     """
     client = new_client(options)
-
-    # -- STEP 1: Sending Hello message
-    client.send(Hello(xid=3).pack())
-
-    # -- STEP 2: Whait for Hello response
-    binary_packet = b''
-    while len(binary_packet) < 8:
-        binary_packet = client.recv(8)
-    header = Header()
-    header.unpack(binary_packet)
-
-    # -- STEP 3: Wait for features_request message
-    binary_packet = b''
-    # len() < 8 here because we just expect a Hello as response
-    while len(binary_packet) < 8:
-        binary_packet = client.recv(8)
-    header = Header()
-    header.unpack(binary_packet)
-
-    # -- STEP 4: Send features_reply to the controller
-    basedir = os.path.dirname(os.path.abspath(__file__))
-    raw_dir = os.path.join(basedir, 'raw')
-    message = None
-    with open(os.path.join(raw_dir, 'features_reply.cap'), 'rb') as file:
-        message = file.read()
-    client.send(message)
-
-    return client
+    return do_handshake(client)

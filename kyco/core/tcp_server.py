@@ -67,7 +67,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         connection_id = (self.ip, self.port)
         event = KycoNewConnection(content=content, connection_id=connection_id)
         self.server.controller_put_raw_event(event)
-        log.debug("New connection from %s:%s", self.ip, self.port)
+        log.info("New connection from %s:%s", self.ip, self.port)
 
     def handle(self):
         curr_thread = current_thread()
@@ -77,9 +77,10 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             header = Header()
             binary_data = b''
 
-            raw_header = self.request.recv(8)
-            if not raw_header:
-                log.debug("Client %s:%s disconnected", self.ip, self.port)
+            try:
+                raw_header = self.request.recv(8)
+            except:
+                log.info("Client %s:%s disconnected", self.ip, self.port)
                 break
 
             while len(raw_header) < header_len:
@@ -103,7 +104,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             self.server.controller_put_raw_event(event)
 
     def finish(self):
-        log.debug("Connection lost from %s:%s", self.ip, self.port)
+        log.info("Connection lost from %s:%s", self.ip, self.port)
         connection_id = (self.ip, self.port)
         event = KycoConnectionLost(connection_id=connection_id)
         self.server.controller_put_raw_event(event)

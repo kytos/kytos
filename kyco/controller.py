@@ -500,7 +500,7 @@ class Controller(object):
         if event.dpid is not None:
             # In this case, the switch has already been instantiated and this
             # is just a update of switch features.
-            self.switches.features = message
+            self.switches[event.dpid].features = message
         else:
             # This is the first features_reply for the switch, which means
             # that we are on the Handshake process and so we need to create a

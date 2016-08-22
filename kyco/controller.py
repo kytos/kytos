@@ -24,6 +24,7 @@ from pyof.v0x01.controller2switch.features_request import FeaturesRequest
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
+from kyco.core.events import KycoConnectionLost
 from kyco.core.events import KycoMessageOutFeaturesRequest
 from kyco.core.events import KycoMessageOutHello
 from kyco.core.events import KycoNewConnection
@@ -196,7 +197,11 @@ class Controller(object):
                     # change the default reference of the event to the switch
                     # instead of referencing the connection itself.
                     event.dpid = connection['dpid']
-                    event.connection_id = None
+                    # If the event is a KycoConnectionLost event, then we will
+                    # pass along both dpid and connection_id to the
+                    # disconnection is correctly handled
+                    if not isinstance(event, KycoConnectionLost):
+                        event.connection_id = None
 
             # Sending the event to the listeners
             self.notify_listeners(event)
@@ -321,7 +326,8 @@ class Controller(object):
         Args:
             event (KycoConnectionLost): Received event with the needed infos
         """
-        log.info("Handling KycoConnectionLost event")
+        log.info("Handling KycoConnectionLost event for: %s",
+                 event.connection_id)
         connection_id = event.connection_id
         if connection_id is not None and connection_id in self.connections:
             dpid = self.connections[event.connection_id]['dpid']

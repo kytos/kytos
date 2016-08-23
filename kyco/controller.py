@@ -242,9 +242,11 @@ class Controller(object):
             # dpid) or to a connection (based on connection_id).
             if dpid is not None:
                 # Sending the OpenFlow message to the switch
-                self.send_to_switch(dpid, message.pack())
+                destination = dpid
             else:
-                self.send_to_connection(connection_id, message.pack())
+                destination = connection_id
+
+            self.send_to(destination, message.pack())
 
             # Sending the event to the listeners
             self.notify_listeners(event)
@@ -359,30 +361,32 @@ class Controller(object):
 
         self.buffers.app.put(new_event)
 
-    def send_to_connection(self, connection_id, message):
-        """Send a packed OF message to the client identified by connection_id
+    def send_to(self, destination, message):
+        """Send a packed OF message to the client/destination
+
+        If the destination is a dpid (string), then the method will look for
+        a switch by it's dpid.
+        If the destination is a connection_id (tuple), then the method will
+        look for the related connection to send the message.
 
         Args:
-            connection_id (tuple): tuple(ip, port)
+            destination (): It could be a connection_id (tuple) or a switch
+                dpid (string)
             message (bytes): packed openflow message (binary)
         """
-        try:
-            self.connections[connection_id]['socket'].send(message)
-        except:
-            # TODO: Raise a ConnectionLost event?
-            pass
-
-    def send_to_switch(self, dpid, message):
-        """ Send a packed OF message to the client switch identified dpid
-
-        Args:
-            dpid: dpid of the switch that will receive the message
-            message (bytes): packed openflow message (binary)
-        """
-        try:
-            self.switches[dpid].send(message)
-        except:
-            raise Exception('Error while sending a message to switch %s', dpid)
+        if isinstance(destination, tuple):
+            try:
+                self.connections[destination]['socket'].send(message)
+            except:
+                # TODO: Raise a ConnectionLost event?
+                raise Exception('Error while sending a message to switch %s',
+                                destination)
+        else:
+            try:
+                self.switches[destination].send(message)
+            except:
+                raise Exception('Error while sending a message to switch %s',
+                                destination)
 
     def load_napp(self, napp_name):
         """Load a single app.

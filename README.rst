@@ -94,11 +94,11 @@ This software is under *MIT-License*. For more information please read
 
 .. |Openflow| image:: https://img.shields.io/badge/Openflow-1.0.0-brightgreen.svg
    :target: https://www.opennetworking.org/images/stories/downloads/sdn-resources/onf-specifications/openflow/openflow-spec-v1.0.0.pdf
-.. |Tag| image:: https://img.shields.io/github/tag/kytos/python-openflow.svg
-   :target: https://github.com/kytos/python-openflow/tags
-.. |Release| image:: https://img.shields.io/github/release/kytos/python-openvpn.svg
-   :target: https://github.com/kytos/python-openflow/releases
-.. |Tests| image:: http://kytos.io/imgs/tests-status.svg
-   :target: https://github.com/kytos/python-openflow
-.. |License| image:: https://img.shields.io/github/license/kytos/python-openflow.svg
-   :target: https://github.com/kytos/python-openflow/blob/master/LICENSE
+.. |Tag| image:: https://img.shields.io/github/tag/kytos/kyco.svg
+   :target: https://github.com/kytos/kyco/tags
+.. |Release| image:: https://img.shields.io/github/release/kytos/kyco.svg
+   :target: https://github.com/kytos/kyco/releases
+.. |Tests| image:: https://travis-ci.org/kytos/kyco.svg?branch=develop
+   :target: https://github.com/kytos/kyco
+.. |License| image:: https://img.shields.io/github/license/kytos/kyco.svg
+   :target: https://github.com/kytos/kyco/blob/master/LICENSE

@@ -3,11 +3,19 @@
 import logging
 
 from abc import abstractmethod, ABCMeta
+from datetime import datetime, timezone
 from threading import Thread
+
+__all__ = ('KycoCoreNApp', 'KycoNApp', 'listen_to', 'now', 'run_on_thread',
+           'start_logger')
 
 log = logging.getLogger('kytos[A]')
 
 APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
+
+def now(tzone=timezone.utc):
+    """Returns the current datetime (default to UTC)"""
+    return datetime.now(tzone)
 
 
 def start_logger():

@@ -412,6 +412,8 @@ class Controller(object):
                 self.events_listeners[event_type] = []
             self.events_listeners[event_type].extend(listeners)
 
+        napp.start()
+
     def install_napp(self, napp_name):
         """Install the requested NApp by its name.
 

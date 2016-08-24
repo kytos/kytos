@@ -6,6 +6,7 @@ will be overridden by the option on command line.
 """
 
 import os
+import re
 
 from configparser import ConfigParser
 
@@ -84,6 +85,17 @@ class KycoConfig():
             defaults = dict(config.items("daemon"))
 
         self.parser.set_defaults(**defaults)
-        if 'test' in argv:
-            argv.pop(argv.index('test'))
+        for item in argv:
+            # Check if we are running a single unittest directly
+            # python -m unittest tests.<something>
+            # Config from the command line, so we can just ignore all argvs.
+            if re.match('tests\..*', item):
+                argv.clear()
+                break
+            # In this case we are running the full test suite with
+            # python setup.py test
+            # Then we are just going to ignore this CLI argument, it was not
+            # intended to be used on Config, but on the setup call.
+            if re.match('test', item):
+                argv.remove(item)
         self.options = self.parser.parse_args(argv)

@@ -12,6 +12,7 @@ from pyof.v0x01.symmetric.hello import Hello
 from kyco.config import KycoConfig
 from kyco.controller import Controller
 
+
 __all__ = ('TestConfig', 'do_handshake', 'new_controller', 'new_client',
            'new_handshaked_client')
 

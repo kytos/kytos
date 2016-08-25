@@ -136,7 +136,7 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         process.
         """
         Thread.__init__(self, daemon=False)
-        self._listeners = {}
+        self._listeners = {'KycoShutdownEvent': [self._shutdown_handler]}
         self.controller = controller
 
         handler_methods = [getattr(self, method_name) for method_name in

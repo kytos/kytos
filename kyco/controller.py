@@ -38,6 +38,8 @@ from kyco.core.tcp_server import KycoServer
 from kyco.utils import start_logger
 from kyco.utils import KycoCoreNApp
 
+__all__ = ('Controller', )
+
 log = start_logger()
 
 
@@ -120,8 +122,9 @@ class Controller(object):
         for thread in self._threads.values():
             thread.start()
 
-        log.info("Loading kyco apps...")
+        log.info("Loading kyco napps...")
         self.load_napps()
+        log.info("kyco napps loaded...")
 
     def stop(self):
         """Stops the controller.
@@ -160,10 +163,12 @@ class Controller(object):
         Args:
             event (KycoEvent): An instance of a KycoEvent subclass
         """
-        for key in self.events_listeners:
-            if re.match(key, type(event).__name__):
-                for listener in self.events_listeners[key]:
-                    listener(event)
+        listeners = set()
+        [[listeners.add(listener) for listener in self.events_listeners[ev]]
+         for ev in self.events_listeners if re.match(ev, type(event).__name__)]
+
+        for listener in listeners:
+            listener(event)
 
     def raw_event_handler(self):
         """Handle raw events.

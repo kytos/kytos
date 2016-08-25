@@ -275,13 +275,13 @@ class Controller(object):
         while True:
             event = self.buffers.app.get()
 
-            if isinstance(event, KycoShutdownEvent):
-                log.debug("AppEvent handler stopped")
-                break
-
             log.debug("AppEvent handler called")
             # Sending the event to the listeners
             self.notify_listeners(event)
+
+            if isinstance(event, KycoShutdownEvent):
+                log.debug("AppEvent handler stopped")
+                break
 
     def new_connection(self, event):
         """Handle a KycoNewConnection event.

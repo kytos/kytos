@@ -68,10 +68,9 @@ def new_controller(options=None):
     if options is None:
         options = TestConfig().options['daemon']
     controller = Controller(options)
-    thread = Thread(name='Controller', target=controller.start)
-    thread.start()
+    controller.start()
     time.sleep(0.1)
-    return controller, thread
+    return controller
 
 
 def new_client(options=None):

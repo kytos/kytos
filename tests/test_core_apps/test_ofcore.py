@@ -2,7 +2,6 @@
 
 import os
 from random import randint
-from socket import socket
 from unittest import TestCase
 from unittest import skip
 
@@ -15,24 +14,18 @@ from pyof.v0x01.controller2switch.set_config import SetConfig
 from pyof.v0x01.symmetric.hello import Hello
 from pyof.v0x01.symmetric.echo_request import EchoRequest
 
-from tests.helper import new_controller
-from tests.helper import new_client
-from tests.helper import new_handshaked_client
-from tests.helper import TestConfig
-
+from tests.helper import new_client, new_controller, new_handshaked_client
 
 
 class TestOFCoreApp(TestCase):
     """Tests of Kyco OFCore App functionalities"""
 
     def setUp(self):
-        config = TestConfig()
-        self.options = config.options['daemon']
-        self.controller, self.thread = new_controller()
+        self.controller = new_controller()
 
     def test_abrupt_client_disconnection_on_hello(self):
         """Test client disconnection after first hello message."""
-        client = new_client(self.options)
+        client = new_client()
         message = Hello(xid=3)
         client.send(message.pack())
         client.close()
@@ -100,9 +93,7 @@ class TestOFCoreApp(TestCase):
     @skip
     def test_full_handshake_process(self):
         """Testing basic OF switch handshake process."""
-        client = socket()
-        # Client (Switch) connecting to the controlller
-        client.connect((self.options.listen, self.options.port))
+        client = new_client()
 
         # -- STEP 1: Sending Hello message
         client.send(Hello(xid=3).pack())
@@ -207,6 +198,3 @@ class TestOFCoreApp(TestCase):
 
     def tearDown(self):
         self.controller.stop()
-        self.thread.join()
-        while self.thread.is_alive():
-            pass

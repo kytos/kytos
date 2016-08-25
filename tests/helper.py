@@ -58,10 +58,9 @@ def new_controller(options=KycoConfig().options):
             controller is running
     """
     controller = Controller(options)
-    thread = Thread(name='Controller', target=controller.start)
-    thread.start()
+    controller.start()
     time.sleep(0.1)
-    return controller, thread
+    return controller
 
 
 def new_client(options=KycoConfig().options):

@@ -1,5 +1,4 @@
 """Utilities"""
-
 import logging
 
 from abc import abstractmethod, ABCMeta
@@ -12,6 +11,7 @@ __all__ = ('KycoCoreNApp', 'KycoNApp', 'listen_to', 'now', 'run_on_thread',
 log = logging.getLogger('kytos[A]')
 
 APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
+
 
 def listen_to(event, *events):
     """Decorator for Event Listener methods.

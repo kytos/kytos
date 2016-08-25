@@ -1,8 +1,10 @@
 # -*- coding: utf-8 *-*
 """Module with main classes related to Switches"""
 import logging
-from datetime import datetime, timezone
-from socket import socket as Socket
+from socket import socket as Socket, error as SocketError
+
+from kyco.constants import POOLING_TIME
+from kyco.utils import now
 
 __all__ = ('KycoSwitch',)
 
@@ -56,8 +58,11 @@ class KycoSwitch(object):
         self.connection_id = connection_id  # (ip, port)
         self.ofp_version = ofp_version
         self.features = features
-        self.firstseen = datetime.now(timezone.utc)
-        self.lastseen = datetime.now(timezone.utc)
+        self.firstseen = now()
+        self.lastseen = now()
+        self.sent_xid = None
+        self.waiting_for_reply = False
+        self.request_timestamp = 0
 
     def disconnect(self):
         """Disconnect the switch.
@@ -68,7 +73,10 @@ class KycoSwitch(object):
         try:
             if self.socket is not None:
                 self.socket.close()
-        except:
+                msg = 'Socket {} from switch {} closed'
+                msg = msg.format(self.connection_id, self.dpid)
+                log.info(msg)
+        except SocketError:
             pass
 
         self.socket = None
@@ -84,16 +92,11 @@ class KycoSwitch(object):
             True: if the connection is alive
             False: if not.
         """
-        try:
-            if self.socket is None:
-                return False
-            else:
-                self.send(b'')
-                self.update_lastseen()
-                return True
-        except:
-            self.socket = None
+        if (now() - self.lastseen).seconds > POOLING_TIME*2:
+            self.disconnect()
             return False
+        else:
+            return True
 
     def save_connection(self, socket, connection_id):
         """Save a new connection to the existing switch.
@@ -110,9 +113,9 @@ class KycoSwitch(object):
             raise Exception("The passed argument is not a python socket")
 
         if self.is_connected():
-            error_message = ("Kyco already have a connected switch with "
-                             "dpid {}")
-            raise Exception(error_message.format(self.dpid))
+            error_message = "Kyco already have a switch ({}) connected at {} "
+            raise Exception(error_message.format(self.dpid,
+                                                 self.connection_id))
 
         self.socket = socket
         self.connection_id = connection_id
@@ -134,7 +137,10 @@ class KycoSwitch(object):
         if not self.socket:
             raise Exception("This switch is not connected")
 
-        self.socket.send(data)
+        try:
+            self.socket.send(data)
+        except SocketError:
+            self.disconnect()
 
     def update_lastseen(self):
-        self.lastseen = datetime.now(timezone.utc)
+        self.lastseen = now()

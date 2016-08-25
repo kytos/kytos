@@ -10,6 +10,8 @@ from pyof.v0x01.common.header import Header
 from pyof.v0x01.symmetric.hello import Hello
 
 from kyco.controller import Controller
+from kyco.config import KycoConfig
+
 
 __all__ = ('do_handshake', 'new_controller', 'new_client',
            'new_handshaked_client')
@@ -45,7 +47,7 @@ def do_handshake(client):
     return client
 
 
-def new_controller(options):
+def new_controller(options=KycoConfig().options):
     """Instantiate a Kyco Controller.
 
     Args:
@@ -62,7 +64,7 @@ def new_controller(options):
     return controller, thread
 
 
-def new_client(options):
+def new_client(options=KycoConfig().options):
     """Create and returns a socket client.
 
     Args:
@@ -77,7 +79,7 @@ def new_client(options):
     return client
 
 
-def new_handshaked_client(options):
+def new_handshaked_client(options=KycoConfig().options):
     """Create and returns a socket client.
 
     Args:

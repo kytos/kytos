@@ -31,6 +31,7 @@ from kyco.core.events import KycoNewConnection
 from kyco.core.events import KycoShutdownEvent
 from kyco.core.events import KycoSwitchUp
 from kyco.core.events import KycoSwitchDown
+from kyco.core.events import KycoMessageOutError
 from kyco.core.switch import KycoSwitch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler
 from kyco.core.tcp_server import KycoServer
@@ -251,7 +252,15 @@ class Controller(object):
             else:
                 destination = connection_id
 
-            self.send_to(destination, message.pack())
+            try:
+                self.send_to(destination, message.pack())
+            except Exception as exception:
+                if dpid is not None:
+                    error = KycoMessageOutError(dpid=dpid)
+                else:
+                    error = KycoMessageOutError(connection_id=connection_id)
+                error.content = {'event': event, 'exception': exception}
+                self.buffers.app.put(event)
 
             # Sending the event to the listeners
             self.notify_listeners(event)

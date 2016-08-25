@@ -164,3 +164,7 @@ class KycoMessageInFeaturesReply(KycoMessageIn):
 
 class KycoMessageOutSetConfig(KycoMessageOut):
     pass
+
+
+class KycoMessageOutError(KycoAppEvent):
+    pass

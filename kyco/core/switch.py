@@ -140,6 +140,7 @@ class KycoSwitch(object):
         try:
             self.socket.send(data)
         except SocketError:
+            # TODO: This is the best way deal with an error while sending data?
             self.disconnect()
 
     def update_lastseen(self):

@@ -8,10 +8,15 @@ from unittest import TestCase
 from pyof.v0x01.symmetric.vendor_header import VendorHeader
 
 from kyco.config import KycoConfig
-from kyco.core.buffers import KycoEventBuffer
-from kyco.core.events import KycoRawEvent
+from kyco.core.buffers import KycoBuffers
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler
 from kyco.core.tcp_server import KycoServer
+
+
+class EmptyController(object):
+    """Empty container to represent a generic controller that will hold buffers
+    """
+    pass
 
 
 class HandlerForTest(BaseRequestHandler):
@@ -32,9 +37,10 @@ class TestKycoServer(TestCase):
     def setUp(self):
         self.config = KycoConfig()
         self.options = self.config.options
-        self.buffer = KycoEventBuffer('test', KycoRawEvent)
+        self.controller = EmptyController()
+        self.controller.buffers = KycoBuffers()
         self.server = KycoServer((self.options.listen, self.options.port),
-                                 HandlerForTest, self.buffer.put)
+                                 HandlerForTest, self.controller)
         self.thread = Thread(name='TCP Server',
                              target=self.server.serve_forever)
         self.thread.start()
@@ -65,9 +71,10 @@ class TestKycoOpenFlowHandler(TestCase):
     def setUp(self):
         self.config = KycoConfig()
         self.options = self.config.options
-        self.buffer = KycoEventBuffer('test', KycoRawEvent)
+        self.controller = EmptyController
+        self.controller.buffers = KycoBuffers()
         self.server = KycoServer((self.options.listen, self.options.port),
-                                 KycoOpenFlowRequestHandler, self.buffer.put)
+                                 KycoOpenFlowRequestHandler, self.controller)
         self.thread = Thread(name='TCP Server',
                              target=self.server.serve_forever)
         self.thread.start()

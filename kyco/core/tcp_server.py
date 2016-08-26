@@ -30,12 +30,15 @@ class KycoServer(ThreadingMixIn, TCPServer):
     main_threads = {}
 
     def __init__(self, server_address, RequestHandlerClass,
-                 controller_put_raw_event):
+                 # Change after definitions on #62
+                 #controller_put_raw_event):
+                 controller):
         super().__init__(server_address, RequestHandlerClass,
                          bind_and_activate=False)
         # Registering the register_event 'endpoint' on the server to be
         #   accessed on the RequestHandler
-        self.controller_put_raw_event = controller_put_raw_event
+        self.controller = controller
+        # self.controller_put_raw_event = controller_put_raw_event
 
     def serve_forever(self, poll_interval=0.5):
         try:
@@ -66,7 +69,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         content = {'request': self.request}  # request = socket
         connection_id = (self.ip, self.port)
         event = KycoNewConnection(content=content, connection_id=connection_id)
-        self.server.controller_put_raw_event(event)
+        self.server.controller.buffers.raw.put(event)
         log.info("New connection from %s:%s", self.ip, self.port)
 
     def handle(self):
@@ -103,7 +106,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
                 connection_id = (self.ip, self.port)
                 event = KycoRawOpenFlowMessage(content=content,
                                                connection_id=connection_id)
-                self.server.controller_put_raw_event(event)
+                self.server.controller.buffers.raw.put(event)
         except Exception:
             log.info("Client %s:%s disconnected", self.ip, self.port)
             raise Exception
@@ -112,4 +115,4 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         log.info("Connection lost from %s:%s", self.ip, self.port)
         connection_id = (self.ip, self.port)
         event = KycoConnectionLost(connection_id=connection_id)
-        self.server.controller_put_raw_event(event)
+        self.server.controller.buffers.raw.put(event)

@@ -3,6 +3,21 @@
 # Buffers exceptions
 
 
+class KycoCoreException(Exception):
+    """Event related exceptions"""
+    def __str__(self):
+        return 'KycoCore exception: ' + super().__str__()
+
+
+class KycoSwitchOfflineException(Exception):
+    def __init__(self, dpid):
+        self.dpid = dpid
+
+    def __str__(self):
+        msg = 'The switch {} is offline, you can not send a message to it'
+        return msg.format(self.dpid)
+
+
 class KycoEventException(Exception):
     """Event related exceptions"""
     def __init__(self, message="KycoEvent exception", event=None):

@@ -68,6 +68,7 @@ class KycoRawEvent(KycoCoreEvent):
 
 # Core Generated Events
 
+
 class KycoNewConnection(KycoRawEvent):
     """A new Connection was stabilished"""
     def __init__(self, connection_id, content,
@@ -90,6 +91,14 @@ class KycoRawOpenFlowMessage(KycoRawEvent):
     This event contains the header of the message and also the body in binary
     format, that still needs to be unpacked."""
     pass
+
+
+class KycoRawMessageOutError(KycoRawEvent):
+    """This event is just a wrapper to KycoMessageOutErro event"""
+    pass
+
+
+# Events to/from NApps communication
 
 
 class KycoSwitchUp(KycoAppEvent):
@@ -120,6 +129,13 @@ class KycoAppUnloaded(KycoAppEvent):
 
 class KycoServerDown(KycoAppEvent):
     pass
+
+
+class KycoMessageOutError(KycoAppEvent):
+    pass
+
+
+# OpenFlowMessage events
 
 
 class KycoMessageIn(KycoMsgEvent):
@@ -163,8 +179,4 @@ class KycoMessageInFeaturesReply(KycoMessageIn):
 
 
 class KycoMessageOutSetConfig(KycoMessageOut):
-    pass
-
-
-class KycoMessageOutError(KycoAppEvent):
     pass

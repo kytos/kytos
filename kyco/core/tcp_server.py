@@ -10,6 +10,8 @@ from threading import current_thread
 # TODO: Fix version scheme
 from pyof.v0x01.common.header import Header
 
+from kyco.core.events import KycoRawMessageOutError
+from kyco.core.events import KycoMessageOutError
 from kyco.core.events import KycoNewConnection
 from kyco.core.events import KycoConnectionLost
 from kyco.core.events import KycoRawOpenFlowMessage
@@ -107,9 +109,18 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
                 event = KycoRawOpenFlowMessage(content=content,
                                                connection_id=connection_id)
                 self.server.controller.buffers.raw.put(event)
-        except Exception:
+        except (SocketError, OSError) as exception:
+            # TODO: Client disconnected is the only possible reason?
             log.info("Client %s:%s disconnected", self.ip, self.port)
-            raise Exception
+            error_content = {'destination': (self.ip, self.port),
+                             'exception': exception, 'event': None}
+            event = KycoMessageOutError(content=error_content)
+            # Wrapping up the event with a container that can be inserted on
+            # the raw buffer
+            wrapper = KycoRawMessageOutError(content={'event': event},
+                                             connection_id=(self.ip, self.port)
+                                             )
+            self.server.controller.buffers.raw.put(wrapper)
 
     def finish(self):
         log.info("Connection lost from %s:%s", self.ip, self.port)

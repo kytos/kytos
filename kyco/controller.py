@@ -21,6 +21,7 @@ import re
 from importlib.machinery import SourceFileLoader
 from pyof.v0x01.symmetric.hello import Hello
 from pyof.v0x01.controller2switch.features_request import FeaturesRequest
+from socket import error as SocketError
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
@@ -28,10 +29,12 @@ from kyco.core.events import KycoConnectionLost
 from kyco.core.events import KycoMessageOutFeaturesRequest
 from kyco.core.events import KycoMessageOutHello
 from kyco.core.events import KycoNewConnection
+from kyco.core.events import KycoRawMessageOutError
 from kyco.core.events import KycoShutdownEvent
 from kyco.core.events import KycoSwitchUp
 from kyco.core.events import KycoSwitchDown
 from kyco.core.events import KycoMessageOutError
+from kyco.core.exceptions import KycoSwitchOfflineException
 from kyco.core.switch import KycoSwitch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler
 from kyco.core.tcp_server import KycoServer
@@ -262,16 +265,16 @@ class Controller(object):
 
             try:
                 self.send_to(destination, message.pack())
-            except Exception as exception:
+                # Sending the event to the listeners
+                self.notify_listeners(event)
+            except (OSError, SocketError, KycoSwitchOfflineException) as exception:
+                error = KycoMessageOutError(content={'event': event,
+                                                     'exception': exception})
                 if dpid is not None:
-                    error = KycoMessageOutError(dpid=dpid)
+                    error.content['destination'] = dpid
                 else:
-                    error = KycoMessageOutError(connection_id=connection_id)
-                error.content = {'event': event, 'exception': exception}
-                self.buffers.app.put(event)
-
-            # Sending the event to the listeners
-            self.notify_listeners(event)
+                    error.content['destination'] = connection_id
+                self.buffers.app.put(error)
 
     def app_event_handler(self):
         """Handle app events.
@@ -405,16 +408,18 @@ class Controller(object):
         if isinstance(destination, tuple):
             try:
                 self.connections[destination]['socket'].send(message)
-            except:
+            except (OSError, SocketError) as exception:
                 # TODO: Raise a ConnectionLost event?
-                raise Exception('Error while sending a message to switch %s',
-                                destination)
+                err_msg = 'Error while sending a message to connection %s'
+                log.debug(err_msg, destination)
+                raise exception
         else:
             try:
                 self.switches[destination].send(message)
-            except:
-                raise Exception('Error while sending a message to switch %s',
-                                destination)
+            except (OSError, SocketError, KycoSwitchOfflineException) as exception:
+                err_msg = 'Error while sending a message to switch %s'
+                log.debug(err_msg, destination)
+                raise exception
 
     def load_napp(self, napp_name):
         """Load a single app.

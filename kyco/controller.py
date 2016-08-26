@@ -79,7 +79,8 @@ class Controller(object):
                                  'KycoConnectionLost': [self.connection_lost],
                                  'KycoMessageInHello': [self.hello_in],
                                  'KycoMessageOutHello': [self.send_features_request],
-                                 'KycoMessageInFeaturesReply': [self.features_reply_in]}
+                                 'KycoMessageInFeaturesReply': [self.features_reply_in],
+                                 'KycoRawMessageOutError': [self.raw_message_out_error]}
         #: dict: Current loaded apps - 'napp_name': napp (instance)
         #:
         #: The key is the napp name (string), while the value is the napp
@@ -289,6 +290,11 @@ class Controller(object):
             if isinstance(event, KycoShutdownEvent):
                 log.debug("AppEvent handler stopped")
                 break
+
+    def raw_message_out_error(self, event):
+        """Unwrapp KycoMessageOutError message"""
+        event = event.content['event']
+        self.buffers.app.put(event)
 
     def new_connection(self, event):
         """Handle a KycoNewConnection event.

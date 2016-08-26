@@ -8,7 +8,7 @@ from threading import Thread
 __all__ = ('KycoCoreNApp', 'KycoNApp', 'listen_to', 'now', 'run_on_thread',
            'start_logger')
 
-log = logging.getLogger('kytos[A]')
+log = logging.getLogger('Kyco')
 
 APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
 
@@ -100,10 +100,10 @@ def run_on_thread(method):
 
 def start_logger():
     """Starts the loggers, both the Kyco and the KycoNApp"""
-    general_formatter = logging.Formatter('%(asctime)s - %(levelname)s '
-                                          '[%(name)s] %(message)s')
-    app_formatter = logging.Formatter('%(asctime)s - %(levelname)s '
-                                      '[%(name)s] %(message)s')
+    fmt = '%(asctime)s - %(levelname)s [%(name)s] %(message)s'
+    # fmt += '\n           %(module)s - %(funcName)s - %(lineno)d'
+    general_formatter = logging.Formatter(fmt)
+    app_formatter = logging.Formatter(fmt)
 
     controller_console_handler = logging.StreamHandler()
     controller_console_handler.setLevel(logging.DEBUG)

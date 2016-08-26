@@ -104,7 +104,9 @@ class Controller(object):
         self.server = KycoServer((self.options.listen,
                                   int(self.options.port)),
                                  KycoOpenFlowRequestHandler,
-                                 self.buffers.raw.put)
+                                 # TODO: Change after #62 definitions
+                                 #self.buffers.raw.put)
+                                 self)
 
         thrds = {'tcp_server': Thread(name='TCP server',
                                       target=self.server.serve_forever),

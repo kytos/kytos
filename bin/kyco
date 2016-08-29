@@ -9,7 +9,7 @@ def main():
 #    daemon = KycoDaemon(config.args)
 #    daemon.run()
 
-    controller = Controller(config.args)
+    controller = Controller(config.options)
     controller.start()
 
 if __name__ == '__main__':

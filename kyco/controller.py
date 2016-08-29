@@ -420,10 +420,12 @@ class Controller(object):
     def load_napps(self):
         """Load all NApps installed on the NApps dir"""
         napps_dir = self.options.napps
-        for napp_name in os.listdir(napps_dir):
-            if os.path.isdir(os.path.join(napps_dir, napp_name)):
-                log.info("Loading app %s", napp_name)
-                self.load_napp(napp_name)
+        for author in os.listdir(napps_dir):
+            author_dir = os.path.join(napps_dir, author)
+            for napp_name in os.listdir(author_dir):
+                full_name = "{}/{}".format(author, napp_name)
+                log.info("Loading app %s", full_name)
+                self.load_napp(full_name)
 
     def unload_napp(self, napp_name):
         """Unload a specific NApp based on its name.

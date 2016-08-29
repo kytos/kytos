@@ -63,8 +63,8 @@ class KycoConfig():
         self.parse_args()
 
     def parse_args(self):
-        napps = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
-                             'napps')
+        # TODO: Fix this hardcode
+        napps = '/var/lib/kytos/napps/'
 
         defaults = {'pidfile': '/var/run/kyco.pid',
                     'workdir': '/var/lib/kyco',

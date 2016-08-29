@@ -65,7 +65,7 @@ class FastLinter(Linter):
                          'Run the slower "lint" after solving these issues:'
 
 
-setup(name='Kyco - Kytos Controller',
+setup(name='kytos-kyco',
       version='1.1.0a0',
       description='Controller for OpenFlow Protocol from the Kytos project',
       url='http://github.com/kytos/kyco',

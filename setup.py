@@ -77,6 +77,7 @@ setup(name='kytos-kyco',
       license='MIT',
       test_suite='tests',
       scripts=['bin/kyco'],
+      data_files=[('/etc/kyco', ['etc/kyco.conf', 'etc/logging.ini'])],
       packages=find_packages(exclude=['tests']),
       install_requires=[str(ir.req) for ir in requirements],
       cmdclass={

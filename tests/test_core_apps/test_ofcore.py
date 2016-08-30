@@ -29,7 +29,7 @@ class TestOFCoreApp(TestCase):
 
     def setUp(self):
         self.config = KycoConfig()
-        self.options = self.config.options
+        self.options = self.config.options['daemon']
         self.controller, self.thread = new_controller(self.options)
 
     def test_client(self):

@@ -31,7 +31,7 @@ class TestKycoServer(TestCase):
 
     def setUp(self):
         self.config = KycoConfig()
-        self.options = self.config.options
+        self.options = self.config.options['daemon']
         self.buffer = KycoEventBuffer('test', KycoRawEvent)
         self.server = KycoServer((self.options.listen, self.options.port),
                                  HandlerForTest, self.buffer.put)
@@ -64,7 +64,7 @@ class TestKycoOpenFlowHandler(TestCase):
 
     def setUp(self):
         self.config = KycoConfig()
-        self.options = self.config.options
+        self.options = self.config.options['daemon']
         self.buffer = KycoEventBuffer('test', KycoRawEvent)
         self.server = KycoServer((self.options.listen, self.options.port),
                                  KycoOpenFlowRequestHandler, self.buffer.put)

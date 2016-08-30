@@ -99,8 +99,8 @@ class Controller(object):
         Load the installed apps.
         """
         log.info("Starting Kyco - Kytos Controller")
-        self.server = KycoServer((self.options['daemon'].listen,
-                                  int(self.options['daemon'].port)),
+        self.server = KycoServer((self.options.listen,
+                                  int(self.options.port)),
                                  KycoOpenFlowRequestHandler,
                                  self.buffers.raw.put)
 
@@ -396,7 +396,7 @@ class Controller(object):
         Args:
             napp_name (str): Name of the NApp to be loaded.
         """
-        path = os.path.join(self.options['daemon'].napps, napp_name, 'main.py')
+        path = os.path.join(self.options.napps, napp_name, 'main.py')
         module = SourceFileLoader(napp_name, path)
 
         napp = module.load_module().Main(controller=self)
@@ -420,7 +420,7 @@ class Controller(object):
 
     def load_napps(self):
         """Load all NApps installed on the NApps dir"""
-        napps_dir = self.options['daemon'].napps
+        napps_dir = self.options.napps
         try:
             for author in os.listdir(napps_dir):
                 author_dir = os.path.join(napps_dir, author)

@@ -19,7 +19,8 @@ class TestKycoController(TestCase):
 
     def setUp(self):
         config = KycoConfig()
-        self.controller = Controller(config.options)
+        self.options = config.options['daemon']
+        self.controller = Controller(self.options)
         self.thread = Thread(name='Controller',
                              target=self.controller.start)
         self.thread.start()

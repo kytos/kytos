@@ -11,6 +11,7 @@ from configparser import ConfigParser
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
+from kyco import __version__
 
 
 class KycoConfig():
@@ -26,10 +27,9 @@ class KycoConfig():
                                 formatter_class=RawDescriptionHelpFormatter,
                                 description=__doc__)
 
-        # TODO: Get version automatically
         parser.add_argument('-v', '--version',
                             action='version',
-                            version='%(prog)s 0.1.0')
+                            version="kyco %s" % __version__)
 
         parser.add_argument('-D', '--debug',
                             action='store_true',

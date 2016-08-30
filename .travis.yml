@@ -1,8 +1,20 @@
 language: python
 python:
-  - "3.4"
-  - "3.5"
+    - "3.4"
+    - "3.5"
 # command to install dependencies
-install: "pip install -r requirements.txt; pip install -r requirements-docs.txt; pip install -r requirements-dev.txt"
+sudo: required
+install:
+    - pip install -r requirements.txt --upgrade --pre
+    - pip install -r requirements-docs.txt
+    - pip install -r requirements-dev.txt
 # command to run tests
-script: python setup.py test
+script:
+    - python setup.py test
+notifications:
+  irc:
+    channels: "irc.freenode.org#kytos"
+    template:
+      - "%{repository}@%{branch}: %{message} (%{build_url})"
+    on_success: change
+    on_failure: change

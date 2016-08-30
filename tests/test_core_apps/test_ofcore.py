@@ -1,10 +1,8 @@
 """Tests regarding OFCore App, responsible by main OpenFlow basic actions"""
 
 import os
-import time
 from random import randint
 from socket import socket
-from threading import Thread
 from unittest import TestCase
 from unittest import skip
 
@@ -17,27 +15,26 @@ from pyof.v0x01.controller2switch.set_config import SetConfig
 from pyof.v0x01.symmetric.hello import Hello
 from pyof.v0x01.symmetric.echo_request import EchoRequest
 
-from kyco.config import KycoConfig
-from kyco.controller import Controller
-
 from tests.helper import new_controller
 from tests.helper import new_client
 from tests.helper import new_handshaked_client
+from tests.helper import TestConfig
+
 
 class TestOFCoreApp(TestCase):
     """Tests of Kyco OFCore App functionalities"""
 
     def setUp(self):
-        self.config = KycoConfig()
-        self.options = self.config.options['daemon']
-        self.controller, self.thread = new_controller(self.options)
+        config = TestConfig()
+        self.options = config.options['daemon']
+        self.controller, self.thread = new_controller()
 
     def test_client(self):
         """Testing basic client operations.
 
         Connect a client, send a OF Hello message and receive another back.
         """
-        client = new_client(self.options)
+        client = new_client()
         message = Hello(xid=3)
         client.send(message.pack())
         response = b''
@@ -53,7 +50,7 @@ class TestOFCoreApp(TestCase):
 
     def test_handshake(self):
         """Testing OF switch handshake process"""
-        client = new_client(self.options)
+        client = new_client()
 
         # -- STEP 1: Sending Hello message
         client.send(Hello(xid=3).pack())
@@ -179,7 +176,7 @@ class TestOFCoreApp(TestCase):
     def test_echo_reply(self):
         """Testing a echo request/reply interaction"""
 
-        client = new_handshaked_client(self.options)
+        client = new_handshaked_client()
 
         # Test of Echo Request
         echo_msg = EchoRequest(randint(1, 10))

@@ -2,19 +2,29 @@
 
 import os
 import time
-
+from distutils import sysconfig
 from socket import socket
 from threading import Thread
 
 from pyof.v0x01.common.header import Header
 from pyof.v0x01.symmetric.hello import Hello
 
+from kyco.config import KycoConfig
 from kyco.controller import Controller
 
-__all__ = ('new_controller', 'new_client', 'new_handshaked_client')
+__all__ = ('TestConfig', 'new_controller', 'new_client',
+           'new_handshaked_client')
 
 
-def new_controller(options):
+class TestConfig(KycoConfig):
+    def __init__(self):
+        super().__init__()
+        if 'TRAVIS' in os.environ:
+            self.options['daemon'].napps = os.path.join(sysconfig.get_python_lib(),
+                                                        'var/lib/kytos/napps/')
+
+
+def new_controller(options=None):
     """Instantiate a Kyco Controller.
 
     Args:
@@ -24,6 +34,8 @@ def new_controller(options):
         (controller, thread): Running Controler and the thread where the
             controller is running
     """
+    if options is None:
+        options = TestConfig().options['daemon']
     controller = Controller(options)
     thread = Thread(name='Controller', target=controller.start)
     thread.start()
@@ -31,7 +43,7 @@ def new_controller(options):
     return controller, thread
 
 
-def new_client(options):
+def new_client(options=None):
     """Create and returns a socket client.
 
     Args:
@@ -41,12 +53,14 @@ def new_client(options):
         client (socket): Client connected to the Kyco controller before
             handshake
     """
+    if options is None:
+        options = TestConfig().options['daemon']
     client = socket()
     client.connect((options.listen, options.port))
     return client
 
 
-def new_handshaked_client(options):
+def new_handshaked_client(options=None):
     """Create and returns a socket client.
 
     Args:
@@ -56,6 +70,8 @@ def new_handshaked_client(options):
         client (socket): Client connected to the Kyco controller with handshake
             done
     """
+    if options is None:
+        options = TestConfig().options['daemon']
     client = new_client(options)
 
     # -- STEP 1: Sending Hello message

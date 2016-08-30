@@ -13,6 +13,11 @@ from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 from kyco import __version__
 
+if 'VIRTUAL_ENV' in os.environ:
+    BASE_ENV = os.environ['VIRTUAL_ENV']
+else:
+    BASE_ENV = '/'
+
 
 class KycoConfig():
     def __init__(self):
@@ -64,10 +69,12 @@ class KycoConfig():
         self.parse_args()
 
     def parse_args(self):
-        defaults = {'pidfile': '/var/run/kyco.pid',
-                    'workdir': '/var/lib/kyco',
-                    'napps': '/var/lib/kytos/napps',
-                    'logging': '/etc/kyco/logging.ini',
+
+        defaults = {'pidfile': os.path.join(BASE_ENV, 'var/run/kyco.pid'),
+                    'workdir': os.path.join(BASE_ENV, 'var/lib/kyco'),
+                    'napps': os.path.join(BASE_ENV, 'var/lib/kytos/napps/'),
+                    'conf': os.path.join(BASE_ENV, 'etc/kyco/kyco.conf'),
+                    'logging': os.path.join(BASE_ENV, 'etc/kyco/logging.ini'),
                     'listen': '0.0.0.0',
                     'port': 6633,
                     'daemon': False,

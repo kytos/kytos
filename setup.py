@@ -3,11 +3,16 @@
 Run "python3 setup --help-commands" to list all available commands and their
 descriptions.
 """
+import os
 import sys
 from subprocess import call
 from setuptools import setup, find_packages, Command
-
 from pip.req import parse_requirements
+
+if 'VIRTUAL_ENV' in os.environ:
+    BASE_ENV = os.environ['VIRTUAL_ENV']
+else:
+    BASE_ENV = '/'
 
 
 class Doctest(Command):
@@ -65,6 +70,7 @@ class FastLinter(Linter):
         self.extra_msg = 'This a faster version of "lint", without pylint. ' \
                          'Run the slower "lint" after solving these issues:'
 
+
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 requirements = parse_requirements('requirements.txt', session=False)
 
@@ -77,7 +83,8 @@ setup(name='kytos-kyco',
       license='MIT',
       test_suite='tests',
       scripts=['bin/kyco'],
-      data_files=[('/etc/kyco', ['etc/kyco.conf', 'etc/logging.ini'])],
+      data_files=[(os.path.join(BASE_ENV, 'etc/kyco'),
+                   ['etc/kyco.conf', 'etc/logging.ini'])],
       packages=find_packages(exclude=['tests']),
       install_requires=[str(ir.req) for ir in requirements],
       cmdclass={

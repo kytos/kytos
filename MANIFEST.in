@@ -1,0 +1,2 @@
+include etc/kyco.conf
+include *.txt

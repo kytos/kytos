@@ -16,6 +16,7 @@ from kyco import __version__
 
 class KycoConfig():
     def __init__(self):
+        self.options = {}
         conf_parser = ArgumentParser(add_help=False)
 
         conf_parser.add_argument("-c", "--conf",
@@ -63,13 +64,9 @@ class KycoConfig():
         self.parse_args()
 
     def parse_args(self):
-        # TODO: Fix this hardcode
-        napps = '/var/lib/kytos/napps/'
-
         defaults = {'pidfile': '/var/run/kyco.pid',
                     'workdir': '/var/lib/kyco',
-                    'napps': napps,
-                    'conf': '/etc/kyco/kyco.conf',
+                    'napps': '/var/lib/kytos/napps',
                     'logging': '/etc/kyco/logging.ini',
                     'listen': '0.0.0.0',
                     'port': 6633,
@@ -84,6 +81,8 @@ class KycoConfig():
             defaults = dict(config.items("daemon"))
 
         self.parser.set_defaults(**defaults)
+
         if 'test' in argv:
             argv.pop(argv.index('test'))
-        self.options = self.parser.parse_args(argv)
+
+        self.options['daemon'] = self.parser.parse_args(argv)

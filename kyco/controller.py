@@ -256,11 +256,12 @@ class Controller(object):
             try:
                 self.send_to(destination, message.pack())
             except Exception as exception:
+                error = KycoMessageOutError(content = {'exception': exception,
+                                                       'event': event})
                 if dpid is not None:
-                    error = KycoMessageOutError(dpid=dpid)
+                    error.content['destination'] = dpid
                 else:
-                    error = KycoMessageOutError(connection_id=connection_id)
-                error.content = {'event': event, 'exception': exception}
+                    error.content['destination'] = connection_id
                 self.buffers.app.put(event)
 
             # Sending the event to the listeners

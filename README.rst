@@ -99,6 +99,6 @@ This software is under *MIT-License*. For more information please read
 .. |Release| image:: https://img.shields.io/github/release/kytos/kyco.svg
    :target: https://github.com/kytos/kyco/releases
 .. |Tests| image:: https://travis-ci.org/kytos/kyco.svg?branch=develop
-   :target: https://github.com/kytos/kyco
+   :target: https://travis-ci.org/kytos/kyco
 .. |License| image:: https://img.shields.io/github/license/kytos/kyco.svg
    :target: https://github.com/kytos/kyco/blob/master/LICENSE

@@ -7,11 +7,11 @@ from unittest import TestCase
 
 from pyof.v0x01.symmetric.vendor_header import VendorHeader
 
-from kyco.config import KycoConfig
 from kyco.core.buffers import KycoEventBuffer
 from kyco.core.events import KycoRawEvent
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler
 from kyco.core.tcp_server import KycoServer
+from tests.helper import TestConfig
 
 
 class HandlerForTest(BaseRequestHandler):
@@ -30,8 +30,8 @@ class HandlerForTest(BaseRequestHandler):
 class TestKycoServer(TestCase):
 
     def setUp(self):
-        self.config = KycoConfig()
-        self.options = self.config.options['daemon']
+        config = TestConfig()
+        self.options = config.options['daemon']
         self.buffer = KycoEventBuffer('test', KycoRawEvent)
         self.server = KycoServer((self.options.listen, self.options.port),
                                  HandlerForTest, self.buffer.put)
@@ -63,7 +63,7 @@ class TestKycoServer(TestCase):
 class TestKycoOpenFlowHandler(TestCase):
 
     def setUp(self):
-        self.config = KycoConfig()
+        self.config = TestConfig()
         self.options = self.config.options['daemon']
         self.buffer = KycoEventBuffer('test', KycoRawEvent)
         self.server = KycoServer((self.options.listen, self.options.port),

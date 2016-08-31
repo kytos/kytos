@@ -7,18 +7,14 @@ from unittest import TestCase
 
 from pyof.v0x01.symmetric.vendor_header import VendorHeader
 
-from kyco.config import KycoConfig
 from kyco.controller import Controller
-
-
-HOST = '127.0.0.1'
-PORT = 6633
+from tests.helper import TestConfig
 
 
 class TestKycoController(TestCase):
 
     def setUp(self):
-        config = KycoConfig()
+        config = TestConfig()
         self.options = config.options['daemon']
         self.controller = Controller(self.options)
         self.thread = Thread(name='Controller',
@@ -32,7 +28,7 @@ class TestKycoController(TestCase):
     def test_client_sending_a_message(self):
         message = VendorHeader(xid=1, vendor=5)
         client = socket()
-        client.connect((HOST, PORT))
+        client.connect((self.options.listen, self.options.port))
         client.send(message.pack())
         client.close()
 

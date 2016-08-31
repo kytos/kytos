@@ -3,7 +3,7 @@
 import logging
 from socket import socket as Socket, error as SocketError
 
-from kyco.constants import POOLING_TIME
+from kyco.constants import CONNECTION_TIMEOUT
 from kyco.utils import now
 
 __all__ = ('KycoSwitch',)
@@ -92,7 +92,9 @@ class KycoSwitch(object):
             True: if the connection is alive
             False: if not.
         """
-        if (now() - self.lastseen).seconds > POOLING_TIME*2:
+        if self.socket is None:
+            return False
+        elif (now() - self.lastseen).seconds > CONNECTION_TIMEOUT:
             self.disconnect()
             return False
         else:

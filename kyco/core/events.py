@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """Module with Kyco Events"""
 
-from datetime import datetime
-from datetime import timezone
+from datetime import datetime, timezone
 
 # Base Events Classes
 
@@ -139,6 +138,14 @@ class KycoMessageOutEchoReply(KycoMessageOut):
     pass
 
 
+class KycoMessageOutEchoRequest(KycoMessageOut):
+    pass
+
+
+class KycoMessageInEchoReply(KycoMessageIn):
+    pass
+
+
 class KycoMessageInHello(KycoMessageIn):
     pass
 
@@ -156,4 +163,8 @@ class KycoMessageInFeaturesReply(KycoMessageIn):
 
 
 class KycoMessageOutSetConfig(KycoMessageOut):
+    pass
+
+
+class KycoMessageOutError(KycoAppEvent):
     pass

@@ -1,7 +1,7 @@
 """Basic TCP Server that will listen to port 6633."""
 import logging
 
-from datetime import datetime
+from socket import error as SocketError
 from socketserver import ThreadingMixIn
 from socketserver import BaseRequestHandler
 from socketserver import TCPServer
@@ -67,43 +67,49 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         connection_id = (self.ip, self.port)
         event = KycoNewConnection(content=content, connection_id=connection_id)
         self.server.controller_put_raw_event(event)
-        log.debug("New connection from %s:%s", self.ip, self.port)
+        log.info("New connection from %s:%s", self.ip, self.port)
 
     def handle(self):
         curr_thread = current_thread()
         header_len = 8
-        while True:
-            # TODO: How to consider the OpenFlow version here?
-            header = Header()
-            binary_data = b''
+        connected = True
+        try:
+            while connected:
+                # TODO: How to consider the OpenFlow version here?
+                header = Header()
+                binary_data = b''
 
-            raw_header = self.request.recv(8)
-            if not raw_header:
-                log.debug("Client %s:%s disconnected", self.ip, self.port)
-                break
+                raw_header = self.request.recv(8)
+                if not raw_header:
+                    log.info("Client %s:%s disconnected", self.ip, self.port)
+                    connected = False
+                    break
 
-            while len(raw_header) < header_len:
-                raw_header += self.request.recv(header_len - len(raw_header))
+                while len(raw_header) < header_len:
+                    raw_header += self.request.recv(header_len - len(raw_header))
 
-            log.debug("New message from %s:%s at thread %s", self.ip,
-                      self.port, curr_thread.name)
+                log.debug("New message from %s:%s at thread %s", self.ip,
+                          self.port, curr_thread.name)
 
-            header.unpack(raw_header)
+                header.unpack(raw_header)
 
-            message_size = header.length - header_len
-            if message_size > 0:
-                log.debug('Reading the binary_data')
-                binary_data += self.request.recv(message_size)
+                message_size = header.length - header_len
+                if message_size > 0:
+                    log.debug('Reading the binary_data')
+                    binary_data += self.request.recv(message_size)
 
-            # TODO: Do we need other informations from the network packet?
-            content = {'header': header, 'binary_data': binary_data}
-            connection_id = (self.ip, self.port)
-            event = KycoRawOpenFlowMessage(content=content,
-                                           connection_id=connection_id)
-            self.server.controller_put_raw_event(event)
+                # TODO: Do we need other informations from the network packet?
+                content = {'header': header, 'binary_data': binary_data}
+                connection_id = (self.ip, self.port)
+                event = KycoRawOpenFlowMessage(content=content,
+                                               connection_id=connection_id)
+                self.server.controller_put_raw_event(event)
+        except Exception:
+            log.info("Client %s:%s disconnected", self.ip, self.port)
+            raise Exception
 
     def finish(self):
-        log.debug("Connection lost from %s:%s", self.ip, self.port)
+        log.info("Connection lost from %s:%s", self.ip, self.port)
         connection_id = (self.ip, self.port)
         event = KycoConnectionLost(connection_id=connection_id)
         self.server.controller_put_raw_event(event)

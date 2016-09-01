@@ -12,7 +12,8 @@ from pyof.v0x01.symmetric.hello import Hello
 from kyco.config import KycoConfig
 from kyco.controller import Controller
 
-__all__ = ('TestConfig', 'new_controller', 'new_client',
+
+__all__ = ('TestConfig', 'do_handshake', 'new_controller', 'new_client',
            'new_handshaked_client')
 
 
@@ -22,6 +23,36 @@ class TestConfig(KycoConfig):
         if 'TRAVIS' in os.environ:
             self.options['daemon'].napps = os.path.join(sysconfig.get_python_lib(),
                                                         'var/lib/kytos/napps/')
+
+
+def do_handshake(client):
+    # -- STEP 1: Sending Hello message
+    client.send(Hello(xid=3).pack())
+
+    # -- STEP 2: Whait for Hello response
+    binary_packet = b''
+    while len(binary_packet) < 8:
+        binary_packet = client.recv(8)
+    header = Header()
+    header.unpack(binary_packet)
+
+    # -- STEP 3: Wait for features_request message
+    binary_packet = b''
+    # len() < 8 here because we just expect a Hello as response
+    while len(binary_packet) < 8:
+        binary_packet = client.recv(8)
+    header = Header()
+    header.unpack(binary_packet)
+
+    # -- STEP 4: Send features_reply to the controller
+    basedir = os.path.dirname(os.path.abspath(__file__))
+    raw_dir = os.path.join(basedir, 'raw')
+    message = None
+    with open(os.path.join(raw_dir, 'features_reply.cap'), 'rb') as file:
+        message = file.read()
+    client.send(message)
+
+    return client
 
 
 def new_controller(options=None):
@@ -37,10 +68,9 @@ def new_controller(options=None):
     if options is None:
         options = TestConfig().options['daemon']
     controller = Controller(options)
-    thread = Thread(name='Controller', target=controller.start)
-    thread.start()
+    controller.start()
     time.sleep(0.1)
-    return controller, thread
+    return controller
 
 
 def new_client(options=None):
@@ -73,31 +103,4 @@ def new_handshaked_client(options=None):
     if options is None:
         options = TestConfig().options['daemon']
     client = new_client(options)
-
-    # -- STEP 1: Sending Hello message
-    client.send(Hello(xid=3).pack())
-
-    # -- STEP 2: Whait for Hello response
-    binary_packet = b''
-    while len(binary_packet) < 8:
-        binary_packet = client.recv(8)
-    header = Header()
-    header.unpack(binary_packet)
-
-    # -- STEP 3: Wait for features_request message
-    binary_packet = b''
-    # len() < 8 here because we just expect a Hello as response
-    while len(binary_packet) < 8:
-        binary_packet = client.recv(8)
-    header = Header()
-    header.unpack(binary_packet)
-
-    # -- STEP 4: Send features_reply to the controller
-    basedir = os.path.dirname(os.path.abspath(__file__))
-    raw_dir = os.path.join(basedir, 'raw')
-    message = None
-    with open(os.path.join(raw_dir, 'features_reply.cap'), 'rb') as file:
-        message = file.read()
-    client.send(message)
-
-    return client
+    return do_handshake(client)

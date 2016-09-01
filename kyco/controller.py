@@ -24,12 +24,14 @@ from pyof.v0x01.controller2switch.features_request import FeaturesRequest
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
+from kyco.core.events import KycoConnectionLost
 from kyco.core.events import KycoMessageOutFeaturesRequest
 from kyco.core.events import KycoMessageOutHello
 from kyco.core.events import KycoNewConnection
 from kyco.core.events import KycoShutdownEvent
 from kyco.core.events import KycoSwitchUp
 from kyco.core.events import KycoSwitchDown
+from kyco.core.events import KycoMessageOutError
 from kyco.core.switch import KycoSwitch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler
 from kyco.core.tcp_server import KycoServer
@@ -197,7 +199,11 @@ class Controller(object):
                     # change the default reference of the event to the switch
                     # instead of referencing the connection itself.
                     event.dpid = connection['dpid']
-                    event.connection_id = None
+                    # If the event is a KycoConnectionLost event, then we will
+                    # pass along both dpid and connection_id to the
+                    # disconnection is correctly handled
+                    if not isinstance(event, KycoConnectionLost):
+                        event.connection_id = None
 
             # Sending the event to the listeners
             self.notify_listeners(event)
@@ -247,7 +253,16 @@ class Controller(object):
             else:
                 destination = connection_id
 
-            self.send_to(destination, message.pack())
+            try:
+                self.send_to(destination, message.pack())
+            except Exception as exception:
+                error = KycoMessageOutError(content = {'exception': exception,
+                                                       'event': event})
+                if dpid is not None:
+                    error.content['destination'] = dpid
+                else:
+                    error.content['destination'] = connection_id
+                self.buffers.app.put(event)
 
             # Sending the event to the listeners
             self.notify_listeners(event)
@@ -262,13 +277,13 @@ class Controller(object):
         while True:
             event = self.buffers.app.get()
 
-            if isinstance(event, KycoShutdownEvent):
-                log.debug("AppEvent handler stopped")
-                break
-
             log.debug("AppEvent handler called")
             # Sending the event to the listeners
             self.notify_listeners(event)
+
+            if isinstance(event, KycoShutdownEvent):
+                log.debug("AppEvent handler stopped")
+                break
 
     def new_connection(self, event):
         """Handle a KycoNewConnection event.
@@ -322,7 +337,8 @@ class Controller(object):
         Args:
             event (KycoConnectionLost): Received event with the needed infos
         """
-        log.info("Handling KycoConnectionLost event")
+        log.info("Handling KycoConnectionLost event for: %s",
+                 event.connection_id)
         connection_id = event.connection_id
         if connection_id is not None and connection_id in self.connections:
             dpid = self.connections[event.connection_id]['dpid']
@@ -406,6 +422,8 @@ class Controller(object):
             if event_type not in self.events_listeners:
                 self.events_listeners[event_type] = []
             self.events_listeners[event_type].extend(listeners)
+
+        napp.start()
 
     def install_napp(self, napp_name):
         """Install the requested NApp by its name.

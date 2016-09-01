@@ -17,29 +17,22 @@ Basic usage:
 
 import os
 import re
-
 from importlib.machinery import SourceFileLoader
-from pyof.v0x01.symmetric.hello import Hello
-from pyof.v0x01.controller2switch.features_request import FeaturesRequest
 from socket import error as SocketError
 from threading import Thread
 
+from pyof.v0x01.controller2switch.features_request import FeaturesRequest
+from pyof.v0x01.symmetric.hello import Hello
+
 from kyco.core.buffers import KycoBuffers
-from kyco.core.events import KycoConnectionLost
-from kyco.core.events import KycoMessageOutFeaturesRequest
-from kyco.core.events import KycoMessageOutHello
-from kyco.core.events import KycoNewConnection
-from kyco.core.events import KycoRawMessageOutError
-from kyco.core.events import KycoShutdownEvent
-from kyco.core.events import KycoSwitchUp
-from kyco.core.events import KycoSwitchDown
-from kyco.core.events import KycoMessageOutError
+from kyco.core.events import (KycoConnectionLost, KycoMessageOutError,
+                              KycoMessageOutFeaturesRequest,
+                              KycoMessageOutHello, KycoNewConnection,
+                              KycoShutdownEvent, KycoSwitchDown, KycoSwitchUp)
 from kyco.core.exceptions import KycoSwitchOfflineException
 from kyco.core.switch import KycoSwitch
-from kyco.core.tcp_server import KycoOpenFlowRequestHandler
-from kyco.core.tcp_server import KycoServer
-from kyco.utils import start_logger
-from kyco.utils import KycoCoreNApp
+from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
+from kyco.utils import KycoCoreNApp, start_logger
 
 log = start_logger()
 

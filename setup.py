@@ -6,8 +6,9 @@ descriptions.
 import os
 import sys
 from subprocess import call
-from setuptools import setup, find_packages, Command
+
 from pip.req import parse_requirements
+from setuptools import Command, find_packages, setup
 
 if 'VIRTUAL_ENV' in os.environ:
     BASE_ENV = os.environ['VIRTUAL_ENV']

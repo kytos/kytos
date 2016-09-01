@@ -1,7 +1,8 @@
 # -*- coding: utf-8 *-*
 """Module with main classes related to Switches"""
 import logging
-from socket import socket as Socket, error as SocketError
+from socket import error as SocketError
+from socket import socket as Socket
 
 from kyco.constants import CONNECTION_TIMEOUT
 from kyco.core.exceptions import KycoSwitchOfflineException

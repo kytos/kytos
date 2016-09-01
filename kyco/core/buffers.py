@@ -2,10 +2,8 @@
 import logging
 from queue import Queue
 
-from kyco.core.events import KycoAppEvent
-from kyco.core.events import KycoMsgEvent
-from kyco.core.events import KycoShutdownEvent
-from kyco.core.events import KycoRawEvent
+from kyco.core.events import (KycoAppEvent, KycoMsgEvent, KycoRawEvent,
+                              KycoShutdownEvent)
 
 __all__ = ['KycoBuffers']
 

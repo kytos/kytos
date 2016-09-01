@@ -2,17 +2,14 @@
 
 import os
 from random import randint
-from unittest import TestCase
-from unittest import skip
+from unittest import TestCase, skip
 
-from pyof.v0x01.common.header import Header
-from pyof.v0x01.common.header import Type
+from pyof.v0x01.common.header import Header, Type
 from pyof.v0x01.controller2switch.barrier_reply import BarrierReply
-from pyof.v0x01.controller2switch.flow_mod import FlowMod
-from pyof.v0x01.controller2switch.flow_mod import FlowModCommand
+from pyof.v0x01.controller2switch.flow_mod import FlowMod, FlowModCommand
 from pyof.v0x01.controller2switch.set_config import SetConfig
-from pyof.v0x01.symmetric.hello import Hello
 from pyof.v0x01.symmetric.echo_request import EchoRequest
+from pyof.v0x01.symmetric.hello import Hello
 
 from tests.helper import new_client, new_controller, new_handshaked_client
 

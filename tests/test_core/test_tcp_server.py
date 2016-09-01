@@ -7,10 +7,8 @@ from unittest import TestCase
 
 from pyof.v0x01.symmetric.vendor_header import VendorHeader
 
-from kyco.config import KycoConfig
 from kyco.core.buffers import KycoBuffers
-from kyco.core.tcp_server import KycoOpenFlowRequestHandler
-from kyco.core.tcp_server import KycoServer
+from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
 from tests.helper import TestConfig
 
 

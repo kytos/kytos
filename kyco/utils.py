@@ -1,7 +1,6 @@
 """Utilities"""
 import logging
-
-from abc import abstractmethod, ABCMeta
+from abc import ABCMeta, abstractmethod
 from datetime import datetime, timezone
 from threading import Thread
 

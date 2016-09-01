@@ -1,20 +1,15 @@
 """Basic TCP Server that will listen to port 6633."""
 import logging
-
 from socket import error as SocketError
-from socketserver import ThreadingMixIn
-from socketserver import BaseRequestHandler
-from socketserver import TCPServer
+from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 from threading import current_thread
 
 # TODO: Fix version scheme
 from pyof.v0x01.common.header import Header
 
-from kyco.core.events import KycoRawMessageOutError
-from kyco.core.events import KycoMessageOutError
-from kyco.core.events import KycoNewConnection
-from kyco.core.events import KycoConnectionLost
-from kyco.core.events import KycoRawOpenFlowMessage
+from kyco.core.events import (KycoConnectionLost, KycoMessageOutError,
+                              KycoNewConnection, KycoRawMessageOutError,
+                              KycoRawOpenFlowMessage)
 
 __all__ = ['KycoServer', 'KycoOpenFlowRequestHandler']
 

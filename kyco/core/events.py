@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Module with Kyco Events"""
 
-from datetime import datetime, timezone
+from kyco.utils import now
 
 
 # Base Events Classes
@@ -19,7 +19,7 @@ class KycoEvent(object):
     context = 'None'
 
     def __init__(self, dpid=None, content=None, connection_id=None,
-                 timestamp=datetime.now(timezone.utc)):
+                 timestamp=now()):
         self.content = content if content is not None else {}
         self.connection_id = connection_id
         self.dpid = dpid
@@ -45,7 +45,7 @@ class KycoAppEvent(KycoEvent):
     context = 'apps'
 
     def __init__(self, dpid=None, content=None,
-                 timestamp=datetime.now(timezone.utc)):
+                 timestamp=now()):
         super().__init__(dpid, content, None, timestamp)
 
 
@@ -54,7 +54,7 @@ class KycoShutdownEvent(KycoEvent):
     context = 'core'
 
     def __init__(self):
-        super().__init__(None, {}, None, datetime.now(timezone.utc))
+        super().__init__(None, {}, None, now())
 
 
 class KycoRawEvent(KycoCoreEvent):
@@ -73,14 +73,14 @@ class KycoRawEvent(KycoCoreEvent):
 class KycoNewConnection(KycoRawEvent):
     """A new Connection was stabilished"""
     def __init__(self, connection_id, content,
-                 timestamp=datetime.now(timezone.utc)):
+                 timestamp=now()):
         super().__init__(None, content, connection_id, timestamp)
 
 
 class KycoConnectionLost(KycoRawEvent):
     """A connection was lost"""
     def __init__(self, dpid=None, connection_id=None,
-                 timestamp=datetime.now(timezone.utc)):
+                 timestamp=now()):
         if dpid is None and connection_id is None:
             raise Exception('The dpid or the connection must be passed')
         super().__init__(dpid, None, connection_id, timestamp)

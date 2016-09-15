@@ -194,3 +194,7 @@ class KycoMessageInFeaturesReply(KycoMessageIn):
 
 class KycoMessageOutSetConfig(KycoMessageOut):
     pass
+
+
+class KycoMessageInPacketIn(KycoMessageIn):
+    pass

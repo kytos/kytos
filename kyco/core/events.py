@@ -196,5 +196,13 @@ class KycoMessageOutSetConfig(KycoMessageOut):
     pass
 
 
-class KycoMessageInPacketIn(KycoMessageIn):
+class KycoPacketIn(KycoMessageIn):
+    pass
+
+
+class KycoPacketOut(KycoMessageOut):
+    pass
+
+
+class KycoMessageOutFlowMod(KycoMessageOut):
     pass

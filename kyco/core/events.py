@@ -206,3 +206,11 @@ class KycoPacketOut(KycoMessageOut):
 
 class KycoMessageOutFlowMod(KycoMessageOut):
     pass
+
+
+class KycoMessageOutStatsRequest(KycoMessageOut):
+    pass
+
+
+class KycoMessageInStatsReply(KycoMessageIn):
+    pass

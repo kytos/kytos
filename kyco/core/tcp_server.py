@@ -28,7 +28,7 @@ class KycoServer(ThreadingMixIn, TCPServer):
 
     def __init__(self, server_address, RequestHandlerClass,
                  # Change after definitions on #62
-                 #controller_put_raw_event):
+                 # controller_put_raw_event):
                  controller):
         super().__init__(server_address, RequestHandlerClass,
                          bind_and_activate=False)

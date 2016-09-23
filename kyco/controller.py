@@ -69,11 +69,11 @@ class Controller(object):
         #: The key of the dict is a KycoEvent (or a string that represent a
         #: regex to match agains KycoEvents) and the value is a list of methods
         #: that will receive the referenced event
-        self.events_listeners = {'KycoNewConnection': [self.new_connection],
-                                 'KycoConnectionLost': [self.connection_lost],
+        self.events_listeners = {'KycoConnectionLost': [self.connection_lost],
                                  'KycoMessageInHello': [self.hello_in],
                                  'KycoMessageOutHello': [self.send_features_request],
                                  'KycoMessageInFeaturesReply': [self.features_reply_in],
+                                 'KycoNewConnection': [self.new_connection],
                                  'KycoRawError': [self.raw_error]}
         #: dict: Current loaded apps - 'napp_name': napp (instance)
         #:
@@ -102,7 +102,7 @@ class Controller(object):
                                   int(self.options.port)),
                                  KycoOpenFlowRequestHandler,
                                  # TODO: Change after #62 definitions
-                                 #self.buffers.raw.put)
+                                 #       self.buffers.raw.put)
                                  self)
 
         thrds = {'tcp_server': Thread(name='TCP server',
@@ -412,10 +412,10 @@ class Controller(object):
         else:
             try:
                 self.switches[destination].send(message)
-            except (OSError, SocketError, KycoSwitchOfflineException) as exception:
+            except (OSError, SocketError, KycoSwitchOfflineException) as excp:
                 err_msg = 'Error while sending a message to switch %s'
                 log.debug(err_msg, destination)
-                raise exception
+                raise excp
 
     def load_napp(self, napp_name):
         """Load a single app.

@@ -109,12 +109,11 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             log.info("Client %s:%s disconnected", self.ip, self.port)
             error_content = {'destination': (self.ip, self.port),
                              'exception': exception, 'event': None}
-            event = KycoMessageOutError(content=error_content)
+            event = KycoError(content=error_content)
             # Wrapping up the event with a container that can be inserted on
             # the raw buffer
-            wrapper = KycoRawMessageOutError(content={'event': event},
-                                             connection_id=(self.ip, self.port)
-                                             )
+            wrapper = KycoRawError(content={'event': event},
+                                   connection_id=(self.ip, self.port))
             self.server.controller.buffers.raw.put(wrapper)
 
     def finish(self):

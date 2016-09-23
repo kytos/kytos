@@ -152,6 +152,14 @@ class KycoMessageOut(KycoMsgEvent):
     pass
 
 
+class KycoMessageOutBarrierRequest(KycoMessageOut):
+    pass
+
+
+class KycoMessageInBarrierReply(KycoMessageIn):
+    pass
+
+
 class KycoMessageInEchoRequest(KycoMessageIn):
     pass
 

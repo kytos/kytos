@@ -9,7 +9,6 @@ __pycache__/
 
 *.swp
 
-
 # Distribution / packaging
 .Python
 env/
@@ -92,3 +91,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Auxilary files to test the controller
+aux_*.py
+aux_*.sh

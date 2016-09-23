@@ -5,7 +5,7 @@ descriptions.
 """
 import os
 import sys
-from subprocess import call
+from subprocess import call, check_call
 from setuptools import setup, find_packages, Command
 from pip.req import parse_requirements
 
@@ -17,16 +17,21 @@ else:
 
 class CleanCommand(Command):
     """Custom clean command to tidy up the project root."""
+
     user_options = []
 
     def initialize_options(self):
+        """No initializa options."""
         pass
 
     def finalize_options(self):
+        """No finalize options."""
         pass
 
     def run(self):
+        """Clean build, dist, pyc and egg from package and docs."""
         os.system('rm -vrf ./build ./dist ./*.pyc ./*.egg-info')
+        os.system('cd docs; make clean')
 
 
 class Doctest(Command):
@@ -34,7 +39,7 @@ class Doctest(Command):
 
     if sys.argv[-1] == 'test':
         print('Running examples in documentation')
-        call('make doctest -C docs/', shell=True)
+        check_call('make doctest -C docs/', shell=True)
 
 
 class Linter(Command):
@@ -73,7 +78,7 @@ class Linter(Command):
 
 
 class FastLinter(Linter):
-    """Same as Linter, but without the slow pylint"""
+    """Same as Linter, but without the slow pylint."""
 
     description = 'Same as "lint", but much faster (no pylama_pylint).'
 

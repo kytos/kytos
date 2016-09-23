@@ -94,8 +94,8 @@ class KycoRawOpenFlowMessage(KycoRawEvent):
     pass
 
 
-class KycoRawMessageOutError(KycoRawEvent):
-    """This event is just a wrapper to KycoMessageOutErro event"""
+class KycoRawError(KycoRawEvent):
+    """This event is just a wrapper to KycoErro event"""
     pass
 
 
@@ -132,7 +132,7 @@ class KycoServerDown(KycoAppEvent):
     pass
 
 
-class KycoMessageOutError(KycoAppEvent):
+class KycoError(KycoAppEvent):
     pass
 
 
@@ -180,8 +180,4 @@ class KycoMessageInFeaturesReply(KycoMessageIn):
 
 
 class KycoMessageOutSetConfig(KycoMessageOut):
-    pass
-
-
-class KycoMessageOutError(KycoAppEvent):
     pass

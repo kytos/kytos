@@ -22,13 +22,16 @@ from socket import error as SocketError
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
-from kyco.core.events import (KycoConnectionLost, KycoError, KycoNewConnection,
-                              KycoShutdownEvent, KycoSwitchDown)
+from kyco.core.events import (KycoConnectionLost, KycoError, KycoEvent,
+                              KycoNewConnection, KycoShutdownEvent,
+                              KycoSwitchDown)
 from kyco.core.exceptions import KycoSwitchOfflineException
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
 from kyco.utils import KycoCoreNApp, start_logger
 
 log = start_logger()
+
+__all__ = ('Controller',)
 
 
 class Controller(object):
@@ -151,8 +154,46 @@ class Controller(object):
         Args:
             event (KycoEvent): An instance of a KycoEvent subclass
         """
+        def get_classes_names(cls):
+            """Build a list with the class of event and its base classes.
+
+            Args:
+                event (KycoEvent): An instance of a KycoEvent (or any subclass
+                    of it).
+            Returns:
+                A list of classes.
+            """
+            if not issubclass(cls, KycoEvent):
+                # We are just interested in KycoEvent classes and subclasses
+                return []
+
+            classes = set([cls.__name__])
+            for base in cls.__bases__:
+                if base is not object and base is not type:
+                    [classes.add(ev) for ev in get_classes_names(base)]
+
+            return list(classes)
+
+        def match_inheritance(regex, event):
+            """Check if any of the classes match the regex.
+
+            Arguments:
+                regex (python regex): A Regex with to match with class or its
+                    base classes.
+                event (KycoEvent): A KycoEvent to have its class and base
+                    classes matched agains the regex.
+
+            Returns:
+                True if any positive match happen.
+                False otherwise.
+            """
+            for cls_name in get_classes_names(type(event)):
+                if re.match(regex, cls_name):
+                    return True
+            return False
+
         for key in self.events_listeners:
-            if re.match(key, type(event).__name__):
+            if match_inheritance(key, event):
                 for listener in self.events_listeners[key]:
                     listener(event)
 

@@ -7,8 +7,8 @@ from threading import current_thread
 # TODO: Fix version scheme
 from pyof.v0x01.common.header import Header
 
-from kyco.core.events import (KycoConnectionLost, KycoMessageOutError,
-                              KycoNewConnection, KycoRawMessageOutError,
+from kyco.core.events import (KycoConnectionLost, KycoError,
+                              KycoNewConnection, KycoRawError,
                               KycoRawOpenFlowMessage)
 
 __all__ = ['KycoServer', 'KycoOpenFlowRequestHandler']
@@ -28,7 +28,7 @@ class KycoServer(ThreadingMixIn, TCPServer):
 
     def __init__(self, server_address, RequestHandlerClass,
                  # Change after definitions on #62
-                 #controller_put_raw_event):
+                 # controller_put_raw_event):
                  controller):
         super().__init__(server_address, RequestHandlerClass,
                          bind_and_activate=False)
@@ -109,12 +109,11 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             log.info("Client %s:%s disconnected", self.ip, self.port)
             error_content = {'destination': (self.ip, self.port),
                              'exception': exception, 'event': None}
-            event = KycoMessageOutError(content=error_content)
+            event = KycoError(content=error_content)
             # Wrapping up the event with a container that can be inserted on
             # the raw buffer
-            wrapper = KycoRawMessageOutError(content={'event': event},
-                                             connection_id=(self.ip, self.port)
-                                             )
+            wrapper = KycoRawError(content={'event': event},
+                                   connection_id=(self.ip, self.port))
             self.server.controller.buffers.raw.put(wrapper)
 
     def finish(self):

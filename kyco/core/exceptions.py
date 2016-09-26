@@ -11,10 +11,12 @@ class KycoCoreException(Exception):
 
 class KycoSwitchOfflineException(Exception):
     def __init__(self, dpid):
+        super().__init__()
         self.dpid = dpid
 
     def __str__(self):
-        msg = 'The switch {} is offline, you can not send a message to it'
+        msg = 'The switch {} is not reachable. Please check the connection '
+        msg += 'between the switch and the controller.'
         return msg.format(self.dpid)
 
 

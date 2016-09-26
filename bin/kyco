@@ -4,6 +4,7 @@
 from kyco.config import KycoConfig
 from kyco.controller import Controller
 
+
 def main():
     config = KycoConfig()
 #    daemon = KycoDaemon(config.args)

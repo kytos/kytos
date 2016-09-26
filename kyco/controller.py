@@ -17,26 +17,22 @@ Basic usage:
 
 import os
 import re
-
 from importlib.machinery import SourceFileLoader
-from pyof.v0x01.symmetric.hello import Hello
-from pyof.v0x01.controller2switch.features_request import FeaturesRequest
+from socket import error as SocketError
 from threading import Thread
 
+from pyof.v0x01.controller2switch.features_request import FeaturesRequest
+from pyof.v0x01.symmetric.hello import Hello
+
 from kyco.core.buffers import KycoBuffers
-from kyco.core.events import KycoConnectionLost
-from kyco.core.events import KycoMessageOutFeaturesRequest
-from kyco.core.events import KycoMessageOutHello
-from kyco.core.events import KycoNewConnection
-from kyco.core.events import KycoShutdownEvent
-from kyco.core.events import KycoSwitchUp
-from kyco.core.events import KycoSwitchDown
-from kyco.core.events import KycoMessageOutError
+from kyco.core.events import (KycoConnectionLost, KycoMessageOutError,
+                              KycoMessageOutFeaturesRequest,
+                              KycoMessageOutHello, KycoNewConnection,
+                              KycoShutdownEvent, KycoSwitchDown, KycoSwitchUp)
+from kyco.core.exceptions import KycoSwitchOfflineException
 from kyco.core.switch import KycoSwitch
-from kyco.core.tcp_server import KycoOpenFlowRequestHandler
-from kyco.core.tcp_server import KycoServer
-from kyco.utils import start_logger
-from kyco.utils import KycoCoreNApp
+from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
+from kyco.utils import KycoCoreNApp, start_logger
 
 log = start_logger()
 
@@ -77,7 +73,8 @@ class Controller(object):
                                  'KycoConnectionLost': [self.connection_lost],
                                  'KycoMessageInHello': [self.hello_in],
                                  'KycoMessageOutHello': [self.send_features_request],
-                                 'KycoMessageInFeaturesReply': [self.features_reply_in]}
+                                 'KycoMessageInFeaturesReply': [self.features_reply_in],
+                                 'KycoRawMessageOutError': [self.raw_message_out_error]}
         #: dict: Current loaded apps - 'napp_name': napp (instance)
         #:
         #: The key is the napp name (string), while the value is the napp
@@ -104,7 +101,9 @@ class Controller(object):
         self.server = KycoServer((self.options.listen,
                                   int(self.options.port)),
                                  KycoOpenFlowRequestHandler,
-                                 self.buffers.raw.put)
+                                 # TODO: Change after #62 definitions
+                                 #self.buffers.raw.put)
+                                 self)
 
         thrds = {'tcp_server': Thread(name='TCP server',
                                       target=self.server.serve_forever),
@@ -255,17 +254,16 @@ class Controller(object):
 
             try:
                 self.send_to(destination, message.pack())
-            except Exception as exception:
-                error = KycoMessageOutError(content = {'exception': exception,
-                                                       'event': event})
+                # Sending the event to the listeners
+                self.notify_listeners(event)
+            except (OSError, SocketError, KycoSwitchOfflineException) as exception:
+                error = KycoMessageOutError(content={'event': event,
+                                                     'exception': exception})
                 if dpid is not None:
                     error.content['destination'] = dpid
                 else:
                     error.content['destination'] = connection_id
-                self.buffers.app.put(event)
-
-            # Sending the event to the listeners
-            self.notify_listeners(event)
+                self.buffers.app.put(error)
 
     def app_event_handler(self):
         """Handle app events.
@@ -284,6 +282,11 @@ class Controller(object):
             if isinstance(event, KycoShutdownEvent):
                 log.debug("AppEvent handler stopped")
                 break
+
+    def raw_message_out_error(self, event):
+        """Unwrapp KycoMessageOutError message"""
+        event = event.content['event']
+        self.buffers.app.put(event)
 
     def new_connection(self, event):
         """Handle a KycoNewConnection event.
@@ -394,16 +397,18 @@ class Controller(object):
         if isinstance(destination, tuple):
             try:
                 self.connections[destination]['socket'].send(message)
-            except:
+            except (OSError, SocketError) as exception:
                 # TODO: Raise a ConnectionLost event?
-                raise Exception('Error while sending a message to switch %s',
-                                destination)
+                err_msg = 'Error while sending a message to connection %s'
+                log.debug(err_msg, destination)
+                raise exception
         else:
             try:
                 self.switches[destination].send(message)
-            except:
-                raise Exception('Error while sending a message to switch %s',
-                                destination)
+            except (OSError, SocketError, KycoSwitchOfflineException) as exception:
+                err_msg = 'Error while sending a message to switch %s'
+                log.debug(err_msg, destination)
+                raise exception
 
     def load_napp(self, napp_name):
         """Load a single app.

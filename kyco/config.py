@@ -6,11 +6,9 @@ will be overridden by the option on command line.
 """
 
 import os
-
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from configparser import ConfigParser
 
-from argparse import ArgumentParser
-from argparse import RawDescriptionHelpFormatter
 from kyco import __version__
 
 if 'VIRTUAL_ENV' in os.environ:

@@ -8,6 +8,9 @@ import sys
 from subprocess import call, check_call
 from setuptools import setup, find_packages, Command
 from pip.req import parse_requirements
+from setuptools import Command, find_packages, setup
+
+from kyco import __version__
 
 if 'VIRTUAL_ENV' in os.environ:
     BASE_ENV = os.environ['VIRTUAL_ENV']
@@ -94,7 +97,7 @@ class FastLinter(Linter):
 requirements = parse_requirements('requirements.txt', session=False)
 
 setup(name='kytos-kyco',
-      version='1.1.0a0',
+      version=__version__,
       description='Controller for OpenFlow Protocol from the Kytos project',
       url='http://github.com/kytos/kyco',
       author='Kytos Team',

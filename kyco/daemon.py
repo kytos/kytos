@@ -1,8 +1,8 @@
+import logging
 import os
+import signal
 import sys
 import time
-import signal
-import logging
 
 from daemon import DaemonContext
 from daemon.pidfile import PIDLockFile

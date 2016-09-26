@@ -1,18 +1,15 @@
 """Basic TCP Server that will listen to port 6633."""
 import logging
-
 from socket import error as SocketError
-from socketserver import ThreadingMixIn
-from socketserver import BaseRequestHandler
-from socketserver import TCPServer
+from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 from threading import current_thread
 
 # TODO: Fix version scheme
 from pyof.v0x01.common.header import Header
 
-from kyco.core.events import KycoNewConnection
-from kyco.core.events import KycoConnectionLost
-from kyco.core.events import KycoRawOpenFlowMessage
+from kyco.core.events import (KycoConnectionLost, KycoMessageOutError,
+                              KycoNewConnection, KycoRawMessageOutError,
+                              KycoRawOpenFlowMessage)
 
 __all__ = ['KycoServer', 'KycoOpenFlowRequestHandler']
 
@@ -30,12 +27,15 @@ class KycoServer(ThreadingMixIn, TCPServer):
     main_threads = {}
 
     def __init__(self, server_address, RequestHandlerClass,
-                 controller_put_raw_event):
+                 # Change after definitions on #62
+                 #controller_put_raw_event):
+                 controller):
         super().__init__(server_address, RequestHandlerClass,
                          bind_and_activate=False)
         # Registering the register_event 'endpoint' on the server to be
         #   accessed on the RequestHandler
-        self.controller_put_raw_event = controller_put_raw_event
+        self.controller = controller
+        # self.controller_put_raw_event = controller_put_raw_event
 
     def serve_forever(self, poll_interval=0.5):
         try:
@@ -66,7 +66,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         content = {'request': self.request}  # request = socket
         connection_id = (self.ip, self.port)
         event = KycoNewConnection(content=content, connection_id=connection_id)
-        self.server.controller_put_raw_event(event)
+        self.server.controller.buffers.raw.put(event)
         log.info("New connection from %s:%s", self.ip, self.port)
 
     def handle(self):
@@ -103,13 +103,22 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
                 connection_id = (self.ip, self.port)
                 event = KycoRawOpenFlowMessage(content=content,
                                                connection_id=connection_id)
-                self.server.controller_put_raw_event(event)
-        except Exception:
+                self.server.controller.buffers.raw.put(event)
+        except (SocketError, OSError) as exception:
+            # TODO: Client disconnected is the only possible reason?
             log.info("Client %s:%s disconnected", self.ip, self.port)
-            raise Exception
+            error_content = {'destination': (self.ip, self.port),
+                             'exception': exception, 'event': None}
+            event = KycoMessageOutError(content=error_content)
+            # Wrapping up the event with a container that can be inserted on
+            # the raw buffer
+            wrapper = KycoRawMessageOutError(content={'event': event},
+                                             connection_id=(self.ip, self.port)
+                                             )
+            self.server.controller.buffers.raw.put(wrapper)
 
     def finish(self):
         log.info("Connection lost from %s:%s", self.ip, self.port)
         connection_id = (self.ip, self.port)
         event = KycoConnectionLost(connection_id=connection_id)
-        self.server.controller_put_raw_event(event)
+        self.server.controller.buffers.raw.put(event)

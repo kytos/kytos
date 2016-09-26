@@ -1,62 +1,15 @@
 """Utilities"""
 import logging
-
-from abc import abstractmethod, ABCMeta
+from abc import ABCMeta, abstractmethod
 from datetime import datetime, timezone
 from threading import Thread
 
 __all__ = ('KycoCoreNApp', 'KycoNApp', 'listen_to', 'now', 'run_on_thread',
            'start_logger')
 
-log = logging.getLogger('kytos[A]')
+log = logging.getLogger('Kyco')
 
 APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
-
-
-def now(tzone=timezone.utc):
-    """Returns the current datetime (default to UTC)"""
-    return datetime.now(tzone)
-
-
-def start_logger():
-    """Starts the loggers, both the Kyco and the KycoNApp"""
-    general_formatter = logging.Formatter('%(asctime)s - %(levelname)s '
-                                          '[%(name)s] %(message)s')
-    app_formatter = logging.Formatter('%(asctime)s - %(levelname)s '
-                                      '[%(name)s] %(message)s')
-
-    controller_console_handler = logging.StreamHandler()
-    controller_console_handler.setLevel(logging.DEBUG)
-    controller_console_handler.setFormatter(general_formatter)
-
-    app_console_handler = logging.StreamHandler()
-    app_console_handler.setLevel(logging.DEBUG)
-    app_console_handler.setFormatter(app_formatter)
-
-    controller_log = logging.getLogger('Kyco')
-    controller_log.setLevel(logging.DEBUG)
-    controller_log.addHandler(controller_console_handler)
-
-    app_log = logging.getLogger('KycoNApp')
-    app_log.setLevel(logging.DEBUG)
-    app_log.addHandler(app_console_handler)
-
-    return controller_log
-
-
-def run_on_thread(method):
-    """Decorator to run the decorated method inside a new thread
-
-    Returns:
-        Decorated method that will run inside a new thread.
-        When the decorated method is called, it will not return the created
-        thread to the caller.
-    """
-    def threaded_method(*args):
-        """Ensure the handler method runs inside a new thread"""
-        thread = Thread(target=method, args=args)
-        thread.start()
-    return threaded_method
 
 
 def listen_to(event, *events):
@@ -122,6 +75,53 @@ def listen_to(event, *events):
         return threaded_handler
 
     return decorator
+
+
+
+def now(tzone=timezone.utc):
+    """Returns the current datetime (default to UTC)"""
+    return datetime.now(tzone)
+
+
+def run_on_thread(method):
+    """Decorator to run the decorated method inside a new thread
+
+    Returns:
+        Decorated method that will run inside a new thread.
+        When the decorated method is called, it will not return the created
+        thread to the caller.
+    """
+    def threaded_method(*args):
+        """Ensure the handler method runs inside a new thread"""
+        thread = Thread(target=method, args=args)
+        thread.start()
+    return threaded_method
+
+
+def start_logger():
+    """Starts the loggers, both the Kyco and the KycoNApp"""
+    fmt = '%(asctime)s - %(levelname)s [%(name)s] %(message)s'
+    # fmt += '\n           %(module)s - %(funcName)s - %(lineno)d'
+    general_formatter = logging.Formatter(fmt)
+    app_formatter = logging.Formatter(fmt)
+
+    controller_console_handler = logging.StreamHandler()
+    controller_console_handler.setLevel(logging.DEBUG)
+    controller_console_handler.setFormatter(general_formatter)
+
+    app_console_handler = logging.StreamHandler()
+    app_console_handler.setLevel(logging.DEBUG)
+    app_console_handler.setFormatter(app_formatter)
+
+    controller_log = logging.getLogger('Kyco')
+    controller_log.setLevel(logging.DEBUG)
+    controller_log.addHandler(controller_console_handler)
+
+    app_log = logging.getLogger('KycoNApp')
+    app_log.setLevel(logging.DEBUG)
+    app_log.addHandler(app_console_handler)
+
+    return controller_log
 
 
 class KycoNApp(Thread, metaclass=ABCMeta):

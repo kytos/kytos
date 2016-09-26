@@ -1,9 +1,11 @@
 # -*- coding: utf-8 *-*
 """Module with main classes related to Switches"""
 import logging
-from socket import socket as Socket, error as SocketError
+from socket import error as SocketError
+from socket import socket as Socket
 
-from kyco.constants import POOLING_TIME
+from kyco.constants import CONNECTION_TIMEOUT
+from kyco.core.exceptions import KycoSwitchOfflineException
 from kyco.utils import now
 
 __all__ = ('KycoSwitch',)
@@ -85,15 +87,13 @@ class KycoSwitch(object):
     def is_connected(self):
         """Verifies if the switch is connected to a socket.
 
-        Try sending a null byte to the switch to check if the connection is
-        still alive.
-
         Returns:
             True: if the connection is alive
             False: if not.
         """
-        if (now() - self.lastseen).seconds > POOLING_TIME*2:
-            self.disconnect()
+        if self.socket is None:
+            return False
+        elif (now() - self.lastseen).seconds > CONNECTION_TIMEOUT:
             return False
         else:
             return True
@@ -135,13 +135,17 @@ class KycoSwitch(object):
             raise Exception("You can only send bytes data to the switch")
 
         if not self.socket:
-            raise Exception("This switch is not connected")
+            # TODO: Client disconnected is the only possible reason?
+            log.info("Switch %s is disconnected", self.dpid)
+            raise KycoSwitchOfflineException(self.dpid)
 
         try:
             self.socket.send(data)
-        except SocketError:
+        except (OSError, SocketError) as exception:
             # TODO: This is the best way deal with an error while sending data?
+            # TODO: Client disconnected is the only possible reason?
             self.disconnect()
+            raise exception
 
     def update_lastseen(self):
         self.lastseen = now()

@@ -69,12 +69,12 @@ class Controller(object):
         #: The key of the dict is a KycoEvent (or a string that represent a
         #: regex to match agains KycoEvents) and the value is a list of methods
         #: that will receive the referenced event
-        self.events_listeners = {'KycoNewConnection': [self.new_connection],
-                                 'KycoConnectionLost': [self.connection_lost],
+        self.events_listeners = {'KycoConnectionLost': [self.connection_lost],
                                  'KycoMessageInHello': [self.hello_in],
                                  'KycoMessageOutHello': [self.send_features_request],
                                  'KycoMessageInFeaturesReply': [self.features_reply_in],
-                                 'KycoRawMessageOutError': [self.raw_message_out_error]}
+                                 'KycoNewConnection': [self.new_connection],
+                                 'KycoRawError': [self.raw_error]}
         #: dict: Current loaded apps - 'napp_name': napp (instance)
         #:
         #: The key is the napp name (string), while the value is the napp
@@ -102,7 +102,7 @@ class Controller(object):
                                   int(self.options.port)),
                                  KycoOpenFlowRequestHandler,
                                  # TODO: Change after #62 definitions
-                                 #self.buffers.raw.put)
+                                 #       self.buffers.raw.put)
                                  self)
 
         thrds = {'tcp_server': Thread(name='TCP server',
@@ -256,9 +256,9 @@ class Controller(object):
                 self.send_to(destination, message.pack())
                 # Sending the event to the listeners
                 self.notify_listeners(event)
-            except (OSError, SocketError, KycoSwitchOfflineException) as exception:
-                error = KycoMessageOutError(content={'event': event,
-                                                     'exception': exception})
+            except (OSError, SocketError, KycoSwitchOfflineException) as excp:
+                error = KycoError(content={'event': event,
+                                           'exception': excp})
                 if dpid is not None:
                     error.content['destination'] = dpid
                 else:
@@ -283,8 +283,15 @@ class Controller(object):
                 log.debug("AppEvent handler stopped")
                 break
 
-    def raw_message_out_error(self, event):
-        """Unwrapp KycoMessageOutError message"""
+    def raw_error(self, event):
+        """Unwrapp KycoRawError message.
+
+        When any error occurs on the tcp_handler module, it will send a
+        KycoRawError event to the raw_buffer, since it only have access to this
+        buffer. Then, this KycoRawError event will be passed to this method
+        that will get the error and put it on the app_buffer as a KycoError
+        event, so every napp can be notified (if it is listening this event).
+        """
         event = event.content['event']
         self.buffers.app.put(event)
 
@@ -405,10 +412,10 @@ class Controller(object):
         else:
             try:
                 self.switches[destination].send(message)
-            except (OSError, SocketError, KycoSwitchOfflineException) as exception:
+            except (OSError, SocketError, KycoSwitchOfflineException) as excp:
                 err_msg = 'Error while sending a message to switch %s'
                 log.debug(err_msg, destination)
-                raise exception
+                raise excp
 
     def load_napp(self, napp_name):
         """Load a single app.

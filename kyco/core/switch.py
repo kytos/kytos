@@ -87,9 +87,6 @@ class KycoSwitch(object):
     def is_connected(self):
         """Verifies if the switch is connected to a socket.
 
-        Try sending a null byte to the switch to check if the connection is
-        still alive.
-
         Returns:
             True: if the connection is alive
             False: if not.
@@ -97,7 +94,6 @@ class KycoSwitch(object):
         if self.socket is None:
             return False
         elif (now() - self.lastseen).seconds > CONNECTION_TIMEOUT:
-            self.disconnect()
             return False
         else:
             return True

@@ -63,8 +63,7 @@ class Controller(object):
         #: The key of the dict is a KycoEvent (or a string that represent a
         #: regex to match agains KycoEvents) and the value is a list of methods
         #: that will receive the referenced event
-        self.events_listeners = {'KycoConnectionLost': [self.connection_lost],
-                                 'KycoNewConnection': [self.new_connection],
+        self.events_listeners = {'KycoNewConnection': [self.new_connection],
                                  'KycoRawError': [self.raw_error]}
         #: dict: Current loaded apps - 'napp_name': napp (instance)
         #:
@@ -292,7 +291,8 @@ class Controller(object):
         This method will read the event and store the connection (socket) into
         the connections attribute on the controller.
 
-        At last, it will create and send a SwitchUp event to the app buffer.
+        It also clear all references to the connection since it is a new
+        connection on the same ip:port.
 
         Args:
             event (KycoNewConnection): The received event with the needed infos
@@ -303,17 +303,17 @@ class Controller(object):
         socket = event.content['request']
         connection_id = event.connection_id
 
-        self.add_new_connection(connection_id, socket)
+        # Do a CleanUp
+        if connection_id in self.connections:
+            connection = self.connections[connection_id]
+            old_dpid = connection['dpid']
+            old_socket = connection['socket']
+            if old_dpid is not None:
+                self.switch_clear_connection(old_dpid)
+            if old_socket is not None:
+                old_socket.close()
 
-    def add_new_connection(self, connection_id, connection_socket):
-        """Stores a new socket connection on the controller.
-
-        If the connection already exists ((ip,port)), an exception is raised.
-        Args:
-            connection_id (tuple): Tuple with ip and port (ip, port)
-            connection_socket (socket): Socket of that connection
-        """
-        self.connections[connection_id] = {'socket': connection_socket,
+        self.connections[connection_id] = {'socket': socket,
                                            'dpid': None}
 
     def add_new_switch(self, switch):
@@ -326,6 +326,19 @@ class Controller(object):
         self.switches[switch.dpid] = switch
         self.connections[switch.connection_id]['socket'] = switch.socket
         self.connections[switch.connection_id]['dpid'] = switch.dpid
+
+    def switch_clear_connection(self, dpid):
+        """Remove connection data from the switch.
+
+        Args:
+            Switch dpid number.
+        """
+        if dpid in self.switches:
+            switch = self.switches[dpid]
+            if switch.socket is not None:
+                switch.socket.close()
+            switch.socket = None
+            switch.connection_id = None
 
     def connection_lost(self, event):
         """Handle a ConnectionLost event.
@@ -340,20 +353,35 @@ class Controller(object):
         """
         log.info("Handling KycoConnectionLost event for: %s",
                  event.connection_id)
-        connection_id = event.connection_id
-        if connection_id is not None and connection_id in self.connections:
-            dpid = self.connections[event.connection_id]['dpid']
-            if dpid is None:
+        if event.connection_id in self.connections:
+            self.remove_connection(event.connection_id)
+
+        if event.dpid in self.switches:
+            self.disconnect_switch(event.dpid)
+
+    def remove_connection(self, connection_id):
+        """Purge data related to a connection_id.
+
+        This will close sockets, remove the 'connection_id' from the
+        self.connections dict and also 'disconnect' the switch attached
+        to the connection.
+        """
+        if connection_id not in self.connections:
+            msg = "Connection {} not found on Kyco".format(connection_id)
+            raise Exception(msg)
+
+        connection = self.connections.pop(connection_id)
+        if 'dpid' in connection:
+            dpid = connection.pop('dpid')
+            if dpid in self.switches:
+                self.disconnect_switch(dpid)
+        if 'socket' in connection:
+            socket = connection.pop('socket')
+            if socket is not None:
                 try:
-                    self.connection[connection_id]['socket'].close()
+                    socket.close()
                 except:
                     pass
-            else:
-                self.disconnect_switch(dpid)
-
-        dpid = event.dpid
-        if event.dpid is not None:
-            self.disconnect_switch(event.dpid)
 
     def disconnect_switch(self, dpid):
         """End the connection with a switch.
@@ -366,14 +394,12 @@ class Controller(object):
         if dpid not in self.switches:
             raise Exception("Switch {} not found on Kyco".format(dpid))
 
-        switch = self.switches[dpid]
+        switch = self.switches.pop(dpid)
         connection_id = switch.connection_id
         switch.disconnect()
-        try:
-            self.connections[connection_id]['socket'].close()
-        except:
-            pass
-        self.connections.pop(connection_id, None)
+
+        if connection_id in self.connections:
+            self.remove_connection(connection_id)
 
         new_event = KycoSwitchDown(dpid=dpid)
 

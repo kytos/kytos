@@ -1,0 +1,1 @@
+"""Test kyco core functionalities."""

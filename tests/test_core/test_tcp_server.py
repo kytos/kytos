@@ -1,4 +1,4 @@
-"""Test of KycoServer and KycoOpenFlowHandler"""
+"""Test of KycoServer and KycoOpenFlowHandler."""
 import time
 from socket import socket
 from socketserver import BaseRequestHandler
@@ -9,6 +9,7 @@ from pyof.v0x01.symmetric.vendor_header import VendorHeader
 
 from kyco.core.buffers import KycoBuffers
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
+
 from tests.helper import TestConfig
 
 
@@ -19,21 +20,27 @@ class EmptyController(object):
 
 
 class HandlerForTest(BaseRequestHandler):
-    "Basic Handler to test KycoServer"
+    """Basic Handler to test KycoServer."""
+
     def setup(self):
+        """Do the test basic setup."""
         pass
 
     def handle(self):
+        """Send a message to the controller and close the connection."""
         self.request.send(b'message received')
         self.request.close()
 
     def finish(self):
+        """Shutdown the test."""
         pass
 
 
 class TestKycoServer(TestCase):
+    """Teste KycoServer class (TCPServer)."""
 
     def setUp(self):
+        """Do the test basic setup."""
         config = TestConfig()
         self.options = config.options['daemon']
         self.controller = EmptyController()
@@ -49,6 +56,7 @@ class TestKycoServer(TestCase):
         time.sleep(0.1)
 
     def test_one_connection(self):
+        """Teste on connected client."""
         message = VendorHeader(xid=1, vendor=5)
         client = socket()
         client.connect((self.options.listen, self.options.port))
@@ -58,6 +66,7 @@ class TestKycoServer(TestCase):
         client.close()
 
     def tearDown(self):
+        """Shutdown the test."""
         self.server.socket.close()
         self.server.shutdown()
         self.thread.join()
@@ -66,8 +75,10 @@ class TestKycoServer(TestCase):
 
 
 class TestKycoOpenFlowHandler(TestCase):
+    """Test the KycoOpenFlowHandler class."""
 
     def setUp(self):
+        """Do the test basic setup."""
         self.config = TestConfig()
         self.options = self.config.options['daemon']
         self.controller = EmptyController
@@ -83,6 +94,7 @@ class TestKycoOpenFlowHandler(TestCase):
         time.sleep(0.1)
 
     def test_one_connection(self):
+        """Test one connected client."""
         message = VendorHeader(xid=1, vendor=5)
         client = socket()
         client.connect((self.options.listen, self.options.port))
@@ -90,6 +102,7 @@ class TestKycoOpenFlowHandler(TestCase):
         client.close()
 
     def tearDown(self):
+        """Shutdown the test."""
         self.server.socket.close()
         self.server.shutdown()
         self.thread.join()

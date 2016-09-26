@@ -1,4 +1,4 @@
-"""Tests regarding OFCore App, responsible by main OpenFlow basic actions"""
+"""Tests regarding OFCore App, responsible by main OpenFlow basic actions."""
 
 import os
 from random import randint
@@ -15,9 +15,10 @@ from tests.helper import new_client, new_controller, new_handshaked_client
 
 
 class TestOFCoreApp(TestCase):
-    """Tests of Kyco OFCore App functionalities"""
+    """Tests of Kyco OFCore App functionalities."""
 
     def setUp(self):
+        """Do the test basic setup."""
         self.controller = new_controller()
 
     def test_abrupt_client_disconnection_on_hello(self):
@@ -50,7 +51,7 @@ class TestOFCoreApp(TestCase):
         client.close()
 
     def test_handshake(self):
-        """Testing OF switch handshake process"""
+        """Testing OF switch handshake process."""
         client = new_client()
 
         # -- STEP 1: Sending Hello message
@@ -151,7 +152,7 @@ class TestOFCoreApp(TestCase):
         binary_packet = b''
         while len(binary_packet) < header.length - 8:
             binary_packet = client.recv(1)
-        message = FlowMod()
+        message = FlowMod()  # pylint: disable=redefined-variable-type
         message.unpack(binary_packet)
         # Check if the message received is ok by checking re-pack length
         self.assertEqual(len(message.pack()), header.length)
@@ -173,8 +174,7 @@ class TestOFCoreApp(TestCase):
         client.close()
 
     def test_echo_reply(self):
-        """Testing a echo request/reply interaction"""
-
+        """Testing a echo request/reply interaction."""
         client = new_handshaked_client()
 
         # Test of Echo Request
@@ -194,4 +194,5 @@ class TestOFCoreApp(TestCase):
         client.close()
 
     def tearDown(self):
+        """Shutdown the test."""
         self.controller.stop()

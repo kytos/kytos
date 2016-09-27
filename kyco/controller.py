@@ -460,6 +460,12 @@ class Controller(object):
         """
         napp = self.napps.pop(napp_name)
         napp.shutdown()
+        # Removing listeners from that napp
+        for event_type, listeners in napp._listeners.items():
+            for listener in listeners:
+                self.events_listeners[event_type].remove(listener)
+            if len(self.events_listeners[event_type]) == 0:
+                self.events_listeners.pop(event_type)
 
     def unload_napps(self):
         """Unload all loaded NApps that are not core NApps."""

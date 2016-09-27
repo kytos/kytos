@@ -5,3 +5,5 @@ instantiation"""
 # Min time (seconds) to send a new EchoRequest to a switch
 POOLING_TIME = 1
 CONNECTION_TIMEOUT = 15
+#: FLOOD_TIMEOUT in microseconds
+FLOOD_TIMEOUT = 100000

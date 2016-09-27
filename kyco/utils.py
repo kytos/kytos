@@ -134,7 +134,8 @@ class KycoNApp(Thread, metaclass=ABCMeta):
                 self._listeners[event_name].append(method)
 
         # TODO: Load NApp data based on its json file
-        self.name = None
+        # self.name is already used in Thread class. Other attribute should be
+        # used
 
     def run(self):
         """This method will call the setup and the execute methos.

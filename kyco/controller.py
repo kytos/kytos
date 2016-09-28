@@ -106,10 +106,10 @@ class Controller(object):
                                       target=self.server.serve_forever),
                  'raw_event_handler': Thread(name='RawEvent Handler',
                                              target=self.raw_event_handler),
-#                 'msg_in_event_handler': Thread(name='MsgInEvent Handler',
-#                                                target=self.msg_in_event_handler),
-#                 'msg_out_event_handler': Thread(name='MsgOutEvent Handler',
-#                                                 target=self.msg_out_event_handler),
+                 'msg_in_event_handler': Thread(name='MsgInEvent Handler',
+                                                target=self.msg_in_event_handler),
+                 'msg_out_event_handler': Thread(name='MsgOutEvent Handler',
+                                                 target=self.msg_out_event_handler),
                  'app_event_handler': Thread(name='AppEvent Handler',
                                              target=self.app_event_handler)}
 
@@ -183,64 +183,44 @@ class Controller(object):
 
             self.notify_listeners(event)
 
-#    def msg_in_event_handler(self):
-#        """Handle msg_in events.
-#
-#        This handler listen to the msg_in_buffer, get every event added to this
-#        buffer and sends it to the listeners listening to this event.
-#        """
-#        log.info("Message In Event Handler started")
-#        while True:
-#            event = self.buffers.msg_in.get()
-#
-#            if event.name == "kyco/core.shutdown":
-#                log.debug("MsgInEvent handler stopped")
-#                break
-#
-#            log.debug("MsgInEvent handler called")
-#            # Sending the event to the listeners
-#            self.notify_listeners(event)
+    def msg_in_event_handler(self):
+        """Handle msg_in events.
 
-#    def msg_out_event_handler(self):
-#        """Handle msg_out events.
-#
-#        This handler listen to the msg_out_buffer, get every event added to
-#        this buffer and sends it to the listeners listening to this event.
-#        """
-#        log.info("Message Out Event Handler started")
-#        while True:
-#            triggered_event = self.buffers.msg_out.get()
-#
-#            if triggered_event.name == "kyco/core.shutdown":
-#                log.debug("MsgOutEvent handler stopped")
-#                break
-#
-#            log.debug("MsgOutEvent handler called")
-#            dpid = triggered_event.dpid
-#            connection_id = triggered_event.connection_id
-#            message = triggered_event.content['message']
-#
-#            # Checking if we need to send the message to a switch (based on its
-#            # dpid) or to a connection (based on connection_id).
-#            if dpid is not None:
-#                # Sending the OpenFlow message to the switch
-#                destination = dpid
-#            else:
-#                destination = connection_id
-#
-#            try:
-#                self.send_to(destination, message.pack())
-#                # Sending the event to the listeners
-#                self.notify_listeners(triggered_event)
-#            except (OSError, SocketError, KycoSwitchOfflineException) as excp:
-#                content = {'event': triggered_event,
-#                           'execption': excp,
-#                           'destination': triggered_event.destination}
-#
-#                event = KycoEvent(name='kytos/core.error',
-#                                  content = content)
-#
-#                self.buffers.app.put(event)
+        This handler listen to the msg_in_buffer, get every event added to this
+        buffer and sends it to the listeners listening to this event.
+        """
+        log.info("Message In Event Handler started")
+        while True:
+            event = self.buffers.msg_in.get()
+
+            if event.name == "kyco/core.shutdown":
+                log.debug("MsgInEvent handler stopped")
+                break
+
+            log.debug("MsgInEvent handler called")
+            # Sending the event to the listeners
+            self.notify_listeners(event)
+
+    def msg_out_event_handler(self):
+        """Handle msg_out events.
+
+        This handler listen to the msg_out_buffer, get every event added to
+        this buffer and sends it to the listeners listening to this event.
+        """
+        log.info("Message Out Event Handler started")
+        while True:
+            triggered_event = self.buffers.msg_out.get()
+
+            if triggered_event.name == "kyco/core.shutdown":
+                log.debug("MsgOutEvent handler stopped")
+                break
+
+            log.debug("MsgOutEvent handler called")
+            message = triggered_event.content['message']
+
+            destination = triggered_event.destination
+            destination.send(message.pack())
+            self.notify_listeners(triggered_event)
 
     def app_event_handler(self):
         """Handle app events.
@@ -318,7 +298,7 @@ class Controller(object):
 
         log.info("Handling KycoEvent:kytos/core.connection.new ...")
 
-        connection = event.content['connection']
+        connection = event.source
 
         # Remove old connection (aka cleanup) if exists
         if self.get_connection_by_id(connection.id):
@@ -408,34 +388,34 @@ class Controller(object):
 #
 #        self.buffers.app.put(new_event)
 
-    def send_to(self, destination, message):
-        """Send a packed OF message to the client/destination
-
-        If the destination is a dpid (string), then the method will look for
-        a switch by it's dpid.
-        If the destination is a connection_id (tuple), then the method will
-        look for the related connection to send the message.
-
-        Args:
-            destination (): It could be a connection_id (tuple) or a switch
-                dpid (string)
-            message (bytes): packed openflow message (binary)
-        """
-        if isinstance(destination, tuple):
-            try:
-                self.connections[destination]['socket'].send(message)
-            except (OSError, SocketError) as exception:
-                # TODO: Raise a ConnectionLost event?
-                err_msg = 'Error while sending a message to connection %s'
-                log.debug(err_msg, destination)
-                raise exception
-        else:
-            try:
-                self.switches[destination].send(message)
-            except (OSError, SocketError, KycoSwitchOfflineException) as excp:
-                err_msg = 'Error while sending a message to switch %s'
-                log.debug(err_msg, destination)
-                raise excp
+#    def send_to(self, destination, message):
+#        """Send a packed OF message to the client/destination
+#
+#        If the destination is a dpid (string), then the method will look for
+#        a switch by it's dpid.
+#        If the destination is a connection_id (tuple), then the method will
+#        look for the related connection to send the message.
+#
+#        Args:
+#            destination (): It could be a connection_id (tuple) or a switch
+#                dpid (string)
+#            message (bytes): packed openflow message (binary)
+#        """
+#        if isinstance(destination, tuple):
+#            try:
+#                self.connections[destination]['socket'].send(message)
+#            except (OSError, SocketError) as exception:
+#                # TODO: Raise a ConnectionLost event?
+#                err_msg = 'Error while sending a message to connection %s'
+#                log.debug(err_msg, destination)
+#                raise exception
+#        else:
+#            try:
+#                self.switches[destination].send(message)
+#            except (OSError, SocketError, KycoSwitchOfflineException) as excp:
+#                err_msg = 'Error while sending a message to switch %s'
+#                log.debug(err_msg, destination)
+#                raise excp
 
     def load_napp(self, napp_name):
         """Load a single app.

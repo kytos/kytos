@@ -35,6 +35,17 @@ class KycoEvent(object):
     def set_destination(self, destination):
         self.content['destination'] = destination
 
+    @property
+    def source(self):
+        try:
+            return self.content['source']
+        except KeyError:
+            return None
+
+    def set_source(self, source):
+        self.content['source'] = source
+
+
 
 #class KycoCoreEvent(KycoEvent):
 #    """Kyco Core Event base class.

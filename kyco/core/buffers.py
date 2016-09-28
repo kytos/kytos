@@ -28,8 +28,7 @@ class KycoEventBuffer(object):
 #                raise Exception(msg.format(type(event).__name__, self.name))
 
             self._queue.put(event)
-            log.debug('[buffer: %s] Added: %s', self.name,
-                      type(event).__name__)
+            log.debug('[buffer: %s] Added: %s', self.name, event.name)
 
         if event.name == "kyco/core.shutdown":
             log.info('[buffer: %s] Stop mode enabled. Rejecting new events.',
@@ -39,8 +38,7 @@ class KycoEventBuffer(object):
     def get(self):
         event = self._queue.get()
 
-        log.debug('[buffer: %s] Removed: %s', self.name,
-                  type(event).__name__)
+        log.debug('[buffer: %s] Removed: %s', self.name, event.name)
 
         return event
 

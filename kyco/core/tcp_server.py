@@ -67,7 +67,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         self.exception = None
 
         event = KycoEvent(name='kyco/core.connection.new',
-                          content = {'connection': self.connection})
+                          content = {'source': self.connection})
 
         self.server.controller.buffers.raw.put(event)
         log.info("New connection from %s:%s", self.ip, self.port)
@@ -81,15 +81,22 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
             binary_data = b''
             raw_header = b''
             try:
-                while len(raw_header) < header_len:
-                    raw_header += self.request.recv(header_len - len(raw_header))
+                # TODO: Check cases where recv return < 8 bytes
+                raw_header = self.request.recv(8)
             except (SocketError, OSError) as exception:
                 self.exception = exception
+                log.debug("Caiu no break")
+                break
+
+            if len(raw_header) == 0:
                 break
 
             log.debug("New message from %s:%s at thread %s", self.ip,
                       self.port, curr_thread.name)
 
+            log.debug("****AQUI*****")
+            log.debug(raw_header)
+            log.debug(len(raw_header))
             # TODO: Create an exception if this is not a OF message
             header.unpack(raw_header)
             body_len = header.length - header_len
@@ -102,7 +109,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
                 break
 
             # TODO: Do we need other informations from the network packet?
-            content = {'connection': self.connection,
+            content = {'source': self.connection,
                        'header': header,
                        'binary_data': binary_data}
 
@@ -114,8 +121,9 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
     def finish(self):
         # TODO: Client disconnected is the only possible reason?
         log.info("Client %s:%s disconnected", self.ip, self.port)
-        content = {'connection': self.connection}
+        content = {'source': self.connection}
         if self.exception:
+            log.debug(self.exception)
             content['exception'] = self.exception
 
         event = KycoEvent(name='kyco/core.connection.lost',

@@ -100,28 +100,10 @@ def run_on_thread(method):
 
 def start_logger():
     """Starts the loggers, both the Kyco and the KycoNApp"""
-    fmt = '%(asctime)s - %(levelname)s [%(name)s] %(message)s'
+    fmt = '%(asctime)s - %(levelname)s [%(name)s] (%(threadName)s) %(message)s'
     # fmt += '\n           %(module)s - %(funcName)s - %(lineno)d'
-    general_formatter = logging.Formatter(fmt)
-    app_formatter = logging.Formatter(fmt)
-
-    controller_console_handler = logging.StreamHandler()
-    controller_console_handler.setLevel(logging.DEBUG)
-    controller_console_handler.setFormatter(general_formatter)
-
-    app_console_handler = logging.StreamHandler()
-    app_console_handler.setLevel(logging.DEBUG)
-    app_console_handler.setFormatter(app_formatter)
-
-    controller_log = logging.getLogger('Kyco')
-    controller_log.setLevel(logging.DEBUG)
-    controller_log.addHandler(controller_console_handler)
-
-    app_log = logging.getLogger('KycoNApp')
-    app_log.setLevel(logging.DEBUG)
-    app_log.addHandler(app_console_handler)
-
-    return controller_log
+    logging.basicConfig(format=fmt, level=logging.DEBUG)
+    return logging.getLogger('Kyco')
 
 
 class KycoNApp(Thread, metaclass=ABCMeta):
@@ -152,7 +134,8 @@ class KycoNApp(Thread, metaclass=ABCMeta):
                 self._listeners[event_name].append(method)
 
         # TODO: Load NApp data based on its json file
-        self.name = None
+        # self.name is already used in Thread class. Other attribute should be
+        # used
 
     def run(self):
         """This method will call the setup and the execute methos.

@@ -31,7 +31,7 @@ class KycoEventBuffer(object):
             log.debug('[buffer: %s] Added: %s', self.name,
                       type(event).__name__)
 
-        if isinstance(event, KycoShutdownEvent):
+        if event.name == "kyco/core.shutdown":
             log.info('[buffer: %s] Stop mode enabled. Rejecting new events.',
                      self.name)
             self._reject_new_events = True
@@ -70,7 +70,7 @@ class KycoBuffers(object):
     def send_stop_signal(self):
         log.info('Stop signal received by Kyco buffers.')
         log.info('Sending KycoShutdownEvent to all apps.')
-        event = KycoShutdownEvent()
+        event = KycoEvent(name='kyco/core.shutdown')
         self.raw.put(event)
         self.msg_in.put(event)
         self.msg_out.put(event)

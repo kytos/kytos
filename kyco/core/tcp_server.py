@@ -62,79 +62,62 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
     def setup(self):
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
-        content = {'request': self.request}  # request = socket
-        connection_id = (self.ip, self.port)
-        event = KycoNewConnection(content=content, connection_id=connection_id)
+
+        self.connection = Connection(self.ip, self.port, self.request)
+        self.exception = None
+
+        event = KycoEvent(name='kyco/core.connection.new',
+                          content = {'connection': self.connection})
+
         self.server.controller.buffers.raw.put(event)
         log.info("New connection from %s:%s", self.ip, self.port)
 
     def handle(self):
         curr_thread = current_thread()
         header_len = 8
-        connected = True
-        while connected:
+        while True:
             # TODO: How to consider the OpenFlow version here?
             header = Header()
             binary_data = b''
-
-            try:
-                raw_header = self.request.recv(8)
-            except (SocketError, OSError) as exception:
-                self.finish()
-                # TODO: Client disconnected is the only possible reason?
-                log.info("Client %s:%s disconnected", self.ip, self.port)
-                error_content = {'destination': (self.ip, self.port),
-                                 'exception': exception, 'event': None}
-                event = KycoError(content=error_content)
-                # Wrapping up the event with a container that can be inserted
-                # on the raw buffer
-                e_wrapper = KycoRawError(content={'event': event},
-                                         connection_id=(self.ip, self.port))
-                self.server.controller.buffers.raw.put(e_wrapper)
-                break
-
-            if not raw_header:
-                self.finish()
-                # log.info("Client %s:%s disconnected", self.ip, self.port)
-                # connected = False
-                break
-
+            raw_header = b''
             try:
                 while len(raw_header) < header_len:
                     raw_header += self.request.recv(header_len - len(raw_header))
             except (SocketError, OSError) as exception:
-                # TODO: Client disconnected is the only possible reason?
-                log.info("Client %s:%s disconnected", self.ip, self.port)
-                error_content = {'destination': (self.ip, self.port),
-                                 'exception': exception, 'event': None}
-                event = KycoError(content=error_content)
-                # Wrapping up the event with a container that can be inserted
-                # on the raw buffer
-                e_wrapper = KycoRawError(content={'event': event},
-                                         connection_id=(self.ip, self.port))
-                self.server.controller.buffers.raw.put(e_wrapper)
-                self.finish()
+                self.exception = exception
                 break
 
             log.debug("New message from %s:%s at thread %s", self.ip,
                       self.port, curr_thread.name)
 
+            # TODO: Create an exception if this is not a OF message
             header.unpack(raw_header)
-
-            message_size = header.length - header_len
-            if message_size > 0:
-                log.debug('Reading the binary_data')
-                binary_data += self.request.recv(message_size)
+            body_len = header.length - header_len
+            log.debug('Reading the binary_data')
+            try:
+                while len(binary_data) < body_len:
+                    binary_data += self.request.recv(body_len - len(binary_data))
+            except (SocketError, OSError) as exception:
+                self.exception = exception
+                break
 
             # TODO: Do we need other informations from the network packet?
-            content = {'header': header, 'binary_data': binary_data}
-            connection_id = (self.ip, self.port)
-            event = KycoRawOpenFlowMessage(content=content,
-                                           connection_id=connection_id)
+            content = {'connection': self.connection,
+                       'header': header,
+                       'binary_data': binary_data}
+
+            event = KycoEvent(name='kyco/core.messages.openflow.new',
+                              content=content)
+
             self.server.controller.buffers.raw.put(event)
 
     def finish(self):
-        log.info("Connection lost from %s:%s", self.ip, self.port)
-        connection_id = (self.ip, self.port)
-        event = KycoConnectionLost(connection_id=connection_id)
-        self.server.controller.buffers.raw.put(event)
+        # TODO: Client disconnected is the only possible reason?
+        log.info("Client %s:%s disconnected", self.ip, self.port)
+        content = {'connection': self.connection}
+        if self.exception:
+            content['exception'] = self.exception
+
+        event = KycoEvent(name='kyco/core.connection.lost',
+                          content=content)
+        self.server.controller.buffers.app.put(event)

@@ -147,57 +147,20 @@ class Controller(object):
             while thread.is_alive():
                 pass
 
+
     def notify_listeners(self, event):
         """Sends the event to the specified listeners.
 
-        Loops over self.events_listeners matching (by regexp) the type of the
-        event with the keys of events_listeners. If a match occurs, then send
-        the event to each registered listener.
+        Loops over self.events_listeners matching (by regexp) the attribute name
+        of the event with the keys of events_listeners. If a match occurs, then
+        send the event to each registered listener.
 
         Args:
-            event (KycoEvent): An instance of a KycoEvent subclass
+            event (KycoEvent): An instance of a KycoEvent.
         """
-        def get_classes_names(cls):
-            """Build a list with the class of event and its base classes.
-
-            Args:
-                event (KycoEvent): An instance of a KycoEvent (or any subclass
-                    of it).
-            Returns:
-                A list of classes.
-            """
-            if not issubclass(cls, KycoEvent):
-                # We are just interested in KycoEvent classes and subclasses
-                return []
-
-            classes = set([cls.__name__])
-            for base in cls.__bases__:
-                if base is not object and base is not type:
-                    [classes.add(ev) for ev in get_classes_names(base)]
-
-            return list(classes)
-
-        def match_inheritance(regex, event):
-            """Check if any of the classes match the regex.
-
-            Arguments:
-                regex (python regex): A Regex with to match with class or its
-                    base classes.
-                event (KycoEvent): A KycoEvent to have its class and base
-                    classes matched agains the regex.
-
-            Returns:
-                True if any positive match happen.
-                False otherwise.
-            """
-            for cls_name in get_classes_names(type(event)):
-                if re.match(regex, cls_name):
-                    return True
-            return False
-
-        for key in self.events_listeners:
-            if match_inheritance(key, event):
-                for listener in self.events_listeners[key]:
+        for event_regex, listeners in self.events_listeners.items():
+            if re.match(event_regex, event.name):
+                for listener in listeners:
                     listener(event)
 
     def raw_event_handler(self):

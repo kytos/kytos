@@ -2,8 +2,9 @@
 import logging
 from queue import Queue
 
-from kyco.core.events import (KycoAppEvent, KycoMsgEvent, KycoRawEvent,
-                              KycoShutdownEvent)
+from kyco.core.events import KycoEvent
+#from kyco.core.events import (KycoAppEvent, KycoMsgEvent, KycoRawEvent,
+#                              KycoShutdownEvent)
 
 __all__ = ['KycoBuffers']
 
@@ -12,7 +13,7 @@ log = logging.getLogger('Kyco')
 
 class KycoEventBuffer(object):
     """Class that """
-    def __init__(self, name, event_base_class):
+    def __init__(self, name, event_base_class = None):
         self.name = name
         self._queue = Queue()
         self._event_base_class = event_base_class
@@ -20,11 +21,11 @@ class KycoEventBuffer(object):
 
     def put(self, event):
         if not self._reject_new_events:
-            if not isinstance(event, self._event_base_class) and \
-                    not isinstance(event, KycoShutdownEvent):
-                # TODO: Raise a more proper exception
-                msg = "{} event can not be added to {} buffer"
-                raise Exception(msg.format(type(event).__name__, self.name))
+#            if not isinstance(event, self._event_base_class) and \
+#                    not isinstance(event, KycoShutdownEvent):
+#                # TODO: Raise a more proper exception
+#                msg = "{} event can not be added to {} buffer"
+#                raise Exception(msg.format(type(event).__name__, self.name))
 
             self._queue.put(event)
             log.debug('[buffer: %s] Added: %s', self.name,
@@ -61,10 +62,10 @@ class KycoEventBuffer(object):
 
 class KycoBuffers(object):
     def __init__(self):
-        self.raw = KycoEventBuffer('raw_event', KycoRawEvent)
-        self.msg_in = KycoEventBuffer('msg_in_event', KycoMsgEvent)
-        self.msg_out = KycoEventBuffer('msg_out_event', KycoMsgEvent)
-        self.app = KycoEventBuffer('app_event', KycoAppEvent)
+        self.raw = KycoEventBuffer('raw_event')
+        self.msg_in = KycoEventBuffer('msg_in_event')
+        self.msg_out = KycoEventBuffer('msg_out_event')
+        self.app = KycoEventBuffer('app_event')
 
     def send_stop_signal(self):
         log.info('Stop signal received by Kyco buffers.')

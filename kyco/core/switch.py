@@ -79,8 +79,6 @@ class KycoSwitch(object):
     def disconnect(self):
         """Disconnect the switch.
 
-        Closes the current socket and set None on the :attr:`socket` and
-        attr:`connection_id` attributes
         """
         try:
             if self.socket is not None:
@@ -96,10 +94,6 @@ class KycoSwitch(object):
 
     def is_connected(self):
         """Verifies if the switch is connected to a socket.
-
-        Returns:
-            True: if the connection is alive
-            False: if not.
         """
         if self.socket is None:
             return False
@@ -134,28 +128,15 @@ class KycoSwitch(object):
         """Sends data to the switch.
 
         Args:
-            data (bytes): bytes data to be sent to the switch throught its
-                socket connection.
+            buffer (bytes): bytes to be sent to the switch throught its
+                            connection.
         Raises:
             # TODO: raise proper exceptions on the code
             ......: If the switch connection was connection.
             ......: If the passed `data` is not a bytes object
         """
-        if not isinstance(data, bytes):
-            raise Exception("You can only send bytes data to the switch")
-
-        if not self.socket:
-            # TODO: Client disconnected is the only possible reason?
-            log.info("Switch %s is disconnected", self.dpid)
-            raise KycoSwitchOfflineException(self.dpid)
-
-        try:
-            self.socket.send(data)
-        except (OSError, SocketError) as exception:
-            # TODO: This is the best way deal with an error while sending data?
-            # TODO: Client disconnected is the only possible reason?
-            self.disconnect()
-            raise exception
+        if self.connection:
+            self.connection.send(buffer)
 
     def update_lastseen(self):
         self.lastseen = now()

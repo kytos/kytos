@@ -7,9 +7,8 @@ from threading import current_thread
 # TODO: Fix version scheme
 from pyof.v0x01.common.header import Header
 
-from kyco.core.events import (KycoConnectionLost, KycoError,
-                              KycoNewConnection, KycoRawError,
-                              KycoRawOpenFlowMessage)
+from kyco.core.events import KycoEvent
+from kyco.core.switch import Connection
 
 __all__ = ['KycoServer', 'KycoOpenFlowRequestHandler']
 

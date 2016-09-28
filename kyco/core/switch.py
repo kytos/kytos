@@ -65,6 +65,16 @@ class KycoSwitch(object):
         self.sent_xid = None
         self.waiting_for_reply = False
         self.request_timestamp = 0
+        #: Dict associating mac addresses to switch ports.
+        #:      the key of this dict is a mac_address, and the value is a set
+        #:      containing the ports of this switch in which that mac can be
+        #:      found.
+        self.mac2port = {}
+        #: This flood_table will keep track of flood packets to avoid over
+        #:     flooding on the network. Its key is a hash composed by
+        #:     (eth_type, mac_src, mac_dst) and the value is the timestamp of
+        #:      the last flood.
+        self.flood_table = {}
 
     def disconnect(self):
         """Disconnect the switch.

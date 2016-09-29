@@ -83,6 +83,8 @@ class Controller(object):
         #: The key is the switch dpid, while the value is a KycoSwitch object.
         self.switches = {}  # dpid: KycoSwitch()
 
+        self.started_at = None
+
     def start(self):
         """Start the controller.
 
@@ -115,6 +117,7 @@ class Controller(object):
 
         log.info("Loading kyco apps...")
         self.load_napps()
+        self.started_at = now()
 
     def stop(self):
         """Stops the controller.
@@ -143,6 +146,17 @@ class Controller(object):
             while thread.is_alive():
                 pass
 
+        self.started_at = None
+
+    def status(self):
+        if self.started_at:
+            return "Running since %s" % self.started_at
+        else:
+            return "Stopped"
+
+    def uptime(self):
+        # TODO: Return a better output
+        return self.started_at - now() if self.started_at else 0 
 
     def notify_listeners(self, event):
         """Sends the event to the specified listeners.

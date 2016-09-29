@@ -17,20 +17,16 @@ Basic usage:
 
 import os
 import re
+
 from importlib.machinery import SourceFileLoader
 from socket import error as SocketError
 from threading import Thread
 
-from kyco.core.buffers import KycoBuffers
 from kyco.core.events import KycoEvent
 from kyco.core.switch import Connection
+from kyco.core.buffers import KycoBuffers
 
-#(KycoConnectionLost, KycoError, KycoEvent,
-#                              KycoNewConnection, KycoShutdownEvent,
-#                              KycoSwitchDown)
-
-from kyco.core.exceptions import KycoSwitchOfflineException
-from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
+from kyc:.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
 from kyco.utils import KycoCoreNApp, start_logger
 
 log = start_logger()

@@ -132,7 +132,6 @@ class Controller(object):
             - stop the KycoServer;
         """
         log.info("Stopping Kyco")
-        self.server.socket.close()
         self.server.shutdown()
         self.buffers.send_stop_signal()
 

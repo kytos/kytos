@@ -1,15 +1,12 @@
 """Utilities"""
 import logging
-from abc import ABCMeta, abstractmethod
 from datetime import datetime, timezone
 from threading import Thread
 
-__all__ = ('KycoCoreNApp', 'KycoNApp', 'listen_to', 'now', 'run_on_thread',
+__all__ = ('listen_to', 'now', 'run_on_thread',
            'start_logger')
 
-log = logging.getLogger('Kyco')
-
-APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
+# APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
 
 
 def listen_to(event, *events):

@@ -22,12 +22,12 @@ from importlib.machinery import SourceFileLoader
 from socket import error as SocketError
 from threading import Thread
 
-from kyco.core.events import KycoEvent
-from kyco.core.switch import Connection
 from kyco.core.buffers import KycoBuffers
-
-from kyc:.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
-from kyco.utils import KycoCoreNApp, start_logger
+from kyco.core.events import KycoEvent
+from kyco.core.napps import KycoCoreNApp
+from kyco.core.switch import Connection, KycoSwitch
+from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
+from kyco.utils import start_logger, now
 
 log = start_logger()
 

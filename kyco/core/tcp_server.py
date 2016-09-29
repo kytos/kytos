@@ -64,6 +64,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         self.port = self.client_address[1]
 
         self.connection = Connection(self.ip, self.port, self.request)
+        self.request.settimeout(30) # TODO: Send this to a config option
         self.exception = None
 
         event = KycoEvent(name='kyco/core.connection.new',
@@ -78,32 +79,29 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         while True:
             # TODO: How to consider the OpenFlow version here?
             header = Header()
-            binary_data = b''
-            raw_header = b''
+            binary_data, raw_header = b'', b''
             try:
-                # TODO: Check cases where recv return < 8 bytes
-                raw_header = self.request.recv(8)
-            except (SocketError, OSError) as exception:
+                while len(raw_header) < header_len:
+                    remaining = header_len - len(raw_header)
+                    raw_header += self.request.recv(remaining)
+                    if len(raw_header) == 0: break
+            except Exception as exception:
                 self.exception = exception
-                log.debug("Caiu no break")
                 break
-
-            if len(raw_header) == 0:
-                break
+            else:
+                if len(raw_header) == 0: break
 
             log.debug("New message from %s:%s at thread %s", self.ip,
                       self.port, curr_thread.name)
 
-            log.debug("****AQUI*****")
-            log.debug(raw_header)
-            log.debug(len(raw_header))
             # TODO: Create an exception if this is not a OF message
             header.unpack(raw_header)
             body_len = header.length - header_len
             log.debug('Reading the binary_data')
             try:
                 while len(binary_data) < body_len:
-                    binary_data += self.request.recv(body_len - len(binary_data))
+                    remaining = body_len - len(binary_data)
+                    binary_data += self.request.recv(remaining)
             except (SocketError, OSError) as exception:
                 self.exception = exception
                 break
@@ -120,10 +118,12 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
 
     def finish(self):
         # TODO: Client disconnected is the only possible reason?
-        log.info("Client %s:%s disconnected", self.ip, self.port)
+        log.info("Client %s:%s disconnected. Reason: %s",
+                 self.ip, self.port, self.exception)
+        
+        self.request.close()
         content = {'source': self.connection}
         if self.exception:
-            log.debug(self.exception)
             content['exception'] = self.exception
 
         event = KycoEvent(name='kyco/core.connection.lost',

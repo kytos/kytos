@@ -120,7 +120,6 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         # TODO: Client disconnected is the only possible reason?
         log.info("Client %s:%s disconnected. Reason: %s",
                  self.ip, self.port, self.exception)
-        
         self.request.close()
         content = {'source': self.connection}
         if self.exception:

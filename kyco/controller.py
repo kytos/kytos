@@ -267,23 +267,52 @@ class Controller(object):
         except KeyError:
             return None
 
+    def get_switch_or_create(self, dpid, connection):
+
+        self.create_or_update_connection(connection)
+        switch = self.get_switch_by_dpid(dpid)
+        event = None
+
+        if switch is None:
+            switch = KycoSwitch(dpid=dpid)
+            self.add_new_switch(switch)
+
+            event = KycoEvent(name='kyco/core.switches.new',
+                              content={'switch': switch})
+
+        old_connection = switch.connection
+        switch.update_connection(connection)
+
+        if old_connection is not connection:
+            self.remove_connection(old_connection)
+
+        if event:
+            self.buffers.app.put(event)
+
+        return switch
+
+    def create_or_update_connection(self, connection):
+        self.connections[connection.id] = connection
+
     def get_connection_by_id(self, id):
         try:
             return self.connections[id]
         except KeyError:
             return None
 
-    def remove_connection(self, id):
+    def remove_connection(self, connection):
+        if connection is None:
+            return False
+
         try:
-            connection = self.connections.pop(id)
+            connection.close()
+            self.connections.pop(connection.id)
         except KeyError:
             return False
 
-        return True
-
-    def remove_switch(self, dpid):
+    def remove_switch(self, switch):
         try:
-            switch = self.switches.pop(dpid)
+            switch = self.switches.pop(switch.dpid)
         except KeyError:
             return False
 
@@ -313,24 +342,17 @@ class Controller(object):
         if self.get_connection_by_id(connection.id):
             self.remove_connection(connection.id)
 
-        # Disconnect old switch if exists
-        switch = self.get_switch_by_dpid(connection.dpid)
-        if switch:
-            switch.disconnect()
-
         # Update connections with the new connection
-        self.connections[connection.id] = connection
+        self.create_or_update_connection(connection)
 
-#    def add_new_switch(self, switch):
-#        """Adds a new switch on the controller.
-#
-#        Args:
-#            switch (KycoSwitch): A KycoSwitch object
-#        """
-#
-#        self.switches[switch.dpid] = switch
-#        self.connections[switch.connection_id]['socket'] = switch.socket
-#        self.connections[switch.connection_id]['dpid'] = switch.dpid
+    def add_new_switch(self, switch):
+        """Adds a new switch on the controller.
+
+        Args:
+            switch (KycoSwitch): A KycoSwitch object
+        """
+
+        self.switches[switch.dpid] = switch
 
 #    def connection_lost(self, event):
 #        """Handle a ConnectionLost event.

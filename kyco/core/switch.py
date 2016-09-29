@@ -13,33 +13,38 @@ __all__ = ('KycoSwitch',)
 log = logging.getLogger('Kyco')
 
 class Connection(object):
-        def __init__(self, address, port, socket, dpid=None):
+        def __init__(self, address, port, socket, switch=None):
             self.address = address
             self.port = port
             self.socket = socket
-            self.dpid = dpid
+            self.switch = switch
 
         @property
         def id(self):
-            if self.dpid is not None:
-                return self.dpid
-            else:
-                return (self.address, self.port)
+            return (self.address, self.port)
 
         def send(self, buffer):
             try:
                 self.socket.send(buffer)
             except (OSError, SocketError) as exception:
                 self.close()
+                # TODO: Raise or create an error event?
                 raise exception
 
         def close(self):
-            if self.socket:
+            if self.socket is not None:
                 self.socket.close()
-                self.socket = None # TODO: I dont know if this is necessary
+                self.socket = None  # TODO: Is this really necessary?
+
+            if self.switch.connection is self:
+                self.switch.connection = None
 
         def is_connected(self):
             return self.socket is not None
+
+        def update_switch(self, switch):
+            self.switch = switch
+            self.switch.connection = self
 
 
 class KycoSwitch(object):
@@ -103,6 +108,9 @@ class KycoSwitch(object):
         #:      the last flood.
         self.flood_table = {}
 
+        if connection:
+            connection.switch = self
+
     def disconnect(self):
         """Disconnect the switch.
 
@@ -119,27 +127,12 @@ class KycoSwitch(object):
         """
         return self.connection.is_connected() and self.is_active()
 
-#    def save_connection(self, socket, connection_id):
-#        """Save a new connection to the existing switch.
-#
-#        Args:
-#            socket (socket): Socket connection to the switch
-#            connection_id (tuple): Tuple with ip and port from the switch
-#        Raises:
-#            # TODO: raise proper exceptions
-#            ...: The passed attribute is not a socket connection
-#            ...: This switch is already connected to a socket
-#        """
-#        if not isinstance(socket, Socket):
-#            raise Exception("The passed argument is not a python socket")
-#
-#        if self.is_connected():
-#            error_message = "Kyco already have a switch ({}) connected at {} "
-#            raise Exception(error_message.format(self.dpid,
-#                                                 self.connection_id))
-#
-#        self.socket = socket
-#        self.connection_id = connection_id
+    def update_connection(self, connection):
+        self.connection = connection
+        self.connection.switch = self
+
+    def update_features(self, features):
+        self.features = features
 
     def send(self, buffer):
         """Sends data to the switch.

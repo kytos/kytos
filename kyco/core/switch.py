@@ -11,6 +11,15 @@ __all__ = ('Switch',)
 
 log = logging.getLogger('Kyco')
 
+class Interface(object):
+    def __init__(self, name, port_number, switch, address=None, state=None):
+        self.name = name
+        self.port_number = int(port_number)
+        self.switch = switch
+        self.address = address
+        self.state = state
+
+
 class Connection(object):
     def __init__(self, address, port, socket, switch=None):
         self.address = address
@@ -106,6 +115,7 @@ class Switch(object):
         #:     (eth_type, mac_src, mac_dst) and the value is the timestamp of
         #:      the last flood.
         self.flood_table = {}
+        self.interfaces = {}
 
         if connection:
             connection.switch = self
@@ -149,6 +159,10 @@ class Switch(object):
 
     def update_lastseen(self):
         self.lastseen = now()
+
+    def update_interface(self, interface):
+        if interface.port_number not in self.interfaces:
+            self.interfaces[interface.port_number] = interface
 
     def update_mac_table(self, mac, port_number):
         if mac.value in self.mac2port:

@@ -6,7 +6,7 @@ descriptions.
 import os
 import sys
 from subprocess import call, check_call
-from setuptools import setup, find_packages, Command
+
 from pip.req import parse_requirements
 from setuptools import Command, find_packages, setup
 
@@ -69,7 +69,7 @@ class Linter(Command):
 
     def run(self):
         """Run pylama and radon."""
-        files = 'tests setup.py pyof'
+        files = 'tests setup.py kyco'
         print('running pylama with {}. {}'.format(', '.join(self.linters),
                                                   self.extra_msg))
         cmd = 'pylama -l {} {}'.format(','.join(self.linters), files)

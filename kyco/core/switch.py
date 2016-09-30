@@ -4,7 +4,7 @@ import logging
 from socket import error as SocketError
 from socket import socket as Socket
 
-from kyco.constants import CONNECTION_TIMEOUT
+from kyco.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
 from kyco.utils import now
 
 __all__ = ('Switch',)
@@ -170,6 +170,29 @@ class Switch(object):
             self.mac2port[mac.value].add(port_number)
         else:
             self.mac2port[mac.value] = set([port_number])
+
+    def last_flood(self, ethernet_frame):
+        """Returns the timestamp when the ethernet_frame was flooded.
+
+        This method is usefull to check if a frame was flooded before or not.
+        """
+        try:
+            return self.flood_table[ethernet_frame.get_hash()]
+        except KeyError:
+            return None
+
+    def should_flood(self, ethernet_frame):
+        last_flood = self.last_flood(ethernet_frame)
+
+        if last_flood is None:
+            return True
+        elif (now() - last_flood).microseconds > FLOOD_TIMEOUT:
+            return True
+        else:
+            return False
+
+    def update_flood_table(self, ethernet_frame):
+        self.flood_table[ethernet_frame.get_hash()] = now()
 
     def where_is_mac(self, mac):
         try:

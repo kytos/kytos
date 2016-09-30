@@ -12,6 +12,40 @@ __all__ = ('KycoSwitch',)
 
 log = logging.getLogger('Kyco')
 
+class Connection(object):
+        def __init__(self, address, port, socket, switch=None):
+            self.address = address
+            self.port = port
+            self.socket = socket
+            self.switch = switch
+
+        @property
+        def id(self):
+            return (self.address, self.port)
+
+        def send(self, buffer):
+            try:
+                self.socket.send(buffer)
+            except (OSError, SocketError) as exception:
+                self.close()
+                # TODO: Raise or create an error event?
+                raise exception
+
+        def close(self):
+            if self.socket is not None:
+                self.socket.close()
+                self.socket = None  # TODO: Is this really necessary?
+
+            if self.switch.connection is self:
+                self.switch.connection = None
+
+        def is_connected(self):
+            return self.socket is not None
+
+        def update_switch(self, switch):
+            self.switch = switch
+            self.switch.connection = self
+
 
 class KycoSwitch(object):
     """This is the main class related to Switches modeled on Kyco.
@@ -53,11 +87,9 @@ class KycoSwitch(object):
         ofp_version (string): Current talked OpenFlow version
         features (FeaturesReply): FeaturesReply (from python-openflow) instance
     """
-    def __init__(self, dpid, socket, connection_id, ofp_version='0x01',
-                 features=None):
+    def __init__(self, dpid, connection=None, ofp_version='0x01', features=None):
         self.dpid = dpid
-        self.socket = socket
-        self.connection_id = connection_id  # (ip, port)
+        self.connection = connection
         self.ofp_version = ofp_version
         self.features = features
         self.firstseen = now()
@@ -76,86 +108,57 @@ class KycoSwitch(object):
         #:      the last flood.
         self.flood_table = {}
 
+        if connection:
+            connection.switch = self
+
     def disconnect(self):
         """Disconnect the switch.
 
-        Closes the current socket and set None on the :attr:`socket` and
-        attr:`connection_id` attributes
         """
-        try:
-            if self.socket is not None:
-                self.socket.close()
-                msg = 'Socket {} from switch {} closed'
-                msg = msg.format(self.connection_id, self.dpid)
-                log.info(msg)
-        except SocketError:
-            pass
+        self.connection.close()
+        self.connection = None
+        log.info("Switch %s is disconnected", self.dpid)
 
-        self.socket = None
-        self.connection_id = None
+    def is_active(self):
+        return (now() - self.lastseen).seconds <= CONNECTION_TIMEOUT
 
     def is_connected(self):
         """Verifies if the switch is connected to a socket.
-
-        Returns:
-            True: if the connection is alive
-            False: if not.
         """
-        if self.socket is None:
-            return False
-        elif (now() - self.lastseen).seconds > CONNECTION_TIMEOUT:
-            return False
-        else:
-            return True
+        return self.connection.is_connected() and self.is_active()
 
-    def save_connection(self, socket, connection_id):
-        """Save a new connection to the existing switch.
+    def update_connection(self, connection):
+        self.connection = connection
+        self.connection.switch = self
 
-        Args:
-            socket (socket): Socket connection to the switch
-            connection_id (tuple): Tuple with ip and port from the switch
-        Raises:
-            # TODO: raise proper exceptions
-            ...: The passed attribute is not a socket connection
-            ...: This switch is already connected to a socket
-        """
-        if not isinstance(socket, Socket):
-            raise Exception("The passed argument is not a python socket")
+    def update_features(self, features):
+        self.features = features
 
-        if self.is_connected():
-            error_message = "Kyco already have a switch ({}) connected at {} "
-            raise Exception(error_message.format(self.dpid,
-                                                 self.connection_id))
-
-        self.socket = socket
-        self.connection_id = connection_id
-
-    def send(self, data):
+    def send(self, buffer):
         """Sends data to the switch.
 
         Args:
-            data (bytes): bytes data to be sent to the switch throught its
-                socket connection.
+            buffer (bytes): bytes to be sent to the switch throught its
+                            connection.
         Raises:
             # TODO: raise proper exceptions on the code
             ......: If the switch connection was connection.
             ......: If the passed `data` is not a bytes object
         """
-        if not isinstance(data, bytes):
-            raise Exception("You can only send bytes data to the switch")
-
-        if not self.socket:
-            # TODO: Client disconnected is the only possible reason?
-            log.info("Switch %s is disconnected", self.dpid)
-            raise KycoSwitchOfflineException(self.dpid)
-
-        try:
-            self.socket.send(data)
-        except (OSError, SocketError) as exception:
-            # TODO: This is the best way deal with an error while sending data?
-            # TODO: Client disconnected is the only possible reason?
-            self.disconnect()
-            raise exception
+        if self.connection:
+            self.connection.send(buffer)
 
     def update_lastseen(self):
         self.lastseen = now()
+
+    def update_mac_table(self, mac, port_number):
+        if mac.value in self.mac2port:
+            self.mac2port[mac.value].add(port_number)
+        else:
+            self.mac2port[mac.value] = set([port_number])
+
+    def where_is_mac(self, mac):
+        try:
+            return list(self.mac2port[mac.value])
+        except KeyError as exception:
+            return None

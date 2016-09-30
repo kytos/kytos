@@ -2,8 +2,9 @@
 import logging
 from queue import Queue
 
-from kyco.core.events import (KycoAppEvent, KycoMsgEvent, KycoRawEvent,
-                              KycoShutdownEvent)
+from kyco.core.events import KycoEvent
+#from kyco.core.events import (KycoAppEvent, KycoMsgEvent, KycoRawEvent,
+#                              KycoShutdownEvent)
 
 __all__ = ['KycoBuffers']
 
@@ -12,7 +13,7 @@ log = logging.getLogger('Kyco')
 
 class KycoEventBuffer(object):
     """Class that """
-    def __init__(self, name, event_base_class):
+    def __init__(self, name, event_base_class = None):
         self.name = name
         self._queue = Queue()
         self._event_base_class = event_base_class
@@ -20,17 +21,16 @@ class KycoEventBuffer(object):
 
     def put(self, event):
         if not self._reject_new_events:
-            if not isinstance(event, self._event_base_class) and \
-                    not isinstance(event, KycoShutdownEvent):
-                # TODO: Raise a more proper exception
-                msg = "{} event can not be added to {} buffer"
-                raise Exception(msg.format(type(event).__name__, self.name))
+#            if not isinstance(event, self._event_base_class) and \
+#                    not isinstance(event, KycoShutdownEvent):
+#                # TODO: Raise a more proper exception
+#                msg = "{} event can not be added to {} buffer"
+#                raise Exception(msg.format(type(event).__name__, self.name))
 
             self._queue.put(event)
-            log.debug('[buffer: %s] Added: %s', self.name,
-                      type(event).__name__)
+            log.debug('[buffer: %s] Added: %s', self.name, event.name)
 
-        if isinstance(event, KycoShutdownEvent):
+        if event.name == "kyco/core.shutdown":
             log.info('[buffer: %s] Stop mode enabled. Rejecting new events.',
                      self.name)
             self._reject_new_events = True
@@ -38,8 +38,7 @@ class KycoEventBuffer(object):
     def get(self):
         event = self._queue.get()
 
-        log.debug('[buffer: %s] Removed: %s', self.name,
-                  type(event).__name__)
+        log.debug('[buffer: %s] Removed: %s', self.name, event.name)
 
         return event
 
@@ -61,15 +60,15 @@ class KycoEventBuffer(object):
 
 class KycoBuffers(object):
     def __init__(self):
-        self.raw = KycoEventBuffer('raw_event', KycoRawEvent)
-        self.msg_in = KycoEventBuffer('msg_in_event', KycoMsgEvent)
-        self.msg_out = KycoEventBuffer('msg_out_event', KycoMsgEvent)
-        self.app = KycoEventBuffer('app_event', KycoAppEvent)
+        self.raw = KycoEventBuffer('raw_event')
+        self.msg_in = KycoEventBuffer('msg_in_event')
+        self.msg_out = KycoEventBuffer('msg_out_event')
+        self.app = KycoEventBuffer('app_event')
 
     def send_stop_signal(self):
         log.info('Stop signal received by Kyco buffers.')
         log.info('Sending KycoShutdownEvent to all apps.')
-        event = KycoShutdownEvent()
+        event = KycoEvent(name='kyco/core.shutdown')
         self.raw.put(event)
         self.msg_in.put(event)
         self.msg_out.put(event)

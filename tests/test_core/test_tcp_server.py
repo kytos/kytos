@@ -9,13 +9,12 @@ from pyof.v0x01.symmetric.vendor_header import VendorHeader
 
 from kyco.core.buffers import KycoBuffers
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
-
 from tests.helper import TestConfig
 
 
 class EmptyController(object):
-    """Empty container to represent a generic controller that will hold buffers
-    """
+    """Empty container to represent a generic controller."""
+
     pass
 
 

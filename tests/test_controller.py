@@ -4,7 +4,6 @@ import time
 from unittest import TestCase
 
 from pyof.v0x01.symmetric.vendor_header import VendorHeader
-
 from tests.helper import new_client, new_controller
 
 

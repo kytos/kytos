@@ -150,3 +150,15 @@ class KycoSwitch(object):
 
     def update_lastseen(self):
         self.lastseen = now()
+
+    def update_mac_table(self, mac, port_number):
+        if mac.value in self.mac2port:
+            self.mac2port[mac.value].add(port_number)
+        else:
+            self.mac2port[mac.value] = set([port_number])
+
+    def where_is_mac(self, mac):
+        try:
+            return list(self.mac2port[mac.value])
+        except KeyError as exception:
+            return None

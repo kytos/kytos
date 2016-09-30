@@ -12,38 +12,38 @@ __all__ = ('Switch',)
 log = logging.getLogger('Kyco')
 
 class Connection(object):
-        def __init__(self, address, port, socket, switch=None):
-            self.address = address
-            self.port = port
-            self.socket = socket
-            self.switch = switch
+    def __init__(self, address, port, socket, switch=None):
+        self.address = address
+        self.port = port
+        self.socket = socket
+        self.switch = switch
 
-        @property
-        def id(self):
-            return (self.address, self.port)
+    @property
+    def id(self):
+        return (self.address, self.port)
 
-        def send(self, buffer):
-            try:
-                self.socket.send(buffer)
-            except (OSError, SocketError) as exception:
-                self.close()
-                # TODO: Raise or create an error event?
-                raise exception
+    def send(self, buffer):
+        try:
+            self.socket.send(buffer)
+        except (OSError, SocketError) as exception:
+            self.close()
+            # TODO: Raise or create an error event?
+            raise exception
 
-        def close(self):
-            if self.socket is not None:
-                self.socket.close()
-                self.socket = None  # TODO: Is this really necessary?
+    def close(self):
+        if self.socket is not None:
+            self.socket.close()
+            self.socket = None  # TODO: Is this really necessary?
 
-            if self.switch.connection is self:
-                self.switch.connection = None
+        if self.switch.connection is self:
+            self.switch.connection = None
 
-        def is_connected(self):
-            return self.socket is not None
+    def is_connected(self):
+        return self.socket is not None
 
-        def update_switch(self, switch):
-            self.switch = switch
-            self.switch.connection = self
+    def update_switch(self, switch):
+        self.switch = switch
+        self.switch.connection = self
 
 
 class Switch(object):

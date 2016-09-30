@@ -119,7 +119,7 @@ class Controller(object):
         self.load_napps()
         self.started_at = now()
 
-    def stop(self):
+    def stop(self, graceful=True):
         """Stops the controller.
 
         This method should:
@@ -131,10 +131,14 @@ class Controller(object):
             - stop all running threads;
             - stop the KycoServer;
         """
+        # TODO: Review this shutdown process
         log.info("Stopping Kyco")
+
+        if not graceful:
+            self.server.socket.close()
+
         self.server.shutdown()
         self.buffers.send_stop_signal()
-
         self.unload_napps()
 
         for thread in self._threads.values():

@@ -27,4 +27,4 @@ class TestKycoController(TestCase):
 
     def tearDown(self):
         """Shutdown the test."""
-        self.controller.stop()
+        self.controller.stop(graceful=False)

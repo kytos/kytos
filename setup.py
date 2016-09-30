@@ -7,9 +7,10 @@ import os
 import sys
 from subprocess import call, check_call
 
-from kyco import __version__
 from pip.req import parse_requirements
 from setuptools import Command, find_packages, setup
+
+from kyco import __version__
 
 if 'VIRTUAL_ENV' in os.environ:
     BASE_ENV = os.environ['VIRTUAL_ENV']
@@ -68,7 +69,7 @@ class Linter(Command):
 
     def run(self):
         """Run pylama and radon."""
-        files = 'tests setup.py pyof'
+        files = 'tests setup.py kyco'
         print('running pylama with {}. {}'.format(', '.join(self.linters),
                                                   self.extra_msg))
         cmd = 'pylama -l {} {}'.format(','.join(self.linters), files)

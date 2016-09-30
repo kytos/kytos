@@ -141,6 +141,7 @@ class Switch(object):
         self.connection.switch = self
 
     def update_features(self, features):
+        # TODO: We should avoid OF structs here
         self.features = features
 
     def send(self, buffer):

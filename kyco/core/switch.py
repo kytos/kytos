@@ -5,10 +5,9 @@ from socket import error as SocketError
 from socket import socket as Socket
 
 from kyco.constants import CONNECTION_TIMEOUT
-from kyco.core.exceptions import KycoSwitchOfflineException
 from kyco.utils import now
 
-__all__ = ('KycoSwitch',)
+__all__ = ('Switch',)
 
 log = logging.getLogger('Kyco')
 
@@ -47,17 +46,17 @@ class Connection(object):
             self.switch.connection = self
 
 
-class KycoSwitch(object):
+class Switch(object):
     """This is the main class related to Switches modeled on Kyco.
 
-    A new KycoSwitch will be created every time the handshake process is done
+    A new Switch will be created every time the handshake process is done
     (after receiving the first FeaturesReply). Considering this, the
     :attr:`socket`, :attr:`connection_id`, :attr:`of_version` and
     :attr:`features` need to be passed on init. But when the connection to the
     switch is lost, then this attributes can be set to None (actually some of
     them must be).
 
-    The :attr:`dpid` attribute will be the unique identifier of a KycoSwitch.
+    The :attr:`dpid` attribute will be the unique identifier of a Switch.
     It is the :attr:`pyof.*.controller2switch.SwitchFeatures.datapath-id` that
     defined by the OpenFlow Specification, it is a 64 bit field that should be
     thought of as analogous to a Ethernet Switches bridge MAC, its a unique
@@ -70,11 +69,11 @@ class KycoSwitch(object):
 
     :attr:`connection_id` is a tuple, composed by the ip and port of the
     stabilished connection (if any). It will be used to help map the connection
-    to the KycoSwitch and vice-versa.
+    to the Switch and vice-versa.
 
     :attr:`ofp_version` is a string representing the accorded version of
     python-openflow that will be used on the communication between the
-    Controller and the KycoSwitch.
+    Controller and the Switch.
 
     :attr:`features` is an instance of
     :class:`pyof.*.controller2switch.FeaturesReply` representing the current

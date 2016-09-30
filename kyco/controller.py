@@ -25,7 +25,7 @@ from threading import Thread
 from kyco.core.buffers import KycoBuffers
 from kyco.core.events import KycoEvent
 from kyco.core.napps import KycoCoreNApp
-from kyco.core.switch import Connection, KycoSwitch
+from kyco.core.switch import Connection, Switch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
 from kyco.utils import start_logger, now
 
@@ -80,8 +80,8 @@ class Controller(object):
         self.server = None
         #: dict: Current existing switches.
         #:
-        #: The key is the switch dpid, while the value is a KycoSwitch object.
-        self.switches = {}  # dpid: KycoSwitch()
+        #: The key is the switch dpid, while the value is a Switch object.
+        self.switches = {}  # dpid: Switch()
 
         self.started_at = None
 
@@ -278,7 +278,7 @@ class Controller(object):
         event = None
 
         if switch is None:
-            switch = KycoSwitch(dpid=dpid)
+            switch = Switch(dpid=dpid)
             self.add_new_switch(switch)
 
             event = KycoEvent(name='kyco/core.switches.new',
@@ -353,7 +353,7 @@ class Controller(object):
         """Adds a new switch on the controller.
 
         Args:
-            switch (KycoSwitch): A KycoSwitch object
+            switch (Switch): A Switch object
         """
 
         self.switches[switch.dpid] = switch
@@ -419,7 +419,7 @@ class Controller(object):
 #        if connection_id in self.connections:
 #            self.remove_connection(connection_id)
 #
-#        new_event = KycoSwitchDown(dpid=dpid)
+#        new_event = SwitchDown(dpid=dpid)
 #
 #        self.buffers.app.put(new_event)
 

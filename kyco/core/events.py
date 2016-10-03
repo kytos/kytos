@@ -44,3 +44,20 @@ class KycoEvent(object):
 
     def set_source(self, source):
         self.content['source'] = source
+
+    @property
+    def message(self):
+        """Return the message carried by the event if it exists.
+
+        If there is any OpenFlow message on the event, then it will be stored
+        on the 'message' key of the 'content' attribute. So, if there is any
+        message we return it, if not, we return None.
+
+        Returns:
+            A python OpenfFlow message instance if it exists.
+            None otherwise.
+        """
+        try:
+            return self.content['message']
+        except KeyError:
+            return None

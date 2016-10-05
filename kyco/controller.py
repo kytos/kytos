@@ -67,7 +67,6 @@ class Controller(object):
         #: regex to match agains KycoEvents) and the value is a list of methods
         #: that will receive the referenced event
         self.events_listeners = {'kyco/core.connection.new': [self.new_connection]}
-#                                 'KycoRawError': [self.raw_error]}
         #: dict: Current loaded apps - 'napp_name': napp (instance)
         #:
         #: The key is the napp name (string), while the value is the napp
@@ -159,7 +158,7 @@ class Controller(object):
 
     def uptime(self):
         # TODO: Return a better output
-        return self.started_at - now() if self.started_at else 0 
+        return self.started_at - now() if self.started_at else 0
 
     def notify_listeners(self, event):
         """Sends the event to the specified listeners.
@@ -253,18 +252,6 @@ class Controller(object):
                 log.debug("AppEvent handler stopped")
                 break
 
-#    def raw_error(self, event):
-#        """Unwrapp KycoRawError message.
-#
-#        When any error occurs on the tcp_handler module, it will send a
-#        KycoRawError event to the raw_buffer, since it only have access to this
-#        buffer. Then, this KycoRawError event will be passed to this method
-#        that will get the error and put it on the app_buffer as a KycoError
-#        event, so every napp can be notified (if it is listening this event).
-#        """
-#        event = event.content['event']
-#        self.buffers.app.put(event)
-
     def get_switch_by_dpid(self, dpid):
         try:
             return self.switches[dpid]
@@ -319,10 +306,6 @@ class Controller(object):
             switch = self.switches.pop(switch.dpid)
         except KeyError:
             return False
-
-# KycoError          = kytos/core.error
-# KycoNewConnection  = kytos/core.connection.new
-
 
     def new_connection(self, event):
         """Handle a kytos/core.connection.new event.

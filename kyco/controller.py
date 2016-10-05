@@ -409,3 +409,16 @@ class Controller(object):
         for napp_name in list(self.napps):
             if not isinstance(self.napps[napp_name], KycoCoreNApp):
                 self.unload_napp(napp_name)
+
+    def update_switches_link(self, nodeA, nodeB):
+        """Update a link between two switches.
+
+        nodeA and nodeB are tuples composed by switch dpid and port_no.
+        """
+        switchA = self.get_switch_by_dpid(nodeA[0])
+        interfaceA = switchA.get_interface_by_port_no(nodeA[1])
+        switchB = self.get_switch_by_dpid(nodeB[0])
+        interfaceB = switchB.get_interface_by_port_no(nodeB[1])
+
+        interfaceA.endpoint = interfaceB
+        interfaceB.endpoint = interfaceA

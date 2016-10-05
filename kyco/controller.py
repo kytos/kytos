@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Kyco - Kytos Contoller
 
 This module contains the main class of Kyco, which is
@@ -19,13 +18,12 @@ import os
 import re
 
 from importlib.machinery import SourceFileLoader
-from socket import error as SocketError
 from threading import Thread
 
 from kyco.core.buffers import KycoBuffers
 from kyco.core.events import KycoEvent
 from kyco.core.napps import KycoCoreNApp
-from kyco.core.switch import Connection, Switch
+from kyco.core.switch import Switch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
 from kyco.utils import start_logger, now
 
@@ -159,7 +157,7 @@ class Controller(object):
 
     def uptime(self):
         # TODO: Return a better output
-        return self.started_at - now() if self.started_at else 0 
+        return self.started_at - now() if self.started_at else 0
 
     def notify_listeners(self, event):
         """Sends the event to the specified listeners.

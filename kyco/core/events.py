@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Module with Kyco Events"""
 
 from kyco.utils import now
@@ -9,7 +8,7 @@ from kyco.utils import now
 #######################
 
 class KycoEvent(object):
-    """Base Event class
+    """Base Event class.
 
     The event data will be passed on the content attribute, which should be a
     dictionary.
@@ -27,20 +26,14 @@ class KycoEvent(object):
 
     @property
     def destination(self):
-        try:
-            return self.content['destination']
-        except KeyError:
-            return None
+        return self.content.get('destination')
 
     def set_destination(self, destination):
         self.content['destination'] = destination
 
     @property
     def source(self):
-        try:
-            return self.content['source']
-        except KeyError:
-            return None
+        return self.content.get('source')
 
     def set_source(self, source):
         self.content['source'] = source

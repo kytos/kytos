@@ -9,6 +9,7 @@ __all__ = ('Switch',)
 
 log = logging.getLogger('Kyco')
 
+
 class Interface(object):
     def __init__(self, name, port_number, switch, address=None, state=None):
         self.name = name
@@ -16,6 +17,9 @@ class Interface(object):
         self.switch = switch
         self.address = address
         self.state = state
+        #: Someone is connected to this interface if this is not None.
+        #: It could be a Interface or a Host (not yet defined).
+        self.endpoint = None
 
 
 class Connection(object):
@@ -125,6 +129,9 @@ class Switch(object):
         self.connection.close()
         self.connection = None
         log.info("Switch %s is disconnected", self.dpid)
+
+    def get_interface_by_port_no(self, port_no):
+        return self.interfaces.get(port_no)
 
     def is_active(self):
         return (now() - self.lastseen).seconds <= CONNECTION_TIMEOUT

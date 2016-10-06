@@ -132,10 +132,7 @@ class Switch(object):
         log.info("Switch %s is disconnected", self.dpid)
 
     def get_interface_by_port_no(self, port_no):
-        try:
-            return self.interfaces[port_no]
-        except KeyError:
-            return None
+        return self.interfaces.get(port_no)
 
     def is_active(self):
         return (now() - self.lastseen).seconds <= CONNECTION_TIMEOUT

@@ -6,6 +6,7 @@ Sphinx~=1.4.5
 # Linters, also for test
 pylama == 7.0.9 # There is a bug on 7.1.0
 pylama-pylint >= 2.2.1
+isort >= 4.2.5
 
 # Code coverage
 coverage >= 4.1

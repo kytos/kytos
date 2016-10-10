@@ -1,5 +1,7 @@
 """Module with main classes related to Switches"""
 import logging
+import json
+
 from socket import error as SocketError
 
 from kyco.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
@@ -17,10 +19,58 @@ class Interface(object):
         self.switch = switch
         self.address = address
         self.state = state
-        #: Someone is connected to this interface if this is not None.
-        #: It could be a Interface or a Host (not yet defined).
-        self.endpoint = None
+        self.endpoints = []
 
+    def __eq__(self, other):
+        if self.port_number != other.port_number:
+            return False
+
+        if self.name != other.name:
+            return False
+
+        if self.address != other.address:
+            return False
+
+        if self.switch.dpid != self.switch.dpid:
+            return False
+
+        return True
+
+    @property
+    def id(self):
+        return "{}:{}".format(self.switch.dpid, self.port_number)
+
+    def get_endpoint(self, endpoint):
+        for endpoint, timestamp in self.endpoints:
+            if endpoint == endpoint:
+                return endpoint, timestamp
+        return None
+
+    def add_endpoint(self, endpoint):
+        exists = self.get_endpoint(endpoint)
+        if not exists:
+            self.endpoints.append((endpoint, now()))
+
+    def delete_endpoint(self, endpoint):
+        exists = self.get_endpoint(endpoint)
+        if exists:
+            self.endpoints.remove(exists)
+
+    def update_endpoint(self, endpoint):
+        exists = self.get_endpoint(endpoint)
+        if exists:
+            self.delete_endpoint(endpoint)
+        self.add_endpoint(endpoint)
+
+    def as_dict(self):
+        return {'id': self.id,
+                'name': self.name,
+                'port_number': self.port_number,
+                'switch': self.switch.dpid,
+                'class': 'interface'}
+
+    def as_json(self):
+        return json.dumps(self.as_dict())
 
 class Connection(object):
     def __init__(self, address, port, socket, switch=None):
@@ -122,6 +172,10 @@ class Switch(object):
         if connection:
             connection.switch = self
 
+    @property
+    def id(self):
+        return "{}".format(self.dpid)
+
     def disconnect(self):
         """Disconnect the switch.
 
@@ -204,3 +258,12 @@ class Switch(object):
             return list(self.mac2port[mac.value])
         except KeyError as exception:
             return None
+
+    def as_dict(self):
+        return {'id': self.id,
+                'dpid': self.dpid,
+                'ofp_version': self.ofp_version,
+                'class': 'switch'}
+
+    def as_json(self):
+        return json.dumps(self.as_dict())

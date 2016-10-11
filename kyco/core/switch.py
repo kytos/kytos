@@ -72,6 +72,7 @@ class Interface(object):
     def as_json(self):
         return json.dumps(self.as_dict())
 
+
 class Connection(object):
     def __init__(self, address, port, socket, switch=None):
         self.address = address
@@ -147,7 +148,8 @@ class Switch(object):
         ofp_version (string): Current talked OpenFlow version
         features (FeaturesReply): FeaturesReply (from python-openflow) instance
     """
-    def __init__(self, dpid, connection=None, ofp_version='0x01', features=None):
+    def __init__(self, dpid, connection=None, ofp_version='0x01',
+                 features=None):
         self.dpid = dpid
         self.connection = connection
         self.ofp_version = ofp_version

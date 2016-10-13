@@ -1,7 +1,7 @@
 import logging
 
 from abc import ABCMeta, abstractmethod
-from threading import Thread
+from threading import Event, Thread
 
 from kyco.utils import listen_to
 
@@ -11,6 +11,8 @@ __all__ = ('KycoCoreNApp', 'KycoNApp')
 
 class KycoNApp(Thread, metaclass=ABCMeta):
     """Base class for any KycoNApp to be developed."""
+    __event = Event()
+    EXECUTE_INTERVAL = 30
 
     def __init__(self, controller, **kwargs):
         """Go through all of the instance methods and selects those that have
@@ -21,8 +23,8 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         process.
         """
         Thread.__init__(self, daemon=False)
-        self._listeners = {'KycoShutdownEvent': [self._shutdown_handler]}
         self.controller = controller
+        self._listeners = {'kyco/core.shutdown': [self._shutdown_handler]}
 
         handler_methods = [getattr(self, method_name) for method_name in
                            dir(self) if method_name[0] != '_' and
@@ -48,11 +50,17 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         # TODO: If the setup method is blocking, then the execute method will
         #       never be called. Should we execute it inside a new thread?
         self.setup()
-        self.execute()
+        self._execute_loop()
 
-    @listen_to('KycoShutdownEvent')
+    @listen_to('kyco/core.shutdown')
     def _shutdown_handler(self, event):
+        self.__event.set()
         self.shutdown()
+
+    def _execute_loop(self):
+        while(not self.__event.is_set()):
+            self.execute()
+            self.__event.wait(self.EXECUTE_INTERVAL)
 
     @abstractmethod
     def setup(self):
@@ -64,9 +72,10 @@ class KycoNApp(Thread, metaclass=ABCMeta):
 
     @abstractmethod
     def execute(self):
-        """Method to be runned once on app 'start' or in a loop.
+        """Method executed in a loop until the signal 'kyco/core.shutdown'
+        is received.
 
-        The execute method is called by the run method of KycoNApp class.
+        The execute method is called by KycoNApp class.
         Users shouldn't call this method directly."""
         pass
 

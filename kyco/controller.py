@@ -14,10 +14,9 @@ Basic usage:
     controller.start()
 """
 
+import json
 import os
 import re
-import json
-
 from importlib.machinery import SourceFileLoader
 from threading import Thread
 
@@ -26,7 +25,8 @@ from kyco.core.events import KycoEvent
 from kyco.core.napps import KycoCoreNApp
 from kyco.core.switch import Switch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
-from kyco.utils import start_logger, now
+from kyco.utils import now, start_logger
+from pyof.foundation.basic_types import HWAddress
 
 log = start_logger()
 
@@ -57,15 +57,17 @@ class Controller(object):
         #: dict: keep track of the socket connections labeled by ``(ip, port)``
         #:
         #: This dict stores all connections between the controller and the
-        #: swtiches. The key for this dict is a tuple (ip, port). The content is
-        #: another dict with the connection information.
+        #: swtiches. The key for this dict is a tuple (ip, port). The content
+        #: is another dict with the connection information.
         self.connections = {}
         #: dict: mapping of events and event listeners.
         #:
         #: The key of the dict is a KycoEvent (or a string that represent a
         #: regex to match agains KycoEvents) and the value is a list of methods
         #: that will receive the referenced event
-        self.events_listeners = {'kyco/core.connection.new': [self.new_connection]}
+        self.events_listeners = {'kyco/core.connection.new':
+                                 [self.new_connection]}
+
         #: dict: Current loaded apps - 'napp_name': napp (instance)
         #:
         #: The key is the napp name (string), while the value is the napp
@@ -162,9 +164,9 @@ class Controller(object):
     def notify_listeners(self, event):
         """Sends the event to the specified listeners.
 
-        Loops over self.events_listeners matching (by regexp) the attribute name
-        of the event with the keys of events_listeners. If a match occurs, then
-        send the event to each registered listener.
+        Loops over self.events_listeners matching (by regexp) the attribute
+        name of the event with the keys of events_listeners. If a match occurs,
+        then send the event to each registered listener.
 
         Args:
             event (KycoEvent): An instance of a KycoEvent.

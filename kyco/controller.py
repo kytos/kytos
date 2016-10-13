@@ -422,8 +422,12 @@ class Controller(object):
                 nodes[interface.id] = interface.as_dict()
                 links.append(link)
                 for endpoint, ts in interface.endpoints:
-                    link = {'source': interface.id,
-                            'target': endpoint.id}
+                    if type(endpoint) is HWAddress:
+                        link = {'source': interface.id,
+                                'target': endpoint.value}
+                    else:
+                        link = {'source': interface.id,
+                                'target': endpoint.id}
                     links.append(link)
 
         with open('/tmp/topology.json', 'w') as fp:

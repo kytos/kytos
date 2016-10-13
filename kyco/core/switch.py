@@ -46,6 +46,12 @@ class Interface(object):
                 return endpoint, timestamp
         return None
 
+    def is_link_between_switches(self):
+        for endpoint, timestamp in self.endpoints:
+            if type(endpoint) is Interface:
+                return True
+        return False
+
     def add_endpoint(self, endpoint):
         exists = self.get_endpoint(endpoint)
         if not exists:

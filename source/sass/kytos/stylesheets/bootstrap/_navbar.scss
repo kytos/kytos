@@ -1,0 +1,72 @@
+.navbar-kytos {
+  background : #000000;
+  &.transparent {
+    background: transparent;
+  }
+  padding : 10px;
+  border-width: 0!important;
+  opacity: 0.95;
+  @include box-shadow(none);
+
+  &.top-nav-collapse {
+    .navbar-brand {
+      font-size : 2.5em;
+    }
+    background : #444;
+  }
+
+  .container>.navbar-header,
+  .container>.navbar-collapse,
+  .container-fluid>.navbar-header,
+  .container-fluid>.navbar-collapse {
+    margin-left: 15px;
+    margin-right: 15px;
+    @media screen and (max-width: $screen-xs-max) {
+      margin-left: -15px;
+      margin-right: -15px;
+    }
+  }
+
+  @media screen and (max-width: $screen-xs-max) {
+    .navbar-collapse {
+      background : #444;
+    }
+  }
+
+  .navbar-brand {
+    @include kytos-anim-easing(0.3s);
+    padding : 10px 0;
+    font-size : 3.5em;
+    color : $kytos-primary-color-50;
+    &:hover {
+      color : $kytos-primary-color-50;
+    }
+  }
+
+  .navbar-nav>li.active>a:hover,
+  .navbar-nav>li.active>a {
+    background: $kytos-cover-color;
+    color : #fff;
+  }
+
+  .navbar-nav>li>a {
+    color: #fff;
+    font-size: 1.2em;
+    font-weight: 100;
+    letter-spacing: normal;
+    &:active,
+    &:hover {
+      background: $kytos-cover-color;
+      @extend %color-blue-grey-50;
+    }
+    &:hover {
+      background: $kytos-cover-color;
+      @extend %color-blue-grey-50;
+    }
+
+  }
+   .navbar-toggle:hover, .navbar-default .navbar-toggle:focus {
+      background: $kytos-cover-color;
+      color : #fff;
+   }
+}

@@ -1,23 +1,4 @@
 /*
- * Base structure
- */
-/* Move down content because we have a fixed navbar that is 50px tall */
-body {
-    padding-top: 50px;
-}
-/*
- * Global add-ons
- */
-.sub-header {
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-}
-
-.navbar-inverse .navbar-brand-kytos {
-    width: 212px;
-    background: red;
-}
-/*
  * Top navigation
  * Hide default border to remove 1px line.
  */
@@ -29,20 +10,20 @@ body {
  */
 /* Hide for mobile, show later */
 .sidebar {
-    display: none;
-    @media (min-width: 768px) {
-        position: fixed;
-        top: 51px;
-        bottom: 0;
-        left: 0;
-        z-index: 1000;
-        display: block;
-        padding: 20px;
-        overflow-x: hidden;
-        overflow-y: auto;
-        /* Scrollable contents if viewport is shorter than content. */
-        background-color: #24262d;
-        border-right: 1px solid #eee;
+    width: 200px;
+    position: fixed;
+    top: 51px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    /* Scrollable contents if viewport is shorter than content. */
+    background-color: #24262d;
+    @media (max-width: $screen-sm-max) {
+        width: 100px;
     }
 }
 /* Sidebar navigation */
@@ -54,7 +35,7 @@ body {
 }
 
 .nav-sidebar > li > a {
-    color : #fff;
+    color: #fff;
     padding-right: 20px;
     padding-left: 20px;
 }

@@ -1,0 +1,27 @@
+
+.navbar-form {
+    margin-top: 11px;
+    padding: 0;
+}
+
+.navbar-form input.form-control {
+    border: none;
+    box-shadow: none;
+    color: #949ba2;
+}
+
+.navbar-form input.form-control::-webkit-input-placeholder {
+    color: #6f7780;
+}
+
+.navbar-form input.form-control:-moz-placeholder {
+    color: #6f7780;
+}
+
+.navbar-form input.form-control::-moz-placeholder {
+    color: #6f7780;
+}
+
+.navbar-form input.form-control:-ms-input-placeholder {
+    color: #6f7780;
+}

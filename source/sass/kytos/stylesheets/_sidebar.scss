@@ -1,0 +1,68 @@
+.sidebar.nav {
+    @include kytos-anim-easing(300ms);
+    padding : 15px 0 0 0;
+    background: #2a2d35;
+    color : #848c94;
+}
+
+.sidebar.nav li > a,
+.sidebar.nav .nav-category {
+    padding: 8px 15px 8px 25px;
+    margin: 0 0;
+}
+
+.sidebar.nav .nav-info {
+    margin-top: 50px;
+    padding: 20px 25px 25px 25px;
+    font-size: 12px;
+    background-color: #24262d;
+}
+
+.sidebar.nav .nav-info i {
+    font-size: 34px;
+}
+
+.sidebar.nav .nav-second li > a {
+    padding-left: 40px;
+}
+
+.sidebar.nav li.active .nav-second li > a {
+    padding-left: 40px;
+    border-left: none;
+    color: #848c94;
+}
+
+.sidebar.nav li.active .nav-second li.active a {
+    padding-left: 34px;
+    border-left: 6px solid $kytos-cover-color;
+    color: #c0c4c8;
+}
+
+.sidebar.nav li.active .nav-second li a:hover {
+    color: #c0c4c8;
+}
+
+.sidebar.nav li > a {
+    color: #848c94;
+}
+
+.sidebar.nav li.active a {
+    border-left: 6px solid $kytos-cover-color;
+    padding-left: 19px;
+    color: #c0c4c8;
+}
+
+.sidebar.nav li a:hover,
+.sidebar.nav li a:focus {
+    color: #c0c4c8;
+    background: inherit;
+}
+
+.sidebar.nav .nav-category {
+    color: #FFFFFF;
+    margin-top: 10px;
+}
+
+.sidebar.nav .sub-nav-icon {
+    float: right;
+}

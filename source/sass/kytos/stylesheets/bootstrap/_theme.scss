@@ -4,10 +4,11 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 
-//
-// Load core variables and mixins
-// --------------------------------------------------
-
+ body {
+     padding-top: 60px;
+     background : #2f323b;
+     @include kytos-anim-easing(300ms);
+ }
 
 //
 // Buttons

@@ -2,8 +2,10 @@
 @import 'font-awesome/font-awesome.scss';
 @import "kytos/stylesheets/bootstrap/variables";
 @import 'kytos/stylesheets/material-colors/sass-material-colors';
-@import "kytos/stylesheets/bootstrap/theme";
-
 @import "kytos/stylesheets/mixins";
+@import "kytos/stylesheets/bootstrap/theme";
 @import "kytos/stylesheets/bootstrap/navbar";
+@import "kytos/stylesheets/bootstrap/navbar_form";
 @import "kytos/stylesheets/dashboard";
+@import "kytos/stylesheets/sidebar";
+@import "kytos/stylesheets/content";

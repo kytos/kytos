@@ -20,7 +20,7 @@ module.exports = function(grunt) {
         sass: {
             dist: {
                 files: {
-                    'build/static/css/style.css': 'source/sass/main.scss'
+                  'build/static/css/style.css': 'source/sass/main.scss'
                 }
             }
         },
@@ -46,20 +46,25 @@ module.exports = function(grunt) {
                     expand: true,
                     cwd: 'source/images/',
                     src: '**',
-                    dest: 'build/images/',
+                    dest: 'build/static/images/',
                 }, {
                     expand: true,
                     cwd: 'source/fonts/',
                     src: '**',
                     dest: 'build/static/fonts/',
+                }, {
+                    expand: true,
+                    cwd: 'source/js/',
+                    src: '**',
+                    dest: 'build/static/js/',
                 }]
 
             }
         },
         watch: {
             sass: {
-                files: ['**/*.scss', '**/*.html'],
-                tasks: ['sass', 'cssmin']
+                files: ['source/sass/**/*.scss', 'source/template/**/*.html'],
+                tasks: ['sass', 'cssmin', 'copy']
             },
             all: {
                 files: '**/*.html',
@@ -76,6 +81,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.registerTask('server', ['copy', 'express', 'open', 'watch']);
+    grunt.registerTask('server', ['copy', 'express', 'open', 'dev', 'watch']);
     grunt.registerTask('dev', ['sass', 'cssmin', 'copy']);
+    grunt.registerTask('dev-css', ['sass', 'cssmin']);
 }

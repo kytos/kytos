@@ -6,7 +6,7 @@
     margin-left: 200px;
     padding: 0;
     width: calc(100% - 200px);
-    position: absolute;
+    position: fixed;
     bottom: 0;
     right: 0;
     height: 30vh;
@@ -17,11 +17,25 @@
     }
 
     &.closed {
-      display : none;
+        display: none;
+    }
+
+    &.maximized {
+        height: calc(100vh - 60px);
     }
 
     &.minimized {
         height: 30px;
+
+        .terminal-actions {
+            a.terminal-min {
+                display: none;
+            }
+
+            a.terminal-med {
+                display: inline-block;
+            }
+        }
 
         .terminal-body,
         .terminal-footer {
@@ -53,6 +67,10 @@
         a {
             display: inline-block;
             color: #e7e7e7;
+
+            &.terminal-med {
+                display: none;
+            }
         }
     }
 

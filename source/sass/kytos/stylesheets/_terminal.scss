@@ -16,6 +16,19 @@
         width: calc(100% - 102px);
     }
 
+    &.closed {
+      display : none;
+    }
+
+    &.minimized {
+        height: 30px;
+
+        .terminal-body,
+        .terminal-footer {
+            display: none;
+        }
+    }
+
     .terminal-header {
         color: #e7e7e7;
         background: $kytos-cover-color;

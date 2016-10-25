@@ -158,6 +158,26 @@
                 <section class="content">
                     Main
                 </section>
+                <section id="terminal" class="terminal">
+                  <div class="terminal-header">
+                    <div class="terminal-title">
+                      <i class="fa fa-terminal"></i> Terminal
+                    </div>
+                    <div class="terminal-actions">
+                      <a href="#" class="terminal-max"><i class="fa fa-times-circle"></i></a>
+                      <a href="#" class="terminal-min"><i class="fa fa-minus-square-o"></i></a>
+                      <a href="#" class="terminal-close"><i class="fa fa-times"></i></a>
+                    </div>
+                  </div>
+                    <div class="terminal-body">
+                      Aqui fica o conteúdo do terminal
+                    </div>
+                    <div class="terminal-footer">
+                      <form action="#" class="terminal-form">
+                        <input name="command" class="input" rows="2" cols="40" />
+                      </form>
+                    </div>
+                </section>
             </div>
         </div>
 
@@ -165,5 +185,7 @@
             window.jQuery || document.write('<script src="static/js/jquery.min.js"><\/script>')
         </script>
         <script src="static/js/bootstrap.min.js"></script>
+        <script src="static/js/kytos-helper.js"></script>
+        <script src="static/js/kytos-terminal.js"></script>
     </body>
 </html>

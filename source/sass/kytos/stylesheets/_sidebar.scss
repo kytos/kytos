@@ -1,3 +1,21 @@
+.sidebar {
+  width: 200px;
+  position: fixed;
+  top: 51px;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: block;
+  padding: 20px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* Scrollable contents if viewport is shorter than content. */
+  background-color: #24262d;
+  @media (max-width: $screen-sm-max) {
+      width: 100px;
+  }
+}
+
 .sidebar.nav {
     @include kytos-anim-easing(300ms);
     padding : 15px 0 0 0;
@@ -16,6 +34,8 @@
     padding: 20px 25px 25px 25px;
     font-size: 12px;
     background-color: #24262d;
+    position: absolute;
+    bottom: 0;
 }
 
 .sidebar.nav .nav-info i {

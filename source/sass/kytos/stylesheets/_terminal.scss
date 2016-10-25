@@ -1,0 +1,85 @@
+.terminal {
+    @include kytos-anim-easing(300ms);
+    font-size: 11px;
+    border: 1px solid #555;
+    margin-top: 0;
+    margin-left: 200px;
+    padding: 0;
+    width: calc(100% - 200px);
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 30vh;
+    color: #adadad;
+    @media (max-width: $screen-sm-max) {
+        margin-left: 100px;
+        width: calc(100% - 102px);
+    }
+
+    .terminal-header {
+        color: #e7e7e7;
+        background: $kytos-cover-color;
+        font-size: 11px;
+        font-weight: 300;
+        letter-spacing: 0.1em;
+        padding: 5px;
+        overflow: hidden;
+
+        i {
+            font-size: 11px;
+        }
+    }
+
+    .terminal-title {
+        float: left;
+    }
+
+    .terminal-actions {
+        float: right;
+
+        a {
+            display: inline-block;
+            color: #e7e7e7;
+        }
+    }
+
+    .terminal-body {
+        font-family: monospace;
+        padding: 5px;
+        background: #24262d;
+        height: 100%;
+    }
+
+    .terminal-footer {
+        background: #111;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 27px;
+        overflow: hidden;
+        padding: 0;
+
+        .terminal-form {
+            display: table;
+            width: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+
+            input {
+                margin: 0;
+                width: 100%;
+                padding: 5px;
+                color: #d9e6ef;
+                font-size: 11px;
+                background: #24262d;
+                border: 1px solid #696969;
+
+                &:focus {
+                    background: #f7f7f7;
+                    color: #444;
+                }
+            }
+        }
+    }
+}

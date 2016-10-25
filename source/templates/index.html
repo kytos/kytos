@@ -164,9 +164,9 @@
                       <i class="fa fa-terminal"></i> Terminal
                     </div>
                     <div class="terminal-actions">
-                      <a href="#" class="terminal-max"><i class="fa fa-times-circle"></i></a>
-                      <a href="#" class="terminal-min"><i class="fa fa-minus-square-o"></i></a>
-                      <a href="#" class="terminal-close"><i class="fa fa-times"></i></a>
+                      <a href="#" data-action="max" class="terminal-max"><i class="fa fa-times-circle"></i></a>
+                      <a href="#" data-action="min" class="terminal-min"><i class="fa fa-minus-square-o"></i></a>
+                      <a href="#" data-action="close" class="terminal-close"><i class="fa fa-times"></i></a>
                     </div>
                   </div>
                     <div class="terminal-body">
@@ -181,10 +181,8 @@
             </div>
         </div>
 
-        <script>
-            window.jQuery || document.write('<script src="static/js/jquery.min.js"><\/script>')
-        </script>
-        <script src="static/js/bootstrap.min.js"></script>
+        <script src="static/js/vendors/jquery.min.js"></script>
+        <script src="static/js/vendors/bootstrap.min.js"></script>
         <script src="static/js/kytos-helper.js"></script>
         <script src="static/js/kytos-terminal.js"></script>
     </body>

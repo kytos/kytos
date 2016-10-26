@@ -12,7 +12,6 @@ __all__ = ('KycoCoreNApp', 'KycoNApp')
 class KycoNApp(Thread, metaclass=ABCMeta):
     """Base class for any KycoNApp to be developed."""
     __event = Event()
-    EXECUTE_INTERVAL = 30
 
     def __init__(self, controller, **kwargs):
         """Go through all of the instance methods and selects those that have
@@ -25,6 +24,9 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         Thread.__init__(self, daemon=False)
         self.controller = controller
         self._listeners = {'kyco/core.shutdown': [self._shutdown_handler]}
+        #: int: Seconds to sleep before next call to :meth:`execute`. If
+        #: negative, run :meth:`execute` only once.
+        self.__interval = -1
 
         handler_methods = [getattr(self, method_name) for method_name in
                            dir(self) if method_name[0] != '_' and
@@ -42,6 +44,19 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         # self.name is already used in Thread class. Other attribute should be
         # used
 
+    def execute_as_loop(self, interval):
+        """Run :meth:`execute` within a loop. Call this method during setup.
+
+        By calling this method, the application does not need to worry about
+        loop details such as sleeping and stopping the loop when
+        :meth:`shutdown` is called. Just call this method during :meth:`setup`
+        and implement :meth:`execute` as a single execution.
+
+        Args:
+            interval (int): Seconds between each call to :meth:`execute`.
+        """
+        self.__interval = interval
+
     def run(self):
         """This method will call the setup and the execute methos.
 
@@ -50,17 +65,15 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         # TODO: If the setup method is blocking, then the execute method will
         #       never be called. Should we execute it inside a new thread?
         self.setup()
-        self._execute_loop()
+        self.execute()
+        while self.__interval > 0 and not self.__event.is_set():
+            self.__event.wait(self.__interval)
+            self.execute()
 
     @listen_to('kyco/core.shutdown')
     def _shutdown_handler(self, event):
         self.__event.set()
         self.shutdown()
-
-    def _execute_loop(self):
-        while(not self.__event.is_set()):
-            self.execute()
-            self.__event.wait(self.EXECUTE_INTERVAL)
 
     @abstractmethod
     def setup(self):

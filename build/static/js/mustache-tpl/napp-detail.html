@@ -1,0 +1,208 @@
+<div class="container">
+  <div id="alert-area" class="row">
+  </div>
+</div>
+
+<div class="container-fluid napp-header">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-9 col-md-9 col-sm-8 col-xs-12">
+            <h1>{{user}}/{{name}}</h1>
+            <p>{{description}}</p>
+            <span class="rating" data-value="3.5" data-stars="5" data-change="true"></span> (50 reviews)
+          </div>
+          <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 napp-buttons">
+            <a href="{{git}}" target="new" class="btn btn-kytos-primary"><i class="fa fa-download"></i> Download ({{version}})</a>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" href="#details">About this Napp</a></li>
+              <li><a data-toggle="tab" href="#reviews">Reviews</a></li>
+              <li><a data-toggle="tab" href="#comments">Comments</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+  </div>
+    <div class="container">
+    <div class="row">
+      <div class="col-lg-9">
+        <div class="tab-content">
+          <div id="details" class="tab-pane fade in active">
+
+
+                <article class="markdown-body entry-content" itemprop="text">
+
+
+                <p><em>Kyco</em> is the main component of Kytos Project. Kytos Controller (Kyco)
+                uses <em>python-openflow</em> library to parse low level OpenFlow messages.</p>
+                <p>This code is part of <em>Kytos</em> project and was developed to be used with
+                <em>Kytos</em> controller.</p>
+                <p>For more information about, please visit our <a href="http://kytos.io/">Kytos web
+                site</a>.</p>
+                <a name="user-content-installing"></a>
+                <h2><a id="user-content-installing" class="anchor" href="#installing" aria-hidden="true"></a>Installing</h2>
+                <p>You can install this package from source or via pip. If you have cloned
+                this repository and want to install it via <code>setuptools</code>, please run,
+                from the cloned directory:</p>
+                <div class="highlight highlight-source-shell"><pre>sudo python3 setup.py install</pre></div>
+                <p>Or, to install via pip, please execute:</p>
+                <div class="highlight highlight-source-shell"><pre>sudo pip3 install kyco</pre></div>
+                <a name="user-content-usage"></a>
+                <h2><a id="user-content-usage" class="anchor" href="#usage" aria-hidden="true"></a>Usage</h2>
+                <a name="user-content-main-highlights"></a>
+                <h2><a id="user-content-main-highlights" class="anchor" href="#main-highlights" aria-hidden="true"></a>Main Highlights</h2>
+                <a name="user-content-speed-focused"></a>
+                <h3><a id="user-content-speed-focused" class="anchor" href="#speed-focused" aria-hidden="true"></a>Speed focused</h3>
+                <p>We keep the word <em>performance</em> in mind since the beginning of the
+                development. Also, as computer scientists, we will always try to get the
+                best performance by using the most suitable algorithms.</p>
+                <p>Some of our developers participated in several demonstrations involving
+                tests with high-speed networks (~1 terabit/s), some even involving data
+                transfers from/to CERN.</p>
+                <a name="user-content-always-updated"></a>
+                <h3><a id="user-content-always-updated" class="anchor" href="#always-updated" aria-hidden="true"></a>Always updated</h3>
+                <p><code>Kyco</code> will be able to handle switches that use different OpenFlow versions
+                at the same time, negociating the OpenFlow version with each one individually.</p>
+                <a name="user-content-easy-to-learn"></a>
+                <h3><a id="user-content-easy-to-learn" class="anchor" href="#easy-to-learn" aria-hidden="true"></a>Easy to learn</h3>
+                <p>Python is an easy language to learn and we aim at writing code in a
+                "pythonic way". We also provide a well documented API. Thus, building new
+                NetworkApps (NApps) to <code>Kyco</code> is a easy and simple process.</p>
+                <a name="user-content-born-to-be-free"></a>
+                <h3><a id="user-content-born-to-be-free" class="anchor" href="#born-to-be-free" aria-hidden="true"></a>Born to be free</h3>
+                <p>OpenFlow was born with a simple idea: make your network more vendor
+                agnostic and we like that!</p>
+                <p>We are advocates and supporters of free software and we believe that the
+                more eyes observe the code, the better it will be. This project can
+                receive support from many vendors, but will never follow a particular
+                vendor direction.</p>
+                <p><em>kyco</em> will always be free software.</p>
+                <a name="user-content-authors"></a>
+                <h2><a id="user-content-authors" class="anchor" href="#authors" aria-hidden="true"></a>Authors</h2>
+                <p>This is a collaborative project between SPRACE (From São Paulo State
+                University, Unesp) and Caltech (California Institute of Technology). For a
+                complete list of authors, please open AUTHORS.rst &lt;docs/toc/AUTHORS.rst file.</p>
+                <a name="user-content-contributing"></a>
+                <h2><a id="user-content-contributing" class="anchor" href="#contributing" aria-hidden="true"></a>Contributing</h2>
+                <p>If you want to contribute to this project, please read
+                <a href="/kytos/kyco/blob/develop/docs/toc/CONTRIBUTE.rst">CONTRIBUTE.rst</a> and
+                <a href="/kytos/kyco/blob/develop/docs/toc/HACKING.md">HACKING.md</a> files.</p>
+                <a name="user-content-license"></a>
+                <h2><a id="user-content-license" class="anchor" href="#license" aria-hidden="true"></a>License</h2>
+                <p>This software is under <em>MIT-License</em>. For more information please read
+                <code>LICENSE</code> file.</p>
+
+                </article>
+
+            </div>
+
+        <div id="reviews" class="tab-pane fade in users_comments">
+          <div class="col-lg-12">
+            <div class="pull-right"><a href="#add-rating" class="btn btn-kytos-default">Add review</a></div>
+            <h2>Reviews</h2>
+
+            <div class="panel panel-default  panel-review">
+              <div class="panel-heading">
+                <div class="pull-right">
+                    <a href="#" class="btn btn-default"><i class="fa fa-thumbs-up icon"></i>10</a>
+                </div>
+
+                  <div class="pull-left avatar">
+                    <img src="/static/images/avatar.jpg" alt="José Luiz Coe"/>
+                  </div>
+                  <div class="pull-left meta">
+                    <h5>
+                        <a href="#"><b>José Luiz Coe</b></a> - 5 days ago
+                    </h5>
+                    <span class="rating" data-value="3.5" data-stars="5" data-change="true"></span>
+                  </div>
+              </div>
+              <div class="panel-body">
+                  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis sapiente reiciendis illo aut aperiam incidunt sequi impedit minus at. Accusantium itaque illo distinctio numquam vel. Atque, ea expedita quia aliquam.</p>
+                  <a href="#"><i class="fa fa-ban"></i> Mark as spam or abuse</a>
+              </div>
+            </div>
+
+
+
+          </div>
+
+          <form id="add-rating" class="col-lg-12 rating-form">
+            <h3>Rate this napp:</h3>
+
+            <span class="rating" data-value="3.5" data-stars="5" data-change="true"></span>
+            <div class="form-group">
+              <div class="alert-area"></div>
+              <textarea class="form-control" placeholder="Add a comment" type="text" rows="6"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-kytos-primary">add review</button>
+          </form>
+        </div>
+
+        <div id="comments" class="tab-pane fade in users_comments">
+          <div class="col-lg-12">
+            <div class="pull-right"><a href="#add-comment" class="btn btn-kytos-default">Add Comment</a></div>
+            <h2>Comments</h2>
+
+            <div class="panel panel-default  panel-review">
+              <div class="panel-heading">
+                <div class="pull-right">
+                    <a href="#" class="btn btn-default"><i class="fa fa-thumbs-up icon"></i>10</a>
+                </div>
+
+                  <div class="pull-left avatar">
+                    <img src="/static/images/avatar.jpg" alt="José Luiz Coe"/>
+                  </div>
+                  <div class="pull-left meta">
+                    <h5>
+                        <a href="#"><b>José Luiz Coe</b></a> - 5 days ago
+                    </h5>
+                  </div>
+              </div>
+              <div class="panel-body">
+                  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis sapiente reiciendis illo aut aperiam incidunt sequi impedit minus at. Accusantium itaque illo distinctio numquam vel. Atque, ea expedita quia aliquam.</p>
+                  <a href="#"><i class="fa fa-ban"></i> Mark as spam or abuse</a>
+              </div>
+            </div>
+
+
+
+          </div>
+
+          <form id="add-comment" class="col-lg-12 rating-form">
+            <h3>Comment:</h3>
+            <div class="form-group">
+              <div class="alert-area"></div>
+              <textarea class="form-control" placeholder="Add a comment" type="text" rows="6"></textarea>
+            </div>
+            <button type="submit" class="btn btn-kytos-primary">add comment</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+    <div class="col-lg-3 sidebar">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Details</h3>
+        </div>
+        <div class="panel-body text-right">
+            <h4>Tags:</h4>
+            <p class="tags">
+              {{#tags}}
+              <a href="/napps/list" class="tag">{{.}}</a>
+              {{/tags}}
+            </p>
+            <h4>Repository:</h4>
+            <p><i class="fa fa-git"></i> <a href="{{git}}">{{git}}</a></p>
+            <h4>License:</h4>
+            <p><i class="fa fa-gavel"></i> {{license}}</p>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>

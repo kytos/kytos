@@ -1,0 +1,136 @@
+// Variables
+// --------------------------------------------------
+
+
+//== Colors - Flat UI
+$turquoise:                 #1abc9c;
+$green-sea:                 #16a085;
+
+$emerald:                   #2ecc71;
+$nephritis:                 #27ae60;
+
+$peter-river:               #3498db;
+$belize-hole:               #2980b9;
+
+$amethyst:                  #9b59b6;
+$wisteria:                  #8e44ad;
+
+$wet-asphalt:               #34495e;
+$midnight-blue:             #2c3e50;
+
+$sun-flower:                #f1c40f;
+$orange:                    #f39c12;
+
+$carrot:                    #e67e22;
+$pumpkin:                   #d35400;
+
+$alizarin:                  #e74c3c;
+$pomegranate:               #c0392b;
+
+$clouds:                    #ecf0f1;
+$silver:                    #bdc3c7;
+
+$concrete:                  #95a5a6;
+$asbestos:                  #7f8c8d;
+
+
+/* Kytos Website Colors */
+$footer-bg-color : $midnight-blue;
+$kytos-cover-color : #554077;
+$kytos-covert-invert-color : #ccc;
+
+$kytos-primary-color-name : 'kytos';
+$kytos-primary-color: material-color($kytos-primary-color-name, '800');
+$kytos-primary-color-switch: material-color($kytos-primary-color-name, '50');
+$kytos-primary-color-invert: #fff !default;
+
+$kytos-primary-color-50: material-color($kytos-primary-color-name, '50') !default; // #eee
+$kytos-primary-color-100: material-color($kytos-primary-color-name, '100') !default; // #eee
+$kytos-primary-color-200: material-color($kytos-primary-color-name, '200') !default; // #eee
+$kytos-primary-color-300: material-color($kytos-primary-color-name, '300') !default; // #eee
+$kytos-primary-color-400: material-color($kytos-primary-color-name, '400') !default; // #eee
+$kytos-primary-color-500: material-color($kytos-primary-color-name, '500') !default; // #eee
+$kytos-primary-color-600: material-color($kytos-primary-color-name, '600') !default; // #eee
+$kytos-primary-color-700: material-color($kytos-primary-color-name, '700') !default; // #eee
+$kytos-primary-color-800: material-color($kytos-primary-color-name, '800') !default; // #eee
+$kytos-primary-color-900: material-color($kytos-primary-color-name, '900') !default; // #eee
+
+
+$kytos-secondary-color-name : 'deep-purple';
+$kytos-secondary-color-50: material-color($kytos-secondary-color-name, '50') !default; // #eee
+$kytos-secondary-color-100: material-color($kytos-secondary-color-name, '100') !default; // #eee
+$kytos-secondary-color-200: material-color($kytos-secondary-color-name, '200') !default; // #eee
+$kytos-secondary-color-300: material-color($kytos-secondary-color-name, '300') !default; // #eee
+$kytos-secondary-color-400: material-color($kytos-secondary-color-name, '400') !default; // #eee
+$kytos-secondary-color-500: material-color($kytos-secondary-color-name, '500') !default; // #eee
+$kytos-secondary-color-600: material-color($kytos-secondary-color-name, '600') !default; // #eee
+$kytos-secondary-color-700: material-color($kytos-secondary-color-name, '700') !default; // #eee
+$kytos-secondary-color-800: material-color($kytos-secondary-color-name, '800') !default; // #eee
+$kytos-secondary-color-900: material-color($kytos-secondary-color-name, '900') !default; // #eee
+$kytos-secondary-color: $kytos-secondary-color-500;
+
+
+$kytos-accent-color-name : 'kytos-dark';
+$kytos-accent-color-50: material-color($kytos-accent-color-name, '50') !default; // #eee
+$kytos-accent-color-100: material-color($kytos-accent-color-name, '100') !default; // #eee
+$kytos-accent-color-200: material-color($kytos-accent-color-name, '200') !default; // #eee
+$kytos-accent-color-300: material-color($kytos-accent-color-name, '300') !default; // #eee
+$kytos-accent-color-400: material-color($kytos-accent-color-name, '400') !default; // #eee
+$kytos-accent-color-500: material-color($kytos-accent-color-name, '500') !default; // #eee
+$kytos-accent-color-600: material-color($kytos-accent-color-name, '600') !default; // #eee
+$kytos-accent-color-700: material-color($kytos-accent-color-name, '700') !default; // #eee
+$kytos-accent-color-800: material-color($kytos-accent-color-name, '800') !default; // #eee
+$kytos-accent-color-900: material-color($kytos-accent-color-name, '900') !default; // #eee
+$kytos-accent-color: $kytos-accent-color-500;
+
+//== Scaffolding
+//
+//## Settings for some of the most global styles.
+
+$body-bg:                   #fff;
+$text-color:                $kytos-primary-color;
+
+//** Global textual link color.
+$link-color:                $green-sea;
+$link-hover-color:          $turquoise;
+//** Link hover decoration.
+$link-hover-decoration:     none;
+
+//== Typography
+//
+//## Font, line-height, and color for body text, headings, and more.
+
+$font-family-sans-serif:  "Open Sans", "Helvetica Neue", arial, sans-serif;
+$font-family-serif:       Georgia, "Times New Roman", Times, serif;
+//** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`.
+$font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace;
+$font-family-base:        $font-family-sans-serif;
+
+
+//== Typography
+//
+//## Font, line-height, and color for body text, headings, and more.
+//** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`.
+$font-size-base:          14px;
+$font-size-large:         ceil(($font-size-base * 1.25)); // ~18px
+$font-size-small:         ceil(($font-size-base * 0.85)); // ~12px
+
+$font-size-h1:            floor(($font-size-base * 3.2)); // ~36px
+$font-size-h2:            floor(($font-size-base * 2.4)); // ~30px
+$font-size-h3:            ceil(($font-size-base * 1.6)); // ~24px
+$font-size-h4:            ceil(($font-size-base * 1.2)); // ~18px
+$font-size-h5:            $font-size-base;
+$font-size-h6:            ceil(($font-size-base * 0.85)); // ~12px
+
+//** Unit-less `line-height` for use in components like buttons.
+$line-height-base:        1.428571429; // 20/14
+//** Computed "line-height" (`font-size` * `line-height`) for use with `margin`, `padding`, etc.
+$line-height-computed:    floor(($font-size-base * $line-height-base)); // ~20px
+
+//** By default, this inherits from the `<body>`.
+$headings-font-family:    inherit;
+$headings-font-weight:    300;
+$headings-line-height:    1.1;
+$headings-color:          inherit;
+
+$border-radius-base: 0;

@@ -1,0 +1,34 @@
+<ul class="napps">
+  {{#napps}}
+  <li class="app">
+    <div class="col-lg-12">
+      <div class="avatar">
+        <a href="/napps/nap/" title="napps-server">
+          <img src="/static/images/avatar.jpg" alt="José Luiz Coe"/>
+        </a>
+      </div>
+      <div class="top">
+        <div class="col-lg-11 col-md-10 col-sm-10 col-xs-12">
+          <h4><a href="/{{user}}/{{name}}/"><strong class="repository_name">{{user}}/{{name}}</strong></a>
+          </h4>
+          <span class="rating" data-value="5" data-stars="5" data-change="true"></span> (1880 reviews)
+          <p class="tags">
+            {{#tags}}
+            <a href="{{.}}" class="tag">{{.}}</a>
+            {{/tags}}
+          </p>
+        </div>
+        <div class="col-lg-1 col-md-2 col-sm-2 col-xs-12">
+          <ul class="napps_detail">
+            <li class="text-right">300 <i class="pull-right fa fa-comments fa-fw"></i></li>
+            <li class="text-right">10 <i class="pull-right fa fa-code-fork fa-fw"></i></li>
+          </ul>
+        </div>
+      </div>
+      <div class="naps_description">
+        <p>{{description}}</p>
+      </div>
+    </div>
+  </li>
+{{/napps}}
+</ul>

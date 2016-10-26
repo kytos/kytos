@@ -1,0 +1,35 @@
+
+@mixin kytos-primary-bg (){
+  @include gradient-horizontal-three-colors($kytos-primary-color-400, $kytos-primary-color-500, 50%, $kytos-primary-color-400);
+}
+
+@mixin kytos-secondary-bg (){
+  @include gradient-horizontal-three-colors($kytos-secondary-color-800, $kytos-secondary-color-500, 50%, $kytos-secondary-color-400);
+}
+
+@mixin kytos-default-bg (){
+  background : #fff;
+}
+
+@mixin kytos-anim-easing($time){
+  -webkit-transition: all $time ease-in-out;
+  -moz-transition: all $time ease-in-out;
+  -o-transition: all $time ease-in-out;
+  transition: all $time ease-in-out;
+}
+
+@mixin kytos-bw-image(){
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
+  &:hover {
+    -webkit-filter: grayscale(0%);
+    filter: grayscale(0%);
+    opacity: 0.9;  /* Opacity for Modern Browsers */
+    filter: alpha(opacity=90);  /* Opacity for IE8 and lower */
+    zoom: 1;  /* Fix for IE7 */
+
+  }
+  opacity: 0.4;  /* Opacity for Modern Browsers */
+  filter: alpha(opacity=40);  /* Opacity for IE8 and lower */
+  zoom: 1;  /* Fix for IE7 */
+}

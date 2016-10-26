@@ -146,7 +146,7 @@ class Flow(object):
         flow.tp_dst = flow_stats.match.tp_dst
         flow.actions = []
         for ofp_action in flow_stats.actions:
-            if ofp_action.type == ActionType.OFPAT_OUTPUT:
+            if ofp_action.action_type == ActionType.OFPAT_OUTPUT:
                 flow.actions.append(OutputAction.from_of_action(ofp_action))
         return flow
 

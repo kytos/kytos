@@ -176,6 +176,7 @@ class Switch(object):
         #:      the last flood.
         self.flood_table = {}
         self.interfaces = {}
+        self.flows = []
 
         if connection:
             connection.switch = self

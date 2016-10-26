@@ -11,12 +11,6 @@ module.exports = function(grunt) {
                 }
             }
         },
-        open: {
-            dev: {
-                path: 'http://127.0.0.1:8080/',
-                app: 'Google Chrome'
-            }
-        },
         sass: {
             dist: {
                 files: {
@@ -76,12 +70,11 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-express');
-    grunt.loadNpmTasks('grunt-open');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.registerTask('server', ['copy', 'express', 'open', 'dev', 'watch']);
+    grunt.registerTask('server', ['copy', 'express', 'dev', 'watch']);
     grunt.registerTask('dev', ['sass', 'cssmin', 'copy']);
     grunt.registerTask('dev-css', ['sass', 'cssmin']);
 }

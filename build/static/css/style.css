@@ -9581,8 +9581,15 @@ body {
   color: #FFFFFF;
   background-color: #554077; }
 
+.navbar-brand {
+  padding: 0;
+  text-align: center !important;
+  display: table;
+  vertical-align: middle;
+  float: left; }
+
 .navbar-brand img {
-  margin: 5px 0; }
+  margin: 4px auto; }
 
 .navbar-default {
   border-bottom: none;
@@ -9736,18 +9743,18 @@ body {
   -moz-transition: all 300ms ease-in-out;
   -o-transition: all 300ms ease-in-out;
   transition: all 300ms ease-in-out;
-  padding: 15px 0 0 0;
+  padding: 15px 0 0;
   background: #2a2d35;
   color: #848c94; }
 
-.sidebar.nav li > a,
-.sidebar.nav .nav-category {
+.sidebar.nav .nav-category,
+.sidebar.nav li > a {
   padding: 8px 15px 8px 25px;
-  margin: 0 0; }
+  margin: 0; }
 
 .sidebar.nav .nav-info {
   margin-top: 50px;
-  padding: 20px 25px 25px 25px;
+  padding: 20px 25px 25px;
   font-size: 12px;
   background-color: #24262d;
   position: absolute;
@@ -9763,6 +9770,9 @@ body {
   padding-left: 40px;
   border-left: none;
   color: #848c94; }
+  @media (max-width: 991px) {
+    .sidebar.nav li.active .nav-second li > a {
+      padding-left: 0; } }
 
 .sidebar.nav li.active .nav-second li.active a {
   padding-left: 34px;
@@ -9780,8 +9790,8 @@ body {
   padding-left: 19px;
   color: #c0c4c8; }
 
-.sidebar.nav li a:hover,
-.sidebar.nav li a:focus {
+.sidebar.nav li a:focus,
+.sidebar.nav li a:hover {
   color: #c0c4c8;
   background: inherit; }
 
@@ -9792,6 +9802,31 @@ body {
 .sidebar.nav .sub-nav-icon {
   float: right; }
 
+@media (max-width: 991px) {
+  .nav.sidebar li a {
+    width: 100%;
+    display: block;
+    text-align: center;
+    padding: 30px 0;
+    border-bottom: 1px solid #31343c;
+    border-top: 1px solid #33363e; }
+
+  .nav.sidebar li.active a {
+    width: 100%;
+    display: block;
+    text-align: center;
+    padding: 34px 0;
+    color: #fff;
+    border-bottom: 0; }
+
+  .sidebar.nav li > a {
+    font-size: 0.8em;
+    font-weight: 400;
+    letter-spacing: 0.05em; }
+
+  .sidebar.nav li > a i {
+    display: block;
+    margin-bottom: 0.08em; } }
 .content {
   -webkit-transition: all 300ms ease-in-out;
   -moz-transition: all 300ms ease-in-out;
@@ -9800,7 +9835,7 @@ body {
   margin-top: 0;
   margin-left: 200px;
   position: relative;
-  padding: 30px;
+  padding: 0;
   color: #fff; }
   @media (max-width: 991px) {
     .content {
@@ -9889,5 +9924,11 @@ body {
         .terminal .terminal-footer .terminal-form input:focus {
           background: #f7f7f7;
           color: #444; }
+
+iframe {
+  width: 100%;
+  height: 93vh;
+  border: 0;
+  overflow: 0; }
 
 /*# sourceMappingURL=style.css.map */

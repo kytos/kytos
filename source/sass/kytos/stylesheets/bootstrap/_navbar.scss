@@ -27,8 +27,15 @@
     background-color: $kytos-cover-color;
 }
 
+.navbar-brand {
+padding: 0;
+text-align: center!important;
+display: table;
+vertical-align: middle;
+float: left
+}
 .navbar-brand img {
-  margin : 5px 0;
+  margin : 4px auto;
 }
 
 .navbar-default {

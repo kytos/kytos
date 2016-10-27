@@ -3,8 +3,6 @@ import logging
 from queue import Queue
 
 from kyco.core.events import KycoEvent
-#from kyco.core.events import (KycoAppEvent, KycoMsgEvent, KycoRawEvent,
-#                              KycoShutdownEvent)
 
 __all__ = ['KycoBuffers']
 
@@ -21,12 +19,6 @@ class KycoEventBuffer(object):
 
     def put(self, event):
         if not self._reject_new_events:
-#            if not isinstance(event, self._event_base_class) and \
-#                    not isinstance(event, KycoShutdownEvent):
-#                # TODO: Raise a more proper exception
-#                msg = "{} event can not be added to {} buffer"
-#                raise Exception(msg.format(type(event).__name__, self.name))
-
             self._queue.put(event)
             log.debug('[buffer: %s] Added: %s', self.name, event.name)
 

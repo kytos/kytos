@@ -179,7 +179,6 @@ class Controller(object):
 
         self.server.shutdown()
         self.buffers.send_stop_signal()
-        self.unload_napps()
 
         for thread in self._threads.values():
             log.info("Stopping thread: %s", thread.name)
@@ -192,6 +191,9 @@ class Controller(object):
         self.stop_api_server()
 
         self.started_at = None
+        self.unload_napps()
+        self.buffers = KycoBuffers()
+        self.server.server_close()
 
     def stop_api_server(self):
         """Stops the API server"""
@@ -242,12 +244,12 @@ class Controller(object):
         log.info("Raw Event Handler started")
         while True:
             event = self.buffers.raw.get()
+            self.notify_listeners(event)
+            log.debug("Raw Event handler called")
 
             if event.name == "kyco/core.shutdown":
                 log.debug("RawEvent handler stopped")
                 break
-
-            self.notify_listeners(event)
 
     def msg_in_event_handler(self):
         """Handle msg_in events.
@@ -258,14 +260,13 @@ class Controller(object):
         log.info("Message In Event Handler started")
         while True:
             event = self.buffers.msg_in.get()
+            self.notify_listeners(event)
+            log.debug("MsgInEvent handler called")
 
             if event.name == "kyco/core.shutdown":
                 log.debug("MsgInEvent handler stopped")
                 break
 
-            log.debug("MsgInEvent handler called")
-            # Sending the event to the listeners
-            self.notify_listeners(event)
 
     def msg_out_event_handler(self):
         """Handle msg_out events.
@@ -281,12 +282,11 @@ class Controller(object):
                 log.debug("MsgOutEvent handler stopped")
                 break
 
-            log.debug("MsgOutEvent handler called")
             message = triggered_event.content['message']
-
             destination = triggered_event.destination
             destination.send(message.pack())
             self.notify_listeners(triggered_event)
+            log.debug("MsgOutEvent handler called")
 
     def app_event_handler(self):
         """Handle app events.
@@ -297,10 +297,8 @@ class Controller(object):
         log.info("App Event Handler started")
         while True:
             event = self.buffers.app.get()
-
-            log.debug("AppEvent handler called")
-            # Sending the event to the listeners
             self.notify_listeners(event)
+            log.debug("AppEvent handler called")
 
             if event.name == "kyco/core.shutdown":
                 log.debug("AppEvent handler stopped")

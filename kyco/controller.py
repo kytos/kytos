@@ -19,6 +19,9 @@ import os
 import re
 from importlib.machinery import SourceFileLoader
 from threading import Thread
+from multiprocessing import Process
+
+from flask import Flask, request
 
 from kyco.core.buffers import KycoBuffers
 from kyco.core.events import KycoEvent
@@ -31,6 +34,8 @@ from pyof.foundation.basic_types import HWAddress
 log = start_logger()
 
 __all__ = ('Controller',)
+
+app = Flask(__name__)
 
 
 class Controller(object):
@@ -85,6 +90,36 @@ class Controller(object):
 
         self.started_at = None
 
+        self.rest_endpoints = {}
+
+        self.api_server_running = False
+
+    def start_api_server(self):
+        """Starts Flask server inside its own thread"""
+        for url in self.rest_endpoints:
+            function = self.rest_endpoints[url][0]
+            methods = self.rest_endpoints[url][1]
+            new_endpoint_url = "/kytos{}".format(url)
+            app.add_url_rule(new_endpoint_url, function.__name__, function,
+                             methods=methods)
+        self.api_server = Process(target=app.run)
+        self.api_server.start()
+        self.api_server_running = True
+        # self.flask_thread = Thread(target=app.run).start()
+        # app.run(use_reloader=False)
+
+    def register_rest_endpoint(self, url, function, methods):
+        """Register a new rest endpoint"""
+        if url not in self.rest_endpoints:
+            self.rest_endpoints[url] = (function, methods)
+            self.restart_api_server()
+
+    def restart_api_server(self):
+        """Responsible for restarting the Flask server"""
+        if self.api_server_running:
+            self.stop_api_server()
+        self.start_api_server()
+
     def start(self):
         """Start the controller.
 
@@ -93,23 +128,27 @@ class Controller(object):
         Load the installed apps.
         """
         log.info("Starting Kyco - Kytos Controller")
-        self.server = KycoServer((self.options.listen,
-                                  int(self.options.port)),
+        self.server = KycoServer((self.options.listen, int(self.options.port)),
                                  KycoOpenFlowRequestHandler,
                                  # TODO: Change after #62 definitions
                                  #       self.buffers.raw.put)
                                  self)
 
+        raw_event_handler = self.raw_event_handler
+        msg_in_event_handler = self.msg_in_event_handler
+        msg_out_event_handler = self.msg_out_event_handler
+        app_event_handler = self.app_event_handler
+
         thrds = {'tcp_server': Thread(name='TCP server',
                                       target=self.server.serve_forever),
                  'raw_event_handler': Thread(name='RawEvent Handler',
-                                             target=self.raw_event_handler),
+                                             target=raw_event_handler),
                  'msg_in_event_handler': Thread(name='MsgInEvent Handler',
-                                                target=self.msg_in_event_handler),
+                                                target=msg_in_event_handler),
                  'msg_out_event_handler': Thread(name='MsgOutEvent Handler',
-                                                 target=self.msg_out_event_handler),
+                                                 target=msg_out_event_handler),
                  'app_event_handler': Thread(name='AppEvent Handler',
-                                             target=self.app_event_handler)}
+                                             target=app_event_handler)}
 
         self._threads = thrds
         for thread in self._threads.values():
@@ -129,6 +168,7 @@ class Controller(object):
             - finish reading the events on all buffers;
             - stop each running handler;
             - stop all running threads;
+            - stop the running API server;
             - stop the KycoServer;
         """
         # TODO: Review this shutdown process
@@ -149,7 +189,20 @@ class Controller(object):
             while thread.is_alive():
                 pass
 
+        self.stop_api_server()
+
         self.started_at = None
+
+    def stop_api_server(self):
+        """Stops the API server"""
+        # Shutdown the Flask Server
+#        server_shutdown = request.environ.get('werkzeug.server.shutdown')
+#        if server_shutdown is None:
+#            raise RuntimeError('Not running with the Werkzeug Server')
+#        server_shutdown()
+        self.api_server.terminate()
+        self.api_server.join()
+        self.api_server_running = False
 
     def status(self):
         if self.started_at:

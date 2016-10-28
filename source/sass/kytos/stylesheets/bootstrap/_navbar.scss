@@ -27,6 +27,10 @@
     background-color: $kytos-cover-color;
 }
 
+.navbar-default .navbar-nav > li.profil-link > a {
+padding : 14px 15px 13px 15px;
+}
+
 .navbar-brand {
 padding: 0;
 text-align: center!important;
@@ -64,69 +68,4 @@ float: left
 .left-nav-toggle a:hover,
 .left-nav-toggle a:focus {
     text-decoration: none;
-}
-
-.navbar-form {
-    margin-top: 11px;
-    padding: 0;
-}
-
-.navbar-form input.form-control {
-    border: none;
-    box-shadow: none;
-    color: #949ba2;
-}
-
-.navbar-form input.form-control::-webkit-input-placeholder {
-    color: #6f7780;
-}
-
-.navbar-form input.form-control:-moz-placeholder {
-    color: #6f7780;
-}
-
-.navbar-form input.form-control::-moz-placeholder {
-    color: #6f7780;
-}
-
-.navbar-form input.form-control:-ms-input-placeholder {
-    color: #6f7780;
-}
-
-.navbar-nav > li > a {
-    padding: 20px 15px;
-    text-transform: uppercase;
-    font-weight: 500;
-}
-
-.navbar-nav > li:first-child > a {
-    padding-left: 0;
-}
-
-.navbar-nav > li:last-child > a {
-    padding: 10px 25px 10px 15px;
-}
-
-.navbar-nav.navbar-right a .label {
-    margin: -5px 0 0 5px;
-}
-
-
-
-#mobile-menu {
-    display: none;
-}
-
-@media (max-width: $screen-sm-max) {
-    #mobile-menu {
-        display: inline-block;
-    }
-}
-
-#mobile-menu {
-    float: right;
-}
-
-#mobile-menu .left-nav-toggle {
-    padding-right: 25px;
 }

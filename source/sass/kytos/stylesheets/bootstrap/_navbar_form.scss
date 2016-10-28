@@ -1,27 +1,31 @@
-
 .navbar-form {
-    margin-top: 11px;
     padding: 0;
-}
+    margin : 13px 0;
 
-.navbar-form input.form-control {
-    border: none;
-    box-shadow: none;
-    color: #949ba2;
-}
+    input.form-control {
+        border: none;
+        box-shadow: none;
+        color: #949ba2;
+        margin : 0;
+        padding : 10px;
+        width : 50vw!important;
+        display : table;
+        vertical-align : bottom;
+    }
 
-.navbar-form input.form-control::-webkit-input-placeholder {
-    color: #6f7780;
-}
+    input.form-control::-webkit-input-placeholder {
+        color: #6f7780;
+    }
 
-.navbar-form input.form-control:-moz-placeholder {
-    color: #6f7780;
-}
+    input.form-control:-moz-placeholder {
+        color: #6f7780;
+    }
 
-.navbar-form input.form-control::-moz-placeholder {
-    color: #6f7780;
-}
+    input.form-control::-moz-placeholder {
+        color: #6f7780;
+    }
 
-.navbar-form input.form-control:-ms-input-placeholder {
-    color: #6f7780;
+    input.form-control:-ms-input-placeholder {
+        color: #6f7780;
+    }
 }

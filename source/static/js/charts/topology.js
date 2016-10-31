@@ -1,14 +1,19 @@
-function get_node_size(type) {
-  return size[type];
-}
-
+// Nodes vars
 var charge = {'switch': 400,
-              'host': 20,
-              'interface': -20};
+              'interface': -20,
+              'host': 20};
 
 var size = {'switch': 20,
-            'host': 10,
-            'interface': 5};
+            'interface': 5,
+            'host': 10};
+
+var nodes_fill = {'switch': "rgba(255,255,255,0)",
+                  'interface': "rgba(255,255,255,0.5)",
+                  'host': "rgba(255,0,0,1)"};
+
+var nodes_stroke = {'switch': "rgba(255,255,255,0.5)",
+                    'interface': "rgba(255,255,255,0.5)",
+                    'host': "rgba(255,255,255.0.5)"};
 
 // Links vars
 var strength = {'link': 0.001,
@@ -23,29 +28,29 @@ var strokes = {'interface': 0,
                'link': 1,
                'host': 1};
 
-var nodes_fill = {'switch': "rgba(255,255,255,0)",
-                  'interface': "rgba(255,255,255,0.5)",
-                  'host': "rgba(255,0,0,1)"
-                 };
-
-var nodes_stroke = {'switch': "rgba(255,255,255,0.5)",
-                    'interface': "rgba(255,255,255,0.5)",
-                    'host': "rgba(255,255,255.0.5)"
-                 };
-
-
 var width = $("#topology-chart").parent().width();
 var height = 600;
+
+var zoom = d3.zoom()
+            .scaleExtent([0.2, 3])
+            //.translateExtent([[-100, -100], [width + 90, height + 100]])
+            .on("zoom", zoomed);
 
 var svg = d3.select("#topology-chart")
              .append("svg")
              .attr("width", width)
              .attr("height", height);
 
-// Adds Pan and Zoom
-// svg.call(d3.zoom().on("zoom", function () {
-//             svg.attr("transform", d3.event.transform)
-//     }))
+var zoomer = svg.append("rect")
+                .attr("width", width)
+                .attr("height", height)
+                .style("fill", "none")
+                .style("pointer-events", "all")
+                .call(zoom);
+
+var container = svg.append('g')
+
+zoomer.call(zoom.transform, d3.zoomIdentity.translate(150,0));
 
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
@@ -60,14 +65,14 @@ var simulation = d3.forceSimulation()
 d3.json("/static/data/topology.json", function(error, graph) {
   if (error) throw error;
 
-  var link = svg.append("g")
+  var link = container.append("g")
       .attr("class", "links")
     .selectAll("line")
     .data(graph.links)
     .enter().append("line")
       .attr("stroke-width", function(d) { return strokes[d.type]; })
 
-  var node = svg.append("g")
+  var node = container.append("g")
       .attr("class", "nodes")
     .selectAll("circle")
     .data(graph.nodes)
@@ -104,6 +109,10 @@ d3.json("/static/data/topology.json", function(error, graph) {
         .attr("cy", function(d) { return d.y; });
   }
 });
+
+function get_node_size(type) {
+  return size[type];
+}
 
 function dragstarted(d) {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -190,6 +199,27 @@ function get_switch_interfaces(d){
   return interfaces;
 }
 
+function get_nodes_by_type(type) {
+  selected_nodes = [];
+  $.each(simulation.nodes(), function(index, node){
+      if (node.type == type) { selected_nodes.push(node); };
+  });
+  return selected_nodes;
+}
+
+function get_interfaces() {
+  return get_nodes_by_type('interface');
+}
+
+function get_node_links(node) {
+  links = [];
+  $.each(simulation.force('link').links(), function(index, link) {
+    if (link.target == node || link.source == node )
+      links.push(link);
+  });
+  return links;
+}
+
 function radius_positioning(cx, cy, x, y) {
   delta_x = x - cx;
   delta_y = y - cy;
@@ -198,4 +228,25 @@ function radius_positioning(cx, cy, x, y) {
   new_y = cy + Math.sin(rad) * distance['interface'];
 
   return [new_x, new_y];
+}
+
+function toggle_unused_interfaces(){
+  $.each(get_interfaces(), function(index, interface){
+    unused = true;
+    $.each(get_node_links(interface), function(index, link){
+      if (link.type == 'link') unused = false;
+    });
+    // To be continued.....
+    //if (unused == true) return true;
+  })
+}
+
+function zoomed() {
+  container.attr("transform", d3.event.transform);
+}
+
+function resetted() {
+  container.transition()
+    .duration(450)
+    .call(zoom.transform, d3.zoomIdentity);
 }

@@ -199,6 +199,27 @@ function get_switch_interfaces(d){
   return interfaces;
 }
 
+function get_nodes_by_type(type) {
+  selected_nodes = [];
+  $.each(simulation.nodes(), function(index, node){
+      if (node.type == type) { selected_nodes.push(node); };
+  });
+  return selected_nodes;
+}
+
+function get_interfaces() {
+  return get_nodes_by_type('interface');
+}
+
+function get_node_links(node) {
+  links = [];
+  $.each(simulation.force('link').links(), function(index, link) {
+    if (link.target == node || link.source == node )
+      links.push(link);
+  });
+  return links;
+}
+
 function radius_positioning(cx, cy, x, y) {
   delta_x = x - cx;
   delta_y = y - cy;
@@ -207,6 +228,17 @@ function radius_positioning(cx, cy, x, y) {
   new_y = cy + Math.sin(rad) * distance['interface'];
 
   return [new_x, new_y];
+}
+
+function toggle_unused_interfaces(){
+  $.each(get_interfaces(), function(index, interface){
+    unused = true;
+    $.each(get_node_links(interface), function(index, link){
+      if (link.type == 'link') unused = false;
+    });
+    // To be continued.....
+    //if (unused == true) return true;
+  })
 }
 
 function zoomed() {

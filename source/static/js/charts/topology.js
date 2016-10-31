@@ -54,7 +54,7 @@ var simulation = d3.forceSimulation()
                                  .strength(function(d) { return strength[d.type]; })
                                  .distance(function(d) { return distance[d.type]; })
           )
-    .force("charge", d3.forceManyBody().strength(function(d) {return 10^-16;}))
+    .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
 d3.json("/static/data/topology.json", function(error, graph) {
@@ -75,7 +75,7 @@ d3.json("/static/data/topology.json", function(error, graph) {
       .attr("r", function(d) { return get_node_size(d.type); })
       .attr("stroke", function(d) { return nodes_stroke[d.type]; })
       .attr("stroke-width", 2)
-      .attr("fill", function(d) { console.log(d.type); return nodes_fill[d.type]; })
+      .attr("fill", function(d) { return nodes_fill[d.type]; })
       .call(d3.drag()
           .on("start", dragstarted)
           .on("drag", dragged)

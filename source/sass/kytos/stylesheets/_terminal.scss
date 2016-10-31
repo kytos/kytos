@@ -50,7 +50,7 @@
         font-size: 11px;
         font-weight: 300;
         letter-spacing: 0.1em;
-        padding: 5px;
+        padding: 0;
         overflow: hidden;
 
         i {
@@ -68,6 +68,7 @@
         a {
             display: inline-block;
             color: #e7e7e7;
+            padding : 5px;
 
             &.terminal-med {
                 display: none;
@@ -115,3 +116,5 @@
         }
     }
 }
+
+

@@ -108,7 +108,12 @@
                 <section id="terminal" class="terminal">
                   <div class="terminal-header">
                     <div class="terminal-title">
-                      <i class="glyphicon glyphicon-console"></i> Terminal
+                    <ul class="nav nav-pills kytos-nav-pills">
+                        <li class="active"><a data-toggle="pill" href="#tab_terminal"><i class="fa fa-terminal"></i> Terminal</a></li>
+                        <li><a data-toggle="pill" href="#tab_logs"><i class="fa fa-list"></i> Logs</a></li>
+                        <li><a data-toggle="pill" href="#tab_notifications"><i class="fa fa-bell-o"></i> Notifications</a></li>
+                        <li><a data-toggle="pill" href="#tab_settings"><i class="fa fa-cogs"></i> Settings</a></li>
+                      </ul>
                     </div>
                     <div class="terminal-actions">
                       <a href="#" data-action="max" class="terminal-max"><i class="glyphicon glyphicon-fullscreen"></i></a>
@@ -117,13 +122,20 @@
                       <a href="#" data-action="close" class="terminal-close"><i class="fa fa-times"></i></a>
                     </div>
                   </div>
-                    <div class="terminal-body">
-                      Aqui fica o conteúdo do terminal
-                    </div>
-                    <div class="terminal-footer">
-                      <form action="#" class="terminal-form">
-                        <input name="command" class="input" rows="2" cols="40" />
-                      </form>
+                    <div class="terminal-body tab-content">
+                        <div id="tab_terminal" class="tab-pane fade in active">
+                            Terminal content
+                        </div>
+
+                        <div id="tab_logs" class="tab-pane fade">
+                            Logs contents
+                        </div>
+                        <div id="tab_notifications" class="tab-pane fade">
+                            Notifications
+                        </div>
+                        <div id="tab_settings" class="tab-pane fade">
+                            Settings
+                        </div>
                     </div>
                 </section>
             </div>

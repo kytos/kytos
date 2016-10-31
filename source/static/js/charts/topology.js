@@ -16,12 +16,31 @@ var strength = {'link': 0.001,
                 'host': 0.05};
 
 var distance = {'link': 6 * size['switch'],
-                'interface': size['switch'],
+                'interface': size['switch'] + 10,
                 'host': 5 * size['interface']};
 
-var svg = d3.select("#topology-chart svg"),
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
+var strokes = {'interface': 0,
+               'link': 1,
+               'host': 1};
+
+var nodes_fill = {'switch': "rgba(255,255,255,0)",
+                  'interface': "rgba(255,255,255,0.5)",
+                  'host': "rgba(255,0,0,1)"
+                 };
+
+var nodes_stroke = {'switch': "rgba(255,255,255,0.5)",
+                    'interface': "rgba(255,255,255,0.5)",
+                    'host': "rgba(255,255,255.0.5)"
+                 };
+
+
+var width = $("#topology-chart").parent().width();
+var height = 600;
+
+var svg = d3.select("#topology-chart")
+             .append("svg")
+             .attr("width", width)
+             .attr("height", height);
 
 // Adds Pan and Zoom
 // svg.call(d3.zoom().on("zoom", function () {
@@ -46,7 +65,7 @@ d3.json("/static/data/topology.json", function(error, graph) {
     .selectAll("line")
     .data(graph.links)
     .enter().append("line")
-      .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
+      .attr("stroke-width", function(d) { return strokes[d.type]; })
 
   var node = svg.append("g")
       .attr("class", "nodes")
@@ -54,7 +73,9 @@ d3.json("/static/data/topology.json", function(error, graph) {
     .data(graph.nodes)
     .enter().append("circle")
       .attr("r", function(d) { return get_node_size(d.type); })
-      .attr("fill", function(d) { return color(d.group); })
+      .attr("stroke", function(d) { return nodes_stroke[d.type]; })
+      .attr("stroke-width", 2)
+      .attr("fill", function(d) { console.log(d.type); return nodes_fill[d.type]; })
       .call(d3.drag()
           .on("start", dragstarted)
           .on("drag", dragged)

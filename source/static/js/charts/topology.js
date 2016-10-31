@@ -1,14 +1,19 @@
-function get_node_size(type) {
-  return size[type];
-}
-
+// Nodes vars
 var charge = {'switch': 400,
-              'host': 20,
-              'interface': -20};
+              'interface': -20,
+              'host': 20};
 
 var size = {'switch': 20,
-            'host': 10,
-            'interface': 5};
+            'interface': 5,
+            'host': 10};
+
+var nodes_fill = {'switch': "rgba(255,255,255,0)",
+                  'interface': "rgba(255,255,255,0.5)",
+                  'host': "rgba(255,0,0,1)"};
+
+var nodes_stroke = {'switch': "rgba(255,255,255,0.5)",
+                    'interface': "rgba(255,255,255,0.5)",
+                    'host': "rgba(255,255,255.0.5)"};
 
 // Links vars
 var strength = {'link': 0.001,
@@ -22,17 +27,6 @@ var distance = {'link': 6 * size['switch'],
 var strokes = {'interface': 0,
                'link': 1,
                'host': 1};
-
-var nodes_fill = {'switch': "rgba(255,255,255,0)",
-                  'interface': "rgba(255,255,255,0.5)",
-                  'host': "rgba(255,0,0,1)"
-                 };
-
-var nodes_stroke = {'switch': "rgba(255,255,255,0.5)",
-                    'interface': "rgba(255,255,255,0.5)",
-                    'host': "rgba(255,255,255.0.5)"
-                 };
-
 
 var width = $("#topology-chart").parent().width();
 var height = 600;
@@ -104,6 +98,10 @@ d3.json("/static/data/topology.json", function(error, graph) {
         .attr("cy", function(d) { return d.y; });
   }
 });
+
+function get_node_size(type) {
+  return size[type];
+}
 
 function dragstarted(d) {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();

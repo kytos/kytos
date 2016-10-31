@@ -1,11 +1,23 @@
 function get_node_size(type) {
-  if (type == "switch")
-    return 15;
-  else if (type == "interface")
-    return 5;
-  else if (type == "host")
-    return 10;
+  return size[type];
 }
+
+var charge = {'switch': 400,
+              'host': 20,
+              'interface': -20};
+
+var size = {'switch': 20,
+            'host': 10,
+            'interface': 5};
+
+// Links vars
+var strength = {'link': 0.0001,
+                'interface': 2,
+                'host': 0.05};
+
+var distance = {'link': 6 * size['switch'],
+                'interface': size['switch'],
+                'host': 5 * size['interface']};
 
 var svg = d3.select("#topology-chart svg"),
     width = +svg.attr("width"),
@@ -19,7 +31,10 @@ var svg = d3.select("#topology-chart svg"),
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
 var simulation = d3.forceSimulation()
-    .force("link", d3.forceLink().id(function(d) { return d.name; }))
+    .force("link", d3.forceLink().id(function(d) { return d.name; })
+                                 .strength(function(d) { return strength[d.type]; })
+                                 .distance(function(d) { return distance[d.type]; })
+          )
     .force("charge", d3.forceManyBody())
     .force("center", d3.forceCenter(width / 2, height / 2));
 

@@ -22,6 +22,12 @@
 
     <body>
 
+    <style>
+      line {
+        stroke: white;
+      }
+    </style>
+
         <nav class="navbar navbar-default navbar-fixed-top">
             <div class="container-fluid">
                 <div class="navbar-header">
@@ -100,9 +106,9 @@
                 </nav>
 
                 <section class="content">
-<!--
-                  <iframe src="//200.145.46.244/admin/" allowfullscreen></iframe>
--->
+                  <div id='topology-chart'>
+                    <svg width="960" height="600"></svg>
+                  </div>
                 </section>
 
                 <section id="terminal" class="terminal">
@@ -142,9 +148,11 @@
         </div>
 
         <script src="static/js/vendors/jquery.min.js"></script>
+        <script src="//d3js.org/d3.v4.min.js"></script>
         <script src="static/js/vendors/bootstrap.min.js"></script>
         <script src="static/js/kytos-helper.js"></script>
         <script src="static/js/kytos-terminal.js"></script>
         <script src="static/js/main.js"></script>
+        <script src="static/js/charts/topology.js"></script>
     </body>
 </html>

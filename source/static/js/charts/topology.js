@@ -1,20 +1,29 @@
+function get_node_size(type) {
+  if (type == "switch")
+    return 15;
+  else if (type == "interface")
+    return 5;
+  else if (type == "host")
+    return 10;
+}
+
 var svg = d3.select("#topology-chart svg"),
     width = +svg.attr("width"),
     height = +svg.attr("height");
 
 // Adds Pan and Zoom
-svg.call(d3.zoom().on("zoom", function () {
-            svg.attr("transform", d3.event.transform)
-    }))
+// svg.call(d3.zoom().on("zoom", function () {
+//             svg.attr("transform", d3.event.transform)
+//     }))
 
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
 var simulation = d3.forceSimulation()
-    .force("link", d3.forceLink().id(function(d) { return d.id; }))
+    .force("link", d3.forceLink().id(function(d) { return d.name; }))
     .force("charge", d3.forceManyBody())
     .force("center", d3.forceCenter(width / 2, height / 2));
 
-d3.json("https://bl.ocks.org/mbostock/raw/4062045/miserables.json", function(error, graph) {
+d3.json("/static/data/topology.json", function(error, graph) {
   if (error) throw error;
 
   var link = svg.append("g")
@@ -29,7 +38,7 @@ d3.json("https://bl.ocks.org/mbostock/raw/4062045/miserables.json", function(err
     .selectAll("circle")
     .data(graph.nodes)
     .enter().append("circle")
-      .attr("r", 5)
+      .attr("r", function(d) { return get_node_size(d.type); })
       .attr("fill", function(d) { return color(d.group); })
       .call(d3.drag()
           .on("start", dragstarted)
@@ -38,7 +47,7 @@ d3.json("https://bl.ocks.org/mbostock/raw/4062045/miserables.json", function(err
           .on("dblclick", releaseNode);
 
   node.append("title")
-      .text(function(d) { return d.id; });
+      .text(function(d) { return d.name; });
 
   simulation
       .nodes(graph.nodes)

@@ -15,7 +15,7 @@ var strength = {'link': 0.001,
                 'interface': 2,
                 'host': 0.05};
 
-var distance = {'link': 6 * size['switch'],
+var distance = {'link': 20 * size['switch'],
                 'interface': size['switch'] + 10,
                 'host': 5 * size['interface']};
 

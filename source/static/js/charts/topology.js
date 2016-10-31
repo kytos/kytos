@@ -80,7 +80,7 @@ d3.json("/static/data/topology.json", function(error, graph) {
           .on("start", dragstarted)
           .on("drag", dragged)
           .on("end", dragended))
-          .on("dblclick", releaseNode);
+          .on("dblclick", release_node);
 
   node.append("title")
       .text(function(d) { return d.name; });
@@ -107,34 +107,95 @@ d3.json("/static/data/topology.json", function(error, graph) {
 
 function dragstarted(d) {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+  if ( d.type == 'switch' ) {
+    d.old_fx = d.x;
+    d.old_fy = d.y;
+  }
   d.fx = d.x;
   d.fy = d.y;
 }
 
 function dragged(d) {
-  d.fx = d3.event.x;
-  d.fy = d3.event.y;
+  if ( d.type == 'switch' ) {
+    d.old_fx = d.fx;
+    d.old_fy = d.fy;
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+    delta_x = d.fx - d.old_fx;
+    delta_y = d.fy - d.old_fy;
+    $.each(get_switch_interfaces(d), function(index, interface){
+      if (interface.fx == undefined) {
+        interface.fx = interface.x;
+        interface.fy = interface.y;
+      }
+      interface.fx += delta_x;
+      interface.fy += delta_y;
+    });
+  } else if ( d.type == 'interface' ) {
+    owner = get_interface_owner(d);
+    if (owner.fx == undefined) {
+      cx = owner.x;
+      cy = owner.y;
+    } else {
+      cx = owner.fx;
+      cy = owner.fy;
+    }
+    new_positions = radius_positioning(cx, cy, d3.event.x, d3.event.y);
+    d.fx = new_positions[0]
+    d.fy = new_positions[1]
+  } else {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
 }
 
 function dragended(d) {
   if (!d3.event.active) simulation.alphaTarget(0);
   // uncomment the lines bellow to disable de fixed drag behavior
-  if ( d.type == 'interface' ) {
-      releaseNode(d);
+  //if ( d.type == 'interface' ) {
+      //release_node(d);
+  //}
+}
+
+function release_node(d) {
+  d.fx = null;
+  d.fy = null;
+  if (d.type == 'switch') {
+    $.each(get_switch_interfaces(d), function(index, interface){
+      interface.fx = null;
+      interface.fy = null;
+    });
   }
 }
 
-function releaseNode(d) {
-  d.fx = null;
-  d.fy = null;
+function get_interface_owner(d){
+  /* Get the switch in which the 'd' interface is connected */
+  searched_switch = null;
+  $.each(simulation.force('link').links(), function(index, link) {
+    if (link.type == 'interface' && link.target.name == d.name) {
+      searched_switch = link.source;
+    }
+  });
+  return searched_switch;
 }
 
-function getInterfaceHost(d){
-  /* Get the host in which the 'd' interface is connected */
-  return null;
-}
-
-function getHostInterfaces(d){
+function get_switch_interfaces(d){
   /* Get all interfaces associated to the 'd' host */
-  return null;
+  interfaces = []
+  $.each(simulation.force('link').links(), function(index, link) {
+    if (link.type == 'interface' && link.source.name == d.name) {
+      interfaces.push(link.target);
+    }
+  });
+  return interfaces;
+}
+
+function radius_positioning(cx, cy, x, y) {
+  delta_x = x - cx;
+  delta_y = y - cy;
+  rad = Math.atan2(delta_y, delta_x);
+  new_x = cx + Math.cos(rad) * distance['interface'];
+  new_y = cy + Math.sin(rad) * distance['interface'];
+
+  return [new_x, new_y];
 }

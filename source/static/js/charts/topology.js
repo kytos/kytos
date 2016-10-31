@@ -11,7 +11,7 @@ var size = {'switch': 20,
             'interface': 5};
 
 // Links vars
-var strength = {'link': 0.0001,
+var strength = {'link': 0.001,
                 'interface': 2,
                 'host': 0.05};
 
@@ -35,7 +35,7 @@ var simulation = d3.forceSimulation()
                                  .strength(function(d) { return strength[d.type]; })
                                  .distance(function(d) { return distance[d.type]; })
           )
-    .force("charge", d3.forceManyBody())
+    .force("charge", d3.forceManyBody().strength(function(d) {return 10^-16;}))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
 d3.json("/static/data/topology.json", function(error, graph) {
@@ -98,12 +98,22 @@ function dragged(d) {
 function dragended(d) {
   if (!d3.event.active) simulation.alphaTarget(0);
   // uncomment the lines bellow to disable de fixed drag behavior
-  //d.fx = null;
-  //d.fy = null;
+  if ( d.type == 'interface' ) {
+      releaseNode(d);
+  }
 }
 
 function releaseNode(d) {
-    d.fx = null;
-    d.fy = null;
+  d.fx = null;
+  d.fy = null;
 }
 
+function getInterfaceHost(d){
+  /* Get the host in which the 'd' interface is connected */
+  return null;
+}
+
+function getHostInterfaces(d){
+  /* Get all interfaces associated to the 'd' host */
+  return null;
+}

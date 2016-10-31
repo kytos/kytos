@@ -38,11 +38,8 @@ class Flow(object):
 
     @property
     def id(self):
-        """Returns the hash of the object"""
-        return hash(self)
+        """Returns the hash of the object.
 
-    def __hash__(self):
-        """
         Calculates the hash of the object by using the hashlib we use md5 of
         strings.
         """
@@ -204,10 +201,11 @@ class OutputAction(FlowAction):
         """Builds an Output Action from a dictionary"""
         return OutputAction(output_port=dict_content['port'])
 
-    def __hash__(self):
+    @property
+    def id(self):
         """Returns the (unambiguous) representation of the Object"""
         hash_result = hashlib.md5()
-        hash_result.update("OutputAction(output_port={})".encode('utf-8'))
+        hash_result.update(str(self.as_dict()).encode('utf-8'))
         return hash_result.hexdigest()
 
     @staticmethod

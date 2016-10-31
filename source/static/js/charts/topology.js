@@ -50,7 +50,7 @@ var zoomer = svg.append("rect")
 
 var container = svg.append('g')
 
-zoomer.call(zoom.transform, d3.zoomIdentity.translate(150,0));
+zoomer.call(zoom.transform, d3.zoomIdentity.translate(0,0));
 
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 

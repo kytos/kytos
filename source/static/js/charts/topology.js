@@ -31,15 +31,26 @@ var strokes = {'interface': 0,
 var width = $("#topology-chart").parent().width();
 var height = 600;
 
+var zoom = d3.zoom()
+            .scaleExtent([0.2, 3])
+            //.translateExtent([[-100, -100], [width + 90, height + 100]])
+            .on("zoom", zoomed);
+
 var svg = d3.select("#topology-chart")
              .append("svg")
              .attr("width", width)
              .attr("height", height);
 
-// Adds Pan and Zoom
-// svg.call(d3.zoom().on("zoom", function () {
-//             svg.attr("transform", d3.event.transform)
-//     }))
+var zoomer = svg.append("rect")
+                .attr("width", width)
+                .attr("height", height)
+                .style("fill", "none")
+                .style("pointer-events", "all")
+                .call(zoom);
+
+var container = svg.append('g')
+
+zoomer.call(zoom.transform, d3.zoomIdentity.translate(150,0));
 
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
@@ -54,14 +65,14 @@ var simulation = d3.forceSimulation()
 d3.json("/static/data/topology.json", function(error, graph) {
   if (error) throw error;
 
-  var link = svg.append("g")
+  var link = container.append("g")
       .attr("class", "links")
     .selectAll("line")
     .data(graph.links)
     .enter().append("line")
       .attr("stroke-width", function(d) { return strokes[d.type]; })
 
-  var node = svg.append("g")
+  var node = container.append("g")
       .attr("class", "nodes")
     .selectAll("circle")
     .data(graph.nodes)
@@ -196,4 +207,14 @@ function radius_positioning(cx, cy, x, y) {
   new_y = cy + Math.sin(rad) * distance['interface'];
 
   return [new_x, new_y];
+}
+
+function zoomed() {
+  container.attr("transform", d3.event.transform);
+}
+
+function resetted() {
+  container.transition()
+    .duration(450)
+    .call(zoom.transform, d3.zoomIdentity);
 }

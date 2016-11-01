@@ -77,6 +77,8 @@ d3.json("/static/data/topology.json", function(error, graph) {
     .selectAll("circle")
     .data(graph.nodes)
     .enter().append("circle")
+      .attr("id", function(d) {
+          return "node-" + d.type + "-" + fix_name(d.name); })
       .attr("r", function(d) { return get_node_size(d.type); })
       .attr("stroke", function(d) { return nodes_stroke[d.type]; })
       .attr("stroke-width", 2)
@@ -242,6 +244,16 @@ function toggle_unused_interfaces(){
   })
 }
 
+function highlight_switch(obj) {
+  d3.selectAll("[id^='node-switch-']").attr('style', 'opacity: 0.3');
+  d3.selectAll("[id^='node-interface-']").attr('style', 'opacity: 0.3');
+  d3.select("#node-switch-"+fix_name(obj.name)).attr('style', 'opacity: 1');
+  $.each(get_switch_interfaces(obj), function(idx, interface){
+    d3.select("#node-interface-"+fix_name(interface.name))
+      .attr('style', 'opacity: 1');
+  });
+}
+
 function zoomed() {
   container.attr("transform", d3.event.transform);
 }
@@ -257,5 +269,14 @@ function show_context(d) {
     data = d.data;
     data['name'] = d.name
     show_switch_context(data);
+    highlight_switch(d);
   }
+}
+
+function fix_name(name) {
+  return name.toString().replace(/:/g, '__');
+}
+
+function unfix_name(name) {
+  return name.toString().replace(/\_\_/g, ':');
 }

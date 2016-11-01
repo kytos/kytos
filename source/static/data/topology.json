@@ -1,10 +1,10 @@
 {
   "nodes": [
-    {"name": "switch1", "group": 1, "type": "switch"},
-    {"name": "switch2", "group": 1, "type": "switch"},
-    {"name": "switch3", "group": 1, "type": "switch"},
-    {"name": "switch4", "group": 1, "type": "switch"},
-    {"name": "switch5", "group": 1, "type": "switch"},
+    {"name": "switch1", "group": 1, "type": "switch", "data": {"connection": "(192.168.1.11, 3311)", "hardware": "hardware do switch 1", "software": "software do switch 1..."}},
+    {"name": "switch2", "group": 1, "type": "switch", "data": {"connection": "(192.168.1.12, 3312)", "hardware": "hardware do switch 2", "software": "software do switch 2..."}},
+    {"name": "switch3", "group": 1, "type": "switch", "data": {"connection": "(192.168.1.13, 3313)", "hardware": "hardware do switch 3", "software": "software do switch 3..."}},
+    {"name": "switch4", "group": 1, "type": "switch", "data": {"connection": "(192.168.1.14, 3314)", "hardware": "hardware do switch 4", "software": "software do switch 4..."}},
+    {"name": "switch5", "group": 1, "type": "switch", "data": {"connection": "(192.168.1.15, 3315)", "hardware": "hardware do switch 5", "software": "software do switch 5..."}},
     {"name": "switch1:1", "group": 1, "type": "interface"},
     {"name": "switch1:2", "group": 1, "type": "interface"},
     {"name": "switch1:3", "group": 1, "type": "interface"},

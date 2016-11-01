@@ -82,10 +82,11 @@ d3.json("/static/data/topology.json", function(error, graph) {
       .attr("stroke-width", 2)
       .attr("fill", function(d) { return nodes_fill[d.type]; })
       .call(d3.drag()
-          .on("start", dragstarted)
-          .on("drag", dragged)
-          .on("end", dragended))
-          .on("dblclick", release_node);
+              .on("start", dragstarted)
+              .on("drag", dragged)
+              .on("end", dragended))
+      .on('click', show_context)
+      .on("dblclick", release_node);
 
   node.append("title")
       .text(function(d) { return d.name; });
@@ -249,4 +250,12 @@ function resetted() {
   container.transition()
     .duration(450)
     .call(zoom.transform, d3.zoomIdentity);
+}
+
+function show_context(d) {
+  if (d.type == 'switch') {
+    data = d.data;
+    data['name'] = d.name
+    show_switch_context(data);
+  }
 }

@@ -238,10 +238,10 @@
 
         <script language="javascript">
 
-          function show_switch_context(obj) {
+          function show_switch_context(data) {
             var template = $('#context-switch-template').html();
             Mustache.parse(template);   // optional, speeds up future uses
-            var rendered = Mustache.render(template, {name: "switch1"});
+            var rendered = Mustache.render(template, data);
             $('#context-target').html(rendered);
           }
 

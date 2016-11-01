@@ -152,16 +152,13 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                             <div class="row-fluid">
                                 <div class="col-settings col-md-3 col-xs-6">
                                     <h1>Settings</h1>
-                                    <p class="help">Put some help text here.</p>
+                                    <p class="help">Clean interface</p>
                                     <div class="checkbox">
                                     <label>
-                                      <input type="checkbox"> Check me out
+                                      <input type="checkbox" onclick='javascript:toggle_unused_interfaces(this);'> Hide unused interfaces
                                     </label>
                                     <label>
-                                      <input type="checkbox"> Check me out
-                                    </label>
-                                    <label>
-                                      <input type="checkbox"> Check me out
+                                      <input type="checkbox" onclick='javascript:toggle_disconnected_hosts(this);'> Hide disconnected hosts
                                     </label>
                                   </div>
                                 </div>

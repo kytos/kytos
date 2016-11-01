@@ -214,6 +214,10 @@ function get_interfaces() {
   return get_nodes_by_type('interface');
 }
 
+function get_hosts() {
+  return get_nodes_by_type('host');
+}
+
 function get_node_links(node) {
   links = [];
   $.each(simulation.force('link').links(), function(index, link) {
@@ -233,16 +237,51 @@ function radius_positioning(cx, cy, x, y) {
   return [new_x, new_y];
 }
 
-function toggle_unused_interfaces(){
+function hide_unused_interfaces(){
   $.each(get_interfaces(), function(index, interface){
     unused = true;
     $.each(get_node_links(interface), function(index, link){
       if (link.type == 'link') unused = false;
     });
     // To be continued.....
-    //if (unused == true) return true;
+    if (unused == true) {
+      d3.select("#node-"+interface.type+"-"+fix_name(interface.name))
+        .attr('style', 'opacity: 0');
+    }
   })
 }
+
+function toggle_unused_interfaces(checkbox){
+  opacity = 1;
+  if (checkbox.checked == true){
+    opacity = 0;
+  }
+  $.each(get_interfaces(), function(index, interface){
+    unused = true;
+    $.each(get_node_links(interface), function(index, link){
+      if (link.type == 'link') unused = false;
+    });
+    if (unused == true) {
+      d3.select("#node-interface-"+fix_name(interface.name))
+        .attr('style', 'opacity: ' + opacity);
+    }
+  })
+}
+
+function toggle_disconnected_hosts(checkbox){
+  opacity = 1;
+  if (checkbox.checked == true){
+    opacity = 0;
+  }
+  $.each(get_hosts(), function(index, host){
+    links = get_node_links(host);
+    if (links.length == 0) {
+      d3.select("#node-host-"+fix_name(host.name))
+        .attr('style', 'opacity: ' + opacity);
+    }
+  })
+}
+
 
 function highlight_switch(obj) {
   d3.selectAll("[id^='node-switch-']").attr('style', 'opacity: 0.3');

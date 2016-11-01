@@ -237,59 +237,61 @@ function radius_positioning(cx, cy, x, y) {
   return [new_x, new_y];
 }
 
-function hide_unused_interfaces(){
+function toggle_unused_interfaces(hide){
   $.each(get_interfaces(), function(index, interface){
     unused = true;
     $.each(get_node_links(interface), function(index, link){
       if (link.type == 'link') unused = false;
     });
-    // To be continued.....
-    if (unused == true) {
-      d3.select("#node-"+interface.type+"-"+fix_name(interface.name))
-        .attr('style', 'opacity: 0');
+    if (unused) {
+      d3.select("#node-interface-" + fix_name(interface.name))
+        .classed('invisible', hide);
     }
   })
 }
 
-function toggle_unused_interfaces(checkbox){
-  opacity = 1;
-  if (checkbox.checked == true){
-    opacity = 0;
-  }
-  $.each(get_interfaces(), function(index, interface){
-    unused = true;
-    $.each(get_node_links(interface), function(index, link){
-      if (link.type == 'link') unused = false;
-    });
-    if (unused == true) {
-      d3.select("#node-interface-"+fix_name(interface.name))
-        .attr('style', 'opacity: ' + opacity);
-    }
-  })
-}
-
-function toggle_disconnected_hosts(checkbox){
-  opacity = 1;
-  if (checkbox.checked == true){
-    opacity = 0;
-  }
+function toggle_disconnected_hosts(hide){
   $.each(get_hosts(), function(index, host){
     links = get_node_links(host);
     if (links.length == 0) {
-      d3.select("#node-host-"+fix_name(host.name))
-        .attr('style', 'opacity: ' + opacity);
+      d3.select("#node-host-" + fix_name(host.name))
+        .classed('invisible', hide);
     }
   })
 }
 
+function node_highlight(node) {
+  d3.select("#node-" + node.type + "-" + fix_name(node.name))
+    .classed('downlight', false);
+}
+
+function node_downlight(node) {
+  d3.select("#node-" + node.type + "-" + fix_name(node.name))
+    .selection.classed('downlight', true);
+}
+
+function highlight_all_switches() {
+  d3.selectAll("[id^='node-switch-']").classed('downlight', false);
+}
+
+function highlight_all_interfaces() {
+  d3.selectAll("[id^='node-interface-']").classed('downlight', false);
+}
+
+function downlight_all_switches() {
+  d3.selectAll("[id^='node-switch-']").classed('downlight', true);
+}
+
+function downlight_all_interfaces() {
+  d3.selectAll("[id^='node-interface-']").classed('downlight', true);
+}
 
 function highlight_switch(obj) {
-  d3.selectAll("[id^='node-switch-']").attr('style', 'opacity: 0.3');
-  d3.selectAll("[id^='node-interface-']").attr('style', 'opacity: 0.3');
-  d3.select("#node-switch-"+fix_name(obj.name)).attr('style', 'opacity: 1');
+  downlight_all_switches();
+  downlight_all_interfaces();
+  node_highlight(obj);
   $.each(get_switch_interfaces(obj), function(idx, interface){
-    d3.select("#node-interface-"+fix_name(interface.name))
-      .attr('style', 'opacity: 1');
+    node_highlight(interface)
   });
 }
 

@@ -15,6 +15,7 @@ Basic usage:
 """
 
 import json
+import requests
 import os
 import re
 from importlib.machinery import SourceFileLoader
@@ -96,17 +97,18 @@ class Controller(object):
 
     def start_api_server(self):
         """Starts Flask server inside its own thread"""
+        app.add_url_rule('/kytos/shutdown',self.stop_api_server.__name__,
+                         self.stop_api_server,methods=['GET'])
+
         for url in self.rest_endpoints:
             function = self.rest_endpoints[url][0]
             methods = self.rest_endpoints[url][1]
             new_endpoint_url = "/kytos{}".format(url)
             app.add_url_rule(new_endpoint_url, function.__name__, function,
                              methods=methods)
-        self.api_server = Process(target=app.run)
+        self.api_server = Thread(target=app.run)
         self.api_server.start()
         self.api_server_running = True
-        # self.flask_thread = Thread(target=app.run).start()
-        # app.run(use_reloader=False)
 
     def register_rest_endpoint(self, url, function, methods):
         """Register a new rest endpoint"""
@@ -159,6 +161,12 @@ class Controller(object):
         self.started_at = now()
 
     def stop(self, graceful=True):
+        if self.api_server_running:
+            requests.get('http://127.0.0.1:5000/kytos/shutdown')
+        if self.started_at:
+            self.stop_controller(graceful)
+
+    def stop_controller(self,graceful=True):
         """Stops the controller.
 
         This method should:
@@ -188,8 +196,6 @@ class Controller(object):
             while thread.is_alive():
                 pass
 
-        self.stop_api_server()
-
         self.started_at = None
         self.unload_napps()
         self.buffers = KycoBuffers()
@@ -197,14 +203,12 @@ class Controller(object):
 
     def stop_api_server(self):
         """Stops the API server"""
-        # Shutdown the Flask Server
-#        server_shutdown = request.environ.get('werkzeug.server.shutdown')
-#        if server_shutdown is None:
-#            raise RuntimeError('Not running with the Werkzeug Server')
-#        server_shutdown()
-        self.api_server.terminate()
-        self.api_server.join()
+        server_shutdown = request.environ.get('werkzeug.server.shutdown')
+        if server_shutdown is None:
+            raise RuntimeError('Not running with the Werkzeug Server')
+        server_shutdown()
         self.api_server_running = False
+        return 'Server shutting down...'
 
     def status(self):
         if self.started_at:
@@ -266,7 +270,6 @@ class Controller(object):
             if event.name == "kyco/core.shutdown":
                 log.debug("MsgInEvent handler stopped")
                 break
-
 
     def msg_out_event_handler(self):
         """Handle msg_out events.

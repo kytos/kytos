@@ -46,7 +46,8 @@ var zoomer = svg.append("rect")
                 .attr("height", height)
                 .style("fill", "none")
                 .style("pointer-events", "all")
-                .call(zoom);
+                .call(zoom)
+                .on('click', highlight_all_nodes);
 
 var container = svg.append('g')
 
@@ -276,6 +277,10 @@ function highlight_all_switches() {
 
 function highlight_all_interfaces() {
   d3.selectAll("[id^='node-interface-']").classed('downlight', false);
+}
+
+function highlight_all_nodes() {
+  d3.selectAll("[id^='node-']").classed('downlight', false);
 }
 
 function downlight_all_switches() {

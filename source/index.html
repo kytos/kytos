@@ -116,7 +116,7 @@
                     <div class="terminal-title">
                     <ul class="nav nav-pills kytos-nav-pills">
                         <li class="active"><a data-toggle="pill" href="#tab_terminal"><i class="fa fa-terminal"></i> Terminal</a></li>
-                        <li><a data-toggle="pill" href="#tab_context"><i class="fa fa-eye"></i> Context</a></li>
+                        <li id='tab_context_button'><a data-toggle="pill" href="#tab_context"><i class="fa fa-eye"></i> Context</a></li>
                         <li><a data-toggle="pill" href="#tab_logs"><i class="fa fa-list"></i> Logs</a></li>
                         <li><a data-toggle="pill" href="#tab_notifications"><i class="fa fa-bell-o"></i> Notifications</a></li>
                         <li><a data-toggle="pill" href="#tab_settings"><i class="fa fa-cogs"></i> Settings</a></li>
@@ -240,6 +240,7 @@
 
           function show_switch_context(data) {
             var template = $('#context-switch-template').html();
+            $('#tab_context_button a').click();
             Mustache.parse(template);   // optional, speeds up future uses
             var rendered = Mustache.render(template, data);
             $('#context-target').html(rendered);

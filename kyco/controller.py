@@ -462,30 +462,6 @@ class Controller(object):
             if not isinstance(self.napps[napp_name], KycoCoreNApp):
                 self.unload_napp(napp_name)
 
-    def save_json_topology(self):
-        nodes, links = {}, []
-
-        for dpid, switch in self.switches.items():
-            nodes[switch.id] = switch.as_dict()
-            for port_no, interface in switch.interfaces.items():
-                link = {'source': switch.id,
-                        'target': interface.id}
-                nodes[interface.id] = interface.as_dict()
-                links.append(link)
-                for endpoint, ts in interface.endpoints:
-                    if type(endpoint) is HWAddress:
-                        link = {'source': interface.id,
-                                'target': endpoint.value}
-                    else:
-                        link = {'source': interface.id,
-                                'target': endpoint.id}
-                    links.append(link)
-
-        with open('/tmp/topology.json', 'w') as fp:
-            output = {'nodes': nodes,
-                      'links': links}
-            fp.write(json.dumps(output))
-
 #    def update_switches_link(self, nodeA, nodeB):
 #        """Update a link between two switches.
 #

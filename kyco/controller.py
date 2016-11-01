@@ -15,12 +15,11 @@ Basic usage:
 """
 
 import json
-import requests
 import os
 import re
 from importlib.machinery import SourceFileLoader
 from threading import Thread
-from multiprocessing import Process
+from urllib.request import urlopen
 
 from flask import Flask, request
 
@@ -97,15 +96,16 @@ class Controller(object):
 
     def start_api_server(self):
         """Starts Flask server inside its own thread"""
-        app.add_url_rule('/kytos/shutdown',self.stop_api_server.__name__,
-                         self.stop_api_server,methods=['GET'])
+        self.register_rest_endpoint('/shutdown', self.shutdown_api,
+                                    methods=['GET'])
 
         for url in self.rest_endpoints:
             function = self.rest_endpoints[url][0]
             methods = self.rest_endpoints[url][1]
             new_endpoint_url = "/kytos{}".format(url)
-            app.add_url_rule(new_endpoint_url, function.__name__, function,
-                             methods=methods)
+            app.add_url_rule(new_endpoint_url, function.__name__,
+                             function, methods=methods)
+
         self.api_server = Thread(target=app.run)
         self.api_server.start()
         self.api_server_running = True
@@ -119,7 +119,7 @@ class Controller(object):
     def restart_api_server(self):
         """Responsible for restarting the Flask server"""
         if self.api_server_running:
-            self.stop_api_server()
+           self.stop_api_server()
         self.start_api_server()
 
     def start(self):
@@ -162,7 +162,7 @@ class Controller(object):
 
     def stop(self, graceful=True):
         if self.api_server_running:
-            requests.get('http://127.0.0.1:5000/kytos/shutdown')
+            self.stop_api_server()
         if self.started_at:
             self.stop_controller(graceful)
 
@@ -202,13 +202,20 @@ class Controller(object):
         self.server.server_close()
 
     def stop_api_server(self):
+        urlopen('http://127.0.0.1:5000/kytos/shutdown')
+
+    def shutdown_api(self):
         """Stops the API server"""
+        allowed_host = ['127.0.0.1:5000', 'localhost:5000']
+        if request.host not in allowed_host:
+            return "", 403
+
         server_shutdown = request.environ.get('werkzeug.server.shutdown')
         if server_shutdown is None:
             raise RuntimeError('Not running with the Werkzeug Server')
         server_shutdown()
         self.api_server_running = False
-        return 'Server shutting down...'
+        return 'Server shutting down...', 200
 
     def status(self):
         if self.started_at:

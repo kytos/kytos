@@ -326,3 +326,65 @@ function fix_name(name) {
 function unfix_name(name) {
   return name.toString().replace(/\_\_/g, ':');
 }
+
+function get_current_layout() {
+  /*
+    {
+      nodes: {
+        <node_name>: {
+          type: ,
+          x: ,
+          y: ,
+          fx: ,
+          fy: ,
+          downlight: ,
+          invisible:
+        },
+        ...
+      },
+      other_settings: {
+       .....
+      }
+    }
+   */
+  layout = {'nodes': {}, 'other_settings': {}};
+  $.each(simulation.nodes(), function(idx, node) {
+    d3node = d3.select('#node-' + node.type + '-' + fix_name(node.name));
+    node_data = {
+      'name': node.name,
+      'type': node.type,
+      'x': node.x,
+      'y': node.y,
+      'fx': node.fx,
+      'fy': node.fy,
+      'downlight': d3node.classed('downlight'),
+    };
+    layout.nodes[node.name] = node_data;
+  });
+  layout.other_settings['hide_unused_interfaces'] = $('#hide_unused_interfaces')[0].checked;
+  layout.other_settings['hide_disconnected_hosts'] = $('#hide_disconnected_hosts')[0].checked;
+  return layout;
+}
+
+function restore_layout(layout) {
+  $.each(simulation.nodes(), function(idx, node) {
+    if (node.name in layout.nodes) {
+      restored_node = layout.nodes[node.name];
+      node.x = restored_node.x;
+      node.y = restored_node.y;
+      node.fx = restored_node.fx;
+      node.fy = restored_node.fy;
+      d3node = d3.select('#node-' + node.type + '-' + fix_name(node.name))
+                    .classed('downlight', restored_node.downlight);
+    }
+  });
+  checkbox_interfaces = $('#hide_unused_interfaces');
+  if (layout.other_settings.hide_unused_interfaces != checkbox_interfaces[0].checked) {
+    checkbox_interfaces.click();
+  }
+  checkbox_hosts = $('#hide_disconnected_hosts');
+  if (layout.other_settings.hide_disconnected_hosts != checkbox_hosts[0].checked) {
+    checkbox_hosts.click();
+  }
+  simulation.restart();
+}

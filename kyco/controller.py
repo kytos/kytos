@@ -96,25 +96,22 @@ class Controller(object):
 
     def start_api_server(self):
         """Starts Flask server inside its own thread"""
-        self.register_rest_endpoint('/shutdown', self.shutdown_api,
-                                    methods=['GET'])
-
-        for url in self.rest_endpoints:
-            function = self.rest_endpoints[url][0]
-            methods = self.rest_endpoints[url][1]
-            new_endpoint_url = "/kytos{}".format(url)
-            app.add_url_rule(new_endpoint_url, function.__name__,
-                             function, methods=methods)
-
+        app.add_url_rule('/kytos/shutdown', self.shutdown_api.__name__,
+                         self.shutdown_api, methods=['GET'])
         self.api_server = Thread(target=app.run)
         self.api_server.start()
         self.api_server_running = True
 
     def register_rest_endpoint(self, url, function, methods):
         """Register a new rest endpoint"""
+        if not self.api_server_running:
+            self.start_api_server()
+
         if url not in self.rest_endpoints:
             self.rest_endpoints[url] = (function, methods)
-            self.restart_api_server()
+            new_endpoint_url = "/kytos{}".format(url)
+            app.add_url_rule(new_endpoint_url, function.__name__,
+                             function, methods=methods)
 
     def restart_api_server(self):
         """Responsible for restarting the Flask server"""

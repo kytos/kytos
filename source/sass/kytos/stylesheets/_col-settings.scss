@@ -1,0 +1,28 @@
+.col-settings {
+  font-family : "Helvetica Neue",Helvetica,Arial,sans-serif;
+
+  h1 {
+    margin : 5px 0 0 0;
+    font-weight : normal;
+    font-size : 14px;
+    padding : 0;
+  }
+
+  label {
+    font-size : 12px;
+    display : block;
+  }
+
+  .help {
+    font-weight : 300;
+    margin: 0;
+    padding : 0;
+  }
+
+  input[type="radio"],
+  input[type="checkbox"] {
+    vertical-align : bottom;
+    margin-top : 1px;
+  }
+}
+

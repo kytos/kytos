@@ -137,7 +137,10 @@
                         <div id="tab_context" class="tab-pane fade">
                           <div id="context-target">Loading...</div>
                             <script id="context-switch-template" type="x-tmpl-mustache">
-                            Hello I'm the switch {{ name }}!
+                                Hello I'm the switch "<b>{{ name }}</b>"!<br/>
+                                My current connection is: <b>{{connection}}</b><br/>
+                                My hardware is: <b>{{hardware}}</b><br/>
+                                My software is: <b>{{software}}</b>
                             </script>
                         </div>
 

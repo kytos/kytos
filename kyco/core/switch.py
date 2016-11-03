@@ -282,7 +282,7 @@ class Switch(object):
                                              self.connection.port),
                 'ofp_version': self.ofp_version,
                 'type': 'switch',
-                'hardware': self.switch.dpid,
+                'hardware': '',
                 'software': ''}
 
     def as_json(self):

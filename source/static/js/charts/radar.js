@@ -11,9 +11,9 @@ function get_interface_usage(usage, total) {
 
 function RadarChart(id, data) {
 	var cfg = {
-	 w: 500,				//Width of the circle
-	 h: 500,				//Height of the circle
-	 margin: {top: 100, right: 100, bottom: 100, left: 100}, //The margins of the SVG
+	 w: $("#switchChart").parent().width() / 2,				//Width of the circle
+	 h: $("#switchChart").parent().width() / 2,				//Height of the circle
+	 margin: {top: 30, right: 30, bottom: 30, left: 30}, //The margins of the SVG
 	 levels: 4,				//How many levels or inner circles should there be drawn
 	 maxValue: 40000, 			//What is the value that the biggest circle will represent
 	 labelFactor: 1.15, 	//How much farther than the radius of the outer circle should the labels be placed
@@ -98,7 +98,7 @@ function RadarChart(id, data) {
 	// Append the interfaces circles at each axis
 	axis.append("circle")
 		.attr("class", "interface")
-		.attr("r", function(d,i) { return d.speed * 0.0005; })
+		.attr("r", function(d,i) { return d.speed * 0.00015 })
 		.attr("cx", function(d, i){ return rScale(maxValue * cfg.labelFactor) * Math.cos(angleSlice*i - Math.PI/2); })
 		.attr("cy", function(d, i){ return rScale(maxValue * cfg.labelFactor) * Math.sin(angleSlice*i - Math.PI/2); })
     .style("fill", function(d,i) { return interfaceColor(get_interface_usage(d.value, d.speed)); });

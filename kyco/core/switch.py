@@ -79,7 +79,7 @@ class Interface(object):
                 'name': self.name,
                 'port_number': self.port_number,
                 'switch': self.switch.dpid,
-                'class': 'interface'}
+                'type': 'interface'}
 
     def as_json(self):
         return json.dumps(self.as_dict())
@@ -276,9 +276,14 @@ class Switch(object):
 
     def as_dict(self):
         return {'id': self.id,
+                'name': self.id,
                 'dpid': self.dpid,
+                'connection': "{}:{}".format(self.connection.address,
+                                             self.connection.port),
                 'ofp_version': self.ofp_version,
-                'class': 'switch'}
+                'type': 'switch',
+                'hardware': self.switch.dpid,
+                'software': ''}
 
     def as_json(self):
         return json.dumps(self.as_dict())

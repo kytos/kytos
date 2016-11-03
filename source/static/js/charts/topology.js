@@ -56,14 +56,15 @@ zoomer.call(zoom.transform, d3.zoomIdentity.translate(0,0));
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
 var simulation = d3.forceSimulation()
-    .force("link", d3.forceLink().id(function(d) { return d.name; })
+    .force("link", d3.forceLink().id(function(d) { return d.id; })
                                  .strength(function(d) { return strength[d.type]; })
                                  .distance(function(d) { return distance[d.type]; })
           )
     .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
-d3.json("/static/data/topology.json", function(error, graph) {
+url = "http://localhost:5000/kytos/topology"
+d3.json(url,function(error, graph) {
   if (error) throw error;
 
   var link = container.append("g")
@@ -312,7 +313,9 @@ function resetted() {
 
 function show_context(d) {
   if (d.type == 'switch') {
-    data = d.data;
+    data = {'connection': d.connection,
+            'hardware': d.hardware,
+            'software':d.software}
     data['name'] = d.name
     show_switch_context(data);
     highlight_switch(d);

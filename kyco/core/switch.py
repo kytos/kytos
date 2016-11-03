@@ -22,6 +22,12 @@ class Interface(object):
         self.endpoints = []
 
     def __eq__(self, other):
+        if isinstance(other,str):
+            return self.address == other
+
+        if not isinstance(other,Interface):
+            return False
+
         if self.port_number != other.port_number:
             return False
 
@@ -41,9 +47,9 @@ class Interface(object):
         return "{}:{}".format(self.switch.dpid, self.port_number)
 
     def get_endpoint(self, endpoint):
-        for endpoint, timestamp in self.endpoints:
-            if endpoint == endpoint:
-                return endpoint, timestamp
+        for item in self.endpoints:
+            if endpoint == item[0]:
+                return item
         return None
 
     def is_link_between_switches(self):

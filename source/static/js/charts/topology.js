@@ -369,7 +369,35 @@ function get_current_layout() {
   return layout;
 }
 
-function restore_layout(layout) {
+function save_layout(i) {
+  layout = get_current_layout();
+  data = JSON.stringify(layout);
+  console.log(data);
+  $.ajax({
+    type: "POST",
+    url: 'http://127.0.0.1:5000/kytos/webtopo/teste' + i,
+    data: data,
+    success: function(data) {
+      console.log(data)
+    },
+    contentType: "application/json",
+    dataType: "json"
+  });
+}
+
+function get_saved_layouts() {
+  layouts = undefined;
+  $.getJSON('http://127.0.0.1:5000/kytos/webtopo/', function(data) {
+    layouts = JSON.parse(data);
+  });
+  console.log(layouts);
+}
+
+function restore_layout(name) {
+  layout = undefined
+  $.getJSON('http://127.0.0.1:5000/kytos/webtopo/' + name, function(data) {
+    layout = JSON.pase(data);
+  });
   $.each(simulation.nodes(), function(idx, node) {
     if (node.name in layout.nodes) {
       restored_node = layout.nodes[node.name];

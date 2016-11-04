@@ -11,20 +11,8 @@ from pyof.v0x01.symmetric.hello import Hello
 from kyco.config import KycoConfig
 from kyco.controller import Controller
 
-__all__ = ('TestConfig', 'do_handshake', 'new_controller', 'new_client',
+__all__ = ('do_handshake', 'new_controller', 'new_client',
            'new_handshaked_client')
-
-
-class TestConfig(KycoConfig):
-    """A Wrapper class around KycoConfig to fix test suit on TravisCI."""
-
-    def __init__(self):
-        """Initiate the config."""
-        super().__init__()
-        if 'TRAVIS' in os.environ:
-            napps_path = os.path.join(sysconfig.get_python_lib(),
-                                      'var/lib/kytos/napps/')
-            self.options['daemon'].napps = napps_path
 
 
 def do_handshake(client):
@@ -78,7 +66,7 @@ def new_controller(options=None):
         controller: Running Controler
     """
     if options is None:
-        options = TestConfig().options['daemon']
+        options = KycoConfig().options['daemon']
     controller = Controller(options)
     controller.start()
     time.sleep(0.1)
@@ -96,7 +84,7 @@ def new_client(options=None):
             handshake
     """
     if options is None:
-        options = TestConfig().options['daemon']
+        options = KycoConfig().options['daemon']
     client = socket()
     client.connect((options.listen, options.port))
     return client
@@ -113,6 +101,6 @@ def new_handshaked_client(options=None):
             done
     """
     if options is None:
-        options = TestConfig().options['daemon']
+        options = KycoConfig().options['daemon']
     client = new_client(options)
     return do_handshake(client)

@@ -315,10 +315,12 @@ function resetted() {
 
 function show_context(d) {
   if (d.type == 'switch') {
-    data = {'connection': d.connection,
+    data = {'name': d.name,
+            'dpid': d.dpid,
+            'connection': d.connection,
+            'ofp_version': d.ofp_version,
             'hardware': d.hardware,
-            'software':d.software}
-    data['name'] = d.name
+            'software': d.software}
     show_switch_context(data);
     highlight_switch(d);
   }

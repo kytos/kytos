@@ -30,6 +30,50 @@
 
     </style>
 
+    <!-- MODALS -->
+
+    <div class="modal fade" id="saveLayout" tabindex="-1" role="dialog" aria-labelledby="saveLayoutLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title" id="saveLayoutLavel">Modal title</h4>
+          </div>
+          <div class="modal-body">
+            <input type="text" id="layout-name" placeholder='Layout name'/>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onClick='save_layout();'>Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="restoreLayout" tabindex="-1" role="dialog" aria-labelledby="restoreLayoutLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title" id="saveLayoutLavel">Modal title</h4>
+          </div>
+          <div class="modal-body">
+            <select id='savedLayouts'></select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onClick='restore_layout();'>Restore</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END OF MODALS -->
+
+
         <nav class="navbar navbar-default navbar-fixed-top">
             <div class="container-fluid">
                 <div class="navbar-header">
@@ -221,21 +265,10 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                                 </div>
 
                                 <div class="col-settings col-md-3 col-xs-6">
-                                    <h1>Settings</h1>
-                                    <p class="help">Put some help text here.</p>
-                                    <div class="checkbox">
-                                      <label>
-                                        <input type="checkbox" value="">
-                                        Option one is this
-                                      </label>
-                                    </div>
-                                    <div class="checkbox disabled">
-                                      <label>
-                                        <input type="checkbox" value="" disabled>
-                                        Option two is disabled
-                                      </label>
-                                    </div>
-
+                                  <h1>Layout Settings</h1>
+                                  <p class="help">Save and restore layouts.</p>
+                                  <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#saveLayout">Save Layout</button>
+                                  <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#restoreLayout">Load Layout</button>
                                 </div>
 
                                 <div class="col-settings col-md-3 col-xs-6">

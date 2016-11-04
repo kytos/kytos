@@ -1,3 +1,5 @@
+var layouts_url = 'http://127.0.0.1:5000/kytos/web/topology/layouts/';
+
 // Nodes vars
 var charge = {'switch': 400,
               'interface': -20,
@@ -369,53 +371,88 @@ function get_current_layout() {
   return layout;
 }
 
-function save_layout(i) {
-  layout = get_current_layout();
-  data = JSON.stringify(layout);
-  console.log(data);
-  $.ajax({
-    type: "POST",
-    url: 'http://127.0.0.1:5000/kytos/webtopo/teste' + i,
-    data: data,
-    success: function(data) {
-      console.log(data)
-    },
-    contentType: "application/json",
-    dataType: "json"
-  });
+function save_layout() {
+  layout_name = $('#layout-name')[0].value;
+  if (layout_name == '') {
+    alert('Please, choose a name for the layout.');
+  } else {
+    layout = get_current_layout();
+    data = JSON.stringify(layout);
+    $.ajax({
+      type: "POST",
+      url: layouts_url + layout_name,
+      data: data,
+      success: function(data) {
+        alert('Layout ' + layout_name + ' saved.');
+        $('#saveLayout').modal('hide');
+      },
+      contentType: "application/json",
+      dataType: "json"
+    })
+    .done(function(){
+        alert('Layout ' + layout_name + ' saved.');
+        $('#saveLayout').modal('hide');
+    });
+    $('#saveLayout').modal('hide');
+  }
 }
 
 function get_saved_layouts() {
-  layouts = undefined;
-  $.getJSON('http://127.0.0.1:5000/kytos/webtopo/', function(data) {
-    layouts = JSON.parse(data);
-  });
-  console.log(layouts);
-}
-
-function restore_layout(name) {
-  layout = undefined
-  $.getJSON('http://127.0.0.1:5000/kytos/webtopo/' + name, function(data) {
-    layout = JSON.pase(data);
-  });
-  $.each(simulation.nodes(), function(idx, node) {
-    if (node.name in layout.nodes) {
-      restored_node = layout.nodes[node.name];
-      node.x = restored_node.x;
-      node.y = restored_node.y;
-      node.fx = restored_node.fx;
-      node.fy = restored_node.fy;
-      d3node = d3.select('#node-' + node.type + '-' + fix_name(node.name))
-                    .classed('downlight', restored_node.downlight);
+  $.ajax({
+    async: false,
+    dataType: "json",
+    url: layouts_url,
+    success: function(data) {
+      return JSON.parse(data);
     }
   });
-  checkbox_interfaces = $('#hide_unused_interfaces');
-  if (layout.other_settings.hide_unused_interfaces != checkbox_interfaces[0].checked) {
-    checkbox_interfaces.click();
+}
+
+function load_layouts() {
+  $.ajax({
+    dataType: "json",
+    url: layouts_url,
+    success: function(layouts) {
+      if (layouts == undefined) {
+        alert("There isn't any saved layout to be loaded");
+      } else {
+        $.each(layouts, function (idx, item) {
+          $('<option>').val(item).text(item).appendTo('#savedLayouts');
+        });
+      }
+    }
+  });
+}
+
+$('#restoreLayout').on('show.bs.modal', function (e) {
+    load_layouts();
+})
+
+function restore_layout(name) {
+  if ( name === undefined ) {
+    name = $('#savedLayouts').val();
   }
-  checkbox_hosts = $('#hide_disconnected_hosts');
-  if (layout.other_settings.hide_disconnected_hosts != checkbox_hosts[0].checked) {
-    checkbox_hosts.click();
-  }
-  simulation.restart();
+  $.getJSON(layouts_url + name, function(layout) {
+    $.each(simulation.nodes(), function(idx, node) {
+      if (node.name in layout.nodes) {
+        restored_node = layout.nodes[node.name];
+        node.x = restored_node.x;
+        node.y = restored_node.y;
+        node.fx = restored_node.fx;
+        node.fy = restored_node.fy;
+        d3node = d3.select('#node-' + node.type + '-' + fix_name(node.name))
+                      .classed('downlight', restored_node.downlight);
+      }
+    });
+    checkbox_interfaces = $('#hide_unused_interfaces');
+    if (layout.other_settings.hide_unused_interfaces != checkbox_interfaces[0].checked) {
+      checkbox_interfaces.click();
+    }
+    checkbox_hosts = $('#hide_disconnected_hosts');
+    if (layout.other_settings.hide_disconnected_hosts != checkbox_hosts[0].checked) {
+      checkbox_hosts.click();
+    }
+    $('#restoreLayout').modal('hide');
+    simulation.restart();
+  });
 }

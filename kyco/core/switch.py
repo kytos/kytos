@@ -22,10 +22,10 @@ class Interface(object):
         self.endpoints = []
 
     def __eq__(self, other):
-        if isinstance(other,str):
+        if isinstance(other, str):
             return self.address == other
 
-        if not isinstance(other,Interface):
+        if not isinstance(other, Interface):
             return False
 
         if self.port_number != other.port_number:
@@ -78,6 +78,7 @@ class Interface(object):
         return {'id': self.id,
                 'name': self.name,
                 'port_number': self.port_number,
+                'mac': self.address,
                 'switch': self.switch.dpid,
                 'type': 'interface'}
 

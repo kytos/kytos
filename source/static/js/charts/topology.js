@@ -416,6 +416,10 @@ function load_layouts() {
       if (layouts == undefined) {
         alert("There isn't any saved layout to be loaded");
       } else {
+        $('#savedLayouts').empty();
+        opt = '<option selected="true" disabled="disabled">Selecione seu Layout</option>'
+        $('#savedLayouts')
+          .append(opt);
         $.each(layouts, function (idx, item) {
           $('<option>').val(item).text(item).appendTo('#savedLayouts');
         });
@@ -423,10 +427,6 @@ function load_layouts() {
     }
   });
 }
-
-$('#restoreLayout').on('show.bs.modal', function (e) {
-    load_layouts();
-})
 
 function restore_layout(name) {
   if ( name === undefined ) {
@@ -452,7 +452,8 @@ function restore_layout(name) {
     if (layout.other_settings.hide_disconnected_hosts != checkbox_hosts[0].checked) {
       checkbox_hosts.click();
     }
-    $('#restoreLayout').modal('hide');
     simulation.restart();
   });
 }
+
+$('#savedLayouts').ready(load_layouts);

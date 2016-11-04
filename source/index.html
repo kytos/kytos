@@ -12,7 +12,6 @@
         <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Dosis|Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i|Work+Sans:100,200,300,400,500,600,700,800,900">
         <!-- Bootstrap core CSS -->
         <link href="static/css/style.css" rel="stylesheet">
-        <link href="static/css/chart.css" rel="stylesheet">
 
         <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
         <!--[if lt IE 9]><script src="../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
@@ -52,27 +51,7 @@
       </div>
     </div>
 
-    <div class="modal fade" id="restoreLayout" tabindex="-1" role="dialog" aria-labelledby="restoreLayoutLabel">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-            <h4 class="modal-title" id="saveLayoutLavel">Modal title</h4>
-          </div>
-          <div class="modal-body">
-            <select id='savedLayouts'></select>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" onClick='restore_layout();'>Restore</button>
-          </div>
-        </div>
-      </div>
-    </div>
     <!-- END OF MODALS -->
-
 
         <nav class="navbar navbar-default navbar-fixed-top">
             <div class="container-fluid">
@@ -122,6 +101,14 @@
                         </li>
 
                         <li>
+                            <a href="#switches">
+                              <i class="fa fa-bar-chart fa-2x hidden-lg hidden-md"></i>
+                              <i class="fa fa-bar-chart hidden-xs hidden-sm"></i>
+                              Switches
+                            </a>
+                        </li>
+
+                        <li>
                             <a href="#monitoring" class="open-terminal" data-toggle="collapse" aria-expanded="false">
                               <i class="fa fa-terminal fa-2x hidden-lg hidden-md"></i>
                               <i class="fa fa-terminal hidden-xs hidden-sm"></i>
@@ -151,7 +138,6 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                     <ul class="nav nav-pills kytos-nav-pills">
                         <li class="active"><a data-toggle="pill" href="#tab_terminal"><i class="fa fa-terminal"></i> Terminal</a></li>
                         <li id='tab_context_button'><a data-toggle="pill" href="#tab_context"><i class="fa fa-eye"></i> Context</a></li>
-                        <li><a data-toggle="pill" href="#tab_switches"><i class="fa fa-circle-o"></i> Switches</a></li>
                         <li><a data-toggle="pill" href="#tab_logs"><i class="fa fa-list"></i> Logs</a></li>
                         <li><a data-toggle="pill" href="#tab_notifications"><i class="fa fa-bell-o"></i> Notifications</a></li>
                         <li><a data-toggle="pill" href="#tab_settings"><i class="fa fa-cogs"></i> Settings</a></li>
@@ -169,76 +155,13 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                             Terminal content
                         </div>
 
-                        <div id="tab_switches" class="tab-pane fade in">
-                            Switches
-                        </div>
-
-
                         <div id="tab_context" class="tab-pane fade">
                           <div id="context-target">Loading...</div>
                             <script id="context-switch-template" type="x-tmpl-mustache">
-
-                            <div class="row-fluid" style="display: flex;">
-                                <div class="col-settings col-md-3 col-xs-6">
-                                  <div id="switchChart" class="text-center"></div>
-                                </div>
-
-<!--
-                                <div class="col-settings col-md-3 col-xs-6" style="display: flex; align-items: center;">
-                                  <table class="table table-condensed table-responsive">
-                                    <tbody>
-                                      <tr><td align="right">Switch</td><td>{{ name }}</td></tr>
-                                      <tr><td align="right">Connection</td><td>{{ connection }}</td></tr>
-                                      <tr><td align="right">OF Version</td><td>{{ of_version }}</td></tr>
-                                      <tr><td align="right">Hardware</td><td>{{ hardware }}</td></tr>
-                                      <tr><td align="right">Software</td><td>{{ software }}</td></tr>
-                                    </tbody>
-                                  </table>
-                                </div>
-
--->
-
-                                <div class="col-settings col-md-9 col-xs-6">
-
-<div>
-        <!-- Nav tabs -->
-        <ul class="nav nav-tabs nav-kytos nav-tabs-kytos nav-justified" role="tablist">
-          <li role="presentation" class="active"><a href="#summary" aria-controls="home" role="tab" data-toggle="tab" aria-expanded="true">Summary</a></li>
-          <li role="presentation" class=""><a href="#interfaces" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="false">Interfaces</a></li>
-          <li role="presentation" class=""><a href="#flows" aria-controls="messages" role="tab" data-toggle="tab" aria-expanded="false">Flows</a></li>
-        </ul>
-      
-        <!-- Tab panes -->
-        <div class="tab-content">
-          <div role="tabpanel" class="tab-pane active" id="summary">
-            <table class="table table-condensed">
-              <thead>
-                <tr><td width="50%"></td>
-                <td width="50%"></td>
-              </tr></thead>
-              <tbody>
-                <tr><td class="text-right"><strong>Name</strong></td><td>{{ name }}</td></tr>
-                <tr><td class="text-right"><strong>DPID</strong></td><td>{{ dpid }}</td></tr>
-                <tr><td class="text-right"><strong>Connection</strong></td><td>{{ connection }}</td></tr>
-                <tr><td class="text-right"><strong>OF Version</strong></td><td>{{ of_version }}</td></tr>
-                <tr><td class="text-right"><strong>Hardware</strong></td><td>{{ hardware }}</td></tr>
-                <tr><td class="text-right"><strong>Software</strong></td><td>{{ software }}</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div role="tabpanel" class="tab-pane" id="interfaces">
-            <div class="chart panel-default">
-              <div class="chart-body">
-                <div id="interfacesChart"><svg width="914" height="700"></svg></div>
-              </div>
-            </div>
-          </div>
-          <div role="tabpanel" class="tab-pane" id="flows">flows</div>
-        </div>
-      </div>
-
-                            </div>
-
+                                Hello I'm the switch "<b>{{ name }}</b>"!<br/>
+                                My current connection is: <b>{{connection}}</b><br/>
+                                My hardware is: <b>{{hardware}}</b><br/>
+                                My software is: <b>{{software}}</b>
                             </script>
                         </div>
 
@@ -267,8 +190,12 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                                 <div class="col-settings col-md-3 col-xs-6">
                                   <h1>Layout Settings</h1>
                                   <p class="help">Save and restore layouts.</p>
-                                  <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#saveLayout">Save Layout</button>
-                                  <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#restoreLayout">Load Layout</button>
+                                  <p>
+                                    <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#saveLayout">Save Layout</button>
+                                  </p>
+                                  <p>
+                                    <select id='savedLayouts' onChange='restore_layout();'></select>
+                                  </p>
                                 </div>
 
                                 <div class="col-settings col-md-3 col-xs-6">
@@ -319,7 +246,6 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
         <script src="static/js/kytos-terminal.js"></script>
         <script src="static/js/main.js"></script>
         <script src="static/js/charts/topology.js"></script>
-        <script src="static/js/charts/radar.js"></script>
 
         <script language="javascript">
 
@@ -329,11 +255,6 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
             Mustache.parse(template);   // optional, speeds up future uses
             var rendered = Mustache.render(template, data);
             $('#context-target').html(rendered);
-
-            // load switch interfaces data
-
-        var data = [[{'speed': 40000, 'name': 'ether1/1', 'value': 18983.2}, {'speed': 40000, 'name': 'ether1/2', 'value': 34533.2}, {'speed': 40000, 'name': 'ether1/3', 'value': 31283.2}, {'speed': 40000, 'name': 'ether1/4', 'value': 29000}, {'speed': 10000, 'name': 'ether1/5', 'value': 10000}, {'speed': 10000, 'name': 'ether1/6', 'value': 10000}, {'speed': 10000, 'name': 'ether1/7', 'value': 10000}, {'speed': 10000, 'name': 'ether1/8', 'value': 10000}, {'speed': 10000, 'name': 'ether1/9', 'value': 10000}, {'speed': 10000, 'name': 'ether1/10', 'value': 10000}, {'speed': 10000, 'name': 'ether1/11', 'value': 10000}, {'speed': 10000, 'name': 'ether1/12', 'value': 10000}, {'speed': 10000, 'name': 'ether1/13', 'value': 10000}, {'speed': 10000, 'name': 'ether1/14', 'value': 10000}, {'speed': 10000, 'name': 'ether1/15', 'value': 10000}, {'speed': 10000, 'name': 'ether1/16', 'value': 10000}, {'speed': 10000, 'name': 'ether1/17', 'value': 10000}, {'speed': 10000, 'name': 'ether1/18', 'value': 10000}, {'speed': 10000, 'name': 'ether1/19', 'value': 10000}, {'speed': 10000, 'name': 'ether1/20', 'value': 10000}, {'speed': 10000, 'name': 'ether1/21', 'value': 10000}, {'speed': 10000, 'name': 'ether1/22', 'value': 10000}, {'speed': 10000, 'name': 'ether1/23', 'value': 10000}, {'speed': 10000, 'name': 'ether1/24', 'value': 1000}], []]
-		        RadarChart("#switchChart", data);
           }
 
         </script>

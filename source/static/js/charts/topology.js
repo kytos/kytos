@@ -322,7 +322,16 @@ function show_context(d) {
             'connection': d.connection,
             'ofp_version': d.ofp_version,
             'hardware': d.hardware,
-            'software': d.software}
+            'software': d.software,
+            'interfaces': []};
+    interfaces = get_switch_interfaces(d);
+    $.each(interfaces, function(idx, interface){
+        iface = {'name': interface.name,
+                 'port_number': interface.port_number,
+                 'mac': interface.mac,
+                 'speed': 'To Be Done...'}
+        data.interfaces.push(iface)
+    });
     show_switch_context(data);
     highlight_switch(d);
   }

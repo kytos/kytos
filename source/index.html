@@ -273,12 +273,12 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
               <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="summary">
                   <table class="table table-condensed">
-                    <thead>
-                      <tr>
-                        <td width="50%"></td>
-                        <td width="50%"></td>
-                      </tr>
-                    </thead>
+                    <!--<thead>-->
+                      <!--<tr>-->
+                        <!--<td width="50%"></td>-->
+                        <!--<td width="50%"></td>-->
+                      <!--</tr>-->
+                    <!--</thead>-->
                     <tbody>
                       <tr><td class="text-right"><strong>Name</strong></td><td>{{ name }}</td></tr>
                       <tr><td class="text-right"><strong>DPID</strong></td><td>{{ dpid }}</td></tr>
@@ -290,6 +290,25 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                   </table>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="interfaces">
+                  <table class="table table-condensed">
+                    <thead>
+                      <tr>
+                        <td width="33%"><strong>Name</strong></td>
+                        <td width="33%"><strong>Port No.</strong></td>
+                        <td width="34%"><strong>MAC Address</strong></td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{#interfaces}}
+                        <tr>
+                          <td>{{ name }}</td>
+                          <td>{{ port_number }}</td>
+                          <td>{{ mac }}</td>
+                          <!--<td>{{ speed }}</td>-->
+                        </tr>
+                      {{/interfaces}}
+                    </tbody>
+                  </table>
                   <div class="chart panel-default">
                     <div class="chart-body">
                       <div id="interfacesChart">

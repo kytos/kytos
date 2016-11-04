@@ -5,7 +5,7 @@ from threading import Event, Thread
 
 from kyco.utils import listen_to
 
-log = logging.getLogger('Kyco')
+log = logging.getLogger(__name__)
 
 __all__ = ('KycoCoreNApp', 'KycoNApp')
 

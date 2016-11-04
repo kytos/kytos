@@ -31,7 +31,7 @@ from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
 from kyco.utils import now, start_logger
 from pyof.foundation.basic_types import HWAddress
 
-log = start_logger()
+log = start_logger(__name__)
 
 __all__ = ('Controller',)
 

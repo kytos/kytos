@@ -7,9 +7,9 @@ from unittest import TestCase
 
 from pyof.v0x01.symmetric.vendor_header import VendorHeader
 
+from kyco.config import KycoConfig
 from kyco.core.buffers import KycoBuffers
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
-from tests.helper import TestConfig
 
 
 class EmptyController(object):
@@ -40,7 +40,7 @@ class TestKycoServer(TestCase):
 
     def setUp(self):
         """Do the test basic setup."""
-        config = TestConfig()
+        config = KycoConfig()
         self.options = config.options['daemon']
         self.controller = EmptyController()
         self.controller.buffers = KycoBuffers()
@@ -78,7 +78,7 @@ class TestKycoOpenFlowHandler(TestCase):
 
     def setUp(self):
         """Do the test basic setup."""
-        self.config = TestConfig()
+        self.config = KycoConfig()
         self.options = self.config.options['daemon']
         self.controller = EmptyController
         self.controller.buffers = KycoBuffers()

@@ -3,11 +3,16 @@ python:
     - "3.4"
     - "3.5"
 # command to install dependencies
-sudo: required
 install:
+    - pip install git+git://github.com/kytos/python-openflow.git@develop
+    - pip install git+git://github.com/kytos/kyco-core-napps.git@develop
     - pip install -r requirements.txt --upgrade --pre
     - pip install -r requirements-docs.txt
     - pip install -r requirements-dev.txt
+before_script:
+    - cd $VIRTUAL_ENV/var/lib/kytos/napps/kytos
+    - for app in *; do if [ $app != "of.core" ]; then rm -rf $app; fi; done
+    - cd -
 # command to run tests
 script:
     - python setup.py test

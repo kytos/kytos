@@ -284,6 +284,8 @@ function highlight_all_interfaces() {
 
 function highlight_all_nodes() {
   d3.selectAll("[id^='node-']").classed('downlight', false);
+  $('#context-target').html('Loading ...');
+  $('#tab_terminal_button a').click();
 }
 
 function downlight_all_switches() {
@@ -315,10 +317,21 @@ function resetted() {
 
 function show_context(d) {
   if (d.type == 'switch') {
-    data = {'connection': d.connection,
+    data = {'name': d.name,
+            'dpid': d.dpid,
+            'connection': d.connection,
+            'ofp_version': d.ofp_version,
             'hardware': d.hardware,
-            'software':d.software}
-    data['name'] = d.name
+            'software': d.software,
+            'interfaces': []};
+    interfaces = get_switch_interfaces(d);
+    $.each(interfaces, function(idx, interface){
+        iface = {'name': interface.name,
+                 'port_number': interface.port_number,
+                 'mac': interface.mac,
+                 'speed': 'To Be Done...'}
+        data.interfaces.push(iface)
+    });
     show_switch_context(data);
     highlight_switch(d);
   }

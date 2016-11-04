@@ -3,6 +3,3 @@ python-daemon
 python-openflow >= 1.1.0a2.post2
 kyco-core-napps >= 1.1.0a5.dev1
 flask
-
-# Used by stats app
-rrdtool >= 0.1.6

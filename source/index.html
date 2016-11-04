@@ -13,6 +13,8 @@
         <!-- Bootstrap core CSS -->
         <link href="static/css/style.css" rel="stylesheet">
         <link href="static/css/chart.css" rel="stylesheet">
+        <link href="static/css/vendors/owl.carousel.min.css" rel="stylesheet">
+        <link href="static/css/vendors/owl.theme.default.min.css" rel="stylesheet">
 
         <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
         <!--[if lt IE 9]><script src="../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
@@ -27,7 +29,6 @@
       line {
         stroke: rgba(255,255,255,0.5);
       }
-
     </style>
 
     <!-- MODALS -->
@@ -150,7 +151,18 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                         </div>
 
                         <div id="tab_switches" class="tab-pane fade in">
-                            Switches
+
+<div class="owl-carousel owl-theme">
+  <div> Your Content </div>
+  <div> Your Content </div>
+  <div> Your Content </div>
+  <div> Your Content </div>
+  <div> Your Content </div>
+  <div> Your Content </div>
+  <div> Your Content </div>
+</div>
+
+
                         </div>
 
 
@@ -296,6 +308,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
         </div>
 
         <script src="static/js/vendors/jquery.min.js"></script>
+        <script src="static/js/vendors/owl.carousel.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
         <script src="//d3js.org/d3.v4.min.js"></script>
         <script src="static/js/vendors/bootstrap.min.js"></script>
@@ -306,6 +319,13 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
         <script src="static/js/charts/radar.js"></script>
 
         <script language="javascript">
+
+          $(document).ready(function() {
+
+						$('.owl-carousel').owlCarousel({
+						    margin:10,
+						})
+          });
 
           function show_switch_context(data) {
             var template = $('#context-switch-template').html();

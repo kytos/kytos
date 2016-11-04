@@ -284,6 +284,8 @@ function highlight_all_interfaces() {
 
 function highlight_all_nodes() {
   d3.selectAll("[id^='node-']").classed('downlight', false);
+  $('#context-target').html('Loading ...');
+  $('#tab_terminal_button a').click();
 }
 
 function downlight_all_switches() {

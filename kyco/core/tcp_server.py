@@ -12,7 +12,7 @@ from kyco.core.switch import Connection
 
 __all__ = ['KycoServer', 'KycoOpenFlowRequestHandler']
 
-log = logging.getLogger('Kyco')
+log = logging.getLogger(__name__)
 
 
 class KycoServer(ThreadingMixIn, TCPServer):

@@ -6,7 +6,7 @@ from kyco.core.events import KycoEvent
 
 __all__ = ['KycoBuffers']
 
-log = logging.getLogger('Kyco')
+log = logging.getLogger(__name__)
 
 
 class KycoEventBuffer(object):

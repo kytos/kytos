@@ -9,7 +9,7 @@ from kyco.utils import now
 
 __all__ = ('Switch',)
 
-log = logging.getLogger('Kyco')
+log = logging.getLogger(__name__)
 
 
 class Interface(object):

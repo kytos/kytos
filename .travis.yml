@@ -3,7 +3,6 @@ python:
     - "3.4"
     - "3.5"
 # command to install dependencies
-sudo: required
 install:
     - pip install git+git://github.com/kytos/python-openflow.git@develop
     - pip install git+git://github.com/kytos/kyco-core-napps.git@develop

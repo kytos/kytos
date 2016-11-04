@@ -156,70 +156,6 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
 
                         <div id="tab_context" class="tab-pane fade">
                           <div id="context-target">Loading...</div>
-                            <script id="context-switch-template" type="x-tmpl-mustache">
-
-                            <div class="row-fluid" style="display: flex;">
-                                <div class="col-settings col-md-3 col-xs-6">
-                                  <div id="switchChart" class="text-center"></div>
-                                </div>
-
-<!--
-                                <div class="col-settings col-md-3 col-xs-6" style="display: flex; align-items: center;">
-                                  <table class="table table-condensed table-responsive">
-                                    <tbody>
-                                      <tr><td align="right">Switch</td><td>{{ name }}</td></tr>
-                                      <tr><td align="right">Connection</td><td>{{ connection }}</td></tr>
-                                      <tr><td align="right">OFP Version</td><td>{{ ofp_version }}</td></tr>
-                                      <tr><td align="right">Hardware</td><td>{{ hardware }}</td></tr>
-                                      <tr><td align="right">Software</td><td>{{ software }}</td></tr>
-                                    </tbody>
-                                  </table>
-                                </div>
-
--->
-
-                                <div class="col-settings col-md-9 col-xs-6">
-
-<div>
-        <!-- Nav tabs -->
-        <ul class="nav nav-tabs nav-kytos nav-tabs-kytos nav-justified" role="tablist">
-          <li role="presentation" class="active"><a href="#summary" aria-controls="home" role="tab" data-toggle="tab" aria-expanded="true">Summary</a></li>
-          <li role="presentation" class=""><a href="#interfaces" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="false">Interfaces</a></li>
-          <li role="presentation" class=""><a href="#flows" aria-controls="messages" role="tab" data-toggle="tab" aria-expanded="false">Flows</a></li>
-        </ul>
-      
-        <!-- Tab panes -->
-        <div class="tab-content">
-          <div role="tabpanel" class="tab-pane active" id="summary">
-            <table class="table table-condensed">
-              <thead>
-                <tr><td width="50%"></td>
-                <td width="50%"></td>
-              </tr></thead>
-              <tbody>
-                <tr><td class="text-right"><strong>Name</strong></td><td>{{ name }}</td></tr>
-                <tr><td class="text-right"><strong>DPID</strong></td><td>{{ dpid }}</td></tr>
-                <tr><td class="text-right"><strong>Connection</strong></td><td>{{ connection }}</td></tr>
-                <tr><td class="text-right"><strong>OFP Version</strong></td><td>{{ ofp_version }}</td></tr>
-                <tr><td class="text-right"><strong>Hardware</strong></td><td>{{ hardware }}</td></tr>
-                <tr><td class="text-right"><strong>Software</strong></td><td>{{ software }}</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div role="tabpanel" class="tab-pane" id="interfaces">
-            <div class="chart panel-default">
-              <div class="chart-body">
-                <div id="interfacesChart"><svg width="914" height="700"></svg></div>
-              </div>
-            </div>
-          </div>
-          <div role="tabpanel" class="tab-pane" id="flows">flows</div>
-        </div>
-      </div>
-
-                            </div>
-
-                            </script>
                         </div>
 
 
@@ -304,6 +240,71 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
         <script src="static/js/main.js"></script>
         <script src="static/js/charts/topology.js"></script>
         <script src="static/js/charts/radar.js"></script>
+
+
+        <script id="context-switch-template" type="x-tmpl-mustache">
+          <div class="row-fluid" style="display: flex;">
+            <div class="col-settings col-md-3 col-xs-6">
+              <div id="switchChart" class="text-center"></div>
+            </div>
+
+            <div class="col-settings col-md-9 col-xs-6">
+              <div>
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs nav-kytos nav-tabs-kytos nav-justified" role="tablist">
+                  <li role="presentation" class="active">
+                    <a href="#summary" aria-controls="home" role="tab" data-toggle="tab" aria-expanded="true">
+                      Summary
+                    </a>
+                  </li>
+                  <li role="presentation" class="">
+                    <a href="#interfaces" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="false">
+                      Interfaces
+                    </a>
+                  </li>
+                  <li role="presentation" class="">
+                    <a href="#flows" aria-controls="messages" role="tab" data-toggle="tab" aria-expanded="false">
+                      Flows
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="summary">
+                  <table class="table table-condensed">
+                    <thead>
+                      <tr>
+                        <td width="50%"></td>
+                        <td width="50%"></td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr><td class="text-right"><strong>Name</strong></td><td>{{ name }}</td></tr>
+                      <tr><td class="text-right"><strong>DPID</strong></td><td>{{ dpid }}</td></tr>
+                      <tr><td class="text-right"><strong>Connection</strong></td><td>{{ connection }}</td></tr>
+                      <tr><td class="text-right"><strong>OFP Version</strong></td><td>{{ ofp_version }}</td></tr>
+                      <tr><td class="text-right"><strong>Hardware</strong></td><td>{{ hardware }}</td></tr>
+                      <tr><td class="text-right"><strong>Software</strong></td><td>{{ software }}</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="interfaces">
+                  <div class="chart panel-default">
+                    <div class="chart-body">
+                      <div id="interfacesChart">
+                        <svg width="914" height="700"></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="flows">
+                  flows
+                </div>
+              </div>
+            </div>
+          </div>
+        </script>
 
         <script language="javascript">
 

@@ -1,4 +1,6 @@
-var layouts_url = 'http://127.0.0.1:5000/kytos/web/topology/layouts/';
+var layouts_url = 'http://" + window.location.hostname + "8181/kytos/web/topology/layouts/';
+
+console.log(window.location.hostname);
 
 // Nodes vars
 var charge = {'switch': 400,
@@ -65,7 +67,7 @@ var simulation = d3.forceSimulation()
     .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
-url = "http://localhost:5000/kytos/topology"
+url = "http://" + window.location.hostname +":8181/kytos/topology"
 d3.json(url,function(error, graph) {
   if (error) throw error;
 

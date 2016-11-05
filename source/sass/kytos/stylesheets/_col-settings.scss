@@ -1,5 +1,18 @@
 .col-settings {
   font-family : "Helvetica Neue",Helvetica,Arial,sans-serif;
+  margin-top : -3px ;
+  min-height : 100vh;
+  border-right : 1px solid #111;
+  border-left : 1px solid #2a2d35;
+
+  &:first-child {
+    border-left : 0;
+  }
+
+  &:last-child {
+    border-right : 0;
+  }
+
 
   h1 {
     margin : 5px 0 0 0;
@@ -8,7 +21,14 @@
     padding : 0;
   }
 
+  .checkbox {
+    label {
+      padding-left: 0;
+    }
+  }
+
   label {
+    padding-left: 0;
     font-size : 12px;
     display : block;
   }
@@ -25,4 +45,3 @@
     margin-top : 1px;
   }
 }
-

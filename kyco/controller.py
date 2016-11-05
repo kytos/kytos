@@ -30,6 +30,7 @@ from kyco.core.switch import Switch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
 from kyco.utils import now, start_logger
 from pyof.foundation.basic_types import HWAddress
+from kyco.core.websocket import LogWebSocket
 
 log = start_logger(__name__)
 
@@ -94,6 +95,8 @@ class Controller(object):
 
         self.api_server_running = False
 
+        self.log_websocket = LogWebSocket()
+
     def start_api_server(self):
         """Starts Flask server inside its own thread"""
         app.add_url_rule('/kytos/shutdown', self.shutdown_api.__name__,
@@ -119,6 +122,10 @@ class Controller(object):
            self.stop_api_server()
         self.start_api_server()
 
+    def start_log_websocket(self):
+        self.log_websocket.register_log(log)
+        self.log_websocket.start()
+
     def start(self):
         """Start the controller.
 
@@ -126,6 +133,7 @@ class Controller(object):
         Starts a thread for each buffer handler.
         Load the installed apps.
         """
+        self.start_log_websocket()
         log.info("Starting Kyco - Kytos Controller")
         self.server = KycoServer((self.options.listen, int(self.options.port)),
                                  KycoOpenFlowRequestHandler,
@@ -158,6 +166,8 @@ class Controller(object):
         self.started_at = now()
 
     def stop(self, graceful=True):
+        if self.log_websocket.is_running:
+            self.log_websocket.shutdown()
         if self.api_server_running:
             self.stop_api_server()
         if self.started_at:

@@ -1,5 +1,7 @@
 object,
 embed,
+input[type="checkbox"],
+input[type="radio"],
 a {
   outline: 0;
   &:hover,
@@ -7,6 +9,14 @@ a {
   &:focus {
      outline: 0;
   }
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  &:focus {
+    outline: 0;
+  }
+
 }
 
 input::-moz-focus-inner {

@@ -13,6 +13,8 @@
         <!-- Bootstrap core CSS -->
         <link href="static/css/style.css" rel="stylesheet">
         <link href="static/css/chart.css" rel="stylesheet">
+        <link href="static/css/vendors/owl.carousel.min.css" rel="stylesheet">
+        <link href="static/css/vendors/owl.theme.default.min.css" rel="stylesheet">
 
         <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
         <!--[if lt IE 9]><script src="../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
@@ -27,7 +29,6 @@
       line {
         stroke: rgba(255,255,255,0.5);
       }
-
     </style>
 
     <!-- MODALS -->
@@ -128,8 +129,8 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                 <section id="terminal" class="terminal">
                   <div class="terminal-header">
                     <div class="terminal-title">
-                    <ul class="nav nav-pills kytos-nav-pills">
-                        <li class="active"><a data-toggle="pill" href="#tab_terminal"><i class="fa fa-terminal"></i> Terminal</a></li>
+                      <ul class="nav nav-pills kytos-nav-pills">
+                        <li id='tab_terminal_button' class="active"><a data-toggle="pill" href="#tab_terminal"><i class="fa fa-terminal"></i> Terminal</a></li>
                         <li id='tab_context_button'><a data-toggle="pill" href="#tab_context"><i class="fa fa-eye"></i> Context</a></li>
                         <li><a data-toggle="pill" href="#tab_switches"><i class="fa fa-circle-o"></i> Switches</a></li>
                         <li><a data-toggle="pill" href="#tab_logs"><i class="fa fa-list"></i> Logs</a></li>
@@ -150,76 +151,28 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                         </div>
 
                         <div id="tab_switches" class="tab-pane fade in">
-                            Switches
+
+<div class="owl-carousel owl-theme">
+    <div class="item"><h4>1</h4></div>
+    <div class="item"><h4>2</h4></div>
+    <div class="item"><h4>3</h4></div>
+    <div class="item"><h4>4</h4></div>
+    <div class="item"><h4>5</h4></div>
+    <div class="item"><h4>6</h4></div>
+    <div class="item"><h4>7</h4></div>
+    <div class="item"><h4>8</h4></div>
+    <div class="item"><h4>9</h4></div>
+    <div class="item"><h4>10</h4></div>
+    <div class="item"><h4>11</h4></div>
+    <div class="item"><h4>12</h4></div>
+</div>
+
+
                         </div>
 
 
                         <div id="tab_context" class="tab-pane fade">
                           <div id="context-target">Loading...</div>
-                            <script id="context-switch-template" type="x-tmpl-mustache">
-
-                            <div class="row-fluid" style="display: flex;">
-                                <div class="col-settings col-md-3 col-xs-6">
-                                  <div id="switchChart" class="text-center"></div>
-                                </div>
-
-<!--
-                                <div class="col-settings col-md-3 col-xs-6" style="display: flex; align-items: center;">
-                                  <table class="table table-condensed table-responsive">
-                                    <tbody>
-                                      <tr><td align="right">Switch</td><td>{{ name }}</td></tr>
-                                      <tr><td align="right">Connection</td><td>{{ connection }}</td></tr>
-                                      <tr><td align="right">OF Version</td><td>{{ of_version }}</td></tr>
-                                      <tr><td align="right">Hardware</td><td>{{ hardware }}</td></tr>
-                                      <tr><td align="right">Software</td><td>{{ software }}</td></tr>
-                                    </tbody>
-                                  </table>
-                                </div>
-
--->
-
-                                <div class="col-settings col-md-9 col-xs-6">
-
-<div>
-        <!-- Nav tabs -->
-        <ul class="nav nav-tabs nav-kytos nav-tabs-kytos nav-justified" role="tablist">
-          <li role="presentation" class="active"><a href="#summary" aria-controls="home" role="tab" data-toggle="tab" aria-expanded="true">Summary</a></li>
-          <li role="presentation" class=""><a href="#interfaces" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="false">Interfaces</a></li>
-          <li role="presentation" class=""><a href="#flows" aria-controls="messages" role="tab" data-toggle="tab" aria-expanded="false">Flows</a></li>
-        </ul>
-      
-        <!-- Tab panes -->
-        <div class="tab-content">
-          <div role="tabpanel" class="tab-pane active" id="summary">
-            <table class="table table-condensed">
-              <thead>
-                <tr><td width="50%"></td>
-                <td width="50%"></td>
-              </tr></thead>
-              <tbody>
-                <tr><td class="text-right"><strong>Name</strong></td><td>{{ name }}</td></tr>
-                <tr><td class="text-right"><strong>DPID</strong></td><td>{{ dpid }}</td></tr>
-                <tr><td class="text-right"><strong>Connection</strong></td><td>{{ connection }}</td></tr>
-                <tr><td class="text-right"><strong>OF Version</strong></td><td>{{ of_version }}</td></tr>
-                <tr><td class="text-right"><strong>Hardware</strong></td><td>{{ hardware }}</td></tr>
-                <tr><td class="text-right"><strong>Software</strong></td><td>{{ software }}</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div role="tabpanel" class="tab-pane" id="interfaces">
-            <div class="chart panel-default">
-              <div class="chart-body">
-                <div id="interfacesChart"><svg width="914" height="700"></svg></div>
-              </div>
-            </div>
-          </div>
-          <div role="tabpanel" class="tab-pane" id="flows">flows</div>
-        </div>
-      </div>
-
-                            </div>
-
-                            </script>
                         </div>
 
 
@@ -296,6 +249,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
         </div>
 
         <script src="static/js/vendors/jquery.min.js"></script>
+        <script src="static/js/vendors/owl.carousel.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
         <script src="//d3js.org/d3.v4.min.js"></script>
         <script src="static/js/vendors/bootstrap.min.js"></script>
@@ -305,7 +259,99 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
         <script src="static/js/charts/topology.js"></script>
         <script src="static/js/charts/radar.js"></script>
 
+
+        <script id="context-switch-template" type="x-tmpl-mustache">
+          <div class="row-fluid" style="display: flex;">
+            <div class="col-settings col-md-3 col-xs-6">
+              <div id="switchChart" class="text-center"></div>
+            </div>
+
+            <div class="col-settings col-md-9 col-xs-6">
+              <div>
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs nav-kytos nav-tabs-kytos nav-justified" role="tablist">
+                  <li role="presentation" class="active">
+                    <a href="#summary" aria-controls="home" role="tab" data-toggle="tab" aria-expanded="true">
+                      Summary
+                    </a>
+                  </li>
+                  <li role="presentation" class="">
+                    <a href="#interfaces" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="false">
+                      Interfaces
+                    </a>
+                  </li>
+                  <li role="presentation" class="">
+                    <a href="#flows" aria-controls="messages" role="tab" data-toggle="tab" aria-expanded="false">
+                      Flows
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="summary">
+                  <table class="table table-condensed">
+                    <!--<thead>-->
+                      <!--<tr>-->
+                        <!--<td width="50%"></td>-->
+                        <!--<td width="50%"></td>-->
+                      <!--</tr>-->
+                    <!--</thead>-->
+                    <tbody>
+                      <tr><td class="text-right"><strong>Name</strong></td><td>{{ name }}</td></tr>
+                      <tr><td class="text-right"><strong>DPID</strong></td><td>{{ dpid }}</td></tr>
+                      <tr><td class="text-right"><strong>Connection</strong></td><td>{{ connection }}</td></tr>
+                      <tr><td class="text-right"><strong>OFP Version</strong></td><td>{{ ofp_version }}</td></tr>
+                      <tr><td class="text-right"><strong>Hardware</strong></td><td>{{ hardware }}</td></tr>
+                      <tr><td class="text-right"><strong>Software</strong></td><td>{{ software }}</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="interfaces">
+                  <table class="table table-condensed">
+                    <thead>
+                      <tr>
+                        <td width="33%"><strong>Name</strong></td>
+                        <td width="33%"><strong>Port No.</strong></td>
+                        <td width="34%"><strong>MAC Address</strong></td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{#interfaces}}
+                        <tr>
+                          <td>{{ name }}</td>
+                          <td>{{ port_number }}</td>
+                          <td>{{ mac }}</td>
+                          <!--<td>{{ speed }}</td>-->
+                        </tr>
+                      {{/interfaces}}
+                    </tbody>
+                  </table>
+                  <div class="chart panel-default">
+                    <div class="chart-body">
+                      <div id="interfacesChart">
+                        <svg width="914" height="700"></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="flows">
+                  flows
+                </div>
+              </div>
+            </div>
+          </div>
+        </script>
+
         <script language="javascript">
+
+          $(document).ready(function() {
+
+						$('.owl-carousel').owlCarousel({
+						    margin:10,
+                nav:true,
+						})
+          });
 
           function show_switch_context(data) {
             var template = $('#context-switch-template').html();

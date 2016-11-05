@@ -187,12 +187,12 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                                 <div class="col-settings col-md-3 col-xs-6">
                                     <h1>Settings</h1>
                                     <p class="help">Clean interface</p>
-                                    <div class="checkbox">
-                                    <label>
-                                      <input id='hide_unused_interfaces' type="checkbox" onclick='javascript:toggle_unused_interfaces(this.checked);'> Hide unused interfaces
+                                    <div class="checkbox" data-label-width="0"  data-size="mini" >
+                                    <label for="hide_unused_interfaces">
+                                      <input id='hide_unused_interfaces' type="checkbox" onclick="javascript:toggle_unused_interfaces(this.checked);" data-label-width="0"  data-on-color="primary"data-size="mini"> Hide unused interfaces
                                     </label>
-                                    <label>
-                                      <input id='hide_disconnected_hosts' type="checkbox" onclick='javascript:toggle_disconnected_hosts(this.checked);'> Hide disconnected hosts
+                                    <label for="hide_disconnected_hosts">
+                                      <input id='hide_disconnected_hosts' type="checkbox"  data-label-width="0"  data-size="mini" onclick="javascript:toggle_disconnected_hosts(this.checked);"> Hide disconnected hosts
                                     </label>
                                   </div>
                                 </div>
@@ -200,32 +200,44 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                                 <div class="col-settings col-md-3 col-xs-6">
                                   <h1>Layout Settings</h1>
                                   <p class="help">Save and restore layouts.</p>
-                                  <p>
-                                    <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#saveLayout">Save Layout</button>
-                                  </p>
+                                  <div class="mt">
+                                    <button type="button" class="btn btn-sm btn-kytos-default" data-toggle="modal" data-target="#saveLayout">Save Layout</button>
+                                  </div>
                                   <p>
                                     <select id='savedLayouts' onChange='restore_layout();'></select>
                                   </p>
+                                    <div class="dropup">
+                                      <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Saved Layouts
+                                        <span class="caret"></span>
+                                      </button>
+                                      <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                        <li><a href="#">Layout One</a></li>
+                                        <li><a href="#">Another layout</a></li>
+                                        <li><a href="#">My Layout</a></li>
+                                      </ul>
+                                    </div>
+
                                 </div>
 
                                 <div class="col-settings col-md-3 col-xs-6">
                                     <h1>Settings</h1>
                                     <p class="help">Put some help text here.</p>
                                     <div class="radio">
-                                      <label>
-                                        <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked>
+                                      <label for="optionsRadios1">
+                                        <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1"  data-label-width="0"  data-size="mini"  class="switch-radio" checked>
                                         Option one is this
                                       </label>
                                     </div>
                                     <div class="radio">
-                                      <label>
-                                        <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+                                      <label for="optionsRadios2">
+                                        <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2" data-label-width="0"  data-size="mini"  class="switch-radio" >
                                         Option two can be something else
                                       </label>
                                     </div>
                                     <div class="radio disabled">
-                                      <label>
-                                        <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3" disabled>
+                                      <label for="optionsRadios3">
+                                        <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3" disabled data-label-width="0"  data-size="mini"  class="switch-radio" >
                                         Option three is disabled
                                       </label>
                                     </div>
@@ -234,10 +246,11 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                                 <div class="col-settings col-md-3 col-xs-6">
                                     <h1>Settings</h1>
                                     <p class="help">Put some help text here.</p>
-                                    <div class="checkbox">
-                                    <label>
-                                      <input type="checkbox"> Check me out
-                                    </label>
+                                    <div class="checkbox" data-label-width="0"  data-size="mini" >
+                                        <label for="checkboxOption1">
+                                        <input type="checkbox" data-label-width="0"  data-size="mini"  id="checkboxOption1" checked="checked">
+                                            Check me out
+                                        </label>
                                   </div>
                                 </div>
 
@@ -253,6 +266,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
         <script src="//cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
         <script src="//d3js.org/d3.v4.min.js"></script>
         <script src="static/js/vendors/bootstrap.min.js"></script>
+        <script src="static/js/vendors/bootstrap-switch.min.js"></script>
         <script src="static/js/kytos-helper.js"></script>
         <script src="static/js/kytos-terminal.js"></script>
         <script src="static/js/main.js"></script>

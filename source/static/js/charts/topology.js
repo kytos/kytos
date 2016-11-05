@@ -387,7 +387,7 @@ function get_current_layout() {
 }
 
 function save_layout() {
-  layout_name = $('#layout-name')[0].value;
+  layout_name = $('#savedLayouts>button>span.layout-name').text();
   if (layout_name == '') {
     alert('Please, choose a name for the layout.');
   } else {
@@ -398,16 +398,17 @@ function save_layout() {
       url: layouts_url + layout_name,
       data: data,
       success: function(data) {
-        alert('Layout ' + layout_name + ' saved.');
+        console.log('Layout ' + layout_name + ' saved.');
         $('#saveLayout').modal('hide');
       },
       contentType: "application/json",
       dataType: "json"
     })
     .done(function(){
-        alert('Layout ' + layout_name + ' saved.');
+        console.log('Layout ' + layout_name + ' saved.');
         $('#saveLayout').modal('hide');
     });
+    appendLayoutListItem(layout_name);
     $('#saveLayout').modal('hide');
   }
 }
@@ -431,22 +432,35 @@ function load_layouts() {
       if (layouts == undefined) {
         alert("There isn't any saved layout to be loaded");
       } else {
-        $('#savedLayouts').empty();
-        opt = '<option selected="true" disabled="disabled">Selecione seu Layout</option>'
-        $('#savedLayouts')
-          .append(opt);
+        savedLayouts = $('#savedLayouts>ul');
+        savedLayouts.empty();
         $.each(layouts, function (idx, item) {
-          $('<option>').val(item).text(item).appendTo('#savedLayouts');
+          appendLayoutListItem(item);
         });
       }
     }
   });
 }
 
+function appendLayoutListItem(item){
+  var savedLayouts = $('#savedLayouts>ul'),
+      exists = false;
+
+  savedLayouts.find('li').each(function(){
+    if ($(this).text() == item) {
+      exists = true;
+    }
+  });
+  if (!exists){
+    $('<li><a href="#" data-value="'+ item +'" onclick="restore_layout(\''+ item +'\')">'+ item +'</a></li>').appendTo(savedLayouts);
+  }
+}
+
 function restore_layout(name) {
   if ( name === undefined ) {
-    name = $('#savedLayouts').val();
+    name = $('#savedLayouts>ul>li:first').text();
   }
+  $('#savedLayouts>button>span.layout-name').text(name);
   $.getJSON(layouts_url + name, function(layout) {
     $.each(simulation.nodes(), function(idx, node) {
       if (node.name in layout.nodes) {

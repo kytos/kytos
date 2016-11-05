@@ -34,20 +34,20 @@
     <!-- MODALS -->
 
     <div class="modal fade" id="saveLayout" tabindex="-1" role="dialog" aria-labelledby="saveLayoutLabel">
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-            <h4 class="modal-title" id="saveLayoutLavel">Modal title</h4>
+            <h4 class="modal-title text-center" id="saveLayoutLavel">Save this layout</h4>
           </div>
           <div class="modal-body">
-            <input type="text" id="layout-name" placeholder='Layout name'/>
+            <input type="text" class="form-control input-sm" id="layout-name" placeholder='Layout name'/>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" onClick='save_layout();'>Save changes</button>
+            <button type="button" class="btn btn-kytos-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-kytos-primary" onclick='save_layout();'>Save changes</button>
           </div>
         </div>
       </div>
@@ -189,10 +189,10 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                                     <p class="help">Clean interface</p>
                                     <div class="checkbox" data-label-width="0"  data-size="mini" >
                                     <label for="hide_unused_interfaces">
-                                      <input id='hide_unused_interfaces' type="checkbox" onclick="javascript:toggle_unused_interfaces(this.checked);" data-label-width="0"  data-on-color="primary"data-size="mini"> Hide unused interfaces
+                                      <input id='hide_unused_interfaces' type="checkbox" onchange="toggle_unused_interfaces(this.checked);" data-label-width="0"  data-on-color="primary" data-size="mini"> Hide unused interfaces
                                     </label>
                                     <label for="hide_disconnected_hosts">
-                                      <input id='hide_disconnected_hosts' type="checkbox"  data-label-width="0"  data-size="mini" onclick="javascript:toggle_disconnected_hosts(this.checked);"> Hide disconnected hosts
+                                      <input id='hide_disconnected_hosts' type="checkbox"  data-label-width="0"  data-size="mini" onchange="toggle_disconnected_hosts(this.checked);"> Hide disconnected hosts
                                     </label>
                                   </div>
                                 </div>
@@ -203,20 +203,14 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                                   <div class="mt">
                                     <button type="button" class="btn btn-sm btn-kytos-default" data-toggle="modal" data-target="#saveLayout">Save Layout</button>
                                   </div>
-                                  <p>
-                                    <select id='savedLayouts' onChange='restore_layout();'></select>
-                                  </p>
-                                    <div class="dropup">
-                                      <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Saved Layouts
-                                        <span class="caret"></span>
-                                      </button>
-                                      <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                        <li><a href="#">Layout One</a></li>
-                                        <li><a href="#">Another layout</a></li>
-                                        <li><a href="#">My Layout</a></li>
-                                      </ul>
-                                    </div>
+                                  <div class="dropup mt" id="savedLayouts">
+                                    <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                      <span class="layout-name">Saved Layouts</span>
+                                      <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                    </ul>
+                                  </div>
 
                                 </div>
 

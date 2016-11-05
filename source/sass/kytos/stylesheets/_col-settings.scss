@@ -44,4 +44,13 @@
     vertical-align : bottom;
     margin-top : 1px;
   }
+
+  .dropup {
+    .dropdown-menu {
+      font-size : 12px;
+      max-height: 105px;
+      overflow-x : hidden;
+      overflow-y : auto;
+    }
+  }
 }

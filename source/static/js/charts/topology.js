@@ -1,4 +1,4 @@
-var layouts_url = 'http://" + window.location.hostname + "8181/kytos/web/topology/layouts/';
+var layouts_url = 'http://" + window.location.hostname + ":8181/kytos/web/topology/layouts/';
 
 console.log(window.location.hostname);
 

@@ -1,6 +1,6 @@
-var layouts_url = 'http://" + window.location.hostname + "8181/kytos/web/topology/layouts/';
-
-console.log(window.location.hostname);
+var api_url = "http://" + window.location.hostname + ":8181/kytos/",
+    layouts_url = api_url + "web/topology/layouts/",
+    topology_url = api_url + "topology";
 
 // Nodes vars
 var charge = {'switch': 400,
@@ -33,7 +33,7 @@ var strokes = {'interface': 0,
                'host': 1};
 
 var width = $("#topology-chart").parent().width();
-var height = 600;
+var height = $(window).height() - $('.navbar').height() - 5;
 
 var zoom = d3.zoom()
             .scaleExtent([0.2, 3])
@@ -65,11 +65,16 @@ var simulation = d3.forceSimulation()
                                  .distance(function(d) { return distance[d.type]; })
           )
     .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
-    .force("center", d3.forceCenter(width / 2, height / 2));
+    .force("center", d3.forceCenter(width / 2, 2 * height / 5));
 
-url = "http://" + window.location.hostname +":8181/kytos/topology"
-d3.json(url,function(error, graph) {
-  if (error) throw error;
+setStatus('Loading topology ... ');
+d3.json(topology_url, function(error, graph) {
+  if (error) {
+    setStatus('Error while trying to load  the topology');
+    throw error;
+  };
+
+  setStatus("Topology loaded, let's print it ... ");
 
   var link = container.append("g")
       .attr("class", "links")
@@ -117,6 +122,9 @@ d3.json(url,function(error, graph) {
         .attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
   }
+
+  setStatus('Topology built. Have fun!');
+
 });
 
 function get_node_size(type) {
@@ -128,6 +136,10 @@ function dragstarted(d) {
   if ( d.type == 'switch' ) {
     d.old_fx = d.x;
     d.old_fy = d.y;
+    $.each(get_switch_interfaces(d), function(index, interface){
+      interface.fx = interface.x;
+      interface.fy = interface.y;
+    });
   }
   d.fx = d.x;
   d.fy = d.y;
@@ -286,8 +298,9 @@ function highlight_all_interfaces() {
 
 function highlight_all_nodes() {
   d3.selectAll("[id^='node-']").classed('downlight', false);
-  $('#context-target').html('Loading ...');
-  $('#tab_terminal_button a').click();
+  dv = '<div id="orientation_text">Click on an element in the topology chart to show its context here.</div>'
+  $('#context_target').html(dv);
+  resize_terminal_available_area();
 }
 
 function downlight_all_switches() {
@@ -387,7 +400,7 @@ function get_current_layout() {
 }
 
 function save_layout() {
-  layout_name = $('#savedLayouts>button>span.layout-name').text();
+  layout_name = $('#layout_name').val();
   if (layout_name == '') {
     alert('Please, choose a name for the layout.');
   } else {
@@ -398,14 +411,14 @@ function save_layout() {
       url: layouts_url + layout_name,
       data: data,
       success: function(data) {
-        console.log('Layout ' + layout_name + ' saved.');
+        setStatus('Layout saved as ' + layout_name);
         $('#saveLayout').modal('hide');
       },
       contentType: "application/json",
       dataType: "json"
     })
     .done(function(){
-        console.log('Layout ' + layout_name + ' saved.');
+        setStatus('Layout saved as ' + layout_name);
         $('#saveLayout').modal('hide');
     });
     appendLayoutListItem(layout_name);
@@ -460,6 +473,7 @@ function restore_layout(name) {
   if ( name === undefined ) {
     name = $('#savedLayouts>ul>li:first').text();
   }
+  setStatus('Trying to restore the layout: ' + name);
   $('#savedLayouts>button>span.layout-name').text(name);
   $.getJSON(layouts_url + name, function(layout) {
     $.each(simulation.nodes(), function(idx, node) {
@@ -473,16 +487,23 @@ function restore_layout(name) {
                       .classed('downlight', restored_node.downlight);
       }
     });
-    checkbox_interfaces = $('#hide_unused_interfaces');
-    if (layout.other_settings.hide_unused_interfaces != checkbox_interfaces[0].checked) {
-      checkbox_interfaces.click();
-    }
-    checkbox_hosts = $('#hide_disconnected_hosts');
-    if (layout.other_settings.hide_disconnected_hosts != checkbox_hosts[0].checked) {
-      checkbox_hosts.click();
-    }
+    $('#hide_unused_interfaces')
+        .prop('checked', layout.other_settings.hide_unused_interfaces)
+        .change();
+
+    $('#hide_disconnected_hosts')
+        .prop('checked', layout.other_settings.hide_disconnected_hosts)
+        .change();
+
     simulation.restart();
-  });
+  }).done(function(){setStatus('Layout ' + name + ' restored.')});
+}
+
+function get_size_for_topology() {
+  var chart = $("#topology-chart svg");
+  chart.attr("width", chart.parent().width());
 }
 
 $('#savedLayouts').ready(load_layouts);
+
+$(window).on('resize', get_size_for_topology).trigger('resize');

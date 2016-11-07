@@ -1,6 +1,9 @@
 /*! Kytos Admin - Kterminal - 2016-10-25
  * Copyright (c) 2016 José Luiz Coe; */
-;
+function resize_terminal_available_area() {
+  $('#orientation_text').height($('.terminal-body').height() - 25);
+}
+
 (function($) {
 
     $.fn.kterminal = function() {
@@ -10,6 +13,10 @@
             this_actions = this_obj.find('.terminal-actions'),
             this_form = this_obj.find('form'),
             external_link = $(".open-terminal");
+
+        var trigger_resize = function() {
+            $(window).trigger('resize');
+        }
 
         var action_close = function() {
             this_obj.fadeOut();
@@ -71,4 +78,26 @@
 
         return this_obj;
     }
+
+$('#terminal').on('resize', resize_terminal_available_area).trigger('resize');
+
 }(jQuery));
+
+$('.terminal-status-bar span').typeIt({
+  speed: 50,
+  autoStart: false
+})
+  .tiPause(5000)
+  .tiDelete();
+
+function setStatus(input) {
+  $('.terminal-status-bar span').typeIt({
+    strings: input,
+    speed: 50,
+    autoStart: true,
+    breakDelay: 3000,
+    breakLines: false
+  })
+    .tiPause(5000)
+    .tiDelete();
+}

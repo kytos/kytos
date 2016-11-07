@@ -43,7 +43,7 @@
             <h4 class="modal-title text-center" id="saveLayoutLavel">Save this layout</h4>
           </div>
           <div class="modal-body">
-            <input type="text" class="form-control input-sm" id="layout-name" placeholder='Layout name'/>
+            <input type="text" class="form-control input-sm" id="layout_name" placeholder='Layout name'/>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-kytos-default" data-dismiss="modal">Close</button>
@@ -138,6 +138,11 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                         <li><a data-toggle="pill" href="#tab_settings"><i class="fa fa-cogs"></i> Settings</a></li>
                       </ul>
                     </div>
+                    <div class="terminal-status-bar">
+                      <span class='terminal-status-background'>
+                        Terminal status...
+                      </span>
+                    </div>
                     <div class="terminal-actions">
                       <a href="#" data-action="max" data-callback="show_switch_context(data)" class="terminal-max"><i class="glyphicon glyphicon-fullscreen"></i></a>
                       <a href="#" data-action="med" class="terminal-med"><i class="glyphicon glyphicon-menu-up"></i></a>
@@ -172,7 +177,11 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
 
 
                         <div id="tab_context" class="tab-pane fade">
-                          <div id="context-target">Loading...</div>
+                          <div id="context_target">
+                            <div id="orientation_text">
+                              Click on an element on the topology chart to show its context here.
+                            </div>
+                          </div>
                         </div>
 
 
@@ -205,7 +214,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                                   </div>
                                   <div class="dropup mt" id="savedLayouts">
                                     <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                      <span class="layout-name">Saved Layouts</span>
+                                      <span class="layout-name disabled-option">Saved Layouts</span>
                                       <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
@@ -261,6 +270,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
         <script src="//d3js.org/d3.v4.min.js"></script>
         <script src="static/js/vendors/bootstrap.min.js"></script>
         <script src="static/js/vendors/bootstrap-switch.min.js"></script>
+        <script src="static/js/vendors/typeit.min.js"></script>
         <script src="static/js/kytos-helper.js"></script>
         <script src="static/js/kytos-terminal.js"></script>
         <script src="static/js/main.js"></script>
@@ -379,17 +389,25 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
 
         <script language="javascript">
 
+          $(document).ready(function() {
+
+            $('.owl-carousel').owlCarousel({
+                margin:10,
+                nav:true,
+            })
+          });
+
           function show_switch_context(data) {
             var template = $('#context-switch-template').html();
             $('#tab_context_button a').click();
             Mustache.parse(template);   // optional, speeds up future uses
             var rendered = Mustache.render(template, data);
-            $('#context-target').html(rendered);
+            $('#context_target').html(rendered);
 
             // load switch interfaces data
 
-            var data = [[{'speed': 40000, 'name': 'ether1/1', 'value': 18983.2}, {'speed': 40000, 'name': 'ether1/2', 'value': 34533.2}, {'speed': 40000, 'name': 'ether1/3', 'value': 31283.2}, {'speed': 40000, 'name': 'ether1/4', 'value': 29000}, {'speed': 10000, 'name': 'ether1/5', 'value': 10000}, {'speed': 10000, 'name': 'ether1/6', 'value': 10000}, {'speed': 10000, 'name': 'ether1/7', 'value': 10000}, {'speed': 10000, 'name': 'ether1/8', 'value': 10000}, {'speed': 10000, 'name': 'ether1/9', 'value': 10000}, {'speed': 10000, 'name': 'ether1/10', 'value': 10000}, {'speed': 10000, 'name': 'ether1/11', 'value': 10000}, {'speed': 10000, 'name': 'ether1/12', 'value': 10000}, {'speed': 10000, 'name': 'ether1/13', 'value': 10000}, {'speed': 10000, 'name': 'ether1/14', 'value': 10000}, {'speed': 10000, 'name': 'ether1/15', 'value': 10000}, {'speed': 10000, 'name': 'ether1/16', 'value': 10000}, {'speed': 10000, 'name': 'ether1/17', 'value': 10000}, {'speed': 10000, 'name': 'ether1/18', 'value': 10000}, {'speed': 10000, 'name': 'ether1/19', 'value': 10000}, {'speed': 10000, 'name': 'ether1/20', 'value': 10000}, {'speed': 10000, 'name': 'ether1/21', 'value': 10000}, {'speed': 10000, 'name': 'ether1/22', 'value': 10000}, {'speed': 10000, 'name': 'ether1/23', 'value': 10000}, {'speed': 10000, 'name': 'ether1/24', 'value': 1000}], []]
-		        RadarChart("#switchChart", data);
+        var data = [[{'speed': 40000, 'name': 'ether1/1', 'value': 18983.2}, {'speed': 40000, 'name': 'ether1/2', 'value': 34533.2}, {'speed': 40000, 'name': 'ether1/3', 'value': 31283.2}, {'speed': 40000, 'name': 'ether1/4', 'value': 29000}, {'speed': 10000, 'name': 'ether1/5', 'value': 10000}, {'speed': 10000, 'name': 'ether1/6', 'value': 10000}, {'speed': 10000, 'name': 'ether1/7', 'value': 10000}, {'speed': 10000, 'name': 'ether1/8', 'value': 10000}, {'speed': 10000, 'name': 'ether1/9', 'value': 10000}, {'speed': 10000, 'name': 'ether1/10', 'value': 10000}, {'speed': 10000, 'name': 'ether1/11', 'value': 10000}, {'speed': 10000, 'name': 'ether1/12', 'value': 10000}, {'speed': 10000, 'name': 'ether1/13', 'value': 10000}, {'speed': 10000, 'name': 'ether1/14', 'value': 10000}, {'speed': 10000, 'name': 'ether1/15', 'value': 10000}, {'speed': 10000, 'name': 'ether1/16', 'value': 10000}, {'speed': 10000, 'name': 'ether1/17', 'value': 10000}, {'speed': 10000, 'name': 'ether1/18', 'value': 10000}, {'speed': 10000, 'name': 'ether1/19', 'value': 10000}, {'speed': 10000, 'name': 'ether1/20', 'value': 10000}, {'speed': 10000, 'name': 'ether1/21', 'value': 10000}, {'speed': 10000, 'name': 'ether1/22', 'value': 10000}, {'speed': 10000, 'name': 'ether1/23', 'value': 10000}, {'speed': 10000, 'name': 'ether1/24', 'value': 1000}], []]
+            RadarChart("#switchChart", data);
           }
 
         </script>

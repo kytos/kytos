@@ -497,7 +497,7 @@ function get_size_for_topology() {
 $(window).on('resize', get_size_for_topology).trigger('resize');
 
 function resize_terminal_available_area() {
-  $('#orientation_text').height($('.terminal-body').height());
+  $('#orientation_text').height($('.terminal-body').height() - 25);
   //$('#context_target').height(function(){
     //return $('.terminal-body').height();
   //});

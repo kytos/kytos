@@ -64,8 +64,9 @@ class Flow(object):
 
         return hash_result.hexdigest()
 
-    def as_json(self):
-        """Returns the representation of a flow in a json format"""
+    def as_dict(self):
+        """Returns the representation of a flow as a python dictionary"""
+
         dictionary_rep = {"flow": {"self.id": self.id,
                                    "idle_timeout": self.idle_timeout,
                                    "hard_timeout": self.hard_timeout,
@@ -87,9 +88,14 @@ class Flow(object):
         for action in self.actions:
             actions.append(action.as_dict())
 
-        dictionary_rep[self.id][actions] = actions
+        dictionary_rep["flow"]["actions"] = actions
 
-        return json.dumps(dictionary_rep)
+        return dictionary_rep
+
+    def as_json(self):
+        """Returns the representation of a flow in a json format"""
+
+        return json.dumps(self.as_dict())
 
     @staticmethod
     def from_json(json_content):

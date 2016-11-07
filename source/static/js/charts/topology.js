@@ -67,14 +67,14 @@ var simulation = d3.forceSimulation()
     .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
     .force("center", d3.forceCenter(width / 2, 2 * height / 5));
 
-setStatus('Loading topology ... ');
+set_status('Loading topology ... ');
 d3.json(topology_url, function(error, graph) {
   if (error) {
-    setStatus('Error while trying to load  the topology');
+    set_status('Error while trying to load  the topology');
     throw error;
   };
 
-  setStatus("Topology loaded, let's print it ... ");
+  set_status("Topology loaded, let's print it ... ");
 
   var link = container.append("g")
       .attr("class", "links")
@@ -123,7 +123,7 @@ d3.json(topology_url, function(error, graph) {
         .attr("cy", function(d) { return d.y; });
   }
 
-  setStatus('Topology built. Have fun!');
+  set_status('Topology built. Have fun!');
 
 });
 
@@ -411,14 +411,14 @@ function save_layout() {
       url: layouts_url + layout_name,
       data: data,
       success: function(data) {
-        setStatus('Layout saved as ' + layout_name);
+        set_status('Layout saved as ' + layout_name);
         $('#saveLayout').modal('hide');
       },
       contentType: "application/json",
       dataType: "json"
     })
     .done(function(){
-        setStatus('Layout saved as ' + layout_name);
+        set_status('Layout saved as ' + layout_name);
         $('#saveLayout').modal('hide');
     });
     appendLayoutListItem(layout_name);
@@ -473,7 +473,7 @@ function restore_layout(name) {
   if ( name === undefined ) {
     name = $('#savedLayouts>ul>li:first').text();
   }
-  setStatus('Trying to restore the layout: ' + name);
+  set_status('Trying to restore the layout: ' + name);
   $('#savedLayouts>button>span.layout-name').text(name);
   $.getJSON(layouts_url + name, function(layout) {
     $.each(simulation.nodes(), function(idx, node) {
@@ -496,7 +496,7 @@ function restore_layout(name) {
         .change();
 
     simulation.restart();
-  }).done(function(){setStatus('Layout ' + name + ' restored.')});
+  }).done(function(){set_status('Layout ' + name + ' restored.')});
 }
 
 function get_size_for_topology() {

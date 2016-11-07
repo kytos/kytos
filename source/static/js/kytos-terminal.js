@@ -90,7 +90,7 @@ $('.terminal-status-bar span').typeIt({
   .tiPause(5000)
   .tiDelete();
 
-function setStatus(input, error=false) {
+function set_status(input, error=false) {
   if (error) {
     input = "<span class='status-error'>" + input + "</span>"
   }

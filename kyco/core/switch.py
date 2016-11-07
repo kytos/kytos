@@ -4,6 +4,7 @@ import json
 
 from socket import error as SocketError
 
+from pyof.v0x01.common.phy_port import PortFeatures
 from kyco.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
 from kyco.utils import now
 
@@ -13,12 +14,15 @@ log = logging.getLogger(__name__)
 
 
 class Interface(object):
-    def __init__(self, name, port_number, switch, address=None, state=None):
+    def __init__(self, name, port_number, switch, address=None, state=None,
+                 features=None):
         self.name = name
         self.port_number = int(port_number)
         self.switch = switch
         self.address = address
         self.state = state
+        #: PortFeatures: Used to calculate link utilization.
+        self.features = features
         self.endpoints = []
 
     def __eq__(self, other):
@@ -73,6 +77,18 @@ class Interface(object):
         if exists:
             self.delete_endpoint(endpoint)
         self.add_endpoint(endpoint)
+
+    def get_speed(self):
+        """Return the link speed in bits per second."""
+        fs = self.features
+        if fs & PortFeatures.OFPPF_10GB_FD:
+            return 10 * 10**9
+        elif fs & (PortFeatures.OFPPF_1GB_HD | PortFeatures.OFPPF_1GB_FD):
+            return 10**9
+        elif fs & (PortFeatures.OFPPF_100MB_HD | PortFeatures.OFPPF_100MB_FD):
+            return 100 * 10**6
+        elif fs & (PortFeatures.OFPPF_10MB_HD | PortFeatures.OFPPF_10MB_FD):
+            return 10 * 10**6
 
     def as_dict(self):
         return {'id': self.id,

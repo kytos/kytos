@@ -97,7 +97,10 @@ def run_on_thread(method):
 
 def start_logger(name):
     """Starts the loggers, both the Kyco and the KycoNApp"""
+    logging.basicConfig(format=log_fmt(), level=logging.INFO)
+    return logging.getLogger(name)
+
+def log_fmt():
     fmt = '%(asctime)s - %(levelname)s [%(name)s] (%(threadName)s) %(message)s'
     # fmt += '\n           %(module)s - %(funcName)s - %(lineno)d'
-    logging.basicConfig(format=fmt, level=logging.DEBUG)
-    return logging.getLogger(name)
+    return fmt

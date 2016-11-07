@@ -133,19 +133,19 @@ class Flow(object):
     def from_flow_stats(flow_stats):
         """Builds a new Flow Object from a stats_reply """
         flow = Flow()
-        flow.idle_timeout = flow_stats.idle_timeout
-        flow.hard_timeout = flow_stats.hard_timeout
-        flow.priority = flow_stats.priority
-        flow.table_id = flow_stats.table_id
-        flow.in_port = flow_stats.match.in_port
-        flow.dl_src = flow_stats.match.dl_src
-        flow.dl_dst = flow_stats.match.dl_dst
-        flow.dl_vlan = flow_stats.match.dl_vlan
-        flow.dl_type = flow_stats.match.dl_type
-        flow.nw_src = flow_stats.match.nw_src
-        flow.nw_dst = flow_stats.match.nw_dst
-        flow.tp_src = flow_stats.match.tp_src
-        flow.tp_dst = flow_stats.match.tp_dst
+        flow.idle_timeout = flow_stats.idle_timeout.value
+        flow.hard_timeout = flow_stats.hard_timeout.value
+        flow.priority = flow_stats.priority.value
+        flow.table_id = flow_stats.table_id.value
+        flow.in_port = flow_stats.match.in_port.value
+        flow.dl_src = flow_stats.match.dl_src.value
+        flow.dl_dst = flow_stats.match.dl_dst.value
+        flow.dl_vlan = flow_stats.match.dl_vlan.value
+        flow.dl_type = flow_stats.match.dl_type.value
+        flow.nw_src = flow_stats.match.nw_src.value
+        flow.nw_dst = flow_stats.match.nw_dst.value
+        flow.tp_src = flow_stats.match.tp_src.value
+        flow.tp_dst = flow_stats.match.tp_dst.value
         flow.actions = []
         for ofp_action in flow_stats.actions:
             if ofp_action.action_type == ActionType.OFPAT_OUTPUT:
@@ -216,7 +216,7 @@ class OutputAction(FlowAction):
     @staticmethod
     def from_of_action(ofp_action):
         """Builds a OutputAction from python-openflow ActionOutpud"""
-        return OutputAction(output_port=ofp_action.port)
+        return OutputAction(output_port=ofp_action.port.value)
 
 
 class DLChangeAction(FlowAction):

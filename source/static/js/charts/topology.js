@@ -485,3 +485,18 @@ function restore_layout(name) {
 }
 
 $('#savedLayouts').ready(load_layouts);
+
+function get_size_for_topology() {
+    var chart = $("#topology-chart svg"),
+        navbar_h = $('.navbar-header').height(),
+        terminal_h = $('#terminal').height(),
+        container = chart.parent(),
+        targetWidth = container.width();
+    console.log('nav: ' + navbar_h, ' | terminal: ' + terminal_h + " | " + $(window).height());
+
+    chart.attr("width", targetWidth);
+    chart.attr("height", Math.round($(window).height() - navbar_h - terminal_h));
+}
+
+$(window).on('resize', get_size_for_topology).trigger('resize');
+

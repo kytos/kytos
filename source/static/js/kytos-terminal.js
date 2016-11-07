@@ -11,21 +11,29 @@
             this_form = this_obj.find('form'),
             external_link = $(".open-terminal");
 
+        var trigger_resize = function() {
+            $(window).trigger('resize');
+        }
+
         var action_close = function() {
             this_obj.fadeOut();
             this_obj.attr("class", "terminal closed");
+            //trigger_resize();
         }
 
         var action_max = function() {
             this_obj.toggleClass("maximized");
+            //trigger_resize();
         }
 
         var action_med = function() {
             this_obj.attr("class", "terminal");
+            //trigger_resize();
         }
 
         var action_min = function() {
             this_obj.attr("class", "terminal minimized");
+            //trigger_resize();
         }
 
         // Actions
@@ -45,7 +53,8 @@
                 } else if (action == "min") {
                     action_min();
                 }
-                return false;
+                //return false;
+                trigger_resize();
             });
         });
 

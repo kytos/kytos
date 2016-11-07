@@ -11,6 +11,10 @@
             this_form = this_obj.find('form'),
             external_link = $(".open-terminal");
 
+        var trigger_resize = function() {
+            $(window).trigger('resize');
+        }
+
         var action_close = function() {
             this_obj.fadeOut();
             this_obj.attr("class", "terminal closed");

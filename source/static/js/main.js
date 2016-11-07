@@ -8,6 +8,11 @@
     $(this).blur();
   })
 
+  // carroussel
+  $('.owl-carousel').owlCarousel({
+    margin:10,
+    nav:true,
+  });
 
   // Change the selector if needed
   var $table = $('table.scroll'),

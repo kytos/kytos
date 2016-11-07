@@ -68,12 +68,14 @@ var simulation = d3.forceSimulation()
     .force("center", d3.forceCenter(width / 2, 2 * height / 5));
 
 
-
+setStatus('Loading topology ... ');
 d3.json(topology_url, function(error, graph) {
   if (error) {
     setStatus('Error while trying to load  the topology');
     throw error;
   };
+
+  setStatus("Topology loaded, let's print it ... ");
 
   var link = container.append("g")
       .attr("class", "links")
@@ -121,6 +123,9 @@ d3.json(topology_url, function(error, graph) {
         .attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
   }
+
+  setStatus('Topology built. Have fun!');
+
 });
 
 function get_node_size(type) {

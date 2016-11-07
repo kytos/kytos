@@ -412,14 +412,14 @@ function save_layout() {
       url: layouts_url + layout_name,
       data: data,
       success: function(data) {
-        console.log('Layout ' + layout_name + ' saved.');
+        setStatus('Layout saved as ' + layout_name);
         $('#saveLayout').modal('hide');
       },
       contentType: "application/json",
       dataType: "json"
     })
     .done(function(){
-        console.log('Layout ' + layout_name + ' saved.');
+        setStatus('Layout saved as ' + layout_name);
         $('#saveLayout').modal('hide');
     });
     appendLayoutListItem(layout_name);
@@ -474,6 +474,7 @@ function restore_layout(name) {
   if ( name === undefined ) {
     name = $('#savedLayouts>ul>li:first').text();
   }
+  setStatus('Trying to restore the layout: ' + name);
   $('#savedLayouts>button>span.layout-name').text(name);
   $.getJSON(layouts_url + name, function(layout) {
     $.each(simulation.nodes(), function(idx, node) {
@@ -496,7 +497,7 @@ function restore_layout(name) {
         .change();
 
     simulation.restart();
-  });
+  }).done(function(){setStatus('Layout ' + name + ' restored.')});
 }
 
 function get_size_for_topology() {

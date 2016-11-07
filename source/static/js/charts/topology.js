@@ -284,7 +284,8 @@ function highlight_all_interfaces() {
 
 function highlight_all_nodes() {
   d3.selectAll("[id^='node-']").classed('downlight', false);
-  $('#context-target').html('Loading ...');
+  dv = '<div class="orientation_text"><p>Click on a element in the topology chart to show its context here.</p></div>'
+  $('#context_target').html(dv);
   $('#tab_terminal_button a').click();
 }
 

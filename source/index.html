@@ -139,7 +139,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                       </ul>
                     </div>
                     <div class="terminal-actions">
-                      <a href="#" data-action="max" class="terminal-max"><i class="glyphicon glyphicon-fullscreen"></i></a>
+                      <a href="#" data-action="max" data-callback="show_switch_context" class="terminal-max"><i class="glyphicon glyphicon-fullscreen"></i></a>
                       <a href="#" data-action="med" class="terminal-med"><i class="glyphicon glyphicon-menu-up"></i></a>
                       <a href="#" data-action="min" class="terminal-min"><i class="glyphicon glyphicon-menu-down"></i></a>
                       <a href="#" data-action="close" class="terminal-close"><i class="fa fa-times"></i></a>
@@ -271,16 +271,16 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
         <script id="context-switch-template" type="x-tmpl-mustache">
           <div class="row-fluid">
 
-  <div class="col-settings col-xs-6">
+  <div class="col-settings col-md-6">
 
     <!--// esquerda  //-->
-    <div class="col-xs-6">
+    <div class="col-xs-6 context-chart">
       <div id="switchChart" class="text-center">
       </div>
     </div>
 
     <!--// direita //-->
-    <div class="col-xs-6">
+    <div class="col-xs-6 context-details">
       <h1>{{ name }}</h1>
       <div class="row">
         <div class="col-xs-12">
@@ -322,7 +322,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
     </div>
   </div>
 
-            <div class="col-settings col-xs-6">
+            <div class="col-settings col-md-6">
               <div class="context-content">
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs nav-kytos nav-tabs-kytos nav-justified" role="tablist">
@@ -388,7 +388,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
 
             // load switch interfaces data
 
-        var data = [[{'speed': 40000, 'name': 'ether1/1', 'value': 18983.2}, {'speed': 40000, 'name': 'ether1/2', 'value': 34533.2}, {'speed': 40000, 'name': 'ether1/3', 'value': 31283.2}, {'speed': 40000, 'name': 'ether1/4', 'value': 29000}, {'speed': 10000, 'name': 'ether1/5', 'value': 10000}, {'speed': 10000, 'name': 'ether1/6', 'value': 10000}, {'speed': 10000, 'name': 'ether1/7', 'value': 10000}, {'speed': 10000, 'name': 'ether1/8', 'value': 10000}, {'speed': 10000, 'name': 'ether1/9', 'value': 10000}, {'speed': 10000, 'name': 'ether1/10', 'value': 10000}, {'speed': 10000, 'name': 'ether1/11', 'value': 10000}, {'speed': 10000, 'name': 'ether1/12', 'value': 10000}, {'speed': 10000, 'name': 'ether1/13', 'value': 10000}, {'speed': 10000, 'name': 'ether1/14', 'value': 10000}, {'speed': 10000, 'name': 'ether1/15', 'value': 10000}, {'speed': 10000, 'name': 'ether1/16', 'value': 10000}, {'speed': 10000, 'name': 'ether1/17', 'value': 10000}, {'speed': 10000, 'name': 'ether1/18', 'value': 10000}, {'speed': 10000, 'name': 'ether1/19', 'value': 10000}, {'speed': 10000, 'name': 'ether1/20', 'value': 10000}, {'speed': 10000, 'name': 'ether1/21', 'value': 10000}, {'speed': 10000, 'name': 'ether1/22', 'value': 10000}, {'speed': 10000, 'name': 'ether1/23', 'value': 10000}, {'speed': 10000, 'name': 'ether1/24', 'value': 1000}], []]
+            var data = [[{'speed': 40000, 'name': 'ether1/1', 'value': 18983.2}, {'speed': 40000, 'name': 'ether1/2', 'value': 34533.2}, {'speed': 40000, 'name': 'ether1/3', 'value': 31283.2}, {'speed': 40000, 'name': 'ether1/4', 'value': 29000}, {'speed': 10000, 'name': 'ether1/5', 'value': 10000}, {'speed': 10000, 'name': 'ether1/6', 'value': 10000}, {'speed': 10000, 'name': 'ether1/7', 'value': 10000}, {'speed': 10000, 'name': 'ether1/8', 'value': 10000}, {'speed': 10000, 'name': 'ether1/9', 'value': 10000}, {'speed': 10000, 'name': 'ether1/10', 'value': 10000}, {'speed': 10000, 'name': 'ether1/11', 'value': 10000}, {'speed': 10000, 'name': 'ether1/12', 'value': 10000}, {'speed': 10000, 'name': 'ether1/13', 'value': 10000}, {'speed': 10000, 'name': 'ether1/14', 'value': 10000}, {'speed': 10000, 'name': 'ether1/15', 'value': 10000}, {'speed': 10000, 'name': 'ether1/16', 'value': 10000}, {'speed': 10000, 'name': 'ether1/17', 'value': 10000}, {'speed': 10000, 'name': 'ether1/18', 'value': 10000}, {'speed': 10000, 'name': 'ether1/19', 'value': 10000}, {'speed': 10000, 'name': 'ether1/20', 'value': 10000}, {'speed': 10000, 'name': 'ether1/21', 'value': 10000}, {'speed': 10000, 'name': 'ether1/22', 'value': 10000}, {'speed': 10000, 'name': 'ether1/23', 'value': 10000}, {'speed': 10000, 'name': 'ether1/24', 'value': 1000}], []]
 		        RadarChart("#switchChart", data);
           }
 

@@ -112,9 +112,36 @@
 
 .maximized {
 
-    .table-scroll {
-      tbody {
-        height: 90vh;
+    .context-chart {
+      position : relative;
+      display: inline-block;
+      width : 100%;
+      height: calc(100vh - 91px);
+
+      svg {
+        display: inline-block;
+        position: absolute;
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        transform: translateY(-50%);
+        left: 0;
+        right: 0;
+        margin: auto;
+        text-align: center;
+      }
+    }
+
+    .context-detail {
+      display: none;
+    }
+
+
+    .tab-content {
+      .table-scroll {
+        tbody {
+          height: 75vh;
+        }
       }
     }
 }

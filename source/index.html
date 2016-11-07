@@ -355,18 +355,19 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                   <table class="table table-scroll">
                     <thead>
                       <tr>
-                        <th width="33%"><strong>Name</strong></th>
-                        <th width="33%"><strong>Port No.</strong></th>
-                        <th width="34%"><strong>MAC Address</strong></th>
+                        <th width="20%"><strong>Name</strong></th>
+                        <th width="20%"><strong>Port No.</strong></th>
+                        <th width="30%"><strong>MAC Address</strong></th>
+                        <th width="30%"><strong>Speed</strong></th>
                       </tr>
                     </thead>
                     <tbody>
                       {{#interfaces}}
                         <tr>
-                          <td>{{ name }}</td>
-                          <td>{{ port_number }}</td>
-                          <td>{{ mac }}</td>
-                          <!--<td>{{ speed }}</td>-->
+                          <td width="20%">{{ name }}</td>
+                          <td width="20%">{{ port_number }}</td>
+                          <td width="30%">{{ mac }}</td>
+                          <td width="30%">{{ speed }}</td>
                         </tr>
                       {{/interfaces}}
                     </tbody>

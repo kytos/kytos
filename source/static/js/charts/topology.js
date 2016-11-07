@@ -344,7 +344,7 @@ function show_context(d) {
         iface = {'name': interface.name,
                  'port_number': interface.port_number,
                  'mac': interface.mac,
-                 'speed': 'To Be Done...'}
+                 'speed': interface.speed}
         data.interfaces.push(iface)
     });
     show_switch_context(data);

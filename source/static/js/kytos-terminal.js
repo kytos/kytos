@@ -76,3 +76,22 @@ function resize_terminal_available_area() {
 $('#terminal').on('resize', resize_terminal_available_area).trigger('resize');
 
 }(jQuery));
+
+$('.terminal-status-bar span').typeIt({
+  speed: 50,
+  autoStart: false
+})
+  .tiPause(5000)
+  .tiDelete();
+
+function setStatus(input) {
+  $('.terminal-status-bar span').typeIt({
+    strings: input,
+    speed: 50,
+    autoStart: true,
+    breakDelay: 3000,
+    breakLines: false
+  })
+    .tiPause(5000)
+    .tiDelete();
+}

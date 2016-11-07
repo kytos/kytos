@@ -67,8 +67,13 @@ var simulation = d3.forceSimulation()
     .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
     .force("center", d3.forceCenter(width / 2, 2 * height / 5));
 
+
+
 d3.json(topology_url, function(error, graph) {
-  if (error) throw error;
+  if (error) {
+    setStatus('Error while trying to load  the topology');
+    throw error;
+  };
 
   var link = container.append("g")
       .attr("class", "links")

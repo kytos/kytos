@@ -62,6 +62,23 @@
         float: left;
     }
 
+    .terminal-status-bar {
+      float: left;
+      padding: 6px 0;
+      font-family: monospace;
+      color: #adadad;
+      font-size: 11px;
+
+      &:before {
+        content: '|';
+      }
+
+      .terminal-status-background {
+        background-color: #222;
+        padding: 3px;
+      }
+    }
+
     .terminal-actions {
         float: right;
 

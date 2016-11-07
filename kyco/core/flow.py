@@ -60,7 +60,7 @@ class Flow(object):
         hash_result.update(str(self.tp_src).encode('utf-8'))
         hash_result.update(str(self.tp_dst).encode('utf-8'))
         for action in self.actions:
-            hash_result.update(str(hash(action)).encode('utf-8'))
+            hash_result.update(action.id.encode('utf-8'))
 
         return hash_result.hexdigest()
 

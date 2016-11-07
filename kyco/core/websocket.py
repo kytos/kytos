@@ -21,7 +21,7 @@ class WebSocket(Thread):
             port (int): number of port used to bind the server.(defaults: 6553)
         """
         Thread.__init__(self)
-        self.host = kwargs.get('host','localhost')
+        self.host = kwargs.get('host','0.0.0.0')
         self.port = kwargs.get('port', 6553)
         self.event_loop = None
         self.is_running = False

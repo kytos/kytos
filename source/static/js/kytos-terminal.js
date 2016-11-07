@@ -73,8 +73,6 @@ function resize_terminal_available_area() {
         return this_obj;
     }
 
-$(window).on('resize', get_size_for_topology).trigger('resize');
-
 $('#terminal').on('resize', resize_terminal_available_area).trigger('resize');
 
 }(jQuery));

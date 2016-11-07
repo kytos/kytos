@@ -495,3 +495,5 @@ function get_size_for_topology() {
 }
 
 $('#savedLayouts').ready(load_layouts);
+
+$(window).on('resize', get_size_for_topology).trigger('resize');

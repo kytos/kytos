@@ -90,7 +90,10 @@ $('.terminal-status-bar span').typeIt({
   .tiPause(5000)
   .tiDelete();
 
-function setStatus(input) {
+function setStatus(input, error=false) {
+  if (error) {
+    input = "<span class='status-error'>" + input + "</span>"
+  }
   $('.terminal-status-bar span').typeIt({
     strings: input,
     speed: 50,

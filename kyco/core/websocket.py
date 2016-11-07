@@ -1,8 +1,9 @@
 import asyncio
 from abc import abstractmethod
-from logging import ERROR, getLogger, StreamHandler
+from logging import ERROR, Formatter, getLogger, StreamHandler
 from io import StringIO
 from threading import Thread
+from kyco.utils import log_fmt
 import websockets
 
 # hide websocket logs
@@ -39,12 +40,17 @@ class WebSocket(Thread):
 
     def run(self):
         """Method used to create and wait requets."""
-        websocket = websockets.serve(self.handle_msg, self.host, self.port)
-        self.event_loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.event_loop)
-        self.is_running = True
-        self.event_loop.run_until_complete(websocket)
-        self.event_loop.run_forever()
+        try:
+            self.websocket = websockets.serve(self.handle_msg,
+                                              self.host, self.port)
+            self.event_loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.event_loop)
+            self.is_running = True
+            self.event_loop.run_until_complete(self.websocket)
+            self.event_loop.run_forever()
+        finally:
+            self.event_loop.close()
+            self.websocket.close()
 
     def shutdown(self):
         """Method used to stop de websocket."""
@@ -88,4 +94,5 @@ class LogWebSocket(WebSocket):
         """
         if log:
             streaming = StreamHandler(self.stream)
+            streaming.setFormatter(Formatter(log_fmt()))
             log.addHandler(streaming)

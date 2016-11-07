@@ -99,5 +99,5 @@ def start_logger(name):
     """Starts the loggers, both the Kyco and the KycoNApp"""
     fmt = '%(asctime)s - %(levelname)s [%(name)s] (%(threadName)s) %(message)s'
     # fmt += '\n           %(module)s - %(funcName)s - %(lineno)d'
-    logging.basicConfig(format=fmt, level=logging.DEBUG)
+    logging.basicConfig(format=fmt, level=logging.INFO)
     return logging.getLogger(name)

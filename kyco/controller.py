@@ -101,7 +101,7 @@ class Controller(object):
         """Starts Flask server inside its own thread"""
         app.add_url_rule('/kytos/shutdown', self.shutdown_api.__name__,
                          self.shutdown_api, methods=['GET'])
-        self.api_server = Thread(target=app.run)
+        self.api_server = Thread(target=app.run, args=['0.0.0.0', 8181])
         self.api_server.start()
         self.api_server_running = True
 
@@ -209,11 +209,11 @@ class Controller(object):
         self.server.server_close()
 
     def stop_api_server(self):
-        urlopen('http://127.0.0.1:5000/kytos/shutdown')
+        urlopen('http://127.0.0.1:8181/kytos/shutdown')
 
     def shutdown_api(self):
         """Stops the API server"""
-        allowed_host = ['127.0.0.1:5000', 'localhost:5000']
+        allowed_host = ['127.0.0.1:8181', 'localhost:8181']
         if request.host not in allowed_host:
             return "", 403
 

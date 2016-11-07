@@ -144,7 +144,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                       </span>
                     </div>
                     <div class="terminal-actions">
-                      <a href="#" data-action="max" class="terminal-max"><i class="glyphicon glyphicon-fullscreen"></i></a>
+                      <a href="#" data-action="max" data-callback="show_switch_context(data)" class="terminal-max"><i class="glyphicon glyphicon-fullscreen"></i></a>
                       <a href="#" data-action="med" class="terminal-med"><i class="glyphicon glyphicon-menu-up"></i></a>
                       <a href="#" data-action="min" class="terminal-min"><i class="glyphicon glyphicon-menu-down"></i></a>
                       <a href="#" data-action="close" class="terminal-close"><i class="fa fa-times"></i></a>
@@ -280,21 +280,64 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
 
 
         <script id="context-switch-template" type="x-tmpl-mustache">
-          <div class="row-fluid" style="display: flex;">
-            <div class="col-settings col-md-3 col-xs-6">
-              <div id="switchChart" class="text-center"></div>
-            </div>
+          <div class="row-fluid">
 
-            <div class="col-settings col-md-9 col-xs-6">
-              <div>
+  <div class="col-settings col-md-6">
+
+    <!--// esquerda  //-->
+    <div class="col-xs-6 context-chart">
+      <div id="switchChart" class="text-center">
+      </div>
+    </div>
+
+    <!--// direita //-->
+    <div class="col-xs-6 context-details">
+      <h1>{{ name }}</h1>
+      <div class="row">
+        <div class="col-xs-12">
+          <dl>
+            <dt>DPID</dt>
+            <dd>{{ dpid }}</dd>
+          </dl>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-6">
+          <dl>
+            <dt>Connection</dt>
+            <dd>{{ connection }}</dd>
+          </dl>
+        </div>
+        <div class="col-xs-6">
+          <dl>
+            <dt>OFP Vdt</dt>
+            <dd>{{ ofp_version }}</dd>
+          </dl>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-6">
+          <dl>
+            <dt>Hardware</dt>
+            <dd>{{ hardware }}</dd>
+          </dl>
+        </div>
+
+        <div class="col-xs-6">
+          <dl>
+            <dt>Software</dt>
+            <dd>{{ software }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+            <div class="col-settings col-md-6">
+              <div class="context-content">
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs nav-kytos nav-tabs-kytos nav-justified" role="tablist">
                   <li role="presentation" class="active">
-                    <a href="#summary" aria-controls="home" role="tab" data-toggle="tab" aria-expanded="true">
-                      Summary
-                    </a>
-                  </li>
-                  <li role="presentation" class="">
                     <a href="#interfaces" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="false">
                       Interfaces
                     </a>
@@ -308,31 +351,13 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
               </div>
               <!-- Tab panes -->
               <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active" id="summary">
-                  <table class="table table-condensed">
-                    <!--<thead>-->
-                      <!--<tr>-->
-                        <!--<td width="50%"></td>-->
-                        <!--<td width="50%"></td>-->
-                      <!--</tr>-->
-                    <!--</thead>-->
-                    <tbody>
-                      <tr><td class="text-right"><strong>Name</strong></td><td>{{ name }}</td></tr>
-                      <tr><td class="text-right"><strong>DPID</strong></td><td>{{ dpid }}</td></tr>
-                      <tr><td class="text-right"><strong>Connection</strong></td><td>{{ connection }}</td></tr>
-                      <tr><td class="text-right"><strong>OFP Version</strong></td><td>{{ ofp_version }}</td></tr>
-                      <tr><td class="text-right"><strong>Hardware</strong></td><td>{{ hardware }}</td></tr>
-                      <tr><td class="text-right"><strong>Software</strong></td><td>{{ software }}</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div role="tabpanel" class="tab-pane" id="interfaces">
-                  <table class="table table-condensed">
+                <div role="tabpanel" class="tab-pane active" id="interfaces">
+                  <table class="table table-scroll">
                     <thead>
                       <tr>
-                        <td width="33%"><strong>Name</strong></td>
-                        <td width="33%"><strong>Port No.</strong></td>
-                        <td width="34%"><strong>MAC Address</strong></td>
+                        <th width="33%"><strong>Name</strong></th>
+                        <th width="33%"><strong>Port No.</strong></th>
+                        <th width="34%"><strong>MAC Address</strong></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -346,20 +371,21 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                       {{/interfaces}}
                     </tbody>
                   </table>
-                  <div class="chart panel-default">
-                    <div class="chart-body">
-                      <div id="interfacesChart">
-                        <svg width="914" height="700"></svg>
-                      </div>
-                    </div>
-                  </div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="flows">
                   flows
                 </div>
+
+                  <div class="chart panel-default">
+                    <div class="chart-body">
+                      <div id="interfacesChart">
+                        <svg width="100%" height="700"></svg>
+                      </div>
+                    </div>
+                  </div>
               </div>
             </div>
-          </div>
+        </div>
         </script>
 
         <script language="javascript">

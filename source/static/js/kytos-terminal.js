@@ -41,7 +41,8 @@ function resize_terminal_available_area() {
                 e.preventDefault();
                 e.stopPropagation();
                 var this_link = $(this),
-                    action = this_link.attr("data-action");
+                    action = this_link.attr("data-action"),
+                    callback = this_link.attr("data-callback");
 
                 if (action == "close") {
                     action_close();
@@ -51,6 +52,11 @@ function resize_terminal_available_area() {
                     action_med();
                 } else if (action == "min") {
                     action_min();
+                }
+                if (typeof(callback)) {
+                    setTimeout(function(){
+                        eval(callback);
+                    }, 300);
                 }
                 return false;
             });

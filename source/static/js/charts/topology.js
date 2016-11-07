@@ -1,4 +1,6 @@
-var layouts_url = "http://" + window.location.hostname + ":8181/kytos/web/topology/layouts/";
+var api_url = "http://" + window.location.hostname + ":5000/kytos/",
+    layouts_url = api_url + "web/topology/layouts/",
+    topology_url = api_url + "topology";
 
 // Nodes vars
 var charge = {'switch': 400,
@@ -65,9 +67,14 @@ var simulation = d3.forceSimulation()
     .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
     .force("center", d3.forceCenter(width / 2, 2 * height / 5));
 
-url = "http://" + window.location.hostname +":8181/kytos/topology"
-d3.json(url,function(error, graph) {
-  if (error) throw error;
+setStatus('Loading topology ... ');
+d3.json(topology_url, function(error, graph) {
+  if (error) {
+    setStatus('Error while trying to load  the topology');
+    throw error;
+  };
+
+  setStatus("Topology loaded, let's print it ... ");
 
   var link = container.append("g")
       .attr("class", "links")
@@ -115,6 +122,9 @@ d3.json(url,function(error, graph) {
         .attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
   }
+
+  setStatus('Topology built. Have fun!');
+
 });
 
 function get_node_size(type) {
@@ -126,6 +136,10 @@ function dragstarted(d) {
   if ( d.type == 'switch' ) {
     d.old_fx = d.x;
     d.old_fy = d.y;
+    $.each(get_switch_interfaces(d), function(index, interface){
+      interface.fx = interface.x;
+      interface.fy = interface.y;
+    });
   }
   d.fx = d.x;
   d.fy = d.y;
@@ -397,14 +411,14 @@ function save_layout() {
       url: layouts_url + layout_name,
       data: data,
       success: function(data) {
-        console.log('Layout ' + layout_name + ' saved.');
+        setStatus('Layout saved as ' + layout_name);
         $('#saveLayout').modal('hide');
       },
       contentType: "application/json",
       dataType: "json"
     })
     .done(function(){
-        console.log('Layout ' + layout_name + ' saved.');
+        setStatus('Layout saved as ' + layout_name);
         $('#saveLayout').modal('hide');
     });
     appendLayoutListItem(layout_name);
@@ -459,6 +473,7 @@ function restore_layout(name) {
   if ( name === undefined ) {
     name = $('#savedLayouts>ul>li:first').text();
   }
+  setStatus('Trying to restore the layout: ' + name);
   $('#savedLayouts>button>span.layout-name').text(name);
   $.getJSON(layouts_url + name, function(layout) {
     $.each(simulation.nodes(), function(idx, node) {
@@ -481,32 +496,14 @@ function restore_layout(name) {
         .change();
 
     simulation.restart();
-  });
+  }).done(function(){setStatus('Layout ' + name + ' restored.')});
+}
+
+function get_size_for_topology() {
+  var chart = $("#topology-chart svg");
+  chart.attr("width", chart.parent().width());
 }
 
 $('#savedLayouts').ready(load_layouts);
 
-function get_size_for_topology() {
-    var chart = $("#topology-chart svg"),
-        container = chart.parent(),
-        targetWidth = container.width();
-
-    chart.attr("width", targetWidth);
-}
-
 $(window).on('resize', get_size_for_topology).trigger('resize');
-
-function resize_terminal_available_area() {
-  $('#orientation_text').height($('.terminal-body').height());
-  //$('#context_target').height(function(){
-    //return $('.terminal-body').height();
-  //});
-}
-
-$('#terminal').on('ready', function(){
-  resize_terminal_available_area();
-})
-
-$('#terminal').on('resize', function() {
-  resize_terminal_available_area();
-}).trigger('resize');

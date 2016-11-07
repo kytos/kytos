@@ -31,7 +31,7 @@ var strokes = {'interface': 0,
                'host': 1};
 
 var width = $("#topology-chart").parent().width();
-var height = 600;
+var height = $(window).height() - $('.navbar').height() - 5;
 
 var zoom = d3.zoom()
             .scaleExtent([0.2, 3])
@@ -63,7 +63,7 @@ var simulation = d3.forceSimulation()
                                  .distance(function(d) { return distance[d.type]; })
           )
     .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
-    .force("center", d3.forceCenter(width / 2, height / 2));
+    .force("center", d3.forceCenter(width / 2, 2 * height / 5));
 
 url = "http://" + window.location.hostname +":5000/kytos/topology"
 d3.json(url,function(error, graph) {
@@ -284,9 +284,9 @@ function highlight_all_interfaces() {
 
 function highlight_all_nodes() {
   d3.selectAll("[id^='node-']").classed('downlight', false);
-  dv = '<div class="orientation_text"><p>Click on a element in the topology chart to show its context here.</p></div>'
+  dv = '<div id="orientation_text">Click on an element in the topology chart to show its context here.</div>'
   $('#context_target').html(dv);
-  $('#tab_terminal_button a').click();
+  resize_terminal_available_area();
 }
 
 function downlight_all_switches() {
@@ -488,15 +488,25 @@ $('#savedLayouts').ready(load_layouts);
 
 function get_size_for_topology() {
     var chart = $("#topology-chart svg"),
-        navbar_h = $('.navbar-header').height(),
-        terminal_h = $('#terminal').height(),
         container = chart.parent(),
         targetWidth = container.width();
-    console.log('nav: ' + navbar_h, ' | terminal: ' + terminal_h + " | " + $(window).height());
 
     chart.attr("width", targetWidth);
-    chart.attr("height", Math.round($(window).height() - navbar_h - terminal_h));
 }
 
 $(window).on('resize', get_size_for_topology).trigger('resize');
 
+function resize_terminal_available_area() {
+  $('#orientation_text').height($('.terminal-body').height());
+  //$('#context_target').height(function(){
+    //return $('.terminal-body').height();
+  //});
+}
+
+$('#terminal').on('ready', function(){
+  resize_terminal_available_area();
+})
+
+$('#terminal').on('resize', function() {
+  resize_terminal_available_area();
+}).trigger('resize');

@@ -1,6 +1,4 @@
-var layouts_url = 'http://" + window.location.hostname + ":8181/kytos/web/topology/layouts/';
-
-console.log(window.location.hostname);
+var layouts_url = "http://" + window.location.hostname + ":5000/kytos/web/topology/layouts/";
 
 // Nodes vars
 var charge = {'switch': 400,
@@ -67,7 +65,7 @@ var simulation = d3.forceSimulation()
     .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
-url = "http://" + window.location.hostname +":8181/kytos/topology"
+url = "http://" + window.location.hostname +":5000/kytos/topology"
 d3.json(url,function(error, graph) {
   if (error) throw error;
 
@@ -387,7 +385,7 @@ function get_current_layout() {
 }
 
 function save_layout() {
-  layout_name = $('#savedLayouts>button>span.layout-name').text();
+  layout_name = $('#layout_name').val();
   if (layout_name == '') {
     alert('Please, choose a name for the layout.');
   } else {
@@ -473,14 +471,14 @@ function restore_layout(name) {
                       .classed('downlight', restored_node.downlight);
       }
     });
-    checkbox_interfaces = $('#hide_unused_interfaces');
-    if (layout.other_settings.hide_unused_interfaces != checkbox_interfaces[0].checked) {
-      checkbox_interfaces.click();
-    }
-    checkbox_hosts = $('#hide_disconnected_hosts');
-    if (layout.other_settings.hide_disconnected_hosts != checkbox_hosts[0].checked) {
-      checkbox_hosts.click();
-    }
+    $('#hide_unused_interfaces')
+        .prop('checked', layout.other_settings.hide_unused_interfaces)
+        .change();
+
+    $('#hide_disconnected_hosts')
+        .prop('checked', layout.other_settings.hide_disconnected_hosts)
+        .change();
+
     simulation.restart();
   });
 }

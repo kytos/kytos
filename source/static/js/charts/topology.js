@@ -70,7 +70,7 @@ var simulation = d3.forceSimulation()
 set_status('Loading topology ... ');
 d3.json(topology_url, function(error, graph) {
   if (error) {
-    set_status('Error while trying to load  the topology');
+    set_status('Error while trying to load  the topology', true);
     throw error;
   };
 

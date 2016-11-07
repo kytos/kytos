@@ -1,4 +1,6 @@
-var layouts_url = "http://" + window.location.hostname + ":5000/kytos/web/topology/layouts/";
+var api_url = "http://" + window.location.hostname + ":5000/kytos/",
+    layouts_url = api_url + "web/topology/layouts/",
+    topology_url = api_url + "topology";
 
 // Nodes vars
 var charge = {'switch': 400,
@@ -65,8 +67,7 @@ var simulation = d3.forceSimulation()
     .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
     .force("center", d3.forceCenter(width / 2, 2 * height / 5));
 
-url = "http://" + window.location.hostname +":5000/kytos/topology"
-d3.json(url,function(error, graph) {
+d3.json(topology_url, function(error, graph) {
   if (error) throw error;
 
   var link = container.append("g")
@@ -126,6 +127,10 @@ function dragstarted(d) {
   if ( d.type == 'switch' ) {
     d.old_fx = d.x;
     d.old_fy = d.y;
+    $.each(get_switch_interfaces(d), function(index, interface){
+      interface.fx = interface.x;
+      interface.fy = interface.y;
+    });
   }
   d.fx = d.x;
   d.fy = d.y;
@@ -484,29 +489,9 @@ function restore_layout(name) {
   });
 }
 
-$('#savedLayouts').ready(load_layouts);
-
 function get_size_for_topology() {
-    var chart = $("#topology-chart svg"),
-        container = chart.parent(),
-        targetWidth = container.width();
-
-    chart.attr("width", targetWidth);
+  var chart = $("#topology-chart svg");
+  chart.attr("width", chart.parent().width());
 }
 
-$(window).on('resize', get_size_for_topology).trigger('resize');
-
-function resize_terminal_available_area() {
-  $('#orientation_text').height($('.terminal-body').height() - 25);
-  //$('#context_target').height(function(){
-    //return $('.terminal-body').height();
-  //});
-}
-
-$('#terminal').on('ready', function(){
-  resize_terminal_available_area();
-})
-
-$('#terminal').on('resize', function() {
-  resize_terminal_available_area();
-}).trigger('resize');
+$('#savedLayouts').ready(load_layouts);

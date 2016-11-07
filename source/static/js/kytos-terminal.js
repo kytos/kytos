@@ -1,6 +1,9 @@
 /*! Kytos Admin - Kterminal - 2016-10-25
  * Copyright (c) 2016 José Luiz Coe; */
-;
+function resize_terminal_available_area() {
+  $('#orientation_text').height($('.terminal-body').height() - 25);
+}
+
 (function($) {
 
     $.fn.kterminal = function() {
@@ -69,4 +72,9 @@
 
         return this_obj;
     }
+
+$(window).on('resize', get_size_for_topology).trigger('resize');
+
+$('#terminal').on('resize', resize_terminal_available_area).trigger('resize');
+
 }(jQuery));

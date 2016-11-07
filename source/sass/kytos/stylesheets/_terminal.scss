@@ -22,6 +22,11 @@
 
     &.maximized {
         height: calc(100vh - 61px);
+        #tab_logs {
+          height: 600px;
+          max-height: 600px;
+          overflow-y: scroll;
+        }
     }
 
     &.minimized {
@@ -42,6 +47,11 @@
         .terminal-footer {
             display: none;
         }
+    }
+    #tab_logs {
+      height: 180px;
+      max-height: 180px;
+      overflow-y: scroll;
     }
 
     .terminal-header {

@@ -81,8 +81,7 @@ class Flow(object):
                                    "nw_src": self.nw_src,
                                    "nw_dst": self.nw_dst,
                                    "tp_src": self.tp_src,
-                                   "tp_dst": self.tp_dst,
-                                   "actions": self.actions}}
+                                   "tp_dst": self.tp_dst}}
 
         actions = []
         for action in self.actions:

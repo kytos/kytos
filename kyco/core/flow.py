@@ -107,27 +107,44 @@ class Flow(object):
         """Builds a Flow object from a json"""
         flow_fields = dict_content['flow']
         flow = Flow()
-        flow.idle_timeout = flow_fields['idle_timeout']
-        flow.hard_timeout = flow_fields['hard_timeout']
-        flow.priority = flow_fields['buffer_id']
-        flow.priority = flow_fields['table_id']
-        flow.priority = flow_fields['priority']
-        flow.in_port = flow_fields['in_port']
-        flow.dl_src = flow_fields['dl_src']
-        flow.dl_dst = flow_fields['dl_dst']
-        flow.dl_vlan = flow_fields['dl_vlan']
-        flow.dl_type = flow_fields['dl_type']
-        flow.nw_src = flow_fields['nw_src']
-        flow.nw_dst = flow_fields['nw_dst']
-        flow.tp_src = flow_fields['tp_src']
-        flow.tp_dst = flow_fields['tp_dst']
+        if 'idle_timeout' in flow_fields:
+            flow.idle_timeout = flow_fields['idle_timeout']
+        if 'hard_timeout' in flow_fields:
+            flow.hard_timeout = flow_fields['hard_timeout']
+        if 'buffer_id' in flow_fields:
+            flow.priority = flow_fields['buffer_id']
+        if 'table_id' in flow_fields:
+            flow.priority = flow_fields['table_id']
+        if 'priority' in flow_fields:
+            flow.priority = flow_fields['priority']
+        if 'in_port' in flow_fields:
+            flow.in_port = flow_fields['in_port']
+        if 'dl_src' in flow_fields:
+            flow.dl_src = flow_fields['dl_src']
+        if 'dl_dst' in flow_fields:
+            flow.dl_dst = flow_fields['dl_dst']
+        if 'dl_vlan' in flow_fields:
+            flow.dl_vlan = flow_fields['dl_vlan']
+        if 'dl_type' in flow_fields:
+            flow.dl_type = flow_fields['dl_type']
+        if 'nw_src' in flow_fields:
+            flow.nw_src = flow_fields['nw_src']
+        if 'nw_dst' in flow_fields:
+            flow.nw_dst = flow_fields['nw_dst']
+        if 'tp_src' in flow_fields:
+            flow.tp_src = flow_fields['tp_src']
+        if 'tp_dst' in flow_fields:
+            flow.tp_dst = flow_fields['tp_dst']
 
-        actions = []
-        for dict_action in dict_content['actions']:
-            action = OutputAction.from_dict(dict_action)  # Only Output
-            actions.append(action)
+        if 'actions' in flow_fields:
+            actions = []
+            for dict_action in flow_fields['actions']:
+                action = OutputAction.from_dict(dict_action)  # Only Output
+                actions.append(action)
 
-        flow.actions = actions
+            flow.actions = actions
+
+        return flow
 
     @staticmethod
     def from_flow_stats(flow_stats):
@@ -152,27 +169,41 @@ class Flow(object):
                 flow.actions.append(OutputAction.from_of_action(ofp_action))
         return flow
 
-    def as_flow_mod(self, flow_type):
+    def as_flow_mod(self, flow_type=FlowModCommand.OFPFC_ADD):
         """Transform a Flow object into a flow_mod message"""
         flow_mod = FlowMod()
         flow_mod.command = flow_type
-        flow_mod.buffer_id = self.buffer_id
-        flow_mod.idle_timeout = self.idle_timeout
-        flow_mod.hard_timeout = self.hard_timeout
-        flow_mod.priority = self.priority
+        if self.buffer_id is not None:
+            flow_mod.buffer_id = self.buffer_id
+        if self.idle_timeout is not None:
+            flow_mod.idle_timeout = self.idle_timeout
+        if self.hard_timeout is not None:
+            flow_mod.hard_timeout = self.hard_timeout
+        if self.priority is not None:
+            flow_mod.priority = self.priority
         flow_mod.match = Match()
-        flow_mod.match.in_port = self.in_port
-        flow_mod.match.dl_src = self.dl_src
-        flow_mod.match.dl_dst = self.dl_dst
-        flow_mod.match.dl_vlan = self.dl_vlan
-        flow_mod.match.dl_type = self.dl_type
-        flow_mod.match.nw_src = self.nw_src
-        flow_mod.match.nw_dst = self.nw_dst
-        flow_mod.match.tp_src = self.tp_src
-        flow_mod.match.tp_dst = self.tp_dst
+        if self.in_port is not None:
+            flow_mod.match.in_port = self.in_port
+        if self.dl_src is not None:
+            flow_mod.match.dl_src = self.dl_src
+        if self.dl_dst is not None:
+            flow_mod.match.dl_dst = self.dl_dst
+        if self.dl_vlan is not None:
+            flow_mod.match.dl_vlan = self.dl_vlan
+        if self.dl_type is not None:
+            flow_mod.match.dl_type = self.dl_type
+        if self.nw_src is not None:
+            flow_mod.match.nw_src = self.nw_src
+        if self.nw_dst is not None:
+            flow_mod.match.nw_dst = self.nw_dst
+        if self.tp_src is not None:
+            flow_mod.match.tp_src = self.tp_src
+        if self.tp_dst is not None:
+            flow_mod.match.tp_dst = self.tp_dst
         flow_mod.match.fill_wildcards()
-        for action in self.actions:
-            flow_mod.actions.append(action.as_of_action())
+        if self.actions is not None:
+            for action in self.actions:
+                flow_mod.actions.append(action.as_of_action())
         return flow_mod
 
 

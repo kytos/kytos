@@ -60,7 +60,6 @@ class WebSocket(Thread):
 class LogWebSocket(WebSocket):
     """LogWebSocket is used to serve a kyco logs."""
 
-    stream = None
     def __init__(self, **kwargs):
         """The contructor of this class use the below params.
 
@@ -70,7 +69,7 @@ class LogWebSocket(WebSocket):
         """
         kwargs['port'] = kwargs.get('port',8765)
         self.stream = kwargs.get('stream',StringIO())
-
+        self.full_log = ""
         super().__init__(**kwargs)
 
     @asyncio.coroutine
@@ -83,8 +82,14 @@ class LogWebSocket(WebSocket):
         """
         self.stream.seek(0)
         msg = self.stream.read()
-        yield from websocket.send(msg)
         self.stream.truncate(0)
+        self.full_log += msg
+
+        log_status = yield from websocket.recv()
+        if log_status == 'full':
+            msg = self.full_log
+
+        yield from websocket.send(msg)
 
     def register_log(self, log=None):
         """Method used to register new logs.

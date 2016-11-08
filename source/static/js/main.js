@@ -19,17 +19,47 @@
       $bodyCells = $table.find('tbody tr:first').children(),
       colWidth;
 
-  // Adjust the width of thead cells when window resizes
-  $(window).resize(function() {
-      // Get the tbody columns width array
-      colWidth = $bodyCells.map(function() {
-          return $(this).width();
-      }).get();
+  function resize_topology_svg() {
+    $("#topology-chart").width($('#chart').width());
+    $("#topology-chart svg").attr("width", $('#chart').width());
+  }
 
-      // Set the width of thead columns
-      $table.find('thead tr').children().each(function(i, v) {
-          $(v).width(colWidth[i]);
-      });
-  }).resize(); // Trigger resize handler
+  function resize_chart_container() {
+    $("#chart").height($(window).height() - $('.navbar').height());
+    $("#background-map").height($(window).height() - $('.navbar').height());
+  }
+
+  $(window).on('resize', function() {
+    // Adjust the width of thead cells when window resizes
+    // Get the tbody columns width array
+    colWidth = $bodyCells.map(function() {
+        return $(this).width();
+    }).get();
+
+    // Set the width of thead columns
+    $table.find('thead tr').children().each(function(i, v) {
+        $(v).width(colWidth[i]);
+    });
+
+    resize_chart_container();
+    resize_topology_svg();
+
+  }).trigger('resize');
 
 }());
+
+$(window).ready(function(){
+  load_layouts();
+  draw_background_map(draw_topology);
+
+  // Load default settings defined at kytos-settings.js
+  toggle_disconnected_hosts(default_settings.show_disconnected_hosts);
+  toggle_unused_interfaces(default_settings.show_unused_interfaces);
+  if (default_settings.show_topology) {
+    $('#show_topology').prop('checked', true).change();
+    $('#topology-chart').show();
+  } else {
+    $('#show_topology').prop('checked', false).change();
+    $('#topology-chart').hide();
+  }
+})

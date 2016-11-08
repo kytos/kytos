@@ -35,28 +35,6 @@ var strokes = {'interface': 0,
 var width = $("#topology-chart").parent().width();
 var height = $(window).height() - $('.navbar').height() - 5;
 
-var zoom = d3.zoom()
-            .scaleExtent([0.2, 3])
-            //.translateExtent([[-100, -100], [width + 90, height + 100]])
-            .on("zoom", zoomed);
-
-var svg = d3.select("#topology-chart")
-             .append("svg")
-             .attr("width", width)
-             .attr("height", height);
-
-var zoomer = svg.append("rect")
-                .attr("width", width)
-                .attr("height", height)
-                .style("fill", "none")
-                .style("pointer-events", "all")
-                .call(zoom)
-                .on('click', highlight_all_nodes);
-
-var container = svg.append('g')
-
-zoomer.call(zoom.transform, d3.zoomIdentity.translate(0,0));
-
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
 var simulation = d3.forceSimulation()
@@ -66,66 +44,6 @@ var simulation = d3.forceSimulation()
           )
     .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
     .force("center", d3.forceCenter(width / 2, 2 * height / 5));
-
-set_status('Loading topology ... ');
-d3.json(topology_url, function(error, graph) {
-  if (error) {
-    set_status('Error while trying to load  the topology', true);
-    throw error;
-  };
-
-  set_status("Topology loaded, let's print it ... ");
-
-  var link = container.append("g")
-      .attr("class", "links")
-    .selectAll("line")
-    .data(graph.links)
-    .enter().append("line")
-      .attr("stroke-width", function(d) { return strokes[d.type]; })
-
-  var node = container.append("g")
-      .attr("class", "nodes")
-    .selectAll("circle")
-    .data(graph.nodes)
-    .enter().append("circle")
-      .attr("id", function(d) {
-          return "node-" + d.type + "-" + fix_name(d.name); })
-      .attr("r", function(d) { return get_node_size(d.type); })
-      .attr("stroke", function(d) { return nodes_stroke[d.type]; })
-      .attr("stroke-width", 2)
-      .attr("fill", function(d) { return nodes_fill[d.type]; })
-      .call(d3.drag()
-              .on("start", dragstarted)
-              .on("drag", dragged)
-              .on("end", dragended))
-      .on('click', show_context)
-      .on("dblclick", release_node);
-
-  node.append("title")
-      .text(function(d) { return d.name; });
-
-  simulation
-      .nodes(graph.nodes)
-      .on("tick", ticked);
-
-  simulation.force("link")
-      .links(graph.links);
-
-  function ticked() {
-    link
-        .attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
-
-    node
-        .attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
-  }
-
-  set_status('Topology built. Have fun!');
-
-});
 
 function get_node_size(type) {
   return size[type];
@@ -255,7 +173,8 @@ function radius_positioning(cx, cy, x, y) {
   return [new_x, new_y];
 }
 
-function toggle_unused_interfaces(hide){
+function toggle_unused_interfaces(){
+  show = $('#show_unused_interfaces')[0].checked;
   $.each(get_interfaces(), function(index, interface){
     unused = true;
     $.each(get_node_links(interface), function(index, link){
@@ -263,17 +182,18 @@ function toggle_unused_interfaces(hide){
     });
     if (unused) {
       d3.select("#node-interface-" + fix_name(interface.name))
-        .classed('invisible', hide);
+        .classed('invisible', !show);
     }
   })
 }
 
-function toggle_disconnected_hosts(hide){
+function toggle_disconnected_hosts(){
+  show = $('#show_disconnected_hosts')[0].checked;
   $.each(get_hosts(), function(index, host){
     links = get_node_links(host);
     if (links.length == 0) {
       d3.select("#node-host-" + fix_name(host.name))
-        .classed('invisible', hide);
+        .classed('invisible', !show);
     }
   })
 }
@@ -397,8 +317,11 @@ function get_current_layout() {
     };
     layout.nodes[node.name] = node_data;
   });
-  layout.other_settings['hide_unused_interfaces'] = $('#hide_unused_interfaces')[0].checked;
-  layout.other_settings['hide_disconnected_hosts'] = $('#hide_disconnected_hosts')[0].checked;
+  layout.other_settings['show_unused_interfaces'] = $('#show_unused_interfaces')[0].checked;
+  layout.other_settings['show_disconnected_hosts'] = $('#show_disconnected_hosts')[0].checked;
+  layout.other_settings['show_topology'] = $('#show_topology')[0].checked;
+  layout.other_settings['map_center'] = background_map.getCenter();
+  layout.other_settings['map_zoom'] = background_map.getZoom();
   return layout;
 }
 
@@ -409,23 +332,22 @@ function save_layout() {
   } else {
     layout = get_current_layout();
     data = JSON.stringify(layout);
-    $.ajax({
-      type: "POST",
+    set_status('Trying to save layout: ' + layout_name);
+    $.post({
       url: layouts_url + layout_name,
       data: data,
-      success: function(data) {
+      contentType: "application/json",
+      success: function(data, status, xhr) {
+        appendLayoutListItem(layout_name);
         set_status('Layout saved as ' + layout_name);
         $('#saveLayout').modal('hide');
       },
-      contentType: "application/json",
-      dataType: "json"
-    })
-    .done(function(){
-        set_status('Layout saved as ' + layout_name);
+      error: function(xhr, status, error){
+        set_status('Error while trying to save layout', true);
         $('#saveLayout').modal('hide');
+      },
+      dataType: "json"
     });
-    appendLayoutListItem(layout_name);
-    $('#saveLayout').modal('hide');
   }
 }
 
@@ -473,11 +395,12 @@ function appendLayoutListItem(item){
 }
 
 function restore_layout(name) {
-  if ( name === undefined ) {
-    name = $('#savedLayouts>ul>li:first').text();
-  }
+  if ( name === undefined ) name = $('#savedLayouts>ul>li:first').text();
+
   set_status('Trying to restore the layout: ' + name);
+
   $('#savedLayouts>button>span.layout-name').text(name);
+
   $.getJSON(layouts_url + name, function(layout) {
     $.each(simulation.nodes(), function(idx, node) {
       if (node.name in layout.nodes) {
@@ -490,23 +413,113 @@ function restore_layout(name) {
                       .classed('downlight', restored_node.downlight);
       }
     });
-    $('#hide_unused_interfaces')
-        .prop('checked', layout.other_settings.hide_unused_interfaces)
+
+    $('#show_unused_interfaces')
+        .prop('checked', layout.other_settings.show_unused_interfaces)
         .change();
 
-    $('#hide_disconnected_hosts')
-        .prop('checked', layout.other_settings.hide_disconnected_hosts)
+    $('#show_disconnected_hosts')
+        .prop('checked', layout.other_settings.show_disconnected_hosts)
         .change();
+
+    if (layout.other_settings.show_topology) {
+      $('#show_topology').prop('checked', true).change();
+      $('#topology-chart').show();
+    } else {
+      $('#show_topology').prop('checked', false).change();
+      $('#topology-chart').hide();
+    }
+
+    background_map.flyTo({
+      center: layout.other_settings.map_center,
+      zoom: layout.other_settings.map_zoom
+    })
 
     simulation.restart();
+
+    window.location.hash = name;
+
   }).done(function(){set_status('Layout ' + name + ' restored.')});
 }
 
-function get_size_for_topology() {
-  var chart = $("#topology-chart svg");
-  chart.attr("width", chart.parent().width());
+function draw_topology() {
+  window.zoom = d3.zoom()
+              .scaleExtent([0.2, 3])
+              //.translateExtent([[-100, -100], [width + 90, height + 100]])
+              .on("zoom", zoomed);
+
+  var svg = d3.select("#topology-chart")
+               .append("svg")
+               .attr("width", width)
+               .attr("height", height);
+
+  var zoomer = svg.append("rect")
+                  .attr("width", width)
+                  .attr("height", height)
+                  .style("fill", "none")
+                  .style("pointer-events", "all")
+                  .call(zoom)
+                  .on('click', highlight_all_nodes);
+
+  window.container = svg.append('g')
+
+  zoomer.call(zoom.transform, d3.zoomIdentity.translate(0,0));
+
+  set_status('Loading topology ... ');
+  d3.json(topology_url, function(error, graph) {
+    if (error) {
+      set_status('Error while trying to load  the topology', true);
+      throw error;
+    };
+
+    var link = container.append("g")
+        .attr("class", "links")
+      .selectAll("line")
+      .data(graph.links)
+      .enter().append("line")
+        .attr("stroke-width", function(d) { return strokes[d.type]; })
+
+    var node = container.append("g")
+        .attr("class", "nodes")
+      .selectAll("circle")
+      .data(graph.nodes)
+      .enter().append("circle")
+        .attr("id", function(d) {
+            return "node-" + d.type + "-" + fix_name(d.name); })
+        .attr("r", function(d) { return get_node_size(d.type); })
+        .attr("stroke", function(d) { return nodes_stroke[d.type]; })
+        .attr("stroke-width", 2)
+        .attr("fill", function(d) { return nodes_fill[d.type]; })
+        .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended))
+        .on('click', show_context)
+        .on("dblclick", release_node);
+
+    node.append("title")
+        .text(function(d) { return d.name; });
+
+    simulation
+        .nodes(graph.nodes)
+        .on("tick", ticked);
+
+    simulation.force("link")
+        .links(graph.links);
+
+    function ticked() {
+      link
+          .attr("x1", function(d) { return d.source.x; })
+          .attr("y1", function(d) { return d.source.y; })
+          .attr("x2", function(d) { return d.target.x; })
+          .attr("y2", function(d) { return d.target.y; });
+
+      node
+          .attr("cx", function(d) { return d.x; })
+          .attr("cy", function(d) { return d.y; });
+    }
+
+    set_status('Topology built. Have fun!');
+
+  });
 }
-
-$('#savedLayouts').ready(load_layouts);
-
-$(window).on('resize', get_size_for_topology).trigger('resize');

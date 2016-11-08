@@ -11,6 +11,7 @@
     right: 0;
     height: 30vh;
     color: #adadad;
+    z-index: 100;
     @media (max-width: $screen-sm-max) {
         margin-left: 100px;
         width: calc(100% - 102px);

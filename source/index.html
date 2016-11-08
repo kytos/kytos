@@ -123,7 +123,9 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                 </nav>
 
                 <section class="content">
-                  <div id='topology-chart'>
+                  <div id='chart'>
+                    <div id='background-map'></div>
+                    <div id='topology-chart'></div>
                   </div>
                 </section>
 
@@ -195,14 +197,17 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                         <div id="tab_settings" class="tab-pane fade">
                             <div class="row-fluid">
                                 <div class="col-settings col-md-3 col-xs-6">
-                                    <h1>Settings</h1>
-                                    <p class="help">Clean interface</p>
-                                    <div class="checkbox" data-label-width="0"  data-size="mini" >
-                                    <label for="hide_unused_interfaces">
-                                      <input id='hide_unused_interfaces' type="checkbox" onchange="toggle_unused_interfaces(this.checked);" data-label-width="0"  data-on-color="primary" data-size="mini"> Hide unused interfaces
+                                  <h1>Display elements:</h1>
+                                  <p class="help">Select the elements to be displayed</p>
+                                  <div class="checkbox" data-label-width="0"  data-size="mini" >
+                                    <label for="show_topology">
+                                      <input id='show_topology' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#topology-chart").toggle()'> Topology
                                     </label>
-                                    <label for="hide_disconnected_hosts">
-                                      <input id='hide_disconnected_hosts' type="checkbox"  data-label-width="0"  data-size="mini" onchange="toggle_disconnected_hosts(this.checked);"> Hide disconnected hosts
+                                    <label for="show_unused_interfaces">
+                                      <input id='show_unused_interfaces' type="checkbox" data-label-width="0" data-size="mini" checked="checked" data-on-color="primary" onchange="toggle_unused_interfaces();"> Unused interfaces
+                                    </label>
+                                    <label for="show_disconnected_hosts">
+                                      <input id='show_disconnected_hosts' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange="toggle_disconnected_hosts();"> Disconnected hosts
                                     </label>
                                   </div>
                                 </div>

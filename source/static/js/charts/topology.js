@@ -341,11 +341,14 @@ function show_context(d) {
             'interfaces': []};
     interfaces = get_switch_interfaces(d);
     $.each(interfaces, function(idx, interface){
+      // E.g.: port 65534 has speed == 0 and no human-readable string
+      if (interface.speed != '') {
         iface = {'name': interface.name,
                  'port_number': interface.port_number,
                  'mac': interface.mac,
-                 'speed': 'To Be Done...'}
-        data.interfaces.push(iface)
+                 'speed': interface.speed}
+        data.interfaces.push(iface);
+      }
     });
     show_switch_context(data);
     highlight_switch(d);

@@ -69,4 +69,14 @@ $(window).ready(function(){
     $('#show_map').prop('checked', false).change();
     $('#background-map').hide();
   }
+
+
+  if (window.location.hash){
+    if (window.location.hash.indexOf('#') == 0) {
+      restore_layout(window.location.hash.split('#')[1]);
+    } else {
+      restore_layout(window.location.hash);
+    }
+  }
+
 })

@@ -89,6 +89,20 @@ class Interface(object):
             return 100 * 10**6
         elif fs & (PortFeatures.OFPPF_10MB_HD | PortFeatures.OFPPF_10MB_FD):
             return 10 * 10**6
+        else:
+            log.warning("Couldn't get port speed:\n"
+                        "  dpid = %s, port = %d, features = %s.",
+                        self.switch.dpid, self.port_number, self.features)
+
+    def get_hr_speed(self):
+        """Return Human-Readable string for link speed."""
+        speed = self.get_speed()
+        if speed is None:
+            return ''
+        elif speed >= 10**9:
+            return '{} Gbps'.format(round(speed / 10**9))
+        else:
+            return '{} Mbps'.format(round(speed / 10**6))
 
     def as_dict(self):
         return {'id': self.id,
@@ -96,7 +110,8 @@ class Interface(object):
                 'port_number': self.port_number,
                 'mac': self.address,
                 'switch': self.switch.dpid,
-                'type': 'interface'}
+                'type': 'interface',
+                'speed': self.get_hr_speed()}
 
     def as_json(self):
         return json.dumps(self.as_dict())

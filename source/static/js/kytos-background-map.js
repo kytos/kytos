@@ -3,8 +3,8 @@ function draw_background_map(callback=undefined) {
   var map = new mapboxgl.Map({
         container: 'background-map',
         style: 'mapbox://styles/mapbox/dark-v9',
-        center: [-97.8445676, 35.3437248],
-        zoom: 4
+        center: default_settings.map_center,
+        zoom: default_settings.map_zoom
       });
   window.background_map = map;
   if (callback) {

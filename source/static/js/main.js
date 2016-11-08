@@ -62,4 +62,11 @@ $(window).ready(function(){
     $('#show_topology').prop('checked', false).change();
     $('#topology-chart').hide();
   }
+  if (default_settings.show_topology) {
+    $('#show_map').prop('checked', true).change();
+    $('#background-map').show();
+  } else {
+    $('#show_map').prop('checked', false).change();
+    $('#background-map').hide();
+  }
 })

@@ -320,6 +320,7 @@ function get_current_layout() {
   layout.other_settings['show_unused_interfaces'] = $('#show_unused_interfaces')[0].checked;
   layout.other_settings['show_disconnected_hosts'] = $('#show_disconnected_hosts')[0].checked;
   layout.other_settings['show_topology'] = $('#show_topology')[0].checked;
+  layout.other_settings['show_map'] = $('#show_map')[0].checked;
   layout.other_settings['map_center'] = background_map.getCenter();
   layout.other_settings['map_zoom'] = background_map.getZoom();
   return layout;
@@ -430,6 +431,13 @@ function restore_layout(name) {
       $('#topology-chart').hide();
     }
 
+    if (layout.other_settings.show_map) {
+      $('#show_map').prop('checked', true).change();
+      $('#background-map').show();
+    } else {
+      $('#show_map').prop('checked', false).change();
+      $('#background-map').hide();
+    }
     background_map.flyTo({
       center: layout.other_settings.map_center,
       zoom: layout.other_settings.map_zoom

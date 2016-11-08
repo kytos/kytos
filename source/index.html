@@ -276,6 +276,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
         <script src="static/js/kytos-logs.js"></script>
         <script src="static/js/main.js"></script>
         <script src="static/js/charts/topology.js"></script>
+        <script src="static/js/kytos-stats.js"></script>
         <script src="static/js/charts/radar.js"></script>
 
 
@@ -405,11 +406,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
             Mustache.parse(template);   // optional, speeds up future uses
             var rendered = Mustache.render(template, data);
             $('#context_target').html(rendered);
-
-            // load switch interfaces data
-
-        var data = [[{'speed': 40000, 'name': 'ether1/1', 'value': 18983.2}, {'speed': 40000, 'name': 'ether1/2', 'value': 34533.2}, {'speed': 40000, 'name': 'ether1/3', 'value': 31283.2}, {'speed': 40000, 'name': 'ether1/4', 'value': 29000}, {'speed': 10000, 'name': 'ether1/5', 'value': 10000}, {'speed': 10000, 'name': 'ether1/6', 'value': 10000}, {'speed': 10000, 'name': 'ether1/7', 'value': 10000}, {'speed': 10000, 'name': 'ether1/8', 'value': 10000}, {'speed': 10000, 'name': 'ether1/9', 'value': 10000}, {'speed': 10000, 'name': 'ether1/10', 'value': 10000}, {'speed': 10000, 'name': 'ether1/11', 'value': 10000}, {'speed': 10000, 'name': 'ether1/12', 'value': 10000}, {'speed': 10000, 'name': 'ether1/13', 'value': 10000}, {'speed': 10000, 'name': 'ether1/14', 'value': 10000}, {'speed': 10000, 'name': 'ether1/15', 'value': 10000}, {'speed': 10000, 'name': 'ether1/16', 'value': 10000}, {'speed': 10000, 'name': 'ether1/17', 'value': 10000}, {'speed': 10000, 'name': 'ether1/18', 'value': 10000}, {'speed': 10000, 'name': 'ether1/19', 'value': 10000}, {'speed': 10000, 'name': 'ether1/20', 'value': 10000}, {'speed': 10000, 'name': 'ether1/21', 'value': 10000}, {'speed': 10000, 'name': 'ether1/22', 'value': 10000}, {'speed': 10000, 'name': 'ether1/23', 'value': 10000}, {'speed': 10000, 'name': 'ether1/24', 'value': 1000}], []]
-            RadarChart("#switchChart", data);
+            plot_radar(data.dpid)
           }
 
         </script>

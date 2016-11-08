@@ -81,18 +81,20 @@ class Interface(object):
     def get_speed(self):
         """Return the link speed in bits per second."""
         fs = self.features
-        if fs & PortFeatures.OFPPF_10GB_FD:
+        PF = PortFeatures
+        if fs and fs & PF.OFPPF_10GB_FD:
             return 10 * 10**9
-        elif fs & (PortFeatures.OFPPF_1GB_HD | PortFeatures.OFPPF_1GB_FD):
+        elif fs and fs & (PF.OFPPF_1GB_HD | PF.OFPPF_1GB_FD):
             return 10**9
-        elif fs & (PortFeatures.OFPPF_100MB_HD | PortFeatures.OFPPF_100MB_FD):
+        elif fs and fs & (PF.OFPPF_100MB_HD | PF.OFPPF_100MB_FD):
             return 100 * 10**6
-        elif fs & (PortFeatures.OFPPF_10MB_HD | PortFeatures.OFPPF_10MB_FD):
+        elif fs and fs & (PF.OFPPF_10MB_HD | PF.OFPPF_10MB_FD):
             return 10 * 10**6
         else:
             log.warning("Couldn't get port speed:\n"
                         "  dpid = %s, port = %d, features = %s.",
                         self.switch.dpid, self.port_number, self.features)
+        return None
 
     def get_hr_speed(self):
         """Return Human-Readable string for link speed."""

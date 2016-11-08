@@ -91,9 +91,8 @@ class Interface(object):
         elif fs and fs & (PF.OFPPF_10MB_HD | PF.OFPPF_10MB_FD):
             return 10 * 10**6
         else:
-            log.warning("Couldn't get port speed:\n"
-                        "  dpid = %s, port = %d, features = %s.",
-                        self.switch.dpid, self.port_number, self.features)
+            log.warning("No speed port %s, sw %s, feats %s", self.port_number,
+                        self.switch.dpid[-3:], self.features)
         return None
 
     def get_hr_speed(self):

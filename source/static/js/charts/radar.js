@@ -19,7 +19,7 @@ function RadarChart(id, data) {
   var maxValue = 100;  //Utilization percentage
   //Speed multiplier to get radius of the external circles, proportional to
   //their area.
-  var speedScale = 7.0 / getMaxSpeed(data[0])**0.5;
+  var speedScale = 7.0 / Math.pow(getMaxSpeed(data[0]),0.5);
 
 	var cfg = {
 	 w: $("#switchChart").parent().width() / 2,				//Width of the circle
@@ -106,7 +106,7 @@ function RadarChart(id, data) {
 	// Append the interfaces circles at each axis
 	axis.append("circle")
 		.attr("class", "interface")
-		.attr("r", function(d,i) { return d.speed**0.5 * speedScale })
+		.attr("r", function(d,i) { return Math.pow(d.speed,0.5) * speedScale })
 		.attr("cx", function(d, i){ return rScale(maxValue * cfg.labelFactor) * Math.cos(angleSlice*i - Math.PI/2); })
 		.attr("cy", function(d, i){ return rScale(maxValue * cfg.labelFactor) * Math.sin(angleSlice*i - Math.PI/2); })
     .style("fill", function(d,i) { return interfaceColor(d.value); });

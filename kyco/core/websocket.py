@@ -83,7 +83,7 @@ class LogWebSocket(WebSocket):
         self.stream.seek(0)
         msg = self.stream.read()
         self.stream.truncate(0)
-        self.full_log = self.full_log+msg
+        self.full_log += msg
 
         log_status = yield from websocket.recv()
         if log_status == 'full':

@@ -23,6 +23,7 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         """
         Thread.__init__(self, daemon=False)
         self.controller = controller
+        self.controller.log_websocket.register_log(log)
         self._listeners = {'kyco/core.shutdown': [self._shutdown_handler]}
         #: int: Seconds to sleep before next call to :meth:`execute`. If
         #: negative, run :meth:`execute` only once.

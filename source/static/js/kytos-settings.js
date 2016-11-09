@@ -12,5 +12,4 @@ var default_settings = {
     api_url = "http://" + server_host + ":8181/kytos/",
     layouts_url = api_url + "web/topology/layouts/",
     topology_url = api_url + "topology",
-    log_server_url = "ws://" + server_host + ":8765",
-    enable_log = true;
+    log_server_url = "ws://" + server_host + ":8765";

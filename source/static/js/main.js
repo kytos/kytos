@@ -49,12 +49,11 @@
 }());
 
 $(window).ready(function(){
-  load_layouts();
-  draw_background_map(draw_topology);
-
-  // Load default settings defined at kytos-settings.js
-  toggle_disconnected_hosts(default_settings.show_disconnected_hosts);
-  toggle_unused_interfaces(default_settings.show_unused_interfaces);
+  if (default_settings.enable_log) {
+    $('#enable_log').prop('checked', true).change();
+  } else {
+    $('#enable_log').prop('checked', false).change();
+  }
 
   if (default_settings.show_topology) {
     $('#show_topology').prop('checked', true).change();
@@ -64,18 +63,12 @@ $(window).ready(function(){
     $('#topology-chart').hide();
   }
 
-  if (default_settings.show_topology) {
+  if (default_settings.show_map) {
     $('#show_map').prop('checked', true).change();
     $('#background-map').show();
   } else {
     $('#show_map').prop('checked', false).change();
     $('#background-map').hide();
-  }
-
-  if (default_settings.show_topology) {
-    $('#enable_log').prop('checked', true).change();
-  } else {
-    $('#enable_log').prop('checked', false).change();
   }
 
   $('#map_opacity').slider({
@@ -89,6 +82,13 @@ $(window).ready(function(){
     .on('change', function(current, current2) {
       $('#background-map').css('opacity', current.value.newValue);
     });
+
+  load_layouts();
+  draw_background_map(draw_topology);
+
+  // Load default settings defined at kytos-settings.js
+  toggle_disconnected_hosts(default_settings.show_disconnected_hosts);
+  toggle_unused_interfaces(default_settings.show_unused_interfaces);
 
   if (window.location.hash){
     if (window.location.hash.indexOf('#') == 0) {

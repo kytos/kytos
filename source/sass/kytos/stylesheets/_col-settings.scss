@@ -1,7 +1,7 @@
 .col-settings {
   font-family : "Helvetica Neue",Helvetica,Arial,sans-serif;
   margin-top : -3px ;
-  min-height : 100vh;
+  min-height : 30vh;
   border-right : 1px solid #111;
   border-left : 1px solid #2a2d35;
 
@@ -16,7 +16,7 @@
 
   h1 {
     margin : 10px 0 0 0;
-    font-weight : bold;
+    font-weight : 500;
     font-size : 20px;
     padding : 0;
   }
@@ -58,18 +58,18 @@
     margin-bottom: 5px;
     width: 100%;
     dt {
-      font-size: 8px;
-      font-weight: 200;
-      letter-spacing: 2px;
+      font-size: 9px;
+      font-weight: 300;
       margin-top: 5px;
       margin-bottom: 0;
-      text-transform: uppercase;
       line-height: 1.2em;
+      color : #a7a7a5;
     }
     dd {
       font-size : 14px;
-      font-weight: 300;
+      font-weight: 400;
       line-height: 1.2em;
+      color : #2d2c2a;
     }
   }
 
@@ -85,15 +85,14 @@
     .table-scroll {
       tbody {
         position: absolute;
-        overflow-y: scroll;
+        overflow-y: auto;
         height: 15vh;
       }
       tr {
         width: 100%;
         table-layout: fixed;
         display: inline-table;
-        border-top : 1px solid #444;
-        border-bottom: 1px solid #111;
+        border-bottom : 1px solid #444;
       }
 
       thead > tr > th {
@@ -108,9 +107,32 @@
 
   }
 
+    .context-chart {
+      background: #000 none repeat scroll 0 0;
+      color : #444;
+      height: 180px;
+    }
+
+    .context-details {
+      h1 {
+        color : #554077;
+      }
+
+      background: #fff none repeat scroll 0 0;
+      color : #444;
+      bottom: 0;
+      display: block;
+      height: 180px;
+      opacity: 1;
+    }
+
+
 }
 
 .maximized {
+    .col-settings {
+      overflow: hidden;
+    }
 
     .context-chart {
       position : relative;
@@ -121,7 +143,7 @@
       svg {
         display: inline-block;
         position: absolute;
-        top: 50%;
+        top: 40%;
         -webkit-transform: translateY(-50%);
         -ms-transform: translateY(-50%);
         transform: translateY(-50%);
@@ -132,8 +154,14 @@
       }
     }
 
-    .context-detail {
-      display: none;
+    .context-details {
+      background: #fff none repeat scroll 0 0;
+      color : #444;
+      bottom: 0;
+      display: block;
+      height: 180px;
+      position: absolute;
+      width: 100%;
     }
 
 

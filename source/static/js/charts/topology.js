@@ -116,7 +116,7 @@ function get_interface_owner(d){
   /* Get the switch in which the 'd' interface is connected */
   searched_switch = null;
   $.each(simulation.force('link').links(), function(index, link) {
-    if (link.type == 'interface' && link.target.name == d.name) {
+    if (link.type == 'interface' && link.target.id == d.id) {
       searched_switch = link.source;
     }
   });
@@ -127,7 +127,7 @@ function get_switch_interfaces(d){
   /* Get all interfaces associated to the 'd' host */
   interfaces = []
   $.each(simulation.force('link').links(), function(index, link) {
-    if (link.type == 'interface' && link.source.name == d.name) {
+    if (link.type == 'interface' && link.source.id == d.id) {
       interfaces.push(link.target);
     }
   });
@@ -177,7 +177,7 @@ function toggle_unused_interfaces(){
       if (link.type == 'link') unused = false;
     });
     if (unused) {
-      d3.select("#node-interface-" + fix_name(interface.name))
+      d3.select("#node-interface-" + fix_name(interface.id))
         .classed('invisible', !show);
     }
   })
@@ -188,19 +188,19 @@ function toggle_disconnected_hosts(){
   $.each(get_hosts(), function(index, host){
     links = get_node_links(host);
     if (links.length == 0) {
-      d3.select("#node-host-" + fix_name(host.name))
+      d3.select("#node-host-" + fix_name(host.id))
         .classed('invisible', !show);
     }
   })
 }
 
 function node_highlight(node) {
-  d3.select("#node-" + node.type + "-" + fix_name(node.name))
+  d3.select("#node-" + node.type + "-" + fix_name(node.id))
     .classed('downlight', false);
 }
 
 function node_downlight(node) {
-  d3.select("#node-" + node.type + "-" + fix_name(node.name))
+  d3.select("#node-" + node.type + "-" + fix_name(node.id))
     .selection.classed('downlight', true);
 }
 
@@ -249,6 +249,7 @@ function resetted() {
 function show_context(d) {
   if (d.type == 'switch') {
     data = {'name': d.name,
+            'id': d.id,
             'dpid': d.dpid,
             'connection': d.connection,
             'ofp_version': d.ofp_version,
@@ -260,6 +261,7 @@ function show_context(d) {
       // E.g.: port 65534 has speed == 0 and no human-readable string
       if (interface.speed != '') {
         iface = {'name': interface.name,
+                 'id': interface.id,
                  'port_number': interface.port_number,
                  'mac': interface.mac,
                  'speed': interface.speed}
@@ -301,9 +303,10 @@ function get_current_layout() {
    */
   layout = {'nodes': {}, 'other_settings': {}};
   $.each(simulation.nodes(), function(idx, node) {
-    d3node = d3.select('#node-' + node.type + '-' + fix_name(node.name));
+    d3node = d3.select('#node-' + node.type + '-' + fix_name(node.id));
     node_data = {
       'name': node.name,
+      'id': node.id,
       'type': node.type,
       'x': node.x,
       'y': node.y,
@@ -311,7 +314,7 @@ function get_current_layout() {
       'fy': node.fy,
       'downlight': d3node.classed('downlight'),
     };
-    layout.nodes[node.name] = node_data;
+    layout.nodes[node.id] = node_data;
   });
   layout.other_settings['show_unused_interfaces'] = $('#show_unused_interfaces')[0].checked;
   layout.other_settings['show_disconnected_hosts'] = $('#show_disconnected_hosts')[0].checked;
@@ -406,13 +409,13 @@ function restore_layout(name) {
 
   $.getJSON(layouts_url + name, function(layout) {
     $.each(simulation.nodes(), function(idx, node) {
-      if (node.name in layout.nodes) {
-        restored_node = layout.nodes[node.name];
+      if (node.id in layout.nodes) {
+        restored_node = layout.nodes[node.id];
         node.x = restored_node.x;
         node.y = restored_node.y;
         node.fx = restored_node.fx;
         node.fy = restored_node.fy;
-        d3node = d3.select('#node-' + node.type + '-' + fix_name(node.name))
+        d3node = d3.select('#node-' + node.type + '-' + fix_name(node.id))
                       .classed('downlight', restored_node.downlight);
       }
     });
@@ -495,7 +498,7 @@ function draw_topology() {
       .data(graph.nodes)
       .enter().append("circle")
         .attr("id", function(d) {
-            return "node-" + d.type + "-" + fix_name(d.name); })
+            return "node-" + d.type + "-" + fix_name(d.id); })
         .attr("r", function(d) { return get_node_size(d.type); })
         .attr("stroke", function(d) { return nodes_stroke[d.type]; })
         .attr("stroke-width", 2)

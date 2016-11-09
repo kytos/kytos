@@ -15,6 +15,7 @@
         <link href="static/css/vendors/owl.carousel.min.css" rel="stylesheet">
         <link href="static/css/vendors/owl.theme.default.min.css" rel="stylesheet">
         <link href="static/css/vendors/jquery.mCustomScrollbar.min.css" rel="stylesheet">
+        <link href="static/css/vendors/bootstrap-slider.min.css" rel="stylesheet">
         <link href="static/css/style.css" rel="stylesheet">
         <link href="static/css/chart.css" rel="stylesheet">
 
@@ -260,6 +261,12 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
                                         <label for="show_map">
                                           <input id='show_map' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#background-map").toggle()'> Show Map
                                         </label>
+                                        <label for='map_opacity'>
+                                          <input id="map_opacity" data-slider-id='map_opacity_slider' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="0.1" data-slider-value="1"/>
+                                          </label>
+                                        <label for="enable_log">
+                                          <input id='enable_log' type="checkbox" data-label-width="0" data-size="mini" checked="checked"> Enable Logs
+                                        </label>
                                   </div>
                                 </div>
 
@@ -276,6 +283,7 @@ information, please visit <a href="http://kytos.io/">kytos.io</a>
         <script src="static/js/vendors/d3.v4.min.js"></script>
         <script src="static/js/vendors/bootstrap.min.js"></script>
         <script src="static/js/vendors/bootstrap-switch.min.js"></script>
+        <script src="static/js/vendors/bootstrap-slider.min.js"></script>
         <script src="static/js/vendors/typeit.min.js"></script>
         <script src="static/js/vendors/mapbox-gl.js"></script>
         <script src="static/js/kytos-settings.js"></script>

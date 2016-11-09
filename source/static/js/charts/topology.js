@@ -1,7 +1,3 @@
-var api_url = "http://" + window.location.hostname + ":8181/kytos/",
-    layouts_url = api_url + "web/topology/layouts/",
-    topology_url = api_url + "topology";
-
 // Nodes vars
 var charge = {'switch': 400,
               'interface': -20,

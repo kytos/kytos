@@ -2,19 +2,21 @@
   console.log("kytos-logs started")
   // Method used to request a websocket and append in tab_logs terminal.
   function LogWebSocketReceive() {
-    if ("WebSocket" in window) {
-      var ws = new WebSocket("ws://localhost:8765");
+    if ($('#enable_log')[0].checked) {
+      if ("WebSocket" in window) {
+        var ws = new WebSocket(log_server_url);
 
-      ws.onmessage = function (evt) {
-        var received_msgs = evt.data;
-        $.each(received_msgs.split('\n'), function(index, msg) {
-          if (msg) {
-            add_log_message(msg, 'controller')
-          }
-        })
-      };
-    } else {
-      console.log("WebSocket NOT supported by your Browser!");
+        ws.onmessage = function (evt) {
+          var received_msgs = evt.data;
+          $.each(received_msgs.split('\n'), function(index, msg) {
+            if (msg) {
+              add_log_message(msg, 'controller')
+            }
+          })
+        };
+      } else {
+        console.log("WebSocket NOT supported by your Browser!");
+      }
     }
   }
 

@@ -55,6 +55,7 @@ $(window).ready(function(){
   // Load default settings defined at kytos-settings.js
   toggle_disconnected_hosts(default_settings.show_disconnected_hosts);
   toggle_unused_interfaces(default_settings.show_unused_interfaces);
+
   if (default_settings.show_topology) {
     $('#show_topology').prop('checked', true).change();
     $('#topology-chart').show();
@@ -62,6 +63,7 @@ $(window).ready(function(){
     $('#show_topology').prop('checked', false).change();
     $('#topology-chart').hide();
   }
+
   if (default_settings.show_topology) {
     $('#show_map').prop('checked', true).change();
     $('#background-map').show();
@@ -70,6 +72,23 @@ $(window).ready(function(){
     $('#background-map').hide();
   }
 
+  if (default_settings.show_topology) {
+    $('#enable_log').prop('checked', true).change();
+  } else {
+    $('#enable_log').prop('checked', false).change();
+  }
+
+  $('#map_opacity').slider({
+    formatter: function(value) {
+      return "Map opacity of " + value;
+    }
+  })
+    .on('slide', function(current) {
+      $('#background-map').css('opacity', current.value);
+    })
+    .on('change', function(current, current2) {
+      $('#background-map').css('opacity', current.value.newValue);
+    });
 
   if (window.location.hash){
     if (window.location.hash.indexOf('#') == 0) {

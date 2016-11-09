@@ -1,6 +1,6 @@
 {
-  "name": "admin-ui",
-  "version": "v1.1.0-alpha0",
+  "name": "kytos-admin-ui",
+  "version": "v1.1.0b0",
   "description": "Kytos admin page",
   "main": "Gruntfile.js",
   "repository": {

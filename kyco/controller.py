@@ -1,4 +1,4 @@
-"""Kyco - Kytos Contoller
+"""Kyco - Kytos Contoller.
 
 This module contains the main class of Kyco, which is
 :class:`~.controller.Controller`.
@@ -14,7 +14,6 @@ Basic usage:
     controller.start()
 """
 
-import json
 import os
 import re
 from importlib.machinery import SourceFileLoader
@@ -28,9 +27,8 @@ from kyco.core.events import KycoEvent
 from kyco.core.napps import KycoCoreNApp
 from kyco.core.switch import Switch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
-from kyco.utils import now, start_logger
-from pyof.foundation.basic_types import HWAddress
 from kyco.core.websocket import LogWebSocket
+from kyco.utils import now, start_logger
 
 log = start_logger(__name__)
 
@@ -40,7 +38,7 @@ app = Flask(__name__)
 
 
 class Controller(object):
-    """This is the main class of Kyco.
+    """Main class of Kyco.
 
     The main responsabilities of this class are:
         - start a thread with :class:`~.core.tcp_server.KycoServer`;
@@ -49,6 +47,7 @@ class Controller(object):
         - manage which event should be sent to NApps methods;
         - manage the buffers handlers, considering one thread per handler.
     """
+
     def __init__(self, options):
         """Init method of Controller class.
 
@@ -97,8 +96,10 @@ class Controller(object):
 
         self.log_websocket = LogWebSocket()
 
+        self.api_server = None  # started by :meth:`start_api_server`
+
     def start_api_server(self):
-        """Starts Flask server inside its own thread"""
+        """Start Flask server inside its own thread."""
         app.add_url_rule('/kytos/shutdown', self.shutdown_api.__name__,
                          self.shutdown_api, methods=['GET'])
         self.api_server = Thread(target=app.run, args=['0.0.0.0', 8181])
@@ -106,7 +107,7 @@ class Controller(object):
         self.api_server_running = True
 
     def register_rest_endpoint(self, url, function, methods):
-        """Register a new rest endpoint"""
+        """Register a new rest endpoint."""
         if not self.api_server_running:
             self.start_api_server()
 
@@ -117,9 +118,9 @@ class Controller(object):
                              function, methods=methods)
 
     def restart_api_server(self):
-        """Responsible for restarting the Flask server"""
+        """Responsible for restarting the Flask server."""
         if self.api_server_running:
-           self.stop_api_server()
+            self.stop_api_server()
         self.start_api_server()
 
     def start_log_websocket(self):
@@ -173,8 +174,8 @@ class Controller(object):
         if self.started_at:
             self.stop_controller(graceful)
 
-    def stop_controller(self,graceful=True):
-        """Stops the controller.
+    def stop_controller(self, graceful=True):
+        """Stop the controller.
 
         This method should:
             - announce on the network that the controller will shutdown;
@@ -212,7 +213,7 @@ class Controller(object):
         urlopen('http://127.0.0.1:8181/kytos/shutdown')
 
     def shutdown_api(self):
-        """Stops the API server"""
+        """Stop the API server."""
         allowed_host = ['127.0.0.1:8181', 'localhost:8181']
         if request.host not in allowed_host:
             return "", 403
@@ -235,7 +236,7 @@ class Controller(object):
         return self.started_at - now() if self.started_at else 0
 
     def notify_listeners(self, event):
-        """Sends the event to the specified listeners.
+        """Send the event to the specified listeners.
 
         Loops over self.events_listeners matching (by regexp) the attribute
         name of the event with the keys of events_listeners. If a match occurs,
@@ -322,13 +323,10 @@ class Controller(object):
                 break
 
     def get_switch_by_dpid(self, dpid):
-        try:
-            return self.switches[dpid]
-        except KeyError:
-            return None
+        return self.switches.get(dpid)
 
     def get_switch_or_create(self, dpid, connection):
-
+        """Return switch and create it if necessary."""
         self.create_or_update_connection(connection)
         switch = self.get_switch_by_dpid(dpid)
         event = None
@@ -354,11 +352,8 @@ class Controller(object):
     def create_or_update_connection(self, connection):
         self.connections[connection.id] = connection
 
-    def get_connection_by_id(self, id):
-        try:
-            return self.connections[id]
-        except KeyError:
-            return None
+    def get_connection_by_id(self, conn_id):
+        return self.connections.get(conn_id)
 
     def remove_connection(self, connection):
         if connection is None:
@@ -372,7 +367,7 @@ class Controller(object):
 
     def remove_switch(self, switch):
         try:
-            switch = self.switches.pop(switch.dpid)
+            self.switches.pop(switch.dpid)
         except KeyError:
             return False
 
@@ -389,7 +384,6 @@ class Controller(object):
             event (KycoEvent): The received event (kytos/core.connection.new)
             with the needed infos.
         """
-
         log.info("Handling KycoEvent:kytos/core.connection.new ...")
 
         connection = event.source
@@ -402,12 +396,11 @@ class Controller(object):
         self.create_or_update_connection(connection)
 
     def add_new_switch(self, switch):
-        """Adds a new switch on the controller.
+        """Add a new switch on the controller.
 
         Args:
             switch (Switch): A Switch object
         """
-
         self.switches[switch.dpid] = switch
 
     def load_napp(self, napp_name):
@@ -442,7 +435,7 @@ class Controller(object):
         pass
 
     def load_napps(self):
-        """Load all NApps installed on the NApps dir"""
+        """Load all NApps installed on the NApps dir."""
         napps_dir = self.options.napps
         try:
             for author in os.listdir(napps_dir):
@@ -452,7 +445,7 @@ class Controller(object):
                     log.info("Loading app %s", full_name)
                     self.load_napp(full_name)
         except FileNotFoundError as e:
-            log.error("Could not load napps: {}".format(e))
+            log.error("Could not load napps: %s", e)
 
     def unload_napp(self, napp_name):
         """Unload a specific NApp based on its name.

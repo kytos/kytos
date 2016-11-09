@@ -1,6 +1,6 @@
 lockfile
 python-daemon
 websockets
-python-openflow >= 1.1.0a2.post2
-kyco-core-napps >= 1.1.0a5.dev1
+python-openflow >= 1.1.0b0.post1
+kyco-core-napps >= 1.1.0b0.post1
 flask

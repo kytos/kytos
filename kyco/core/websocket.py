@@ -60,7 +60,6 @@ class WebSocket(Thread):
 class LogWebSocket(WebSocket):
     """LogWebSocket is used to serve a kyco logs."""
 
-    stream = None
     def __init__(self, **kwargs):
         """The contructor of this class use the below params.
 
@@ -70,7 +69,7 @@ class LogWebSocket(WebSocket):
         """
         kwargs['port'] = kwargs.get('port',8765)
         self.stream = kwargs.get('stream',StringIO())
-
+        self.logs = []
         super().__init__(**kwargs)
 
     @asyncio.coroutine
@@ -92,7 +91,8 @@ class LogWebSocket(WebSocket):
         Args:
             log (class `logging.Logger`): logger object that will be heard.
         """
-        if log:
+        if log and log.name not in self.logs:
             streaming = StreamHandler(self.stream)
             streaming.setFormatter(Formatter(log_fmt()))
             log.addHandler(streaming)
+            self.logs.append(log.name)

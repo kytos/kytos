@@ -1,4 +1,4 @@
-var api_url = "http://200.145.46.244:8181/kytos/",
+var api_url = "http://" + window.location.hostname + ":8181/kytos/",
     layouts_url = api_url + "web/topology/layouts/",
     topology_url = api_url + "topology";
 

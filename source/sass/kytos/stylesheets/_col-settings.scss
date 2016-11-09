@@ -84,8 +84,6 @@
 
     .table-scroll {
       tbody {
-        position: absolute;
-        overflow-y: auto;
         height: 15vh;
       }
       tr {
@@ -100,20 +98,20 @@
         background : #292929;
         padding : 3px;
       }
-      tr > td {
-        padding : 3px;
-      }
     }
 
   }
 
     .context-chart {
-      background: #000 none repeat scroll 0 0;
+      @include kytos-anim-easing(300ms);
+      background: #191a1a none repeat scroll 0 0;
       color : #444;
       height: 180px;
     }
 
     .context-details {
+      @include kytos-anim-easing(300ms);
+
       h1 {
         color : #554077;
       }
@@ -130,17 +128,22 @@
 }
 
 .maximized {
+    @include kytos-anim-easing(300ms);
+
     .col-settings {
+      @include kytos-anim-easing(300ms);
       overflow: hidden;
     }
 
     .context-chart {
+      @include kytos-anim-easing(300ms);
       position : relative;
       display: inline-block;
       width : 100%;
       height: calc(100vh - 91px);
 
       svg {
+        @include kytos-anim-easing(300ms);
         display: inline-block;
         position: absolute;
         top: 40%;

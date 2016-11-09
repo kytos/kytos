@@ -114,10 +114,13 @@ function release_node(d) {
 
 function get_interface_owner(d){
   /* Get the switch in which the 'd' interface is connected */
+
+  if (d.type != 'interface') return null;
   searched_switch = null;
-  $.each(simulation.force('link').links(), function(index, link) {
-    if (link.type == 'interface' && link.target.id == d.id) {
-      searched_switch = link.source;
+  $.each(simulation.nodes(), function(index, node) {
+    if (node.id == d.switch) {
+      searched_switch = node;
+      return false;  // this just breaks the each loop.
     }
   });
   return searched_switch;
@@ -125,11 +128,11 @@ function get_interface_owner(d){
 
 function get_switch_interfaces(d){
   /* Get all interfaces associated to the 'd' host */
+  if (d.type != 'switch') return null;
   interfaces = []
-  $.each(simulation.force('link').links(), function(index, link) {
-    if (link.type == 'interface' && link.source.id == d.id) {
-      interfaces.push(link.target);
-    }
+  $.each(simulation.nodes(), function(index, node) {
+    if (node.type == 'interface' && node.switch == d.id)
+      interfaces.push(node);
   });
   return interfaces;
 }
@@ -148,6 +151,10 @@ function get_interfaces() {
 
 function get_hosts() {
   return get_nodes_by_type('host');
+}
+
+function get_switches() {
+  return get_nodes_by_type('switch');
 }
 
 function get_node_links(node) {

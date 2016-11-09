@@ -79,7 +79,7 @@ $(window).ready(function(){
     .on('slide', function(current) {
       $('#background-map').css('opacity', current.value);
     })
-    .on('change', function(current, current2) {
+    .on('change', function(current) {
       $('#background-map').css('opacity', current.value.newValue);
     });
 

@@ -1,4 +1,4 @@
-var api_url = "http://" + window.location.hostname + ":8181/kytos/",
+var api_url = "http://200.145.46.244:8181/kytos/",
     layouts_url = api_url + "web/topology/layouts/",
     topology_url = api_url + "topology";
 
@@ -359,6 +359,9 @@ function get_saved_layouts() {
     url: layouts_url,
     success: function(data) {
       return JSON.parse(data);
+    },
+    done : function(){
+      scrollBehavior();
     }
   });
 }
@@ -377,6 +380,9 @@ function load_layouts() {
           appendLayoutListItem(item);
         });
       }
+    },
+    done: function(){
+      scrollBehavior();
     }
   });
 }
@@ -529,5 +535,14 @@ function draw_topology() {
 
     set_status('Topology built. Have fun!');
 
+  });
+}
+
+function scrollBehavior(){
+  // custom scroolbar
+  $(".customScroll").mCustomScrollbar({
+    scrollButtons:{enable:true},
+    theme:"light-thick",
+    scrollbarPosition:"outside"
   });
 }

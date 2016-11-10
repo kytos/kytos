@@ -1,14 +1,17 @@
+"""Module with WebSockets."""
 import asyncio
+import json
+import logging
 from abc import abstractmethod
-from logging import ERROR, Formatter, getLogger, StreamHandler
 from io import StringIO
 from threading import Thread
-from kyco.utils import log_fmt
 import websockets
+from kyco.utils import log_fmt
 
 # hide websocket logs
-log = getLogger('websockets.protocol')
-log.setLevel(ERROR)
+log = logging.getLogger('websockets.protocol')
+log.setLevel(logging.ERROR)
+
 
 class WebSocket(Thread):
     """Websocket class is used to serve a websocket."""
@@ -21,16 +24,15 @@ class WebSocket(Thread):
             port (int): number of port used to bind the server.(defaults: 6553)
         """
         Thread.__init__(self)
-        self.host = kwargs.get('host','0.0.0.0')
+        self.host = kwargs.get('host', '0.0.0.0')
         self.port = kwargs.get('port', 6553)
         self.event_loop = None
         self.is_running = False
 
     @abstractmethod
     @asyncio.coroutine
-    def handle_msg(self,websocket, path):
-        """Abstract method used to handle websocket messages.This method is
-        asynchronous.
+    def handle_msg(self, websocket, path):
+        """Abstract method used to handle websocket messages.
 
         Args:
             websocket (websocket.server): websocket.server used.
@@ -70,20 +72,32 @@ class LogWebSocket(WebSocket):
         kwargs['port'] = kwargs.get('port',8765)
         self.stream = kwargs.get('stream',StringIO())
         self.logs = []
+        self.buff = ""
+
         super().__init__(**kwargs)
 
     @asyncio.coroutine
-    def handle_msg(self,websocket, path):
-        """Asynchronous method used to send logs from registered logs.
+    def handle_msg(self, websocket, path):
+        """Method used to send logs from registered logs.
 
         Args:
             websocket (websocket.server): websocket.server used.
             path(string): path of the websocket.server.
         """
+        data = yield from websocket.recv()
+        data = json.loads(data)
         self.stream.seek(0)
         msg = self.stream.read()
-        yield from websocket.send(msg)
         self.stream.truncate(0)
+        self.buff += msg
+
+        if data['type'] == "full_buff":
+            msg = self.buff
+
+        if len(self.buff) > 10**5:
+            self.buff = msg
+
+        yield from websocket.send(json.dumps({'msg': msg}))
 
     def register_log(self, log=None):
         """Method used to register new logs.
@@ -92,7 +106,7 @@ class LogWebSocket(WebSocket):
             log (class `logging.Logger`): logger object that will be heard.
         """
         if log and log.name not in self.logs:
-            streaming = StreamHandler(self.stream)
-            streaming.setFormatter(Formatter(log_fmt()))
+            streaming = logging.StreamHandler(self.stream)
+            streaming.setFormatter(logging.Formatter(log_fmt()))
             log.addHandler(streaming)
             self.logs.append(log.name)

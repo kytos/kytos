@@ -7,11 +7,11 @@ var size = {'switch': 20,
             'interface': 5,
             'host': 10};
 
-var nodes_fill = {'switch': "rgba(255,255,255,0)",
+var nodes_fill = {'switch': "#554077", // "rgba(255,255,255,0)",
                   'interface': "rgba(255,255,255,0.5)",
                   'host': "rgba(255,0,0,1)"};
 
-var nodes_stroke = {'switch': "rgba(255,255,255,0.5)",
+var nodes_stroke = {'switch': "#554077", //"rgba(255,255,255,0.5)",
                     'interface': "rgba(255,255,255,0.5)",
                     'host': "rgba(255,255,255.0.5)"};
 

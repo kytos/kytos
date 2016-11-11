@@ -83,24 +83,12 @@ $(window).ready(function(){
       $('#background-map').css('opacity', current.value.newValue);
     });
 
-  load_layouts();
-  draw_background_map(draw_topology);
-
-  // Load default settings defined at kytos-settings.js
-  toggle_disconnected_hosts(default_settings.show_disconnected_hosts);
-  toggle_unused_interfaces(default_settings.show_unused_interfaces);
-
-  if (window.location.hash){
-    if (window.location.hash.indexOf('#') == 0) {
-      restore_layout(window.location.hash.split('#')[1]);
-    } else {
-      restore_layout(window.location.hash);
-    }
-  }
-
   $('.owl-carousel').owlCarousel({
     margin:10,
     nav:true
   })
+
+  load_layouts();
+  draw_background_map(draw_topology);
 
 })

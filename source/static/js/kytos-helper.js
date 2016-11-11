@@ -12,3 +12,12 @@ KYTOS_HELPER.loadTemplate = function(target, data, path_template){
     });
 
 }
+
+function scrollBehavior(){
+  // custom scroolbar
+  $(".customScroll").mCustomScrollbar({
+    scrollButtons:{enable:true},
+    theme:"light-thick",
+    scrollbarPosition:"outside"
+  });
+}

@@ -796,14 +796,20 @@ function draw_topology() {
 
     set_status('Topology built. Have fun!');
 
-  });
-}
+    if (window.location.hash){
+      if (window.location.hash.indexOf('#') == 0) {
+        restore_layout(window.location.hash.split('#')[1]);
+      } else {
+        restore_layout(window.location.hash);
+      }
+    } else {
+      // Load default settings defined at kytos-settings.js
+      toggle_disconnected_hosts(default_settings.show_disconnected_hosts);
+      toggle_unused_interfaces(default_settings.show_unused_interfaces);
+    }
 
-function scrollBehavior(){
-  // custom scroolbar
-  $(".customScroll").mCustomScrollbar({
-    scrollButtons:{enable:true},
-    theme:"light-thick",
-    scrollbarPosition:"outside"
-  });
+    toggle_labels('switch', 'name');
+    toggle_labels('host', 'mac');
+
+    });
 }

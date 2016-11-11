@@ -27,7 +27,7 @@ function draw_background_map(callback=undefined) {
       L.mapbox.accessToken = 'pk.eyJ1IjoiZGlyYW9sIiwiYSI6ImNpdjlweGl2bDAwamQyb3M5cmo2NmMzZnUifQ.QFVrOl-nUkV6D5RNoKmTJA';
       var map = L.mapbox.map('background-map', 'mapbox.dark', {
           scrollWheelZoom: true,
-          maxZoom: 10,
+          maxZoom: 20,
           minZoom: 2
       }).setView([default_settings.map_center[1], default_settings.map_center[0]],
                  default_settings.map_zoom);

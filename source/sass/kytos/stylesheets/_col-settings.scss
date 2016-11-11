@@ -58,18 +58,18 @@
     margin-bottom: 5px;
     width: 100%;
     dt {
-      font-size: 9px;
+      font-size: 11px;
       font-weight: 300;
       margin-top: 5px;
       margin-bottom: 0;
       line-height: 1.2em;
-      color : #a7a7a5;
+      color : #554077;
     }
     dd {
       font-size : 14px;
       font-weight: 400;
       line-height: 1.2em;
-      color : #2d2c2a;
+      color : #ddd;
     }
   }
 
@@ -113,10 +113,10 @@
       @include kytos-anim-easing(300ms);
 
       h1 {
-        color : #554077;
+        color : #ddd;
       }
 
-      background: #fff none repeat scroll 0 0;
+      background: #111 none repeat scroll 0 0;
       color : #444;
       bottom: 0;
       display: block;

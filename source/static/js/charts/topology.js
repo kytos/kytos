@@ -788,19 +788,7 @@ function draw_topology() {
           return "translate(" + [d.x, d.y] + ")";
         }
       });
-      gnodes.selectAll('.name_label_group')
-        .attr('transform', function(d){
-          return "translate(" + [gnode_radius(d) - 6, gnode_radius(d) - 6] + ")";
-        })
-      gnodes.selectAll('.address_label_group')
-        .attr('transform', function(d){
-          return "translate(" + [gnode_radius(d) - 6, gnode_radius(d) - 6] + ")";
-        })
-      gnodes.selectAll('.dpid_label_group')
-        .attr('transform', function(d){
-          return "translate(" + [gnode_radius(d) - 6, gnode_radius(d) - 6] + ")";
-        })
-      gnodes.selectAll('.mac_label_group')
+      gnodes.selectAll('[class$="_label_group"]')
         .attr('transform', function(d){
           return "translate(" + [gnode_radius(d) - 6, gnode_radius(d) - 6] + ")";
         })

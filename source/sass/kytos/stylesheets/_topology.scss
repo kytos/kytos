@@ -3,23 +3,19 @@ line {
   stroke: rgba(255,255,255,0.5);
 }
 
-.name_label_group,
-.address_label_group,
-.mac_label_group,
-.dpid_label_group {
+.switch_label_group,
+.host_label_group {
   pointer-events: none;
 }
 
-.name_label_group,
-.mac_label_group,
-.dpid_label_group {
+.name_label,
+.mac_label,
+.dpid_label {
   display: none;
 }
 
-text.name_label,
-text.mac_label,
-text.dpid_label,
-text.address_label {
+.switch_label_group text,
+.host_label_group text {
   fill: rgba(255,255,255,1) ;
   color: rgba(255,255,255,1) ;
   background-color: #554077;

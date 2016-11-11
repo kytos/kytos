@@ -4,33 +4,6 @@
 
   $("[type='checkbox'], [type='radio']").bootstrapSwitch();
 
-  $('input[name="nodes_labels"]').on('switchChange.bootstrapSwitch', function(event, state) {
-    if (this.value == 'address') {
-      $('.name_label_group').fadeOut()
-      $('.mac_label_group').fadeOut()
-      $('.dpid_label_group').fadeOut()
-      $('.mac_label_group').fadeOut()
-      $('.address_label_group').fadeIn()
-    } else if (this.value == 'name') {
-      $('.address_label_group').fadeOut()
-      $('.mac_label_group').fadeOut()
-      $('.dpid_label_group').fadeOut()
-      $('.name_label_group').fadeIn()
-    } else if (this.value == 'mac') {
-      $('.address_label_group').fadeOut()
-      $('.name_label_group').fadeOut()
-      $('.dpid_label_group').fadeOut()
-      $('.mac_label_group').fadeIn()
-    } else if (this.value == 'dpid'){
-      $('.address_label_group').fadeOut()
-      $('.name_label_group').fadeOut()
-      $('.mac_label_group').fadeOut()
-      $('.dpid_label_group').fadeIn()
-    } else {
-      $('[class$="_label_group"]').fadeOut();
-    }
-  });
-
   $("a,div").focus(function(){
     $(this).blur();
   })

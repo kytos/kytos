@@ -230,6 +230,11 @@ function highlight_switch(obj) {
   });
 }
 
+function toggle_labels(node_type, label_type) {
+  $('.' + node_type + '_label_group').fadeOut();
+  $('.' + node_type + '_label_group.' + label_type + '_label').fadeIn()
+}
+
 function zoomed() {
   container.attr("transform", d3.event.transform);
 }
@@ -532,18 +537,24 @@ function draw_topology() {
         .attr("stroke-width", 2)
         .attr("fill", gnode_fill);
 
-    // only labeling switches and hosts, but not interfaces
-    var labeled_items = gnodes.filter(function(d) {
-                              return (d.type == 'switch' || d.type == 'host');
-    });
+    /*******************
+     * SWITCH LABELING *
+     *******************/
+    // only labeling switches, but not interfaces
+    var switch_labeled_items = gnodes.filter(function(d) {return d.type == 'switch';});
 
+    //
+    // NAME LABEL
+    //
     // creating a group for the NAME label
-    var name_label_group = labeled_items
+    var switch_name_label_group = switch_labeled_items
       .append('g')
-      .classed('name_label_group', true);
+      .classed('switch_label_group', true)
+      .classed('name_label', true);
 
     // creating a rect to do some backgrounding on the label.
-    var name_label_rects = name_label_group.append('rect')
+    var switch_name_label_rects = switch_name_label_group
+        .append('rect')
           .attr('x', 0)
           .attr('y', 0)
           .attr('rx', 5)
@@ -551,28 +562,32 @@ function draw_topology() {
           .style('fill', 'rgba(155,155,255,0.2)');
 
     // adding the NAME itself as a svg text element
-    var  name_label_text = name_label_group.append('text')
-          .classed('name_label', true)
+    var switch_name_label_text = switch_name_label_group
+        .append('text')
           .text(function(d){ return d.name; });
 
     // fixing the rect width and height according to the NAME size.
-    name_label_rects
+    switch_name_label_rects
       .attr('width', function(d) { return this.parentNode.getBBox().width + 8; })
       .attr('height', function(d) { return this.parentNode.getBBox().height + 8; })
 
     // fixing the NAME text element positioning to the center of the rect.
-    name_label_text
+    switch_name_label_text
         .attr('x', function(d) { return 4; })
         .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
 
-
+    //
+    // ADDRESS LABEL
+    //
     // creating a group for the ADDRESS label
-    var address_label_group = labeled_items
+    var switch_address_label_group = switch_labeled_items
       .append('g')
-      .classed('address_label_group', true);
+      .classed('switch_label_group', true)
+      .classed('address_label', true);
 
     // creating a rect to do some backgrounding on the label.
-    var address_label_rects = address_label_group.append('rect')
+    var switch_address_label_rects = switch_address_label_group
+        .append('rect')
           .attr('x', 0)
           .attr('y', 0)
           .attr('rx', 5)
@@ -580,29 +595,32 @@ function draw_topology() {
           .style('fill', 'rgba(155,155,255,0.2)');
 
     // adding the ip itself as a svg text element
-    var  address_label_text = address_label_group.append('text')
-          .classed('address_label', true)
+    var switch_address_label_text = switch_address_label_group
+        .append('text')
           .text(function(d){ return d.connection; });
 
     // fixing the rect width and height according to the ip size.
-    address_label_rects
+    switch_address_label_rects
       .attr('width', function(d) { return this.parentNode.getBBox().width + 8; })
       .attr('height', function(d) { return this.parentNode.getBBox().height + 8; })
 
     // fixing the IP text element positioning to the center of the rect.
-    address_label_text
+    switch_address_label_text
         .attr('x', function(d) { return 4; })
         .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
 
     //
-    // creating a group for the DPID label
+    // DPID LABEL
     //
-    var dpid_label_group = labeled_items
-      .append('g')
-      .classed('dpid_label_group', true);
+    // creating a group for the DPID label
+    var switch_dpid_label_group = switch_labeled_items
+        .append('g')
+          .classed('switch_label_group', true)
+          .classed('dpid_label', true);
 
     // creating a rect to do some backgrounding on the label.
-    var dpid_label_rects = dpid_label_group.append('rect')
+    var switch_dpid_label_rects = switch_dpid_label_group
+        .append('rect')
           .attr('x', 0)
           .attr('y', 0)
           .attr('rx', 5)
@@ -610,51 +628,133 @@ function draw_topology() {
           .style('fill', 'rgba(155,155,255,0.2)');
 
     // adding the DPID itself as a svg text element
-    var  dpid_label_text = dpid_label_group.append('text')
-          .classed('dpid_label', true)
+    var switch_dpid_label_text = switch_dpid_label_group
+        .append('text')
           .text(function(d){ return d.dpid; });
 
     // fixing the rect width and height according to the NAME size.
-    dpid_label_rects
+    switch_dpid_label_rects
       .attr('width', function(d) { return this.parentNode.getBBox().width + 8; })
       .attr('height', function(d) { return this.parentNode.getBBox().height + 8; })
 
     // fixing the NAME text element positioning to the center of the rect.
-    dpid_label_text
-        .attr('x', function(d) { return 4; })
-        .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
+    switch_dpid_label_text
+      .attr('x', function(d) { return 4; })
+      .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
+
+    /**************************
+     * END OF SWITCH LABELING *
+     **************************/
+
+    /******************
+     * HOSTS LABELING *
+     ******************/
+    // only labeling hostes, but not interfaces
+    var host_labeled_items = gnodes.filter(function(d) {return d.type == 'host';});
 
     //
-    // creating a group for the MAC label
+    // NAME LABEL
     //
-    var mac_label_group = labeled_items
+    // creating a group for the NAME label
+    var host_name_label_group = host_labeled_items
       .append('g')
-      .classed('mac_label_group', true);
+      .classed('host_label_group', true)
+      .classed('name_label', true);
 
     // creating a rect to do some backgrounding on the label.
-    var mac_label_rects = mac_label_group.append('rect')
+    var host_name_label_rects = host_name_label_group
+        .append('rect')
           .attr('x', 0)
           .attr('y', 0)
           .attr('rx', 5)
           .attr('ry', 5)
           .style('fill', 'rgba(155,155,255,0.2)');
 
-    // adding the DPID itself as a svg text element
-    var  mac_label_text = mac_label_group.append('text')
-          .classed('mac_label', true)
-          .text(function(d){ return d.mac; });
+    // adding the NAME itself as a svg text element
+    var host_name_label_text = host_name_label_group
+        .append('text')
+          .text(function(d){ return d.name; });
 
     // fixing the rect width and height according to the NAME size.
-    mac_label_rects
+    host_name_label_rects
       .attr('width', function(d) { return this.parentNode.getBBox().width + 8; })
       .attr('height', function(d) { return this.parentNode.getBBox().height + 8; })
 
     // fixing the NAME text element positioning to the center of the rect.
-    mac_label_text
+    host_name_label_text
         .attr('x', function(d) { return 4; })
         .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
 
     //
+    // MAC LABEL
+    //
+    // creating a group for the ADDRESS label
+    var host_mac_label_group = host_labeled_items
+      .append('g')
+      .classed('host_label_group', true)
+      .classed('mac_label', true);
+
+    // creating a rect to do some backgrounding on the label.
+    var host_mac_label_rects = host_mac_label_group
+        .append('rect')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('rx', 5)
+          .attr('ry', 5)
+          .style('fill', 'rgba(155,155,255,0.2)');
+
+    // adding the ip itself as a svg text element
+    var host_mac_label_text = host_mac_label_group
+        .append('text')
+          .text(function(d){ return d.mac; });
+
+    // fixing the rect width and height according to the ip size.
+    host_mac_label_rects
+      .attr('width', function(d) { return this.parentNode.getBBox().width + 8; })
+      .attr('height', function(d) { return this.parentNode.getBBox().height + 8; })
+
+    // fixing the IP text element positioning to the center of the rect.
+    host_mac_label_text
+        .attr('x', function(d) { return 4; })
+        .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
+
+    //
+    // ADDRESS LABEL
+    //
+    // creating a group for the address label
+    var host_address_label_group = host_labeled_items
+        .append('g')
+          .classed('host_label_group', true)
+          .classed('address_label', true);
+
+    // creating a rect to do some backgrounding on the label.
+    var host_address_label_rects = host_address_label_group
+        .append('rect')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('rx', 5)
+          .attr('ry', 5)
+          .style('fill', 'rgba(155,155,255,0.2)');
+
+    // adding the address itself as a svg text element
+    var host_address_label_text = host_address_label_group
+        .append('text')
+          .text(function(d){ return d.address; });
+
+    // fixing the rect width and height according to the NAME size.
+    host_address_label_rects
+      .attr('width', function(d) { return this.parentNode.getBBox().width + 8; })
+      .attr('height', function(d) { return this.parentNode.getBBox().height + 8; })
+
+    // fixing the NAME text element positioning to the center of the rect.
+    host_address_label_text
+      .attr('x', function(d) { return 4; })
+      .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
+
+    /*************************
+     * END OF HOSTS LABELING *
+     *************************/
+
     //
     simulation
         .nodes(graph.nodes)

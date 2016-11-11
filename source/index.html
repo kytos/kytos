@@ -216,7 +216,37 @@
                 </div>
                 <div class="col-settings col-md-3 col-xs-6">
                   <h1>Label Settings</h1>
-                  <p class="help"> Select which label you want to show</p>
+                  <p class="help">Select which labels you want to show.</p>
+                  <div class="dropup mt" id="switch_label">
+                    <label for='switch_label_dropdown'>
+                      Switch: 
+                      <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="switch_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="layout-name disabled-option">Switch Labels</span>
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                        <li><a href="#" data-value="Name" onclick="toggle_labels('switch', 'name');">Name</a></li>
+                        <li><a href="#" data-value="DPID" onclick="toggle_labels('switch', 'dpid');">DPID</a></li>
+                        <li><a href="#" data-value="Address" onclick="toggle_labels('switch', 'address');">Address</a></li>
+                        <li><a href="#" data-value="None" onclick="toggle_labels('switch', 'none');">None</a></li>
+                      </ul>
+                    </label>
+                  </div>
+                  <div class="dropup mt" id="host_label">
+                    <label for='host_label_dropdown'>
+                      Host: 
+                      <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="host_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="layout-name disabled-option">Host Labels</span>
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                        <li><a href="#" data-value="Name" onclick="toggle_labels('host', 'name');">Name</a></li>
+                        <li><a href="#" data-value="Mac" onclick="toggle_labels('host', 'mac');">MAC</a></li>
+                        <li><a href="#" data-value="Address" onclick="toggle_labels('host', 'address');">Address</a></li>
+                        <li><a href="#" data-value="None" onclick="toggle_labels('host', 'none');">None</a></li>
+                      </ul>
+                    </label>
+                  </div>
                   <div class="radio">
                     <label for="nodes_labels_1">
                       <input type="radio" name="nodes_labels" id="nodes_labels_1" value="address" data-label-width="0"  data-size="mini"  class="switch-radio" checked>
@@ -225,18 +255,6 @@
                     <label for="nodes_labels_2">
                       <input type="radio" name="nodes_labels" id="nodes_labels_2" value="name"  data-label-width="0"  data-size="mini"  class="switch-radio">
                         Name
-                    </label>
-                    <label for="nodes_labels_3">
-                      <input type="radio" name="nodes_labels" id="nodes_labels_3" value="dpid"  data-label-width="0"  data-size="mini"  class="switch-radio">
-                        DPID
-                    </label>
-                    <label for="nodes_labels_4">
-                      <input type="radio" name="nodes_labels" id="nodes_labels_4" value="mac"  data-label-width="0"  data-size="mini"  class="switch-radio">
-                        MAC
-                    </label>
-                    <label for="nodes_labels_5">
-                      <input type="radio" name="nodes_labels" id="nodes_labels_5" value="none"  data-label-width="0"  data-size="mini"  class="switch-radio">
-                        None
                     </label>
                   </div>
                 </div>

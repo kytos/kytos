@@ -566,13 +566,13 @@ function draw_topology() {
         .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
 
 
-    // creating a group for the IP label
-    var ip_label_group = labeled_items
+    // creating a group for the ADDRESS label
+    var address_label_group = labeled_items
       .append('g')
-      .classed('ip_label_group', true);
+      .classed('address_label_group', true);
 
     // creating a rect to do some backgrounding on the label.
-    var ip_label_rects = ip_label_group.append('rect')
+    var address_label_rects = address_label_group.append('rect')
           .attr('x', 0)
           .attr('y', 0)
           .attr('rx', 5)
@@ -580,22 +580,82 @@ function draw_topology() {
           .style('fill', 'rgba(155,155,255,0.2)');
 
     // adding the ip itself as a svg text element
-    var  ip_label_text = ip_label_group.append('text')
-          .classed('ip_label', true)
+    var  address_label_text = address_label_group.append('text')
+          .classed('address_label', true)
           .text(function(d){ return d.connection; });
 
     // fixing the rect width and height according to the ip size.
-    ip_label_rects
+    address_label_rects
       .attr('width', function(d) { return this.parentNode.getBBox().width + 8; })
       .attr('height', function(d) { return this.parentNode.getBBox().height + 8; })
 
     // fixing the IP text element positioning to the center of the rect.
-    ip_label_text
+    address_label_text
         .attr('x', function(d) { return 4; })
         .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
 
+    //
+    // creating a group for the DPID label
+    //
+    var dpid_label_group = labeled_items
+      .append('g')
+      .classed('dpid_label_group', true);
 
+    // creating a rect to do some backgrounding on the label.
+    var dpid_label_rects = dpid_label_group.append('rect')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('rx', 5)
+          .attr('ry', 5)
+          .style('fill', 'rgba(155,155,255,0.2)');
 
+    // adding the DPID itself as a svg text element
+    var  dpid_label_text = dpid_label_group.append('text')
+          .classed('dpid_label', true)
+          .text(function(d){ return d.dpid; });
+
+    // fixing the rect width and height according to the NAME size.
+    dpid_label_rects
+      .attr('width', function(d) { return this.parentNode.getBBox().width + 8; })
+      .attr('height', function(d) { return this.parentNode.getBBox().height + 8; })
+
+    // fixing the NAME text element positioning to the center of the rect.
+    dpid_label_text
+        .attr('x', function(d) { return 4; })
+        .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
+
+    //
+    // creating a group for the MAC label
+    //
+    var mac_label_group = labeled_items
+      .append('g')
+      .classed('mac_label_group', true);
+
+    // creating a rect to do some backgrounding on the label.
+    var mac_label_rects = mac_label_group.append('rect')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('rx', 5)
+          .attr('ry', 5)
+          .style('fill', 'rgba(155,155,255,0.2)');
+
+    // adding the DPID itself as a svg text element
+    var  mac_label_text = mac_label_group.append('text')
+          .classed('mac_label', true)
+          .text(function(d){ return d.mac; });
+
+    // fixing the rect width and height according to the NAME size.
+    mac_label_rects
+      .attr('width', function(d) { return this.parentNode.getBBox().width + 8; })
+      .attr('height', function(d) { return this.parentNode.getBBox().height + 8; })
+
+    // fixing the NAME text element positioning to the center of the rect.
+    mac_label_text
+        .attr('x', function(d) { return 4; })
+        .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
+
+    //
+    //
     simulation
         .nodes(graph.nodes)
         .on("tick", ticked);
@@ -632,7 +692,15 @@ function draw_topology() {
         .attr('transform', function(d){
           return "translate(" + [gnode_radius(d) - 6, gnode_radius(d) - 6] + ")";
         })
-      gnodes.selectAll('.ip_label_group')
+      gnodes.selectAll('.address_label_group')
+        .attr('transform', function(d){
+          return "translate(" + [gnode_radius(d) - 6, gnode_radius(d) - 6] + ")";
+        })
+      gnodes.selectAll('.dpid_label_group')
+        .attr('transform', function(d){
+          return "translate(" + [gnode_radius(d) - 6, gnode_radius(d) - 6] + ")";
+        })
+      gnodes.selectAll('.mac_label_group')
         .attr('transform', function(d){
           return "translate(" + [gnode_radius(d) - 6, gnode_radius(d) - 6] + ")";
         })

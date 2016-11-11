@@ -4,12 +4,22 @@ line {
 }
 
 .name_label_group,
-.ip_label_group {
+.address_label_group,
+.mac_label_group,
+.dpid_label_group {
   pointer-events: none;
 }
 
+.name_label_group,
+.mac_label_group,
+.dpid_label_group {
+  display: none;
+}
+
 text.name_label,
-text.ip_label {
+text.mac_label,
+text.dpid_label,
+text.address_label {
   fill: rgba(255,255,255,1) ;
   color: rgba(255,255,255,1) ;
   background-color: #554077;

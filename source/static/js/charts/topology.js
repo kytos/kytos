@@ -17,29 +17,16 @@ var nodes_stroke = {'switch': "rgba(255,255,255,0.5)",
 
 // Links vars
 var strength = {'link': 0.001,
-                'interface': 2,
-                'host': 0.05};
+                'interface': 1,
+                'host': 0.1};
 
 var distance = {'link': 20 * size['switch'],
                 'interface': size['switch'] + 10,
-                'host': 5 * size['interface']};
+                'host': 1 * size['interface']};
 
 var strokes = {'interface': 0,
                'link': 1,
                'host': 1};
-
-var width = $("#topology-chart").parent().width();
-var height = $(window).height() - $('.navbar').height() - 5;
-
-var color = d3.scaleOrdinal(d3.schemeCategory20);
-
-var simulation = d3.forceSimulation()
-    .force("link", d3.forceLink().id(function(d) { return d.id; })
-                                 .strength(function(d) { return strength[d.type]; })
-                                 .distance(function(d) { return distance[d.type]; })
-          )
-    .force("charge", d3.forceManyBody().theta(1)) //strength(function(d) {return 10^-10;}))
-    .force("center", d3.forceCenter(width / 2, 2 * height / 5));
 
 function get_node_size(type) {
   return size[type];
@@ -463,21 +450,45 @@ function restore_layout(name) {
 }
 
 function draw_topology() {
+
+  // helper functions
+  function topo_id(d) { return d.id; }
+  function topo_strength(d) { return strength[d.type]; }
+  function topo_distance(d) { return distance[d.type]; }
+  function link_stroke_width(d){ return strokes[d.type]; }
+  function gnode_radius(d) { return get_node_size(d.type); }
+  function gnode_stroke(d) { return nodes_stroke[d.type]; }
+  function gnode_fill(d) { return nodes_fill[d.type]; }
+  function gnode_id(d) { return "node-" + d.type + "-" + fix_name(d.id); }
+
+  // basic 'constants' and 'variables'
+  var width = $("#topology-chart").parent().width(),
+      height = $(window).height() - $('.navbar').height() - 5,
+      color = d3.scaleOrdinal(d3.schemeCategory20);
+
+  // main forceSimulation variable
+  //  exposing it publicly in a way that some filtering can be done
+  window.simulation = d3.forceSimulation()
+                        .force("link", d3.forceLink().id(topo_id)
+                                                     .strength(topo_strength)
+                                                     .distance(topo_distance)
+                        )
+                        .force("charge", d3.forceManyBody().theta(1))
+                        .force("center", d3.forceCenter(width/2, 0.4*height));
+
   window.zoom = d3.zoom()
-              .scaleExtent([0.2, 3])
-              //.translateExtent([[-100, -100], [width + 90, height + 100]])
-              .on("zoom", zoomed);
+                  .scaleExtent([0.2, 3])
+                  .on("zoom", zoomed);
 
   var svg = d3.select("#topology-chart")
-               .append("svg")
-               .attr("width", width)
-               .attr("height", height);
+              .append("svg")
+              .attr("width", width)
+              .attr("height", height);
 
   var zoomer = svg.append("rect")
                   .attr("width", width)
                   .attr("height", height)
-                  .style("fill", "none")
-                  .style("pointer-events", "all")
+                  .classed('topology_zoom', true)
                   .call(zoom)
                   .on('click', highlight_all_nodes);
 
@@ -488,7 +499,7 @@ function draw_topology() {
   set_status('Loading topology ... ');
   d3.json(topology_url, function(error, graph) {
     if (error) {
-      set_status('Error while trying to load  the topology', true);
+      set_status(['Error while trying to load  the topology', error], true);
       throw error;
     };
 
@@ -497,28 +508,93 @@ function draw_topology() {
       .selectAll("line")
       .data(graph.links)
       .enter().append("line")
-        .attr("stroke-width", function(d) { return strokes[d.type]; })
+        .attr("stroke-width", link_stroke_width)
 
-    var node = container.append("g")
-        .attr("class", "nodes")
-      .selectAll("circle")
+    var gnodes = container.append("g")
+        .classed("nodes", true)
+      .selectAll("g.node")
       .data(graph.nodes)
-      .enter().append("circle")
-        .attr("id", function(d) {
-            return "node-" + d.type + "-" + fix_name(d.id); })
-        .attr("r", function(d) { return get_node_size(d.type); })
-        .attr("stroke", function(d) { return nodes_stroke[d.type]; })
-        .attr("stroke-width", 2)
-        .attr("fill", function(d) { return nodes_fill[d.type]; })
-        .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended))
+      .enter()
+        .append('g')
+          .classed('gnode', true)
+          .attr("id", gnode_id)
+          .call(d3.drag()
+                  .on("start", dragstarted)
+                  .on("drag", dragged)
+                  .on("end", dragended))
         .on('click', show_context)
         .on("dblclick", release_node);
 
-    node.append("title")
-        .text(function(d) { return d.name; });
+    var node = gnodes.append("circle")
+        .attr('class', 'node')
+        .attr("r", gnode_radius)
+        .attr("stroke", gnode_stroke)
+        .attr("stroke-width", 2)
+        .attr("fill", gnode_fill);
+
+    // only labeling switches and hosts, but not interfaces
+    var labeled_items = gnodes.filter(function(d) {
+                              return (d.type == 'switch' || d.type == 'host');
+    });
+
+    // creating a group for the NAME label
+    var name_label_group = labeled_items
+      .append('g')
+      .classed('name_label_group', true);
+
+    // creating a rect to do some backgrounding on the label.
+    var name_label_rects = name_label_group.append('rect')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('rx', 5)
+          .attr('ry', 5)
+          .style('fill', 'rgba(155,155,255,0.2)');
+
+    // adding the NAME itself as a svg text element
+    var  name_label_text = name_label_group.append('text')
+          .classed('name_label', true)
+          .text(function(d){ return d.name; });
+
+    // fixing the rect width and height according to the NAME size.
+    name_label_rects
+      .attr('width', function(d) { return this.parentNode.getBBox().width + 8; })
+      .attr('height', function(d) { return this.parentNode.getBBox().height + 8; })
+
+    // fixing the NAME text element positioning to the center of the rect.
+    name_label_text
+        .attr('x', function(d) { return 4; })
+        .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
+
+
+    // creating a group for the IP label
+    var ip_label_group = labeled_items
+      .append('g')
+      .classed('ip_label_group', true);
+
+    // creating a rect to do some backgrounding on the label.
+    var ip_label_rects = ip_label_group.append('rect')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('rx', 5)
+          .attr('ry', 5)
+          .style('fill', 'rgba(155,155,255,0.2)');
+
+    // adding the ip itself as a svg text element
+    var  ip_label_text = ip_label_group.append('text')
+          .classed('ip_label', true)
+          .text(function(d){ return d.connection; });
+
+    // fixing the rect width and height according to the ip size.
+    ip_label_rects
+      .attr('width', function(d) { return this.parentNode.getBBox().width + 8; })
+      .attr('height', function(d) { return this.parentNode.getBBox().height + 8; })
+
+    // fixing the IP text element positioning to the center of the rect.
+    ip_label_text
+        .attr('x', function(d) { return 4; })
+        .attr('y', function(d) { return this.parentNode.getBBox().height / 2; })
+
+
 
     simulation
         .nodes(graph.nodes)
@@ -534,9 +610,32 @@ function draw_topology() {
           .attr("x2", function(d) { return d.target.x; })
           .attr("y2", function(d) { return d.target.y; });
 
-      node
-          .attr("cx", function(d) { return d.x; })
-          .attr("cy", function(d) { return d.y; });
+      gnodes.attr("transform", function(d) {
+        if ( d.type == 'interface' ) {
+          owner = get_interface_owner(d);
+          if (owner.fx == undefined) {
+            cx = owner.x;
+            cy = owner.y;
+          } else {
+            cx = owner.fx;
+            cy = owner.fy;
+          }
+          new_positions = radius_positioning(cx, cy, d.x, d.y);
+          dx = new_positions[0]
+          dy = new_positions[1]
+          return "translate(" + [dx, dy] + ")";
+        } else {
+          return "translate(" + [d.x, d.y] + ")";
+        }
+      });
+      gnodes.selectAll('.name_label_group')
+        .attr('transform', function(d){
+          return "translate(" + [gnode_radius(d) - 6, gnode_radius(d) - 6] + ")";
+        })
+      gnodes.selectAll('.ip_label_group')
+        .attr('transform', function(d){
+          return "translate(" + [gnode_radius(d) - 6, gnode_radius(d) - 6] + ")";
+        })
     }
 
     set_status('Topology built. Have fun!');

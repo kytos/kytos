@@ -102,7 +102,9 @@ class Controller(object):
         """Start Flask server inside its own thread."""
         app.add_url_rule('/kytos/shutdown', self.shutdown_api.__name__,
                          self.shutdown_api, methods=['GET'])
-        self.api_server = Thread(target=app.run, args=['0.0.0.0', 8181])
+        self.api_server = Thread(target=app.run,
+                                 args=['0.0.0.0', 8181],
+                                 kwargs={'threaded': True})
         self.api_server.start()
         self.api_server_running = True
 

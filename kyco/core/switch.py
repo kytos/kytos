@@ -216,9 +216,17 @@ class Switch(object):
         self.flood_table = {}
         self.interfaces = {}
         self.flows = []
+        self.description = {}
 
         if connection:
             connection.switch = self
+
+    def update_description(self,desc):
+        self.description['manufacturer'] = desc.mfr_desc.value
+        self.description['hardware'] = desc.hw_desc.value
+        self.description['software'] = desc.sw_desc.value
+        self.description['serial'] = desc.serial_num.value
+        self.description['data_path'] = desc.dp_desc.value
 
     @property
     def id(self):
@@ -315,8 +323,12 @@ class Switch(object):
                                              self.connection.port),
                 'ofp_version': self.ofp_version,
                 'type': 'switch',
-                'hardware': '',
-                'software': ''}
+                'manufacturer': self.description.get('manufacturer',''),
+                'serial': self.description.get('serial',''),
+                'hardware': self.description.get('hardware',''),
+                'software': self.description.get('software'),
+                'data_path': self.description.get('data_path','')
+                }
 
     def as_json(self):
         return json.dumps(self.as_dict())

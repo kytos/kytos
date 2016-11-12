@@ -20,11 +20,13 @@ function RadarChart(id, data) {
   //Speed multiplier to get radius of the external circles, proportional to
   //their area.
   var speedScale = 7.0 / Math.pow(getMaxSpeed(data[0]),0.5);
-
+  //var size = $("#switchChart").parent().width() * 0.8;
+  var size = $("#switchChart").parent().width() * 0.55;
+  var margin = $("#switchChart").parent().width() * 0.15;
   var cfg = {
-   w: $("#switchChart").parent().width() / 2,        //Width of the circle
-   h: $("#switchChart").parent().width() / 2,        //Height of the circle
-   margin: {top: 30, right: 30, bottom: 30, left: 30}, //The margins of the SVG
+   w: size,        //Width of the circle
+   h: size,
+   margin: {top: margin, right: margin, bottom: margin, left: margin}, //The margins of the SVG
    levels: 4,        //How many levels or inner circles should there be drawn
    maxValue: maxValue,       //What is the value that the biggest circle will represent
    labelFactor: 1.15,   //How much farther than the radius of the outer circle should the labels be placed
@@ -44,7 +46,7 @@ function RadarChart(id, data) {
 
   var allAxis = (data[0].map(function(i, j) { return i } )),  //Names of each axis
     total = allAxis.length,          //The number of different axes
-    radius = Math.min(cfg.w/2, cfg.h/2),   //Radius of the outermost circle
+    radius = Math.min(size/2,size/2),   //Radius of the outermost circle
     angleSlice = Math.PI * 2 / total;    //The width in radians of each "slice"
 
   // Scale for the radius
@@ -60,7 +62,7 @@ function RadarChart(id, data) {
 
   // Append a g element
   var g = svg.append("g")
-      .attr("transform", "translate(" + (cfg.w/2 + cfg.margin.left) + "," + (cfg.h/2 + cfg.margin.top) + ")");
+      .attr("transform", "translate(" + (size + margin * 2) /2 + "," + (size + margin * 2)/2 + ")");
 
   /////////////////////////////////////////////////////////
   /////////////// Draw the Circular grid //////////////////

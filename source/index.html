@@ -91,28 +91,36 @@
         <!-- MC: SIDEBAR -->
         <nav>
           <ul class="nav sidebar">
-            <li class="active">
+            <li class="active nav-topology-btn">
               <a href="index.html">
                 <i class="fa fa-dashboard fa-2x hidden-lg hidden-md"></i>
                 <i class="fa fa-dashboard hidden-xs hidden-sm"></i>
                 Topology
               </a>
             </li>
-            <li>
+            <li class="nav-hosts-btn">
               <a href="#monitoring">
                 <i class="fa fa-bar-chart fa-2x hidden-lg hidden-md"></i>
                 <i class="fa fa-bar-chart hidden-xs hidden-sm"></i>
                 Hosts
               </a>
             </li>
-            <li>
+            <li class="nav-terminal-btn">
               <a href="#monitoring" class="open-terminal" data-toggle="collapse" aria-expanded="false">
                 <i class="fa fa-terminal fa-2x hidden-lg hidden-md"></i>
                 <i class="fa fa-terminal hidden-xs hidden-sm"></i>
                 Terminal
               </a>
             </li>
-
+            <li class="nav-middle-spacer">&nbsp;</li>
+            <li class="nav-kytos-api-status">
+              <i class="fa fa-power-off api-status" aria-hidden="true"></i>
+              Kytos API
+            </li>
+            <li class='nav-kytos-websocket-status'>
+              <i class="fa fa-power-off websocket-status" aria-hidden="true"></i>
+              Kytos Websocket
+            </li>
             <li class="nav-info hidden-sm hidden-xs">
               <i class="pe pe-7s-shield text-accent"></i>
               <div class="m-t-xs">

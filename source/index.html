@@ -85,7 +85,7 @@
             <div class="checkbox" data-label-width="0"  data-size="mini">
               <div class="dropup mt" id="switch_label">
                 <label for='switch_label_dropdown'>
-                  Switch: 
+                  Switch:
                   <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="switch_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class="layout-name disabled-option">Switch Labels</span>
                     <span class="caret"></span>
@@ -98,7 +98,7 @@
                   </ul>
                 </label>
                   <label for='host_label_dropdown'>
-                    Host: 
+                    Host:
                     <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="host_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       <span class="layout-name disabled-option">Host Labels</span>
                       <span class="caret"></span>
@@ -348,7 +348,7 @@
     <!-- MUSTACHE TEMPLATE -->
     <script id="context-switch-template" type="x-tmpl-mustache">
       <div class="row-fluid">
-        <div class="col-settings col-md-6 no-padding no-border">
+        <div class="col-settings col-md-4 no-padding no-border">
 
           <!--// esquerda  //-->
           <div class="col-xs-6 context-chart">
@@ -367,13 +367,15 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-xs-7">
+              <div class="col-xs-12">
                 <dl>
                   <dt>Connection</dt>
                   <dd>{{ connection }}</dd>
                 </dl>
               </div>
-              <div class="col-xs-5">
+            </div>
+            <div class="row">
+              <div class="col-xs-12">
                 <dl>
                   <dt>OFP Version</dt>
                   <dd>{{ ofp_version }}</dd>
@@ -397,7 +399,7 @@
           </div>
         </div>
 
-        <div class="col-settings col-md-6 no-border">
+        <div class="col-settings col-md-8 no-border">
           <div class="context-content">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs nav-kytos nav-tabs-kytos nav-justified" role="tablist">

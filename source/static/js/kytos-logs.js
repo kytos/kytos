@@ -1,5 +1,7 @@
 ;(function() {
   console.log("kytos-logs started")
+
+  var seek = 0
   // Method used to request a websocket and append in tab_logs terminal.
   ws_led = $('.nav.sidebar .websocket-status');
 
@@ -9,14 +11,23 @@
       ws.onopen = function(evt) {
         ws_led.addClass('status-online');
         ws_led.removeClass('status-offline');
+
+        buff = 'partial_buff';
+        if(seek == 0){
+          buff = 'full_buff';
+          seek = 1;
+        }
+        ws.send('{"type":"'+buff+'"}');
       };
+
       ws.onerror = function(evt) {
         ws_led.removeClass('status-online');
         ws_led.addClass('status-offline');
       }
       if ($('#enable_log')[0].checked) {
         ws.onmessage = function (evt) {
-          var received_msgs = evt.data;
+          data = JSON.parse(evt.data)
+          var received_msgs = data.msg;
           $.each(received_msgs.split('\n'), function(index, msg) {
             if (msg) { add_log_message(msg, 'controller')}
           })

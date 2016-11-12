@@ -72,6 +72,10 @@
         float: left;
     }
 
+    &.with-out-left-bar {
+      width: 100%;
+    }
+
     .terminal-status-bar {
       float: left;
       padding: 6px 0;

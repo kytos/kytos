@@ -71,7 +71,7 @@ $(window).ready(function(){
     $('#background-map').hide();
   }
 
-  $('#map_opacity').slider({
+  $('#map_opacity').bootstrapSlider({
     formatter: function(value) {
       return "Map opacity of " + value;
     }

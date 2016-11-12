@@ -6,7 +6,6 @@
   function LogWebSocketReceive() {
     if ("WebSocket" in window) {
       var ws = new WebSocket(log_server_url)
-      console.log(ws.readyState);
       ws.onopen = function(evt) {
         ws_led.addClass('status-online');
         ws_led.removeClass('status-offline');

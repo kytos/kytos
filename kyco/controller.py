@@ -107,6 +107,8 @@ class Controller(object):
                                  kwargs={'threaded': True})
         self.api_server.start()
         self.api_server_running = True
+        self.register_rest_endpoint('/status/', self.status_api,
+                                    methods=['GET'])
 
     def register_rest_endpoint(self, url, function, methods):
         """Register a new rest endpoint."""
@@ -226,6 +228,12 @@ class Controller(object):
         server_shutdown()
         self.api_server_running = False
         return 'Server shutting down...', 200
+
+    def status_api(self):
+        if self.api_server_running:
+            return '{"response": "running"}', 201
+        else:
+            return '{"response": "not running"}', 404
 
     def status(self):
         if self.started_at:

@@ -235,6 +235,16 @@ class Switch(object):
     def get_interface_by_port_no(self, port_no):
         return self.interfaces.get(port_no)
 
+    def get_flow_by_id(self, flow_id):
+        """Return Flow or None if not found.
+
+        As :attr:`flows` is not a dict, we have to iterate through all flows.
+        """
+        for flow in self.flows:
+            if flow_id == flow.id:
+                return flow
+        return None
+
     def is_active(self):
         return (now() - self.lastseen).seconds <= CONNECTION_TIMEOUT
 

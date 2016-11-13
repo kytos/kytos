@@ -104,3 +104,13 @@ function set_status(input, error=false) {
     .tiPause(5000)
     .tiDelete();
 }
+
+function update_tabs_sizes(){
+    width = $('.terminal-body').width();
+    $('#tab_terminal').width(width);
+    $('#tab_switches').width(width);
+    $('#tab_context').width(width);
+    $('#tab_logs').width(width);
+    $('#tab_notifications').width(width);
+    $('#tab_settings').width(width);
+}

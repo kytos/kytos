@@ -19,6 +19,8 @@
       $bodyCells = $table.find('tbody tr:first').children(),
       colWidth;
 
+  update_tabs_sizes();
+
   function resize_topology_svg() {
     $("#topology-chart").width($('#chart').width());
     $("#topology-chart svg").attr("width", $('#chart').width());
@@ -30,6 +32,7 @@
   }
 
   $(window).on('resize', function() {
+    update_tabs_sizes();
     // Adjust the width of thead cells when window resizes
     // Get the tbody columns width array
     colWidth = $bodyCells.map(function() {
@@ -49,6 +52,8 @@
 }());
 
 $(window).ready(function(){
+  update_tabs_sizes();
+
   if (default_settings.enable_log) {
     $('#enable_log').prop('checked', true).change();
   } else {

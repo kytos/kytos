@@ -42,12 +42,6 @@
 
   setInterval(LogWebSocketReceive, 2000);
 
-  function resize_log_tab() {
-    $('#tab_logs').height($('.terminal-body').height() - 25);
-  }
-
-  $('#tab_logs').on('resize', resize_log_tab).trigger('resize');
-
 }());
 
 function add_log_message(msg, src_tag) {

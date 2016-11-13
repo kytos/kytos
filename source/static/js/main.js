@@ -8,12 +8,6 @@
     $(this).blur();
   })
 
-  // carroussel
-  $('.owl-carousel').owlCarousel({
-    margin:10,
-    nav:true,
-  });
-
   // Change the selector if needed
   var $table = $('table.scroll'),
       $bodyCells = $table.find('tbody tr:first').children(),
@@ -89,8 +83,21 @@ $(window).ready(function(){
     });
 
   $('.owl-carousel').owlCarousel({
-    margin:10,
-    nav:true
+    margin: 10,
+    nav: true,
+    owlNrow: true, // enable plugin
+    owlNrowTarget: 'item',    // class for items in carousel div
+    owlNrowContainer: 'owlNrow-item', // class for items container
+    owlNrowDirection: 'utd', // ltr : directions
+    owlNrowNumberOfRows: 3,
+    responsive: {
+        0: {
+            items: 1
+        },
+        1000: {
+            items: 2
+        }
+    }
   })
 
   load_layouts();

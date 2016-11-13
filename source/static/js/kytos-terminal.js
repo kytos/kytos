@@ -10,6 +10,7 @@ function resize_terminal_available_area() {
         var this_obj = $(this),
             this_header = this_obj.find('.terminal-header'),
             this_body = this_obj.find('.terminal-body'),
+            this_tabs = this_obj.find('.terminal-tabs'),
             this_actions = this_obj.find('.terminal-actions'),
             this_form = this_obj.find('form'),
             external_link = $(".open-terminal");
@@ -42,7 +43,7 @@ function resize_terminal_available_area() {
                 e.stopPropagation();
                 var this_link = $(this),
                     action = this_link.attr("data-action"),
-                    callback = this_link.attr("data-callback");
+                    callback = this_tabs.find('.active>a').attr("data-callback-min-max");
 
                 if (action == "close") {
                     action_close();

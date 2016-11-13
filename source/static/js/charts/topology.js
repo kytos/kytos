@@ -253,7 +253,9 @@ function show_context(d) {
             'connection': d.connection,
             'ofp_version': d.ofp_version,
             'hardware': d.hardware,
-            'software': d.software};
+            'software': d.software,
+            'manufacturer': d.manufacturer,
+            'serial': d.serial};
     add_stats(data, show_switch_context);
     highlight_switch(d);
   }

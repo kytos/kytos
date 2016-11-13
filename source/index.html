@@ -230,7 +230,7 @@
             <div class="checkbox" data-label-width="0"  data-size="mini">
               <div class="dropup mt" id="switch_label">
                 <label for='switch_label_dropdown'>
-                  Switch: 
+                  Switch:
                   <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="switch_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class="layout-name disabled-option">Switch Labels</span>
                     <span class="caret"></span>
@@ -243,7 +243,7 @@
                   </ul>
                 </label>
                   <label for='host_label_dropdown'>
-                    Host: 
+                    Host:
                     <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="host_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       <span class="layout-name disabled-option">Host Labels</span>
                       <span class="caret"></span>
@@ -313,8 +313,8 @@
     <script src="static/js/kytos-logs.js"></script>
     <script src="static/js/kytos-background-map.js"></script>
     <script src="static/js/kytos-sidebar.js"></script>
-    <script src="static/js/charts/topology.js"></script>
     <script src="static/js/kytos-stats.js"></script>
+    <script src="static/js/charts/topology.js"></script>
     <script src="static/js/charts/radar.js"></script>
     <script src="static/js/main.js"></script>
     <!-- END LOADING SCRIPTS -->
@@ -395,26 +395,47 @@
               <table class="table table-scroll customScroll">
                 <thead>
                   <tr>
-                    <th width="20%"><strong>Name</strong></th>
-                    <th width="20%"><strong>Port No.</strong></th>
-                    <th width="30%"><strong>MAC Address</strong></th>
-                    <th width="30%"><strong>Speed</strong></th>
+                    <th width="15%"><strong>Name</strong></th>
+                    <th width="15%"><strong>Port No.</strong></th>
+                    <th width="25%"><strong>MAC Address</strong></th>
+                    <th width="15%"><strong>Rx (%)</strong></th>
+                    <th width="15%"><strong>Tx (%)</strong></th>
+                    <th width="15%"><strong>Speed</strong></th>
                   </tr>
                 </thead>
                 <tbody class="customScroll">
                   {{#interfaces}}
                     <tr>
-                      <td width="20%">{{ name }}</td>
-                      <td width="20%">{{ port_number }}</td>
-                      <td width="30%">{{ mac }}</td>
-                      <td width="30%">{{ speed }}</td>
+                      <td width="15%">{{ name }}</td>
+                      <td width="15%">{{ port }}</td>
+                      <td width="25%">{{ mac }}</td>
+                      <td width="15%">{{ rx_util }} %</td>
+                      <td width="15%">{{ tx_util }} %</td>
+                      <td width="15%">{{ speed }} Gbps</td>
                     </tr>
                   {{/interfaces}}
                 </tbody>
               </table>
             </div>
             <div role="tabpanel" class="tab-pane" id="flows">
-              flows
+              <table class="table table-scroll customScroll">
+                <thead>
+                  <tr>
+                    <th width="34%"><strong>ID</strong></th>
+                    <th width="33%"><strong>Bytes/sec</strong></th>
+                    <th width="33%"><strong>Packets/sec</strong></th>
+                  </tr>
+                </thead>
+                <tbody class="customScroll">
+                  {{#flows}}
+                    <tr>
+                      <td width="34%">{{ id }}</td>
+                      <td width="33%">{{ Bps }}</td>
+                      <td width="33%">{{ pps }}</td>
+                    </tr>
+                  {{/flows}}
+                </tbody>
+              </table>
             </div>
 
               <div class="chart panel-default">
@@ -437,7 +458,7 @@
         Mustache.parse(template);   // optional, speeds up future uses
         var rendered = Mustache.render(template, data);
         $('#context_target').html(rendered);
-        plot_radar(data.dpid)
+        plot_radar(data.interfaces)
       }
     </script>
 </body>

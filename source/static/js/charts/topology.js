@@ -253,21 +253,8 @@ function show_context(d) {
             'connection': d.connection,
             'ofp_version': d.ofp_version,
             'hardware': d.hardware,
-            'software': d.software,
-            'interfaces': []};
-    interfaces = get_switch_interfaces(d);
-    $.each(interfaces, function(idx, interface){
-      // E.g.: port 65534 has speed == 0 and no human-readable string
-      if (interface.speed != '') {
-        iface = {'name': interface.name,
-                 'id': interface.id,
-                 'port_number': interface.port_number,
-                 'mac': interface.mac,
-                 'speed': interface.speed}
-        data.interfaces.push(iface);
-      }
-    });
-    get_switch_flows(data, show_switch_context);
+            'software': d.software};
+    add_stats(data, show_switch_context);
     highlight_switch(d);
   }
 }

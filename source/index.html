@@ -395,19 +395,23 @@
               <table class="table table-scroll customScroll">
                 <thead>
                   <tr>
-                    <th width="20%"><strong>Name</strong></th>
-                    <th width="20%"><strong>Port No.</strong></th>
-                    <th width="30%"><strong>MAC Address</strong></th>
-                    <th width="30%"><strong>Speed</strong></th>
+                    <th width="15%"><strong>Name</strong></th>
+                    <th width="15%"><strong>Port No.</strong></th>
+                    <th width="25%"><strong>MAC Address</strong></th>
+                    <th width="15%"><strong>Rx (%)</strong></th>
+                    <th width="15%"><strong>Tx (%)</strong></th>
+                    <th width="15%"><strong>Speed</strong></th>
                   </tr>
                 </thead>
                 <tbody class="customScroll">
                   {{#interfaces}}
                     <tr>
-                      <td width="20%">{{ name }}</td>
-                      <td width="20%">{{ port_number }}</td>
-                      <td width="30%">{{ mac }}</td>
-                      <td width="30%">{{ speed }}</td>
+                      <td width="15%">{{ name }}</td>
+                      <td width="15%">{{ port }}</td>
+                      <td width="25%">{{ mac }}</td>
+                      <td width="15%">{{ rx_util }} %</td>
+                      <td width="15%">{{ tx_util }} %</td>
+                      <td width="15%">{{ speed }} Gbps</td>
                     </tr>
                   {{/interfaces}}
                 </tbody>
@@ -454,7 +458,7 @@
         Mustache.parse(template);   // optional, speeds up future uses
         var rendered = Mustache.render(template, data);
         $('#context_target').html(rendered);
-        plot_radar(data.dpid)
+        plot_radar(data.interfaces)
       }
     </script>
 </body>

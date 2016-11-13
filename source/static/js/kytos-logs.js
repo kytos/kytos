@@ -26,7 +26,7 @@
       }
       if ($('#enable_log')[0].checked) {
         ws.onmessage = function (evt) {
-          data = JSON.parse(evt.data)
+          data = JSON.parse(evt.data);
           var received_msgs = data.msg;
           $.each(received_msgs.split('\n'), function(index, msg) {
             if (msg) { add_log_message(msg, 'controller')}
@@ -41,12 +41,6 @@
   }
 
   setInterval(LogWebSocketReceive, 2000);
-
-  function resize_log_tab() {
-    $('#tab_logs').height($('.terminal-body').height() - 25);
-  }
-
-  $('#tab_logs').on('resize', resize_log_tab).trigger('resize');
 
 }());
 

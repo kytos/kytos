@@ -267,7 +267,7 @@ function show_context(d) {
         data.interfaces.push(iface);
       }
     });
-    show_switch_context(data);
+    get_switch_flows(data, show_switch_context);
     highlight_switch(d);
   }
 }

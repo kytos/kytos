@@ -21,3 +21,24 @@ function plot_radar(dpid) {
     }
   });
 }
+
+function get_switch_flows(data, callback) {
+  var api_url = "http://" + window.location.hostname + ":8181/kytos/stats/" +
+    data.dpid + "/flows";
+    $.ajax({
+      dataType: "json",
+      url: api_url,
+      success: function(reply) {
+        data.flows = [];
+        if ('data' in reply) {
+          for (var i in reply.data) {
+            flow = reply.data[i];
+            data.flows.push({'id': flow.id.substring(0, 7),
+                             'Bps': flow.stats.Bps.toFixed(2),
+                             'pps': flow.stats.pps.toFixed(2)});
+          }
+        }
+        callback(data);
+      }
+    });
+};

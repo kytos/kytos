@@ -40,6 +40,7 @@ class WebSocket(Thread):
         """
         pass
 
+    @asyncio.coroutine
     def run(self):
         """Method used to create and wait requets."""
         try:
@@ -50,10 +51,11 @@ class WebSocket(Thread):
             self.is_running = True
             self.event_loop.run_until_complete(self.websocket)
             self.event_loop.run_forever()
+            self.is_running= False
         finally:
-            self.event_loop.close()
             self.websocket.close()
 
+    @asyncio.coroutine
     def shutdown(self):
         """Method used to stop de websocket."""
         self.event_loop.stop()

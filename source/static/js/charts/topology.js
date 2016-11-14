@@ -310,6 +310,7 @@ function get_current_layout() {
   layout.other_settings['show_map'] = $('#show_map')[0].checked;
   layout.other_settings['map_center'] = background_map.getCenter();
   layout.other_settings['map_zoom'] = background_map.getZoom();
+  layout.other_settings['topology_transformation'] = d3.select('#topology-chart svg g').attr('transform');
   return layout;
 }
 
@@ -415,6 +416,11 @@ function restore_layout(name) {
     $('#show_disconnected_hosts')
         .prop('checked', layout.other_settings.show_disconnected_hosts)
         .change();
+
+    if (layout.other_settings.topology_transformation) {
+      d3.select('#topology-chart svg g')
+          .attr('transform', layout.other_settings['topology_transformation']);
+    }
 
     if (layout.other_settings.show_topology) {
       $('#show_topology').prop('checked', true).change();

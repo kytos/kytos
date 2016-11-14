@@ -2,6 +2,7 @@ var default_settings = {
       show_unused_interfaces: true,
       show_disconnected_hosts: true,
       show_topology: true,
+      topology_transformation: 'translate(0,0) scale(1)',
       show_map: true,
       map_opacity: 0.4,
       enable_log: true,

@@ -82,23 +82,7 @@ $(window).ready(function(){
       $('#background-map').css('opacity', current.value.newValue);
     });
 
-  $('.owl-carousel').owlCarousel({
-    margin: 10,
-    nav: true,
-    owlNrow: true, // enable plugin
-    owlNrowTarget: 'item',    // class for items in carousel div
-    owlNrowContainer: 'owlNrow-item', // class for items container
-    owlNrowDirection: 'utd', // ltr : directions
-    owlNrowNumberOfRows: 3,
-    responsive: {
-        0: {
-            items: 1
-        },
-        1000: {
-            items: 2
-        }
-    }
-  })
+  $('.owl-carousel').owlCarousel(default_settings.switches_carousel);
 
   load_layouts();
   draw_background_map(draw_topology);

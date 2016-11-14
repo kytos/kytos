@@ -36,17 +36,6 @@
         var carousel = $(thisScope.owl.$element);
         var carouselItems = carousel.find('.' + thisScope.owl.options.owlNrowTarget);
 
-        var aEvenElements = [];
-        var aOddElements = [];
-
-        $.each(carouselItems, function (index, item) {
-            if ( index % thisScope.owl.options.owlNrowNumberOfRows === 0 ) {
-                aEvenElements.push(item);
-            } else {
-                aOddElements.push(item);
-            }
-        });
-
         carousel.empty();
 
         switch (thisScope.owl.options.owlNrowDirection) {
@@ -55,7 +44,7 @@
                 break;
 
             default :
-                thisScope.upTodown(thisScope, aEvenElements, aOddElements, carousel);
+                thisScope.upTodown(thisScope, carousel, carouselItems);
         }
 
     };
@@ -67,58 +56,66 @@
 
         var carouselItemsLength = carouselItems.length;
 
-        var rowsArrays = {};
-        //var firsArr = [];
-        //var secondArr = [];
+        var rowsArrays = {},
+            nrows = thisScope.owl.options.owlNrowNumberOfRows;
 
-        //console.log(carouselItemsLength);
+        rowLength = Math.ceil(carouselItems.length / nrows);
 
-        if (carouselItemsLength % thisScope.owl.options.owlNrowNumberOfRows === 0) {
-            carouselItemsLength = carouselItemsLength/thisScope.owl.options.owlNrowNumberOfRows;
-        } else {
-            carouselItemsLength = ((carouselItemsLength - 1)/thisScope.owl.options.owlNrowNumberOfRows) + 1;
+        // create the array for each row
+        for (i=0; i < nrows; i++) {
+          rowsArrays[i] = [];
         }
 
-        // split items into N arrays, one for each row.
-        var current_row = 0;
-        rowArrays[current_row] = [];
         $.each(carouselItems, function (index, item) {
-          if (index % carouselItemsLength === 0) {
-            current_array ++;
-            rowArrays[current_row] = [];
-          }
-          rowsArray[current_row].push(item);
+          rowsArrays[Math.floor(index/rowLength)].push(item)
         });
 
-        for (var i=0; i<rowsArray[0].length; i++) {
-          var rowContainer = $('<div class="' + owlContainerClass + '"/>');
+        $.each(rowsArrays[0], function (index, item) {
+            var rowContainer = $('<div class="' + owlContainerClass + '"/>');
 
-          $.each(rowArrays, function(index, row){
-            var item = row[i];
-                item.style.marginBottom = owlMargin + 'px';
-            rowContainer.append(item);
-          });
+            for (i=0; i < nrows; i++) {
+              var element = rowsArrays[i][index];
+              if (element) {
+                element.style.marginBottom = owlMargin + 'px';
+                rowContainer.append(element);
+              }
+            }
 
-          carousel.append(rowContainer);
-        }
+            carousel.append(rowContainer);
+        });
+
     };
 
-    OwlNrow.prototype.upTodown = function(thisScope, aEvenElements, aOddElements, carousel){
+    OwlNrow.prototype.upTodown = function(thisScope, carousel, carouselItems){
+
+        var rowsArrays = {};
+        var nrows = thisScope.owl.options.owlNrowNumberOfRows;
+
+        // create the array for each row
+        for (i=0; i < nrows; i++) {
+          rowsArrays[i] = [];
+        }
+
+        // split the items into the rows by up to down
+        $.each(carouselItems, function (index, item) {
+          rowsArrays[index % nrows].push(item)
+        });
 
         var owlContainerClass = thisScope.owl.options.owlNrowContainer;
         var owlMargin = thisScope.owl.options.margin;
 
-        $.each(aEvenElements, function (index, item) {
+        // create the div elements and populate the carousel.
+        $.each(rowsArrays[0], function (index, item) {
 
             var rowContainer = $('<div class="' + owlContainerClass + '"/>');
-            var evenElement = aEvenElements[index];
 
-            evenElement.style.marginBottom = owlMargin + 'px';
-
-            rowContainer
-                .append(evenElement)
-                .append(aOddElements[index]);
-
+            for (i=0; i < nrows; i++) {
+              var element = rowsArrays[i][index];
+              if (element) {
+                element.style.marginBottom = owlMargin + 'px';
+                rowContainer.append(element);
+              }
+            }
             carousel.append(rowContainer);
         });
     };

@@ -4,6 +4,24 @@ function resize_terminal_available_area() {
   $('#orientation_text').height($('.terminal-body').height() - 25);
 }
 
+function update_tabs_sizes(){
+  width = $('.terminal-body').width();
+  $('#tab_terminal').width(width);
+  $('#tab_switches').width(width);
+  $('#tab_context').width(width);
+  $('#tab_logs').width(width);
+  $('#tab_notifications').width(width);
+  $('#tab_settings').width(width);
+
+  height = $('.terminal-body').height();
+  $('#tab_terminal').height(height);
+  $('#tab_switches').height(height);
+  $('#tab_context').height(height);
+  $('#tab_logs').height(height);
+  $('#tab_notifications').height(height);
+  $('#tab_settings').height(height);
+}
+
 (function($) {
 
     $.fn.kterminal = function() {
@@ -57,6 +75,7 @@ function resize_terminal_available_area() {
                 if (typeof(callback)) {
                     setTimeout(function(){
                         eval(callback);
+                        update_tabs_sizes();
                     }, 300);
                 }
                 return false;
@@ -104,14 +123,4 @@ function set_status(input, error=false) {
   })
     .tiPause(5000)
     .tiDelete();
-}
-
-function update_tabs_sizes(){
-    width = $('.terminal-body').width();
-    $('#tab_terminal').width(width);
-    $('#tab_switches').width(width);
-    $('#tab_context').width(width);
-    $('#tab_logs').width(width);
-    $('#tab_notifications').width(width);
-    $('#tab_settings').width(width);
 }

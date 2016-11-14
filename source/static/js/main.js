@@ -8,12 +8,6 @@
     $(this).blur();
   })
 
-  // carroussel
-  $('.owl-carousel').owlCarousel({
-    margin:10,
-    nav:true,
-  });
-
   // Change the selector if needed
   var $table = $('table.scroll'),
       $bodyCells = $table.find('tbody tr:first').children(),
@@ -88,10 +82,7 @@ $(window).ready(function(){
       $('#background-map').css('opacity', current.value.newValue);
     });
 
-  $('.owl-carousel').owlCarousel({
-    margin:10,
-    nav:true
-  })
+  build_switches_carousel(default_settings.switches_carousel);
 
   load_layouts();
   draw_background_map(draw_topology);

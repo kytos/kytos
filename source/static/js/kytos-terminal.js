@@ -4,22 +4,23 @@ function resize_terminal_available_area() {
   $('#orientation_text').height($('.terminal-body').height() - 25);
 }
 
-function update_tabs_sizes(){
-  width = $('.terminal-body').width();
-  $('#tab_terminal').width(width);
-  $('#tab_switches').width(width);
-  $('#tab_context').width(width);
-  $('#tab_logs').width(width);
-  $('#tab_notifications').width(width);
-  $('#tab_settings').width(width);
+function build_switches_carousel(settings){
+  $('.owl-carousel').owlCarousel(settings);
+}
 
-  height = $('.terminal-body').height();
-  $('#tab_terminal').height(height);
-  $('#tab_switches').height(height);
-  $('#tab_context').height(height);
-  $('#tab_logs').height(height);
-  $('#tab_notifications').height(height);
-  $('#tab_settings').height(height);
+function rebuild_switches_carousel() {
+  settings = default_settings.switches_carousel;
+  var terminal = $('#terminal')
+  if (terminal.hasClass('maximized')) {
+      settings.owlNrowNumberOfRows = default_settings.switches_carousel_maximized;
+  } else {
+      settings.owlNrowNumberOfRows = default_settings.switches_carousel_normal;
+  }
+  var items = $('#tab_switches .item');
+  $('#tab_switches').empty();
+  $('#tab_switches').append('<div class="owl-carousel owl-theme"></div>');
+  $('.owl-carousel').append(items);
+  build_switches_carousel(settings);
 }
 
 (function($) {
@@ -75,7 +76,7 @@ function update_tabs_sizes(){
                 if (typeof(callback)) {
                     setTimeout(function(){
                         eval(callback);
-                        update_tabs_sizes();
+                        rebuild_switches_carousel();
                     }, 300);
                 }
                 return false;

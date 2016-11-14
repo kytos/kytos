@@ -326,11 +326,16 @@ class Switch(object):
             return None
 
     def as_dict(self):
+        connection = ""
+        if self.connection is not None:
+            address = self.connection.address
+            port = self.connection.port
+            connection = "{}:{}".format(address, port)
+
         return {'id': self.id,
                 'name': self.id,
                 'dpid': self.dpid,
-                'connection': "{}:{}".format(self.connection.address,
-                                             self.connection.port),
+                'connection':  connection,
                 'ofp_version': self.ofp_version,
                 'type': 'switch',
                 'manufacturer': self.description.get('manufacturer',''),

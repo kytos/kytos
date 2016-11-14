@@ -4,6 +4,25 @@ function resize_terminal_available_area() {
   $('#orientation_text').height($('.terminal-body').height() - 25);
 }
 
+function build_switches_carousel(settings){
+  $('.owl-carousel').owlCarousel(settings);
+}
+
+function rebuild_switches_carousel() {
+  settings = default_settings.switches_carousel;
+  var terminal = $('#terminal')
+  if (terminal.hasClass('maximized')) {
+      settings.owlNrowNumberOfRows = default_settings.switches_carousel_maximized;
+  } else {
+      settings.owlNrowNumberOfRows = default_settings.switches_carousel_normal;
+  }
+  var items = $('#tab_switches .item');
+  $('#tab_switches').empty();
+  $('#tab_switches').append('<div class="owl-carousel owl-theme"></div>');
+  $('.owl-carousel').append(items);
+  build_switches_carousel(settings);
+}
+
 (function($) {
 
     $.fn.kterminal = function() {
@@ -57,6 +76,7 @@ function resize_terminal_available_area() {
                 if (typeof(callback)) {
                     setTimeout(function(){
                         eval(callback);
+                        rebuild_switches_carousel();
                     }, 300);
                 }
                 return false;

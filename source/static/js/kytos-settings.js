@@ -7,6 +7,8 @@ var default_settings = {
       enable_log: true,
       map_center: [-97.8445676, 35.3437248],
       map_zoom: 4,
+      switches_carousel_maximized: 4,
+      switches_carousel_normal: 1,
       switches_carousel: {
         margin: 10,
         nav: true,
@@ -14,7 +16,7 @@ var default_settings = {
         owlNrowTarget: 'item',    // class for items in carousel div
         owlNrowContainer: 'owlNrow-item', // class for items container
         owlNrowDirection: 'ltr', // utd or ltr : directions
-        owlNrowNumberOfRows: 4,
+        owlNrowNumberOfRows: 1,
         responsive: {
             0: {
                 items: 1

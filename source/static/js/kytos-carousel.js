@@ -56,7 +56,7 @@ function populate_switches_carousel() {
     }
     Mustache.parse(template);   // optional, speeds up future uses
     var rendered = Mustache.render(template, data);
-    container.html(rendered);  //.attr("data-data", JSON.stringify(data, null, 2) );
+    container.html(rendered);
     $.each(switches, function(index, item){
       add_switch_interfaces(item, plot_carousel_card_radar)
     })

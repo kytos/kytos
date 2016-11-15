@@ -92,8 +92,6 @@ $(window).ready(function(){
       $('#background-map').css('opacity', current.value.newValue);
     });
 
-  build_switches_carousel(default_settings.switches_carousel);
-
   load_layouts();
   draw_background_map(draw_topology);
 

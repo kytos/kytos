@@ -2,6 +2,20 @@ function build_switches_carousel(settings){
   $('.owl-carousel').owlCarousel(settings);
 }
 
+function plot_carousel_card_radar(dpid, ifaces) {
+  rx = [];
+  tx = [];
+  for (var i in ifaces) {
+    iface = ifaces[i];
+    rx.push({'value': iface.rx_util,
+             'speed': iface.speed});
+    tx.push({'value': iface.tx_util,
+             'speed': iface.speed});
+  }
+  radar_data = [rx, tx];
+  RadarChart("switch-chart-"+dpid, radar_data);
+}
+
 function rebuild_switches_carousel() {
   settings = default_settings.switches_carousel;
   var terminal = $('#terminal')

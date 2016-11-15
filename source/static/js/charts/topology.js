@@ -806,5 +806,9 @@ function draw_topology() {
     toggle_labels('switch', 'name');
     toggle_labels('host', 'mac');
 
+    populate_switches_carousel();
+
     });
+
+
 }

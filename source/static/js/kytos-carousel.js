@@ -2,7 +2,8 @@ function build_switches_carousel(settings){
   $('.owl-carousel').owlCarousel(settings);
 }
 
-function plot_carousel_card_radar(dpid, ifaces) {
+function plot_carousel_card_radar(data) {
+  ifaces = data.interfaces;
   rx = [];
   tx = [];
   for (var i in ifaces) {
@@ -13,7 +14,7 @@ function plot_carousel_card_radar(dpid, ifaces) {
              'speed': iface.speed});
   }
   radar_data = [rx, tx];
-  RadarChart("switch-chart-"+dpid, radar_data);
+  RadarChart("switch-chart-" + fix_name(data.dpid), radar_data);
 }
 
 function rebuild_switches_carousel() {
@@ -22,6 +23,7 @@ function rebuild_switches_carousel() {
       items = $('#tab_switches .item'),
       available_size = $('.terminal-body').height();
 
+  // 252 is the current height of a switch_card, by design
   if (!available_size || available_size <= 252) {
     settings.owlNrowNumberOfRows = 1;
   } else {
@@ -56,8 +58,7 @@ function populate_switches_carousel() {
     var rendered = Mustache.render(template, data);
     container.html(rendered);  //.attr("data-data", JSON.stringify(data, null, 2) );
     $.each(switches, function(index, item){
-      var interfaces = get_switch_interfaces(item);
-      plot_carousel_card_radar(fix_name(item.dpid), interfaces);
+      add_switch_interfaces(item, plot_carousel_card_radar)
     })
   });
 

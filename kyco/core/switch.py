@@ -131,7 +131,8 @@ class Connection(object):
 
     def send(self, buffer):
         try:
-            self.socket.send(buffer)
+            if self.socket and not self.socket._closed:
+                self.socket.send(buffer)
         except (OSError, SocketError) as exception:
             self.close()
             # TODO: Raise or create an error event?

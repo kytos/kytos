@@ -40,25 +40,27 @@ class WebSocket(Thread):
         """
         pass
 
-    @asyncio.coroutine
     def run(self):
         """Method used to create and wait requets."""
-        try:
-            self.websocket = websockets.serve(self.handle_msg,
-                                              self.host, self.port)
-            self.event_loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.event_loop)
-            self.is_running = True
-            self.event_loop.run_until_complete(self.websocket)
-            self.event_loop.run_forever()
-            self.is_running= False
-        finally:
-            self.websocket.close()
+        self.websocket = websockets.serve(self.handle_msg,
+                                          self.host, self.port)
+        self.event_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.event_loop)
+        self.is_running = True
+        self.event_loop.run_until_complete(self.websocket)
+        self.event_loop.run_forever()
+        self.is_running= False
 
-    @asyncio.coroutine
     def shutdown(self):
         """Method used to stop de websocket."""
         self.event_loop.stop()
+        while self.is_running:
+            pass
+        self.websocket.close()
+        self.event_loop.close()
+        while not self.event_loop.is_closed():
+            pass
+
 
 
 class LogWebSocket(WebSocket):

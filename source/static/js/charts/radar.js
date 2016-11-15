@@ -20,9 +20,9 @@ function RadarChart(id, data) {
   //Speed multiplier to get radius of the external circles, proportional to
   //their area.
   var speedScale = 7.0 / Math.pow(getMaxSpeed(data[0]),0.5);
-  //var size = $("#switchChart").parent().width() * 0.8;
-  var size = $("#switchChart").parent().width() * 0.55;
-  var margin = $("#switchChart").parent().width() * 0.15;
+  //var size = $("#" + id).parent().width() * 0.8;
+  var size = $("#" + id).parent().width() * 0.55;
+  var margin = $("#" + id).parent().width() * 0.15;
   var cfg = {
    w: size,        //Width of the circle
    h: size,

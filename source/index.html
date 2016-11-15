@@ -308,14 +308,14 @@
     <script src="static/js/main.js"></script>
     <!-- END LOADING SCRIPTS -->
 
-    <!-- MUSTACHE TEMPLATE -->
+    <!-- MUSTACHE TEMPLATE FOR SWITCH CONTEXT TAB -->
     <script id="context-switch-template" type="x-tmpl-mustache">
       <div class="row-fluid">
         <div class="col-settings col-md-4 no-padding no-border">
 
           <!--// esquerda  //-->
           <div class="col-xs-6 context-chart">
-            <div id="switchChart" class="text-center"></div>
+            <div id="context-switchChart" class="text-center"></div>
           </div>
 
           <!--// direita //-->
@@ -450,7 +450,7 @@
         </div>
       </div>
     </script>
-    <!-- END: MUSTACHE TEMPLATE -->
+    <!-- END: MUSTACHE TEMPLATE FOR SWITCH CONTEXT TAB -->
 
     <script language="javascript">
       function show_switch_context(data) {
@@ -463,9 +463,8 @@
           Mustache.parse(template);   // optional, speeds up future uses
           var rendered = Mustache.render(template, data);
           $('#context_target').html(rendered).attr("data-data", JSON.stringify(data, null, 2) );
-          plot_radar(data.interfaces);
+          plot_context_radar(data.interfaces);
       }
-
     </script>
 </body>
 </html>

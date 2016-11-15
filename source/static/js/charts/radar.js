@@ -55,10 +55,10 @@ function RadarChart(id, data) {
     .domain([0, maxValue]);
 
   // Initiate the radar chart SVG
-  var svg = d3.select(id).append("svg")
+  var svg = d3.select('#'+id).append("svg")
       .attr("width",  cfg.w + cfg.margin.left + cfg.margin.right)
       .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
-      .attr("class", "radar"+id);
+      .attr("class", "radar-"+id);
 
   // Append a g element
   var g = svg.append("g")

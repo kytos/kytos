@@ -1,4 +1,4 @@
-function plot_radar(ifaces) {
+function plot_context_radar(ifaces) {
   rx = [];
   tx = [];
   for (var i in ifaces) {
@@ -9,7 +9,7 @@ function plot_radar(ifaces) {
              'speed': iface.speed});
   }
   radar_data = [rx, tx];
-  RadarChart("#switchChart", radar_data);
+  RadarChart("context-switchChart", radar_data);
 }
 
 function add_switch_interfaces(data, callback1, callback2) {

@@ -13,11 +13,9 @@ function plot_context_radar(ifaces) {
 }
 
 function add_switch_interfaces(data, callback1, callback2) {
-  var api_url = "http://" + window.location.hostname + ":8181/kytos/stats/" +
-    data.dpid + "/ports";
     $.ajax({
       dataType: "json",
-      url: api_url,
+      url: api_stats + data.dpid + '/ports',
       success: function(reply) {
         ifaces = [];
         if ('data' in reply) {
@@ -38,11 +36,9 @@ function add_switch_interfaces(data, callback1, callback2) {
 }
 
 function add_switch_flows(data, callback) {
-  var api_url = "http://" + window.location.hostname + ":8181/kytos/stats/" +
-    data.dpid + "/flows";
     $.ajax({
       dataType: "json",
-      url: api_url,
+      url: api_stats + data.dpid + '/flows',
       success: function(reply) {
         flows = [];
         if ('data' in reply) {
@@ -58,7 +54,6 @@ function add_switch_flows(data, callback) {
       }
     });
 }
-
 
 function add_stats(data, callback) {
   add_switch_interfaces(data, add_switch_flows, callback);

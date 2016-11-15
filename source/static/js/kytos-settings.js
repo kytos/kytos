@@ -29,6 +29,7 @@ var default_settings = {
     },
     server_host = window.location.hostname,
     api_url = "http://" + server_host + ":8181/kytos/",
+    api_stats = api_url + 'stats/',
     api_status = api_url + 'status/',
     layouts_url = api_url + "web/topology/layouts/",
     topology_url = api_url + "topology",

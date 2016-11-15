@@ -28,39 +28,45 @@ class WebSocket(Thread):
         self.port = kwargs.get('port', 6553)
         self.event_loop = None
         self.is_running = False
+        self.turning_off = False
 
-    @abstractmethod
     @asyncio.coroutine
-    def handle_msg(self, websocket, path):
+    def handle_connection(self, websocket, path):
         """Abstract method used to handle websocket messages.
-
-        Args:
-            websocket (websocket.server): websocket.server used.
-            path(string): path of the websocket.server.
         """
         pass
 
+    @asyncio.coroutine
+    def verify_turning_off(self,future):
+        """Task to verify if thread is turning_off"""
+        yield from asyncio.sleep(1)
+        if self.turning_off is True:
+            self.event_loop.stop()
+        asyncio.ensure_future(self.verify_turning_off(self.future))
+
     def run(self):
         """Method used to create and wait requets."""
-        self.websocket = websockets.serve(self.handle_msg,
-                                          self.host, self.port)
-        self.event_loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.event_loop)
-        self.is_running = True
-        self.event_loop.run_until_complete(self.websocket)
-        self.event_loop.run_forever()
-        self.is_running= False
+        try:
+            self.websocket = websockets.serve(self.handle_connection,
+                                              self.host, self.port)
+            self.event_loop = asyncio.new_event_loop()
+
+            asyncio.set_event_loop(self.event_loop)
+            self.future = asyncio.Future()
+            asyncio.ensure_future(self.verify_turning_off(self.future))
+
+            self.is_running = True
+            self.event_loop.run_until_complete(self.websocket)
+            self.event_loop.run_forever()
+            self.is_running = False
+        finally:
+            self.websocket.close()
+            self.event_loop.close()
 
     def shutdown(self):
         """Method used to stop de websocket."""
-        self.event_loop.stop()
-        while self.is_running:
-            pass
-        self.websocket.close()
-        self.event_loop.close()
-        while not self.event_loop.is_closed():
-            pass
-
+        self.turning_off = True
+        while self.is_alive(): pass
 
 
 class LogWebSocket(WebSocket):
@@ -77,16 +83,11 @@ class LogWebSocket(WebSocket):
         self.stream = kwargs.get('stream',StringIO())
         self.logs = []
         self.buff = ""
-
         super().__init__(**kwargs)
 
     @asyncio.coroutine
-    def handle_msg(self, websocket, path):
+    def handle_connection(self, websocket, path):
         """Method used to send logs from registered logs.
-
-        Args:
-            websocket (websocket.server): websocket.server used.
-            path(string): path of the websocket.server.
         """
         data = yield from websocket.recv()
         data = json.loads(data)
@@ -100,7 +101,6 @@ class LogWebSocket(WebSocket):
 
         if len(self.buff) > 10**5:
             self.buff = msg
-
         yield from websocket.send(json.dumps({'msg': msg}))
 
     def register_log(self, log=None):

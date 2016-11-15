@@ -34,7 +34,7 @@ log = start_logger(__name__)
 
 __all__ = ('Controller',)
 
-app = Flask(__name__)
+
 
 
 class Controller(object):
@@ -90,19 +90,16 @@ class Controller(object):
 
         self.started_at = None
 
-        self.rest_endpoints = {}
-
         self.api_server_running = False
 
         self.log_websocket = LogWebSocket()
+        self.app = Flask(__name__)
 
         self.api_server = None  # started by :meth:`start_api_server`
 
     def start_api_server(self):
         """Start Flask server inside its own thread."""
-        app.add_url_rule('/kytos/shutdown', self.shutdown_api.__name__,
-                         self.shutdown_api, methods=['GET'])
-        self.api_server = Thread(target=app.run,
+        self.api_server = Thread(target=self.app.run,
                                  args=['0.0.0.0', 8181],
                                  kwargs={'threaded': True})
         self.api_server.start()
@@ -114,12 +111,18 @@ class Controller(object):
         """Register a new rest endpoint."""
         if not self.api_server_running:
             self.start_api_server()
+            self.app.add_url_rule('/kytos/shutdown',
+                                  self.shutdown_api.__name__,
+                                  self.shutdown_api, methods=['GET'])
 
         if url not in self.rest_endpoints:
-            self.rest_endpoints[url] = (function, methods)
             new_endpoint_url = "/kytos{}".format(url)
-            app.add_url_rule(new_endpoint_url, function.__name__,
+            self.app.add_url_rule(new_endpoint_url, function.__name__,
                              function, methods=methods)
+
+    @property
+    def rest_endpoints(self):
+        return [ x.rule for x in self.app.url_map.iter_rules()]
 
     def restart_api_server(self):
         """Responsible for restarting the Flask server."""
@@ -215,6 +218,8 @@ class Controller(object):
 
     def stop_api_server(self):
         urlopen('http://127.0.0.1:8181/kytos/shutdown')
+        while self.api_server.is_alive():
+            pass
 
     def shutdown_api(self):
         """Stop the API server."""

@@ -1,7 +1,7 @@
 <!-- MUSTACHE TEMPLATE FOR SWITCH CARDS -->
 <script id="switch-list-cards" type="x-tmpl-mustache">
   {{#switches}}
-    <div class="item" data-switchID='{{#fix_name}}{{dpid}}{{/fix_name}}'>
+    <div class="switch-card item" data-switchID='{{#fix_name}}{{dpid}}{{/fix_name}}'>
       <div class="row no-padding no-border">
         <div class='col-xs-12 no-padding no-border text-center' style='margin-left: -15px;'>
           <h4>{{ name }}</h4>

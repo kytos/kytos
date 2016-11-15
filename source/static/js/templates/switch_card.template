@@ -3,9 +3,6 @@
   {{#switches}}
     <div class="switch-card item" data-switchID='{{#fix_name}}{{dpid}}{{/fix_name}}'>
       <div class="row no-padding no-border">
-        <div class='col-xs-12 no-padding no-border text-center' style='margin-left: -15px;'>
-          <h4>{{ name }}</h4>
-        </div>
         <div class="switch-card-container col-xs-12 no-padding no-border">
 
           <!--// left - chart  //-->
@@ -15,6 +12,7 @@
 
           <!--// right - switch infos //-->
           <div class="col-xs-6 context-details">
+            <h4>{{ name }}</h4>
             <div class="row">
               <div class="col-xs-12">
                 <dl>

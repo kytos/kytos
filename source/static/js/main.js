@@ -33,6 +33,7 @@ function update_tabs_sizes(){
   function resize_chart_container() {
     $("#chart").height($(window).height() - $('.navbar').height());
     $("#background-map").height($(window).height() - $('.navbar').height());
+    resize_topology_svg();
   }
 
   $(window).on('resize', function() {
@@ -49,7 +50,6 @@ function update_tabs_sizes(){
     });
 
     resize_chart_container();
-    resize_topology_svg();
 
   }).trigger('resize');
 

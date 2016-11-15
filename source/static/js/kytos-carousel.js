@@ -27,6 +27,11 @@ function rebuild_switches_carousel() {
   } else {
     settings.owlNrowNumberOfRows = Math.floor(available_size / 252);
   }
+
+  items.sort(function(a,b){
+    return $(a).data('switchid').localeCompare($(b).data('switchid'))}
+  )
+
   $('#tab_switches').empty();
   $('#tab_switches').append('<div class="owl-carousel owl-theme"></div>');
   $('.owl-carousel').append(items);

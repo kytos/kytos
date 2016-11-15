@@ -20,9 +20,9 @@ function rebuild_switches_carousel() {
   settings = default_settings.switches_carousel;
   var terminal = $('#terminal')
   if (terminal.hasClass('maximized')) {
-      settings.owlNrowNumberOfRows = default_settings.switches_carousel_maximized;
+    settings.owlNrowNumberOfRows = default_settings.switches_carousel_maximized;
   } else {
-      settings.owlNrowNumberOfRows = default_settings.switches_carousel_normal;
+    settings.owlNrowNumberOfRows = default_settings.switches_carousel_normal;
   }
   var items = $('#tab_switches .item');
   $('#tab_switches').empty();
@@ -32,18 +32,26 @@ function rebuild_switches_carousel() {
 }
 
 function populate_switches_carousel() {
-    var container = $('.owl-carousel'),
-        switches = get_switches();
+  var container = $('.owl-carousel'),
+      switches = get_switches();
 
   $.get(mustache_dir + 'switch_card.template', function(template, textStatus, jqXhr) {
     template = $(template).filter('#switch-list-cards').html();
+    var data = {
+        switches: switches,
+        fix_name: function() {
+          return function(text, render) {
+            return fix_name(render(text));
+          }
+        }
+    }
     Mustache.parse(template);   // optional, speeds up future uses
-    var rendered = Mustache.render(template, {switches: switches});
+    var rendered = Mustache.render(template, data);
     container.html(rendered);  //.attr("data-data", JSON.stringify(data, null, 2) );
-    //$.each(switches, function(index, item){
-      //var interfaces = get_switch_interfaces(item);
-      //plot_context_radar(item.dpid, interfaces);
-    //})
+    $.each(switches, function(index, item){
+      var interfaces = get_switch_interfaces(item);
+      plot_carousel_card_radar(fix_name(item.dpid), interfaces);
+    })
   });
 
   setTimeout(function(){

@@ -18,13 +18,15 @@ function plot_carousel_card_radar(dpid, ifaces) {
 
 function rebuild_switches_carousel() {
   settings = default_settings.switches_carousel;
-  var terminal = $('#terminal')
-  if (terminal.hasClass('maximized')) {
-    settings.owlNrowNumberOfRows = default_settings.switches_carousel_maximized;
+  var terminal = $('#terminal'),
+      items = $('#tab_switches .item'),
+      available_size = $('.terminal-body').height();
+
+  if (!available_size || available_size <= 252) {
+    settings.owlNrowNumberOfRows = 1;
   } else {
-    settings.owlNrowNumberOfRows = default_settings.switches_carousel_normal;
+    settings.owlNrowNumberOfRows = Math.floor(available_size / 252);
   }
-  var items = $('#tab_switches .item');
   $('#tab_switches').empty();
   $('#tab_switches').append('<div class="owl-carousel owl-theme"></div>');
   $('.owl-carousel').append(items);

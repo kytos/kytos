@@ -10,8 +10,6 @@ var default_settings = {
       map_center: [-97.8445676, 35.3437248],
       map_zoom: 4,
       /* Switch carousel and card settings */
-      switches_carousel_maximized: 4,
-      switches_carousel_normal: 1,
       switches_carousel: {
         margin: 10,
         nav: true,
@@ -22,7 +20,7 @@ var default_settings = {
         owlNrowNumberOfRows: 1,
         responsive: {
           0: {
-            items: 3
+            items: 3 // 3 items on the screen per row
           }
         }
       },

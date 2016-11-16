@@ -3,10 +3,12 @@ function plot_radar(ifaces) {
   tx = [];
   for (var i in ifaces) {
     iface = ifaces[i];
-    rx.push({'value': iface.rx_util,
-             'speed': iface.speed});
-    tx.push({'value': iface.tx_util,
-             'speed': iface.speed});
+    if (iface.speed != "") {
+      rx.push({'value': iface.rx_util,
+               'speed': iface.speed});
+      tx.push({'value': iface.tx_util,
+               'speed': iface.speed});
+    }
   }
   radar_data = [rx, tx];
   RadarChart("#switchChart", radar_data);
@@ -23,12 +25,17 @@ function add_switch_interfaces(data, callback1, callback2) {
         if ('data' in reply) {
           for (var i in reply.data) {
             iface = reply.data[i];
-            ifaces.push({name: iface.name,
-                         port: iface.port,
-                         mac: iface.mac,
-                         rx_util: (iface.rx_util * 100).toFixed(2),
-                         tx_util: (iface.tx_util * 100).toFixed(2),
-                         speed: iface.speed / Math.pow(10, 9)});
+            info = {name: iface.name, port: iface.port, mac: iface.mac}
+            if (iface.speed !== null) {
+              info.rx_util = (iface.rx_util * 100).toFixed(2);
+              info.tx_util = (iface.tx_util * 100).toFixed(2);
+              info.speed = iface.speed / Math.pow(10, 9);
+            } else {
+              info.rx_util = "";
+              info.tx_util = "";
+              info.speed = "";
+            }
+            ifaces.push(info);
           }
         }
         data.interfaces = ifaces;

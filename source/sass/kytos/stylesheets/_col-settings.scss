@@ -141,39 +141,39 @@
     .col-settings {
       @include kytos-anim-easing(300ms);
       overflow: hidden;
-    }
 
-    .context-chart {
-      @include kytos-anim-easing(300ms);
-      position : relative;
-      display: inline-block;
-      width : 100%;
-      height: calc(100vh - 301px);
-
-
-      svg {
+      .context-chart {
         @include kytos-anim-easing(300ms);
+        position : relative;
         display: inline-block;
-        left: 0;
-        right: 0;
-        margin: auto;
-        text-align: center;
+        width : 100%;
+        height: calc(100vh - 301px);
+
+
+        svg {
+          @include kytos-anim-easing(299ms);
+          display: inline-block;
+          left: 0;
+          right: 0;
+          margin: auto;
+          text-align: center;
+        }
       }
-    }
 
-    .context-details {
-      bottom: 0;
-      display: block;
-      height: 220px;
-      width: 100%;
-    }
+      .context-details {
+        bottom: 0;
+        display: block;
+        height: 220px;
+        width: 100%;
+      }
 
-
-    .tab-content {
-      .table-scroll {
-        tbody {
-          height: 75vh;
+      .tab-content {
+        .table-scroll {
+          tbody {
+            height: 75vh;
+          }
         }
       }
     }
+
 }

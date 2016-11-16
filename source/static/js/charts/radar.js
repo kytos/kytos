@@ -16,28 +16,35 @@ function getMaxSpeed(ifaces) {
 }
 
 function RadarChart(id, data) {
-  var maxValue = 100;  //Utilization percentage
-  //Speed multiplier to get radius of the external circles, proportional to
-  //their area.
-  var speedScale = 7.0 / Math.pow(getMaxSpeed(data[0]),0.5);
-  //var size = $("#switchChart").parent().width() * 0.8;
-  var size = $("#switchChart").parent().width() * 0.55;
-  var margin = $("#switchChart").parent().width() * 0.15;
-  var cfg = {
-   w: size,        //Width of the circle
-   h: size,
-   margin: {top: margin, right: margin, bottom: margin, left: margin}, //The margins of the SVG
-   levels: 4,        //How many levels or inner circles should there be drawn
-   maxValue: maxValue,       //What is the value that the biggest circle will represent
-   labelFactor: 1.15,   //How much farther than the radius of the outer circle should the labels be placed
-   wrapWidth: 60,     //The number of pixels after which a label needs to be given a new line
-   opacityArea: 0.30,   //The opacity of the area of the blob
-   dotRadius: 3,       //The size of the colored circles of each blog
-   opacityCircles: 0.1,   //The opacity of the circles of each blob
-   strokeWidth: 2,     //The width of the stroke around each blob
-   roundStrokes: true,  //If true the area and stroke will follow a round path (cardinal-closed)
-   color: d3.scaleOrdinal().range(["#549e9f","#b54872"])
-  };
+
+  // calculating reference sizes (width/height)
+
+  var maxValue = 100,  //Utilization percentage
+      //Speed multiplier to get radius of the external circles, proportional to
+      //their area.
+      speedScale = 7.0 / Math.pow(getMaxSpeed(data[0]),0.5),
+      _w = $("#" + id).parent().width(),
+      // 252 is the min height of a switch_card, by design. 198 because of some margins
+      _h = Math.max($("#" + id).parent().height(), 198),
+      ref_size = _w && _w > 0 ? Math.min(_w, _h) : _h,
+      //var size = $("#" + id).parent().width() * 0.8;
+      size = ref_size * 0.75,
+      margin = ref_size * 0.125,
+      cfg = {
+       w: size,        //Width of the circle
+       h: size,
+       margin: {top: margin, right: margin, bottom: margin, left: margin}, //The margins of the SVG
+       levels: 4,        //How many levels or inner circles should there be drawn
+       maxValue: maxValue,       //What is the value that the biggest circle will represent
+       labelFactor: 1.15,   //How much farther than the radius of the outer circle should the labels be placed
+       wrapWidth: 60,     //The number of pixels after which a label needs to be given a new line
+       opacityArea: 0.30,   //The opacity of the area of the blob
+       dotRadius: 3,       //The size of the colored circles of each blog
+       opacityCircles: 0.1,   //The opacity of the circles of each blob
+       strokeWidth: 2,     //The width of the stroke around each blob
+       roundStrokes: true,  //If true the area and stroke will follow a round path (cardinal-closed)
+       color: d3.scaleOrdinal().range(["#549e9f","#b54872"])
+      };
 
   var interfaceColor = d3.scaleLinear()
                          .domain([0, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100])
@@ -55,10 +62,10 @@ function RadarChart(id, data) {
     .domain([0, maxValue]);
 
   // Initiate the radar chart SVG
-  var svg = d3.select(id).append("svg")
+  var svg = d3.select('#'+id).append("svg")
       .attr("width",  cfg.w + cfg.margin.left + cfg.margin.right)
       .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
-      .attr("class", "radar"+id);
+      .attr("class", "radar-"+id);
 
   // Append a g element
   var g = svg.append("g")

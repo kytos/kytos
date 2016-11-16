@@ -150,7 +150,7 @@
               <ul class="nav nav-pills kytos-nav-pills terminal-tabs">
                 <li id='tab_terminal_button' class="active"><a  data-toggle="pill" href="#tab_terminal"><i class="fa fa-terminal"></i> Terminal</a></li>
                 <li id='tab_context_button'><a data-callback-min-max="show_switch_context()" data-toggle="pill" href="#tab_context" ><i class="fa fa-eye"></i> Context</a></li>
-                <li><a data-toggle="pill" href="#tab_switches"><i class="fa fa-circle-o"></i> Switches</a></li>
+                <li><a data-toggle="pill" href="#tab_switches" onClick= populate_switches_carousel() ><i class="fa fa-circle-o"></i> Switches</a></li>
                 <li><a data-toggle="pill" href="#tab_logs"><i class="fa fa-list"></i> Logs</a></li>
                 <li><a data-toggle="pill" href="#tab_notifications"><i class="fa fa-bell-o"></i> Notifications</a></li>
                 <li><a data-toggle="pill" href="#tab_settings"><i class="fa fa-cogs"></i> Settings</a></li>
@@ -169,55 +169,6 @@
             <div id="tab_terminal" class="tab-pane fade in active">Terminal content</div>
             <div id="tab_switches" class="tab-pane fade in">
               <div class="owl-carousel owl-theme">
-                <div class="item"><h4>1</h4></div>
-                <div class="item"><h4>2</h4></div>
-                <div class="item"><h4>3</h4></div>
-                <div class="item"><h4>4</h4></div>
-                <div class="item"><h4>5</h4></div>
-                <div class="item"><h4>6</h4></div>
-                <div class="item"><h4>7</h4></div>
-                <div class="item"><h4>8</h4></div>
-                <div class="item"><h4>9</h4></div>
-                <div class="item"><h4>10</h4></div>
-                <div class="item"><h4>11</h4></div>
-                <div class="item"><h4>12</h4></div>
-                <div class="item"><h4>13</h4></div>
-                <div class="item"><h4>14</h4></div>
-                <div class="item"><h4>15</h4></div>
-                <div class="item"><h4>16</h4></div>
-                <div class="item"><h4>17</h4></div>
-                <div class="item"><h4>18</h4></div>
-                <div class="item"><h4>19</h4></div>
-                <div class="item"><h4>20</h4></div>
-                <div class="item"><h4>21</h4></div>
-                <div class="item"><h4>22</h4></div>
-                <div class="item"><h4>23</h4></div>
-                <div class="item"><h4>24</h4></div>
-                <div class="item"><h4>25</h4></div>
-                <div class="item"><h4>26</h4></div>
-                <div class="item"><h4>27</h4></div>
-                <div class="item"><h4>28</h4></div>
-                <div class="item"><h4>29</h4></div>
-                <div class="item"><h4>30</h4></div>
-                <div class="item"><h4>31</h4></div>
-                <div class="item"><h4>32</h4></div>
-                <div class="item"><h4>33</h4></div>
-                <div class="item"><h4>34</h4></div>
-                <div class="item"><h4>35</h4></div>
-                <div class="item"><h4>36</h4></div>
-                <div class="item"><h4>37</h4></div>
-                <div class="item"><h4>38</h4></div>
-                <div class="item"><h4>39</h4></div>
-                <div class="item"><h4>40</h4></div>
-                <div class="item"><h4>41</h4></div>
-                <div class="item"><h4>42</h4></div>
-                <div class="item"><h4>43</h4></div>
-                <div class="item"><h4>44</h4></div>
-                <div class="item"><h4>45</h4></div>
-                <div class="item"><h4>46</h4></div>
-                <div class="item"><h4>47</h4></div>
-                <div class="item"><h4>48</h4></div>
-                <div class="item"><h4>49</h4></div>
               </div>
             </div>
             <div id="tab_context" class="tab-pane fade">
@@ -352,19 +303,20 @@
     <script src="static/js/kytos-owl-carousel-fork.js"></script>
     <script src="static/js/kytos-background-map.js"></script>
     <script src="static/js/kytos-stats.js"></script>
+    <script src="static/js/kytos-carousel.js"></script>
     <script src="static/js/charts/topology.js"></script>
     <script src="static/js/charts/radar.js"></script>
     <script src="static/js/main.js"></script>
     <!-- END LOADING SCRIPTS -->
 
-    <!-- MUSTACHE TEMPLATE -->
+    <!-- MUSTACHE TEMPLATE FOR SWITCH CONTEXT TAB -->
     <script id="context-switch-template" type="x-tmpl-mustache">
       <div class="row-fluid">
         <div class="col-settings col-md-4 no-padding no-border">
 
           <!--// esquerda  //-->
           <div class="col-xs-6 context-chart">
-            <div id="switchChart" class="text-center"></div>
+            <div id="context-switchChart" class="text-center"></div>
           </div>
 
           <!--// direita //-->
@@ -499,7 +451,7 @@
         </div>
       </div>
     </script>
-    <!-- END: MUSTACHE TEMPLATE -->
+    <!-- END: MUSTACHE TEMPLATE FOR SWITCH CONTEXT TAB -->
 
     <script language="javascript">
       function show_switch_context(data) {
@@ -512,9 +464,8 @@
           Mustache.parse(template);   // optional, speeds up future uses
           var rendered = Mustache.render(template, data);
           $('#context_target').html(rendered).attr("data-data", JSON.stringify(data, null, 2) );
-          plot_radar(data.interfaces);
+          plot_context_radar(data.interfaces);
       }
-
     </script>
 </body>
 </html>

@@ -69,7 +69,7 @@ function RadarChart(id, data) {
 
   // Append a g element
   var g = svg.append("g")
-      .attr("transform", "translate(" + (size + margin * 2.75) /2 + "," + (size + margin * 2)/2 + ")");
+      .attr("transform", "translate(" + (size + margin * 2) /2 + "," + (size + margin * 2)/2 + ")");
 
   /////////////////////////////////////////////////////////
   /////////////// Draw the Circular grid //////////////////

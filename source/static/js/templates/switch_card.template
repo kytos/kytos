@@ -6,7 +6,7 @@
         <div class="switch-card-container col-xs-12 no-padding no-border">
 
           <!--// left - chart  //-->
-          <div class="switch-card-chart context-chart col-xs-6">
+          <div class="switch-card-chart context-chart col-xs-6" onclick='show_context(get_switch_by_dpid("{{dpid}}"))'>
             <div id="switch-chart-{{#fix_name}}{{dpid}}{{/fix_name}}" class="text-center"></div>
           </div>
 

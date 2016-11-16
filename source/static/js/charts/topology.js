@@ -101,7 +101,6 @@ function release_node(d) {
 
 function get_interface_owner(d){
   /* Get the switch in which the 'd' interface is connected */
-
   if (d.type != 'interface') return null;
   searched_switch = null;
   $.each(simulation.nodes(), function(index, node) {
@@ -130,6 +129,14 @@ function get_nodes_by_type(type) {
       if (node.type == type) { selected_nodes.push(node); };
   });
   return selected_nodes;
+}
+
+function get_switch_by_dpid(dpid) {
+  var switch_node = undefined;
+  $.each(simulation.nodes(), function(index, node){
+    if (node.type == 'switch' && node.dpid == dpid) { switch_node = node; }
+  })
+  return switch_node;
 }
 
 function get_interfaces() {

@@ -1,2 +1,3 @@
 include etc/kyco.conf
+include etc/logging.ini
 include *.txt

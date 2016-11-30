@@ -69,7 +69,7 @@ after running ``python3`` or ``ipython3``:
    >>> # no errors should be displayed
 
 Usage
-^^^^^
+=====
 
 To use ``Kyco``, after installing it on the system, you need to open a python
 (``python3``) console and run the following commands:
@@ -88,11 +88,12 @@ necessary permissions, such as open a socket on port 6633.
 
 To enable or disable ``NApps`` (Network Applications) you need to add the napp
 under the NApps directory defined on the config passed to the controller. The
-default NApps directory is ``/var/lib/kytos/napps/``. For more information
-regarding the NApps access `Kytos Core NApps Documentation
+default NApps directory is ``/var/lib/kytos/napps/``. *Kyco* will only load
+those NApps that were at the napps directory when the start method was called.
+For more information regarding the NApps access `Kytos Core NApps Documentation
 <http://github.com/kytos/kyco-core-napps>`__.
 
-Besides starting ``Kyco``, if you wish to use our web based interface you will
+Besides starting *Kyco*, if you wish to use our web based interface you will
 need to start a webserver to serve the this interface. See more at: `Kytos
 Admin UI page <https://github.com/kytos/kytos-admin-ui>`__.
 

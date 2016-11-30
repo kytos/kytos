@@ -34,8 +34,6 @@ log = start_logger(__name__)
 
 __all__ = ('Controller',)
 
-app = Flask(__name__)
-
 
 class Controller(object):
     """Main class of Kyco.
@@ -90,42 +88,30 @@ class Controller(object):
 
         self.started_at = None
 
-        self.rest_endpoints = {}
-
-        self.api_server_running = False
-
         self.log_websocket = LogWebSocket()
 
-        self.api_server = None  # started by :meth:`start_api_server`
+        self.app = Flask(__name__)
 
-    def start_api_server(self):
-        """Start Flask server inside its own thread."""
-        app.add_url_rule('/kytos/shutdown', self.shutdown_api.__name__,
-                         self.shutdown_api, methods=['GET'])
-        self.api_server = Thread(target=app.run,
-                                 args=['0.0.0.0', 8181],
-                                 kwargs={'threaded': True})
-        self.api_server.start()
-        self.api_server_running = True
-        self.register_rest_endpoint('/status/', self.status_api,
-                                    methods=['GET'])
+    def register_kyco_routes(self):
+        if '/kytos/status/' not in self.rest_endpoints:
+            self.app.add_url_rule('/kytos/status/', self.status_api.__name__,
+                                  self.status_api, methods=['GET'])
+
+        if '/kytos/shutdown' not in self.rest_endpoints:
+            self.app.add_url_rule('/kytos/shutdown',
+                                  self.shutdown_api.__name__,
+                                  self.shutdown_api, methods=['GET'])
 
     def register_rest_endpoint(self, url, function, methods):
         """Register a new rest endpoint."""
-        if not self.api_server_running:
-            self.start_api_server()
-
         if url not in self.rest_endpoints:
-            self.rest_endpoints[url] = (function, methods)
             new_endpoint_url = "/kytos{}".format(url)
-            app.add_url_rule(new_endpoint_url, function.__name__,
+            self.app.add_url_rule(new_endpoint_url, function.__name__,
                              function, methods=methods)
 
-    def restart_api_server(self):
-        """Responsible for restarting the Flask server."""
-        if self.api_server_running:
-            self.stop_api_server()
-        self.start_api_server()
+    @property
+    def rest_endpoints(self):
+        return [ x.rule for x in self.app.url_map.iter_rules()]
 
     def start_log_websocket(self):
         self.log_websocket.register_log(log)
@@ -151,7 +137,10 @@ class Controller(object):
         msg_out_event_handler = self.msg_out_event_handler
         app_event_handler = self.app_event_handler
 
-        thrds = {'tcp_server': Thread(name='TCP server',
+        thrds = {'api_server': Thread(target=self.app.run,
+                                      args=['0.0.0.0', 8181],
+                                      kwargs={'threaded': True}),
+                 'tcp_server': Thread(name='TCP server',
                                       target=self.server.serve_forever),
                  'raw_event_handler': Thread(name='RawEvent Handler',
                                              target=raw_event_handler),
@@ -169,12 +158,11 @@ class Controller(object):
         log.info("Loading kyco apps...")
         self.load_napps()
         self.started_at = now()
+        self.register_kyco_routes()
 
     def stop(self, graceful=True):
         if self.log_websocket.is_running:
             self.log_websocket.shutdown()
-        if self.api_server_running:
-            self.stop_api_server()
         if self.started_at:
             self.stop_controller(graceful)
 
@@ -199,6 +187,7 @@ class Controller(object):
 
         self.server.shutdown()
         self.buffers.send_stop_signal()
+        urlopen('http://127.0.0.1:8181/kytos/shutdown')
 
         for thread in self._threads.values():
             log.info("Stopping thread: %s", thread.name)
@@ -213,9 +202,6 @@ class Controller(object):
         self.buffers = KycoBuffers()
         self.server.server_close()
 
-    def stop_api_server(self):
-        urlopen('http://127.0.0.1:8181/kytos/shutdown')
-
     def shutdown_api(self):
         """Stop the API server."""
         allowed_host = ['127.0.0.1:8181', 'localhost:8181']
@@ -226,11 +212,10 @@ class Controller(object):
         if server_shutdown is None:
             raise RuntimeError('Not running with the Werkzeug Server')
         server_shutdown()
-        self.api_server_running = False
         return 'Server shutting down...', 200
 
     def status_api(self):
-        if self.api_server_running:
+        if self._threads['api_server'].is_alive():
             return '{"response": "running"}', 201
         else:
             return '{"response": "not running"}', 404

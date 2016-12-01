@@ -27,6 +27,7 @@ API Reference
    :name: mastertoc
 
    modules
+   toc/listened_events
 
 Indices and tables
 ------------------

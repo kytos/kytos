@@ -1,31 +1,44 @@
-"""Module with main classes related to Switches"""
-import logging
+"""Module with main classes related to Switches."""
 import json
-
+import logging
 from socket import error as SocketError
 
 from pyof.v0x01.common.phy_port import PortFeatures
+
 from kyco.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
 from kyco.utils import now
 
-__all__ = ('Switch',)
+__all__ = ('Interface', 'Connection', 'Switch')
 
 log = logging.getLogger(__name__)
 
 
 class Interface(object):
+    """Interface Class used to abstract the network interfaces."""
+
     def __init__(self, name, port_number, switch, address=None, state=None,
                  features=None):
+        """The contructor of Interface have the below parameters.
+
+        Parameters:
+            name (string): name from this interface.
+            port_number (int): port number from this interface.
+            switch (:class:`~.core.switch.Switch`): Switch with this interface.
+            address (HWAddress): Port address from this interface.
+            state (PortState): Port Stat from interface.
+            features (PortFeatures): Port feature used to calculate link
+                                     utilization from this interface.
+        """
         self.name = name
         self.port_number = int(port_number)
         self.switch = switch
         self.address = address
         self.state = state
-        #: PortFeatures: Used to calculate link utilization.
         self.features = features
         self.endpoints = []
 
     def __eq__(self, other):
+        """Method used to compare Interface class with another instance."""
         if isinstance(other, str):
             return self.address == other
 
@@ -48,38 +61,71 @@ class Interface(object):
 
     @property
     def id(self):
+        """Return id from Interface intance.
+
+        Returns:
+            id (string): Interface id.
+        """
         return "{}:{}".format(self.switch.dpid, self.port_number)
 
     def get_endpoint(self, endpoint):
+        """Return a tuple with existent endpoint, None otherwise.
+
+        Parameters:
+            endpoint (HWAddress,Interface): endpoint instance.
+
+        Returns:
+            item (tuple): A tuple with endpoint and time of last update.
+        """
         for item in self.endpoints:
             if endpoint == item[0]:
                 return item
         return None
 
     def is_link_between_switches(self):
+        """Return True if instance is link between switches.False otherwise."""
         for endpoint, timestamp in self.endpoints:
             if type(endpoint) is Interface:
                 return True
         return False
 
     def add_endpoint(self, endpoint):
+        """Create a new endpoint to Interface instance.
+
+        Parameters:
+            endpoint (HWAddress): A target endpoint.
+        """
         exists = self.get_endpoint(endpoint)
         if not exists:
             self.endpoints.append((endpoint, now()))
 
     def delete_endpoint(self, endpoint):
+        """Delete a existent endpoint in Interface instance.
+
+        Parameters:
+            endpoint (HWAddress): A target endpoint.
+        """
         exists = self.get_endpoint(endpoint)
         if exists:
             self.endpoints.remove(exists)
 
     def update_endpoint(self, endpoint):
+        """Update or create new endpoint to Interface instance.
+
+        Parameters:
+            endpoint (HWAddress): A target endpoint.
+        """
         exists = self.get_endpoint(endpoint)
         if exists:
             self.delete_endpoint(endpoint)
         self.add_endpoint(endpoint)
 
     def get_speed(self):
-        """Return the link speed in bits per second."""
+        """Return the link speed in bits per second, None otherwise.
+
+        Returns:
+            speed (int): Link speed in bits per second.
+        """
         fs = self.features
         PF = PortFeatures
         if fs and fs & PF.OFPPF_10GB_FD:
@@ -96,7 +142,12 @@ class Interface(object):
         return None
 
     def get_hr_speed(self):
-        """Return Human-Readable string for link speed."""
+        """Return Human-Readable string for link speed.
+
+        Returns:
+            human_speed (string): String with link speed.
+            e.g: '350 Gbps' or '350 Mbps'.
+        """
         speed = self.get_speed()
         if speed is None:
             return ''
@@ -106,6 +157,23 @@ class Interface(object):
             return '{} Mbps'.format(round(speed / 10**6))
 
     def as_dict(self):
+        """Return a dictionary with Interface attributes.
+
+        Example of output:
+
+        .. code-block:: python3
+
+            {'id': '00:00:00:00:00:00:00:01:2',
+             'name': 'eth01',
+             'port_number': 2,
+             'mac': '00:7e:04:3b:c2:a6',
+             'switch': '00:00:00:00:00:00:00:01',
+             'type': 'interface',
+             'speed': '350 Mbps'}
+
+        Returns:
+            dictionary (dict): Dictionary filled with interface attributes.
+        """
         return {'id': self.id,
                 'name': self.name,
                 'port_number': self.port_number,
@@ -115,11 +183,38 @@ class Interface(object):
                 'speed': self.get_hr_speed()}
 
     def as_json(self):
+        """Return a json with Interfaces attributes.
+
+        Example of output:
+
+        .. code-block:: json
+
+            {"mac": "00:7e:04:3b:c2:a6",
+             "switch": "00:00:00:00:00:00:00:01",
+             "type": "interface",
+             "name": "eth01",
+             "id": "00:00:00:00:00:00:00:01:2",
+             "port_number": 2,
+             "speed": "350 Mbps"}
+
+        Returns:
+            json (string): Json filled with interface attributes.
+        """
         return json.dumps(self.as_dict())
 
 
 class Connection(object):
+    """Connection class to abstract a network connections."""
+
     def __init__(self, address, port, socket, switch=None):
+        """The constructor method have the below parameters.
+
+        Parameters:
+          address (HWAddress): Source address.
+          port (int): Port number.
+          socket (socket): socket.
+          switch (:class:`~.core.switch.Switch`): switch with this connection.
+        """
         self.address = address
         self.port = port
         self.socket = socket
@@ -127,9 +222,19 @@ class Connection(object):
 
     @property
     def id(self):
+        """Return id from Connection instance.
+
+        Returns:
+            id (string): Connection id.
+        """
         return (self.address, self.port)
 
     def send(self, buffer):
+        """Send a buffer message using the socket from the connection instance.
+
+        Parameters:
+            buffer (bytes): Message buffer that will be sent.
+        """
         try:
             if self.socket and not self.socket._closed:
                 self.socket.send(buffer)
@@ -139,6 +244,7 @@ class Connection(object):
             raise exception
 
     def close(self):
+        """Close the socket from connection instance."""
         if self.socket is not None:
             self.socket.close()
             self.socket = None  # TODO: Is this really necessary?
@@ -147,15 +253,21 @@ class Connection(object):
             self.switch.connection = None
 
     def is_connected(self):
+        """Return True if it is connected.False otherwise."""
         return self.socket is not None
 
     def update_switch(self, switch):
+        """Update switch with this instance of Connection.
+
+        Parameters:
+          switch (:class:`~.core.switch.Switch`): switch instance.
+        """
         self.switch = switch
         self.switch.connection = self
 
 
 class Switch(object):
-    """This is the main class related to Switches modeled on Kyco.
+    """Switch class is a abstraction from switches.
 
     A new Switch will be created every time the handshake process is done
     (after receiving the first FeaturesReply). Considering this, the
@@ -186,16 +298,19 @@ class Switch(object):
     :attr:`features` is an instance of
     :class:`pyof.*.controller2switch.FeaturesReply` representing the current
     featues of the switch.
-
-    Args:
-        dpid (): datapath_id of the switch
-        socket (socket): Socket/Request
-        connection_id (tuple): Tuple `(ip, port)`
-        ofp_version (string): Current talked OpenFlow version
-        features (FeaturesReply): FeaturesReply (from python-openflow) instance
     """
+
     def __init__(self, dpid, connection=None, ofp_version='0x01',
                  features=None):
+        """Contructor of switches have the below parameters.
+
+        Parameters:
+            dpid (DPID): datapath_id of the switch
+            connection (:class:`~.core.switch.Connection`):
+                Connection used by switch.
+            ofp_version (string): Current talked OpenFlow version.
+            features (FeaturesReply): FeaturesReply instance.
+        """
         self.dpid = dpid
         self.connection = connection
         self.ofp_version = ofp_version
@@ -213,7 +328,7 @@ class Switch(object):
         #: This flood_table will keep track of flood packets to avoid over
         #:     flooding on the network. Its key is a hash composed by
         #:     (eth_type, mac_src, mac_dst) and the value is the timestamp of
-        #:      the last flood.
+        #:     the last flood.
         self.flood_table = {}
         self.interfaces = {}
         self.flows = []
@@ -222,7 +337,13 @@ class Switch(object):
         if connection:
             connection.switch = self
 
-    def update_description(self,desc):
+    def update_description(self, desc):
+        """Update switch'descriptions from Switch instance.
+
+        Parameters:
+            desc (DescStats):
+                Description Class with new values of switch'descriptions.
+        """
         self.description['manufacturer'] = desc.mfr_desc.value
         self.description['hardware'] = desc.hw_desc.value
         self.description['software'] = desc.sw_desc.value
@@ -231,23 +352,33 @@ class Switch(object):
 
     @property
     def id(self):
+        """Return id from Switch instance.
+
+        Returns:
+            id (string): the switch id is the data_path_id from switch.
+        """
         return "{}".format(self.dpid)
 
     def disconnect(self):
-        """Disconnect the switch.
-
-        """
+        """Disconnect the switch instance."""
         self.connection.close()
         self.connection = None
         log.info("Switch %s is disconnected", self.dpid)
 
     def get_interface_by_port_no(self, port_no):
+        """Get interface by port number from Switch instance.
+
+        Returns:
+            interface (:class:`~.core.switch.Interface`):
+                Interface from specific port.
+        """
         return self.interfaces.get(port_no)
 
     def get_flow_by_id(self, flow_id):
-        """Return Flow or None if not found.
+        """Return a Flow using the flow_id given. None if not found in flows.
 
-        As :attr:`flows` is not a dict, we have to iterate through all flows.
+        Parameters:
+            flow_id (int): identifier from specific flow stored.
         """
         for flow in self.flows:
             if flow_id == flow.id:
@@ -255,50 +386,70 @@ class Switch(object):
         return None
 
     def is_active(self):
+        """Return true if the switch connection is alive."""
         return (now() - self.lastseen).seconds <= CONNECTION_TIMEOUT
 
     def is_connected(self):
-        """Verifies if the switch is connected to a socket.
-        """
+        """Verify if the switch is connected to a socket."""
         return self.connection.is_connected() and self.is_active()
 
     def update_connection(self, connection):
+        """Update switch connection.
+
+        Parameters:
+            connection (:class:`~.core.switch.Connection`):
+                New connection to this instance of switch.
+        """
         self.connection = connection
         self.connection.switch = self
 
     def update_features(self, features):
+        """Update :attr:`features` attribute."""
         # TODO: We should avoid OF structs here
         self.features = features
 
     def send(self, buffer):
-        """Sends data to the switch.
+        """Send a buffer data to the real switch.
 
-        Args:
-            buffer (bytes): bytes to be sent to the switch throught its
+        Parameters:
+          buffer (bytes): bytes to be sent to the switch throught its
                             connection.
-        Raises:
-            # TODO: raise proper exceptions on the code
-            ......: If the switch connection was connection.
-            ......: If the passed `data` is not a bytes object
         """
+        # Raises:
+        #  # TODO: raise proper exceptions on the code
+        #  ......: If the switch connection was connection.
+        #  ......: If the passed `data` is not a bytes object
         if self.connection:
             self.connection.send(buffer)
 
     def update_lastseen(self):
+        """Update the lastseen attribute."""
         self.lastseen = now()
 
     def update_interface(self, interface):
+        """Update a interface from switch instance.
+
+        Parameters:
+            interface (:class:`~kyco.core.switch.Interface`):
+                Interface object to be storeged.
+        """
         if interface.port_number not in self.interfaces:
             self.interfaces[interface.port_number] = interface
 
     def update_mac_table(self, mac, port_number):
+        """Link the mac address with a port number.
+
+        Parameters:
+            mac (HWAddress): mac address from switch.
+            port (int): port linked in mac address.
+        """
         if mac.value in self.mac2port:
             self.mac2port[mac.value].add(port_number)
         else:
             self.mac2port[mac.value] = set([port_number])
 
     def last_flood(self, ethernet_frame):
-        """Returns the timestamp when the ethernet_frame was flooded.
+        """Return the timestamp when the ethernet_frame was flooded.
 
         This method is usefull to check if a frame was flooded before or not.
         """
@@ -308,6 +459,13 @@ class Switch(object):
             return None
 
     def should_flood(self, ethernet_frame):
+        """Verify if the ethernet frame should flood.
+
+        Parameters:
+            ethernet_frame (Ethernet): Ethernet instance to be verified.
+        Returns:
+            shoudl_flood (bool): True if the ethernet_frame should flood.
+        """
         last_flood = self.last_flood(ethernet_frame)
 
         if last_flood is None:
@@ -318,15 +476,50 @@ class Switch(object):
             return False
 
     def update_flood_table(self, ethernet_frame):
+        """Update a flood table using the given ethernet frame.
+
+        Parameters:
+            ethernet_frame (Ethernet): Ethernet frame to be updated.
+        """
         self.flood_table[ethernet_frame.get_hash()] = now()
 
     def where_is_mac(self, mac):
+        """"Return all ports from specific mac address.
+
+        Parameters:
+            mac (HWAddress): Mac address from switch.
+        Returns:
+            ports (list): A list of ports. None otherswise.
+        """
         try:
             return list(self.mac2port[mac.value])
         except KeyError as exception:
             return None
 
     def as_dict(self):
+        """Return a dictionary with switch attributes.
+
+        Example of output:
+
+        .. code-block:: python3
+
+               {'id': '00:00:00:00:00:00:00:03:2',
+                'name': '00:00:00:00:00:00:00:03:2',
+                'dpid': '00:00:00:00:03',
+                'connection':  connection,
+                'ofp_version': '0x01',
+                'type': 'switch',
+                'manufacturer': "",
+                'serial': "",
+                'hardware': "Open vSwitch",
+                'software': 2.5,
+                'data_path': ""
+                }
+
+
+        Returns:
+            dictionary (dict): Dictionary filled with interface attributes.
+        """
         connection = ""
         if self.connection is not None:
             address = self.connection.address
@@ -339,12 +532,33 @@ class Switch(object):
                 'connection':  connection,
                 'ofp_version': self.ofp_version,
                 'type': 'switch',
-                'manufacturer': self.description.get('manufacturer',''),
-                'serial': self.description.get('serial',''),
-                'hardware': self.description.get('hardware',''),
+                'manufacturer': self.description.get('manufacturer', ''),
+                'serial': self.description.get('serial', ''),
+                'hardware': self.description.get('hardware', ''),
                 'software': self.description.get('software'),
-                'data_path': self.description.get('data_path','')
+                'data_path': self.description.get('data_path', '')
                 }
 
     def as_json(self):
+        """Return a json with switch'attributes.
+
+        Example of output:
+
+        .. code-block:: json
+
+            {"data_path": "",
+             "hardware": "Open vSwitch",
+             "dpid": "00:00:00:00:03",
+             "name": "00:00:00:00:00:00:00:03:2",
+             "manufacturer": "",
+             "serial": "",
+             "software": 2.5,
+             "id": "00:00:00:00:00:00:00:03:2",
+             "ofp_version": "0x01",
+             "type": "switch",
+             "connection": ""}
+
+        Returns:
+            json (string): Json filled with switch'attributes.
+        """
         return json.dumps(self.as_dict())

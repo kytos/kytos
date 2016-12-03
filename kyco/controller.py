@@ -49,7 +49,7 @@ class Controller(object):
     def __init__(self, options):
         """Init method of Controller class.
 
-        Args:
+        Parameters:
             options (ParseArgs.args): 'options' attribute from an instance of
                 KycoConfig class
         """
@@ -93,6 +93,10 @@ class Controller(object):
         self.app = Flask(__name__)
 
     def register_kyco_routes(self):
+        """Register initial routes from kyco using ApiServer.
+
+        Initial routes are: ['/kytos/status', '/kytos/shutdown']
+        """
         if '/kytos/status/' not in self.rest_endpoints:
             self.app.add_url_rule('/kytos/status/', self.status_api.__name__,
                                   self.status_api, methods=['GET'])
@@ -103,17 +107,29 @@ class Controller(object):
                                   self.shutdown_api, methods=['GET'])
 
     def register_rest_endpoint(self, url, function, methods):
-        """Register a new rest endpoint."""
+        """Register a new rest endpoint in Api Server.
+
+        To register new endpoints is needed to have a url, function to handle
+        the requests and type of method allowed.
+
+        Parameters:
+            url (string):        String with partner of route. e.g.: '/status'
+            function (function): Function pointer used to handle the requests.
+            methods (list):      List of request methods allowed.
+                                 e.g: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH']
+        """
         if url not in self.rest_endpoints:
             new_endpoint_url = "/kytos{}".format(url)
             self.app.add_url_rule(new_endpoint_url, function.__name__,
-                             function, methods=methods)
+                                  function, methods=methods)
 
     @property
     def rest_endpoints(self):
-        return [ x.rule for x in self.app.url_map.iter_rules()]
+        """Return string with routes registered by Api Server."""
+        return [x.rule for x in self.app.url_map.iter_rules()]
 
     def start_log_websocket(self):
+        """Start the kyco websocket server."""
         self.log_websocket.register_log(log)
         self.log_websocket.start()
 
@@ -161,6 +177,13 @@ class Controller(object):
         self.register_kyco_routes()
 
     def stop(self, graceful=True):
+        """Method used to shutdown all services used by kyco.
+
+        This method should:
+            - stop all Websockets
+            - stop the API Server
+            - stop the Controller
+        """
         if self.log_websocket.is_running:
             self.log_websocket.shutdown()
         if self.started_at:
@@ -176,7 +199,6 @@ class Controller(object):
             - finish reading the events on all buffers;
             - stop each running handler;
             - stop all running threads;
-            - stop the running API server;
             - stop the KycoServer;
         """
         # TODO: Review this shutdown process
@@ -202,8 +224,16 @@ class Controller(object):
         self.buffers = KycoBuffers()
         self.server.server_close()
 
+    def stop_api_server(self):
+        """Method used to send a shutdown request to stop Api Server."""
+        urlopen('http://127.0.0.1:8181/kytos/shutdown')
+
     def shutdown_api(self):
-        """Stop the API server."""
+        """Handle shutdown requests received by Api Server.
+
+        This method must be called by kyco using the method
+        stop_api_server, otherwise this request will be ignored.
+        """
         allowed_host = ['127.0.0.1:8181', 'localhost:8181']
         if request.host not in allowed_host:
             return "", 403
@@ -215,18 +245,36 @@ class Controller(object):
         return 'Server shutting down...', 200
 
     def status_api(self):
+        """Display json with kyco status using the route '/status'."""
         if self._threads['api_server'].is_alive():
             return '{"response": "running"}', 201
         else:
             return '{"response": "not running"}', 404
 
     def status(self):
+        """Return status of Kyco Server.
+
+        If the controller kyco is running this method will be returned
+        "Running since 'Started_At'", otherwise "Stopped".
+
+        Returns:
+            status (string): String with kyco status.
+        """
         if self.started_at:
             return "Running since %s" % self.started_at
         else:
             return "Stopped"
 
     def uptime(self):
+        """Return the uptime of kyco server.
+
+        This method should return:
+            - 0 if Kyco Server is stopped.
+            - (kyco.start_at - datetime.now) if Kyco Server is running.
+
+        Returns:
+           interval (datetime.timedelta): The uptime interval
+        """
         # TODO: Return a better output
         return self.started_at - now() if self.started_at else 0
 
@@ -237,7 +285,7 @@ class Controller(object):
         name of the event with the keys of events_listeners. If a match occurs,
         then send the event to each registered listener.
 
-        Args:
+        Parameters:
             event (KycoEvent): An instance of a KycoEvent.
         """
         for event_regex, listeners in self.events_listeners.items():
@@ -318,10 +366,29 @@ class Controller(object):
                 break
 
     def get_switch_by_dpid(self, dpid):
+        """Return a specific switch by dpid.
+
+        Parameters:
+            dpid (:class:`pyof.foundation.DPID`): dpid object used to identify
+                                                  a switch.
+
+        Returns:
+            switch (:class:`~.core.switch.Switch`): Switch with dpid specified.
+        """
         return self.switches.get(dpid)
 
     def get_switch_or_create(self, dpid, connection):
-        """Return switch and create it if necessary."""
+        """Return switch or create it if necessary.
+
+        Parameters:
+            dpid (:class:`pyof.foundation.DPID`): dpid object used to identify
+                                                  a switch.
+            connection (:class:`~.core.switch.Connection`): connection used by
+                switch. If a switch has a connection that will be updated.
+
+        Returns:
+            switch (:class:`~.core.switch.Switch`): new or existent switch.
+        """
         self.create_or_update_connection(connection)
         switch = self.get_switch_by_dpid(dpid)
         event = None
@@ -345,12 +412,34 @@ class Controller(object):
         return switch
 
     def create_or_update_connection(self, connection):
+        """Update a connection.
+
+        Parameters:
+            connection (:class:`~.core.switch.Connection`): Instance of
+                connection that will be updated.
+        """
         self.connections[connection.id] = connection
 
     def get_connection_by_id(self, conn_id):
+        """Return a existent connection by id.
+
+        Parameters:
+            id (int): id from a connection.
+
+        Returns:
+            connection (:class:`~.core.switch.Connection`): Instance of
+            connection or None Type.
+        """
         return self.connections.get(conn_id)
 
     def remove_connection(self, connection):
+        """Close a existent connection and remove it.
+
+        Parameters:
+            connection (:class:`~.core.switch.Connection`): Instance of
+                                                            connection that
+                                                            will be removed.
+        """
         if connection is None:
             return False
 
@@ -361,6 +450,14 @@ class Controller(object):
             return False
 
     def remove_switch(self, switch):
+        """Remove a existent switch.
+
+        Parameters:
+            switch (:class:`~.core.switch.Switch`): Instance of switch that
+                                                    will be removed.
+        """
+        # TODO: this can be better using only:
+        #       self.switches.pop(switches.dpid, None)
         try:
             self.switches.pop(switch.dpid)
         except KeyError:
@@ -375,7 +472,7 @@ class Controller(object):
         It also clear all references to the connection since it is a new
         connection on the same ip:port.
 
-        Args:
+        Parameters:
             event (KycoEvent): The received event (kytos/core.connection.new)
             with the needed infos.
         """
@@ -393,7 +490,7 @@ class Controller(object):
     def add_new_switch(self, switch):
         """Add a new switch on the controller.
 
-        Args:
+        Parameters:
             switch (Switch): A Switch object
         """
         self.switches[switch.dpid] = switch
@@ -402,7 +499,8 @@ class Controller(object):
         """Load a single app.
 
         Load a single NAPP based on its name.
-        Args:
+
+        Parameters:
             napp_name (str): Name of the NApp to be loaded.
         """
         path = os.path.join(self.options.napps, napp_name, 'main.py')
@@ -424,7 +522,7 @@ class Controller(object):
         Downloads the NApps from the NApp network and install it.
         TODO: Download or git-clone?
 
-        Args:
+        Parameters:
             napp_name (str): Name of the NApp to be installed.
         """
         pass
@@ -445,7 +543,7 @@ class Controller(object):
     def unload_napp(self, napp_name):
         """Unload a specific NApp based on its name.
 
-        Args:
+        Parameters:
             napp_name (str): Name of the NApp to be unloaded.
         """
         napp = self.napps.pop(napp_name)
@@ -466,16 +564,3 @@ class Controller(object):
         for napp_name in list(self.napps):
             if not isinstance(self.napps[napp_name], KycoCoreNApp):
                 self.unload_napp(napp_name)
-
-#    def update_switches_link(self, nodeA, nodeB):
-#        """Update a link between two switches.
-#
-#        nodeA and nodeB are tuples composed by switch dpid and port_no.
-#        """
-#        switchA = self.get_switch_by_dpid(nodeA[0])
-#        interfaceA = switchA.get_interface_by_port_no(nodeA[1])
-#        switchB = self.get_switch_by_dpid(nodeB[0])
-#        interfaceB = switchB.get_interface_by_port_no(nodeB[1])
-#
-#        interfaceA.endpoint = interfaceB
-#        interfaceB.endpoint = interfaceA

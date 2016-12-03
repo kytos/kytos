@@ -1,5 +1,5 @@
+"""Kyco Napps Module."""
 import logging
-
 from abc import ABCMeta, abstractmethod
 from threading import Event, Thread
 
@@ -9,12 +9,16 @@ log = logging.getLogger(__name__)
 
 __all__ = ('KycoCoreNApp', 'KycoNApp')
 
+
 class KycoNApp(Thread, metaclass=ABCMeta):
     """Base class for any KycoNApp to be developed."""
+
     __event = Event()
 
     def __init__(self, controller, **kwargs):
-        """Go through all of the instance methods and selects those that have
+        """Contructor of KycoNapps.
+
+        Go through all of the instance methods and selects those that have
         the events attribute, then creates a dict containing the event_name
         and the list of methods that are responsible for handling such event.
 
@@ -59,9 +63,10 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         self.__interval = interval
 
     def run(self):
-        """This method will call the setup and the execute methos.
+        """Call the setup and the execute method.
 
-        It should not be overriden."""
+        It should not be overriden.
+        """
         log.info("Running %s App", self.name)
         # TODO: If the setup method is blocking, then the execute method will
         #       never be called. Should we execute it inside a new thread?
@@ -73,24 +78,33 @@ class KycoNApp(Thread, metaclass=ABCMeta):
 
     @listen_to('kyco/core.shutdown')
     def _shutdown_handler(self, event):
+        """Method used to listen shutdown event from kyco.
+
+        This method listens the kyco/core.shutdown event and call the shutdown
+        method from napp subclass implementation.
+
+        Paramters
+            event (:class:`KycoEvent`): event to be listened.
+        """
         self.__event.set()
         self.shutdown()
 
     @abstractmethod
     def setup(self):
-        """'Replaces' the 'init' method for the KycoApp subclass.
+        """Replace the 'init' method for the KycoApp subclass.
 
         The setup method is automatically called by the run method.
-        Users shouldn't call this method directly."""
+        Users shouldn't call this method directly.
+        """
         pass
 
     @abstractmethod
     def execute(self):
-        """Method executed in a loop until the signal 'kyco/core.shutdown'
-        is received.
+        """Execute in a loop until the signal 'kyco/core.shutdown' is received.
 
         The execute method is called by KycoNApp class.
-        Users shouldn't call this method directly."""
+        Users shouldn't call this method directly.
+        """
         pass
 
     @abstractmethod
@@ -103,10 +117,12 @@ class KycoNApp(Thread, metaclass=ABCMeta):
 
         This methods is not going to be called directly, it is going to be
         called by the _shutdown_handler method when a KycoShutdownEvent is
-        sent."""
+        sent.
+        """
         pass
 
 
 class KycoCoreNApp(KycoNApp):
     """Base class for any KycoCoreNApp to be developed."""
+
     pass

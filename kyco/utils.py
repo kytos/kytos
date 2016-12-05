@@ -1,10 +1,10 @@
-"""Utilities"""
+"""Utilities functions used in Kyco."""
 import logging
 from datetime import datetime, timezone
 from threading import Thread
 
 __all__ = ('listen_to', 'now', 'run_on_thread',
-           'start_logger')
+           'start_logger', 'log_fmt')
 
 # APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
 
@@ -24,34 +24,36 @@ def listen_to(event, *events):
     will be a list of the events that the method will handle.
 
     The event that will be listened to is always a string, but it can represent
-    a regular expression to match against multiple Event Types.
+    a regular expression to match against multiple Event Types. All listened
+    events is documented in :doc:`toc/listened_events` section.
 
     Example of usage:
 
     .. code-block:: python3
 
         class MyAppClass(KycoApp):
-            @listen_to('KycoMessageIn')
+            @listen_to('kytos/of.core.messages.in')
             def my_handler_of_message_in(self, event):
                 # Do stuff here...
 
-            @listen_to('KycoMessageOut')
+            @listen_to('kytos/of.core.messages.out')
             def my_handler_of_message_out(self, event):
                 # Do stuff here...
 
-            @listen_to('KycoMessageInHello', 'KycoMessageOutHello')
+            @listen_to('kytos/of.core.messages.in.ofpt_hello',
+                       'kytos/of.core.messages.out.ofpt_hello')
             def my_handler_of_hello_messages(self, event):
                 # Do stuff here...
 
-            @listen_to('KycoMessage*Hello')
+            @listen_to('kytos/of.core.message.*.hello')
             def my_other_handler_of_hello_messages(self, event):
                 # Do stuff here...
 
-            @listen_to('KycoMessage*Hello')
+            @listen_to('kytos/of.core.message.*.hello')
             def my_handler_of_hello_messages(self, event):
                 # Do stuff here...
 
-            @listen_to('KycoMessage*')
+            @listen_to('kytos/of.core.message.*')
             def my_stats_handler_of_any_message(self, event):
                 # Do stuff here...
     """
@@ -64,7 +66,7 @@ def listen_to(event, *events):
         """
         @run_on_thread
         def threaded_handler(*args):
-            """Decorating the handler to run from a new thread"""
+            """Decorating the handler to run from a new thread."""
             handler(*args)
 
         threaded_handler.events = [event]
@@ -74,14 +76,23 @@ def listen_to(event, *events):
     return decorator
 
 
-
 def now(tzone=timezone.utc):
-    """Returns the current datetime (default to UTC)"""
+    """Return the current datetime (default to UTC).
+
+    Paramenters:
+        tzone (datetime.timezone): Specific time zone used in datetime.
+
+    Returns:
+        now (datetime.datetime): Date time with specific time zone.
+    """
     return datetime.now(tzone)
 
 
 def run_on_thread(method):
-    """Decorator to run the decorated method inside a new thread
+    """Decorator to run the decorated method inside a new thread.
+
+    Parameters:
+        method (function): function used to run as a new thread.
 
     Returns:
         Decorated method that will run inside a new thread.
@@ -89,18 +100,31 @@ def run_on_thread(method):
         thread to the caller.
     """
     def threaded_method(*args):
-        """Ensure the handler method runs inside a new thread"""
+        """Ensure the handler method runs inside a new thread."""
         thread = Thread(target=method, args=args)
         thread.start()
     return threaded_method
 
 
 def start_logger(name):
-    """Starts the loggers, both the Kyco and the KycoNApp"""
+    """Start the loggers, both the Kyco and the KycoNApp.
+
+    Parameters:
+      name (string): string with name of logger object.
+
+    Returns:
+      logger (logging.Logger): Logger with kyco message format and level info.
+    """
     logging.basicConfig(format=log_fmt(), level=logging.INFO)
     return logging.getLogger(name)
 
+
 def log_fmt():
+    """Return the logger string format used by Kyco Loggers.
+
+    Returns:
+        fmt (string): String Partner used to make the log message.
+    """
     fmt = '%(asctime)s - %(levelname)s [%(name)s] (%(threadName)s) %(message)s'
     # fmt += '\n           %(module)s - %(funcName)s - %(lineno)d'
     return fmt

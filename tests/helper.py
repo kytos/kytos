@@ -2,7 +2,6 @@
 
 import os
 import time
-from distutils import sysconfig
 from socket import socket
 
 from pyof.v0x01.common.header import Header

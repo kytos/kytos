@@ -18,7 +18,13 @@ else:
 
 
 class KycoConfig():
+    """KycoConfig class handle settings of Kyco."""
+
     def __init__(self):
+        """Constructor of KycoConfig.
+
+        The contructor set defaults parameters that can be used by KycoConfig.
+        """
         self.options = {}
         conf_parser = ArgumentParser(add_help=False)
 
@@ -67,7 +73,20 @@ class KycoConfig():
         self.parse_args()
 
     def parse_args(self):
+        """Get the command line options and update kyco'settings.
 
+        When installed via pip, defaults values are:
+
+        defaults = {'pidfile': '/var/run/kyco.pid',
+                    'workdir': '/var/lib/kyco',
+                    'napps': '/var/lib/kytos/napps/',
+                    'conf': '/etc/kyco/kyco.conf',
+                    'logging': '/etc/kyco/logging.ini',
+                    'listen': '0.0.0.0',
+                    'port': 6633,
+                    'daemon': False,
+                    'debug': False}
+        """
         defaults = {'pidfile': os.path.join(BASE_ENV, 'var/run/kyco.pid'),
                     'workdir': os.path.join(BASE_ENV, 'var/lib/kyco'),
                     'napps': os.path.join(BASE_ENV, 'var/lib/kytos/napps/'),

@@ -18,7 +18,8 @@ class TestKycoController(TestCase):
         #       Do we need to avoid it? Or the Daemon will handle this timing?
         time.sleep(0.1)
 
-    def test_client_sending_a_message(self):
+    @classmethod
+    def test_client_sending_a_message(cls):
         """Test a client sending a message to the controller."""
         message = VendorHeader(xid=1, vendor=5)
         client = new_client()

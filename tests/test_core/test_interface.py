@@ -2,8 +2,8 @@
 import logging
 import unittest
 
-from kyco.core.switch import Interface, Switch
 from pyof.v0x01.common.phy_port import PortFeatures
+from kyco.core.switch import Interface, Switch
 
 logging.basicConfig(level=logging.CRITICAL)
 

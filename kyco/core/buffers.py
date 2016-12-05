@@ -4,7 +4,7 @@ from queue import Queue
 
 from kyco.core.events import KycoEvent
 
-__all__ = ['KycoBuffers']
+__all__ = ('KycoBuffers')
 
 log = logging.getLogger(__name__)
 

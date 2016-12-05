@@ -10,7 +10,7 @@ from pyof.v0x01.common.header import Header
 from kyco.core.events import KycoEvent
 from kyco.core.switch import Connection
 
-__all__ = ['KycoServer', 'KycoOpenFlowRequestHandler']
+__all__ = ('KycoServer', 'KycoOpenFlowRequestHandler')
 
 log = logging.getLogger(__name__)
 

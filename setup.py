@@ -31,7 +31,8 @@ class CleanCommand(Command):
         """No finalize options."""
         pass
 
-    def run(self):
+    @classmethod
+    def run(cls):
         """Clean build, dist, pyc and egg from package and docs."""
         os.system('rm -vrf ./build ./dist ./*.pyc ./*.egg-info')
         os.system('cd docs; make clean')

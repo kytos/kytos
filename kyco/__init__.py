@@ -3,4 +3,4 @@
 Kyco is used to handle low level openflow messages using python-openflow
 library.
 """
-__version__ = "1.1.0b0"
+__version__ = "1.1.0b1.dev0"

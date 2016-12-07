@@ -5,7 +5,8 @@ descriptions.
 """
 import os
 import sys
-from subprocess import call, check_call
+from abc import abstractmethod
+from subprocess import CalledProcessError, call, check_call
 
 from pip.req import parse_requirements
 from setuptools import Command, find_packages, setup
@@ -18,80 +19,75 @@ else:
     BASE_ENV = '/'
 
 
-class CleanCommand(Command):
-    """Custom clean command to tidy up the project root."""
+def lint(strict=True):
+    """Run pylama and radon.
+
+    Args:
+        strict (boolean): Check for all errors. Currently, there are several
+            issues to be solved, so we check more critical errors during tests
+            by setting this argument to False.
+    """
+    opts = '' if strict else '-l isort,pydocstyle,radon,pycodestyle,pyflakes'
+    files = 'tests setup.py kyco'
+    print('Pylama is running. It may take a while...')
+    cmd = 'pylama {} {}'.format(opts, files)
+    try:
+        check_call(cmd, shell=True)
+        print('Low grades (<= C) for Maintainability Index (if any):')
+        check_call('radon mi --min=C ' + files, shell=True)
+    except CalledProcessError as e:
+        print('Linter check failed: ' + e.cmd)
+        sys.exit(e.returncode)
+
+
+class SimpleCommand(Command):
+    """Make Command implementation simpler."""
 
     user_options = []
 
+    @abstractmethod
+    def run(self):
+        """Run when command is invoked.
+
+        Use *call* instead of *check_call* to ignore failures.
+        """
+        pass
+
     def initialize_options(self):
-        """No initializa options."""
+        """Set defa ult values for options."""
         pass
 
     def finalize_options(self):
-        """No finalize options."""
+        """Post-process options."""
         pass
 
-    @classmethod
-    def run(cls):
-        """Clean build, dist, pyc and egg from package and docs."""
-        os.system('rm -vrf ./build ./dist ./*.pyc ./*.egg-info')
-        os.system('cd docs; make clean')
 
+class Linter(SimpleCommand):
+    """Code linters."""
 
-class Doctest(Command):
-    """Run Sphinx doctest."""
-
-    if sys.argv[-1] == 'test':
-        print('Running examples in documentation')
-        check_call('make doctest -C docs/', shell=True)
-
-
-class Linter(Command):
-    """Run several code linters."""
-
-    description = 'Run many code linters. It may take a while'
-    user_options = []
-
-    def __init__(self, *args, **kwargs):
-        """Define linters and a message about them."""
-        super().__init__(*args, **kwargs)
-        self.linters = ['pep257', 'pyflakes', 'mccabe', 'isort', 'pep8',
-                        'pylint']
-        self.extra_msg = 'It may take a while. For a faster version (and ' \
-                         'less checks), run "quick_lint".'
-
-    def initialize_options(self):
-        """For now, options are ignored."""
-        pass
-
-    def finalize_options(self):
-        """For now, options are ignored."""
-        pass
+    description = 'run Pylama on Python files'
 
     def run(self):
-        """Run pylama and radon."""
-        files = 'tests setup.py kyco'
-        print('running pylama with {}. {}'.format(', '.join(self.linters),
-                                                  self.extra_msg))
-        cmd = 'pylama -l {} {}'.format(','.join(self.linters), files)
-        call(cmd, shell=True)
-        print('Low grades (<= C) for Cyclomatic Complexity:')
-        call('radon cc --min=C ' + files, shell=True)
-        print('Low grades (<= C) for Maintainability Index:')
-        call('radon mi --min=C ' + files, shell=True)
+        """Run linter."""
+        lint()
 
 
-class FastLinter(Linter):
-    """Same as Linter, but without the slow pylint."""
+class Cleaner(SimpleCommand):
+    """Custom clean command to tidy up the project root."""
 
-    description = 'Same as "lint", but much faster (no pylama_pylint).'
+    description = 'clean build, dist, pyc and egg from package and docs'
 
-    def __init__(self, *args, **kwargs):
-        """Remove slow linters and redefine the message about the rest."""
-        super().__init__(*args, **kwargs)
-        self.linters.remove('pylint')
-        self.extra_msg = 'This a faster version of "lint", without pylint. ' \
-                         'Run the slower "lint" after solving these issues:'
+    def run(self):
+        """Clean build, dist, pyc and egg from package and docs."""
+        call('rm -vrf ./build ./dist ./*.pyc ./*.egg-info', shell=True)
+        call('make -C docs clean', shell=True)
+
+
+# Run Sphinx doctest and linter during test.
+if sys.argv[-1] == 'test':
+    print('Running examples in documentation')
+    check_call('make doctest -C docs/', shell=True)
+    lint(strict=False)
 
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
@@ -112,7 +108,6 @@ setup(name='kyco',
       install_requires=[str(ir.req) for ir in requirements],
       cmdclass={
           'lint': Linter,
-          'quick_lint': FastLinter,
-          'clean': CleanCommand,
+          'clean': Cleaner,
       },
       zip_safe=False)

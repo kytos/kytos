@@ -1,14 +1,11 @@
 # For developers, the packages below are required.
 
 # For running doctests (during "python setup.py test")
-Sphinx~=1.4.5
+Sphinx >= 1.4.5
 
-# Linters, also for test
-pylama >= 7.2.3
-pylama-pylint >= 2.2.1
-isort >= 4.2.5
-pydocstyle >= 1.1.1
-pycodestyle >= 2.1.0
+# Linters, also in test target
+git+git://github.com/cemsbr/pylama_pylint.git@master
+radon >= 1.4.0
 
 # Code coverage
 coverage >= 4.1

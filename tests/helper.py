@@ -1,5 +1,4 @@
 """Module with some helpers for tests."""
-
 import os
 import time
 from socket import socket

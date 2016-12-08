@@ -73,12 +73,19 @@ class Linter(Command):
         files = 'tests setup.py kyco'
         print('running pylama with {}. {}'.format(', '.join(self.linters),
                                                   self.extra_msg))
+
         cmd = 'pylama -l {} {}'.format(','.join(self.linters), files)
-        call(cmd, shell=True)
+        pylama_call = call(cmd, shell=True)
+
         print('Low grades (<= C) for Cyclomatic Complexity:')
-        call('radon cc --min=C ' + files, shell=True)
+        radon_cc_call = call('radon cc --min=C ' + files, shell=True)
+
         print('Low grades (<= C) for Maintainability Index:')
-        call('radon mi --min=C ' + files, shell=True)
+        radon_mi_call = call('radon mi --min=C ' + files, shell=True)
+
+        if pylama_call or radon_cc_call or radon_mi_call:
+            print('Linter failed.')
+            sys.exit(-1)
 
 
 class FastLinter(Linter):

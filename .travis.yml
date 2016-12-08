@@ -15,7 +15,9 @@ before_script:
     - cd -
 # command to run tests
 script:
-    - python setup.py test
+    - coverage run --source=kyco ./setup.py test
+    - coverage report
+    - python setup.py quick_lint
 notifications:
   irc:
     channels: "irc.freenode.org#kytos"

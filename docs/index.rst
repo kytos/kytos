@@ -1,13 +1,7 @@
-.. include:: ../README.rst
-
-Here you will find an extensive documentation of the project. If you wanna fix
-or improve this documentation, please read our |contrib|_ and feel free to
-submit a patch on our `doc/` directory.
-
-Table of Contents
-=================
-
 .. toctree::
+  :titlesonly:
+  :name: maintoc
+  :caption: Table of contents
   :maxdepth: 2
 
   toc/introduction
@@ -17,24 +11,16 @@ Table of Contents
   toc/HACKING
   toc/AUTHORS
 
-API Reference
--------------
-
 .. toctree::
-   :maxdepth: 9
-   :titlesonly:
-   :caption: Documentation of classes and methods.
-   :name: mastertoc
+  :titlesonly:
+  :caption: API and Modules
+  :name: extratoc
+  :maxdepth: 2
 
-   modules
-   toc/listened_events
+  toc/listened_events
+  kyco
 
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. include:: ../README.rst
 
 .. |kytos-site| replace:: Kytos web site
 .. _kytos-site: http://kytos.io/

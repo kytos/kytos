@@ -242,6 +242,6 @@ dummy:
 livehtml:
 	sphinx-apidoc -o . ../kyco/ -d10 -M
 	sed -i "/Submodules/,+1d" *.rst
-	sphinx-autobuild -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/html -z ../kyco
+	sphinx-autobuild -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml -z ../kyco
 	@echo
-	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."

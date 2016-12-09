@@ -84,8 +84,8 @@ class Interface(object):
 
     def is_link_between_switches(self):
         """Return True if instance is link between switches.False otherwise."""
-        for endpoint, timestamp in self.endpoints:
-            if type(endpoint) is Interface:
+        for endpoint, _ in self.endpoints:
+            if isinstance(endpoint, Interface):
                 return True
         return False
 
@@ -493,7 +493,7 @@ class Switch(object):
         """
         try:
             return list(self.mac2port[mac.value])
-        except KeyError as exception:
+        except KeyError:
             return None
 
     def as_dict(self):
@@ -536,8 +536,7 @@ class Switch(object):
                 'serial': self.description.get('serial', ''),
                 'hardware': self.description.get('hardware', ''),
                 'software': self.description.get('software'),
-                'data_path': self.description.get('data_path', '')
-                }
+                'data_path': self.description.get('data_path', '')}
 
     def as_json(self):
         """Return a json with switch'attributes.

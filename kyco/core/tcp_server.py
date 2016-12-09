@@ -54,8 +54,8 @@ class KycoServer(ThreadingMixIn, TCPServer):
         try:
             self.server_bind()
             self.server_activate()
-            log.info("Kyco listening at {}:{}".format(self.server_address[0],
-                                                      self.server_address[1]))
+            log.info("Kyco listening at %s:%s", self.server_address[0],
+                     self.server_address[1])
             super().serve_forever(poll_interval)
         except:
             self.server_close()

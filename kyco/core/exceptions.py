@@ -38,6 +38,7 @@ class KycoEventException(Exception):
             message (string): message from KycoEventException.
             event (:class:`~kyco.core.events.KycoEvent`): Event malformed.
         """
+        super().__init__()
         self.message = message
         self.event = event
 
@@ -70,6 +71,7 @@ class KycoNAppException(Exception):
         Parameters:
             message (string): message from KycoNAppException.
         """
+        super().__init__()
         self.message = message
 
     def __str__(self):

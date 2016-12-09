@@ -30,6 +30,8 @@ class WebSocket(Thread):
         self.event_loop = None
         self.is_running = False
         self.turning_off = False
+        self.websocket = None
+        self.future = None
 
     @asyncio.coroutine
     def handle_connection(self, websocket, path):

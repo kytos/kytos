@@ -1,7 +1,7 @@
 Kytos - kyco
 ============
 
-|Openflow| |Tag| |Release| |Tests| |License|
+|Experimental| |Openflow| |Tag| |Release| |Pypi| |Tests| |License|
 
 *Kyco* is the main component of Kytos Project. Kytos Controller (Kyco) uses
 *python-openflow* library to parse low level OpenFlow messages.
@@ -154,12 +154,14 @@ License
 This software is under *MIT-License*. For more information please read
 ``LICENSE`` file.
 
+.. |Experimenta| image:: http://badges.github.io/stability-badges/dist/experimental.svg
 .. |Openflow| image:: https://img.shields.io/badge/Openflow-1.0.0-brightgreen.svg
    :target: https://www.opennetworking.org/images/stories/downloads/sdn-resources/onf-specifications/openflow/openflow-spec-v1.0.0.pdf
 .. |Tag| image:: https://img.shields.io/github/tag/kytos/kyco.svg
    :target: https://github.com/kytos/kyco/tags
 .. |Release| image:: https://img.shields.io/github/release/kytos/kyco.svg
    :target: https://github.com/kytos/kyco/releases
+.. |Pypi| image:: https://img.shields.io/pypi/v/kyco.svg
 .. |Tests| image:: https://travis-ci.org/kytos/kyco.svg?branch=develop
    :target: https://travis-ci.org/kytos/kyco
 .. |License| image:: https://img.shields.io/github/license/kytos/kyco.svg

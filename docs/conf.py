@@ -35,6 +35,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.coverage',
+    'sphinx.ext.todo',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -49,9 +50,10 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'references'
 
 # General information about the project.
+project_short_name = u'Kyco'
 project = u'Kyco - OpenFlow Controller from Kytos Project'
 copyright = u'2016, Kytos\' Development Team'
 author = u'Kytos\' Development Team'
@@ -386,3 +388,4 @@ autoclass_content = 'both'
 
 # Order methods before attributes/properties on a class
 autodoc_member_order = 'groupwise'
+todo_include_todos = True

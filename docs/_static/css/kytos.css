@@ -39,6 +39,17 @@
   display: none;
 }
 
+/* Banner */
+#DocsCover.section-primary {
+  margin-top: 72px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+#DocsCover h1 {
+  font-size: 30px;
+}
+
 /* sidebar */
 div.sphinxsidebar {
     margin-left: 0;
@@ -63,14 +74,15 @@ div.sphinxsidebarwrapper {
   margin-bottom: 10px;
 }
 
-
-
 /* body */
 body > div.container {
-  margin-top: 92px;
+  margin-top: 15px;
   margin-bottom: 20px;
 }
 
+body > div.container h4 {
+  margin-top: 20px;
+}
 .prev-next-nav {
   list-style-type: none;
   margin: 0;
@@ -101,5 +113,27 @@ body > div.container {
 .prev-next-nav li:last-child {
   float: right;
 }
+
+/* Code block color */
+/*div.code .highlight pre {*/
+  /*background: none;*/
+  /*background-color: none;*/
+  /*font-family: 'Source Code Pro', monospace;*/
+  /*font-style: normal;*/
+  /*font-size: 0.9em;*/
+  /*letter-spacing: 0.015em;*/
+  /*line-height: 120%;*/
+  /*padding: 0.7em;*/
+  /*white-space: pre-wrap;       [> css-3 <]*/
+  /*white-space: -moz-pre-wrap;  [> Mozilla, since 1999 <]*/
+  /*white-space: -pre-wrap;      [> Opera 4-6 <]*/
+  /*white-space: -o-pre-wrap;    [> Opera 7 <]*/
+  /*word-wrap: break-word;       [> Internet Explorer 5.5+ <]*/
+/*}*/
+
+/*div.code .highlight pre a {*/
+  /*color: inherit;*/
+  /*text-decoration: underline;*/
+/*}*/
 
 /* footer */

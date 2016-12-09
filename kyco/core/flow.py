@@ -20,7 +20,7 @@ class Flow(object):
                  table_id=0xff, buffer_id=None, in_port=None, dl_src=None,
                  dl_dst=None, dl_vlan=None, dl_type=None, nw_proto=None,
                  nw_src=None, nw_dst=None, tp_src=None, tp_dst=None,
-                 actions=[]):
+                 actions=None):
         """Contructor receive the parameters below.
 
         Parameters:
@@ -40,6 +40,8 @@ class Flow(object):
            tp_dst (int): TCP/UDP destination port.
            actions (ListOfAction): List of action to apply.
         """
+        if actions is None:
+            actions = []
         self.idle_timeout = idle_timeout
         self.hard_timeout = hard_timeout
         self.priority = priority

@@ -69,6 +69,8 @@ html:
 
 .PHONY: dirhtml
 dirhtml:
+	sphinx-apidoc -o . ../kyco/ -d10 -M
+	sed -i "/Submodules/,+1d" *.rst
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."
@@ -238,4 +240,6 @@ dummy:
 	@echo "Build finished. Dummy builder generates no files."
 
 livehtml:
-	sphinx-autobuild -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/html -z ../kyco
+	sphinx-apidoc -o . ../kyco/ -d10 -M
+	sed -i "/Submodules/,+1d" *.rst
+	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/html -z ../kyco

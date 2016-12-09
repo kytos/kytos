@@ -35,6 +35,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.coverage',
+    'sphinx.ext.todo',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -49,9 +50,10 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'references'
 
 # General information about the project.
+project_short_name = u'Kyco'
 project = u'Kyco - OpenFlow Controller from Kytos Project'
 copyright = u'2016, Kytos\' Development Team'
 author = u'Kytos\' Development Team'
@@ -216,7 +218,8 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static', '_static/css', '_static/images', '_static/js']
+html_static_path = ['_static', '_static/css', '_static/images', '_static/js',
+                    '_static/fonts']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -386,3 +389,4 @@ autoclass_content = 'both'
 
 # Order methods before attributes/properties on a class
 autodoc_member_order = 'groupwise'
+todo_include_todos = True

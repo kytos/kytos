@@ -1,7 +1,7 @@
-Hacking
-=======
+HACKING
+*******
 
-Before reading this file, please read the :doc:`CONTRIBUTE` section that
+.. note:: Before reading this file, please read the :doc:`CONTRIBUTE` section that
 contains the main guidelines of the project.
 
 Development Environment Setup

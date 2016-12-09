@@ -4,6 +4,11 @@
 {% block navbartoc %}
 {% endblock %}
 
+{% block extrahead %}
+  <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  {{ super() }}
+{% endblock %}
+
 {% block content %}
   {{ super() }}
   <div class='container'>
@@ -92,5 +97,5 @@
 {% endblock %}
 
 {# Custom CSS overrides #}
-{% set bootswatch_css_custom = ['_static/css/kytos-theme.css', '_static/css/kytos.css'] %}
+{% set bootswatch_css_custom = ['_static/css/kytos-theme.css', '_static/css/kytos.css', '_static/css/solarized-dark.css'] %}
 {% set script_files = script_files + ['_static/js/sidebar.js'] %}

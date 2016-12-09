@@ -1,78 +1,98 @@
-Kytos - kyco
-============
+|Experimental| |Openflow| |Tag| |Release| |Pypi| |Tests| |License|
 
-|Openflow| |Tag| |Release| |Tests| |License|
+========
+Overview
+========
 
-*Kyco* is the main component of Kytos Project. Kytos Controller (Kyco) uses
-*python-openflow* library to parse low level OpenFlow messages.
+Kytos Controller (*Kyco*) is the main component of the Kytos Project. It uses
+*python-openflow* library to parse low level OpenFlow messages and to create
+new OpenFlow messages to be sent.
 
 For more information about the Kytos Project, please visit our `Kytos web site
 <http://kytos.io/>`__.
 
-Overview
---------
+This is a basic and experimental SDN controller. You can configure your
+OpenFlow switches to point to this controller after you setup it.
 
-Installation
-^^^^^^^^^^^^
+When *Kyco* starts, it loads all Network Applications (NApps) and orchestrates
+all OF messages among these NApps.
 
-You can install this package from source or via pip.
+To read more about Network Applications, please visit the section "Napps
+Managment" on the Administrator Guide.
 
-=====================
+.. todo:: Add link/reference to the above mentioned sections
+
+QuickStart
+----------
+If you are on a rush, read this QuickStart guide. But we stronglly recommend
+you to read the Administrator Guide if you are willing to install and use this
+controller, or the Developer Guide if you have plans to contribute or hack this
+code.
+
+Installing Kyco
+***************
+
+.. note:: We are improving this and soon you will be able to install from the
+ major distros repositories.
+
+For now, you can install this package from source (if you have cloned this
+repository) or via pip.
+
 Installing from PyPI
-=====================
+++++++++++++++++++++
 
-*Kyco* is in PyPI, so you can easily install it via `pip3` (`pip` for Python 3)
-and also include this project in your `requirements.txt`
+*Kyco* is in PyPI repository, so you can easily install it via `pip3` (`pip`
+for Python 3) or include this project in your `requirements.txt`.
 
-If you do not have `pip3` you can install it on Ubuntu-base machines by running:
-
-.. code-block:: shell
-
-    $ sudo apt update
-    $ sudo apt install python3-pip
-
-
-Once you have `pip3`, execute:
+To install *Kyco* with `pip3`, do:
 
 .. code:: shell
 
-    sudo pip3 install kyco
+    $ sudo pip3 install kyco
 
-=======================
-Installing source code
-=======================
+Installing from source code
++++++++++++++++++++++++++++
 
-First you need to clone `kyco` repository:
+First you need to clone *Kyco* repository:
 
 .. code-block:: shell
 
    $ git clone https://github.com/kytos/kyco.git
 
-After cloning, the installation process is done by `setuptools` in the usual
-way:
+After cloning, the installation process is done by standard `setuptools`
+install procedure:
 
 .. code-block:: shell
 
    $ cd kyco
    $ sudo python3 setup.py install
 
-=====================
-Checking installation
-=====================
+Configuring
+***********
 
-That's it! To check wether it is installed successfully, please try to import
-after running ``python3`` or ``ipython3``:
+After *Kyco* installation, all kyco config files are located at
+``/etc/kytos/kyco/``.
 
-.. code-block:: python3
+*Kyco* also accepts a configuration file as input to change its default
+behaviour. You can view and modify the main kyco config file at
+``/etc/kytos/kyco/kyco.conf``.
 
-   >>> import kyco
-   >>> # no errors should be displayed
+.. note:: We have also a logging.ini config file but is not working yet.
 
-Usage
-=====
+For more information about the config options please visit the section
+`Configuration` on the `Administrator Guide`.
 
-To use ``Kyco``, after installing it on the system, you need to open a python
-(``python3``) console and run the following commands:
+.. todo:: Add link/reference to the above mentioned sections
+
+How to use
+**********
+
+.. note:: Very soon, you will be able to start and manage kyco by a command
+ line tool. But for now, you have to open the ipython and run some code. Sorry
+ about that.
+
+To use *Kyco*, after installing it on the system, you need to open the ipython
+(``ipython3``) console and run the following commands:
 
 .. code-block:: python3
 
@@ -82,84 +102,46 @@ To use ``Kyco``, after installing it on the system, you need to open a python
     >>>> controller = Controller(config)
     >>>> controller.start()
 
+.. todo:: The config argument will be changed to be optional, so the two lines
+          related to config options may be removed soon.
+
 With the above commands your controller will be running and ready to be used.
-Keep in mind that it need to be runned as root - or a user granted with the
-necessary permissions, such as open a socket on port 6633.
+Keep in mind that it need to be run as root - or with a user granted with the
+necessary permissions, such as to open a socket on port 6633.
 
-To enable or disable ``NApps`` (Network Applications) you need to add the napp
-under the NApps directory defined on the config passed to the controller. The
-default NApps directory is ``/var/lib/kytos/napps/``. *Kyco* will only load
-those NApps that were at the napps directory when the start method was called.
-For more information regarding the NApps access `Kytos Core NApps Documentation
-<http://github.com/kytos/kyco-core-napps>`__.
+.. todo:: Check if Kyco really need to be runned as root.
 
-Besides starting *Kyco*, if you wish to use our web based interface you will
-need to start a webserver to serve the this interface. See more at: `Kytos
-Admin UI page <https://github.com/kytos/kytos-admin-ui>`__.
+*Kyco* default setup also deploy our set of Core Network Applications
+(*NApps*). For more information regarding NApps, please visit the section
+``NApps Management`` under the ``Administrator Guide`` and also the `Kytos Core
+NApps Documentation <http://github.com/kytos/kyco-core-napps>`__.
 
-Main Highlights
----------------
+.. todo:: Add link/reference to the above mentioned sections
 
-Speed focused
-^^^^^^^^^^^^^
+.. note:: Besides starting *Kyco*, if you wish to use our web based interface
+ you will need to start a webserver to serve the this interface. See more at:
+ `Kytos Admin UI page <https://github.com/kytos/kytos-admin-ui>`__. On the
+ future this it will be installed automatically. Sorry about that.
 
-We keep the word *performance* in mind since the beginning of the development.
-Also, as computer scientists and engineers, we will always try to get the best
-performance by using the most suitable algorithms.
+Where to go from here?
+----------------------
 
-Some of our developers participated in several demonstrations involving tests
-with high-speed networks (~1 terabit/s), some even involving data transfers
-from/to CERN.
+For more informations please see:
 
-Always updated
-^^^^^^^^^^^^^^
+- :doc:`administrator/index`
+- :doc:`developer/index`
+- :doc:`contributing/index`
+- :doc:`AUTHORS`
+- :doc:`LICENSE`
 
-``Kyco`` will be able to handle switches that use different OpenFlow versions
-at the same time, negociating the OpenFlow version with each one individually.
-
-Easy to learn
-^^^^^^^^^^^^^
-
-Python is an easy language to learn and we aim at writing code in a "pythonic
-way". We also provide a well documented API. Thus, building new NetworkApps
-(NApps) to ``Kyco`` is an easy and simple process.
-
-Born to be free
-^^^^^^^^^^^^^^^
-
-OpenFlow was born with a simple idea: make your network more vendor agnostic
-and we like that!
-
-We are advocates and supporters of free software and we believe that the more
-eyes observe the code, the better it will be. This project can receive support
-from many vendors, but will never follow a particular vendor direction.
-
-*Kyco* will always be free software.
-
-Authors
--------
-
-For a complete list of authors, please open `AUTHORS.rst
-<docs/toc/AUTHORS.rst>` file.
-
-Contributing
-------------
-
-If you want to contribute to this project, please read `CONTRIBUTE.rst
-<docs/toc/CONTRIBUTE.rst>`__ and `HACKING.md <docs/toc/HACKING.md>`__ files.
-
-License
--------
-
-This software is under *MIT-License*. For more information please read
-``LICENSE`` file.
-
+.. |Experimental| image:: https://img.shields.io/badge/stability-experimental-orange.svg
 .. |Openflow| image:: https://img.shields.io/badge/Openflow-1.0.0-brightgreen.svg
    :target: https://www.opennetworking.org/images/stories/downloads/sdn-resources/onf-specifications/openflow/openflow-spec-v1.0.0.pdf
 .. |Tag| image:: https://img.shields.io/github/tag/kytos/kyco.svg
    :target: https://github.com/kytos/kyco/tags
 .. |Release| image:: https://img.shields.io/github/release/kytos/kyco.svg
    :target: https://github.com/kytos/kyco/releases
+.. |Pypi| image:: https://img.shields.io/pypi/v/kyco.svg
 .. |Tests| image:: https://travis-ci.org/kytos/kyco.svg?branch=develop
    :target: https://travis-ci.org/kytos/kyco
 .. |License| image:: https://img.shields.io/github/license/kytos/kyco.svg

@@ -57,16 +57,16 @@
         <div class="row">
           <ul class="list-partners">
             <li class="col-sm-12 col-md-6 col-xs-3">
-              <a href="https://www.sprace.org.br/" title="SPRACE"><img src="/_static/images/partner-sprace.png" class="bw partner-logo"  alt="SPRACE"></a>
+              <a href="https://www.sprace.org.br/" title="SPRACE"><img src="{{ pathto('_static/images/partner-sprace.png', 1) }}" class="bw partner-logo"  alt="SPRACE"></a>
             </li>
             <li class="col-sm-12 col-md-6 col-xs-3">
-              <a href="http://www.huawei.com/" title="Huawei"><img src="/_static/images/partner-huawei.png" class="bw partner-logo"  alt="Huawei"></a>
+              <a href="http://www.huawei.com/" title="Huawei"><img src="{{ pathto('_static/images/partner-huawei.png', 1) }}" class="bw partner-logo"  alt="Huawei"></a>
             </li>
             <li class="col-sm-12 col-md-6 col-xs-3">
-              <a href="https://www.caltech.edu/" title="Caltech"><img src="/_static/images/partner-caltech.png" class="bw partner-logo"  alt="Caltech"></a>
+              <a href="https://www.caltech.edu/" title="Caltech"><img src="{{ pathto('_static/images/partner-caltech.png', 1) }}" class="bw partner-logo"  alt="Caltech"></a>
             </li>
             <li class="col-sm-12 col-md-6 col-xs-3">
-              <a href="https://home.cern/" title="CERN"><img src="/_static/images/partner-cern.png" class="bw partner-logo"  alt="CERN"></a>
+              <a href="https://home.cern/" title="CERN"><img src="{{ pathto('_static/images/partner-cern.png', 1) }}" class="bw partner-logo"  alt="CERN"></a>
             </li>
           </ul>
         </div>
@@ -77,7 +77,7 @@
         <hr/>
         <p>
           {% trans copyright=copyright|e %}
-            &copy; Copyright {{ copyright }} - 2016 - 
+            &copy; Copyright {{ copyright }} - 2016 -
           {% endtrans %}
           Kytos is an Open Source software under MIT license.<br/>
           {%- if last_updated %}

@@ -74,6 +74,10 @@ div.sphinxsidebarwrapper {
   margin-bottom: 10px;
 }
 
+div#sidebar.bs-sidenav.affix {
+  top: 92px;
+}
+
 /* body */
 body > div.container {
   margin-top: 15px;

@@ -13,7 +13,9 @@
         {%- endblock %}
         {% if theme_navbar_title -%}{{ theme_navbar_title|e }}{%- else -%}{{ project|e }}{%- endif -%}
       </a>
-      <span class="navbar-text navbar-version pull-left"><b>{{ version|e }}</b></span>
+      {% if show_version %}
+        <span class="navbar-text navbar-version pull-left"><b>{{ version|e }}</b></span>
+      {% endif %}
     </div>
 
       <div class="collapse navbar-collapse nav-collapse">

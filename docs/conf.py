@@ -64,7 +64,7 @@ author = u'Kytos\' Development Team'
 #
 # The short X.Y version.
 version = u'1.1.0'
-show_version = True
+show_version = False
 # The full version, including alpha/beta/rc tags.
 release = u'1.1.0'
 

@@ -25,14 +25,11 @@
   color: #ecf1ff;
 }
 
-.navbar-kytos .navbar-brand {
+.navbar-kytos .navbar-brand img {
   display: block;
-  text-indent: -9999px;
   width: 100px;
   height: 52px;
-  background: url(/_static/images/logo.png);
-  background-size: 100px 52px;
-  margin: 0 15px 0 15px;
+  margin: -10px 15px 0 15px;
 }
 
 #navbar .navbar-collapse ul.navbar-nav {

@@ -1,5 +1,5 @@
 ============
-CONTRIBUTING
+Contributing
 ============
 
 We'd love for you to contribute to our source code and to make Kytos even

@@ -124,13 +124,13 @@ How to use
 To use *Kyco*, after installing it on the system, you need to open the ipython
 (``ipython3``) console and run the following commands:
 
-.. code-block:: python3
+.. code-block:: python
 
-    >>>> from kyco.controller import Controller
-    >>>> from kyco.config import KycoConfig
-    >>>> config = KycoConfig().options['daemon']
-    >>>> controller = Controller(config)
-    >>>> controller.start()
+    >>> from kyco.controller import Controller
+    >>> from kyco.config import KycoConfig
+    >>> config = KycoConfig().options['daemon']
+    >>> controller = Controller(config)
+    >>> controller.start()
 
 .. todo:: The config argument will be changed to be optional, so the two lines
           related to config options may be removed soon.

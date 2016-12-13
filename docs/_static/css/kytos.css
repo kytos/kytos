@@ -45,6 +45,8 @@
 
 #DocsCover h1 {
   font-size: 30px;
+  padding-left: 15px;
+  text-align: left;
 }
 
 /* sidebar */

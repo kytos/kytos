@@ -28,7 +28,7 @@
 .navbar-kytos .navbar-brand img {
   display: block;
   width: 100px;
-  height: 52px;
+  height: 54px;
   margin: -10px 15px 0 15px;
 }
 
@@ -38,7 +38,7 @@
 
 /* Banner */
 #DocsCover.section-primary {
-  margin-top: 72px;
+  margin-top: 70px;
   padding-top: 10px;
   padding-bottom: 10px;
 }

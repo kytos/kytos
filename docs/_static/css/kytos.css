@@ -115,6 +115,131 @@ body > div.container h4 {
   float: right;
 }
 
+/* Admonitions - General adjustments */
+div.admonition {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: stretch; /* center; stretch; baseline */
+  align-content: stretch;
+  padding: 0;
+  background: none;
+  text-shadow: none;
+}
+
+div.admonition > p.first.admonition-title {
+  display: flex;
+  align-items: center;
+  order: -1;
+  flex-grow: 0;
+  flex-basis: 0;
+  padding-left: 15px;
+  padding-right: 15px;
+  top: 50%;
+  font-family: 'Hind Siliguri', open sans;
+  font-size: 1.8rem;
+  color: #F0F8FF;
+  font-weight: 500;
+  width: 126px;
+  min-width: 126px;
+  max-width: 126px;
+  justify-content: center; /* Remove this to align titles at left side */
+}
+
+div.admonition > p+p {
+  order: 1;
+  flex-grow: 2;
+  flex-basis: auto;
+  margin: 0 0 0 10px;
+  padding: 10px 10px 10px 0;
+  color: #7D7A7A;
+  text-shadow: none;
+}
+
+/* Admonitions - colors */
+/* Sphix   | Bootstrap     |   alternative
+ * --------|---------------|------------------
+ * note    | alert-info    |
+ * todo    | alert-info    | admonitions-todo
+ * warning | alert-warning |
+ * danger  | alert-danger  | alert-error
+ * */
+div.admonition.alert-info {
+  border-color: rgba(96, 137, 179, 0.7);
+}
+
+div.admonition.alert-info > p.first.admonition-title {
+  background-color: rgba(96, 137, 179, 0.7);
+}
+
+div.admonition.alert-info.admonition-todo {
+  border-color: rgba(0, 185, 117, 0.7);
+}
+
+div.admonition.alert-info.admonition-todo > p.first.admonition-title {
+  background-color: rgba(0, 185, 117, 0.7);
+}
+
+div.admonition.alert-warning {
+  border-color: rgba(185,0,78,0.7);
+}
+
+div.admonition.alert-warning > p.first.admonition-title {
+  background-color: rgba(185,0,78,0.7);
+}
+
+div.admonition.alert-danger {
+  border-color: rgba(185,0,17,0.7);
+}
+
+div.admonition.alert-danger > p.first.admonition-title {
+  background-color: rgba(185,0,17,0.7);
+}
+
+/* Images on admonition titles */
+
+/* Sphix   | Bootstrap     |   alternative
+ * --------|---------------|------------------
+ * note    | alert-info    |
+ * todo    | alert-info    | admonitions-todo
+ * warning | alert-warning |
+ * danger  | alert-danger  | alert-error
+ *
+ * see more icons at: http://glyphicons.bootstrapcheatsheets.com/
+ * */
+div.admonition > p.admonition-title:before {
+  font-family: "Glyphicons Halflings";
+  color: #fff;
+  padding: 0px 4px;
+  font-size: 1.7rem;
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  height: auto;
+  width: auto;
+  text-shadow: none;
+}
+div.admonition.alert-info > p.admonition-title:before {
+  content: "\e086";
+}
+
+div.admonition.alert-info.admonition-todo > p.admonition-title:before  {
+  content: "\270f";
+}
+
+div.admonition.alert-warning > p.admonition-title:before  {
+  content: "\e101";
+}
+
+div.admonition.alert-danger > p.admonition-title:before  {
+  content: "\e083";
+}
+
 /* Code block color */
 /*div.code .highlight pre {*/
   /*background: none;*/

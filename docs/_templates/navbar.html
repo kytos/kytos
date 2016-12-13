@@ -27,7 +27,7 @@
 <section id="DocsCover" class="container-fluid section-primary section-cover-docs">
   <div class="container">
     <div class="row features-content">
-      <h1><i class="fa fa-book"></i> Welcome to Kytos documentation</h1>
+      <h1><i class="fa fa-book"></i> Welcome to Kytos/{% if theme_navbar_title %}{{ theme_navbar_title|e  }}{% else %}{{ project|e  }}{% endif %} documentation</h1>
     </div>
   </div>
 </section>

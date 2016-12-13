@@ -229,7 +229,7 @@ div.admonition > p.admonition-title:before {
   text-shadow: none;
 }
 div.admonition.alert-info > p.admonition-title:before {
-  content: "\e086";
+  content: "\e146";
 }
 
 div.admonition.alert-info.admonition-todo > p.admonition-title:before  {

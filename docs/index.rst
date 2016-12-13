@@ -1,6 +1,3 @@
-.. highlight:: Kyco
-.. highlight:: *Kyco*
-
 .. include:: ../README.rst
 
 .. |kytos-site| replace:: Kytos web site

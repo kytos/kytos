@@ -10,18 +10,20 @@
 {% endblock %}
 
 {% block content %}
-  {{ super() }}
-  <div class='container'>
-      <div class='row'>
-        <div class='col-md-9 col-md-offset-3'>
-          <ul class='prev-next-nav'>
-            {% if pagename == "index" %}
-              {% set prev = false %}
-            {% endif %}
-            {% include "relations.html" %}
-          </ul>
+  <div class='kytos-theme-marker-class' id='kytos-theme-content-container'>
+    {{ super() }}
+    <div class='container'>
+        <div class='row'>
+          <div class='col-md-9 col-md-offset-3'>
+            <ul class='prev-next-nav'>
+              {% if pagename == "index" %}
+                {% set prev = false %}
+              {% endif %}
+              {% include "relations.html" %}
+            </ul>
+          </div>
         </div>
-      </div>
+    </div>
   </div>
 {% endblock %}
 

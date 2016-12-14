@@ -51,28 +51,28 @@ Ubuntu/Debian
 
 .. code-block:: shell
 
-    sudo apt-get update
-    sudo apt-get install python3-pip
+    $ sudo apt-get update
+    $ sudo apt-get install python3-pip
 
 Fedora
 ======
 
 .. code-block:: shell
 
-    sudo dnf update
-    sudo dnf install python3-pip
+    $ sudo dnf update
+    $ sudo dnf install python3-pip
 
 Centos
 ======
 
 .. code-block:: shell
 
-    sudo yum -y update
-    sudo yum -y install yum-utils
-    sudo yum -y groupinstall development
-    sudo yum -y install https://centos7.iuscommunity.org/ius-release.rpm
-    sudo yum -y install python35u-3.5.2
-    sudo curl https://bootstrap.pypa.io/get-pip.py | python3.5
+    $ sudo yum -y update
+    $ sudo yum -y install yum-utils
+    $ sudo yum -y groupinstall development
+    $ sudo yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+    $ sudo yum -y install python35u-3.5.2
+    $ sudo curl https://bootstrap.pypa.io/get-pip.py | python3.5
 
 After installed `pip3` you can install *Kyco* running:
 

@@ -83,8 +83,13 @@ body div.kytos-theme-marker-class > div.container {
   margin-bottom: 20px;
 }
 
-body div.kytos-theme-marker-class > div.container h4 {
-  margin-top: 20px;
+body div.kytos-theme-marker-class > div.container h1,
+body div.kytos-theme-marker-class > div.container h2,
+body div.kytos-theme-marker-class > div.container h3,
+body div.kytos-theme-marker-class > div.container h4,
+body div.kytos-theme-marker-class > div.container h5 {
+  margin-top: 35px;
+  margin-bottom: 20px;
 }
 .prev-next-nav {
   list-style-type: none;

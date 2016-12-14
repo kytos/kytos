@@ -6,6 +6,7 @@
   index
   administrator/index
   developer/index
-  contributing/index
+  Get involved <http://docs.kytos.io/kytos/get_involved
+  hacking
   AUTHORS
   LICENSE

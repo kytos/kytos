@@ -31,7 +31,8 @@ interface aims to be intuitive and very easy to use.
     :width: 200px
     :align: center
     :height: 100px
-    :alt: alternate text
+    :alt: Kyco Architecture
     :figclass: align-center
 
+    Kyco's Architecture.
 

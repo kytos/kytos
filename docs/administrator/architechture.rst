@@ -27,6 +27,6 @@ called the Napp Server.
 Finally, a web interface is being developed to manage the controller. This web
 interface aims to be intuitive and very easy to use.
 
-.. image:: KycoArch.pdf
+.. image:: KycoArch.png
 
 

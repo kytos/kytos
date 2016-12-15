@@ -1,5 +1,6 @@
+#######
 Authors
-=======
+#######
 
 - Beraldo Leal <beraldo AT ncc DOT unesp DOT br>
 - Carlos Eduardo Moreira dos Santos <cadu AT ncc DOT unesp DOT br>

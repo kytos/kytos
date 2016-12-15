@@ -1,5 +1,5 @@
 Listened Events
-===============
+***************
 
 This section describe where each event can be listened in Kytos Project. The
 kyco module has the decorator :func:`~kyco.utils.listen_to` used to listen
@@ -7,7 +7,7 @@ each event. There are two types of events: **kyco event message** and
 **openflow event message**.
 
 Kyco Event Message
-------------------
+==================
 
 Kyco Event Message is sent by :class:`~kyco.controller.Controller` class that
 is used to handle events by controller.The kyco events and all classes or
@@ -31,7 +31,7 @@ NApps who can listen these events are listed below.
 +-----------------------------------+-------------------------------------------------+-------------------------------------------------------------+
 
 Openflow Event Message
-----------------------
+======================
 
 A Openflow Event Message is created by any NApp and it is sent using the
 controller buffer. That openflow event message is listened by any

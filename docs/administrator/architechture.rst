@@ -1,5 +1,5 @@
 Architechture overview
-----------------------
+**********************
 
 Kyco is a modular SDN controller, which means that it has several parts that,
 working together, will compose the Kyco controller. Kyco controller itself is

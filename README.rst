@@ -1,8 +1,8 @@
 |Experimental| |Openflow| |Tag| |Release| |Pypi| |Tests| |License|
 
-========
+########
 Overview
-========
+########
 
 Kytos Controller (*Kyco*) is the main component of the Kytos Project. It uses
 *python-openflow* library to parse low level OpenFlow messages and to create
@@ -23,14 +23,15 @@ Managment" on the Administrator Guide.
 .. todo:: Add link/reference to the above mentioned sections
 
 QuickStart
-----------
+**********
+
 If you are on a rush, read this QuickStart guide. But we stronglly recommend
 you to read the Administrator Guide if you are willing to install and use this
 controller, or the Developer Guide if you have plans to contribute or hack this
 code.
 
 Installing Kyco
-***************
+===============
 
 .. note:: We are improving this and soon you will be able to install from the
  major distros repositories.
@@ -39,7 +40,7 @@ For now, you can install this package from source (if you have cloned this
 repository) or via pip.
 
 Installing from PyPI
-++++++++++++++++++++
+--------------------
 
 *Kyco* is in PyPI repository, so you can easily install it via `pip3` (`pip`
 for Python 3) or include this project in your `requirements.txt`.
@@ -47,7 +48,7 @@ for Python 3) or include this project in your `requirements.txt`.
 If you do not have `pip3`, the procedures to install are:
 
 Ubuntu/Debian
-=============
+^^^^^^^^^^^^^
 
 .. code-block:: shell
 
@@ -55,7 +56,7 @@ Ubuntu/Debian
     $ sudo apt-get install python3-pip
 
 Fedora
-======
+^^^^^^
 
 .. code-block:: shell
 
@@ -63,7 +64,7 @@ Fedora
     $ sudo dnf install python3-pip
 
 Centos
-======
+^^^^^^
 
 .. code-block:: shell
 
@@ -81,7 +82,7 @@ After installed `pip3` you can install *Kyco* running:
     $ sudo pip3 install kyco
 
 Installing from source code
-+++++++++++++++++++++++++++
+---------------------------
 
 First you need to clone *Kyco* repository:
 
@@ -98,7 +99,7 @@ install procedure:
    $ sudo python3 setup.py install
 
 Configuring
-***********
+===========
 
 After *Kyco* installation, all kyco config files are located at
 ``/etc/kytos/kyco/``.
@@ -154,7 +155,7 @@ NApps Documentation <http://github.com/kytos/kyco-core-napps>`__.
  future this it will be installed automatically. Sorry about that.
 
 Where to go from here?
-----------------------
+**********************
 
 For more informations please see:
 

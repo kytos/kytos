@@ -1,5 +1,5 @@
 Configuration
--------------
+*************
 
 You can configure you *Kyco* for your needs. To do so, you have to edit the
 ``/etc/kyco/kyco.conf`` file. It contains the following parameters:

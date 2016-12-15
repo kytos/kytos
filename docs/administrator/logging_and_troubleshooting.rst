@@ -1,5 +1,5 @@
 Logging and troubleshooting
----------------------------
+***************************
 
 The default log files from kyco are: ....
 

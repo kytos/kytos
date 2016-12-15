@@ -10,8 +10,9 @@ This library is used to unpack and parse incoming OpenFlow messages and create
 and pack outgoing OpenFlow messages. The core applications are those that are
 needed to the controller operations. A core application is the topology
 discovery, which aims to build and display the topology of the network
-(switches, hosts and the connections between them). More core applications
-are being developed, such as L2 Learning and so on.
+(switches, hosts and the connections between them). Several core applications
+were developed, such as L2 learning switch and so on. Kyco's developer team is
+constantly developing new core application to improve Kyco's features.
 
 The applications stack are general applications, created by Kyco’s users.
 These applications can be installed, loaded and unloaded on the fly by the
@@ -25,7 +26,8 @@ applications are called Network Application (or Napp) and the repository is
 called the Napp Server.
 
 Finally, a web interface is being developed to manage the controller. This web
-interface aims to be intuitive and very easy to use.
+interface aims to be intuitive and very easy to use. In Figure 1 is shown how
+Kyco's module are connected with each other. 
 
 .. figure:: KycoArch.png
     :width: 200px
@@ -35,6 +37,3 @@ interface aims to be intuitive and very easy to use.
     :figclass: align-center
 
     Kyco's Architecture.
-
-
-

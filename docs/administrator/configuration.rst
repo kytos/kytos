@@ -15,7 +15,7 @@ The following parameters are available at ``/etc/kyco/kyco.conf``:
 +-------------+------------+--------------------------+
 | workdir     | file path  | ``var/lib/kyco``         |
 +-------------+------------+--------------------------+
-| napps       | file path  | ``var/lib/kytos/napps/`` |
+| napps       | file path  | ``var/lib/kyco/napps/`` |
 +-------------+------------+--------------------------+
 | conf        | file path  | ``etc/kyco/kyco.conf``   |
 +-------------+------------+--------------------------+
@@ -64,7 +64,7 @@ start as daemon or not. If this entry is set as ``True`` when the *Kyco* starts
 it will detach from the current terminal and run in background. If set as
 ``False`` a console will be provided just after the *Kyco* startup.
 
-**debug=``TRUE | FALSE``** (-D, --debug): This entry is used to tells *Kytos*
+**debug=``TRUE | FALSE``** (-D, --debug): This entry is used to tells *Kyco*
 to start in Debug Mode. When this entry is set to ``TRUE`` a more detailed
 log is generated
 

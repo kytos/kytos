@@ -26,14 +26,4 @@ applications are called Network Application (or Napp) and the repository is
 called the Napp Server.
 
 Finally, a web interface is being developed to manage the controller. This web
-interface aims to be intuitive and very easy to use. In Figure 1 is shown how
-Kyco's module are connected with each other. 
-
-.. figure:: KycoArch.png
-    :width: 200px
-    :align: center
-    :height: 100px
-    :alt: KycoArchitecture
-    :figclass: align-center
-
-    Kyco's Architecture.
+interface aims to be intuitive and very easy to use.

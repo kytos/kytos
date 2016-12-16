@@ -60,7 +60,7 @@ class Controller(object):
         #: dict: keep track of the socket connections labeled by ``(ip, port)``
         #:
         #: This dict stores all connections between the controller and the
-        #: swtiches. The key for this dict is a tuple (ip, port). The content
+        #: switches. The key for this dict is a tuple (ip, port). The content
         #: is another dict with the connection information.
         self.connections = {}
         #: dict: mapping of events and event listeners.
@@ -107,7 +107,7 @@ class Controller(object):
                                   self.shutdown_api, methods=['GET'])
 
     def register_rest_endpoint(self, url, function, methods):
-        """Register a new rest endpoint in Api Server.
+        r"""Register a new rest endpoint in Api Server.
 
         To register new endpoints is needed to have a url, function to handle
         the requests and type of method allowed.

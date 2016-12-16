@@ -17,8 +17,7 @@ During the *Kyco* installation, it will install the following python packages:
   * kyco-core-napps
   * flask
 
-.. note:: Each Network application (Napp) has its own requirements. Please,
-check them for more information.
+.. note:: Each Network application (Napp) has its own requirements. Please, check them for more information.
 
 
 Hardware Requirements

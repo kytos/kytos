@@ -8,27 +8,27 @@ parameters at command line during the startup.
 
 The following parameters are available at ``/etc/kyco/kyco.conf``:
 
-+-------------+------------+--------------------------+
-| Paramenter  | Value      | Default                  |
-+=============+============+==========================+
-| pidfile     | file path  | ``var/run/kyco.pid``     |
-+-------------+------------+--------------------------+
-| workdir     | file path  | ``var/lib/kyco``         |
-+-------------+------------+--------------------------+
-| napps       | file path  | ``var/lib/kyco/napps/`` |
-+-------------+------------+--------------------------+
-| conf        | file path  | ``etc/kyco/kyco.conf``   |
-+-------------+------------+--------------------------+
-| logging     | file path  | ``etc/kyco/logging.ini`` |
-+-------------+------------+--------------------------+
-| listen      | ip address | ``0.0.0.0``              |
-+-------------+------------+--------------------------+
-| port        | 1-65535    | ``6633``                 |
-+-------------+------------+--------------------------+
-| daemon      | boolean    | False                    |
-+-------------+------------+--------------------------+
-| debug       | boolean    | False                    |
-+-------------+------------+--------------------------+
++-------------+---------------+--------------------------+
+| Paramenter  | Value         | Default                  |
++=============+===============+==========================+
+| pidfile     | File Path     | ``var/run/kyco.pid``     |
++-------------+---------------+--------------------------+
+| workdir     | File Path     | ``var/lib/kyco``         |
++-------------+---------------+--------------------------+
+| napps       | File Path     | ``var/lib/kyco/napps/``  |
++-------------+---------------+--------------------------+
+| conf        | File Path     | ``etc/kyco/kyco.conf``   |
++-------------+---------------+--------------------------+
+| logging     | File Path     | ``etc/kyco/logging.ini`` |
++-------------+---------------+--------------------------+
+| listen      | IP Address    | ``0.0.0.0``              |
++-------------+---------------+--------------------------+
+| port        | 1 to 65535    | ``6633``                 |
++-------------+---------------+--------------------------+
+| daemon      | Boolean       | False                    |
++-------------+---------------+--------------------------+
+| debug       | Boolean       | False                    |
++-------------+---------------+--------------------------+
 
 Parameters Description
 ++++++++++++++++++++++
@@ -37,34 +37,34 @@ This section describes all available parameters that can be used during the
 *Kyco* startup. Please note that some parameters are available only at command
 line and others only
 
-**pidfile=``PATH``** (-p, --pidfile): This parameter specify the file where the
+**pidfile** (-p, --pidfile): This parameter specify the file where the
 Process ID (PID) is stored. It can be used to allow other programs or scripts
 to send signals to the *Kyco's*  PID.
 
-**workdir=``PATH``** (-w, --workdir): This is the base directory used by *Kyco*
+**workdir** (-w, --workdir): This is the base directory used by *Kyco*
 to store all files used during its operation.
 
-**napps=``PATH``** (-n, --napps): The location where napps will be stored after
+**napps** (-n, --napps): The location where napps will be stored after
 installation.
 
-**conf=``PATH``** (-c, --conf): The configuration file path. This parameters
+**conf** (-c, --conf): The configuration file path. This parameters
 can be used to point *Kyco* to read other configuration file.
 
-**logging``PATH``**: This entry specifies a file with configurations used by
+**logging**: This entry specifies a file with configurations used by
 *Kyco* to format log outputs. This parameter is not available at command line.
 
-**listen=``IP_ADDRESS``** (-l, --listen): The local IP address which *Kyco*
+**listen** (-l, --listen): The local IP address which *Kyco*
 will be listening for new connections.
 
-**port=``PORT_NUMBER``** (-p, --port): The local TCP port which *Kyco* will be
+**port** (-p, --port): The local TCP port which *Kyco* will be
 listening for new connections.
 
-**daemon=``TRUE | FALSE``** (-d, --daemon): This entry specifies if *Kyco* will
-start as daemon or not. If this entry is set as ``True`` when the *Kyco* starts
+**daemon** (-d, --daemon): This entry specifies if *Kyco* will
+start as daemon or not. If this entry is set as ``TRUE`` when the *Kyco* starts
 it will detach from the current terminal and run in background. If set as
-``False`` a console will be provided just after the *Kyco* startup.
+``FALSE`` a console will be provided just after the *Kyco* startup.
 
-**debug=``TRUE | FALSE``** (-D, --debug): This entry is used to tells *Kyco*
+**debug** (-D, --debug): This entry is used to tells *Kyco*
 to start in Debug Mode. When this entry is set to ``TRUE`` a more detailed
 log is generated
 

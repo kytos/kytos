@@ -1,7 +1,14 @@
 Requirements
 ************
 
-*Kyco* requires you to install the following python packages:
+In order to install *Kyco* you should install the following system software:
+
+  * python3
+  * python3-devel
+  * pip3
+  * rrdtool-devel
+
+During the *Kyco* installation, it will install the following python packages:
 
   * lockfile
   * python-daemon
@@ -10,15 +17,9 @@ Requirements
   * kyco-core-napps
   * flask
 
-and also the following system softwares:
+.. note:: Each Network application (Napp) has its own requirements. Please,
+check them for more information.
 
-  * python3
-  * python3-devel
-  * pip3
-  * rrdtool-devel
-
-Each Network application has its own requirements, so check them for more
-information.
 
 Hardware Requirements
 =====================

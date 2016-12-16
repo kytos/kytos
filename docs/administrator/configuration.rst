@@ -35,7 +35,8 @@ Parameters Description
 
 This section describes all available parameters that can be used during the
 *Kyco* startup. Please note that some parameters are available only at command
-line and others only
+line and others only in configuration file and subsequent parameter settings on
+the commandline will overwrite settings in this configuration file.
 
 **pidfile** (-p, --pidfile): This parameter specify the file where the
 Process ID (PID) is stored. It can be used to allow other programs or scripts

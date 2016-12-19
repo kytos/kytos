@@ -51,6 +51,33 @@ If there is another process listening in configured port (i.e. 6633), you
 should choose another TCP port or IP address to *Kyco* use. This configuration
 can be performed changing the configuration file entries or in command line.
 
+Startup Errors
+--------------
 
+A common error during the startup process of *Kyco* is the absence of Python3.
+*Kyco* (and all his modules) were implemented in Python 3.
 
+.. code-block:: bash
+    # ./kyco
+    /usr/bin/env: python3: No such file or directory
 
+This error can be reach due to the abscense of Python 3 package in your system,
+so if this is the case, you should install it. However, if Python 3 is already
+installed, it may be not in your system ``PATH``. In many cases, you can fix
+it creating a symbolic link pointing to your Python binary.
+
+.. code-block:: bash
+    # ln -s /bin/python3.4 /bin/python3
+
+Another common error is when a process is already listening to the configured
+port. If this happen, you will see the following error during the *Kyco*
+startup:
+
+.. code-block:: bash
+    INFO [kyco.controller] (MainThread) Loading kyco apps...
+        Exception in thread TCP server:
+
+        OSError: [Errno 98] Address already in use
+
+In order to fix that, choose another TCP port or IP address. You can do that
+editing the *Kyco's* configuration file or using the command line arguments.

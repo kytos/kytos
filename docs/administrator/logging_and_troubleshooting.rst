@@ -25,7 +25,7 @@ Several conditions can cause a connection refused by controller. The first is
 to check if the controller is listening to the right TCP Port. First step is to
 know which port *Kyco* is configured to Listen:
 
-.. code-block:: bash
+.. code-block:: shell
     # cat /etc/kyco/kyco.conf | egrep -i "port|listen"
     listen = 0.0.0.0
     port = 6633
@@ -35,7 +35,7 @@ know which port *Kyco* is configured to Listen:
 Once the IP address and Port is identified, you can check if *Kyco* is
 properly listening:
 
-.. code-block:: bash
+.. code-block:: shell
     # netstat -anp | grep 6633
     tcp        0      0 0.0.0.0:6633            0.0.0.0:*               LISTEN      7026/python3
 
@@ -43,7 +43,7 @@ If there is no process listening to the configured port, check if the *Kyco* is
 running. You can use the ``ps`` command to check if *Kyco* is running as
 follow:
 
-.. code-block:: bash
+.. code-block:: shell
     # ps -ef | grep -i kyco
     root      7026  4850  0 10:08 pts/0    00:00:00 python3 ./kyco
 
@@ -57,7 +57,7 @@ Startup Errors
 A common error during the startup process of *Kyco* is the absence of Python3.
 *Kyco* (and all his modules) were implemented in Python 3.
 
-.. code-block:: bash
+.. code-block:: shell
     # ./kyco
     /usr/bin/env: python3: No such file or directory
 
@@ -66,14 +66,14 @@ so if this is the case, you should install it. However, if Python 3 is already
 installed, it may be not in your system ``PATH``. In many cases, you can fix
 it creating a symbolic link pointing to your Python binary.
 
-.. code-block:: bash
+.. code-block:: shell
     # ln -s /bin/python3.4 /bin/python3
 
 Another common error is when a process is already listening to the configured
 port. If this happen, you will see the following error during the *Kyco*
 startup:
 
-.. code-block:: bash
+.. code-block:: shell
     INFO [kyco.controller] (MainThread) Loading kyco apps...
         Exception in thread TCP server:
 

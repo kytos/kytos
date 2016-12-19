@@ -5,8 +5,8 @@ Overview
 ########
 
 Kytos Controller (*Kyco*) is the main component of the Kytos Project. It uses
-*python-openflow* library to parse low level OpenFlow messages and to create
-new OpenFlow messages to be sent.
+`python-openflow <http://docs.kytos.io/python-openflow>`__ library to parse
+low level OpenFlow messages and to create new OpenFlow messages to be sent.
 
 For more information about the Kytos Project, please visit our `Kytos web site
 <http://kytos.io/>`__.
@@ -14,21 +14,19 @@ For more information about the Kytos Project, please visit our `Kytos web site
 This is a basic and experimental SDN controller. You can configure your
 OpenFlow switches to point to this controller after you setup it.
 
-When *Kyco* starts, it loads all Network Applications (NApps) and orchestrates
-all OF messages among these NApps.
+When *Kyco* starts, it loads all configured Network Applications (NApps) and
+orchestrates all OF messages among these NApps.
 
-To read more about Network Applications, please visit the section "Napps
-Managment" on the Administrator Guide.
-
-.. todo:: Add link/reference to the above mentioned sections
+To read more about Network Applications, please visit the section
+":ref:`kyco-napps-management`" on the :ref:`kyco-administrator-guide`.
 
 QuickStart
 **********
 
 If you are on a rush, read this QuickStart guide. But we stronglly recommend
-you to read the Administrator Guide if you are willing to install and use this
-controller, or the Developer Guide if you have plans to contribute or hack this
-code.
+you to read the :ref:`kyco-administrator-guide` if you are willing to install
+and use this controller, or the :ref:`kyco-developer-guide` if you have plans
+to contribute or hack this code.
 
 Installing Kyco
 ===============
@@ -111,9 +109,8 @@ behaviour. You can view and modify the main kyco config file at
 .. note:: We have also a logging.ini config file but is not working yet.
 
 For more information about the config options please visit the section
-`Configuration` on the `Administrator Guide`.
-
-.. todo:: Add link/reference to the above mentioned sections
+:ref:`kyco-administrator-guide-configuration` on the
+:ref:`kyco-administrator-guide`.
 
 How to use
 **********
@@ -133,37 +130,22 @@ To use *Kyco*, after installing it on the system, you need to open the ipython
     >>> controller = Controller(config)
     >>> controller.start()
 
-.. todo:: The config argument will be changed to be optional, so the two lines
-          related to config options may be removed soon.
+.. note:: The config argument will be changed to be optional, so the two lines
+          related to config options will be removed soon.
 
 With the above commands your controller will be running and ready to be used.
 Keep in mind that it need to be run as root - or with a user granted with the
 necessary permissions, such as to open a socket on port 6633.
 
-.. todo:: Check if Kyco really need to be runned as root.
-
 *Kyco* default setup also deploy our set of Core Network Applications
 (*NApps*). For more information regarding NApps, please visit the section
-``NApps Management`` under the ``Administrator Guide`` and also the `Kytos Core
-NApps Documentation <http://github.com/kytos/kyco-core-napps>`__.
-
-.. todo:: Add link/reference to the above mentioned sections
+:ref:`kyco-napps-management` under the :ref:`kyco-administrator-guide` and also
+the `Kytos Core NApps Documentation <http://docs.kytos.io/kyco-core-napps>`__.
 
 .. note:: Besides starting *Kyco*, if you wish to use our web based interface
  you will need to start a webserver to serve the this interface. See more at:
  `Kytos Admin UI page <https://github.com/kytos/kytos-admin-ui>`__. On the
  future this it will be installed automatically. Sorry about that.
-
-Where to go from here?
-**********************
-
-For more informations please see:
-
-- :doc:`administrator/index`
-- :doc:`developer/index`
-- :doc:`contributing/index`
-- :doc:`AUTHORS`
-- :doc:`LICENSE`
 
 .. |Experimental| image:: https://img.shields.io/badge/stability-experimental-orange.svg
 .. |Openflow| image:: https://img.shields.io/badge/Openflow-1.0.0-brightgreen.svg

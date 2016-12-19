@@ -1,3 +1,5 @@
+.. _kyco-developer-guide:
+
 ###############
 Developer Guide
 ###############

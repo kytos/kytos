@@ -7,7 +7,7 @@ Administrator Guide
 Welcome to the **Administrator Guide**, here you will find all information and
 references about *Kyco*.
 
-.. include:: architechture.rst
+.. include:: architecture.rst
 
 .. include:: requirements.rst
 
@@ -18,4 +18,3 @@ references about *Kyco*.
 .. include:: notifications.rst
 
 .. include:: logging_and_troubleshooting.rst
-

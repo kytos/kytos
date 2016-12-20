@@ -7,6 +7,7 @@
   administrator/index
   developer/index
   get_involved
+  getting_help
   hacking
   AUTHORS
   LICENSE

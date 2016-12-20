@@ -1,5 +1,5 @@
 Requirements
-************
+------------
 
 In order to install *Kyco* you should install the following system software:
 
@@ -21,7 +21,7 @@ During the *Kyco* installation, it will install the following python packages:
 
 
 Hardware Requirements
-=====================
+^^^^^^^^^^^^^^^^^^^^^
 
 Until now, no tests were performed in order to evaluate *Kyco* minimum hardware
 requirements.

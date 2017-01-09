@@ -564,3 +564,22 @@ class Controller(object):
         for napp_name in list(self.napps):
             if not isinstance(self.napps[napp_name], KycoCoreNApp):
                 self.unload_napp(napp_name)
+
+    def enable_napp(self, napp_author, napp_name):
+        """Enable a NApp by creating the needed symbolic link on the system."""
+
+        napp_abs_path = os.path.join(self.options.napps, '.installed',
+                                     napp_author, napp_name)
+        napp_sym_path = os.path.join(self.options.napps,
+                                     napp_author, napp_name)
+
+        if not os.path.isdir(napp_abs_path):
+            log.error('The NApp %s/%s is not installed.', napp_author,
+                      napp_name)
+        else:
+            if not os.path.exists(napp_sym_path):
+                os.symlink(napp_abs_path, napp_sym_path)
+                log.info('NApp %s/%s enabled.', napp_author, napp_name)
+            else:
+                log.info('NApp %s/%s was already enabled.', napp_author,
+                         napp_name)

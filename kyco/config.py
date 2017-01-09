@@ -20,6 +20,7 @@ else:
 # include napps modules
 sys.path.append(os.path.join(BASE_ENV, 'var/lib/kytos'))
 
+
 class KycoConfig():
     """KycoConfig class handle settings of Kyco."""
 

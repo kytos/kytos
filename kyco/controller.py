@@ -34,6 +34,7 @@ log = start_logger(__name__)
 
 __all__ = ('Controller',)
 
+
 class Controller(object):
     """Main class of Kyco.
 
@@ -528,16 +529,16 @@ class Controller(object):
 
     def load_napps(self):
         """Load all NApps installed on the NApps dir."""
-        ignored_path= ['.installed', '__pycache__', '__init__.py']
+        ignored_path = ['.installed', '__pycache__', '__init__.py']
         napps_dir = self.options.napps
 
         try:
             for author in os.listdir(napps_dir):
                 # Avoid looking at .installed directory
-                if not author in ignored_path :
+                if author not in ignored_path:
                     author_dir = os.path.join(napps_dir, author)
                     for napp_name in os.listdir(author_dir):
-                        if not napp_name in ignored_path:
+                        if napp_name not in ignored_path:
                             full_name = "{}/{}".format(author, napp_name)
                             log.info("Loading app %s", full_name)
                             self.load_napp(full_name)
@@ -571,7 +572,6 @@ class Controller(object):
 
     def disable_napp(self, napp_author, napp_name):
         """Disable a NApp by removing its symbolic link on the napp folder."""
-
         napp_sym_path = os.path.join(self.options.napps,
                                      napp_author, napp_name)
 
@@ -583,7 +583,6 @@ class Controller(object):
 
     def enable_napp(self, napp_author, napp_name):
         """Enable a NApp by creating the needed symbolic link on the system."""
-
         napp_abs_path = os.path.join(self.options.napps, '.installed',
                                      napp_author, napp_name)
         napp_sym_path = os.path.join(self.options.napps,

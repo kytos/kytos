@@ -34,7 +34,6 @@ log = start_logger(__name__)
 
 __all__ = ('Controller',)
 
-
 class Controller(object):
     """Main class of Kyco.
 
@@ -529,16 +528,19 @@ class Controller(object):
 
     def load_napps(self):
         """Load all NApps installed on the NApps dir."""
+        ignored_path= ['.installed', '__pycache__', '__init__.py']
         napps_dir = self.options.napps
+
         try:
             for author in os.listdir(napps_dir):
                 # Avoid looking at .installed directory
-                if not author.startswith('.'):
+                if not author in ignored_path :
                     author_dir = os.path.join(napps_dir, author)
                     for napp_name in os.listdir(author_dir):
-                        full_name = "{}/{}".format(author, napp_name)
-                        log.info("Loading app %s", full_name)
-                        self.load_napp(full_name)
+                        if not napp_name in ignored_path:
+                            full_name = "{}/{}".format(author, napp_name)
+                            log.info("Loading app %s", full_name)
+                            self.load_napp(full_name)
         except FileNotFoundError as e:
             log.error("Could not load napps: %s", e)
 

@@ -532,11 +532,13 @@ class Controller(object):
         napps_dir = self.options.napps
         try:
             for author in os.listdir(napps_dir):
-                author_dir = os.path.join(napps_dir, author)
-                for napp_name in os.listdir(author_dir):
-                    full_name = "{}/{}".format(author, napp_name)
-                    log.info("Loading app %s", full_name)
-                    self.load_napp(full_name)
+                # Avoid looking at .installed directory
+                if not author.startswith('.'):
+                    author_dir = os.path.join(napps_dir, author)
+                    for napp_name in os.listdir(author_dir):
+                        full_name = "{}/{}".format(author, napp_name)
+                        log.info("Loading app %s", full_name)
+                        self.load_napp(full_name)
         except FileNotFoundError as e:
             log.error("Could not load napps: %s", e)
 

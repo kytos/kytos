@@ -16,6 +16,7 @@ Basic usage:
 
 import os
 import re
+import sys
 from importlib.machinery import SourceFileLoader
 from threading import Thread
 from urllib.request import urlopen
@@ -91,6 +92,11 @@ class Controller(object):
         self.log_websocket = LogWebSocket()
 
         self.app = Flask(__name__)
+
+        #: Adding the napps 'enabled' directory into the PATH
+        #: Now you can access the enabled napps with:
+        #: from napps.<author>.<napp_name> import ?....
+        sys.path.append(os.path.join(self.options.napps, os.pardir))
 
     def register_kyco_routes(self):
         """Register initial routes from kyco using ApiServer.
@@ -529,14 +535,19 @@ class Controller(object):
 
     def load_napps(self):
         """Load all NApps installed on the NApps dir."""
+        ignored_path = ['.installed', '__pycache__', '__init__.py']
         napps_dir = self.options.napps
+
         try:
             for author in os.listdir(napps_dir):
-                author_dir = os.path.join(napps_dir, author)
-                for napp_name in os.listdir(author_dir):
-                    full_name = "{}/{}".format(author, napp_name)
-                    log.info("Loading app %s", full_name)
-                    self.load_napp(full_name)
+                # Avoid looking at .installed directory
+                if author not in ignored_path:
+                    author_dir = os.path.join(napps_dir, author)
+                    for napp_name in os.listdir(author_dir):
+                        if napp_name not in ignored_path:
+                            full_name = "{}/{}".format(author, napp_name)
+                            log.info("Loading app %s", full_name)
+                            self.load_napp(full_name)
         except FileNotFoundError as e:
             log.error("Could not load napps: %s", e)
 
@@ -564,3 +575,32 @@ class Controller(object):
         for napp_name in list(self.napps):
             if not isinstance(self.napps[napp_name], KycoCoreNApp):
                 self.unload_napp(napp_name)
+
+    def disable_napp(self, napp_author, napp_name):
+        """Disable a NApp by removing its symbolic link on the napp folder."""
+        napp_sym_path = os.path.join(self.options.napps,
+                                     napp_author, napp_name)
+
+        try:
+            os.remove(napp_sym_path)
+            log.info('The NApp %s/%s disabled.', napp_author, napp_name)
+        except FileNotFoundError:
+            log.warning('NApp %s/%s was not enabled.', napp_author, napp_name)
+
+    def enable_napp(self, napp_author, napp_name):
+        """Enable a NApp by creating the needed symbolic link on the system."""
+        napp_abs_path = os.path.join(self.options.installed_napps,
+                                     napp_author, napp_name)
+        napp_sym_path = os.path.join(self.options.napps,
+                                     napp_author, napp_name)
+
+        if not os.path.isdir(napp_abs_path):
+            log.error('The NApp %s/%s is not installed.', napp_author,
+                      napp_name)
+        else:
+            if not os.path.exists(napp_sym_path):
+                os.symlink(napp_abs_path, napp_sym_path)
+                log.info('NApp %s/%s enabled.', napp_author, napp_name)
+            else:
+                log.info('NApp %s/%s was already enabled.', napp_author,
+                         napp_name)

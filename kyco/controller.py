@@ -16,6 +16,7 @@ Basic usage:
 
 import os
 import re
+import sys
 from importlib.machinery import SourceFileLoader
 from threading import Thread
 from urllib.request import urlopen
@@ -91,6 +92,11 @@ class Controller(object):
         self.log_websocket = LogWebSocket()
 
         self.app = Flask(__name__)
+
+        #: Adding the napps 'enabled' directory into the PATH
+        #: Now you can access the enabled napps with:
+        #: from napps.<author>.<napp_name> import ?....
+        sys.path.append(os.path.join(self.options.napps, os.pardir))
 
     def register_kyco_routes(self):
         """Register initial routes from kyco using ApiServer.
@@ -583,7 +589,7 @@ class Controller(object):
 
     def enable_napp(self, napp_author, napp_name):
         """Enable a NApp by creating the needed symbolic link on the system."""
-        napp_abs_path = os.path.join(self.options.napps, '.installed',
+        napp_abs_path = os.path.join(self.options.installed_napps,
                                      napp_author, napp_name)
         napp_sym_path = os.path.join(self.options.napps,
                                      napp_author, napp_name)

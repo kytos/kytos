@@ -6,7 +6,6 @@ will be overridden by the option on command line.
 """
 
 import os
-import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from configparser import ConfigParser
 
@@ -16,9 +15,6 @@ if 'VIRTUAL_ENV' in os.environ:
     BASE_ENV = os.environ['VIRTUAL_ENV']
 else:
     BASE_ENV = '/'
-
-# include napps modules
-sys.path.append(os.path.join(BASE_ENV, 'var/lib/kytos'))
 
 
 class KycoConfig():
@@ -94,6 +90,9 @@ class KycoConfig():
         defaults = {'pidfile': os.path.join(BASE_ENV, 'var/run/kyco.pid'),
                     'workdir': os.path.join(BASE_ENV, 'var/lib/kyco'),
                     'napps': os.path.join(BASE_ENV, 'var/lib/kytos/napps/'),
+                    'installed_napps': os.path.join(BASE_ENV,
+                                                    'var/lib/kytos/napps/',
+                                                    '.installed'),
                     'conf': os.path.join(BASE_ENV, 'etc/kyco/kyco.conf'),
                     'logging': os.path.join(BASE_ENV, 'etc/kyco/logging.ini'),
                     'listen': '0.0.0.0',

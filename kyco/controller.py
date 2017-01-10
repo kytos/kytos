@@ -581,10 +581,10 @@ class Controller(object):
         napp_sym_path = os.path.join(self.options.napps,
                                      napp_author, napp_name)
 
-        if os.path.exists(napp_sym_path):
+        try:
             os.remove(napp_sym_path)
             log.info('The NApp %s/%s disabled.', napp_author, napp_name)
-        else:
+        except FileNotFoundError:
             log.warning('NApp %s/%s was not enabled.', napp_author, napp_name)
 
     def enable_napp(self, napp_author, napp_name):

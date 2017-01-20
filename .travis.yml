@@ -1,7 +1,6 @@
 language: python
 python:
-    - "3.4"
-    - "3.5"
+    - "3.6"
 # command to install dependencies
 before_install:
     - sudo apt-get -qq update
@@ -9,9 +8,8 @@ before_install:
 install:
     - pip install git+git://github.com/kytos/python-openflow.git@develop
     - pip install git+git://github.com/kytos/kyco-core-napps.git@develop
-    - pip install -r requirements.txt --upgrade --pre
-    - pip install -r requirements-docs.txt
-    - pip install -r requirements-dev.txt
+    - pip install -r requirements.txt -r requirements-dev.txt --upgrade --pre
+    - pip install coveralls
 before_script:
     - cd $VIRTUAL_ENV/var/lib/kytos/napps/kytos
     - for app in *; do if [ $app != "of_core" ]; then rm -rf $app; fi; done
@@ -19,7 +17,6 @@ before_script:
 # command to run tests
 script:
     - coverage run --source=kyco ./setup.py test
-    - coverage report
 notifications:
   irc:
     channels: "irc.freenode.org#kytos"
@@ -27,3 +24,5 @@ notifications:
       - "%{repository}@%{branch}: %{message} (%{build_url})"
     on_success: change
     on_failure: change
+after_success:
+    coveralls

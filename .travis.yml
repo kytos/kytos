@@ -14,7 +14,7 @@ install:
     - pip install -r requirements-dev.txt
 before_script:
     - cd $VIRTUAL_ENV/var/lib/kytos/napps/kytos
-    - for app in *; do if [ $app != "of.core" ]; then rm -rf $app; fi; done
+    - for app in *; do if [ $app != "of_core" ]; then rm -rf $app; fi; done
     - cd -
 # command to run tests
 script:

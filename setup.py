@@ -10,6 +10,7 @@ from subprocess import CalledProcessError, call, check_call
 
 from pip.req import parse_requirements
 from setuptools import Command, find_packages, setup
+from setuptools.command.test import test as TestCommand
 
 from kyco import __version__
 
@@ -20,27 +21,6 @@ if 'VIRTUAL_ENV' in os.environ:
     BASE_ENV = os.environ['VIRTUAL_ENV']
 else:
     BASE_ENV = '/'
-
-
-def lint(strict=True):
-    """Run pylama and radon.
-
-    Args:
-        strict (boolean): Check for all errors. Currently, there are several
-            issues to be solved, so we check more critical errors during tests
-            by setting this argument to False.
-    """
-    opts = '' if strict else '-l isort,pydocstyle,radon,pycodestyle,pyflakes'
-    files = 'tests setup.py kyco'
-    print('Pylama is running. It may take a while...')
-    cmd = 'pylama {} {}'.format(opts, files)
-    try:
-        check_call(cmd, shell=True)
-        print('Low grades (<= C) for Maintainability Index (if any):')
-        check_call('radon mi --min=C ' + files, shell=True)
-    except CalledProcessError as e:
-        print('Linter check failed: ' + e.cmd)
-        sys.exit(e.returncode)
 
 
 class SimpleCommand(Command):
@@ -72,7 +52,30 @@ class Linter(SimpleCommand):
 
     def run(self):
         """Run linter."""
-        lint()
+        self.lint()
+
+    @staticmethod
+    def lint():
+        """Run pylama and radon."""
+        files = 'setup.py tests kyco'
+        print('Pylama is running. It may take several seconds...')
+        cmd = 'pylama {}'.format(files)
+        try:
+            check_call(cmd, shell=True)
+        except CalledProcessError as e:
+            print('FAILED: please, fix the error(s) above.')
+            sys.exit(e.returncode)
+
+
+class Test(TestCommand):
+    """Run doctest and linter besides tests/*."""
+
+    def run(self):
+        """First, tests/*."""
+        super().run()
+        print('Running examples in documentation')
+        check_call('make doctest -C docs/', shell=True)
+        Linter.lint()
 
 
 class Cleaner(SimpleCommand):
@@ -84,13 +87,6 @@ class Cleaner(SimpleCommand):
         """Clean build, dist, pyc and egg from package and docs."""
         call('rm -vrf ./build ./dist ./*.pyc ./*.egg-info', shell=True)
         call('make -C docs clean', shell=True)
-
-
-# Run Sphinx doctest and linter during test.
-if sys.argv[-1] == 'test':
-    print('Running examples in documentation')
-    check_call('make doctest -C docs/', shell=True)
-    lint(strict=False)
 
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
@@ -112,5 +108,6 @@ setup(name='kyco',
       cmdclass={
           'lint': Linter,
           'clean': Cleaner,
+          'test': Test
       },
       zip_safe=False)

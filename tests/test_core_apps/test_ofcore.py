@@ -1,7 +1,6 @@
 """Tests regarding OFCore App, responsible by main OpenFlow basic actions."""
 
 import os
-from random import randint
 from unittest import TestCase, skip
 
 from pyof.v0x01.common.header import Header, Type
@@ -178,19 +177,27 @@ class TestOFCoreApp(TestCase):
         client = new_handshaked_client()
 
         # Test of Echo Request
-        echo_msg = EchoRequest(randint(1, 10))
+        echo_msg = EchoRequest()
         client.send(echo_msg.pack())
 
-        # Wait for Echo Reply
-        response = b''
-        # len() < 8 here because we just expect a Hello as response
-        while len(response) < 8:
-            response = client.recv(8)
-        response_header = Header()
-        response_header.unpack(response)
+        response_header = Header(xid=-1)
+        header_size = response_header.get_size()
+        # Read until (random) xid matches, ignoring other messages.
+        while response_header.xid != echo_msg.header.xid:
+            # Read header
+            response = b''
+            # len() < 8 here because we just expect a Hello as response
+            while len(response) < header_size:
+                response += client.recv(header_size - len(response))
+                response_header.unpack(response)
+
+            # Discard message body
+            body_bytes = response_header.length - header_size
+            read_bytes = 0
+            while read_bytes < body_bytes:
+                read_bytes += len(client.recv(body_bytes - read_bytes))
 
         self.assertEqual(response_header.message_type, Type.OFPT_ECHO_REPLY)
-
         client.close()
 
     def tearDown(self):

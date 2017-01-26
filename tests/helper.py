@@ -1,5 +1,6 @@
 """Module with some helpers for tests."""
 import os
+import sys
 import time
 from socket import socket
 
@@ -54,6 +55,20 @@ def do_handshake(client):
     return client
 
 
+def get_config():
+    """Exclude unittest args from Config argparser."""
+    argv_backup = None
+    # If cli command was like "python -m unittest"
+    if sys.argv[0].split()[-1] == 'unittest':
+        argv_backup = sys.argv
+        sys.argv = sys.argv[:1]
+    config = KycoConfig()
+    if argv_backup:
+        # Recover original argv
+        sys.argv = argv_backup
+    return config
+
+
 def new_controller(options=None):
     """Instantiate a Kyco Controller.
 
@@ -64,7 +79,7 @@ def new_controller(options=None):
         controller: Running Controler
     """
     if options is None:
-        options = KycoConfig().options['daemon']
+        options = get_config().options['daemon']
     controller = Controller(options)
     controller.start()
     time.sleep(0.1)
@@ -82,7 +97,7 @@ def new_client(options=None):
             handshake
     """
     if options is None:
-        options = KycoConfig().options['daemon']
+        options = get_config().options['daemon']
     client = socket()
     client.connect((options.listen, options.port))
     return client
@@ -99,6 +114,6 @@ def new_handshaked_client(options=None):
             done
     """
     if options is None:
-        options = KycoConfig().options['daemon']
+        options = get_config().options['daemon']
     client = new_client(options)
     return do_handshake(client)

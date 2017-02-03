@@ -57,7 +57,7 @@ class KycoServer(ThreadingMixIn, TCPServer):
             log.info("Kyco listening at %s:%s", self.server_address[0],
                      self.server_address[1])
             super().serve_forever(poll_interval)
-        except:
+        except Exception:
             self.server_close()
             raise
 

@@ -55,15 +55,20 @@ class Linter(SimpleCommand):
         self.lint()
 
     @staticmethod
-    def lint():
+    def lint(ignore=False):
         """Run pylama and radon."""
         files = 'setup.py tests kyco'
         print('Pylama is running. It may take several seconds...')
-        cmd = 'pylama {}'.format(files)
+        ignore_options = '--ignore=W,R,D203,D213,I0011'
+        options = ignore_options if ignore else ''
+        cmd = 'pylama {} {}'.format(options, files)
         try:
             check_call(cmd, shell=True)
         except CalledProcessError as e:
             print('FAILED: please, fix the error(s) above.')
+            if ignore is False:
+                print('Note: the test target currently runs less checks with:')
+                print('      pylama {} {}'.format(ignore_options, files))
             sys.exit(e.returncode)
 
 
@@ -75,7 +80,7 @@ class Test(TestCommand):
         super().run()
         print('Running examples in documentation')
         check_call('make doctest -C docs/', shell=True)
-        Linter.lint()
+        Linter.lint(ignore=True)
 
 
 class Cleaner(SimpleCommand):

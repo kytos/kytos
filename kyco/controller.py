@@ -532,7 +532,7 @@ class Controller(object):
 
     def load_napps(self):
         """Load all NApps enabled on the NApps dir."""
-        napps = NAppsManager(self.options)
+        napps = NAppsManager(self.options.napps)
         for author, napp_name in napps.get_enabled():
             try:
                 log.info("Loading NApp %s/%s", author, napp_name)
@@ -556,7 +556,7 @@ class Controller(object):
             # Removing listeners from that napp
             for event_type, napp_listeners in napp._listeners.items():
                 event_listeners = self.events_listeners[event_type]
-                for listener in listeners:
+                for listener in napp_listeners:
                     event_listeners.remove(listener)
                 if len(event_listeners) == 0:
                     del self.events_listeners[event_type]

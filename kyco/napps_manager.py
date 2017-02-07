@@ -5,13 +5,13 @@ from os import listdir, path
 class NAppsManager:
     """Deal with NApps at filesystem level."""
 
-    def __init__(self, options):
+    def __init__(self, enabled_napps_path):
         """Use folder locations from ``options``.
 
         Args:
-            controller (kyco.Controller): Controller to (un)load NApps.
+            enabled_napps_path (str): Folder of the enabled napps.
         """
-        self._enabled = options.napps
+        self._enabled = enabled_napps_path
 
     def get_enabled(self):
         """List of (author, napp_name) found in enabled napps folder."""

@@ -44,7 +44,8 @@ class WebSocket(Thread):
         yield from asyncio.sleep(1)
         if self.turning_off is True:
             self.event_loop.stop()
-        asyncio.async(self.verify_turning_off(self.future))
+        else:
+            asyncio.ensure_future(self.verify_turning_off(self.future))
 
     def run(self):
         """Method used to create and wait requets."""
@@ -55,7 +56,7 @@ class WebSocket(Thread):
 
             asyncio.set_event_loop(self.event_loop)
             self.future = asyncio.Future()
-            asyncio.async(self.verify_turning_off(self.future))
+            asyncio.ensure_future(self.verify_turning_off(self.future))
 
             self.is_running = True
             self.event_loop.run_until_complete(self.websocket)

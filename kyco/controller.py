@@ -29,6 +29,7 @@ from kyco.core.napps import KycoCoreNApp
 from kyco.core.switch import Switch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
 from kyco.core.websocket import LogWebSocket
+from kyco.napps_manager import NAppsManager
 from kyco.utils import now, start_logger
 
 log = start_logger(__name__)
@@ -451,7 +452,7 @@ class Controller(object):
 
         try:
             connection.close()
-            self.connections.pop(connection.id)
+            del self.connections[connection.id]
         except KeyError:
             return False
 
@@ -465,7 +466,7 @@ class Controller(object):
         # TODO: this can be better using only:
         #       self.switches.pop(switches.dpid, None)
         try:
-            self.switches.pop(switch.dpid)
+            del self.switches[switch.dpid]
         except KeyError:
             return False
 
@@ -501,70 +502,64 @@ class Controller(object):
         """
         self.switches[switch.dpid] = switch
 
-    def load_napp(self, napp_name):
+    def load_napp(self, author, napp_name):
         """Load a single app.
 
         Load a single NAPP based on its name.
 
-        Parameters:
+        Args:
+            author (str): NApp author name present in napp's path.
             napp_name (str): Name of the NApp to be loaded.
+
+        Raise:
+            FileNotFoundError: if napps' main.py is not found.
         """
-        path = os.path.join(self.options.napps, napp_name, 'main.py')
-        module = SourceFileLoader(napp_name, path)
+        if (author, napp_name) in self.napps:
+            log.warning('NApp %s/%s was already loaded', author, napp_name)
+        else:
+            mod_name = '.'.join(['napps', author, napp_name, 'main'])
+            path = os.path.join(self.options.napps, author, napp_name,
+                                'main.py')
+            module = SourceFileLoader(mod_name, path)
 
-        napp = module.load_module().Main(controller=self)
-        self.napps[napp_name] = napp
+            napp = module.load_module().Main(controller=self)
+            self.napps[(author, napp_name)] = napp
 
-        for event_type, listeners in napp._listeners.items():
-            if event_type not in self.events_listeners:
-                self.events_listeners[event_type] = []
-            self.events_listeners[event_type].extend(listeners)
+            for event, listeners in napp._listeners.items():
+                self.events_listeners.setdefault(event, []).extend(listeners)
 
-        napp.start()
-
-    def install_napp(self, napp_name):
-        """Install the requested NApp by its name.
-
-        Downloads the NApps from the NApp network and install it.
-        TODO: Download or git-clone?
-
-        Parameters:
-            napp_name (str): Name of the NApp to be installed.
-        """
-        pass
+            napp.start()
 
     def load_napps(self):
-        """Load all NApps installed on the NApps dir."""
-        ignored_path = ['.installed', '__pycache__', '__init__.py']
-        napps_dir = self.options.napps
+        """Load all NApps enabled on the NApps dir."""
+        napps = NAppsManager(self.options.napps)
+        for author, napp_name in napps.get_enabled():
+            try:
+                log.info("Loading NApp %s/%s", author, napp_name)
+                self.load_napp(author, napp_name)
+            except FileNotFoundError as e:
+                log.error("Could not load NApp %s/%s: %s", author,
+                          napp_name, e)
 
-        try:
-            for author in os.listdir(napps_dir):
-                # Avoid looking at .installed directory
-                if author not in ignored_path:
-                    author_dir = os.path.join(napps_dir, author)
-                    for napp_name in os.listdir(author_dir):
-                        if napp_name not in ignored_path:
-                            full_name = "{}/{}".format(author, napp_name)
-                            log.info("Loading app %s", full_name)
-                            self.load_napp(full_name)
-        except FileNotFoundError as e:
-            log.error("Could not load napps: %s", e)
+    def unload_napp(self, author, napp_name):
+        """Unload a specific NApp.
 
-    def unload_napp(self, napp_name):
-        """Unload a specific NApp based on its name.
-
-        Parameters:
+        Args:
+            author (str): NApp author name.
             napp_name (str): Name of the NApp to be unloaded.
         """
-        napp = self.napps.pop(napp_name)
-        napp.shutdown()
-        # Removing listeners from that napp
-        for event_type, listeners in napp._listeners.items():
-            for listener in listeners:
-                self.events_listeners[event_type].remove(listener)
-            if len(self.events_listeners[event_type]) == 0:
-                self.events_listeners.pop(event_type)
+        napp = self.napps.pop((author, napp_name), None)
+        if napp is None:
+            log.warn('NApp %s/%s was not loaded', author, napp_name)
+        else:
+            napp.shutdown()
+            # Removing listeners from that napp
+            for event_type, napp_listeners in napp._listeners.items():
+                event_listeners = self.events_listeners[event_type]
+                for listener in napp_listeners:
+                    event_listeners.remove(listener)
+                if len(event_listeners) == 0:
+                    del self.events_listeners[event_type]
 
     def unload_napps(self):
         """Unload all loaded NApps that are not core NApps."""
@@ -572,35 +567,6 @@ class Controller(object):
         # 'RuntimeError: dictionary changed size during iteration'
         # This is caused by looping over an dictionary while removing
         # items from it.
-        for napp_name in list(self.napps):
-            if not isinstance(self.napps[napp_name], KycoCoreNApp):
-                self.unload_napp(napp_name)
-
-    def disable_napp(self, napp_author, napp_name):
-        """Disable a NApp by removing its symbolic link on the napp folder."""
-        napp_sym_path = os.path.join(self.options.napps,
-                                     napp_author, napp_name)
-
-        try:
-            os.remove(napp_sym_path)
-            log.info('The NApp %s/%s disabled.', napp_author, napp_name)
-        except FileNotFoundError:
-            log.warning('NApp %s/%s was not enabled.', napp_author, napp_name)
-
-    def enable_napp(self, napp_author, napp_name):
-        """Enable a NApp by creating the needed symbolic link on the system."""
-        napp_abs_path = os.path.join(self.options.installed_napps,
-                                     napp_author, napp_name)
-        napp_sym_path = os.path.join(self.options.napps,
-                                     napp_author, napp_name)
-
-        if not os.path.isdir(napp_abs_path):
-            log.error('The NApp %s/%s is not installed.', napp_author,
-                      napp_name)
-        else:
-            if not os.path.exists(napp_sym_path):
-                os.symlink(napp_abs_path, napp_sym_path)
-                log.info('NApp %s/%s enabled.', napp_author, napp_name)
-            else:
-                log.info('NApp %s/%s was already enabled.', napp_author,
-                         napp_name)
+        for (author, napp_name), napp in list(self.napps.items()):
+            if not isinstance(napp, KycoCoreNApp):
+                self.unload_napp(author, napp_name)

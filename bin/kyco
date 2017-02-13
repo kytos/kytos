@@ -1,17 +1,23 @@
 #!/usr/bin/env python3
+"""Start Controller in foreground and stop it after ctrl+c."""
+import signal
 
-#from kyco.daemon import KycoDaemon
 from kyco.config import KycoConfig
 from kyco.controller import Controller
 
+controller = None
 
-def main():
-    config = KycoConfig()
-#    daemon = KycoDaemon(config.args)
-#    daemon.run()
 
-    controller = Controller(config.options['daemon'])
-    controller.start()
+def stop_controller(signum, frame):
+    """Stop the controller before quitting."""
+    if controller:
+        print('Stopping controller...')
+        controller.stop()
+
+
+signal.signal(signal.SIGINT, stop_controller)
 
 if __name__ == '__main__':
-    main()
+    config = KycoConfig()
+    controller = Controller(config.options['daemon'])
+    controller.start()

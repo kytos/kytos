@@ -105,7 +105,7 @@ class KycoConfig():
         if options.conf:
             config = ConfigParser()
             config.read([options.conf])
-            defaults = dict(config.items("daemon"))
+            defaults.update(dict(config.items("daemon")))
 
         self.parser.set_defaults(**defaults)
 

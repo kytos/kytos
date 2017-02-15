@@ -6,16 +6,19 @@ from kyco.config import KycoConfig
 from kyco.controller import Controller
 
 controller = None
+kill_handler = None
 
 
 def stop_controller(signum, frame):
     """Stop the controller before quitting."""
     if controller:
         print('Stopping controller...')
+        # If stop() hangs, old ctrl+c behaviour will be restored
+        signal.signal(signal.SIGINT, kill_handler)
         controller.stop()
 
 
-signal.signal(signal.SIGINT, stop_controller)
+kill_handler = signal.signal(signal.SIGINT, stop_controller)
 
 if __name__ == '__main__':
     config = KycoConfig()

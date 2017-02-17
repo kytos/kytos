@@ -41,23 +41,12 @@ class Interface(object):
         """Method used to compare Interface class with another instance."""
         if isinstance(other, str):
             return self.address == other
-
-        if not isinstance(other, Interface):
-            return False
-
-        if self.port_number != other.port_number:
-            return False
-
-        if self.name != other.name:
-            return False
-
-        if self.address != other.address:
-            return False
-
-        if self.switch.dpid != self.switch.dpid:
-            return False
-
-        return True
+        elif isinstance(other, Interface):
+            return self.port_number == other.port_number and \
+                self.name == other.name and \
+                self.address == other.address and \
+                self.switch.dpid == other.switch.dpid
+        return False
 
     @property
     def id(self):

@@ -216,7 +216,7 @@ class Controller(object):
 
         self.server.shutdown()
         self.buffers.send_stop_signal()
-        urlopen('http://127.0.0.1:8181/kytos/shutdown')
+        self.stop_api_server()
 
         for thread in self._threads.values():
             log.info("Stopping thread: %s", thread.name)
@@ -233,7 +233,8 @@ class Controller(object):
 
     def stop_api_server(self):
         """Method used to send a shutdown request to stop Api Server."""
-        urlopen('http://127.0.0.1:8181/kytos/shutdown')
+        if self.app:
+            urlopen('http://127.0.0.1:8181/kytos/shutdown')
 
     def shutdown_api(self):
         """Handle shutdown requests received by Api Server.
@@ -249,6 +250,7 @@ class Controller(object):
         if server_shutdown is None:
             raise RuntimeError('Not running with the Werkzeug Server')
         server_shutdown()
+        self.app = None
         return 'Server shutting down...', 200
 
     def status_api(self):

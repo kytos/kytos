@@ -25,7 +25,6 @@ from flask import Flask, request
 
 from kyco.core.buffers import KycoBuffers
 from kyco.core.events import KycoEvent
-from kyco.core.napps import KycoCoreNApp
 from kyco.core.switch import Switch
 from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
 from kyco.core.websocket import LogWebSocket
@@ -570,5 +569,4 @@ class Controller(object):
         # This is caused by looping over an dictionary while removing
         # items from it.
         for (author, napp_name), napp in list(self.napps.items()):
-            if not isinstance(napp, KycoCoreNApp):
-                self.unload_napp(author, napp_name)
+            self.unload_napp(author, napp_name)

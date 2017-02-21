@@ -7,7 +7,7 @@ from kyco.utils import listen_to
 
 log = logging.getLogger(__name__)
 
-__all__ = ('KycoCoreNApp', 'KycoNApp')
+__all__ = ('KycoNApp')
 
 
 class KycoNApp(Thread, metaclass=ABCMeta):
@@ -120,9 +120,3 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         sent.
         """
         pass
-
-
-class KycoCoreNApp(KycoNApp):
-    """Base class for any KycoCoreNApp to be developed."""
-
-    pass

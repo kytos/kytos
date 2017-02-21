@@ -32,28 +32,28 @@ def listen_to(event, *events):
     .. code-block:: python3
 
         class MyAppClass(KycoApp):
-            @listen_to('kytos/of.core.messages.in')
+            @listen_to('kytos/of_core.messages.in')
             def my_handler_of_message_in(self, event):
                 # Do stuff here...
 
-            @listen_to('kytos/of.core.messages.out')
+            @listen_to('kytos/of_core.messages.out')
             def my_handler_of_message_out(self, event):
                 # Do stuff here...
 
-            @listen_to('kytos/of.core.messages.in.ofpt_hello',
-                       'kytos/of.core.messages.out.ofpt_hello')
+            @listen_to('kytos/of_core.messages.in.ofpt_hello',
+                       'kytos/of_core.messages.out.ofpt_hello')
             def my_handler_of_hello_messages(self, event):
                 # Do stuff here...
 
-            @listen_to('kytos/of.core.message.*.hello')
+            @listen_to('kytos/of_core.message.*.hello')
             def my_other_handler_of_hello_messages(self, event):
                 # Do stuff here...
 
-            @listen_to('kytos/of.core.message.*.hello')
+            @listen_to('kytos/of_core.message.*.hello')
             def my_handler_of_hello_messages(self, event):
                 # Do stuff here...
 
-            @listen_to('kytos/of.core.message.*')
+            @listen_to('kytos/of_core.message.*')
             def my_stats_handler_of_any_message(self, event):
                 # Do stuff here...
     """

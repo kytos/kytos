@@ -473,7 +473,7 @@ class Controller(object):
             return False
 
     def new_connection(self, event):
-        """Handle a kytos/core.connection.new event.
+        """Handle a kyco/core.connection.new event.
 
         This method will read new connection event and store the connection
         (socket) into the connections attribute on the controller.
@@ -482,10 +482,10 @@ class Controller(object):
         connection on the same ip:port.
 
         Parameters:
-            event (KycoEvent): The received event (kytos/core.connection.new)
+            event (KycoEvent): The received event (kyco/core.connection.new)
             with the needed infos.
         """
-        log.info("Handling KycoEvent:kytos/core.connection.new ...")
+        log.info("Handling KycoEvent:kyco/core.connection.new ...")
 
         connection = event.source
 

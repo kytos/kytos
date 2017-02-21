@@ -86,8 +86,9 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         Paramters
             event (:class:`KycoEvent`): event to be listened.
         """
-        self.__event.set()
-        self.shutdown()
+        if not self.__event.is_set():
+            self.__event.set()
+            self.shutdown()
 
     @abstractmethod
     def setup(self):

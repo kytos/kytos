@@ -25,9 +25,9 @@ NApps who can listen these events are listed below.
 |                                   +-------------------------------------------------+-------------------------------------------------------------+
 |                                   | :class:`~kyco.core.napps.KycoNApp`              | - :func:`~kyco.core.napps.KycoNApp._shutdown_handler`       |
 +-----------------------------------+-------------------------------------------------+-------------------------------------------------------------+
-| kyco/core.switches.new            | NApp: of.disableipv6                            |                                                             |
+| kyco/core.switches.new            | NApp: of_disableipv6                            |                                                             |
 +-----------------------------------+-------------------------------------------------+-------------------------------------------------------------+
-| kyco/core.messages.openflow.new   | Napp: of.core                                   |                                                             |
+| kyco/core.messages.openflow.new   | Napp: of_core                                   |                                                             |
 +-----------------------------------+-------------------------------------------------+-------------------------------------------------------------+
 
 Openflow Event Message
@@ -42,24 +42,24 @@ that can listen that are listed below.
 +-------------------+-------------------------------------------------+-----------------+
 | Type of Message   |               Event Message                     |    NApps        |
 +===================+=================================================+=================+
-|   Symmetric       | kytos/of.core.messages.in.ofpt_hello            | - of.core       |
+|   Symmetric       | kytos/of_core.messages.in.ofpt_hello            | - of_core       |
 +                   +-------------------------------------------------+-----------------+
-|                   | kytos/of.core.messages.out.ofpt_hello           | - of.core       |
+|                   | kytos/of_core.messages.out.ofpt_hello           | - of_core       |
 +                   +-------------------------------------------------+-----------------+
-|                   | kytos/of.core.messages.in.ofpt_echo_request     | - of.core       |
+|                   | kytos/of_core.messages.in.ofpt_echo_request     | - of_core       |
 +                   +-------------------------------------------------+-----------------+
-|                   | kytos/of.core.messages.out.ofpt_echo_reply      | - of.core       |
+|                   | kytos/of_core.messages.out.ofpt_echo_reply      | - of_core       |
 +-------------------+-------------------------------------------------+-----------------+
-| Controller/Switch | kytos/of.core.messages.in.ofpt_features_reply   | - of.core       |
+| Controller/Switch | kytos/of_core.messages.in.ofpt_features_reply   | - of_core       |
 +-------------------+-------------------------------------------------+-----------------+
-| Statistics        | kytos/of.core.messages.in.ofpt_stats_reply      | - of.core       |
-|                   |                                                 | - of.stats      |
+| Statistics        | kytos/of_core.messages.in.ofpt_stats_reply      | - of_core       |
+|                   |                                                 | - of_stats      |
 +-------------------+-------------------------------------------------+-----------------+
-|  Asynchronous     | kytos/of.core.messages.in.ofpt_packet_in        | - of.l2ls       |
-|                   |                                                 | - of.l2lsloop   |
-|                   |                                                 | - of.lldp       |
-|                   |                                                 | - of.topology   |
+|  Asynchronous     | kytos/of_core.messages.in.ofpt_packet_in        | - of_l2ls       |
+|                   |                                                 | - of_l2lsloop   |
+|                   |                                                 | - of_lldp       |
+|                   |                                                 | - of_topology   |
 +                   +-------------------------------------------------+-----------------+
-|                   | kytos/of.core.messages.in.ofpt_port_status      | - of.topology   |
-|                   |                                                 | - of.l2lsloop   |
+|                   | kytos/of_core.messages.in.ofpt_port_status      | - of_topology   |
+|                   |                                                 | - of_l2lsloop   |
 +-------------------+-------------------------------------------------+-----------------+

@@ -29,7 +29,7 @@ download (clonning or some different method) the Napp inside the directory
 
 After downloading the Napp, you should restart the *Kyco* controller in order
 to it re-read the directory and loads the new Napp. It is important to cite that
-all Napp application directory should have the prefix ``of.`` before the Napp's
+all Napp application directory should have the prefix ``of_`` before the Napp's
 name.
 
 Removing NApps
@@ -42,7 +42,7 @@ recomended to stop *Kyco*.
 .. code-block:: shell
 
     # cd /var/lib/kytos/napps/kyco/
-    # rm -rf of.napp_name
+    # rm -rf of_napp_name
 
 After removing the directory the administrator can start the *Kyco* again and
 the Napp will not be loaded.
@@ -53,7 +53,7 @@ Enable/Disable NApps
 *Kyco* allows the administrator to prevent that a Napp to be loaded during the
 startup process. As mentioned earlier, *Kyco* will look for Napps inside the
 directory defined in ``napp`` line inside the configuration file. However,
-*Kyco* checks for directories with a specific pattern, starting with ``of.``.
+*Kyco* checks for directories with a specific pattern, starting with ``of_``.
 
 In order to prevent a Napp to be loaded, just rename its directory to something
 that does not matches the pattern. In this example, we add a underscore before
@@ -63,7 +63,7 @@ before renaming the Napp application.
 .. code-block:: shell
 
     # cd /var/lib/kytos/napps/kyco/
-    # mv of.napp_name _of.napp_name
+    # mv of_napp_name _of_napp_name
 
 To enable the Napp, just roll back the directory name to match the pattern as
 following:
@@ -71,6 +71,6 @@ following:
 .. code-block:: shell
 
     # cd /var/lib/kytos/napps/kyco/
-    # mv _of.napp_name of.napp_name
+    # mv _of_napp_name of_napp_name
 
 .. note:: In future releases, the process of Install, Removing, Enabling and Disabling will be online, with no need to restart the controller.

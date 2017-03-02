@@ -28,7 +28,9 @@ from kytos.core.helpers import now, start_logger
 from kytos.core.napps_manager import NAppsManager
 from kytos.core.switch import Switch
 from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
-from kytos.core.websocket import LogWebSocket
+from kytos.core.websocket import LogWebSocket, ConsoleWebSocket
+from kytos.napps_manager import NAppsManager
+from kytos.utils import now, start_logger
 
 log = start_logger(__name__)
 
@@ -89,6 +91,7 @@ class Controller(object):
         self.started_at = None
 
         self.log_websocket = LogWebSocket()
+        self.console_websocket = ConsoleWebSocket(controller=self)
 
         self.app = Flask(__name__)
 
@@ -137,6 +140,9 @@ class Controller(object):
         """Start the kytos websocket server."""
         self.log_websocket.register_log(log)
         self.log_websocket.start()
+
+    def start_console_websocket(self):
+        self.console_websocket.start()
 
     def start(self):
         """Start the controller.
@@ -191,6 +197,8 @@ class Controller(object):
         """
         if self.log_websocket.is_running:
             self.log_websocket.shutdown()
+        if self.console_websocket.is_running:
+            self.console_websocket.shutdown()
         if self.started_at:
             self.stop_controller(graceful)
 

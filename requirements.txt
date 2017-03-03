@@ -1,4 +1,4 @@
 lockfile
-websockets
 python-openflow
 flask
+flask-socketio

@@ -29,11 +29,9 @@ from kytos.core.helpers import now, start_logger
 from kytos.core.napps_manager import NAppsManager
 from kytos.core.switch import Switch
 from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
-from kytos.core.websocket import LogWebSocket, ConsoleWebSocket
+from kytos.core.websocket import LogWebSocket
 from kytos.napps_manager import NAppsManager
 from kytos.utils import now, start_logger
-
-log = start_logger(__name__)
 
 __all__ = ('Controller',)
 
@@ -91,8 +89,9 @@ class Controller(object):
 
         self.started_at = None
 
-        self.log_websocket = LogWebSocket()
-        self.console_websocket = ConsoleWebSocket(controller=self)
+        self.websockets = {}
+
+        self.log = start_logger(__name__)
 
         self.app = APIServer(__name__)
 
@@ -101,13 +100,17 @@ class Controller(object):
         #: from napps.<author>.<napp_name> import ?....
         sys.path.append(os.path.join(self.options.napps, os.pardir))
 
-    def start_log_websocket(self):
-        """Start the kytos websocket server."""
-        self.log_websocket.register_log(log)
-        self.log_websocket.start()
+    @property
+    def log_websocket(self):
+        """Method used to return the log_websocket instance."""
+        return self.websockets['log']
 
-    def start_console_websocket(self):
-        self.console_websocket.start()
+    def register_websockets(self):
+        """Method used to register all websockets."""
+        self.websockets['log'] = LogWebSocket()
+        self.websockets['log'].register_log(self.log)
+
+        self.app.register_websockets(self.websockets)
 
     def start(self):
         """Start the controller.
@@ -116,13 +119,15 @@ class Controller(object):
         Starts a thread for each buffer handler.
         Load the installed apps.
         """
-        self.start_log_websocket()
+        self.app.register_kytos_routes()
+        self.register_websockets()
         log.info("Starting Kytos - Kytos Controller")
-        self.server = KytosServer((self.options.listen, int(self.options.port)),
-                                 KytosOpenFlowRequestHandler,
-                                 # TODO: Change after #62 definitions
-                                 #       self.buffers.raw.put)
-                                 self)
+        self.server = KytosServer((self.options.listen,
+                                  int(self.options.port)),
+                                  KytosOpenFlowRequestHandler,
+                                  # TODO: Change after #62 definitions
+                                  #       self.buffers.raw.put)
+                                  self)
 
         raw_event_handler = self.raw_event_handler
         msg_in_event_handler = self.msg_in_event_handler
@@ -150,11 +155,10 @@ class Controller(object):
         log.info("Loading kytos apps...")
         self.load_napps()
         self.started_at = now()
-        self.register_kytos_routes()
 
     def stop_api_server(self):
         """Method used to send a shutdown request to stop Api Server."""
-        if self.app:
+        if self._threads['api_server'].is_alive():
             urlopen('http://127.0.0.1:8181/kytos/shutdown')
 
     def register_rest_endpoint(self, *options, **kwargs):
@@ -168,10 +172,6 @@ class Controller(object):
             - stop the API Server
             - stop the Controller
         """
-        if self.log_websocket.is_running:
-            self.log_websocket.shutdown()
-        if self.console_websocket.is_running:
-            self.console_websocket.shutdown()
         if self.started_at:
             self.stop_controller(graceful)
 
@@ -198,7 +198,7 @@ class Controller(object):
         self.stop_api_server()
 
         for thread in self._threads.values():
-            log.info("Stopping thread: %s", thread.name)
+            self.log.info("Stopping thread: %s", thread.name)
             thread.join()
 
         for thread in self._threads.values():
@@ -262,14 +262,14 @@ class Controller(object):
         `(ip, port)`. If a switch was found, then the `connection_id` attribute
         is set to `None` and the `dpid` is replaced with the switch dpid.
         """
-        log.info("Raw Event Handler started")
+        self.log.info("Raw Event Handler started")
         while True:
             event = self.buffers.raw.get()
             self.notify_listeners(event)
-            log.debug("Raw Event handler called")
+            self.log.debug("Raw Event handler called")
 
             if event.name == "kytos/core.shutdown":
-                log.debug("RawEvent handler stopped")
+                self.log.debug("RawEvent handler stopped")
                 break
 
     def msg_in_event_handler(self):
@@ -278,14 +278,14 @@ class Controller(object):
         This handler listen to the msg_in_buffer, get every event added to this
         buffer and sends it to the listeners listening to this event.
         """
-        log.info("Message In Event Handler started")
+        self.log.info("Message In Event Handler started")
         while True:
             event = self.buffers.msg_in.get()
             self.notify_listeners(event)
-            log.debug("MsgInEvent handler called")
+            self.log.debug("MsgInEvent handler called")
 
             if event.name == "kytos/core.shutdown":
-                log.debug("MsgInEvent handler stopped")
+                self.log.debug("MsgInEvent handler stopped")
                 break
 
     def msg_out_event_handler(self):
@@ -294,19 +294,19 @@ class Controller(object):
         This handler listen to the msg_out_buffer, get every event added to
         this buffer and sends it to the listeners listening to this event.
         """
-        log.info("Message Out Event Handler started")
+        self.log.info("Message Out Event Handler started")
         while True:
             triggered_event = self.buffers.msg_out.get()
 
             if triggered_event.name == "kytos/core.shutdown":
-                log.debug("MsgOutEvent handler stopped")
+                self.log.debug("MsgOutEvent handler stopped")
                 break
 
             message = triggered_event.content['message']
             destination = triggered_event.destination
             destination.send(message.pack())
             self.notify_listeners(triggered_event)
-            log.debug("MsgOutEvent handler called")
+            self.log.debug("MsgOutEvent handler called")
 
     def app_event_handler(self):
         """Handle app events.
@@ -314,14 +314,14 @@ class Controller(object):
         This handler listen to the app_buffer, get every event added to this
         buffer and sends it to the listeners listening to this event.
         """
-        log.info("App Event Handler started")
+        self.log.info("App Event Handler started")
         while True:
             event = self.buffers.app.get()
             self.notify_listeners(event)
-            log.debug("AppEvent handler called")
+            self.log.debug("AppEvent handler called")
 
             if event.name == "kytos/core.shutdown":
-                log.debug("AppEvent handler stopped")
+                self.log.debug("AppEvent handler stopped")
                 break
 
     def get_switch_by_dpid(self, dpid):
@@ -467,7 +467,8 @@ class Controller(object):
             FileNotFoundError: if napps' main.py is not found.
         """
         if (author, napp_name) in self.napps:
-            log.warning('NApp %s/%s was already loaded', author, napp_name)
+            message = 'NApp %s/%s was already loaded'
+            self.log.warning(message, author, napp_name)
         else:
             mod_name = '.'.join(['napps', author, napp_name, 'main'])
             path = os.path.join(self.options.napps, author, napp_name,
@@ -487,10 +488,10 @@ class Controller(object):
         napps = NAppsManager(self.options.napps)
         for author, napp_name in napps.get_enabled():
             try:
-                log.info("Loading NApp %s/%s", author, napp_name)
+                self.log.info("Loading NApp %s/%s", author, napp_name)
                 self.load_napp(author, napp_name)
             except FileNotFoundError as e:
-                log.error("Could not load NApp %s/%s: %s", author,
+                self.log.error("Could not load NApp %s/%s: %s", author,
                           napp_name, e)
 
     def unload_napp(self, author, napp_name):
@@ -502,7 +503,7 @@ class Controller(object):
         """
         napp = self.napps.pop((author, napp_name), None)
         if napp is None:
-            log.warn('NApp %s/%s was not loaded', author, napp_name)
+            self.log.warn('NApp %s/%s was not loaded', author, napp_name)
         else:
             napp.shutdown()
             # Removing listeners from that napp

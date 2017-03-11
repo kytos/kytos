@@ -102,7 +102,7 @@ class Controller(object):
 
     @property
     def log_websocket(self):
-        """Method used to return the log_websocket instance."""
+        """Method used to return LogWebSocket instance."""
         return self.websockets['log']
 
     def register_websockets(self):
@@ -162,7 +162,8 @@ class Controller(object):
             urlopen('http://127.0.0.1:8181/kytos/shutdown')
 
     def register_rest_endpoint(self, *options, **kwargs):
-        self.app.register_rest_endpoint(*options,**kwargs)
+        """Method used to return the endpoints registered by APIServer."""
+        self.app.register_rest_endpoint(*options, **kwargs)
 
     def stop(self, graceful=True):
         """Method used to shutdown all services used by kytos.
@@ -435,7 +436,7 @@ class Controller(object):
             event (KytosEvent): The received event (kytos/core.connection.new)
             with the needed infos.
         """
-        log.info("Handling KytosEvent:kytos/core.connection.new ...")
+        self.log.info("Handling KytosEvent:kytos/core.connection.new ...")
 
         connection = event.source
 
@@ -492,7 +493,7 @@ class Controller(object):
                 self.load_napp(author, napp_name)
             except FileNotFoundError as e:
                 self.log.error("Could not load NApp %s/%s: %s", author,
-                          napp_name, e)
+                               napp_name, e)
 
     def unload_napp(self, author, napp_name):
         """Unload a specific NApp.

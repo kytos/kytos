@@ -1,56 +1,79 @@
 ;(function() {
   console.log("kytos-logs started")
 
-  var seek = 0
-  // Method used to request a websocket and append in tab_logs terminal.
-  ws_led = $('.nav.sidebar .websocket-status');
+  var connected=false;
+  var current_line = 0;
+  var socket = io.connect('http://localhost:8181/logs');
 
-  function LogWebSocketReceive() {
-    if ("WebSocket" in window) {
-      var ws = new WebSocket(log_server_url)
-      ws.onopen = function(evt) {
-        ws_led.addClass('status-online');
-        ws_led.removeClass('status-offline');
+  socket.on('connect', function(){
+    turn_on_led()
+    connected = true;
+    console.log('connected')
+    request_log_changes()
+  })
 
-        buff = 'partial_buff';
-        if(seek == 0){
-          buff = 'full_buff';
-          seek = 1;
-        }
-        ws.send('{"type":"'+buff+'"}');
-      };
+  socket.on('start logs', function(data){
+    if ($('#enable_log')[0].checked)
+    {
+      received_msgs = data.buff
+      current_line = data.last_line
 
-      ws.onerror = function(evt) {
-        ws_led.removeClass('status-online');
-        ws_led.addClass('status-offline');
-      }
-      if ($('#enable_log')[0].checked) {
-        ws.onmessage = function (evt) {
-          data = JSON.parse(evt.data);
-          var received_msgs = data.msg;
-          $.each(received_msgs.split('\n'), function(index, msg) {
-            if (msg) { add_log_message(msg, 'controller')}
-          })
-        };
-      }
-    } else {
-      //console.log("WebSocket NOT supported by your Browser!");
-      $('#enable_log').prop('checked', false).change();
-      ws_led.removeClass('status-online status-offline')
+      $.each(received_msgs, function(index, msg){
+        add_log_message(msg, 'controller')
+      });
     }
+  })
+
+  socket.on('connect_error',function(){
+    connected = false;
+    turn_off_led()
+    console.log('error');
+  })
+
+  socket.on('disconnect', function(data) {
+    connected = false;
+    turn_off_led()
+    console.log('disconnected')
+  })
+
+  socket.on('show logs', function(data){
+    if ($('#enable_log')[0].checked)
+    {
+      received_msgs = data.buff
+      current_line = data.last_line
+
+      $.each(received_msgs, function(index, msg){
+        add_log_message(msg, 'controller')
+      });
+    }
+  })
+
+  var ws_led = $('.nav.sidebar .websocket-status')
+
+  function turn_on_led(){
+    ws_led.addClass('status-online');
+    ws_led.removeClass('status-offline');
   }
 
-  setInterval(LogWebSocketReceive, 2000);
+  function turn_off_led(data){
+      ws_led.removeClass('status-online');
+      ws_led.addClass('status-offline');
+  }
 
+  function add_log_message(msg, src_tag) {
+    if ($('#tab_logs div.log_message').length >= 500) {
+      $('#tab_logs').find('#tab_logs:first').remove();
+    }
+    $('<div/>', {
+        text: msg,
+        "class": 'log_message ' + src_tag
+    }).appendTo('#tab_logs');
+    $('#tab_logs').scrollTop($('#tab_logs').get(0).scrollHeight);
+  }
+
+  function request_log_changes(){
+    if (connected)  socket.emit('show logs', {"current_line": current_line})
+  }
+  setInterval(request_log_changes, 3000)
 }());
 
-function add_log_message(msg, src_tag) {
-  if ($('#tab_logs div.log_message').length >= 500) {
-    $('#tab_logs').find('#tab_logs:first').remove();
-  }
-  $('<div/>', {
-      text: msg,
-      "class": 'log_message ' + src_tag
-  }).appendTo('#tab_logs');
-  $('#tab_logs').scrollTop($('#tab_logs').get(0).scrollHeight);
-}

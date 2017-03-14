@@ -93,7 +93,7 @@ class Controller(object):
 
         self.log = start_logger(__name__)
 
-        self.app = APIServer(__name__)
+        self.api_server = APIServer(__name__)
 
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
@@ -110,7 +110,7 @@ class Controller(object):
         self.websockets['log'] = LogWebSocket()
         self.websockets['log'].register_log(self.log)
 
-        self.app.register_websockets(self.websockets)
+        self.api_server.register_websockets(self.websockets)
 
     def start(self):
         """Start the controller.
@@ -134,7 +134,7 @@ class Controller(object):
         msg_out_event_handler = self.msg_out_event_handler
         app_event_handler = self.app_event_handler
 
-        thrds = {'api_server': Thread(target=self.app.run,
+        thrds = {'api_server': Thread(target=self.api_server.run,
                                       args=['0.0.0.0', 8181],
                                       kwargs={'threaded': True}),
                  'tcp_server': Thread(name='TCP server',
@@ -163,7 +163,7 @@ class Controller(object):
 
     def register_rest_endpoint(self, *options, **kwargs):
         """Method used to return the endpoints registered by APIServer."""
-        self.app.register_rest_endpoint(*options, **kwargs)
+        self.api_server.register_rest_endpoint(*options, **kwargs)
 
     def stop(self, graceful=True):
         """Method used to shutdown all services used by kytos.

@@ -106,6 +106,7 @@ License
 
 This software is under *MIT-License*. For more information please read
 ``LICENSE`` file.
+
 .. |Experimental| image:: https://img.shields.io/badge/stability-experimental-orange.svg
 .. |Tag| image:: https://img.shields.io/github/tag/kytos/kyco.svg
    :target: https://github.com/kytos/kyco/tags

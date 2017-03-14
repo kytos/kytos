@@ -1,7 +1,7 @@
-|Experimental| |Openflow| |Tag| |Release| |Pypi| |Tests| |License|
-
 Kytos SDN Platform
-==================
+##################
+
+|Experimental| |Openflow| |Tag| |Release| |Pypi| |Tests| |License|
 
 `Kytos SDN Platform <https://kytos.io>`_ is conceived to ease SDN controllers
 development and deployment. It was motivated by some gaps left by common SDN

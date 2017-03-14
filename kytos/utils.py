@@ -1,4 +1,4 @@
-"""Utilities functions used in Kyco."""
+"""Utilities functions used in Kytos."""
 import logging
 from datetime import datetime, timezone
 from threading import Thread
@@ -31,7 +31,7 @@ def listen_to(event, *events):
 
     .. code-block:: python3
 
-        class MyAppClass(KycoApp):
+        class MyAppClass(KytosApp):
             @listen_to('kytos/of_core.messages.in')
             def my_handler_of_message_in(self, event):
                 # Do stuff here...
@@ -107,20 +107,20 @@ def run_on_thread(method):
 
 
 def start_logger(name):
-    """Start the loggers, both the Kyco and the KycoNApp.
+    """Start the loggers, both the Kytos and the KytosNApp.
 
     Parameters:
       name (string): string with name of logger object.
 
     Returns:
-      logger (logging.Logger): Logger with kyco message format and level info.
+      logger (logging.Logger): Logger with Kytos message format and level info.
     """
     logging.basicConfig(format=log_fmt(), level=logging.INFO)
     return logging.getLogger(name)
 
 
 def log_fmt():
-    """Return the logger string format used by Kyco Loggers.
+    """Return the logger string format used by Kytos Loggers.
 
     Returns:
         fmt (string): String Partner used to make the log message.

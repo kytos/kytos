@@ -1,1 +1,1 @@
-"""Test kyco core functionalities."""
+"""Test kytos core functionalities."""

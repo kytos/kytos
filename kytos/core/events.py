@@ -1,9 +1,9 @@
-"""Module with Kyco Events."""
+"""Module with Kytos Events."""
 
-from kyco.utils import now
+from kytos.utils import now
 
 
-class KycoEvent(object):
+class KytosEvent(object):
     """Base Event class.
 
     The event data will be passed on the content attribute, which should be a
@@ -11,7 +11,7 @@ class KycoEvent(object):
     """
 
     def __init__(self, name=None, content=None):
-        """Constructor of KycoEvent receive the parameters below.
+        """Constructor of KytosEvent receive the parameters below.
 
         Args:
             name (string): The name of the event. You should prepend with
@@ -24,27 +24,27 @@ class KycoEvent(object):
 
     @property
     def destination(self):
-        """Return the destination of KycoEvent."""
+        """Return the destination of KytosEvent."""
         return self.content.get('destination')
 
     def set_destination(self, destination):
-        """Update the destination of KycoEvent.
+        """Update the destination of KytosEvent.
 
         Parameters:
-            destination (string): destination of  KycoEvent.
+            destination (string): destination of  KytosEvent.
         """
         self.content['destination'] = destination
 
     @property
     def source(self):
-        """Return the source of KycoEvent."""
+        """Return the source of KytosEvent."""
         return self.content.get('source')
 
     def set_source(self, source):
-        """Update the source of KycoEvent.
+        """Update the source of KytosEvent.
 
         Parameters:
-            source (string): source of KycoEvent.
+            source (string): source of KytosEvent.
         """
         self.content['source'] = source
 

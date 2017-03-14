@@ -1,4 +1,4 @@
-"""Module with the main constants from Kyco.
+"""Module with the main constants from Kytos.
 
 This constantes may be overridden by values passed on the controller
 instantiation.

@@ -21,7 +21,7 @@ class Flow(object):
                  dl_dst=None, dl_vlan=None, dl_type=None, nw_proto=None,
                  nw_src=None, nw_dst=None, tp_src=None, tp_dst=None,
                  actions=None):
-        """Contructor receive the parameters below.
+        """Constructor receive the parameters below.
 
         Parameters:
            idle_timeout (int): Idle time before discarding in seconds.
@@ -136,7 +136,7 @@ class Flow(object):
             json_content (string): Json string with flow attributes.
 
         Returns:
-            flow (:class:`~kyco.core.flow.Flow`): Flow built from json.
+            flow (:class:`~kytos.core.flow.Flow`): Flow built from json.
         """
         dict_content = json.loads(json_content)
         return Flow.from_dict(dict_content)
@@ -149,7 +149,7 @@ class Flow(object):
             dict_content (dict): Python dictionary with flow attributes.
 
         Returns:
-            flow (:class:`~kyco.core.flow.Flow`): Flow built from json.
+            flow (:class:`~kytos.core.flow.Flow`): Flow built from json.
         """
         flow_fields = dict_content.get('flow', {})
         flow = Flow()
@@ -173,7 +173,7 @@ class Flow(object):
          stats_reply (StatsReply): Stats Reply Object.
 
         Returns:
-         flow (:class:`~kyco.core.flow.Flow`): Flow built from json.
+         flow (:class:`~kytos.core.flow.Flow`): Flow built from json.
         """
         flow = Flow()
         flow.idle_timeout = flow_stats.idle_timeout.value
@@ -257,7 +257,7 @@ class OutputAction(FlowAction):
         """Build a Action Output from this action.
 
         Returns:
-            output_action (:class:`~kyco.core.flow.OutputAction`):
+            output_action (:class:`~kytos.core.flow.OutputAction`):
                 A instance of OutputAction.
         """
         return ActionOutput(port=self.output_port)
@@ -279,7 +279,7 @@ class OutputAction(FlowAction):
           dict_content (dict): Python dictionary with OutputAction attribute.
 
         Returns:
-          output_action (:class:`~kyco.core.flow.OutputAction`):
+          output_action (:class:`~kytos.core.flow.OutputAction`):
                 A instance of OutputAction.
         """
         return OutputAction(output_port=dict_content['port'])
@@ -303,7 +303,7 @@ class OutputAction(FlowAction):
             ofp_action (ActionOutput): Action used to create OutputAction.
 
         Returns:
-            output_action (:class:`~kyco.core.flow.OutputAction`):
+            output_action (:class:`~kytos.core.flow.OutputAction`):
                 A instance of OutputAction.
         """
         return OutputAction(output_port=ofp_action.port.value)

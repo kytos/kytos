@@ -1,132 +1,80 @@
 |Experimental| |Openflow| |Tag| |Release| |Pypi| |Tests| |License|
 
-########
-Overview
-########
+Kytos SDN Platform
+==================
 
-Kytos Controller (*Kyco*) is the main component of the Kytos Project. It uses
-`python-openflow <http://docs.kytos.io/python-openflow>`__ library to parse
-low level OpenFlow messages and to create new OpenFlow messages to be sent.
+`Kytos SDN Platform <https://kytos.io>`_ is conceived to ease SDN controllers
+development and deployment. It was motivated by some gaps left by common SDN
+solutions. Moreover, it has strong tights with a community view, so it is
+centered on the development of applications by its users. Thus, our intention is
+not only to build a new SDN solution, but also to build a community of
+developers around it, creating new applications that benefit from the SDN
+paradigm.
 
-For more information about the Kytos Project, please visit our `Kytos web site
-<http://kytos.io/>`__.
+The project was born in 2014, when the first version of the message parsing
+library was built. After some time stalled, the development took off in earlier
+2016.
 
-This is a basic and experimental SDN controller. You can configure your
-OpenFlow switches to point to this controller after you setup it.
-
-When *Kyco* starts, it loads all configured Network Applications (NApps) and
-orchestrates all OF messages among these NApps.
-
-To read more about Network Applications, please visit the section
-":ref:`kyco-napps-management`" on the :ref:`kyco-administrator-guide`.
+For more information about this project, please visit `Kytos project website
+<https://kytos.io/>`_.
 
 QuickStart
 **********
 
-If you are on a rush, read this QuickStart guide. But we stronglly recommend
-you to read the :ref:`kyco-administrator-guide` if you are willing to install
-and use this controller, or the :ref:`kyco-developer-guide` if you have plans
-to contribute or hack this code.
+Installing
+==========
 
-Installing Kyco
-===============
+We are doing a huge effort to make Kytos and its components available on all
+common distros. So, we recommend you to download it from your distro repository.
 
-.. note:: We are improving this and soon you will be able to install from the
- major distros repositories.
+But if you are trying to test, develop or just want a more recent version of our
+software no problem: Download now, the latest release (it still a beta
+software), from our repository:
 
-For now, you can install this package from source (if you have cloned this
-repository) or via pip.
-
-Installing from PyPI
---------------------
-
-*Kyco* is in PyPI repository, so you can easily install it via `pip3` (`pip`
-for Python 3) or include this project in your `requirements.txt`.
-
-If you do not have `pip3`, the procedures to install are:
-
-Ubuntu/Debian
-^^^^^^^^^^^^^
+First you need to clone *kytos* repository:
 
 .. code-block:: shell
 
-    $ sudo apt-get update
-    $ sudo apt-get install python3-pip
+   $ git clone https://github.com/kytos/kytos.git
 
-Fedora
-^^^^^^
-
-.. code-block:: shell
-
-    $ sudo dnf update
-    $ sudo dnf install python3-pip
-
-Centos
-^^^^^^
+After cloning, the installation process is done by standard `setuptools` install
+procedure:
 
 .. code-block:: shell
 
-    $ sudo yum -y update
-    $ sudo yum -y install yum-utils
-    $ sudo yum -y groupinstall development
-    $ sudo yum -y install https://centos7.iuscommunity.org/ius-release.rpm
-    $ sudo yum -y install python35u-3.5.2
-    $ sudo curl https://bootstrap.pypa.io/get-pip.py | python3.5
-
-After installed `pip3` you can install *Kyco* running:
-
-.. code:: shell
-
-    $ sudo pip3 install kyco
-
-Installing from source code
----------------------------
-
-First you need to clone *Kyco* repository:
-
-.. code-block:: shell
-
-   $ git clone https://github.com/kytos/kyco.git
-
-After cloning, the installation process is done by standard `setuptools`
-install procedure:
-
-.. code-block:: shell
-
-   $ cd kyco
+   $ cd kytos
    $ sudo python3 setup.py install
 
 Configuring
 ===========
 
-After *Kyco* installation, all kyco config files are located at
-``/etc/kytos/kyco/``.
+After *kytos* installation, all config files will be located at ``/etc/kytos/``.
 
-*Kyco* also accepts a configuration file as input to change its default
-behaviour. You can view and modify the main kyco config file at
-``/etc/kytos/kyco/kyco.conf``.
+*Kytos* also accepts a configuration file as argument to change its default
+behaviour. You can view and modify the main config file at
+``/etc/kytos/kytos.conf``.
 
 .. note:: We have also a logging.ini config file but is not working yet.
 
-For more information about the config options please visit the section
-:ref:`kyco-administrator-guide-configuration` on the
-:ref:`kyco-administrator-guide`.
+For more information about the config options please visit the `Kytos's
+Administrator Guide
+<https://docs.kytos.io/kytos/administrator/#configuration>`__.
 
 How to use
 **********
 
-.. note:: Very soon, you will be able to start and manage kyco by a command
- line tool. But for now, you have to open the ipython and run some code. Sorry
- about that.
+.. note:: Very soon, you will be able to start and manage kytos daemon by a
+   command line tool. But for now, you have to open the ipython and run some
+   code. Sorry about that.
 
-To use *Kyco*, after installing it on the system, you need to open the ipython
+To use *kytos*, after installing it on the system, you need to open the ipython
 (``ipython3``) console and run the following commands:
 
 .. code-block:: python
 
-    >>> from kyco.controller import Controller
-    >>> from kyco.config import KycoConfig
-    >>> config = KycoConfig().options['daemon']
+    >>> from kytos.controller import Controller
+    >>> from kytos.config import KytosConfig
+    >>> config = KytosConfig().options['daemon']
     >>> controller = Controller(config)
     >>> controller.start()
 
@@ -137,15 +85,10 @@ With the above commands your controller will be running and ready to be used.
 Keep in mind that it need to be run as root - or with a user granted with the
 necessary permissions, such as to open a socket on port 6633.
 
-*Kyco* default setup also deploy our set of Core Network Applications
-(*NApps*). For more information regarding NApps, please visit the section
-:ref:`kyco-napps-management` under the :ref:`kyco-administrator-guide` and also
-the `Kytos Core NApps Documentation <http://docs.kytos.io/kyco-core-napps>`__.
-
-.. note:: Besides starting *Kyco*, if you wish to use our web based interface
- you will need to start a webserver to serve the this interface. See more at:
- `Kytos Admin UI page <https://github.com/kytos/kytos-admin-ui>`__. On the
- future this it will be installed automatically. Sorry about that.
+.. note:: Besides starting *Kytos*, if you wish to use our web based interface
+   you will need to start a webserver to serve the this interface. See more at:
+  `Kytos Admin UI page <https://github.com/kytos/kytos-admin-ui>`__. On the future
+  this it will be installed automatically. Sorry about that.
 
 .. |Experimental| image:: https://img.shields.io/badge/stability-experimental-orange.svg
 .. |Openflow| image:: https://img.shields.io/badge/Openflow-1.0.0-brightgreen.svg

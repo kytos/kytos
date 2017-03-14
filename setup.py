@@ -23,7 +23,7 @@ if 'VIRTUAL_ENV' in os.environ:
 else:
     BASE_ENV = '/'
 
-ETC_FILES = ['etc/kyco.conf', 'etc/logging.ini']
+ETC_FILES = ['etc/kytos.conf', 'etc/logging.ini']
 
 
 class SimpleCommand(Command):
@@ -60,7 +60,7 @@ class Linter(SimpleCommand):
     @staticmethod
     def lint(ignore=False):
         """Run pylama and radon."""
-        files = 'setup.py tests kyco'
+        files = 'setup.py tests kytos'
         print('Pylama is running. It may take several seconds...')
         ignore_options = '--ignore=W,R,D203,D213,I0011'
         options = ignore_options if ignore else ''
@@ -136,8 +136,8 @@ setup(name='kytos-core',
       author_email='of-ng-dev@ncc.unesp.br',
       license='MIT',
       test_suite='tests',
-      scripts=['bin/kyco'],
-      data_files=[(os.path.join(BASE_ENV, 'etc/kyco'),
+      scripts=['bin/kytosd'],
+      data_files=[(os.path.join(BASE_ENV, 'etc/kytos'),
                    ETC_FILES)],
       packages=find_packages(exclude=['tests']),
       install_requires=[str(ir.req) for ir in requirements],

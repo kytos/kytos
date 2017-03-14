@@ -1,7 +1,7 @@
 Kytos SDN Platform
 ##################
 
-|Experimental| |Openflow| |Tag| |Release| |Pypi| |Tests| |License|
+|Experimental| |Tag| |Release| |Tests| |License|
 
 `Kytos SDN Platform <https://kytos.io>`_ is conceived to ease SDN controllers
 development and deployment. It was motivated by some gaps left by common SDN
@@ -90,14 +90,27 @@ necessary permissions, such as to open a socket on port 6633.
   `Kytos Admin UI page <https://github.com/kytos/kytos-admin-ui>`__. On the future
   this it will be installed automatically. Sorry about that.
 
+Authors
+*******
+
+For a complete list of authors, please open ``AUTHORS.rst`` file.
+
+Contributing
+************
+
+If you want to contribute to this project, please read `Kytos Documentation
+<https://docs.kytos.io/kytos/contributing/>`__ website.
+
+License
+*******
+
+This software is under *MIT-License*. For more information please read
+``LICENSE`` file.
 .. |Experimental| image:: https://img.shields.io/badge/stability-experimental-orange.svg
-.. |Openflow| image:: https://img.shields.io/badge/Openflow-1.0.0-brightgreen.svg
-   :target: https://www.opennetworking.org/images/stories/downloads/sdn-resources/onf-specifications/openflow/openflow-spec-v1.0.0.pdf
 .. |Tag| image:: https://img.shields.io/github/tag/kytos/kyco.svg
    :target: https://github.com/kytos/kyco/tags
 .. |Release| image:: https://img.shields.io/github/release/kytos/kyco.svg
    :target: https://github.com/kytos/kyco/releases
-.. |Pypi| image:: https://img.shields.io/pypi/v/kyco.svg
 .. |Tests| image:: https://travis-ci.org/kytos/kyco.svg?branch=develop
    :target: https://travis-ci.org/kytos/kyco
 .. |License| image:: https://img.shields.io/github/license/kytos/kyco.svg

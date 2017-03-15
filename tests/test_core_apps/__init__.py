@@ -1,1 +1,1 @@
-"""Module to test the kyco-core-napps."""
+"""Module to test the kytos-napps."""

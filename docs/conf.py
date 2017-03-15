@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Kyco documentation build configuration file, created by
+# Kytos documentation build configuration file, created by
 # sphinx-quickstart on Mon July 04 10:22:32 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -53,8 +53,8 @@ source_suffix = '.rst'
 master_doc = 'references'
 
 # General information about the project.
-project_short_name = u'Kyco'
-project = u'Kyco - OpenFlow Controller from Kytos Project'
+project_short_name = u'Kytos'
+project = u'Kytos SDN Platform'
 copyright = u'2016, Kytos\' Development Team'
 author = u'Kytos\' Development Team'
 
@@ -132,7 +132,7 @@ html_context = {
 # documentation.
 html_theme_options = {
      # Navigation bar title. (Default: ``project`` value)
-    'navbar_title': 'Kyco',
+    'navbar_title': 'Kytos',
 
     # Tab name for entire site. (Default: "Site")
     'navbar_site_name': 'Sections',
@@ -202,7 +202,7 @@ html_theme_options = {
 
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
-#html_title = u'Kyco v0.1.0'
+#html_title = u'Kytos v0.1.0'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -288,7 +288,7 @@ html_show_sourcelink = False
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'kycodoc'
+htmlhelp_basename = 'kytosdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -310,7 +310,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'kyco.tex', u'Kyco Documentation',
+    (master_doc, 'kytos.tex', u'Kytos Documentation',
      u'Kytos\' Development Team', 'manual'),
 ]
 
@@ -340,7 +340,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'kyco', u'Kyco Documentation',
+    (master_doc, 'kytos', u'Kytos Documentation',
      [author], 1)
 ]
 
@@ -354,8 +354,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Kyco', u'Kyco Documentation',
-     author, 'kyco', 'One line description of project.',
+    (master_doc, 'Kytos', u'Kytos Documentation',
+     author, 'kytos', 'One line description of project.',
      'Miscellaneous'),
 ]
 

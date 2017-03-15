@@ -1,22 +1,22 @@
-"""Kyco Napps Module."""
+"""Kytos Napps Module."""
 import logging
 from abc import ABCMeta, abstractmethod
 from threading import Event, Thread
 
-from kyco.utils import listen_to
+from kytos.utils import listen_to
 
 log = logging.getLogger(__name__)
 
-__all__ = ('KycoNApp')
+__all__ = ('KytosNApp')
 
 
-class KycoNApp(Thread, metaclass=ABCMeta):
-    """Base class for any KycoNApp to be developed."""
+class KytosNApp(Thread, metaclass=ABCMeta):
+    """Base class for any KytosNApp to be developed."""
 
     __event = Event()
 
     def __init__(self, controller, **kwargs):
-        """Contructor of KycoNapps.
+        """Contructor of KytosNapps.
 
         Go through all of the instance methods and selects those that have
         the events attribute, then creates a dict containing the event_name
@@ -28,7 +28,7 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         Thread.__init__(self, daemon=False)
         self.controller = controller
         self.controller.log_websocket.register_log(log)
-        self._listeners = {'kyco/core.shutdown': [self._shutdown_handler]}
+        self._listeners = {'kytos/core.shutdown': [self._shutdown_handler]}
         #: int: Seconds to sleep before next call to :meth:`execute`. If
         #: negative, run :meth:`execute` only once.
         self.__interval = -1
@@ -76,15 +76,15 @@ class KycoNApp(Thread, metaclass=ABCMeta):
             self.__event.wait(self.__interval)
             self.execute()
 
-    @listen_to('kyco/core.shutdown')
+    @listen_to('kytos/core.shutdown')
     def _shutdown_handler(self, event):
-        """Method used to listen shutdown event from kyco.
+        """Method used to listen shutdown event from kytos.
 
-        This method listens the kyco/core.shutdown event and call the shutdown
+        This method listens the kytos/core.shutdown event and call the shutdown
         method from napp subclass implementation.
 
         Paramters
-            event (:class:`KycoEvent`): event to be listened.
+            event (:class:`KytosEvent`): event to be listened.
         """
         if not self.__event.is_set():
             self.__event.set()
@@ -92,7 +92,7 @@ class KycoNApp(Thread, metaclass=ABCMeta):
 
     @abstractmethod
     def setup(self):
-        """Replace the 'init' method for the KycoApp subclass.
+        """Replace the 'init' method for the KytosApp subclass.
 
         The setup method is automatically called by the run method.
         Users shouldn't call this method directly.
@@ -101,9 +101,9 @@ class KycoNApp(Thread, metaclass=ABCMeta):
 
     @abstractmethod
     def execute(self):
-        """Execute in a loop until the signal 'kyco/core.shutdown' is received.
+        """Execute in a loop until the signal 'kytos/core.shutdown' is received.
 
-        The execute method is called by KycoNApp class.
+        The execute method is called by KytosNApp class.
         Users shouldn't call this method directly.
         """
         pass
@@ -117,7 +117,7 @@ class KycoNApp(Thread, metaclass=ABCMeta):
         execute method if it is in a loop.
 
         This methods is not going to be called directly, it is going to be
-        called by the _shutdown_handler method when a KycoShutdownEvent is
+        called by the _shutdown_handler method when a KytosShutdownEvent is
         sent.
         """
         pass

@@ -7,15 +7,15 @@ from threading import current_thread
 # TODO: Fix version scheme
 from pyof.v0x01.common.header import Header
 
-from kyco.core.events import KycoEvent
-from kyco.core.switch import Connection
+from kytos.core.events import KytosEvent
+from kytos.core.switch import Connection
 
-__all__ = ('KycoServer', 'KycoOpenFlowRequestHandler')
+__all__ = ('KytosServer', 'KytosOpenFlowRequestHandler')
 
 log = logging.getLogger(__name__)
 
 
-class KycoServer(ThreadingMixIn, TCPServer):
+class KytosServer(ThreadingMixIn, TCPServer):
     """Abstraction a TCPServer to listen packages from the network.
 
     This is a TCP Server that will be listening on the specific port
@@ -32,14 +32,14 @@ class KycoServer(ThreadingMixIn, TCPServer):
                  # Change after definitions on #62
                  # controller_put_raw_event):
                  controller):
-        """Constructor of KycoServer receive the parameters below.
+        """Constructor of KytosServer receive the parameters below.
 
         Parameters:
             server_address (tuple): Address which the server is listening.
                 default ( ('127.0.0.1', 80) )
             RequestHandlerClass (RequestHandlerClass):
                 Class that will be instantiated to handle each request.
-            controller (KycoController): The controller instance.
+            controller (KytosController): The controller instance.
 
         """
         super().__init__(server_address, RequestHandlerClass,
@@ -54,7 +54,7 @@ class KycoServer(ThreadingMixIn, TCPServer):
         try:
             self.server_bind()
             self.server_activate()
-            log.info("Kyco listening at %s:%s", self.server_address[0],
+            log.info("Kytos listening at %s:%s", self.server_address[0],
                      self.server_address[1])
             super().serve_forever(poll_interval)
         except Exception:
@@ -62,12 +62,12 @@ class KycoServer(ThreadingMixIn, TCPServer):
             raise
 
 
-class KycoOpenFlowRequestHandler(BaseRequestHandler):
+class KytosOpenFlowRequestHandler(BaseRequestHandler):
     """The socket/request handler class for our controller.
 
     It is instantiated once per connection between each switche and the
     controller.
-    The setup class will dispatch a KycoEvent (SwitchUp?) on the controller,
+    The setup class will dispatch a KytosEvent (SwitchUp?) on the controller,
     that will be processed by the Controller Core (or a Core App).
     The finish class will close the connection and dispatch a KytonEvents
     (SwitchDown?) on the controller. Or this method will be called by the
@@ -77,8 +77,8 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
     def setup(self):
         """Method used to create a new connection with client.
 
-        This method builds a new connection, makes a new KycoEvent named
-        'kyco/core.connection.new' and put this in a raw buffer.
+        This method builds a new connection, makes a new KytosEvent named
+        'kytos/core.connection.new' and put this in a raw buffer.
         """
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
@@ -87,8 +87,8 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         self.request.settimeout(30)  # TODO: Send this to a config option
         self.exception = None
 
-        event = KycoEvent(name='kyco/core.connection.new',
-                          content={'source': self.connection})
+        event = KytosEvent(name='kytos/core.connection.new',
+                           content={'source': self.connection})
 
         self.server.controller.buffers.raw.put(event)
         log.info("New connection from %s:%s", self.ip, self.port)
@@ -97,7 +97,7 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         """Handle each request generically and put that in a raw event buffer.
 
         This method read the Header of openflow package, read the binary data,
-        then create a new KycoEvent and put this in a raw event buffer.
+        then create a new KytosEvent and put this in a raw event buffer.
         """
         curr_thread = current_thread()
         header_len = 8
@@ -138,16 +138,17 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
                        'header': header,
                        'binary_data': binary_data}
 
-            event = KycoEvent(name='kyco/core.messages.openflow.new',
-                              content=content)
+            event = KytosEvent(name='kytos/core.messages.openflow.new',
+                               content=content)
 
             self.server.controller.buffers.raw.put(event)
 
     def finish(self):
         """Method is called when the client connection is finished.
 
-        When this method is called the request is closed, a new KycoEvent is
-        built with kyco/core.connection.lost name and put this in a app buffer.
+        When this method is called the request is closed, a new KytosEvent is
+        built with kytos/core.connection.lost name and put this in a app
+        buffer.
         """
         # TODO: Client disconnected is the only possible reason?
         log.info("Client %s:%s disconnected. Reason: %s",
@@ -157,6 +158,6 @@ class KycoOpenFlowRequestHandler(BaseRequestHandler):
         if self.exception:
             content['exception'] = self.exception
 
-        event = KycoEvent(name='kyco/core.connection.lost',
-                          content=content)
+        event = KytosEvent(name='kytos/core.connection.lost',
+                           content=content)
         self.server.controller.buffers.app.put(event)

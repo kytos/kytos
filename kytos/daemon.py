@@ -1,4 +1,4 @@
-"""Module used to manage kyco processes without or with daemon context."""
+"""Module used to manage kytos processes without or with daemon context."""
 import logging
 import os
 import signal
@@ -12,15 +12,15 @@ log = logging.getLogger(__name__)
 
 
 class NoDaemonContext(object):
-    """A mock DaemonContext for running kyco without being a daemon."""
+    """A mock DaemonContext for running kytos without being a daemon."""
 
     def __init__(self, **kwargs):
         """Constructor of NoDaemonContext receive the parameters below.
 
         Parameters:
-            signal_map (dict): dictionary with signals used in kyco.
-            pidfile (string): address of a pidfile to be used in kyco.
-            working_dir (string): working directory to be used in kyco.
+            signal_map (dict): dictionary with signals used in kytos.
+            pidfile (string): address of a pidfile to be used in kytos.
+            working_dir (string): working directory to be used in kytos.
         """
         # Do we need pidfile and a different working dir ?
         self.signal_map = kwargs.pop('signal_map', {})
@@ -42,19 +42,19 @@ class NoDaemonContext(object):
             self.pidfile.__exit__(exc_type, exc_val, exc_tb)
 
     def terminate(self, *args):
-        """Method used to shutdown the kyco process."""
+        """Method used to shutdown the kytosd process."""
         print("Terminate requested, without context")
         sys.exit(0)
 
 
-class KycoDaemon(object):
-    """Daemonize and run the kyco daemon."""
+class KytosDaemon(object):
+    """Daemonize and run the kytos daemon."""
 
     def __init__(self, options):
-        """Constructor of KycoDaemon reveice the parameters below.
+        """Constructor of KytosDaemon service the parameters below.
 
         Parameters
-            options (dict): python dictionary with options to run kyco.
+            options (dict): python dictionary with options to run kytos.
         """
         self.options = options
         context_class = DaemonContext if options.daemon else NoDaemonContext
@@ -75,7 +75,7 @@ class KycoDaemon(object):
             files_preserve=[pidfile.path])
 
     def run(self):
-        """Method used to hold kyco processes."""
+        """Method used to hold kytos processes."""
         # setup_logging(self.options)
         # TODO: Print nice message if daemon is_open.
         with self.context:

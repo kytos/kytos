@@ -56,12 +56,12 @@ help:
 
 .PHONY: clean
 clean:
-	rm -rf kyco.*
+	rm -rf kytos.*
 	rm -rf $(BUILDDIR)/*
 
 .PHONY: html
 html:
-	sphinx-apidoc -o . ../kyco/ -d10 -M
+	sphinx-apidoc -o . ../kytos/ -d10 -M
 	sed -i "/Submodules/,+1d" *.rst
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
@@ -69,7 +69,7 @@ html:
 
 .PHONY: dirhtml
 dirhtml:
-	sphinx-apidoc -o . ../kyco/ -d10 -M
+	sphinx-apidoc -o . ../kytos/ -d10 -M
 	sed -i "/Submodules/,+1d" *.rst
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo
@@ -106,9 +106,9 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/kyco.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/kytos.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/kyco.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/kytos.qhc"
 
 .PHONY: applehelp
 applehelp:
@@ -125,8 +125,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/kyco"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/kyco"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/kytos"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/kytos"
 	@echo "# devhelp"
 
 .PHONY: epub
@@ -240,8 +240,8 @@ dummy:
 	@echo "Build finished. Dummy builder generates no files."
 
 livehtml:
-	sphinx-apidoc -o . ../kyco/ -d10 -M
+	sphinx-apidoc -o . ../kytos/ -d10 -M
 	sed -i "/Submodules/,+1d" *.rst
-	sphinx-autobuild -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml -z ../kyco
+	sphinx-autobuild -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml -z ../kytos
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."

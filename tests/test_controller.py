@@ -15,8 +15,8 @@ from tests.helper import new_client, new_controller
 #         """Do the test basic setup."""
 #         self.controller = new_controller()
 #         # Sleep time to wait the starting process
-#         # TODO: How to avoid the necessity of this?
-#         #       Do we need to avoid it? Or the Daemon will handle this timing?
+#         # TODO:How to avoid the necessity of this?
+#         #      Do we need to avoid it? Or the Daemon will handle this timing?
 #         time.sleep(0.1)
 #
 #     @classmethod

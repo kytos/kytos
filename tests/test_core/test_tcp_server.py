@@ -38,7 +38,7 @@ class HandlerForTest(BaseRequestHandler):
 # TODO: We need to rethink this test, since that Kytos is now standalone
 # class TestKytosServer(TestCase):
 #     """Teste KytosServer class (TCPServer)."""
-# 
+#
 #     def setUp(self):
 #         """Do the test basic setup."""
 #         config = get_config()
@@ -51,10 +51,10 @@ class HandlerForTest(BaseRequestHandler):
 #                              target=self.server.serve_forever)
 #         self.thread.start()
 #         # Sleep time to wait the starting process
-#         # TODO: How to avoid the necessity of this?
-#         #       Do we need to avoid it? Or the Daemon will handle this timing?
+#         # TODO:How to avoid the necessity of this?
+#         #      Do we need to avoid it? Or the Daemon will handle this timing?
 #         time.sleep(0.1)
-# 
+#
 #     def test_one_connection(self):
 #         """Teste on connected client."""
 #         message = VendorHeader(xid=1, vendor=5)
@@ -64,7 +64,7 @@ class HandlerForTest(BaseRequestHandler):
 #         message = client.recv(16)
 #         self.assertEqual(message, b'message received')
 #         client.close()
-# 
+#
 #     def tearDown(self):
 #         """Shutdown the test."""
 #         self.server.socket.close()
@@ -72,7 +72,7 @@ class HandlerForTest(BaseRequestHandler):
 #         self.thread.join()
 #         while self.thread.is_alive():
 #             pass
-# 
+#
 
 # TODO: We need to rethink this test, since that Kytos is now standalone
 # class TestKytosOpenFlowHandler(TestCase):
@@ -85,13 +85,13 @@ class HandlerForTest(BaseRequestHandler):
 #         self.controller = EmptyController
 #         self.controller.buffers = KytosBuffers()
 #         self.server = KytosServer((self.options.listen, self.options.port),
-#                                   KytosOpenFlowRequestHandler, self.controller)
+#                                KytosOpenFlowRequestHandler, self.controller)
 #         self.thread = Thread(name='TCP Server',
 #                              target=self.server.serve_forever)
 #         self.thread.start()
 #         # Sleep time to wait the starting process
-#         # TODO: How to avoid the necessity of this?
-#         #       Do we need to avoid it? Or the Daemon will handle this timing?
+#         # TODO:How to avoid the necessity of this?
+#         #      Do we need to avoid it? Or the Daemon will handle this timing?
 #         time.sleep(0.1)
 #
 #     def test_one_connection(self):

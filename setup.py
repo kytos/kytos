@@ -97,7 +97,7 @@ class Cleaner(SimpleCommand):
 
 
 class DevelopMode(develop):
-    """Recommended setup for kytos-core-napps developers.
+    """Recommended setup for developers.
 
     Instead of copying the files to the expected directories, a symlink is
     created on the system aiming the current source code.
@@ -126,9 +126,14 @@ class DevelopMode(develop):
 
 requirements = [i.strip() for i in open("requirements.txt").readlines()]
 
+# TODO: Move this to a more appropiate place
+napps_dir = '/var/lib/kytos/napps'
+if not os.path.exists(napps_dir):
+    os.mkdir(napps_dir)
+
 setup(name='kytos',
       version=__version__,
-      description='Controller for OpenFlow Protocol from the Kytos project',
+      description='Kytos, an open source SDN Plataform.',
       url='http://github.com/kytos/kytos-core',
       author='Kytos Team',
       author_email='of-ng-dev@ncc.unesp.br',
@@ -136,8 +141,7 @@ setup(name='kytos',
       test_suite='tests',
       install_requires=requirements,
       scripts=['bin/kytosd'],
-      data_files=[(os.path.join(BASE_ENV, 'etc/kytos'),
-                   ETC_FILES)],
+      data_files=[(os.path.join(BASE_ENV, 'etc/kytos'), ETC_FILES)],
       packages=find_packages(exclude=['tests']),
       cmdclass={
           'develop': DevelopMode,

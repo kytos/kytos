@@ -7,7 +7,7 @@ from threading import Thread
 
 import websockets
 
-from kyco.utils import log_fmt
+from kytos.utils import log_fmt
 
 # hide websocket logs
 log = logging.getLogger('websockets.protocol')
@@ -74,7 +74,7 @@ class WebSocket(Thread):
 
 
 class LogWebSocket(WebSocket):
-    """LogWebSocket is used to serve a kyco logs."""
+    """LogWebSocket is used to serve a kytos logs."""
 
     def __init__(self, **kwargs):
         """The contructor of this class use the below params.

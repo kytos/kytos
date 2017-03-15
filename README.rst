@@ -108,11 +108,11 @@ This software is under *MIT-License*. For more information please read
 ``LICENSE`` file.
 
 .. |Experimental| image:: https://img.shields.io/badge/stability-experimental-orange.svg
-.. |Tag| image:: https://img.shields.io/github/tag/kytos/kyco.svg
-   :target: https://github.com/kytos/kyco/tags
-.. |Release| image:: https://img.shields.io/github/release/kytos/kyco.svg
-   :target: https://github.com/kytos/kyco/releases
-.. |Tests| image:: https://travis-ci.org/kytos/kyco.svg?branch=develop
-   :target: https://travis-ci.org/kytos/kyco
-.. |License| image:: https://img.shields.io/github/license/kytos/kyco.svg
-   :target: https://github.com/kytos/kyco/blob/master/LICENSE
+.. |Tag| image:: https://img.shields.io/github/tag/kytos/kytos.svg
+   :target: https://github.com/kytos/kytos/tags
+.. |Release| image:: https://img.shields.io/github/release/kytos/kytos.svg
+   :target: https://github.com/kytos/kytos/releases
+.. |Tests| image:: https://travis-ci.org/kytos/kytos.svg?branch=master
+   :target: https://travis-ci.org/kytos/kytos
+.. |License| image:: https://img.shields.io/github/license/kytos/kytos.svg
+   :target: https://github.com/kytos/kytos/blob/master/LICENSE

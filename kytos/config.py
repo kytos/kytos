@@ -1,4 +1,4 @@
-"""Here you can control the config parameters to run kyco controller.
+"""Here you can control the config parameters to run Kytos controller.
 
 Basically you can use a config file (-c option) and use arguments on command
 line. If you specify a config file, then and option configured inside this file
@@ -9,7 +9,7 @@ import os
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from configparser import ConfigParser
 
-from kyco import __version__
+from kytos import __version__
 
 if 'VIRTUAL_ENV' in os.environ:
     BASE_ENV = os.environ['VIRTUAL_ENV']
@@ -17,13 +17,13 @@ else:
     BASE_ENV = '/'
 
 
-class KycoConfig():
-    """KycoConfig class handle settings of Kyco."""
+class KytosConfig():
+    """KytosConfig class handle settings of Kytos."""
 
     def __init__(self):
-        """Constructor of KycoConfig.
+        """Constructor of KytosConfig.
 
-        The contructor set defaults parameters that can be used by KycoConfig.
+        The contructor set defaults parameters that can be used by KytosConfig.
         """
         self.options = {}
         conf_parser = ArgumentParser(add_help=False)
@@ -32,14 +32,14 @@ class KycoConfig():
                                  help="Specify a config file",
                                  metavar="FILE")
 
-        parser = ArgumentParser(prog='kyco',
+        parser = ArgumentParser(prog='kytosd',
                                 parents=[conf_parser],
                                 formatter_class=RawDescriptionHelpFormatter,
                                 description=__doc__)
 
         parser.add_argument('-v', '--version',
                             action='version',
-                            version="kyco %s" % __version__)
+                            version="kytosd %s" % __version__)
 
         parser.add_argument('-D', '--debug',
                             action='store_true',
@@ -73,28 +73,28 @@ class KycoConfig():
         self.parse_args()
 
     def parse_args(self):
-        """Get the command line options and update kyco'settings.
+        """Get the command line options and update kytos settings.
 
         When installed via pip, defaults values are:
 
-        defaults = {'pidfile': '/var/run/kyco.pid',
-                    'workdir': '/var/lib/kyco',
+        defaults = {'pidfile': '/var/run/kytosd.pid',
+                    'workdir': '/var/lib/kytos',
                     'napps': '/var/lib/kytos/napps/',
-                    'conf': '/etc/kyco/kyco.conf',
-                    'logging': '/etc/kyco/logging.ini',
+                    'conf': '/etc/kytos/kytos.conf',
+                    'logging': '/etc/kytos/logging.ini',
                     'listen': '0.0.0.0',
                     'port': 6633,
                     'daemon': False,
                     'debug': False}
         """
-        defaults = {'pidfile': os.path.join(BASE_ENV, 'var/run/kyco.pid'),
-                    'workdir': os.path.join(BASE_ENV, 'var/lib/kyco'),
+        defaults = {'pidfile': os.path.join(BASE_ENV, 'var/run/kytosd.pid'),
+                    'workdir': os.path.join(BASE_ENV, 'var/lib/kytos'),
                     'napps': os.path.join(BASE_ENV, 'var/lib/kytos/napps/'),
                     'installed_napps': os.path.join(BASE_ENV,
                                                     'var/lib/kytos/napps/',
                                                     '.installed'),
-                    'conf': os.path.join(BASE_ENV, 'etc/kyco/kyco.conf'),
-                    'logging': os.path.join(BASE_ENV, 'etc/kyco/logging.ini'),
+                    'conf': os.path.join(BASE_ENV, 'etc/kytos/kytos.conf'),
+                    'logging': os.path.join(BASE_ENV, 'etc/kytos/logging.ini'),
                     'listen': '0.0.0.0',
                     'port': 6633,
                     'daemon': False,

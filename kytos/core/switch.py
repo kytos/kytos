@@ -5,8 +5,8 @@ from socket import error as SocketError
 
 from pyof.v0x01.common.phy_port import PortFeatures
 
-from kyco.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
-from kyco.utils import now
+from kytos.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
+from kytos.utils import now
 
 __all__ = ('Interface', 'Connection', 'Switch')
 
@@ -419,7 +419,7 @@ class Switch(object):
         """Update a interface from switch instance.
 
         Parameters:
-            interface (:class:`~kyco.core.switch.Interface`):
+            interface (:class:`~kytos.core.switch.Interface`):
                 Interface object to be storeged.
         """
         if interface.port_number not in self.interfaces:

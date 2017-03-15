@@ -1,4 +1,4 @@
-"""Test of KycoServer and KycoOpenFlowHandler."""
+"""Test of KytosServer and KytosOpenFlowHandler."""
 import time
 from socket import socket
 from socketserver import BaseRequestHandler
@@ -7,8 +7,8 @@ from unittest import TestCase
 
 from pyof.v0x01.symmetric.vendor_header import VendorHeader
 
-from kyco.core.buffers import KycoBuffers
-from kyco.core.tcp_server import KycoOpenFlowRequestHandler, KycoServer
+from kytos.core.buffers import KytosBuffers
+from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
 from tests.helper import get_config
 
 
@@ -19,7 +19,7 @@ class EmptyController(object):
 
 
 class HandlerForTest(BaseRequestHandler):
-    """Basic Handler to test KycoServer."""
+    """Basic Handler to test KytosServer."""
 
     def setup(self):
         """Do the test basic setup."""
@@ -35,17 +35,17 @@ class HandlerForTest(BaseRequestHandler):
         pass
 
 
-class TestKycoServer(TestCase):
-    """Teste KycoServer class (TCPServer)."""
+class TestKytosServer(TestCase):
+    """Teste KytosServer class (TCPServer)."""
 
     def setUp(self):
         """Do the test basic setup."""
         config = get_config()
         self.options = config.options['daemon']
         self.controller = EmptyController()
-        self.controller.buffers = KycoBuffers()
-        self.server = KycoServer((self.options.listen, self.options.port),
-                                 HandlerForTest, self.controller)
+        self.controller.buffers = KytosBuffers()
+        self.server = KytosServer((self.options.listen, self.options.port),
+                                  HandlerForTest, self.controller)
         self.thread = Thread(name='TCP Server',
                              target=self.server.serve_forever)
         self.thread.start()
@@ -73,17 +73,17 @@ class TestKycoServer(TestCase):
             pass
 
 
-class TestKycoOpenFlowHandler(TestCase):
-    """Test the KycoOpenFlowHandler class."""
+class TestKytosOpenFlowHandler(TestCase):
+    """Test the KytosOpenFlowHandler class."""
 
     def setUp(self):
         """Do the test basic setup."""
         self.config = get_config()
         self.options = self.config.options['daemon']
         self.controller = EmptyController
-        self.controller.buffers = KycoBuffers()
-        self.server = KycoServer((self.options.listen, self.options.port),
-                                 KycoOpenFlowRequestHandler, self.controller)
+        self.controller.buffers = KytosBuffers()
+        self.server = KytosServer((self.options.listen, self.options.port),
+                                  KytosOpenFlowRequestHandler, self.controller)
         self.thread = Thread(name='TCP Server',
                              target=self.server.serve_forever)
         self.thread.start()

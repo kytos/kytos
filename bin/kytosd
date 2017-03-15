@@ -2,8 +2,8 @@
 """Start Controller in foreground and stop it after ctrl+c."""
 import signal
 
-from kyco.config import KycoConfig
-from kyco.controller import Controller
+from kytos.config import KycoConfig
+from kytos.controller import Controller
 
 controller = None
 kill_handler = None

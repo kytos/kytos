@@ -12,7 +12,7 @@ from setuptools import Command, find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.test import test as TestCommand
 
-from kyco import __version__
+from kytos import __version__
 
 if 'bdist_wheel' in sys.argv:
     raise RuntimeError("This setup.py does not support wheels")
@@ -22,7 +22,7 @@ if 'VIRTUAL_ENV' in os.environ:
 else:
     BASE_ENV = '/'
 
-ETC_FILES = ['etc/kyco.conf', 'etc/logging.ini']
+ETC_FILES = ['etc/kytos.conf', 'etc/logging.ini']
 
 
 class SimpleCommand(Command):
@@ -59,7 +59,7 @@ class Linter(SimpleCommand):
     @staticmethod
     def lint(ignore=False):
         """Run pylama and radon."""
-        files = 'setup.py tests kyco'
+        files = 'setup.py tests kytos'
         print('Pylama is running. It may take several seconds...')
         ignore_options = '--ignore=W,R,D203,D213,I0011'
         options = ignore_options if ignore else ''
@@ -126,7 +126,7 @@ class DevelopMode(develop):
 
 requirements = [i.strip() for i in open("requirements.txt").readlines()]
 
-setup(name='kytos-core',
+setup(name='kytos',
       version=__version__,
       description='Controller for OpenFlow Protocol from the Kytos project',
       url='http://github.com/kytos/kytos-core',
@@ -134,9 +134,9 @@ setup(name='kytos-core',
       author_email='of-ng-dev@ncc.unesp.br',
       license='MIT',
       test_suite='tests',
-      scripts=['bin/kyco'],
       install_requires=requirements,
-      data_files=[(os.path.join(BASE_ENV, 'etc/kyco'),
+      scripts=['bin/kytosd'],
+      data_files=[(os.path.join(BASE_ENV, 'etc/kytos'),
                    ETC_FILES)],
       packages=find_packages(exclude=['tests']),
       cmdclass={

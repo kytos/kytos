@@ -1,56 +1,56 @@
-"""Kyco Core-Defined Exceptions."""
+"""Kytos Core-Defined Exceptions."""
 
 
-class KycoCoreException(Exception):
-    """Exception thrown when KycoCore is broken."""
+class KytosCoreException(Exception):
+    """Exception thrown when KytosCore is broken."""
 
     def __str__(self):
-        """Return message of KycoCoreException."""
-        return 'KycoCore exception: ' + super().__str__()
+        """Return message of KytosCoreException."""
+        return 'KytosCore exception: ' + super().__str__()
 
 
-class KycoSwitchOfflineException(Exception):
+class KytosSwitchOfflineException(Exception):
     """Exception thrown when a switch is offline."""
 
     def __init__(self, switch):
         """Constructor receive the parameters below.
 
         Parameters:
-            switch (:class:`~kyco.core.switch.Switch`): A switch offline.
+            switch (:class:`~kytos.core.switch.Switch`): A switch offline.
         """
         super().__init__()
         self.switch = switch
 
     def __str__(self):
-        """Return message of KycoSwitchOfflineException."""
+        """Return message of KytosSwitchOfflineException."""
         msg = 'The switch {} is not reachable. Please check the connection '
         msg += 'between the switch and the controller.'
         return msg.format(self.switch.dpid)
 
 
-class KycoEventException(Exception):
-    """Exception thrown when a KycoEvent have an illegal use."""
+class KytosEventException(Exception):
+    """Exception thrown when a KytosEvent have an illegal use."""
 
-    def __init__(self, message="KycoEvent exception", event=None):
+    def __init__(self, message="KytosEvent exception", event=None):
         """Constructor receive the parameters below.
 
         Parameters:
-            message (string): message from KycoEventException.
-            event (:class:`~kyco.core.events.KycoEvent`): Event malformed.
+            message (string): message from KytosEventException.
+            event (:class:`~kytos.core.events.KytosEvent`): Event malformed.
         """
         super().__init__()
         self.message = message
         self.event = event
 
     def __str__(self):
-        """Return the full message from KycoEventException."""
+        """Return the full message from KytosEventException."""
         message = self.message
         if self.event:
             message += ". EventType: " + type(self.event)
         return message
 
 
-class KycoWrongEventType(KycoEventException):
+class KytosWrongEventType(KytosEventException):
     """Exception related to EventType.
 
     When related to buffers, it means that the EventType is not allowed on
@@ -62,27 +62,27 @@ class KycoWrongEventType(KycoEventException):
 # Exceptions related  to NApps
 
 
-class KycoNAppException(Exception):
-    """Exception raised on a KycoNApp."""
+class KytosNAppException(Exception):
+    """Exception raised on a KytosNApp."""
 
-    def __init__(self, message="KycoNApp exception"):
+    def __init__(self, message="KytosNApp exception"):
         """Constructor receive the paramters below.
 
         Parameters:
-            message (string): message from KycoNAppException.
+            message (string): message from KytosNAppException.
         """
         super().__init__()
         self.message = message
 
     def __str__(self):
-        """Return the message from KycoNAppException."""
+        """Return the message from KytosNAppException."""
         return self.message
 
 
-class KycoNAppMissingInitArgument(KycoNAppException):
+class KytosNAppMissingInitArgument(KytosNAppException):
     """Exception thrown when NApp have a missing init argument."""
 
-    def __init__(self, message="KycoNAppMissingInitArgument"):
+    def __init__(self, message="KytosNAppMissingInitArgument"):
         """Constructor receive the parameters below.
 
         Args:

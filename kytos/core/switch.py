@@ -6,7 +6,7 @@ from socket import error as SocketError
 from pyof.v0x01.common.phy_port import PortFeatures
 
 from kytos.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
-from kytos.utils import now
+from kytos.helpers import now
 
 __all__ = ('Interface', 'Connection', 'Switch')
 

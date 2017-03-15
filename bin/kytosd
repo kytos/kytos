@@ -2,7 +2,7 @@
 """Start Controller in foreground and stop it after ctrl+c."""
 import signal
 
-from kytos.core.config import KycoConfig
+from kytos.core.config import KytosConfig
 from kytos.core.controller import Controller
 
 controller = None

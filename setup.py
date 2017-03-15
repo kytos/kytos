@@ -129,7 +129,7 @@ requirements = [i.strip() for i in open("requirements.txt").readlines()]
 # TODO: Move this to a more appropiate place
 napps_dir = '/var/lib/kytos/napps'
 if not os.path.exists(napps_dir):
-    os.mkdir(napps_dir)
+    os.makedirs(napps_dir, exist_ok=True)
 
 setup(name='kytos',
       version=__version__,

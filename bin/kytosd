@@ -21,6 +21,6 @@ def stop_controller(signum, frame):
 kill_handler = signal.signal(signal.SIGINT, stop_controller)
 
 if __name__ == '__main__':
-    config = KycoConfig()
+    config = KytosConfig()
     controller = Controller(config.options['daemon'])
     controller.start()

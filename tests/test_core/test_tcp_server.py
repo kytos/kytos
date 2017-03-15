@@ -45,7 +45,7 @@ class TestKytosServer(TestCase):
         self.controller = EmptyController()
         self.controller.buffers = KytosBuffers()
         self.server = KytosServer((self.options.listen, self.options.port),
-                                 HandlerForTest, self.controller)
+                                  HandlerForTest, self.controller)
         self.thread = Thread(name='TCP Server',
                              target=self.server.serve_forever)
         self.thread.start()

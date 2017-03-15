@@ -1,4 +1,4 @@
-"""Kytos
+"""Kytos SDN Platform main class.
 
 This module contains the main class of Kytos, which is
 :class:`~.controller.Controller`.

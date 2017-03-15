@@ -128,7 +128,7 @@ class DevelopMode(develop):
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 requirements = parse_requirements('requirements.txt', session=False)
 
-setup(name='kytos-core',
+setup(name='kytos',
       version=__version__,
       description='Controller for OpenFlow Protocol from the Kytos project',
       url='http://github.com/kytos/kytos-core',

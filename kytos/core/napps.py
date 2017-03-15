@@ -3,7 +3,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from threading import Event, Thread
 
-from kytos.helpers import listen_to
+from kytos.core.helpers import listen_to
 
 log = logging.getLogger(__name__)
 

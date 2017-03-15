@@ -1,6 +1,6 @@
 """Module with Kytos Events."""
 
-from kytos.helpers import now
+from kytos.core.helpers import now
 
 
 class KytosEvent(object):

@@ -7,7 +7,7 @@ from threading import Thread
 
 import websockets
 
-from kytos.helpers import log_fmt
+from kytos.core.helpers import log_fmt
 
 # hide websocket logs
 log = logging.getLogger('websockets.protocol')

@@ -28,8 +28,8 @@ from kytos.core.events import KytosEvent
 from kytos.core.switch import Switch
 from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
 from kytos.core.websocket import LogWebSocket
-from kytos.napps_manager import NAppsManager
-from kytos.helpers import now, start_logger
+from kytos.core.napps_manager import NAppsManager
+from kytos.core.helpers import now, start_logger
 
 log = start_logger(__name__)
 

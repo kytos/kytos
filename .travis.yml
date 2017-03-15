@@ -2,13 +2,14 @@ language: python
 python:
     - "3.6"
 # command to install dependencies
-before_install:
-    - sudo apt-get -qq update
-    - sudo apt-get install -y librrd-dev
+addons:
+    apt:
+        packages:
+        - librrd-dev
 install:
     - pip install git+git://github.com/kytos/python-openflow.git
     - pip install git+git://github.com/kytos/kytos-napps.git
-    - pip install -r requirements.txt -r requirements-dev.txt --upgrade --pre
+    - pip install -r requirements.txt -r requirements-dev.txt
     - pip install coveralls
 before_script:
     - cd $VIRTUAL_ENV/var/lib/kytos/napps/kytos

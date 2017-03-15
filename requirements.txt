@@ -1,5 +1,4 @@
 lockfile
-python-daemon
 websockets
 python-openflow >= 1.1.0b0.post1
 flask

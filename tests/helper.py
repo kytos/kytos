@@ -7,8 +7,8 @@ from socket import socket
 from pyof.v0x01.common.header import Header
 from pyof.v0x01.symmetric.hello import Hello
 
-from kytos.config import KytosConfig
-from kytos.controller import Controller
+from kytos.core.config import KytosConfig
+from kytos.core.controller import Controller
 
 __all__ = ('do_handshake', 'new_controller', 'new_client',
            'new_handshaked_client')

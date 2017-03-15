@@ -127,7 +127,8 @@ class DevelopMode(develop):
 requirements = [i.strip() for i in open("requirements.txt").readlines()]
 
 # TODO: Move this to a more appropiate place
-napps_dir = '/var/lib/kytos/napps/.installed'
+napps_dir = os.path.join(BASE_ENV, 'var/lib/kytos/napps/.installed')
+
 if not os.path.exists(napps_dir):
     os.makedirs(napps_dir, exist_ok=True)
 

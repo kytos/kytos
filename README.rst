@@ -72,8 +72,8 @@ To use *kytos*, after installing it on the system, you need to open the ipython
 
 .. code-block:: python
 
-    >>> from kytos.controller import Controller
-    >>> from kytos.config import KytosConfig
+    >>> from kytos.core.controller import Controller
+    >>> from kytos.core.config import KytosConfig
     >>> config = KytosConfig().options['daemon']
     >>> controller = Controller(config)
     >>> controller.start()

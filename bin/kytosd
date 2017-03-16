@@ -2,8 +2,8 @@
 """Start Controller in foreground and stop it after ctrl+c."""
 import signal
 
-from kytos.config import KycoConfig
-from kytos.controller import Controller
+from kytos.core.config import KytosConfig
+from kytos.core.controller import Controller
 
 controller = None
 kill_handler = None
@@ -21,6 +21,6 @@ def stop_controller(signum, frame):
 kill_handler = signal.signal(signal.SIGINT, stop_controller)
 
 if __name__ == '__main__':
-    config = KycoConfig()
+    config = KytosConfig()
     controller = Controller(config.options['daemon'])
     controller.start()

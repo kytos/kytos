@@ -8,12 +8,11 @@ import sys
 from abc import abstractmethod
 from subprocess import CalledProcessError, call, check_call
 
-from pip.req import parse_requirements
 from setuptools import Command, find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.test import test as TestCommand
 
-from kytos import __version__
+from kytos.core import __version__
 
 if 'bdist_wheel' in sys.argv:
     raise RuntimeError("This setup.py does not support wheels")
@@ -98,7 +97,7 @@ class Cleaner(SimpleCommand):
 
 
 class DevelopMode(develop):
-    """Recommended setup for kytos-core-napps developers.
+    """Recommended setup for developers.
 
     Instead of copying the files to the expected directories, a symlink is
     created on the system aiming the current source code.
@@ -125,22 +124,26 @@ class DevelopMode(develop):
             os.symlink(src, dst)
 
 
-# parse_requirements() returns generator of pip.req.InstallRequirement objects
-requirements = parse_requirements('requirements.txt', session=False)
+requirements = [i.strip() for i in open("requirements.txt").readlines()]
+
+# TODO: Move this to a more appropiate place
+napps_dir = os.path.join(BASE_ENV, 'var/lib/kytos/napps/.installed')
+
+if not os.path.exists(napps_dir):
+    os.makedirs(napps_dir, exist_ok=True)
 
 setup(name='kytos',
       version=__version__,
-      description='Controller for OpenFlow Protocol from the Kytos project',
+      description='Kytos, an open source SDN Plataform.',
       url='http://github.com/kytos/kytos-core',
       author='Kytos Team',
       author_email='of-ng-dev@ncc.unesp.br',
       license='MIT',
       test_suite='tests',
+      install_requires=requirements,
       scripts=['bin/kytosd'],
-      data_files=[(os.path.join(BASE_ENV, 'etc/kytos'),
-                   ETC_FILES)],
+      data_files=[(os.path.join(BASE_ENV, 'etc/kytos'), ETC_FILES)],
       packages=find_packages(exclude=['tests']),
-      install_requires=[str(ir.req) for ir in requirements],
       cmdclass={
           'develop': DevelopMode,
           'lint': Linter,

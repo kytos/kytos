@@ -19,9 +19,9 @@ import re
 import sys
 from importlib.machinery import SourceFileLoader
 from threading import Thread
-from urllib.request import urlopen
 
 from flask import Flask, request
+
 from kytos.core.api_server import APIServer
 from kytos.core.buffers import KytosBuffers
 from kytos.core.events import KytosEvent
@@ -30,8 +30,6 @@ from kytos.core.napps_manager import NAppsManager
 from kytos.core.switch import Switch
 from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
 from kytos.core.websocket import LogWebSocket
-from kytos.napps_manager import NAppsManager
-from kytos.utils import now, start_logger
 
 __all__ = ('Controller',)
 
@@ -67,8 +65,8 @@ class Controller(object):
         #: dict: mapping of events and event listeners.
         #:
         #: The key of the dict is a KytosEvent (or a string that represent a
-        #: regex to match agains KytosEvents) and the value is a list of methods
-        #: that will receive the referenced event
+        #: regex to match agains KytosEvents) and the value is a list of
+        #: methods that will receive the referenced event
         self.events_listeners = {'kytos/core.connection.new':
                                  [self.new_connection]}
 
@@ -119,11 +117,11 @@ class Controller(object):
         Starts a thread for each buffer handler.
         Load the installed apps.
         """
-        self.app.register_kytos_routes()
+        self.api_server.register_kytos_routes()
         self.register_websockets()
-        log.info("Starting Kytos - Kytos Controller")
+        self.log.info("Starting Kytos - Kytos Controller")
         self.server = KytosServer((self.options.listen,
-                                  int(self.options.port)),
+                                   int(self.options.port)),
                                   KytosOpenFlowRequestHandler,
                                   # TODO: Change after #62 definitions
                                   #       self.buffers.raw.put)
@@ -135,8 +133,7 @@ class Controller(object):
         app_event_handler = self.app_event_handler
 
         thrds = {'api_server': Thread(target=self.api_server.run,
-                                      args=['0.0.0.0', 8181],
-                                      kwargs={'threaded': True}),
+                                      args=['0.0.0.0', 8181]),
                  'tcp_server': Thread(name='TCP server',
                                       target=self.server.serve_forever),
                  'raw_event_handler': Thread(name='RawEvent Handler',
@@ -152,14 +149,9 @@ class Controller(object):
         for thread in self._threads.values():
             thread.start()
 
-        log.info("Loading kytos apps...")
+        self.log.info("Loading kytos apps...")
         self.load_napps()
         self.started_at = now()
-
-    def stop_api_server(self):
-        """Method used to send a shutdown request to stop Api Server."""
-        if self._threads['api_server'].is_alive():
-            urlopen('http://127.0.0.1:8181/kytos/shutdown')
 
     def register_rest_endpoint(self, *options, **kwargs):
         """Method used to return the endpoints registered by APIServer."""
@@ -189,14 +181,14 @@ class Controller(object):
             - stop the KytosServer;
         """
         # TODO: Review this shutdown process
-        log.info("Stopping Kytos")
+        self.log.info("Stopping Kytos")
 
         if not graceful:
             self.server.socket.close()
 
         self.server.shutdown()
         self.buffers.send_stop_signal()
-        self.stop_api_server()
+        self.api_server.stop_api_server()
 
         for thread in self._threads.values():
             self.log.info("Stopping thread: %s", thread.name)
@@ -358,7 +350,7 @@ class Controller(object):
             self.add_new_switch(switch)
 
             event = KytosEvent(name='kytos/core.switches.new',
-                              content={'switch': switch})
+                               content={'switch': switch})
 
         old_connection = switch.connection
         switch.update_connection(connection)

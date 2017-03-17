@@ -1,4 +1,7 @@
 """Module used to handle a API Server."""
+from http.client import RemoteDisconnected
+from urllib.request import urlopen
+
 from flask import Flask, request
 from flask_socketio import SocketIO
 
@@ -67,6 +70,17 @@ class APIServer:
                                   self.shutdown_api.__name__,
                                   self.shutdown_api, methods=['GET'])
 
+    def status_api(self):
+        """Display json with kytos status using the route '/kytos/status'."""
+        return '{"response": "running"}', 201
+
+    def stop_api_server(self):
+        """Method used to send a shutdown request to stop Api Server."""
+        try:
+           urlopen('http://127.0.0.1:8181/kytos/shutdown')
+        except:
+           pass
+
     def shutdown_api(self):
         """Handle shutdown requests received by Api Server.
 
@@ -78,8 +92,5 @@ class APIServer:
             return "", 403
 
         self.server.stop()
-        return 'Server shutting down...', 200
 
-    def status_api(self):
-        """Display json with kytos status using the route '/status'."""
-        return '{"response": "running"}', 201
+        return 'Server shutting down...', 200

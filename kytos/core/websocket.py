@@ -7,7 +7,8 @@ from io import StringIO
 from threading import Thread
 
 from flask_socketio import emit
-from kytos.utils import log_fmt
+
+from kytos.core.helpers import log_fmt
 
 # hide websocket logs
 engineio_logs = logging.getLogger('engineio')
@@ -68,4 +69,5 @@ class LogWebSocket:
            streaming = logging.StreamHandler(self.stream)
            streaming.setFormatter(logging.Formatter(log_fmt()))
            logger.addHandler(streaming)
+           logger.setLevel(logging.INFO)
            self.loggers.append(logger.name)

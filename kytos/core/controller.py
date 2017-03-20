@@ -228,7 +228,7 @@ class Controller(object):
            interval (datetime.timedelta): The uptime interval
         """
         # TODO: Return a better output
-        return self.started_at - now() if self.started_at else 0
+        return now() - self.started_at if self.started_at else 0
 
     def notify_listeners(self, event):
         """Send the event to the specified listeners.

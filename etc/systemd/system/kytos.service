@@ -1,0 +1,17 @@
+[Unit]
+Description=Kytos SDN Platform daemon
+After=network.target auditd.service
+Documentation=https://docs.kytos.io/
+
+[Service]
+ExecStart=/usr/bin/kytosd start
+PIDFile=/var/run/kytosd.pid
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/usr/bin/kytosd stop
+KillMode=process
+Restart=on-failure
+Type=notify
+
+[Install]
+WantedBy=multi-user.target
+Alias=kytos.service

@@ -1,4 +1,4 @@
 lockfile
 python-openflow
-flask
 flask-socketio
+flask

@@ -1,0 +1,27 @@
+/*
+ * Chart controller
+ *
+ */
+
+#chart-control {
+  position: absolute;
+  padding: 15px;
+  z-index: 10000;
+  top: 200;
+  right: 10;
+  padding: 5px;
+  background-color: #24262d;
+  -moz-border-radius: 20px;
+  -webkit-border-radius: 20px;
+  border-radius: 20px; /* future proofing */
+  -khtml-border-radius: 20px; /* for old Konqueror browsers */
+  color: #fff;
+
+  &.modal {
+    overflow: hidden;
+  }
+
+  .modal-header {
+    width: 100%;
+  }
+}

@@ -1,0 +1,71 @@
+
+.navbar {
+    min-height: 60px;
+}
+
+.navbar-default .navbar-brand,
+.navbar-default .navbar-brand:focus {
+    @include kytos-anim-easing(300ms);
+    background-color: $kytos-cover-color;
+    height: 60px;
+    padding: 3px 20px;
+    font-weight: 400;
+    letter-spacing: 10px;
+    color: #FFFFFF;
+    width: 200px;
+    @media (max-width: $screen-sm-max) {
+        width: 100px;
+    }
+}
+
+.navbar-default .navbar-brand {
+    color: #FFFFFF;
+}
+
+.navbar-default .navbar-brand:hover {
+    color: #FFFFFF;
+    background-color: $kytos-cover-color;
+}
+
+.navbar-default .navbar-nav > li.profil-link > a {
+padding : 14px;
+}
+
+.navbar-brand {
+padding: 0;
+text-align: center!important;
+display: table;
+vertical-align: middle;
+float: left
+}
+.navbar-brand img {
+  margin : 5px auto;
+}
+
+.navbar-default {
+    border-bottom: none;
+    background-color: #FFFFFF;
+}
+
+.left-nav-toggle {
+    float: left;
+    padding: 9px 14px;
+}
+
+.left-nav-toggle:hover a {
+    color: $kytos-cover-color;
+}
+
+.left-nav-toggle a {
+    font-size: 30px;
+    color: #949ba2;
+}
+
+.navbar-default .navbar-nav > li > a {
+    color: #6a727a;
+}
+
+.left-nav-toggle a:hover,
+.left-nav-toggle a:focus {
+    text-decoration: none;
+}

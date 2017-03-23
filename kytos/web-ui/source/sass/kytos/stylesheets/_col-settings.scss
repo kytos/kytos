@@ -1,0 +1,179 @@
+.col-settings {
+  font-family : "Helvetica Neue",Helvetica,Arial,sans-serif;
+  margin-top : 0;
+  min-height : 30vh;
+  border-right : 1px solid #111;
+  border-left : 1px solid #2a2d35;
+
+  &:first-child {
+    border-left : 0;
+  }
+
+  &:last-child {
+    border-right : 0;
+  }
+
+
+  h1 {
+    margin : 10px 0 0 0;
+    font-weight : 500;
+    font-size : 14px;
+    padding : 0;
+  }
+
+  .checkbox {
+    label {
+      padding-left: 0;
+    }
+  }
+
+  label {
+    padding-left: 0;
+    font-size : 12px;
+    display : block;
+  }
+
+  .help {
+    font-weight : 300;
+    margin: 0;
+    padding : 0;
+  }
+
+  input[type="radio"],
+  input[type="checkbox"] {
+    vertical-align : bottom;
+    margin-top : 1px;
+  }
+
+  .dropup {
+    .dropdown-menu {
+      font-size : 12px;
+      max-height: 105px;
+      overflow-x : hidden;
+      overflow-y : auto;
+    }
+  }
+
+  dl {
+    margin-bottom: 5px;
+    width: 100%;
+    dt {
+      color: #616161;
+      font-size: 8px;
+      font-weight: 300;
+      line-height: 1.5em;
+      margin-bottom: 0;
+      margin-top: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    dd {
+      font-size : 11px;
+      font-weight: 400;
+      line-height: 1.2em;
+      color : #ddd;
+    }
+  }
+
+  .tab-content {
+    .nav {
+      li {
+        a {
+          padding : 5px 0;
+        }
+      }
+    }
+
+    .table-scroll {
+      tbody {
+        height: 15vh;
+      }
+      tr {
+        width: 100%;
+        table-layout: fixed;
+        display: inline-table;
+        border-bottom : 1px solid #444;
+      }
+
+      thead > tr > th {
+        border: none;
+        background : #292929;
+        padding : 3px;
+      }
+    }
+
+  }
+
+    .context-chart {
+      @include kytos-anim-easing(300ms);
+      background: #191a1a none repeat scroll 0 0;
+      color : #444;
+      height: 240px;
+      margin: 0;
+      padding: 0;
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .context-details {
+      @include kytos-anim-easing(300ms);
+
+      h1 {
+        color : #ddd;
+      }
+
+      background: #111 none repeat scroll 0 0;
+      color : #444;
+      bottom: 0;
+      display: block;
+      height: 240px;
+      opacity: 1;
+    }
+
+
+}
+
+.maximized {
+    @include kytos-anim-easing(300ms);
+
+    .col-settings {
+      @include kytos-anim-easing(300ms);
+      overflow: hidden;
+
+      .context-chart {
+        @include kytos-anim-easing(300ms);
+        position : relative;
+        display: inline-block;
+        width : 100%;
+        height: calc(100vh - 301px);
+
+
+        svg {
+          @include kytos-anim-easing(299ms);
+          display: inline-block;
+          left: 0;
+          right: 0;
+          margin: auto;
+          text-align: center;
+        }
+      }
+
+      .context-details {
+        bottom: 0;
+        display: block;
+        height: 220px;
+        width: 100%;
+      }
+
+      .tab-content {
+        .table-scroll {
+          tbody {
+            height: 75vh;
+          }
+        }
+      }
+    }
+
+}

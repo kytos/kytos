@@ -1,0 +1,38 @@
+{
+  "name": "kytos-admin-ui",
+  "version": "v1.1.0b0",
+  "description": "Kytos admin page",
+  "main": "Gruntfile.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kytos/admin-ui.git"
+  },
+  "keywords": [
+    "kytos",
+    "admin",
+    "openflow",
+    "network",
+    "interface"
+  ],
+  "author": "Kytos Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kytos/admin-ui/issues"
+  },
+  "homepage": "https://github.com/kytos/admin-ui",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-sass": "^1.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-express": "^1.4.1",
+    "grunt-parallel": "^0.5.1",
+    "grunt-sass": "^1.2.1",
+    "load-grunt-tasks": "^3.5.2"
+  },
+  "dependencies": {
+    "grunt": "^1.0.1",
+    "grunt-sass": "^1.2.1",
+    "grunt-contrib-sass": "^1.0.0",
+    "load-grunt-tasks": "^3.5.2"
+  }
+}

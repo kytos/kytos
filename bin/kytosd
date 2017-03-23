@@ -3,7 +3,7 @@
 import signal
 
 from kytos.core.config import KytosConfig
-from kytos.core.controller import Controller
+from kytos.core.core import Controller
 
 controller = None
 kill_handler = None

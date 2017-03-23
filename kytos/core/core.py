@@ -1,14 +1,14 @@
 """Kytos SDN Platform main class.
 
 This module contains the main class of Kytos, which is
-:class:`~.controller.Controller`.
+:class:`~.core.Controller`.
 
 Basic usage:
 
 .. code-block:: python3
 
     from kytos.config import KytosConfig
-    from kytos.controller import Controller
+    from kytos.core import Controller
     config = KytosConfig()
     controller = Controller(config.options)
     controller.start()

@@ -1,6 +1,8 @@
-#!/usr/bin/env python3
-"""Start Controller in foreground and stop it after ctrl+c."""
+#!/usr/bin/env python3.6
+"""Start Kytos SDN Platform core."""
 import signal
+
+import daemon
 
 from kytos.core.config import KytosConfig
 from kytos.core.core import Controller
@@ -23,4 +25,9 @@ kill_handler = signal.signal(signal.SIGINT, stop_controller)
 if __name__ == '__main__':
     config = KytosConfig()
     controller = Controller(config.options['daemon'])
-    controller.start()
+    if controller.options.foreground:
+        controller.start()
+    else:
+        with daemon.DaemonContext():
+            controller.start()
+        print('Kytos daemon started.')

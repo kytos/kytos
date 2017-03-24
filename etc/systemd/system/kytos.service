@@ -4,7 +4,7 @@ After=network.target auditd.service
 Documentation=https://docs.kytos.io/
 
 [Service]
-ExecStart=/usr/bin/kytosd
+ExecStart=/usr/bin/kytosd -f
 ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]

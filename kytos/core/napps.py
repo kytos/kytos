@@ -1,5 +1,8 @@
 """Kytos Napps Module."""
+import json
 import logging
+import os
+import sys
 from abc import ABCMeta, abstractmethod
 from threading import Event, Thread
 
@@ -45,9 +48,17 @@ class KytosNApp(Thread, metaclass=ABCMeta):
                     self._listeners[event_name] = []
                 self._listeners[event_name].append(method)
 
-        # TODO: Load NApp data based on its json file
-        # self.name is already used in Thread class. Other attribute should be
-        # used
+        self.load_json()
+
+    def load_json(self):
+        """Method used to update object attributes based on kytos.json."""
+        current_file = sys.modules[self.__class__.__module__].__file__
+        json_path = os.path.join(os.path.dirname(current_file), 'kytos.json')
+        with open(json_path, encoding='utf-8') as data_file:
+            data = json.loads(data_file.read())
+
+        for attribute, value in data.items():
+            setattr(self, attribute, value)
 
     def execute_as_loop(self, interval):
         """Run :meth:`execute` within a loop. Call this method during setup.

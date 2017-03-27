@@ -1,3 +1,7 @@
+#############################
+Blueprint: OpenFlow Handshake
+#############################
+
 Abstract
 ========
 This blueprint describes the *OpenFlow* handshake process on **Kyco**.

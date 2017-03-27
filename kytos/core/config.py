@@ -45,9 +45,9 @@ class KytosConfig():
                             action='store_true',
                             help="Run in debug mode")
 
-        parser.add_argument('-d', '--daemon',
+        parser.add_argument('-f', '--foreground',
                             action='store_true',
-                            help="Run in daemon mode")
+                            help="Run in foreground (ctrl+c to stop)")
 
         parser.add_argument('-l', '--listen',
                             action='store',
@@ -84,7 +84,7 @@ class KytosConfig():
                     'logging': '/etc/kytos/logging.ini',
                     'listen': '0.0.0.0',
                     'port': 6633,
-                    'daemon': False,
+                    'foreground': False,
                     'debug': False}
         """
         defaults = {'pidfile': os.path.join(BASE_ENV, 'var/run/kytosd.pid'),
@@ -97,7 +97,7 @@ class KytosConfig():
                     'logging': os.path.join(BASE_ENV, 'etc/kytos/logging.ini'),
                     'listen': '0.0.0.0',
                     'port': 6633,
-                    'daemon': False,
+                    'foreground': False,
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()

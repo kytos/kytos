@@ -105,5 +105,5 @@ class APIServer:
         return 'Server shutting down...', 200
 
     def web_ui(self):
-        """Method userd to serve the index.html page for the admin-ui"""
+        """Method userd to serve the index.html page for the admin-ui."""
         return send_from_directory(self.flask_dir, 'index.html')

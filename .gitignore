@@ -101,4 +101,4 @@ aux_*.sh
 node_modules
 bin
 include
-kytos/web-ui/source/static/css/*
+#kytos/web-ui/source/static/css/*

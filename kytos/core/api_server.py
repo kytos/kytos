@@ -1,10 +1,11 @@
 """Module used to handle a API Server."""
+import os
+
 from http.client import RemoteDisconnected
 from urllib.request import urlopen
 
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from flask_socketio import SocketIO
-
 
 class APIServer:
     """Api server used to provide Kytos Controller routes."""
@@ -17,7 +18,10 @@ class APIServer:
         Parameters:
             app_name(string): String representing a App Name
         """
-        self.app = Flask(app_name)
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        self.flask_dir = os.path.join(dirname, '../web-ui/source')
+
+        self.app = Flask(app_name, root_path=self.flask_dir)
         self.server = SocketIO(self.app)
 
     def run(self, *args, **kwargs ):
@@ -50,6 +54,11 @@ class APIServer:
     def register_websocket(self, name, function, namespace='/'):
         """Method used to register websocket channel."""
         self.server.on_event(name, function, namespace)
+
+    def register_web_ui(self):
+        """Method used to register routes to the admin-ui homepage."""
+        self.app.add_url_rule('/', self.web_ui.__name__, self.web_ui)
+        self.app.add_url_rule('/index.html', self.web_ui.__name__, self.web_ui)
 
     @property
     def rest_endpoints(self):
@@ -94,3 +103,7 @@ class APIServer:
         self.server.stop()
 
         return 'Server shutting down...', 200
+
+    def web_ui(self):
+        """Method userd to serve the index.html page for the admin-ui"""
+        return send_from_directory(self.flask_dir, 'index.html')

@@ -99,6 +99,5 @@ aux_*.sh
 # Web-Ui stuff
 .sass-cache
 node_modules
-bin
 include
 kytos/web-ui/source/static/css/*

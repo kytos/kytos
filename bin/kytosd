@@ -5,7 +5,7 @@ import signal
 import daemon
 
 from kytos.core.config import KytosConfig
-from kytos.core.core import Controller
+from kytos.core import Controller
 
 controller = None
 kill_handler = None

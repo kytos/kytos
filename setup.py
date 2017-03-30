@@ -141,6 +141,10 @@ setup(name='kytos',
       license='MIT',
       test_suite='tests',
       install_requires=requirements,
+      dependency_links=[
+          'https://github.com/cemsbr/python-daemon/tarball/latest_release'
+          '#egg=python-daemon-2.1.2'
+      ],
       scripts=['bin/kytosd'],
       data_files=[(os.path.join(BASE_ENV, 'etc/kytos'), ETC_FILES)],
       packages=find_packages(exclude=['tests']),

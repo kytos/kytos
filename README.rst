@@ -3,13 +3,18 @@ Kytos SDN Platform
 
 |Experimental| |Tag| |Release| |Tests| |License|
 
-`Kytos SDN Platform <https://kytos.io>`_ is conceived to ease SDN controllers
-development and deployment. It was motivated by some gaps left by common SDN
-solutions. Moreover, it has strong tights with a community view, so it is
-centered on the development of applications by its users. Thus, our intention is
-not only to build a new SDN solution, but also to build a community of
-developers around it, creating new applications that benefit from the SDN
-paradigm.
+`Kytos SDN Platform <https://kytos.io>`_ is the fastest way to deploy an SDN
+Network. With this you can deploy a basic OpenFlow controller or your own
+controller. Kytos was designed to be easy to install, use, develop and share
+Network Apps (NApps). Kytos is incredibly powerful and easy, its modular design
+makes Kytos a lightweight SDN Platform.
+
+Kytos is conceived to ease SDN controllers development and deployment. It was
+motivated by some gaps left by common SDN solutions. Moreover, it has strong
+tights with a community view, so it is centered on the development of
+applications by its users. Thus, our intention is not only to build a new SDN
+solution, but also to build a community of developers around it, creating new
+applications that benefit from the SDN paradigm.
 
 The project was born in 2014, when the first version of the message parsing
 library was built. After some time stalled, the development took off in earlier
@@ -75,7 +80,7 @@ To use *kytos*, after installing it on the system, you need to open the ipython
 
 .. code-block:: python
 
-    >>> from kytos.core.core import Controller
+    >>> from kytos.core import Controller
     >>> from kytos.core.config import KytosConfig
     >>> config = KytosConfig().options['daemon']
     >>> controller = Controller(config)

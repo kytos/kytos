@@ -46,7 +46,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
                 self._listeners[event_name].append(method)
 
         self.load_json()
-        self.register_loggers()
+        self.register_napp_logger()
 
     def load_json(self):
         """Method used to update object attributes based on kytos.json."""
@@ -58,14 +58,13 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         for attribute, value in data.items():
             setattr(self, attribute, value)
 
-    def register_loggers(self):
+    def register_napp_logger(self):
         """Method used to create and register a logger.
 
         After called the instance will have an attribute named log.
         """
-        logger = logging.getLogger(self.author+'/'+self.name)
-        self.controller.log_websocket.register_log(logger)
-        self.log = logger
+        logger_name = "{}/{}".format(self.author, self.name)
+        self.log = self.controller.log_manager.new_logger(logger_name)
 
     def execute_as_loop(self, interval):
         """Run :meth:`execute` within a loop. Call this method during setup.

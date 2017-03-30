@@ -1,7 +1,16 @@
-##########
-Change log
-##########
+#########
+Changelog
+#########
 All notable changes to the kytos project will be documented in this file.
+
+[2017.1b2] - "bethania" beta2 - 2017-05-05
+******************************************
+Added
+=====
+- Continuous Integration with:
+  - Code quality score
+  - Test coverage
+
 
 [2017.1b1] - "bethania" beta1 - 2017-24-03
 ******************************************

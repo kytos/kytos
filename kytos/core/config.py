@@ -9,7 +9,7 @@ import os
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from configparser import ConfigParser
 
-from kytos.core import __version__
+from kytos.core._metadata import __version__
 
 if 'VIRTUAL_ENV' in os.environ:
     BASE_ENV = os.environ['VIRTUAL_ENV']

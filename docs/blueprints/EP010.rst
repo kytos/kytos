@@ -1,0 +1,110 @@
+###################################
+Blueprint: Enhancement Proposal 010
+###################################
+
+Objective: 
+##########
+Implement the OpenFlow protocol by parsing the ``OFX.X--openflow.h`` headers
+
+Affected projects:
+==================
+
+    ::
+
+        python-openflow
+
+Description:
+============
+
+
+``OFX.X--openflow.h`` contains all the necessary structs and enums, and they
+could be easely parsed and transformed into python code for use in the library.
+This could dramatically decrease new versions implementation time, and or/also
+provide a good base for testing.
+
+``OF1.3-openflow.h``:
+
+    ::
+    
+        /* Port numbering. Ports are numbered starting from 1. */
+        enum ofp_port_no {
+            /* Maximum number of physical and logical switch ports. */
+            OFPP_MAX        = 0xffffff00,
+
+            /* Reserved OpenFlow Port (fake output "ports"). */
+            OFPP_IN_PORT    = 0xfffffff8,  /* Send the packet out the input port.  This
+                                              reserved port must be explicitly used
+                                              in order to send back out of the input
+                                              port. */
+            OFPP_TABLE      = 0xfffffff9,  /* Submit the packet to the first flow table
+                                              NB: This destination port can only be
+                                              used in packet-out messages. */
+            OFPP_NORMAL     = 0xfffffffa,  /* Forward using non-OpenFlow pipeline. */
+            OFPP_FLOOD      = 0xfffffffb,  /* Flood using non-OpenFlow pipeline. */
+            OFPP_ALL        = 0xfffffffc,  /* All standard ports except input port. */
+            OFPP_CONTROLLER = 0xfffffffd,  /* Send to controller. */
+            OFPP_LOCAL      = 0xfffffffe,  /* Local openflow "port". */
+            OFPP_ANY        = 0xffffffff   /* Special value used in some requests when
+                                              no port is specified (i.e. wildcarded). */
+        };
+
+becomes >>
+
+``pyof/v0x04/common/port.py``
+
+    ::
+
+        class PortNo(Enum):
+            """
+            Port numbering. Ports are numbered starting from 1.
+            """
+
+            # Maximum number of physical and logical switch ports. 
+            OFPP_MAX        = 0xffffff00,
+
+            # Reserved OpenFlow Port (fake output "ports"). 
+            OFPP_IN_PORT    = 0xfffffff8,  # Send the packet out the input port.  This
+                                           #   reserved port must be explicitly used
+                                           #   in order to send back out of the input
+                                           #   port. 
+            OFPP_TABLE      = 0xfffffff9,  # Submit the packet to the first flow table
+                                           #   NB: This destination port can only be
+                                           #   used in packet-out messages. 
+            OFPP_NORMAL     = 0xfffffffa,  # Forward using non-OpenFlow pipeline. 
+            OFPP_FLOOD      = 0xfffffffb,  # Flood using non-OpenFlow pipeline. 
+            OFPP_ALL        = 0xfffffffc,  # All standard ports except input port. 
+            OFPP_CONTROLLER = 0xfffffffd,  # Send to controller. 
+            OFPP_LOCAL      = 0xfffffffe,  # Local openflow "port". 
+            OFPP_ANY        = 0xffffffff   # Special value used in some requests when
+                                           #   no port is specified (i.e. wildcarded). 
+
+or >>
+
+    ::
+
+        PORTNO = {
+            # Maximum number of physical and logical switch ports. 
+            'OFPP_MAX'        : 0xffffff00,
+
+            # Reserved OpenFlow Port (fake output "ports"). 
+            'OFPP_IN_PORT'    : 0xfffffff8,  # Send the packet out the input port.  This
+                                             #   reserved port must be explicitly used
+                                             #   in order to send back out of the input
+                                             #   port. 
+            'OFPP_TABLE'      : 0xfffffff9,  # Submit the packet to the first flow table
+                                             #   NB: This destination port can only be
+                                             #   used in packet-out messages. 
+            'OFPP_NORMAL'     : 0xfffffffa,  # Forward using non-OpenFlow pipeline. 
+            'OFPP_FLOOD'      : 0xfffffffb,  # Flood using non-OpenFlow pipeline. 
+            'OFPP_ALL'        : 0xfffffffc,  # All standard ports except input port. 
+            'OFPP_CONTROLLER' : 0xfffffffd,  # Send to controller. 
+            'OFPP_LOCAL'      : 0xfffffffe,  # Local openflow "port". 
+            'OFPP_ANY'        : 0xffffffff   # Special value used in some requests when
+                                             #   no port is specified (i.e. wildcarded).         
+        }
+
+
+
+
+
+

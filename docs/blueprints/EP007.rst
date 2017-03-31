@@ -1,0 +1,125 @@
+###################################
+Blueprint: Enhancement Proposal 007
+###################################
+
+
+Objective:
+##########
+Proposes the OpenFlow handshake process on Kytos.
+
+
+Affected projects:
+==================
+
+    ::
+
+        python-openflow
+        kytos
+        kytos-napps (of_core)
+
+
+Description
+============
+
+The handshake is the process by which the Controller and Switches establish 
+OpenFlow connections between each other. It is based on the OpenFlow
+specification.
+
+An OpenFlow connection is established in two stages.
+
+* The first stage is the establishment of a transport connection, which can be
+  a TCP or TLS connection between controller and Switch.
+* The second stage is the setup of the connection according to the OpenFlow
+  protocol specification. It includes for example the OF switch protocol version
+  negotiation.
+
+The First stage is implemented by kytos/core.
+While the second stage is implemented by napps/of_core.
+
+
+First stage - transport connection
+----------------------------------
+
+A server listens on a specific address\:port. For TCP connections, a custom 
+``socketserver.TCPServer`` is used. It is responsible for new requests, and 
+connection maintenance through the use of underlying TCP or TLS timeouts.
+
+During this first stage the connection is identified by the tuple
+``(ip, port)``, and is not yet related to a specific switch object.
+
+When a new TLS or TCP connection is established with ``Kytos``, the server
+instantiates a new ``KytosRequestHandler`` to be used with this connection, 
+and generates a  ``kytos/core.server.newconnection`` event carrying the 
+connection  ``(ip, port)`` identification tuple.
+
+The controller will then respond to the event adding this new connection to
+the controller ``connections`` attribute, and finally generate a
+``.kytos/core.connection.new`` event.
+
+At this point, the transport connection between the controller and the switch
+is established, and it's maintenance is being managed. All requests from the 
+connection are being passed on to the ``KytosRequestHandler``
+instance of the connection who should read the packet from the request buffer, 
+and trigger a ``kytos/core.server.message.in``, carrying the whole binary 
+message packet. It is not the server's nor the handler's responsability to 
+understand/parse the binary message received in the request.
+
+When messages are writen to the connection buffer, the server should trigger
+a ``kytos/core.server.message.out`` carrying the binary message packet.
+
+
+Second stage - openflow negotiation
+-----------------------------------
+
+Once a transport connection is established, the napps/of_core napp should
+respond the ``kytos/core.connection.new`` event, immediately sending a Hello
+packet through the new connection, and listening to any incoming Hello packets
+in the ``kytos/core.server.message.in`` events.
+
+When a Hello packet is received, the app should handle the negotiation process,
+and according to its conclusions, set connection attributes like
+``connection.pack`` and ``connection.unpack`` to the correct parser 
+module/version functions (ex: ``connection.unpack = pyof.v0x01.unpack_message`` 
+could be an option) to be used with this connection, and trigger a
+``kytos/of_core.hello_complete``. If the negotiation fails, a 
+``kytos/of_core.hello_failed`` event should be triggered.
+
+Listening to those events, other methods would either send a
+``FeaturesRequest``, or a ``HelloFailed``.
+
+To ensure that the connection is not closed before the ``HelloFailed`` packet 
+is sent, during the queuing of the ``HelloFailed``, a method could be
+configured to listen to ``kytos/core.server.message.out`` events looking for
+the queued packet, and only then terminate the connection.
+
+Other details
+-------------
+This attribute (``connections``) is a dictionary in which the key is the tuple
+composed by the socket connection ``ip`` and ``port``, and the value is the
+``socket`` object itself. On the ``BaseRequestHandler`` python class the socket
+is named ``request``.
+
+A ``connections`` item is composed by:
+
+::
+	connections = {
+	    (ip, port): {
+	        'socket': `connection_socket`,
+	        'dpid': None,
+	        'pack': `protocol pack function`,
+	        'unpack': `protocol unpack function`
+	    }
+	}
+
+
+While the handshake is not complete (``kytos/of_core.hello_complete``), ``pack``
+and ``unpack`` attributes should be ``None``.
+
+While we do not receive the ``FeaturesReply`` message with the switch ``dpid``,
+the value of the *dpid* attribute will be ``None``.
+
+During the process of a ``FeaturesReply``, the method will create a new instance
+of ``KycoSwitch`` and call the ``add_new_switch`` controller method, passing the
+created object as argument. This method will add the switch dpid on the right
+``connections`` item, and will also add the switch on the ``switches``
+attribute.

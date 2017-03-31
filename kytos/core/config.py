@@ -102,10 +102,14 @@ class KytosConfig():
 
         options, argv = self.conf_parser.parse_known_args()
 
-        if options.conf:
-            config = ConfigParser()
-            config.read([options.conf])
+        config = ConfigParser()
+        result = config.read([options.conf or defaults.get('conf')])
+
+        if result:
             defaults.update(dict(config.items("daemon")))
+        else:
+            print('There is no config file.')
+            exit(-1)
 
         self.parser.set_defaults(**defaults)
 

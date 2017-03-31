@@ -22,7 +22,7 @@ if 'VIRTUAL_ENV' in os.environ:
 else:
     BASE_ENV = '/'
 
-ETC_FILES = ['etc/kytos.conf', 'etc/logging.ini']
+ETC_FILES = ['etc/kytos/kytos.conf', 'etc/kytos/logging.ini']
 
 
 class SimpleCommand(Command):
@@ -111,14 +111,14 @@ class DevelopMode(develop):
 
     def create_path(self, file_name):
         """Method used to create the configurations files using develop."""
-        etc_dir = os.path.join(BASE_ENV, 'etc')
+        etc_kytos_dir = os.path.join(BASE_ENV, 'etc/kytos')
 
         current_directory = os.path.dirname(__file__)
         src = os.path.join(os.path.abspath(current_directory), file_name)
         dst = os.path.join(BASE_ENV, file_name)
 
-        if not os.path.exists(etc_dir):
-            os.mkdir(etc_dir)
+        if not os.path.exists(etc_kytos_dir):
+            os.makedirs(etc_kytos_dir)
 
         if not os.path.exists(dst):
             os.symlink(src, dst)

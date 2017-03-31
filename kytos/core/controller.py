@@ -94,7 +94,7 @@ class Controller(object):
 
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
-        #: from napps.<author>.<napp_name> import ?....
+        #: from napps.<username>.<napp_name> import ?....
         sys.path.append(os.path.join(self.options.napps, os.pardir))
 
     def register_websockets(self):
@@ -445,29 +445,29 @@ class Controller(object):
         """
         self.switches[switch.dpid] = switch
 
-    def load_napp(self, author, napp_name):
+    def load_napp(self, username, napp_name):
         """Load a single app.
 
         Load a single NAPP based on its name.
 
         Args:
-            author (str): NApp author name present in napp's path.
+            username (str): NApp username present in napp's path.
             napp_name (str): Name of the NApp to be loaded.
 
         Raise:
             FileNotFoundError: if napps' main.py is not found.
         """
-        if (author, napp_name) in self.napps:
+        if (username, napp_name) in self.napps:
             message = 'NApp %s/%s was already loaded'
-            self.log.warning(message, author, napp_name)
+            self.log.warning(message, username, napp_name)
         else:
-            mod_name = '.'.join(['napps', author, napp_name, 'main'])
-            path = os.path.join(self.options.napps, author, napp_name,
+            mod_name = '.'.join(['napps', username, napp_name, 'main'])
+            path = os.path.join(self.options.napps, username, napp_name,
                                 'main.py')
             module = SourceFileLoader(mod_name, path)
 
             napp = module.load_module().Main(controller=self)
-            self.napps[(author, napp_name)] = napp
+            self.napps[(username, napp_name)] = napp
 
             for event, listeners in napp._listeners.items():  # noqa
                 self.events_listeners.setdefault(event, []).extend(listeners)
@@ -477,24 +477,24 @@ class Controller(object):
     def load_napps(self):
         """Load all NApps enabled on the NApps dir."""
         napps = NAppsManager(self.options.napps)
-        for author, napp_name in napps.get_enabled():
+        for username, napp_name in napps.get_enabled():
             try:
-                self.log.info("Loading NApp %s/%s", author, napp_name)
-                self.load_napp(author, napp_name)
+                self.log.info("Loading NApp %s/%s", username, napp_name)
+                self.load_napp(username, napp_name)
             except FileNotFoundError as e:
-                self.log.error("Could not load NApp %s/%s: %s", author,
+                self.log.error("Could not load NApp %s/%s: %s", username,
                                napp_name, e)
 
-    def unload_napp(self, author, napp_name):
+    def unload_napp(self, username, napp_name):
         """Unload a specific NApp.
 
         Args:
-            author (str): NApp author name.
+            username (str): NApp username.
             napp_name (str): Name of the NApp to be unloaded.
         """
-        napp = self.napps.pop((author, napp_name), None)
+        napp = self.napps.pop((username, napp_name), None)
         if napp is None:
-            self.log.warn('NApp %s/%s was not loaded', author, napp_name)
+            self.log.warn('NApp %s/%s was not loaded', username, napp_name)
         else:
             napp.shutdown()
             # Removing listeners from that napp
@@ -511,5 +511,5 @@ class Controller(object):
         # 'RuntimeError: dictionary changed size during iteration'
         # This is caused by looping over an dictionary while removing
         # items from it.
-        for (author, napp_name) in list(self.napps.keys()):  # noqa
-            self.unload_napp(author, napp_name)
+        for (username, napp_name) in list(self.napps.keys()):  # noqa
+            self.unload_napp(username, napp_name)

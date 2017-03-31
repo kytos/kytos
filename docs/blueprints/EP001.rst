@@ -1,0 +1,52 @@
+###################################
+Blueprint: Enhancement Proposal 001
+###################################
+
+Status:
+#######
+Accepted
+
+
+Objective:
+##########
+Proposes how message xid should be handled
+
+
+Affected projects:
+==================
+
+    ::
+
+        kytos-napps (of_core)
+
+
+Description
+============
+
+This `blueprint` defines how the ``xid`` of OpenFlowMessages should be treated.
+
+Solution
+========
+
+The default behavior related to ``xid`` of OpenFlowMessages when replying a 
+received message is to use the same ``xid`` of the received message.
+
+On the case of sending a new message that is not a specific reply to a 
+received message, then we will use a random ``xid`` (considering that the 
+``xid`` field is a ``UBInt32``).
+
+The ``python-openflow`` (pyof) library already implements this random 
+fulfillment of the ``xid`` attribute, so when creating new messages we just 
+need to not pass any data to this parameter.
+
+Recap:
+-----
+Response Messages -> same ``xid`` of the received message
+
+New messages -> default ``python-openflow`` behaviour (random ``xid``)
+
+Issues
+======
+
+- https://github.com/kytos/kyco/issues/35
+- https://github.com/kytos/python-openflow/issues/124

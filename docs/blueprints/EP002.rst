@@ -2,6 +2,12 @@
 Blueprint: OpenFlow Handshake
 #############################
 
+
+Status:
+#######
+Accepted
+
+
 Abstract
 ========
 This blueprint describes the *OpenFlow* handshake process on **Kyco**.

@@ -13,7 +13,7 @@ Basic usage:
     controller = Controller(config.options)
     controller.start()
 """
-
+import logging
 import os
 import re
 import sys
@@ -26,7 +26,7 @@ from kytos.core.api_server import APIServer
 from kytos.core.buffers import KytosBuffers
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
-from kytos.core.log import LogManager
+from kytos.core.logs import LogManager
 from kytos.core.napps_manager import NAppsManager
 from kytos.core.switch import Switch
 from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
@@ -91,7 +91,6 @@ class Controller(object):
         self.websockets = {}
 
         self.log = None
-        self.log_manager = None
 
         self.api_server = APIServer(__name__)
 
@@ -102,19 +101,18 @@ class Controller(object):
 
     def register_websockets(self):
         """Method used to register all websockets."""
-        self.websockets['log'] = LogWebSocket()
-        self.log_manager.enable_websocket_log(self.websockets['log'])
+        log = LogWebSocket()
+        self.websockets['log'] = log
+        LogManager.add_stream_handler(log.stream)
 
         self.api_server.register_websockets(self.websockets)
 
     def enable_logs(self):
         """Method used to register kytos log and enable the logs."""
-        self.log_manager = LogManager('INFO')
-
         if self.options.debug:
-            self.log_manager.enable_syslog()
+            LogManager.add_syslog()
 
-        self.log = self.log_manager.new_logger(__name__)
+        self.log = logging.getLogger(__name__)
 
     def start(self):
         """Start the controller.

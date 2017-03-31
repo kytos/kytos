@@ -1,5 +1,6 @@
 """Module to abstract a WebSockets."""
 import asyncio
+import logging
 import sys
 import traceback
 from io import StringIO
@@ -21,6 +22,13 @@ class LogWebSocket:
         self.stream = kwargs.get('stream', StringIO())
         self.buffer_max_size = kwargs.get('buffer_max_size', 5000)
         self.buff = []
+        self._set_log_level(logging.ERROR)
+
+   @staticmethod
+   def _set_log_level(level):
+        for name in 'engineio', 'socketio':
+            log = logging.getLogger(name)
+            log.setLevel(level)
 
    @property
    def events(self):

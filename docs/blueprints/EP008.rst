@@ -1,0 +1,97 @@
+###################################
+Blueprint: Enhancement Proposal 008
+###################################
+
+
+Objective:
+##########
+Proposes a simpler way to specify pack/unpack tests and also to capture/dump
+binary message packets used in the controller comunications.
+
+
+Affected projects:
+==================
+    ::
+
+        python-openflow
+
+
+Description:
+============
+
+Current implementation:
+-----------------------
+Binary raw openflow packets are stored in multiple files, adding 
+unnecessary complexity (and time/inefficiency) to the access of those binary
+files and also to the project structure.
+``raw/v0x01/ofpt_hello.dat`` contains ``0100 0008 0000 0001`` for example.
+
+Test classes are created for each message, and a few attributes must be set
+at each class definition:
+- A raw_file reference.
+- The corresponding Class and parameters to be passed.
+- A minimum length for the packet.
+
+
+Proposal:
+---------
+A single dictionary containing multiple binary messages
+
+::
+
+  raw_packets = {
+      1: {'hello': [b'\x01\x00\x00\x08\x00\x00\x00\x01'],
+           # ...
+          }
+      4: {'hello': [b'\x04\x00\x00\x0E\x00\x00\x00\x01\x00\x01\x00\x08\x00\x12',
+                    b'\x04\x00\x00\x0E\x00\x00\x00\x01\x00\x01\x00\x08\x00\x02'
+                    ]
+           # ...
+          }
+  }
+
+we could even include the attributes dictionary to be tested against:
+
+::
+
+  raw_packets_refs = {
+      1: {'hello': [(b'\x01\x00\x00\x08\x00\x00\x00\x01',
+                                    {'version': 1,
+                                     'type': 'hello',
+                                     'xid': 1
+                                     })
+                    ]
+          }
+      4: {'hello': [(b'\x04\x00\x00\x0E\x00\x00\x00\x01\x00\x01\x00\x08\x00\x12',
+                                    {'version': 4,
+                                     'type': 'hello',
+                                     'xid': 1,
+                                     'version_bitmap': [1, 4]
+                                     })
+                    ]
+          }
+  }
+
+which provides an easier access for packet examples:
+::
+
+  from pyof import raw_packets_refs
+  hello_binary, hello_attributes = raw_packets_refs[4]['hello'][0]
+
+There could be an utility function to include new examples in the definition
+file. A napp, or an of_core function, or even a python-openflow utility
+function reacting at every pack/unpack call, can be made to log all/some python
+openflow communication together with their pack/unpack results to this file.
+We would have then not only examples for testing/debugging, but also message
+and protocol usage statistics.
+For now, as a simple testing platform, a ``socketserver.TCPServer`` may act as
+a middle-man, passing communication between controller and switch, and dumping
+the packets exchanged in the connection. One could use this platform to dump 
+communication from an existing controller implementation connected to a switch.
+
+NB:
+    Notice that it is proposed an attributes dictionary instead of a 
+    correspondent class with parameters attributes for those classes as is the 
+    current approach. This was done with the EP003 in mind, that talks about 
+    what is exposed to the user.
+

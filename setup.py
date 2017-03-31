@@ -4,6 +4,7 @@ Run "python3 setup --help-commands" to list all available commands and their
 descriptions.
 """
 import os
+import re
 import sys
 from abc import abstractmethod
 from subprocess import CalledProcessError, call, check_call
@@ -12,7 +13,7 @@ from setuptools import Command, find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.test import test as TestCommand
 
-from kytos.core import __version__
+from kytos.core import _metadata as metadata
 
 if 'bdist_wheel' in sys.argv:
     raise RuntimeError("This setup.py does not support wheels")
@@ -133,12 +134,12 @@ if not os.path.exists(napps_dir):
     os.makedirs(napps_dir, exist_ok=True)
 
 setup(name='kytos',
-      version=__version__,
-      description='Kytos, an open source SDN Plataform.',
-      url='http://github.com/kytos/kytos-core',
-      author='Kytos Team',
-      author_email='of-ng-dev@ncc.unesp.br',
-      license='MIT',
+      version=metadata.__version__,
+      description=metadata.__description__,
+      url=metadata.__url__,
+      author=metadata.__author__,
+      author_email=metadata.__author_email__,
+      license=metadata.__license__,
       test_suite='tests',
       install_requires=requirements,
       dependency_links=[

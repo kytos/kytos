@@ -14,7 +14,7 @@ Here we have the main Tests guidelines of the ``python-openflow`` library.
 
 The main guidelines are:
 
-* Follow TDD, which means: Write testes before writing codes!!
+* Follow TDD, which means: Write tests before writing code!!
 * We aim test coverage of 100%;
 * Invalid messages must raise exceptions, and these exceptions must be covered by unittests;
 * All Messages must be tested (for attributes order and also size);
@@ -25,7 +25,7 @@ Basic Tests
 
 Considering the above described guidelines, bellow are some tasks that need to be done:
 
-* **Struct size**: assert the basic class size according to OFSpec (structs asserts) (`get_size` method);
+* **Struct size**: assert the basic class size according to OFSpec (structs asserts) (``get_size`` method);
 * **Pack**:
 
   * Check by comparing the result of pack() with raw files;

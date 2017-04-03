@@ -19,9 +19,9 @@ It will follow the OpenFlow specification, but internally **Kytos** has some spe
 Description
 ============
 
-Internally **Kytos** will represent each switch with a ``Switch`` object. This object will be identified by the switch `dpid`.
+Internally **Kytos** will represent each switch with a ``Switch`` object. This object will be identified by the switch ``dpid``.
 
-The switch `dpid` is only sent by the ``FeaturesReply`` message, so, before this moment, we do not have the identification of the `switch`. What we actually have is the identification of the current `socket` connection ``(ip, port)``.
+The switch ``dpid`` is only sent by the ``FeaturesReply`` message, so, before this moment, we do not have the identification of the ``switch``. What we actually have is the identification of the current ``socket`` connection ``(ip, port)``.
 
 So, because of that, internally the handshake processes will be held into two stages:
 
@@ -40,14 +40,14 @@ This attribute (``connections``) is a dictionary in which the key is the tuple c
 
 A ``connections`` item is composed by:
 
-```python
-connections = {
-    (ip, port): {
-        'socket': `connection_socket`,
-        'dpid': None
-    }
-}
-```
+.. code:: python
+
+  connections = {
+      (ip, port): {
+          'socket': `connection_socket`,
+          'dpid': None
+      }
+  }
 
 While we do not receive the ``FeaturesReply`` message with the switch ``dpid``, the value of the *dpid* attribute will be ``None``.
 

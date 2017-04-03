@@ -102,6 +102,7 @@ is named ``request``.
 A ``connections`` item is composed by:
 
 .. code:: python
+
   connections = {
       (ip, port): {
           'socket': `connection_socket`,

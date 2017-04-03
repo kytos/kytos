@@ -13,6 +13,7 @@ Problem Description
 To illustrate the problem, let's use a simple example code with the following structure (source code with problem and solution in https://transfer.sh/ExoAW/version-inheritance-only.tar.gz):
 
 .. code:: bash
+
   version_inheritance
   ├── example
   │   ├── __init__.py
@@ -31,6 +32,7 @@ To illustrate the problem, let's use a simple example code with the following st
 The code is quite simple and all the source is in the block below:
 
 .. code:: python
+
   # File example/v1/myclass.py
   from example.v1.myenum import MyEnum
   class MyClass:
@@ -62,6 +64,7 @@ The code is quite simple and all the source is in the block below:
 _run_all.sh_ runs both _run_v1.py_ and _run_v2.py_:
 
 .. code:: bash
+
   #!/bin/bash
   # File run_all.sh
   
@@ -79,6 +82,7 @@ Intended behavior
 We want ``v1.myclass.MyClass`` to use ``v1.myenum.MyEnum`` and ``v2.myclass.MyClass`` to use ``v2.myenum.MyEnum``. Thus, the **expected** output is:
 
 .. code:: bash
+
   v1 MyClass object
   =================
   MyClass is using MyEnum of v1.
@@ -93,6 +97,7 @@ What actually happens
 As we can notice in the output below, ``MyEnum`` is always from _v1_, imported where ``print`` is.
 
 .. code:: bash
+
   v1 MyClass object
   =================
   MyClass is using MyEnum of v1.
@@ -121,6 +126,7 @@ The line ``from example.v1.myenum import MyEnum`` must have 2 results: importing
 The solution implements a dynamic import abstract by, for example:
 
 .. code:: python
+
   from example.version_manager import VersionManager
   ver_man = VersionManager()
   MyEnum = ver_man.version_import('myenum', 'MyEnum')
@@ -132,6 +138,7 @@ Implementation and results
 These are the changes to produce the desired behavior:
 
 .. code:: diff
+
   diff -r problem/example/v1/myclass.py solution/example/v1/myclass.py
   1c1,4
   < from example.v1.myenum import MyEnum
@@ -145,6 +152,7 @@ These are the changes to produce the desired behavior:
 To check the ``VersionManager`` implementation, download the source code: https://transfer.sh/ExoAW/version-inheritance-only.tar.gz (it includes both problem and solution folders with a _v3_ that inherits from _v2_). Now, the output now is:
 
 .. code:: bash
+
   v1 MyClass object
   =================
   DEBUG: Parent class from v1 detected:

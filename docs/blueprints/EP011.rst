@@ -47,6 +47,7 @@ Case 1: Requests with empty body:
 =================================
 
 .. code:: python
+
   from pyof.v0x04.controller2switch.common import MultipartTypes as MTypes
   from pyof.v0x04.controller2switch.multipart_request import MultipartRequest
 
@@ -57,6 +58,7 @@ Case 2: Requests with a single struct body:
 ===========================================
 
 .. code:: python
+
   from pyof.v0x04.controller2switch.common import MultipartTypes as MTypes
   from pyof.v0x04.controller2switch.multipart_request import (MultipartRequest,
         SpecificRequestBody)
@@ -71,6 +73,7 @@ Case 3: Requests with an array of structs as body:
 ==================================================
 
 .. code:: python
+
   from pyof.v0x04.controller2switch.common import MultipartTypes as MTypes
   from pyof.v0x04.controller2switch.multipart_request import (MultipartRequest,
         SpecificRequestBody)
@@ -94,6 +97,7 @@ Case 1: Requests with empty body:
 =================================
 
 .. code:: python
+
   from pyof.v0x04.controller2switch.multipart_request import SpecificRequestBody
 
   request = SpecificRequestBody()
@@ -103,6 +107,7 @@ Case 2: Requests with a single struct body:
 ===========================================
 
 .. code:: python
+
   from pyof.v0x04.controller2switch.multipart_request import SpecificRequestBody
 
   request = SpecificRequestBody(some_data=1)
@@ -112,6 +117,7 @@ Case 3: Requests with an array of structs as body:
 ==================================================
 
 .. code:: python
+
   from pyof.v0x04.controller2switch.multipart_request import SpecificRequestBody
 
   request = SpecificRequestBody(list_of_data=(1,2,3))

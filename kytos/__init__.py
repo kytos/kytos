@@ -1,7 +1,6 @@
-"""Kytos Controller (Kyco) is a main component of Kytos Project.
+"""Kytos Controller is a main component of Kytos Project.
 
-Kyco is used to handle low level openflow messages using python-openflow
-library.
+This is the OpenFlow Controller of the Kytos project.
 """
 from pkgutil import extend_path
 

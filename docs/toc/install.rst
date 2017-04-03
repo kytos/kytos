@@ -10,7 +10,7 @@ You can install this package with pip package installer or from source code.
 Installing from PyPI
 --------------------
 
-*Kyco* is in PyPI, so you can easily install it via `pip3` (`pip` for Python 3)
+*Kytos* is in PyPI, so you can easily install it via `pip3` (`pip` for Python 3)
 and also include this project in your `requirements.txt` (don't worry if you
 don't recognize this file).
 
@@ -32,23 +32,23 @@ Yes, you can include this project in your ``requirements.txt`` or install from
 
 .. code-block:: shell
 
-   $ sudo pip3 install kyco
+   $ sudo pip3 install kytos
 
 Installing from source/git
 --------------------------
 
-First you need to clone `kyco` repository:
+First you need to clone `kytos` repository:
 
 .. code-block:: shell
 
-   $ git clone https://github.com/kytos/kyco
+   $ git clone https://github.com/kytos/kytos
 
 After clone, the installation process is normal when using `setuptools`:
 
 .. code-block:: shell
 
-   $ cd kyco
-   $ sudo python3 setup.py install
+   $ cd kytos
+   $ sudo python3.6 setup.py install
 
 Checking installation
 ---------------------
@@ -58,5 +58,5 @@ or `ipython`:
 
 .. code-block:: python3
 
-   >>> import kyco
+   >>> import kytos
    >>> # no errors should be displayed

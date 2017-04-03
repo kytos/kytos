@@ -8,13 +8,6 @@ from threading import Thread
 
 from flask_socketio import emit
 
-from kytos.core.helpers import log_fmt
-
-# hide websocket logs
-engineio_logs = logging.getLogger('engineio')
-engineio_logs.setLevel(logging.ERROR)
-socketio_logs = logging.getLogger('socketio')
-socketio_logs.setLevel(logging.ERROR)
 
 class LogWebSocket:
    """Class used to send logs using socketio."""
@@ -28,8 +21,14 @@ class LogWebSocket:
         """
         self.stream = kwargs.get('stream', StringIO())
         self.buffer_max_size = kwargs.get('buffer_max_size', 5000)
-        self.loggers = []
         self.buff = []
+        self._set_log_level(logging.ERROR)
+
+   @staticmethod
+   def _set_log_level(level):
+        for name in 'engineio', 'socketio':
+            log = logging.getLogger(name)
+            log.setLevel(level)
 
    @property
    def events(self):
@@ -58,16 +57,3 @@ class LogWebSocket:
        result = {"buff":  self.buff[current_line:],
                  "last_line": len(self.buff)}
        emit('show logs', result)
-
-   def register_log(self, logger=None):
-       """Method used to register new loggers.
-
-       Args:
-           logger (class `logging.Logger`): logger object that will be heard.
-       """
-       if logger and logger.name not in self.loggers:
-           streaming = logging.StreamHandler(self.stream)
-           streaming.setFormatter(logging.Formatter(log_fmt()))
-           logger.addHandler(streaming)
-           logger.setLevel(logging.INFO)
-           self.loggers.append(logger.name)

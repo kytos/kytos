@@ -1,14 +1,14 @@
 """Kytos Napps Module."""
 import json
-import logging
 import os
 import sys
 from abc import ABCMeta, abstractmethod
 from threading import Event, Thread
 
+from kytos.core import log
 from kytos.core.helpers import listen_to
 
-__all__ = ('KytosNApp')
+__all__ = 'KytosNApp',
 
 
 class KytosNApp(Thread, metaclass=ABCMeta):
@@ -46,7 +46,6 @@ class KytosNApp(Thread, metaclass=ABCMeta):
                 self._listeners[event_name].append(method)
 
         self.load_json()
-        self.register_loggers()
 
     def load_json(self):
         """Method used to update object attributes based on kytos.json."""
@@ -57,15 +56,6 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
         for attribute, value in data.items():
             setattr(self, attribute, value)
-
-    def register_loggers(self):
-        """Method used to create and register a logger.
-
-        After called the instance will have an attribute named log.
-        """
-        logger = logging.getLogger(self.author+'/'+self.name)
-        self.controller.log_websocket.register_log(logger)
-        self.log = logger
 
     def execute_as_loop(self, interval):
         """Run :meth:`execute` within a loop. Call this method during setup.
@@ -85,7 +75,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
         It should not be overriden.
         """
-        self.log.info("Running %s App", self.name)
+        log.info("Running %s App", self.name)
         # TODO: If the setup method is blocking, then the execute method will
         #       never be called. Should we execute it inside a new thread?
         self.setup()

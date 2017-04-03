@@ -1,10 +1,8 @@
 """Utilities functions used in Kytos."""
-import logging
 from datetime import datetime, timezone
 from threading import Thread
 
-__all__ = ('listen_to', 'now', 'run_on_thread',
-           'start_logger', 'log_fmt')
+__all__ = ('listen_to', 'now', 'run_on_thread')
 
 # APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
 
@@ -104,27 +102,3 @@ def run_on_thread(method):
         thread = Thread(target=method, args=args)
         thread.start()
     return threaded_method
-
-
-def start_logger(name):
-    """Start the loggers, both the Kytos and the KytosNApp.
-
-    Parameters:
-      name (string): string with name of logger object.
-
-    Returns:
-      logger (logging.Logger): Logger with Kytos message format and level info.
-    """
-    logging.basicConfig(format=log_fmt(), level=logging.INFO)
-    return logging.getLogger(name)
-
-
-def log_fmt():
-    """Return the logger string format used by Kytos Loggers.
-
-    Returns:
-        fmt (string): String Partner used to make the log message.
-    """
-    fmt = '%(asctime)s - %(levelname)s [%(name)s] (%(threadName)s) %(message)s'
-    # fmt += '\n           %(module)s - %(funcName)s - %(lineno)d'
-    return fmt

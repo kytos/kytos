@@ -14,7 +14,7 @@ Here we have the main Tests guidelines of the ``python-openflow`` library.
 
 The main guidelines are:
 
-* Follow TDD, which means: Write testes before writing codes!!
+* Follow TDD, which means: Write tests before writing code!!
 * We aim test coverage of 100%;
 * Invalid messages must raise exceptions, and these exceptions must be covered by unittests;
 * All Messages must be tested (for attributes order and also size);

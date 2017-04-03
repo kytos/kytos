@@ -101,15 +101,15 @@ is named ``request``.
 
 A ``connections`` item is composed by:
 
-::
-	connections = {
-	    (ip, port): {
-	        'socket': `connection_socket`,
-	        'dpid': None,
-	        'pack': `protocol pack function`,
-	        'unpack': `protocol unpack function`
-	    }
-	}
+.. code:: python
+  connections = {
+      (ip, port): {
+          'socket': `connection_socket`,
+          'dpid': None,
+          'pack': `protocol pack function`,
+          'unpack': `protocol unpack function`
+      }
+  }
 
 
 While the handshake is not complete (``kytos/of_core.hello_complete``), ``pack``
@@ -119,7 +119,7 @@ While we do not receive the ``FeaturesReply`` message with the switch ``dpid``,
 the value of the *dpid* attribute will be ``None``.
 
 During the process of a ``FeaturesReply``, the method will create a new instance
-of ``KycoSwitch`` and call the ``add_new_switch`` controller method, passing the
+of ``Switch`` and call the ``add_new_switch`` controller method, passing the
 created object as argument. This method will add the switch dpid on the right
 ``connections`` item, and will also add the switch on the ``switches``
 attribute.

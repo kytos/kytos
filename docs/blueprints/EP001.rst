@@ -48,5 +48,5 @@ New messages -> default ``python-openflow`` behaviour (random ``xid``)
 Issues
 ======
 
-- https://github.com/kytos/kyco/issues/35
+- https://github.com/kytos/kytos/issues/35
 - https://github.com/kytos/python-openflow/issues/124

@@ -12,154 +12,152 @@ Problem Description
 
 To illustrate the problem, let's use a simple example code with the following structure (source code with problem and solution in https://transfer.sh/ExoAW/version-inheritance-only.tar.gz):
 
-```
-version_inheritance
-├── example
-│   ├── __init__.py
-│   ├── v1
-│   │   ├── __init__.py
-│   │   ├── myclass.py
-│   │   └── myenum.py
-│   └── v2
-│       ├── __init__.py
-│       ├── myclass.py
-│       └── myenum.py
-├── run_all.sh
-├── run_v1.py
-└── run_v2.py
-```
+.. code:: bash
+  version_inheritance
+  ├── example
+  │   ├── __init__.py
+  │   ├── v1
+  │   │   ├── __init__.py
+  │   │   ├── myclass.py
+  │   │   └── myenum.py
+  │   └── v2
+  │       ├── __init__.py
+  │       ├── myclass.py
+  │       └── myenum.py
+  ├── run_all.sh
+  ├── run_v1.py
+  └── run_v2.py
 
 The code is quite simple and all the source is in the block below:
 
-```python
-# File example/v1/myclass.py
-from example.v1.myenum import MyEnum
-class MyClass:
-    def __init__(self):
-        enum_version = MyEnum.VERSION.value
-        print('MyClass is using MyEnum of v{}.'.format(enum_version))
-
-# File example/v1/myenum.py
-from enum import Enum
-class MyEnum(Enum):
-    VERSION = '1'
-
-# File example/v2/myclass.py
-from example.v1.myclass import MyClass
-
-# File example/v2/myenum.py
-from enum import Enum
-class MyEnum(Enum):
-    VERSION = '2'
-
-# File run_v1.py
-from example.v1.myclass import MyClass
-MyClass()
-
-# File run_v2.py
-from example.v2.myclass import MyClass
-MyClass()
-```
+.. code:: python
+  # File example/v1/myclass.py
+  from example.v1.myenum import MyEnum
+  class MyClass:
+      def __init__(self):
+          enum_version = MyEnum.VERSION.value
+          print('MyClass is using MyEnum of v{}.'.format(enum_version))
+ 
+  # File example/v1/myenum.py
+  from enum import Enum
+  class MyEnum(Enum):
+      VERSION = '1'
+  
+  # File example/v2/myclass.py
+  from example.v1.myclass import MyClass
+  
+  # File example/v2/myenum.py
+  from enum import Enum
+  class MyEnum(Enum):
+      VERSION = '2'
+  
+  # File run_v1.py
+  from example.v1.myclass import MyClass
+  MyClass()
+  
+  # File run_v2.py
+  from example.v2.myclass import MyClass
+  MyClass()
 
 _run_all.sh_ runs both _run_v1.py_ and _run_v2.py_:
-```bash
-#!/bin/bash
-# File run_all.sh
 
-echo 'v1 MyClass object'
-echo '================='
-python3 run_v1.py
-echo
-echo 'v2 MyClass object'
-echo '================='
-python3 run_v2.py
-```
+.. code:: bash
+  #!/bin/bash
+  # File run_all.sh
+  
+  echo 'v1 MyClass object'
+  echo '================='
+  python3 run_v1.py
+  echo
+  echo 'v2 MyClass object'
+  echo '================='
+  python3 run_v2.py
 
 Intended behavior
 -----------------
 
-We want `v1.myclass.MyClass` to use `v1.myenum.MyEnum` and `v2.myclass.MyClass` to use `v2.myenum.MyEnum`. Thus, the **expected** output is:
-```
-v1 MyClass object
-=================
-MyClass is using MyEnum of v1.
+We want ``v1.myclass.MyClass`` to use ``v1.myenum.MyEnum`` and ``v2.myclass.MyClass`` to use ``v2.myenum.MyEnum``. Thus, the **expected** output is:
 
-v2 MyClass object
-=================
-MyClass is using MyEnum of v2.
-```
+.. code:: bash
+  v1 MyClass object
+  =================
+  MyClass is using MyEnum of v1.
+  
+  v2 MyClass object
+  =================
+  MyClass is using MyEnum of v2.
 
 What actually happens
 ---------------------
 
-As we can notice in the output below, `MyEnum` is always from _v1_, imported where `print` is.
+As we can notice in the output below, ``MyEnum`` is always from _v1_, imported where ``print`` is.
 
-```
-v1 MyClass object
-=================
-MyClass is using MyEnum of v1.
-
-v2 MyClass object
-=================
-MyClass is using MyEnum of v1.
-```
+.. code:: bash
+  v1 MyClass object
+  =================
+  MyClass is using MyEnum of v1.
+  
+  v2 MyClass object
+  =================
+  MyClass is using MyEnum of v1.
 
 Solution
 ========
 
-The solution comprises 2 parts: import `v2.myenum.MyEnum` instead of `v1.myenum.MyEnum` only when `v2.myclass.MyClass` is used and, as a requirement, find out whether _v1_ or _v2_ should be used.
+The solution comprises 2 parts: import ``v2.myenum.MyEnum`` instead of ``v1.myenum.MyEnum`` only when ``v2.myclass.MyClass`` is used and, as a requirement, find out whether _v1_ or _v2_ should be used.
 
 Which version?
 --------------
 
-When `v1.myclass.MyClass` is loaded, which `MyEnum` should it use? Two possibilities: either the user (the lib user, end-user of the lib) sets the version or we discover it and don't bother the user.
+When ``v1.myclass.MyClass`` is loaded, which ``MyEnum`` should it use? Two possibilities: either the user (the lib user, end-user of the lib) sets the version or we discover it and don't bother the user.
 
-This solution discovers the version being used by checking the first file loaded that matches a pattern, like `example/(v\d+)/.*\.py`. This way, when the user runs `from example.v2.myclass import MyClass`, _example/v2/myclass/myclass.py_ is loaded and we deduce the user will use _v2_ from now on.
+This solution discovers the version being used by checking the first file loaded that matches a pattern, like ``example/(v\d+)/.*\.py``. This way, when the user runs ``from example.v2.myclass import MyClass``, _example/v2/myclass/myclass.py_ is loaded and we deduce the user will use _v2_ from now on.
 
 Importing the right version
 ---------------------------
 
-The line `from example.v1.myenum import MyEnum` must have 2 results: importing from _v1_ or importing from _v2_. Thus, using `v1` in this line is not appropriate.
+The line ``from example.v1.myenum import MyEnum`` must have 2 results: importing from _v1_ or importing from _v2_. Thus, using ``v1`` in this line is not appropriate.
 
 The solution implements a dynamic import abstract by, for example:
-```python
-from example.version_manager import VersionManager
-ver_man = VersionManager()
-MyEnum = ver_man.version_import('myenum', 'MyEnum')
-```
-The `VersionManager` will figure out the version being used and import the right `MyEnum` version.
+
+.. code:: python
+  from example.version_manager import VersionManager
+  ver_man = VersionManager()
+  MyEnum = ver_man.version_import('myenum', 'MyEnum')
+
+The ``VersionManager`` will figure out the version being used and import the right ``MyEnum`` version.
 
 Implementation and results
 --------------------------
 These are the changes to produce the desired behavior:
-```diff
-diff -r problem/example/v1/myclass.py solution/example/v1/myclass.py
-1c1,4
-< from example.v1.myenum import MyEnum
----
-> from example.version_manager import VersionManager
-> ver_man = VersionManager()
-> MyEnum = ver_man.version_import('myenum', 'MyEnum')
->
-Only in solution/example: version_manager.py
-```
 
-To check the `VersionManager` implementation, download the source code: https://transfer.sh/ExoAW/version-inheritance-only.tar.gz (it includes both problem and solution folders with a _v3_ that inherits from _v2_). Now, the output now is:
-```
-v1 MyClass object
-=================
-DEBUG: Parent class from v1 detected:
-DEBUG: - First lib file called: /(...)/example/v1/myclass.py
-DEBUG: - Version: v1
-MyClass is using MyEnum of v1.
+.. code:: diff
+  diff -r problem/example/v1/myclass.py solution/example/v1/myclass.py
+  1c1,4
+  < from example.v1.myenum import MyEnum
+  ---
+  > from example.version_manager import VersionManager
+  > ver_man = VersionManager()
+  > MyEnum = ver_man.version_import('myenum', 'MyEnum')
+  >
+  Only in solution/example: version_manager.py
 
-v2 MyClass object
-=================
-DEBUG: Parent class from v1 detected:
-DEBUG: - First lib file called: /(...)/example/v2/myclass.py
-DEBUG: - Version: v2
-MyClass is using MyEnum of v2.
-```
+To check the ``VersionManager`` implementation, download the source code: https://transfer.sh/ExoAW/version-inheritance-only.tar.gz (it includes both problem and solution folders with a _v3_ that inherits from _v2_). Now, the output now is:
+
+.. code:: bash
+  v1 MyClass object
+  =================
+  DEBUG: Parent class from v1 detected:
+  DEBUG: - First lib file called: /(...)/example/v1/myclass.py
+  DEBUG: - Version: v1
+  MyClass is using MyEnum of v1.
+  
+  v2 MyClass object
+  =================
+  DEBUG: Parent class from v1 detected:
+  DEBUG: - First lib file called: /(...)/example/v2/myclass.py
+  DEBUG: - Version: v2
+  MyClass is using MyEnum of v2.
 
 Pros and Cons
 =============
@@ -173,4 +171,4 @@ Pros and Cons
 **Cons**:
 
 1. Dynamic import may require one file per class to avoid circular imports;
-1. Cannot automatically import from 2 or more versions in the same execution. Possible solution: to change the version once the program has started, the user would run something like `version_manager.set_version(...)`
+1. Cannot automatically import from 2 or more versions in the same execution. Possible solution: to change the version once the program has started, the user would run something like ``version_manager.set_version(...)``

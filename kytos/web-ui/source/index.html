@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head;
+        any other head content must come *after* these tags -->
+  <meta name="description" content="Kytos administrative interface">
+  <meta name="author" content="Kytos Team">
+  <link rel="icon" href="static/images/favicon.png">
+  <title>Kytos - Administrative Interface</title>
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Dosis|Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i|Work+Sans:100,200,300,400,500,600,700,800,900">
+  <!-- Bootstrap core CSS -->
+  <link href='static/css/vendors/mapbox-gl.css' rel='stylesheet' />
+  <link href="static/css/vendors/owl.carousel.min.css" rel="stylesheet">
+  <link href="static/css/vendors/owl.theme.default.min.css" rel="stylesheet">
+  <link href="static/css/vendors/jquery.mCustomScrollbar.min.css" rel="stylesheet">
+  <link href="static/css/vendors/bootstrap-slider.min.css" rel="stylesheet">
+  <link href="static/css/style.css" rel="stylesheet">
+  <link href="static/css/chart.css" rel="stylesheet">
+
+  <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+  <!--[if lt IE 9]>
+    <script src="../assets/js/ie8-responsive-file-warning.js"></script>
+  <![endif]-->
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+<!-- MODALS -->
+  <div class="modal fade" id="saveLayout" tabindex="-1" role="dialog" aria-labelledby="saveLayoutLabel">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title text-center" id="saveLayoutLabel">Save this layout</h4>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="form-control input-sm" id="layout_name" placeholder='Layout name'/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-kytos-default" data-dismiss="modal">
+            Close
+          </button>
+          <button type="button" class="btn btn-kytos-primary" onclick='save_layout();'>
+            Save changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- END OF MODALS -->
+<!-- NAVBAR -->
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="index.html">
+          <img src="static/images/logo.png" class="hidden-xs hidden-sm visible-lg visible-md" height="45" alt="Kytos"/>
+          <img src="static/images/logo-circle-white.png" class="hidden-lg hidden-md visible-sm visible-xs" height="45" alt="Kytos"/>
+        </a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <div class="left-nav-toggle">
+          <a href=""> <i class="fa fa-bars"></i> </a>
+        </div>
+        <form class="navbar-form navbar-left">
+          <input type="text" class="form-control" placeholder="Search data for analysis" style="width: 175px">
+          </form>
+          <ul class="nav navbar-nav navbar-right">
+            <li class=" profil-link">
+              <a href="login.html">
+                <img src="static/images/avatar.jpg" class="img-circle" alt="">
+              </a>
+            </li>
+          </ul>
+      </div>
+    </div>
+  </nav>
+<!-- END OF NAVBAR -->
+<!-- MAIN CONTENT (MC) -->
+  <div class="container-fluid">
+      <div class="row">
+        <!-- MC: SIDEBAR -->
+        <nav>
+          <ul class="nav sidebar">
+            <li class="active nav-topology-btn">
+              <a href="index.html">
+                <i class="fa fa-dashboard fa-2x hidden-lg hidden-md"></i>
+                <i class="fa fa-dashboard hidden-xs hidden-sm"></i>
+                Topology
+              </a>
+            </li>
+            <li class="nav-hosts-btn">
+              <a href="#monitoring">
+                <i class="fa fa-bar-chart fa-2x hidden-lg hidden-md"></i>
+                <i class="fa fa-bar-chart hidden-xs hidden-sm"></i>
+                Hosts
+              </a>
+            </li>
+            <li class="nav-terminal-btn">
+              <a href="#monitoring" class="open-terminal" data-toggle="collapse" aria-expanded="false">
+                <i class="fa fa-terminal fa-2x hidden-lg hidden-md"></i>
+                <i class="fa fa-terminal hidden-xs hidden-sm"></i>
+                Terminal
+              </a>
+            </li>
+            <li class="nav-middle-spacer">&nbsp;</li>
+            <li class="nav-kytos-api-status">
+              <i class="fa fa-power-off api-status" aria-hidden="true"></i>
+              <span class='hidden-sm hidden-xs'>Kytos </span>API
+            </li>
+            <li class='nav-kytos-websocket-status'>
+              <i class="fa fa-power-off websocket-status" aria-hidden="true"></i>
+              <span class='hidden-sm hidden-xs'>Kytos Websocket</span>
+              <span class='show-sm show-xs'>WS</span>
+            </li>
+            <li class="nav-info hidden-sm hidden-xs">
+              <i class="pe pe-7s-shield text-accent"></i>
+              <div class="m-t-xs">
+                <span class="c-white">Kytos</span> is a <strong>beta software</strong>.
+                For more information, please visit <a href="http://kytos.io/">kytos.io</a>
+              </div>
+            </li>
+          </ul>
+        </nav>
+        <!-- END MC: SIDEBAR -->
+
+        <!-- MC: CHART AREA -->
+        <section class="content">
+          <div id='chart'>
+            <div id='background-map'></div>
+            <div id='topology-chart'></div>
+          </div>
+        </section>
+        <!-- END MC: CHART AREA -->
+
+        <!-- MC: BOTTOM PANEL -->
+        <section id="terminal" class="terminal">
+          <div class="terminal-header">
+            <div class="terminal-title">
+              <ul class="nav nav-pills kytos-nav-pills terminal-tabs">
+                <li id='tab_terminal_button' class="active"><a  data-toggle="pill" href="#tab_terminal"><i class="fa fa-terminal"></i> Terminal</a></li>
+                <li id='tab_context_button'><a data-callback-min-max="show_switch_context()" data-toggle="pill" href="#tab_context" ><i class="fa fa-eye"></i> Context</a></li>
+                <li><a data-toggle="pill" href="#tab_switches" onClick= populate_switches_carousel() ><i class="fa fa-circle-o"></i> Switches</a></li>
+                <li><a data-toggle="pill" href="#tab_logs"><i class="fa fa-list"></i> Logs</a></li>
+                <li><a data-toggle="pill" href="#tab_notifications"><i class="fa fa-bell-o"></i> Notifications</a></li>
+                <li><a data-toggle="pill" href="#tab_settings"><i class="fa fa-cogs"></i> Settings</a></li>
+              </ul>
+            </div>
+            <div class="terminal-status-bar">
+              <span class='terminal-status-background'>&nbsp;</span>
+            </div>
+            <div class="terminal-actions">
+              <a href="#" data-action="max" class="terminal-max"><i class="glyphicon glyphicon-fullscreen"></i></a>
+              <a href="#" data-action="med" class="terminal-med"><i class="glyphicon glyphicon-menu-up"></i></a>
+              <a href="#" data-action="min" class="terminal-min"><i class="glyphicon glyphicon-menu-down"></i></a>
+            </div>
+          </div>
+          <div class="terminal-body tab-content">
+            <div id="tab_terminal" class="tab-pane fade in active">Terminal content</div>
+            <div id="tab_switches" class="tab-pane fade in">
+              <div class="owl-carousel owl-theme">
+              </div>
+            </div>
+            <div id="tab_context" class="tab-pane fade">
+              <div id="context_target">
+                <div id="orientation_text">
+                  Click on an element on the topology chart to show its context here.
+                </div>
+              </div>
+            </div>
+            <div id="tab_logs" class="tab-pane fade"></div>
+            <div id="tab_notifications" class="tab-pane fade">Notifications</div>
+            <div id="tab_settings" class="tab-pane fade">
+              <div class="row-fluid">
+                <div class="col-settings col-md-3 col-xs-6">
+                  <h1>Display elements:</h1>
+                  <p class="help">Select the elements to be displayed</p>
+            <div class="checkbox" data-label-width="0"  data-size="mini">
+              <label for="show_topology">
+                <input id='show_topology' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#topology-chart").toggle()'> Topology
+              </label>
+              <label for="show_unused_interfaces">
+                <input id='show_unused_interfaces' type="checkbox" data-label-width="0" data-size="mini" checked="checked" data-on-color="primary" onchange="toggle_unused_interfaces();"> Unused interfaces
+              </label>
+              <label for="show_disconnected_hosts">
+                <input id='show_disconnected_hosts' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange="toggle_disconnected_hosts();"> Disconnected hosts
+              </label>
+            </div>
+                </div>
+                <div class="col-settings col-md-3 col-xs-6">
+                  <h1>Layout Settings</h1>
+                  <p class="help">Save and restore layouts.</p>
+                  <div class="mt">
+                    <button type="button" class="btn btn-sm btn-kytos-default" data-toggle="modal" data-target="#saveLayout">Save Layout</button>
+                  </div>
+                  <div class="dropup mt" id="savedLayouts">
+                    <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <span class="layout-name disabled-option">Saved Layouts</span>
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-settings col-md-3 col-xs-6">
+                  <h1>Label Settings</h1>
+                  <p class="help">Select which labels you want to show.</p>
+            <div class="checkbox" data-label-width="0"  data-size="mini">
+              <div class="dropup mt" id="switch_label">
+                <label for='switch_label_dropdown'>
+                  Switch:
+                  <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="switch_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="layout-name disabled-option">Switch Labels</span>
+                    <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                    <li><a href="#" data-value="Name" onclick="toggle_labels('switch', 'name');">Name</a></li>
+                    <li><a href="#" data-value="DPID" onclick="toggle_labels('switch', 'dpid');">DPID</a></li>
+                    <li><a href="#" data-value="Address" onclick="toggle_labels('switch', 'address');">Address</a></li>
+                    <li><a href="#" data-value="None" onclick="toggle_labels('switch', 'none');">None</a></li>
+                  </ul>
+                </label>
+                  <label for='host_label_dropdown'>
+                    Host:
+                    <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="host_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <span class="layout-name disabled-option">Host Labels</span>
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                      <li><a href="#" data-value="Name" onclick="toggle_labels('host', 'name');">Name</a></li>
+                      <li><a href="#" data-value="Mac" onclick="toggle_labels('host', 'mac');">MAC</a></li>
+                      <li><a href="#" data-value="Address" onclick="toggle_labels('host', 'address');">Address</a></li>
+                      <li><a href="#" data-value="None" onclick="toggle_labels('host', 'none');">None</a></li>
+                    </ul>
+                  </label>
+              </div>
+            </div>
+                  <div class="radio">
+                    <label for="nodes_labels_1">
+                      <input type="radio" name="nodes_labels" id="nodes_labels_1" value="address" data-label-width="0"  data-size="mini"  class="switch-radio" checked>
+                        Address
+                    </label>
+                    <label for="nodes_labels_2">
+                      <input type="radio" name="nodes_labels" id="nodes_labels_2" value="name"  data-label-width="0"  data-size="mini"  class="switch-radio">
+                        Name
+                    </label>
+                  </div>
+                </div>
+                <div class="col-settings col-md-3 col-xs-6">
+                  <h1>Other Settings</h1>
+                  <p class="help">,,,</p>
+            <div class="checkbox" data-label-width="0"  data-size="mini">
+              <label for="show_map">
+                <input id='show_map' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#background-map").toggle()'> Show Map
+              </label>
+              <label for='map_opacity'>
+                <input id="map_opacity" data-slider-id='map_opacity_slider' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="0.1" data-slider-value="1"/>
+              </label>
+            </div>
+            <div class="checkbox" data-label-width="0"  data-size="mini">
+              <label for="enable_log">
+                <input id='enable_log' type="checkbox" data-label-width="0" data-size="mini" checked="checked"> Enable Logs
+              </label>
+            </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- END MC: BOTTOM PANEL -->
+      </div>
+    </div>
+    <!-- END MAIN CONTENT -->
+
+    <!-- LOADING SCRIPTS -->
+    <script src="static/js/vendors/jquery.min.js"></script>
+    <script src="static/js/vendors/owl.carousel.min.js"></script>
+    <script src="static/js/vendors/mustache.min.js"></script>
+    <script src="static/js/vendors/d3.v4.min.js"></script>
+    <script src="static/js/vendors/bootstrap.min.js"></script>
+    <script src="static/js/vendors/bootstrap-switch.min.js"></script>
+    <script src="static/js/vendors/bootstrap-slider.min.js"></script>
+    <script src="static/js/vendors/typeit.min.js"></script>
+    <script src="static/js/vendors/jquery-ui.min.js"></script>
+    <script src="static/js/vendors/jquery.mCustomScrollbar.js"></script>
+    <script src="static/js/vendors/mapbox-gl.js"></script>
+    <script src="static/js/vendors/socket.io.min.js"></script>
+    <script src="static/js/kytos-settings.js"></script>
+    <script src="static/js/kytos-control-panel.js"></script>
+    <script src="static/js/kytos-helper.js"></script>
+    <script src="static/js/kytos-terminal.js"></script>
+    <script src="static/js/kytos-logs.js"></script>
+    <script src="static/js/kytos-sidebar.js"></script>
+    <script src="static/js/kytos-owl-carousel-fork.js"></script>
+    <script src="static/js/kytos-background-map.js"></script>
+    <script src="static/js/kytos-stats.js"></script>
+    <script src="static/js/kytos-carousel.js"></script>
+    <script src="static/js/charts/topology.js"></script>
+    <script src="static/js/charts/radar.js"></script>
+    <script src="static/js/main.js"></script>
+    <!-- END LOADING SCRIPTS -->
+
+    <!-- MUSTACHE TEMPLATE FOR SWITCH CONTEXT TAB -->
+    <script id="context-switch-template" type="x-tmpl-mustache">
+      <div class="row-fluid">
+        <div class="col-settings col-md-4 no-padding no-border">
+
+          <!--// esquerda  //-->
+          <div class="col-xs-6 context-chart">
+            <div id="context-switchChart" class="text-center"></div>
+          </div>
+
+          <!--// direita //-->
+          <div class="col-xs-6 context-details ">
+            <h1>{{ name }}</h1>
+            <div class="row">
+              <div class="col-xs-12">
+                <dl>
+                  <dt>DPID</dt>
+                  <dd>{{ dpid }}</dd>
+                </dl>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-12">
+                <dl>
+                  <dt>Connection</dt>
+                  <dd>{{ connection }}</dd>
+                </dl>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-12">
+                <dl>
+                  <dt>OFP Version</dt>
+                  <dd>{{ ofp_version }}</dd>
+                </dl>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-6">
+                <dl>
+                  <dt>Hardware</dt>
+                  <dd>{{ hardware }}</dd>
+                </dl>
+              </div>
+              <div class="col-xs-6">
+                <dl>
+                  <dt>Software</dt>
+                  <dd>{{ software }}</dd>
+                </dl>
+              </div>
+              <div class="col-xs-12">
+                <dl>
+                  <dt>Manufacturer</dt>
+                  <dd>{{ manufacturer }}</dd>
+                </dl>
+              </div>
+              <div class="col-xs-12">
+                <dl>
+                  <dt>Serial</dt>
+                  <dd>{{ serial }}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-settings col-md-8 no-border">
+          <div class="context-content">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs nav-kytos nav-tabs-kytos nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#interfaces" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="false">
+                  Interfaces
+                </a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#flows" aria-controls="messages" role="tab" data-toggle="tab" aria-expanded="false">
+                  Flows
+                </a>
+              </li>
+            </ul>
+          </div>
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="interfaces">
+              <table class="table table-scroll customScroll">
+                <thead>
+                  <tr>
+                    <th width="15%"><strong>Name</strong></th>
+                    <th width="15%"><strong>Port No.</strong></th>
+                    <th width="25%"><strong>MAC Address</strong></th>
+                    <th width="15%"><strong>Rx (%)</strong></th>
+                    <th width="15%"><strong>Tx (%)</strong></th>
+                    <th width="15%"><strong>Speed</strong></th>
+                  </tr>
+                </thead>
+                <tbody class="customScroll">
+                  {{#interfaces}}
+                    <tr>
+                      <td width="15%">{{ name }}</td>
+                      <td width="15%">{{ port }}</td>
+                      <td width="25%">{{ mac }}</td>
+                      <td width="15%">{{ rx_util }} %</td>
+                      <td width="15%">{{ tx_util }} %</td>
+                      <td width="15%">{{ speed }} Gbps</td>
+                    </tr>
+                  {{/interfaces}}
+                </tbody>
+              </table>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="flows">
+              <table class="table table-scroll customScroll">
+                <thead>
+                  <tr>
+                    <th width="34%"><strong>ID</strong></th>
+                    <th width="33%"><strong>Bytes/sec</strong></th>
+                    <th width="33%"><strong>Packets/sec</strong></th>
+                  </tr>
+                </thead>
+                <tbody class="customScroll">
+                  {{#flows}}
+                    <tr>
+                      <td width="34%">{{ id }}</td>
+                      <td width="33%">{{ Bps }}</td>
+                      <td width="33%">{{ pps }}</td>
+                    </tr>
+                  {{/flows}}
+                </tbody>
+              </table>
+            </div>
+
+              <div class="chart panel-default">
+                <div class="chart-body">
+                  <div id="interfacesChart">
+                    <svg width="100%" height="700"></svg>
+                  </div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </script>
+    <!-- END: MUSTACHE TEMPLATE FOR SWITCH CONTEXT TAB -->
+
+    <script language="javascript">
+      function show_switch_context(data) {
+        // redraw svg on maximize or minimize window
+          if(typeof(data) == "undefined") {
+            var data = JSON.parse($("#context_target").attr("data-data"));
+          }
+          var template = $('#context-switch-template').html();
+          $('#tab_context_button a').click();
+          Mustache.parse(template);   // optional, speeds up future uses
+          var rendered = Mustache.render(template, data);
+          $('#context_target').html(rendered).attr("data-data", JSON.stringify(data, null, 2) );
+          plot_context_radar(data.interfaces);
+      }
+    </script>
+</body>
+</html>

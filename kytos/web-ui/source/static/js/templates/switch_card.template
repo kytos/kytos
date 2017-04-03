@@ -1,0 +1,72 @@
+<!-- MUSTACHE TEMPLATE FOR SWITCH CARDS -->
+<script id="switch-list-cards" type="x-tmpl-mustache">
+  {{#switches}}
+    <div class="switch-card item" data-switchID='{{#fix_name}}{{dpid}}{{/fix_name}}'>
+      <div class="row no-padding no-border">
+        <div class="switch-card-container col-xs-12 no-padding no-border">
+
+          <!--// left - chart  //-->
+          <div class="switch-card-chart context-chart col-xs-6" onclick='show_context(get_switch_by_dpid("{{dpid}}"))'>
+            <div id="switch-chart-{{#fix_name}}{{dpid}}{{/fix_name}}" class="text-center"></div>
+          </div>
+
+          <!--// right - switch infos //-->
+          <div class="col-xs-6 context-details">
+            <h4>{{ name }}</h4>
+            <div class="row">
+              <div class="col-xs-12">
+                <dl>
+                  <dt>DPID</dt>
+                  <dd>{{ dpid }}</dd>
+                </dl>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-12">
+                <dl>
+                  <dt>Connection</dt>
+                  <dd>{{ connection }}</dd>
+                </dl>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-12">
+                <dl>
+                  <dt>OFP Version</dt>
+                  <dd>{{ ofp_version }}</dd>
+                </dl>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-6">
+                <dl>
+                  <dt>Hardware</dt>
+                  <dd>{{ hardware }}</dd>
+                </dl>
+              </div>
+              <div class="col-xs-6">
+                <dl>
+                  <dt>Software</dt>
+                  <dd>{{ software }}</dd>
+                </dl>
+              </div>
+              <div class="col-xs-12">
+                <dl>
+                  <dt>Manufacturer</dt>
+                  <dd>{{ manufacturer }}</dd>
+                </dl>
+              </div>
+              <div class="col-xs-12">
+                <dl>
+                  <dt>Serial</dt>
+                  <dd>{{ serial }}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/switches}}
+</script>
+<!-- END: MUSTACHE TEMPLATE FOR SWITCH CONTEXT TAB -->

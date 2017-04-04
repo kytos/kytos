@@ -4,6 +4,8 @@ checks:
         duplicate_code: true
 filter:
     paths: ['kytos/*', 'tests/*']
+    excluded_paths:
+        - 'kytos/web-ui/*'
 build:
     environment:
         python: 3.6.0

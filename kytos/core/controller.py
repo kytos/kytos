@@ -20,8 +20,6 @@ import sys
 from importlib.machinery import SourceFileLoader
 from threading import Thread
 
-from flask import Flask, request
-
 from kytos.core.api_server import APIServer
 from kytos.core.buffers import KytosBuffers
 from kytos.core.events import KytosEvent

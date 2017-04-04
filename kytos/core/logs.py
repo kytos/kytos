@@ -7,7 +7,7 @@ import re
 __all__ = 'LogManager', 'NAppLog'
 
 FORMAT = '%(asctime)s - %(levelname)s [%(name)s] (%(threadName)s) %(message)s'
-logging.basicConfig(format=FORMAT)
+logging.basicConfig(format=FORMAT, level=logging.INFO)
 
 
 class LogManager:

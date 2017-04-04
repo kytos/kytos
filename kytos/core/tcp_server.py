@@ -7,7 +7,7 @@ from threading import current_thread
 # TODO: Fix version scheme
 from pyof.v0x01.common.header import Header
 
-from kytos.core.events import KytosEvent
+from kytos.core import KytosEvent
 from kytos.core.switch import Connection
 
 __all__ = ('KytosServer', 'KytosOpenFlowRequestHandler')

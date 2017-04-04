@@ -22,9 +22,9 @@ from threading import Thread
 
 from flask import Flask, request
 
+from kytos.core import KytosEvent
 from kytos.core.api_server import APIServer
 from kytos.core.buffers import KytosBuffers
-from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
 from kytos.core.napps_manager import NAppsManager

@@ -2,7 +2,7 @@
 import logging
 from queue import Queue
 
-from kytos.core.events import KytosEvent
+from kytos.core import KytosEvent
 
 __all__ = ('KytosBuffers')
 

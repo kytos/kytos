@@ -5,10 +5,12 @@ import sys
 from abc import ABCMeta, abstractmethod
 from threading import Event, Thread
 
-from kytos.core import log
+from kytos.core.logs import NAppLog
 from kytos.core.helpers import listen_to
 
 __all__ = 'KytosNApp',
+
+log = NAppLog()
 
 
 class KytosNApp(Thread, metaclass=ABCMeta):

@@ -1,0 +1,53 @@
+python-openflow Tests
+#####################
+
+
+Status:
+#######
+Accepted
+
+
+Abstract
+========
+
+Here we have the main Tests guidelines of the ``python-openflow`` library.
+
+The main guidelines are:
+
+* Follow TDD, which means: Write tests before writing code!!
+* We aim test coverage of 100%;
+* Invalid messages must raise exceptions, and these exceptions must be covered by unittests;
+* All Messages must be tested (for attributes order and also size);
+* All reimplemented methods must be tested.
+
+Basic Tests
+===========
+
+Considering the above described guidelines, bellow are some tasks that need to be done:
+
+* **Struct size**: assert the basic class size according to OFSpec (structs asserts) (``get_size`` method);
+* **Pack**:
+
+  * Check by comparing the result of pack() with raw files;
+  * This must be done for all messages, 'structs' and basic_types;
+
+* **Unpack**:
+
+  * Check by unpacking a known raw file and evaluating the values of the unpacked object with the expected ones;
+  * This must be done for all messages, 'structs' and basic_types;
+
+* OpenFlow Spec compliance for **attributes restrictions**:
+
+  * Look for constrains defined on the OpenFlow specification for each attribute (Not all attributes have constrains);
+  * Main constrains: value limitation based on pre-defined constants
+ 
+Solution
+========
+
+Issues
+======
+
+- https://github.com/kytos/python-openflow/issues/8 
+- https://github.com/kytos/python-openflow/issues/9
+- https://github.com/kytos/python-openflow/issues/10
+- https://github.com/kytos/python-openflow/issues/122

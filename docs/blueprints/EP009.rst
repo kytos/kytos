@@ -1,0 +1,287 @@
+###################################
+Blueprint: Enhancement Proposal 009
+###################################
+
+
+Objective: 
+##########
+Offer a more high\-level message packing/unpacking interface to the user
+
+
+Affected projects:
+==================
+    ::
+
+        python-openflow
+        kytos
+        kytos-napps
+
+Description:
+============
+
+- The user should not have to understand how the message is structured.
+- Only the content of the message is important to the user.
+
+Current Implementation:
+-----------------------
+The returned message from unpacking a binary buffer is an instance of a certain
+class that depends on the message type.
+
+Attributes of the class inherit hierarchical structure of the protocol, even
+when it is not necessary: ``packet.header.version`` instead of simply
+``packet.version``, or ``packet.header.message_type`` instead 
+of ``packet.type``. The header is usually treated separated from its body.
+
+Changes on attributes are allowed but not checked. A Hello instance with a
+header.type different than OFPT_HELLO is a valid object.
+
+Implementing all these classes and it's respective test classes is a great
+amount of work for something the user does not need. Keeping the implementation
+simple eases the task of implementing new specifications of the protocol.
+
+
+::
+
+    match = Match(in_port=80,
+                  dl_src='01:02:03:04:05:06',
+                  dl_dst='01:02:03:04:05:06', 
+                  dl_vlan=1,
+                  dl_vlan_pcp=1, 
+                  dl_type=1,
+                  nw_tos=1, 
+                  nw_proto=1,
+                  nw_src='192.168.0.1', 
+                  nw_dst='192.168.0.1',
+                  tp_src=80, 
+                  tp_dst=80)
+
+    body = FlowStatsRequest(match=_get_match(), table_id=1, out_port=80)
+
+    packet = StatsRequest(xid=12,
+                           body_type=StatsTypes.OFPST_FLOW,
+                           flags=0, 
+                           body=body)
+
+... and in the end, we still don't know if packet is a compliant packet, and
+the pack method must be explicitly called.
+
+Proposal:
+---------
+
+    ::
+
+                d = {
+                      'xid': 12,
+                      'flags': 0, 
+                      'match': {'in_port':80,
+                                'dl_src':'01:02:03:04:05:06',
+                                'dl_dst':'01:02:03:04:05:06', 
+                                'dl_vlan':1,
+                                'dl_vlan_pcp':1, 
+                                'dl_type':1,
+                                'nw_tos':1, 
+                                'nw_proto':1,
+                                'nw_src':'192.168.0.1', 
+                                'nw_dst':'192.168.0.1',
+                                'tp_src':80, 
+                                'tp_dst':80       
+                      }, 
+                      'table_id': 1, 
+                      'out_port': 80
+                }
+
+                packet = pyof.v0x04.FlowStatsRequest(**d)
+                type(packet) == OFPacket
+
+    or
+
+        ::
+
+            d.update({'version': 4,
+                      'type': 'FlowStatsRequest'})
+            packet = pyof.OFPacket(**d)
+            type(packet) == OFPacket
+
+
+``OFPacket``: a unique class for all packets.
+    - It is used to pack, unpack and move message packets around.
+    - No other classes are  exposed to the user.
+    - OFPacket.buffer holds the binary of the packet, and is calculated upon
+      instantiation.
+    - It should be impossible to instantiate a non compliant message.
+
+        + invalid message Exception.
+
+        + validation and pack upon instantiation.
+    
+    - Once it is instantiated, it should not be altered.
+
+        + If something needs to be changed, a new instance is created and thus
+          automatically validated and packed. Trying to set an attribute
+          should lead to exception. Making a reply based on a request is shown
+          as an example below.
+
+    - Attributes that do not hold content, like the header's length attribute 
+      for example, should not be exposed to the user.
+
+**Other comments**:
+    - After the OF negotiation, ``this_connection.protocol`` could be 
+      linked to the correct version of pyof needed for this connection. Then 
+      the apps could simply use ``connection.protocol.Packet`` to deal with 
+      packets.
+
+
+**usage examples:**
+  ::
+
+    # messages could be build using different approaches:
+
+    from pyof import OFPacket, raw_packets_refs
+
+    from pyof import v0x01 as pyof01
+    from pyof import v0x04 as pyof04
+
+  ::
+
+    # after OF connection version negotiation, set the correct version/module
+    this.connection.protocol = pyof04
+
+  ::
+
+    # load binary and attributes references:
+    
+    ref_binary, ref_attributes = raw_packets_refs[4]['hello'][0]
+
+  ::
+
+    # Instantiate a few packets by different methods
+
+    d = {'version': 1,
+         'type': 'hello',
+         'xid': 1
+        }
+
+    some_packet = pyof01.Hello()
+
+    new_attributes = some_packet.attributes.copy().update({'xid': 2})
+
+    hello_packets = [ 
+        # for testing
+        OFPacket(**ref_attributes),
+        OFPacket(ref_binary),
+        
+        # from a dict
+        OFPacket(**d),
+        
+        # from some other packet
+        OFPacket(**new_attributes),
+
+        # as parameters
+        pyof04.OFPacket(type='hello', 
+                        xid=1, 
+                        version_bitmap=[1, 4])
+        # using the proper version for the connection
+        this.connection.protocol.Hello(xid=1, 
+                                       version_bitmap=[1, 4])
+    ]
+    
+Easy pack/unpack testing:
+
+::
+
+    # test the hello packets created in the last code block:
+    test = [packet.buffer == ref_binary
+            and packet.attributes == ref_attributes
+                for packet in hello_packets]
+
+    for version, refs in raw_packets_refs.items():
+        for packet_name, (binary, attributes) in refs:
+            print(f'version 0x{version:02x} - {packet_name:24})
+            print('    unpack: ', OFPacket(binary).attributes == attributes)
+            print('      pack: ', OFPacket(**attributes).buffer == binary)
+
+------------------------------------------
+
+*Other examples based on current implementation*
+
+    ::
+
+        # of_l2ls/main.py
+        # ===============
+            # making a FlowMod packet now:
+                flow_mod = FlowMod()
+                flow_mod.command = FlowModCommand.OFPFC_ADD
+                flow_mod.match = Match()
+                flow_mod.match.dl_src = ethernet.source.value
+                flow_mod.match.dl_dst = ethernet.destination.value
+                flow_mod.match.dl_type = ethernet.type
+                flow_mod.buffer_id = packet_in.buffer_id
+                flow_mod.actions.append(ActionOutput(port=ports[0]))
+
+            # what it would be like:
+                msg_attributes = {'xid': xid,
+                                  'match': {
+                                      'dl_src': ethernet.source.value,
+                                      'dl_dst': ethernet.destination.value,
+                                      'dl_type': ethernet.type
+                                  }
+                                  'buffer_id': packet_in.buffer_id,
+                                  'actions': [ActionOutput(port=ports[0])]
+                                 }
+                flow_mod_packet = this_connection.pyof.FlowMod(**msg_attributes)
+
+            # -------------------------------------------------------------------------
+
+            # making a PacketOut now:
+                packet_out = PacketOut()
+                packet_out.buffer_id = packet_in.buffer_id
+                packet_out.in_port = packet_in.in_port
+
+            # what it could be like
+                packet_out = PacketOut({'buffer_id': packet_in.buffer_id,
+                                        'in_port': packet_in.in_port})
+            # or
+                packet_out = PacketOut(packet_in)
+        # -------------------------------------------------------------------------
+
+        # of_core/main.py
+        # ===============
+            # making a FlowStatsRequest now:
+                body = FlowStatsRequest()  # Port.OFPP_NONE and All Tables
+                req = StatsRequest(body_type=StatsTypes.OFPST_FLOW, body=body)
+                req.pack()
+
+            # what it could be like:
+                stats_request_packet = FlowStatsRequest()
+        # -------------------------------------------------------------------------
+
+
+        # kytos/core/flow.py
+        # ==================
+            # creating a flow from a flow_stats packet
+            # what is now:
+                flow = Flow()
+                flow.idle_timeout = flow_stats.idle_timeout.value
+                flow.hard_timeout = flow_stats.hard_timeout.value
+                flow.priority = flow_stats.priority.value
+                flow.table_id = flow_stats.table_id.value
+                flow.in_port = flow_stats.match.in_port.value
+                flow.dl_src = flow_stats.match.dl_src.value
+                flow.dl_dst = flow_stats.match.dl_dst.value
+                flow.dl_vlan = flow_stats.match.dl_vlan.value
+                flow.dl_type = flow_stats.match.dl_type.value
+                flow.nw_src = flow_stats.match.nw_src.value
+                flow.nw_dst = flow_stats.match.nw_dst.value
+                flow.tp_src = flow_stats.match.tp_src.value
+                flow.tp_dst = flow_stats.match.tp_dst.value
+
+                for attribute in FLOW_STATS_ATTRIBUTES:
+                    setattr(flow, getattr(flow_stats_packet, attribute))
+
+            # what it could be like:
+                for attribute in flow_stats_packet.stats_attributes:
+                    setattr(flow, attribute, flow_stats[attribute])
+            # or
+                for attribute in flow_stats_packet.stats_attributes:
+                    setattr(flow, attribute, getattr(flow_stats, attribute))
+

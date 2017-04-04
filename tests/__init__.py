@@ -1,1 +1,1 @@
-"""Test module of Kyco project."""
+"""Test module of Kytos project."""

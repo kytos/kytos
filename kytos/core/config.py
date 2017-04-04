@@ -9,7 +9,7 @@ import os
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from configparser import ConfigParser
 
-from kytos.core import __version__
+from kytos.core._metadata import __version__
 
 if 'VIRTUAL_ENV' in os.environ:
     BASE_ENV = os.environ['VIRTUAL_ENV']
@@ -102,10 +102,14 @@ class KytosConfig():
 
         options, argv = self.conf_parser.parse_known_args()
 
-        if options.conf:
-            config = ConfigParser()
-            config.read([options.conf])
+        config = ConfigParser()
+        result = config.read([options.conf or defaults.get('conf')])
+
+        if result:
             defaults.update(dict(config.items("daemon")))
+        else:
+            print('There is no config file.')
+            exit(-1)
 
         self.parser.set_defaults(**defaults)
 

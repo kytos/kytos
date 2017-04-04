@@ -13,7 +13,7 @@ Basic usage:
     controller = Controller(config.options)
     controller.start()
 """
-
+import logging
 import os
 import re
 import sys
@@ -25,7 +25,8 @@ from flask import Flask, request
 from kytos.core.api_server import APIServer
 from kytos.core.buffers import KytosBuffers
 from kytos.core.events import KytosEvent
-from kytos.core.helpers import now, start_logger
+from kytos.core.helpers import now
+from kytos.core.logs import LogManager
 from kytos.core.napps_manager import NAppsManager
 from kytos.core.switch import Switch
 from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
@@ -89,7 +90,7 @@ class Controller(object):
 
         self.websockets = {}
 
-        self.log = start_logger(__name__)
+        self.log = None
 
         self.api_server = APIServer(__name__)
 
@@ -98,17 +99,20 @@ class Controller(object):
         #: from napps.<author>.<napp_name> import ?....
         sys.path.append(os.path.join(self.options.napps, os.pardir))
 
-    @property
-    def log_websocket(self):
-        """Method used to return LogWebSocket instance."""
-        return self.websockets['log']
-
     def register_websockets(self):
         """Method used to register all websockets."""
-        self.websockets['log'] = LogWebSocket()
-        self.websockets['log'].register_log(self.log)
+        log = LogWebSocket()
+        self.websockets['log'] = log
+        LogManager.add_stream_handler(log.stream)
 
         self.api_server.register_websockets(self.websockets)
+
+    def enable_logs(self):
+        """Method used to register kytos log and enable the logs."""
+        if self.options.debug:
+            LogManager.add_syslog()
+
+        self.log = logging.getLogger(__name__)
 
     def start(self):
         """Start the controller.
@@ -119,6 +123,7 @@ class Controller(object):
         """
         self.api_server.register_kytos_routes()
         self.api_server.register_web_ui()
+        self.enable_logs()
         self.register_websockets()
         self.log.info("Starting Kytos - Kytos Controller")
         self.server = KytosServer((self.options.listen,

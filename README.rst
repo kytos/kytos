@@ -1,7 +1,7 @@
 Kytos SDN Platform
 ##################
 
-|Experimental| |Tag| |Release| |Tests| |License|
+|Experimental| |Tag| |Release| |License| |Build| |Coverage| |Quality|
 
 `Kytos SDN Platform <https://kytos.io>`_ is the fastest way to deploy an SDN
 Network. With this you can deploy a basic OpenFlow controller or your own
@@ -124,3 +124,12 @@ This software is under *MIT-License*. For more information please read
    :target: https://travis-ci.org/kytos/kytos
 .. |License| image:: https://img.shields.io/github/license/kytos/kytos.svg
    :target: https://github.com/kytos/kytos/blob/master/LICENSE
+.. |Build| image:: https://scrutinizer-ci.com/g/kytos/kytos/badges/build.png?b=master
+  :alt: Build status
+  :target: https://scrutinizer-ci.com/g/kytos/kytos/?branch=master
+.. |Coverage| image:: https://scrutinizer-ci.com/g/kytos/kytos/badges/coverage.png?b=master
+  :alt: Code coverage
+  :target: https://scrutinizer-ci.com/g/kytos/kytos/?branch=master
+.. |Quality| image:: https://scrutinizer-ci.com/g/kytos/kytos/badges/quality-score.png?b=master
+  :alt: Code-quality score
+  :target: https://scrutinizer-ci.com/g/kytos/kytos/?branch=master

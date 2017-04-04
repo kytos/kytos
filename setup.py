@@ -13,8 +13,6 @@ from setuptools import Command, find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.test import test as TestCommand
 
-from kytos.core import _metadata as metadata
-
 if 'bdist_wheel' in sys.argv:
     raise RuntimeError("This setup.py does not support wheels")
 
@@ -130,16 +128,26 @@ requirements = [i.strip() for i in open("requirements.txt").readlines()]
 # TODO: Move this to a more appropiate place
 napps_dir = os.path.join(BASE_ENV, 'var/lib/kytos/napps/.installed')
 
+# We are parsing the metadata file as if it was a text file because if we
+# import it as a python module, necessarily the kytos.core module would be
+# initialized, which means that kyots/core/__init__.py would be run and, then,
+# kytos.core.controller.Controller would be called and it will try to import
+# some modules that are dependencies from this project and that were not yet
+# installed, since the requirements installation from this project hasn't yet
+# happened.
+meta_file = open("kytos/core/metadata.py").read()
+metadata = dict(re.findall("(__[a-z]+__)\s*=\s*'([^']+)'", meta_file))
+
 if not os.path.exists(napps_dir):
     os.makedirs(napps_dir, exist_ok=True)
 
 setup(name='kytos',
-      version=metadata.__version__,
-      description=metadata.__description__,
-      url=metadata.__url__,
-      author=metadata.__author__,
-      author_email=metadata.__author_email__,
-      license=metadata.__license__,
+      version=metadata.get('__version__'),
+      description=metadata.get('__description__'),
+      url=metadata.get('__url__'),
+      author=metadata.get('__author__'),
+      author_email=metadata.get('__author_email__'),
+      license=metadata.get('__license__'),
       test_suite='tests',
       install_requires=requirements,
       dependency_links=[

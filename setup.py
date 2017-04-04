@@ -155,6 +155,7 @@ setup(name='kytos',
           '#egg=python-daemon-2.1.2'
       ],
       scripts=['bin/kytosd'],
+      include_package_data=True,
       data_files=[(os.path.join(BASE_ENV, 'etc/kytos'), ETC_FILES)],
       packages=find_packages(exclude=['tests']),
       cmdclass={

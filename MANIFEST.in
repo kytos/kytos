@@ -1,3 +1,4 @@
 include etc/kytos.conf
 include etc/logging.ini
 include *.txt
+recursive-include kytos *

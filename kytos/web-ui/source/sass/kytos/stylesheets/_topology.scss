@@ -1,0 +1,37 @@
+/* SVG ELEMENTS */
+line {
+  stroke: rgba(255,255,255,0.5);
+}
+
+.switch_label_group,
+.host_label_group {
+  pointer-events: none;
+}
+
+.switch_label_group text,
+.host_label_group text {
+  fill: rgba(255,255,255,1) ;
+  color: rgba(255,255,255,1) ;
+  background-color: #554077;
+  -webkit-border-radius: 36px;
+  -moz-border-radius: 36px;
+  border-radius: 36px;
+  font-size: 11px;
+}
+
+.downlight {
+  opacity: 0.3;
+}
+
+.topology_zoom {
+  fill: none;
+  pointer-events: all;
+}
+
+/* Other characteristics */
+
+#topology-chart {
+  z-index: 50;
+  position: absolute;
+  top: 0;
+}

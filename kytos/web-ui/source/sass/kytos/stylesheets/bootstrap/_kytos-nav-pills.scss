@@ -1,0 +1,22 @@
+.kytos-nav-pills {
+  li {
+    margin : 0;
+    a {
+      color : #aaa;
+      padding : 6px 15px;
+      border : 0;
+      border-radius : 0;
+      &:hover {
+        background : #8a5ec9;
+        color : #eee;
+      }
+    }
+    &.active {
+      a,
+      a:hover,
+      a:focus {
+        background : #342749
+      }
+    }
+  }
+}

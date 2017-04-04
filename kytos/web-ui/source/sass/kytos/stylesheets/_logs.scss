@@ -1,0 +1,14 @@
+#tab_logs {
+    .log_message {
+        width: 100%;
+        margin : 0;
+        padding : 0px 10px;
+        &:hover{
+          background : #342749;
+          color : #fff;
+        }
+        &:last-child  {
+          margin-bottom : 10px
+        }
+    }
+}

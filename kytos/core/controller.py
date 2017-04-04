@@ -122,6 +122,7 @@ class Controller(object):
         Load the installed apps.
         """
         self.api_server.register_kytos_routes()
+        self.api_server.register_web_ui()
         self.enable_logs()
         self.register_websockets()
         self.log.info("Starting Kytos - Kytos Controller")

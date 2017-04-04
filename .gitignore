@@ -95,3 +95,9 @@ ENV/
 # Auxilary files to test the controller
 aux_*.py
 aux_*.sh
+
+# Web-Ui stuff
+.sass-cache
+node_modules
+include
+kytos/web-ui/source/static/css/*

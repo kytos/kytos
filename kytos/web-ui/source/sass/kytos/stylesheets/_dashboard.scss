@@ -1,0 +1,50 @@
+/*
+ * Top navigation
+ * Hide default border to remove 1px line.
+ */
+.navbar-fixed-top {
+    border: 0;
+}
+
+.navbar-form {
+  input {
+    &.form-control {
+      background : transparent;
+    }
+  }
+}
+.nav-sidebar {
+    margin-right: -21px;
+    /* 20px padding + 1px border */
+    margin-bottom: 20px;
+    margin-left: -20px;
+}
+
+.nav-sidebar > li > a {
+    color: #fff;
+    padding-right: 20px;
+    padding-left: 20px;
+}
+
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:focus,
+.nav-sidebar > .active > a:hover {
+    color: #fff;
+    background-color: #428bca;
+}
+/*
+ * Main content
+ */
+.main {
+    padding: 20px;
+}
+@media (min-width: 768px) {
+    .main {
+        padding-right: 40px;
+        padding-left: 40px;
+    }
+}
+
+.main .page-header {
+    margin-top: 0;
+}

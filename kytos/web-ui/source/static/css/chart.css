@@ -1,0 +1,73 @@
+/* TODO: Move this to a .sass file */
+
+.grid-lines {
+	fill: #5c3e7a;
+	fill-opacity: 0.1;
+	stroke: #fff;
+	stroke-opacity: 0.1;
+	stroke-width: 2.5px;
+}
+
+path.line {
+	fill: none;
+	stroke: #795ca7;
+	stroke-width: 2.5;
+}
+
+.axis path, .axis line {
+	fill: none;
+	stroke: #aaa;
+	shape-rendering: crispEdges;
+}
+
+.axis line, .x.axis path, .y.axis path {
+	stroke: transparent;
+	stroke-width: 0px;
+	fill: none;
+}
+.radarCircle {
+	fill: #795ca7;
+}
+.axisLabel, .x.axis text, .y.axis text {
+	fill: #555555;
+	font-size: 11px;
+	font-weight: 300;
+}
+
+
+.nav-tabs-kytos > li > a {
+	line-height: 1.42857143;
+	color: #555555;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+.nav-tabs-kytos > li.active > a::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	height: 1px;
+	width: 100%;
+	border-bottom: 3px solid #554077;
+	pointer-events: none;
+}
+
+.nav-tabs-kytos > li > a {
+	line-height: 1.42857143;
+	color: #555555;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.nav-kytos > li > a::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	height: 1px;
+	width: 100%;
+	border-bottom: 3px solid #292929;
+	pointer-events: none;
+}
+
+

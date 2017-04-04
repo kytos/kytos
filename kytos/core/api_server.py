@@ -1,11 +1,12 @@
 """Module used to handle a API Server."""
 import os
 
-from http.client import RemoteDisconnected
+from urllib.error import URLError
 from urllib.request import urlopen
 
 from flask import Flask, request, send_from_directory
 from flask_socketio import SocketIO
+
 
 class APIServer:
     """Api server used to provide Kytos Controller routes."""
@@ -24,7 +25,7 @@ class APIServer:
         self.app = Flask(app_name, root_path=self.flask_dir)
         self.server = SocketIO(self.app)
 
-    def run(self, *args, **kwargs ):
+    def run(self, *args, **kwargs):
         """Method used to run the APIServer."""
         self.server.run(self.app, *args, **kwargs)
 
@@ -86,9 +87,9 @@ class APIServer:
     def stop_api_server(self):
         """Method used to send a shutdown request to stop Api Server."""
         try:
-           urlopen('http://127.0.0.1:8181/kytos/shutdown')
-        except:
-           pass
+            urlopen('http://127.0.0.1:8181/kytos/shutdown')
+        except URLError:
+            pass
 
     def shutdown_api(self):
         """Handle shutdown requests received by Api Server.

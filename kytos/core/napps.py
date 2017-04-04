@@ -5,8 +5,8 @@ import sys
 from abc import ABCMeta, abstractmethod
 from threading import Event, Thread
 
-from kytos.core.logs import NAppLog
 from kytos.core.helpers import listen_to
+from kytos.core.logs import NAppLog
 
 __all__ = 'KytosNApp',
 

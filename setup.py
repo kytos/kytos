@@ -11,16 +11,15 @@ from subprocess import call
 
 from setuptools import Command, find_packages, setup
 from setuptools.command.develop import develop
+from setuptools.command.install import install
 
 if 'bdist_wheel' in sys.argv:
     raise RuntimeError("This setup.py does not support wheels")
 
-if 'VIRTUAL_ENV' in os.environ:
-    BASE_ENV = os.environ['VIRTUAL_ENV']
-else:
-    BASE_ENV = '/'
 
-ETC_FILES = ['etc/kytos/kytos.conf', 'etc/kytos/logging.ini']
+BASE_ENV = os.environ['VIRTUAL_ENV'] or '/'
+ETC_FILES = ['etc/kytos/logging.ini']
+TEMPLATE_FILES = ['etc/kytos/kytos.conf.template']
 
 
 class SimpleCommand(Command):
@@ -91,7 +90,48 @@ class Linter(SimpleCommand):
         call('pylama setup.py tests kytos', shell=True)
 
 
-class DevelopMode(develop):
+class CommonInstall:
+    """Class with common method used by children classes."""
+
+    @staticmethod
+    def generate_file_from_template(templates,
+                                    destination=os.path.dirname(__file__),
+                                    **kwargs):
+        """Create a config file based on a template file.
+
+        If no destination is passed, the new conf file will be created on the
+        directory of the template file.
+
+        Args:
+            template (string):    Path of the template file
+            destination (string): Directory in which the config file will
+                                  be placed.
+        """
+        from jinja2 import Template
+        for path in templates:
+            with open(path, 'r', encoding='utf-8') as src_file:
+                content = Template(src_file.read()).render(**kwargs)
+                dst_path = os.path.join(destination,
+                                        path.replace('.template', ''))
+                with open(dst_path, 'w') as dst_file:
+                    dst_file.write(content)
+
+
+class InstallMode(install, CommonInstall):
+    """Class used to overwrite the default installation using setuptools.
+
+    Besides doing the default install, the config files used by
+    Kytos SDN Platform will also be created, based on templates.
+    """
+
+    def run(self):
+        """Install the package in an install mode."""
+        super().run()
+        self.generate_file_from_template(TEMPLATE_FILES, BASE_ENV,
+                                         prefix=BASE_ENV)
+
+
+class DevelopMode(develop, CommonInstall):
     """Recommended setup for developers.
 
     Instead of copying the files to the expected directories, a symlink is
@@ -101,27 +141,36 @@ class DevelopMode(develop):
     def run(self):
         """Install the package in a developer mode."""
         super().run()
-        for _file in ETC_FILES:
-            self.create_path(_file)
+
+        self.create_paths()
+        self.generate_file_from_template(TEMPLATE_FILES, prefix=BASE_ENV)
+
+        for file_name in ETC_FILES:
+            self.generate_file_link(file_name)
+
+        for file_name in TEMPLATE_FILES:
+            self.generate_file_link(file_name.replace('.template', ''))
 
     @staticmethod
-    def create_path(file_name):
-        """Method used to create the configurations files using develop."""
-        etc_kytos_dir = os.path.join(BASE_ENV, 'etc/kytos')
-
+    def generate_file_link(file_name):
+        """Method used to create a symbolic link from a file name."""
         current_directory = os.path.dirname(__file__)
         src = os.path.join(os.path.abspath(current_directory), file_name)
         dst = os.path.join(BASE_ENV, file_name)
 
-        if not os.path.exists(etc_kytos_dir):
-            os.makedirs(etc_kytos_dir)
-
         if not os.path.exists(dst):
             os.symlink(src, dst)
 
+    @staticmethod
+    def create_paths():
+        """Method used to create the paths used by Kytos in develop mode."""
+        directories = [os.path.join(BASE_ENV, 'etc/kytos')]
+        for directory in directories:
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+
 
 requirements = [i.strip() for i in open("requirements.txt").readlines()]
-napps_dir = os.path.join(BASE_ENV, 'var/lib/kytos/napps/.installed')
 
 # We are parsing the metadata file as if it was a text file because if we
 # import it as a python module, necessarily the kytos.core module would be
@@ -132,9 +181,6 @@ napps_dir = os.path.join(BASE_ENV, 'var/lib/kytos/napps/.installed')
 # happened.
 meta_file = open("kytos/core/metadata.py").read()
 metadata = dict(re.findall(r"(__[a-z]+__)\s*=\s*'([^']+)'", meta_file))
-
-if not os.path.exists(napps_dir):
-    os.makedirs(napps_dir, exist_ok=True)
 
 setup(name='kytos',
       version=metadata.get('__version__'),
@@ -157,6 +203,7 @@ setup(name='kytos',
           'clean': Cleaner,
           'coverage': TestCoverage,
           'develop': DevelopMode,
+          'install': InstallMode,
           'doctest': DocTest,
           'lint': Linter
       },

@@ -5,11 +5,11 @@
 # current working directory on that filesystem, this should either be left at
 # default or set to a directory that is a sensible home directory for the
 # daemon while it is running. Default is /var/lib/kytos.
-workdir = /var/lib/kytos
+workdir = {{ prefix }}/var/lib/kytos
 
 # PID file to write. When the controller starts, it will save the his pid on
 # this file.
-pidfile = /var/run/kytosd.pid
+pidfile = {{ prefix }}/var/run/kytosd.pid
 
 # This controller can be started in two modes: 'daemon' mode or 'interactive'
 # mode. On daemon mode, the process will detach from terminal when starts,
@@ -21,7 +21,7 @@ daemon = False
 debug = False
 
 # Logging config file. Please specify the full path of logging config file.
-logging = /etc/kytos/logging.ini
+logging = {{prefix}}/etc/kytos/logging.ini
 
 listen = 0.0.0.0
 
@@ -29,4 +29,4 @@ port = 6633
 
 # Where should the controller look for network apps ?
 # This directory has both core napps and user installed napps.
-napps = /var/lib/kytos/napps
+napps = {{ prefix }}/var/lib/kytos/napps

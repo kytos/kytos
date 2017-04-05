@@ -3,3 +3,4 @@ python-openflow
 flask-socketio
 flask
 python-daemon>=2.1.2
+setuptools>=34.0.0

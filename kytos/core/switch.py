@@ -225,18 +225,17 @@ class Connection(object):
             buffer (bytes): Message buffer that will be sent.
         """
         try:
-            if self.socket and not self.socket._closed:
+            if self.socket:
                 self.socket.send(buffer)
         except (OSError, SocketError) as exception:
             self.close()
-            # TODO: Raise or create an error event?
             raise exception
 
     def close(self):
         """Close the socket from connection instance."""
-        if self.socket is not None:
+        if self.socket:
             self.socket.close()
-            self.socket = None  # TODO: Is this really necessary?
+            self.socket = None
 
         if self.switch.connection is self:
             self.switch.connection = None
@@ -394,7 +393,6 @@ class Switch(object):
 
     def update_features(self, features):
         """Update :attr:`features` attribute."""
-        # TODO: We should avoid OF structs here
         self.features = features
 
     def send(self, buffer):
@@ -404,10 +402,6 @@ class Switch(object):
           buffer (bytes): bytes to be sent to the switch throught its
                             connection.
         """
-        # Raises:
-        #  # TODO: raise proper exceptions on the code
-        #  ......: If the switch connection was connection.
-        #  ......: If the passed `data` is not a bytes object
         if self.connection:
             self.connection.send(buffer)
 

@@ -71,27 +71,25 @@ Administrator Guide
 How to use
 **********
 
-.. note:: Very soon, you will be able to start and manage kytos daemon by a
-   command line tool. But for now, you have to open the ipython and run some
-   code. Sorry about that.
+Once *Kytos* is installed, you can run the controller using:
 
-To use *kytos*, after installing it on the system, you need to open the ipython
-(``ipython3``) console and run the following commands:
+.. code-block:: shell
 
-.. code-block:: python
+   $ kytosd
 
-    >>> from kytos.core import Controller
-    >>> from kytos.core.config import KytosConfig
-    >>> config = KytosConfig().options['daemon']
-    >>> controller = Controller(config)
-    >>> controller.start()
+Kytos runs as a daemon by default. To run it in foreground, add the ``-f``
+option to the command line:
 
-.. note:: The config argument will be changed to be optional, so the two lines
-          related to config options will be removed soon.
+.. code-block:: shell
+
+   $ kytosd -f
+
+You can use ``-h`` or ``--help`` for more information about options to the
+command line.
 
 With the above commands your controller will be running and ready to be used.
-Keep in mind that it need to be run as root - or with a user granted with the
-necessary permissions, such as to open a socket on port 6633.
+Please note that the commands need to be run as a user who has permission to
+open sockets at ports 6633 and 8181.
 
 The Web Admin User Interface:
 -----------------------------

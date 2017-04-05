@@ -4,7 +4,6 @@ from socket import error as SocketError
 from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 from threading import current_thread
 
-# TODO: Fix version scheme
 from pyof.v0x01.common.header import Header
 
 from kytos.core.events import KytosEvent
@@ -84,7 +83,7 @@ class KytosOpenFlowRequestHandler(BaseRequestHandler):
         self.port = self.client_address[1]
 
         self.connection = Connection(self.ip, self.port, self.request)
-        self.request.settimeout(30)  # TODO: Send this to a config option
+        self.request.settimeout(30)
         self.exception = None
 
         event = KytosEvent(name='kytos/core.connection.new',
@@ -102,7 +101,6 @@ class KytosOpenFlowRequestHandler(BaseRequestHandler):
         curr_thread = current_thread()
         header_len = 8
         while True:
-            # TODO: How to consider the OpenFlow version here?
             header = Header()
             binary_data, raw_header = b'', b''
             try:
@@ -111,7 +109,7 @@ class KytosOpenFlowRequestHandler(BaseRequestHandler):
                     raw_header += self.request.recv(remaining)
                     if len(raw_header) == 0:
                         break
-            except Exception as exception:
+            except InterruptedError as exception:
                 self.exception = exception
                 break
             else:
@@ -121,7 +119,6 @@ class KytosOpenFlowRequestHandler(BaseRequestHandler):
             log.debug("New message from %s:%s at thread %s", self.ip,
                       self.port, curr_thread.name)
 
-            # TODO: Create an exception if this is not a OF message
             header.unpack(raw_header)
             body_len = header.length - header_len
             log.debug('Reading the binary_data')
@@ -133,7 +130,6 @@ class KytosOpenFlowRequestHandler(BaseRequestHandler):
                 self.exception = exception
                 break
 
-            # TODO: Do we need other informations from the network packet?
             content = {'source': self.connection,
                        'header': header,
                        'binary_data': binary_data}
@@ -150,7 +146,6 @@ class KytosOpenFlowRequestHandler(BaseRequestHandler):
         built with kytos/core.connection.lost name and put this in a app
         buffer.
         """
-        # TODO: Client disconnected is the only possible reason?
         log.info("Client %s:%s disconnected. Reason: %s",
                  self.ip, self.port, self.exception)
         self.request.close()

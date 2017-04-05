@@ -127,8 +127,6 @@ class Controller(object):
         self.server = KytosServer((self.options.listen,
                                    int(self.options.port)),
                                   KytosOpenFlowRequestHandler,
-                                  # TODO: Change after #62 definitions
-                                  #       self.buffers.raw.put)
                                   self)
 
         raw_event_handler = self.raw_event_handler
@@ -184,7 +182,6 @@ class Controller(object):
             - stop all running threads;
             - stop the KytosServer;
         """
-        # TODO: Review this shutdown process
         self.log.info("Stopping Kytos")
 
         if not graceful:
@@ -231,7 +228,6 @@ class Controller(object):
         Returns:
            interval (datetime.timedelta): The uptime interval
         """
-        # TODO: Return a better output
         return now() - self.started_at if self.started_at else 0
 
     def notify_listeners(self, event):
@@ -412,8 +408,6 @@ class Controller(object):
             switch (:class:`~.core.switch.Switch`): Instance of switch that
                                                     will be removed.
         """
-        # TODO: this can be better using only:
-        #       self.switches.pop(switches.dpid, None)
         try:
             del self.switches[switch.dpid]
         except KeyError:
@@ -475,7 +469,7 @@ class Controller(object):
             napp = module.load_module().Main(controller=self)
             self.napps[(author, napp_name)] = napp
 
-            for event, listeners in napp._listeners.items():
+            for event, listeners in napp._listeners.items():  # noqa
                 self.events_listeners.setdefault(event, []).extend(listeners)
 
             napp.start()
@@ -504,7 +498,7 @@ class Controller(object):
         else:
             napp.shutdown()
             # Removing listeners from that napp
-            for event_type, napp_listeners in napp._listeners.items():
+            for event_type, napp_listeners in napp._listeners.items():  # noqa
                 event_listeners = self.events_listeners[event_type]
                 for listener in napp_listeners:
                     event_listeners.remove(listener)
@@ -517,5 +511,5 @@ class Controller(object):
         # 'RuntimeError: dictionary changed size during iteration'
         # This is caused by looping over an dictionary while removing
         # items from it.
-        for (author, napp_name), napp in list(self.napps.items()):
+        for (author, napp_name) in list(self.napps.keys()):  # noqa
             self.unload_napp(author, napp_name)

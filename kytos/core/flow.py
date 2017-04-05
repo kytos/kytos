@@ -16,7 +16,7 @@ class Flow(object):
     actions that should occur in case any match happen.
     """
 
-    def __init__(self, idle_timeout=0, hard_timeout=0, priority=0,
+    def __init__(self, idle_timeout=0, hard_timeout=0, priority=0,  # noqa
                  table_id=0xff, buffer_id=None, in_port=None, dl_src=None,
                  dl_dst=None, dl_vlan=None, dl_type=None, nw_proto=None,
                  nw_src=None, nw_dst=None, tp_src=None, tp_dst=None,

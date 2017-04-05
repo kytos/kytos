@@ -26,6 +26,16 @@ For more information about this project, please visit `Kytos project website
 QuickStart
 **********
 
+Try First
+=========
+
+You may try kytos without installing it by running our docker image.
+Just install docker from your package provider and run:
+
+.. code-block:: shell
+
+   $ sudo docker run -it --privileged kytos/tryfirst
+
 Installing
 ==========
 

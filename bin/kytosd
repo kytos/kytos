@@ -1,15 +1,21 @@
 #!/usr/bin/env python3.6
 """Start Kytos SDN Platform core."""
+import daemon
+import IPython
 import signal
 
-import daemon
-
-from kytos.core.config import KytosConfig
 from kytos.core import Controller
+from kytos.core.config import KytosConfig
 
 controller = None
 kill_handler = None
 
+banner1 = """Welcome to Kytos SDN Platform!
+
+We are doing a huge effort to make sure that this console will work fine. But
+for now is still experimental.
+
+Please be patient!"""
 
 def stop_controller(signum, frame):
     """Stop the controller before quitting."""
@@ -27,6 +33,7 @@ if __name__ == '__main__':
     controller = Controller(config.options['daemon'])
     if controller.options.foreground:
         controller.start()
+        IPython.embed(banner1=banner1)
     else:
         with daemon.DaemonContext():
             controller.start()

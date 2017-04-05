@@ -1,3 +1,4 @@
+ipython
 lockfile
 python-openflow
 flask-socketio

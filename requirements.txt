@@ -4,6 +4,6 @@ python-openflow
 flask-socketio
 flask
 python-daemon>=2.1.2
-# For some reason appdirs is not installed as subdependency
+# For some reason setuptools
 # Maybe we need to remove this on the future
-appdirs
+setuptools>=34.0.0

@@ -34,7 +34,7 @@ Just install docker from your package provider and run:
 
 .. code-block:: shell
 
-   $ sudo docker run -it kytos/tryfirst /bin/bash
+   $ sudo docker run -it --privileged kytos/tryfirst /bin/bash
 
 Installing
 ==========

@@ -56,20 +56,15 @@ class Linter(SimpleCommand):
         self.lint()
 
     @staticmethod
-    def lint(ignore=False):
+    def lint():
         """Run pylama and radon."""
         files = 'setup.py tests kytos'
         print('Pylama is running. It may take several seconds...')
-        ignore_options = '--ignore=W,R,D203,D213,I0011'
-        options = ignore_options if ignore else ''
-        cmd = 'pylama {} {}'.format(options, files)
+        cmd = 'pylama ' + files
         try:
             check_call(cmd, shell=True)
         except CalledProcessError as e:
             print('FAILED: please, fix the error(s) above.')
-            if ignore is False:
-                print('Note: the test target currently runs less checks with:')
-                print('      pylama {} {}'.format(ignore_options, files))
             sys.exit(e.returncode)
 
 
@@ -81,7 +76,7 @@ class Test(TestCommand):
         super().run()
         print('Running examples in documentation')
         check_call('make doctest -C docs/', shell=True)
-        Linter.lint(ignore=True)
+        Linter.lint()
 
 
 class Cleaner(SimpleCommand):
@@ -108,7 +103,8 @@ class DevelopMode(develop):
         for _file in ETC_FILES:
             self.create_path(_file)
 
-    def create_path(self, file_name):
+    @staticmethod
+    def create_path(file_name):
         """Method used to create the configurations files using develop."""
         etc_kytos_dir = os.path.join(BASE_ENV, 'etc/kytos')
 
@@ -124,8 +120,6 @@ class DevelopMode(develop):
 
 
 requirements = [i.strip() for i in open("requirements.txt").readlines()]
-
-# TODO: Move this to a more appropiate place
 napps_dir = os.path.join(BASE_ENV, 'var/lib/kytos/napps/.installed')
 
 # We are parsing the metadata file as if it was a text file because if we
@@ -136,7 +130,7 @@ napps_dir = os.path.join(BASE_ENV, 'var/lib/kytos/napps/.installed')
 # installed, since the requirements installation from this project hasn't yet
 # happened.
 meta_file = open("kytos/core/metadata.py").read()
-metadata = dict(re.findall("(__[a-z]+__)\s*=\s*'([^']+)'", meta_file))
+metadata = dict(re.findall(r"(__[a-z]+__)\s*=\s*'([^']+)'", meta_file))
 
 if not os.path.exists(napps_dir):
     os.makedirs(napps_dir, exist_ok=True)

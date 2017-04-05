@@ -155,4 +155,14 @@ setup(name='kytos',
           'clean': Cleaner,
           'test': Test
       },
-      zip_safe=False)
+      zip_safe=False,
+      classifiers=[
+            'License :: OSI Approved :: MIT License',
+            'Operating System :: POSIX :: Linux',
+            'Programming Language :: Python :: 3.6',
+            'Topic :: System :: Networking',
+            'Development Status :: 4 - Beta',
+            'Environment :: Console',
+            'Environment :: No Input/Output (Daemon)',
+       ],
+      )

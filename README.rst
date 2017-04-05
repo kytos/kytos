@@ -93,10 +93,12 @@ With the above commands your controller will be running and ready to be used.
 Keep in mind that it need to be run as root - or with a user granted with the
 necessary permissions, such as to open a socket on port 6633.
 
-.. note:: Besides starting *Kytos*, if you wish to use our web based interface
-   you will need to start a webserver to serve the this interface. See more at:
-  `Kytos Admin UI page <https://github.com/kytos/kytos-admin-ui>`__. On the future
-  this it will be installed automatically. Sorry about that.
+The Web Admin User Interface:
+-----------------------------
+
+*Kytos* installs automatically a web based interface for administration. When
+*Kytos* is running, the Web UI runs in your localhost and can be accessed via
+browser, in `<http://localhost:8181>`_. Have fun (:
 
 Authors
 *******

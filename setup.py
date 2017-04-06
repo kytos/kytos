@@ -7,11 +7,10 @@ import os
 import re
 import sys
 from abc import abstractmethod
-from subprocess import CalledProcessError, call, check_call
+from subprocess import call
 
 from setuptools import Command, find_packages, setup
 from setuptools.command.develop import develop
-from setuptools.command.test import test as TestCommand
 
 if 'bdist_wheel' in sys.argv:
     raise RuntimeError("This setup.py does not support wheels")
@@ -46,39 +45,6 @@ class SimpleCommand(Command):
         pass
 
 
-class Linter(SimpleCommand):
-    """Code linters."""
-
-    description = 'run Pylama on Python files'
-
-    def run(self):
-        """Run linter."""
-        self.lint()
-
-    @staticmethod
-    def lint():
-        """Run pylama and radon."""
-        files = 'setup.py tests kytos'
-        print('Pylama is running. It may take several seconds...')
-        cmd = 'pylama ' + files
-        try:
-            check_call(cmd, shell=True)
-        except CalledProcessError as e:
-            print('FAILED: please, fix the error(s) above.')
-            sys.exit(e.returncode)
-
-
-class Test(TestCommand):
-    """Run doctest and linter besides tests/*."""
-
-    def run(self):
-        """First, tests/*."""
-        super().run()
-        print('Running examples in documentation')
-        check_call('make doctest -C docs/', shell=True)
-        Linter.lint()
-
-
 class Cleaner(SimpleCommand):
     """Custom clean command to tidy up the project root."""
 
@@ -86,8 +52,43 @@ class Cleaner(SimpleCommand):
 
     def run(self):
         """Clean build, dist, pyc and egg from package and docs."""
-        call('rm -vrf ./build ./dist ./*.pyc ./*.egg-info', shell=True)
-        call('make -C docs clean', shell=True)
+        call('rm -vrf ./build ./dist ./*.egg-info', shell=True)
+        call('find . -name __pycache__ -type d | xargs rm -rf')
+        call('make -C docs/ clean', shell=True)
+
+
+class TestCoverage(SimpleCommand):
+    """Display test coverage."""
+
+    description = 'run unit tests and display code coverage'
+
+    def run(self):
+        """Run unittest quietly and display coverage report."""
+        cmd = 'coverage3 run -m unittest discover -qs tests' \
+              ' && coverage3 report'
+        call(cmd, shell=True)
+
+
+class DocTest(SimpleCommand):
+    """Run documentation tests."""
+
+    description = 'run documentation tests'
+
+    def run(self):
+        """Run doctests using Sphinx Makefile."""
+        cmd = 'make -C docs/ doctest'
+        call(cmd, shell=True)
+
+
+class Linter(SimpleCommand):
+    """Code linters."""
+
+    description = 'lint Python source code'
+
+    def run(self):
+        """Run pylama."""
+        print('Pylama is running. It may take several seconds...')
+        call('pylama setup.py tests kytos', shell=True)
 
 
 class DevelopMode(develop):
@@ -153,10 +154,11 @@ setup(name='kytos',
       data_files=[(os.path.join(BASE_ENV, 'etc/kytos'), ETC_FILES)],
       packages=find_packages(exclude=['tests']),
       cmdclass={
-          'develop': DevelopMode,
-          'lint': Linter,
           'clean': Cleaner,
-          'test': Test
+          'coverage': TestCoverage,
+          'develop': DevelopMode,
+          'doctest': DocTest,
+          'lint': Linter
       },
       zip_safe=False,
       classifiers=[

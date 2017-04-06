@@ -14,14 +14,3 @@ build:
     dependencies:
         override:
             - true
-    tests:
-        before:
-            - pip install git+git://github.com/kytos/python-openflow.git
-            - pip install -r requirements.txt -r requirements-dev.txt
-        override:
-            -
-                command: 'coverage run setup.py test'
-                coverage:
-                    file: '.coverage'
-                    config_file: '.coveragerc'
-                    format: 'py-cc'

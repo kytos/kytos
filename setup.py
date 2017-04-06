@@ -53,7 +53,7 @@ class Cleaner(SimpleCommand):
     def run(self):
         """Clean build, dist, pyc and egg from package and docs."""
         call('rm -vrf ./build ./dist ./*.egg-info', shell=True)
-        call('find . -name __pycache__ -type d | xargs rm -rf')
+        call('find . -name __pycache__ -type d | xargs rm -rf', shell=True)
         call('make -C docs/ clean', shell=True)
 
 

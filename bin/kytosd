@@ -24,6 +24,8 @@ for now is still experimental.
 
 Please be patient!"""
 
+exit_msg = "Stopping Kytos daemon... Bye, see you!"
+
 def stop_controller(signum, frame):
     """Stop the controller before quitting."""
     if controller:
@@ -40,7 +42,8 @@ if __name__ == '__main__':
     controller = Controller(config.options['daemon'])
     if controller.options.foreground:
         controller.start()
-        ipshell = InteractiveShellEmbed(banner1=banner1)
+        ipshell = InteractiveShellEmbed(banner1=banner1,
+                                        exit_msg=exit_msg)
         ipshell.prompts = KytosPrompt(ipshell)
         ipshell()
         controller.stop()

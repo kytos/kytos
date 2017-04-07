@@ -26,6 +26,16 @@ For more information about this project, please visit `Kytos project website
 QuickStart
 **********
 
+Try First
+=========
+
+You may try kytos without installing it by running our docker image.
+Just install docker from your package provider and run:
+
+.. code-block:: shell
+
+   $ sudo docker run -it --privileged kytos/tryfirst
+
 Installing
 ==========
 
@@ -33,10 +43,11 @@ We use python3.6. So in order to use this software please install python3.6
 into your environment beforehand.
 
 We are doing a huge effort to make Kytos and its components available on all
-common distros. So, we recommend you to download it from your distro repository.
+common distros. So, we recommend you to download it from your distro
+repository.
 
-But if you are trying to test, develop or just want a more recent version of our
-software no problem: Download now, the latest release (it still a beta
+But if you are trying to test, develop or just want a more recent version of
+our software no problem: Download now, the latest release (it still a beta
 software), from our repository:
 
 First you need to clone *kytos* repository:
@@ -45,8 +56,8 @@ First you need to clone *kytos* repository:
 
    $ git clone https://github.com/kytos/kytos.git
 
-After cloning, the installation process is done by standard `setuptools` install
-procedure:
+After cloning, the installation process is done by standard `setuptools`
+install procedure:
 
 .. code-block:: shell
 
@@ -56,7 +67,8 @@ procedure:
 Configuring
 ===========
 
-After *kytos* installation, all config files will be located at ``/etc/kytos/``.
+After *kytos* installation, all config files will be located at
+``/etc/kytos/``.
 
 *Kytos* also accepts a configuration file as argument to change its default
 behaviour. You can view and modify the main config file at
@@ -91,8 +103,8 @@ With the above commands your controller will be running and ready to be used.
 Please note that the commands need to be run as a user who has permission to
 open sockets at ports 6633 and 8181.
 
-The Web Admin User Interface:
------------------------------
+The Web Admin User Interface
+============================
 
 *Kytos* installs automatically a web based interface for administration. When
 *Kytos* is running, the Web UI runs in your localhost and can be accessed via

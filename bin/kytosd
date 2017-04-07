@@ -4,8 +4,15 @@ import daemon
 import IPython
 import signal
 
+from IPython.terminal.embed import InteractiveShellEmbed
+from IPython.terminal.prompts import Prompts, Token
 from kytos.core import Controller
 from kytos.core.config import KytosConfig
+
+
+class KytosPrompt(Prompts):
+     def in_prompt_tokens(self, cli=None):
+         return [(Token.Prompt, 'kytos $> ')]
 
 controller = None
 kill_handler = None
@@ -33,7 +40,9 @@ if __name__ == '__main__':
     controller = Controller(config.options['daemon'])
     if controller.options.foreground:
         controller.start()
-        IPython.embed(banner1=banner1)
+        ipshell = InteractiveShellEmbed(banner1=banner1)
+        ipshell.prompts = KytosPrompt(ipshell)
+        ipshell()
         controller.stop()
     else:
         with daemon.DaemonContext():

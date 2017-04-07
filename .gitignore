@@ -101,3 +101,6 @@ aux_*.sh
 node_modules
 include
 kytos/web-ui/source/static/css/*
+
+# ignore templates
+etc/kytos/kytos.conf

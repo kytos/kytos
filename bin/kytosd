@@ -32,10 +32,9 @@ Welcome to Kytos SDN Platform!
 We are doing a huge effort to make sure that this console will work fine. But
 for now is still experimental.
 
-Kytos website: https://kytos.io/
-Documentation: https://docs.kytos.io/
-
-"""
+Kytos website.: https://kytos.io/
+Documentation.: https://docs.kytos.io/
+OF Address....:"""
 
 exit_msg = "Stopping Kytos daemon... Bye, see you!"
 
@@ -55,6 +54,10 @@ if __name__ == '__main__':
     controller = Controller(config.options['daemon'])
     if controller.options.foreground:
         controller.start()
+        address = controller.server.server_address[0]
+        port = controller.server.server_address[1]
+        banner1 += " tcp://{}:{}\n".format(address, port)
+        banner1 += "WEB UI........: http://0.0.0.0:8181/"
         ipshell = InteractiveShellEmbed(banner1=banner1,
                                         exit_msg=exit_msg)
         ipshell.prompts = KytosPrompt(ipshell)

@@ -17,7 +17,7 @@ if 'bdist_wheel' in sys.argv:
     raise RuntimeError("This setup.py does not support wheels")
 
 
-BASE_ENV = os.environ['VIRTUAL_ENV'] or '/'
+BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
 ETC_FILES = ['etc/kytos/logging.ini']
 TEMPLATE_FILES = ['etc/kytos/kytos.conf.template']
 

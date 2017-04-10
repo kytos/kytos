@@ -11,7 +11,7 @@ from configparser import ConfigParser
 
 from kytos.core.metadata import __version__
 
-BASE_ENV = os.environ['VIRTUAL_ENV'] or '/'
+BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
 
 
 class KytosConfig():

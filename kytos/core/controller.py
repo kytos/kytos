@@ -17,6 +17,7 @@ import logging
 import os
 import re
 import sys
+import time
 from importlib.machinery import SourceFileLoader
 from threading import Thread
 
@@ -134,10 +135,10 @@ class Controller(object):
         msg_out_event_handler = self.msg_out_event_handler
         app_event_handler = self.app_event_handler
 
-        thrds = {'api_server': Thread(target=self.api_server.run,
-                                      args=['0.0.0.0', 8181]),
-                 'tcp_server': Thread(name='TCP server',
+        thrds = {'tcp_server': Thread(name='TCP server',
                                       target=self.server.serve_forever),
+                 'api_server': Thread(target=self.api_server.run,
+                                      args=['0.0.0.0', 8181]),
                  'raw_event_handler': Thread(name='RawEvent Handler',
                                              target=raw_event_handler),
                  'msg_in_event_handler': Thread(name='MsgInEvent Handler',
@@ -149,7 +150,6 @@ class Controller(object):
 
         self._threads = thrds
         # This is critical, if any of them started we should exit.
-        # TODO: Since that is another thread, except is not working.
         for thread in self._threads.values():
             try:
                 thread.start()

@@ -17,7 +17,17 @@ class KytosPrompt(Prompts):
 controller = None
 kill_handler = None
 
-banner1 = """Welcome to Kytos SDN Platform!
+banner1 = """\033[95m
+  _          _
+ | |        | |
+ | | ___   _| |_ ___  ___
+ | |/ / | | | __/ _ \/ __|
+ |   <| |_| | || (_) \__ \\
+ |_|\_\\\\__, |\__\___/|___/
+        __/ |
+       |___/
+\033[0m
+Welcome to Kytos SDN Platform!
 
 We are doing a huge effort to make sure that this console will work fine. But
 for now is still experimental.

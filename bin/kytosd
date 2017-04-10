@@ -6,9 +6,11 @@ import signal
 
 from IPython.terminal.embed import InteractiveShellEmbed
 from IPython.terminal.prompts import Prompts, Token
+
 from kytos.core import Controller
 from kytos.core.config import KytosConfig
 
+from traitlets.config.loader import Config
 
 class KytosPrompt(Prompts):
      def in_prompt_tokens(self, cli=None):
@@ -58,7 +60,13 @@ if __name__ == '__main__':
         port = controller.server.server_address[1]
         banner1 += " tcp://{}:{}\n".format(address, port)
         banner1 += "WEB UI........: http://0.0.0.0:8181/"
-        ipshell = InteractiveShellEmbed(banner1=banner1,
+
+        cfg = Config()
+        cfg.TerminalInteractiveShell.autocall = 2
+        cfg.TerminalInteractiveShell.show_rewritten_input = False
+
+        ipshell = InteractiveShellEmbed(config=cfg,
+                                        banner1=banner1,
                                         exit_msg=exit_msg)
         ipshell.prompts = KytosPrompt(ipshell)
         ipshell()

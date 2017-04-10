@@ -14,12 +14,12 @@ class NAppsManager:
         self._enabled = enabled_napps_path
 
     def get_enabled(self):
-        """List of (author, napp_name) found in enabled napps folder."""
+        """List of (username, napp_name) found in enabled napps folder."""
         folder = self._enabled
         napps = []
         ignored_paths = set(['.installed', '__pycache__', '__init__.py'])
-        for author in set(listdir(folder)) - ignored_paths:
-            author_dir = path.join(folder, author)
-            for napp_name in set(listdir(author_dir)) - ignored_paths:
-                napps.append((author, napp_name))
+        for username in set(listdir(folder)) - ignored_paths:
+            username_dir = path.join(folder, username)
+            for napp_name in set(listdir(username_dir)) - ignored_paths:
+                napps.append((username, napp_name))
         return sorted(napps)

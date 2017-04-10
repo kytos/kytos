@@ -27,7 +27,10 @@ class APIServer:
 
     def run(self, *args, **kwargs):
         """Method used to run the APIServer."""
-        self.server.run(self.app, *args, **kwargs)
+        try:
+            self.server.run(self.app, *args, **kwargs)
+        except OSError as e:
+            pass
 
     def register_rest_endpoint(self, url, function, methods):
         r"""Register a new rest endpoint in Api Server.

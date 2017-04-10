@@ -1,5 +1,7 @@
 """Basic TCP Server that will listen to port 6633."""
 import logging
+import sys
+
 from socket import error as SocketError
 from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 from threading import current_thread
@@ -56,7 +58,9 @@ class KytosServer(ThreadingMixIn, TCPServer):
             log.info("Kytos listening at %s:%s", self.server_address[0],
                      self.server_address[1])
             super().serve_forever(poll_interval)
-        except Exception:
+        except Exception as e:
+            log.error("Maybe you have already a Kytos instance.")
+            log.error('Failed to start Kytos daemon.')
             self.server_close()
             raise
 

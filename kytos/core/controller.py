@@ -148,8 +148,16 @@ class Controller(object):
                                              target=app_event_handler)}
 
         self._threads = thrds
+        # This is critical, if any of them started we should exit.
+        # TODO: Since that is another thread, except is not working.
         for thread in self._threads.values():
-            thread.start()
+            try:
+                thread.start()
+            except Exception as e:
+                self.log.error("Error starting thread {}".format(thread))
+                self.log.error(e)
+                self.log.error("Kytos start aborted.")
+                sys.exit()
 
         self.log.info("Loading kytos apps...")
         self.load_napps()

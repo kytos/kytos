@@ -1,5 +1,6 @@
 """Manage Network Application files."""
 from os import listdir, path
+import logging
 
 
 class NAppsManager:
@@ -18,6 +19,14 @@ class NAppsManager:
         folder = self._enabled
         napps = []
         ignored_paths = set(['.installed', '__pycache__', '__init__.py'])
+
+        if not path.exists(folder):
+            log = logging.getLogger(__name__)
+            msg = 'The NApps directory "%s" does not exist on your '
+            msg += 'filesystem. No NApp will be loaded.'
+            log.warning(msg, folder)
+            return napps
+
         for username in set(listdir(folder)) - ignored_paths:
             username_dir = path.join(folder, username)
             for napp_name in set(listdir(username_dir)) - ignored_paths:

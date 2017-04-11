@@ -80,7 +80,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
         It should not be overriden.
         """
-        log.info("Running %s App", self.name)
+        log.info("Running NApp: %s", self)
         # TODO: If the setup method is blocking, then the execute method will
         #       never be called. Should we execute it inside a new thread?
         self.setup()

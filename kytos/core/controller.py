@@ -17,7 +17,6 @@ import logging
 import os
 import re
 import sys
-import time
 from importlib.machinery import SourceFileLoader
 from threading import Thread
 
@@ -153,7 +152,7 @@ class Controller(object):
         for thread in self._threads.values():
             try:
                 thread.start()
-            except Exception as e:
+            except OSError as e:
                 self.log.error("Error starting thread {}".format(thread))
                 self.log.error(e)
                 self.log.error("Kytos start aborted.")

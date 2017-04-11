@@ -1,6 +1,6 @@
 """Manage Network Application files."""
-from os import listdir, path
 import logging
+from os import listdir, path
 
 
 class NAppsManager:

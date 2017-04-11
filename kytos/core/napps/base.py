@@ -49,6 +49,9 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
         self.load_json()
 
+    def __str__(self):
+        return "{}/{}".format(self.username, self.name)
+
     def load_json(self):
         """Method used to update object attributes based on kytos.json."""
         current_file = sys.modules[self.__class__.__module__].__file__

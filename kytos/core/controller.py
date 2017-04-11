@@ -25,7 +25,7 @@ from kytos.core.buffers import KytosBuffers
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
-from kytos.core.napps_manager import NAppsManager
+from kytos.core.napps.manager import NAppsManager
 from kytos.core.switch import Switch
 from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
 from kytos.core.websocket import LogWebSocket
@@ -483,7 +483,7 @@ class Controller(object):
 
     def load_napps(self):
         """Load all NApps enabled on the NApps dir."""
-        napps = NAppsManager(self.options.napps)
+        napps = NAppsManager(self.options)
         for username, napp_name in napps.get_enabled():
             try:
                 self.log.info("Loading NApp %s/%s", username, napp_name)

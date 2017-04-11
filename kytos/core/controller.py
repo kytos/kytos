@@ -22,6 +22,7 @@ from threading import Thread
 
 from kytos.core.api_server import APIServer
 from kytos.core.buffers import KytosBuffers
+from kytos.core.config import KytosConfig
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
@@ -44,13 +45,15 @@ class Controller(object):
         - manage the buffers handlers, considering one thread per handler.
     """
 
-    def __init__(self, options):
+    def __init__(self, options=None):
         """Init method of Controller class.
 
         Parameters:
             options (ParseArgs.args): 'options' attribute from an instance of
                 KytosConfig class
         """
+        if options is None:
+            options = KytosConfig().options['daemon']
         #: dict: keep the main threads of the controller (buffers and handler)
         self._threads = {}
         #: KytosBuffers: KytosBuffer object with Controller buffers

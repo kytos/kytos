@@ -16,7 +16,12 @@ from kytos.utils.client import NAppsClient
 log = logging.getLogger(__name__)
 
 class NApp:
-    def __init__(self):
+    def __init__(self, username=None, name=None, version=None,
+                 repository=None):
+        self.username = username
+        self.name = name
+        self.version = version
+        self.repository = repository
         self.enabled = False
 
     def __str__(self):
@@ -29,28 +34,116 @@ class NApp:
     def id(self):
         return str(self)
 
-    @classmethod
-    def create_from_json(cls, filename):
-        napp = NApp()
-        napp.load_from_json(filename)
-        return napp
+    @property
+    def uri(self):
+        version = self.version if self.version else 'latest'
+        if self._has_valid_repository():
+            return "{}/{}-{}".format(self.repository, self.id, version)
+            # Use the next line after Diraol fix redirect using ":" for version
+            #return "{}/{}:{}".format(self.repository, self.id, version)
 
-    def load_from_json(self, filename):
+    @property
+    def package_url(self):
+        if self.uri:
+            return "{}.napp".format(self.uri)
+
+    @staticmethod
+    def create_from_json(filename):
         """Method used to update object attributes based on kytos.json."""
+        napp = NApp()
         with open(filename, encoding='utf-8') as data_file:
             data = json.loads(data_file.read())
 
         for attribute, value in data.items():
-            setattr(self, attribute, value)
+            print(attribute, value)
+            setattr(napp, attribute, value)
+
+        return napp
+
+    @staticmethod
+    def create_from_uri(uri):
+        regex =  r'^(((https?://|file://)(.+))/)?(.+?)/(.+?)/?(:(.+))?$'
+        match = re.match(regex, uri)
+
+        if match:
+            return NApp(username=match.groups()[4],
+                        name=match.groups()[5],
+                        version=match.groups()[7],
+                        repository=match.groups()[1])
+
+    def download(self):
+        """Download NApp package from his repository.
+
+        Raises:
+            urllib.error.HTTPError: If download is not successful.
+
+        Return:
+            str: Downloaded temp filename.
+        """
+        if self.package_url:
+            package_filename = urllib.request.urlretrieve(self.package_url)[0]
+            extracted = self._extract(package_filename)
+            Path(package_filename).unlink()
+            self._update_repo_file(extracted)
+            return extracted
 
     def as_json(self):
         """Dump all NApp attributes on a json format."""
         pass
 
+    @staticmethod
+    def _extract(filename):
+        """Extract package to a temporary folder.
+
+        Return:
+            pathlib.Path: Temp dir with package contents.
+        """
+        tmp = tempfile.mkdtemp(prefix='kytos-napp-')
+        with tarfile.open(filename, 'r:xz') as tar:
+            tar.extractall(tmp)
+        return Path(tmp)
+
+    def _has_valid_repository(self):
+        return all([self.username, self.name, self.repository])
+
+    def _update_repo_file(self, destination=None):
+        with open("{}/.repo".format(destination), 'w') as fp:
+            fp.write(self.repository + '\n')
+
+
+
+#napp.download()
+
+# NAPP URI:
+
+
+# NAPP Identifier:
+# [protocol://][repository]
+
+# beraldo/foo:20170909
+
+    # https://napps.kytos.io/repo/beraldo/foo:latest
+
+
+
+
+
+# controller.napps.install('foo/bar')
+#  -> config.repos
+
+#  napp = NApp(username='foo', name='bar', repository='https://napps.kytos.io/repo')
+#  napp.install('/var/lib/kytos/napps/.installed', enable=True)
+
+
+# controller.napps.install('https://napps.kytos.io/repo/foo/bar')
+# controller.napps.install('https://napps.kytos.io/repo/foo/bar:20170909')
+## controller.napps.install('file:///home/beraldo/napps/foo/bar')
+
+
 class NAppsManager:
     """Deal with NApps at filesystem level and ask Kytos to (un)load NApps."""
 
-    def __init__(self, config):
+    def __init__(self, controller):
         """If controller is not informed, the necessary paths must be.
 
         If ``controller`` is available, NApps will be (un)loaded at runtime and
@@ -64,13 +157,45 @@ class NAppsManager:
             enabled_path (str): Folder where enabled NApps are stored. If None,
                 use the controller's configuration.
         """
-        self._config = config
+        self._config = controller.options
+
+        self._controller = controller
 
         self._enabled = Path(self._config.napps)
         self._installed = self._enabled / '.installed'
 #
 #        self.user = None
 #        self.napp = None
+
+    def install(self, napp_uri, enable=True):
+        napp = NApp.create_from_uri(napp_uri)
+
+        if napp in self.get_installed2():
+            log.warning("Unable to install NApp {}. Already "
+                        "installed".format(napp.id))
+            return False
+
+        if not napp.repository:
+            # Check here what is configured repo
+            pass
+
+        pkg_folder = None
+        try:
+            pkg_folder = napp.download()
+            napp_folder = self._get_local_folder(napp, pkg_folder)
+            dst = self._installed / napp.username / napp.name
+            self._create_module(dst.parent)
+            shutil.move(str(napp_folder), str(dst))
+        finally:
+            if pkg_folder and pkg_folder.exists():
+                shutil.rmtree(str(pkg_folder))
+
+        log.info("New NApp installed: {}".format(napp.id))
+
+        if enable:
+            return self.enable(napp_uri)
+
+        return True
 
     def list(self):
         napps = self.get_installed2()
@@ -123,73 +248,77 @@ class NAppsManager:
         """Sorted list of (author, napp_name) of installed napps."""
         return self._get_napps2(self._installed)
 
-    def disable2(self, napp):
-        """Disable a NApp if it is enabled."""
-        path = self._enabled / napp.username / napp.name
-        try:
-            path.unlink()
-            napp.enabled = False
-        except FileNotFoundError:
-            pass  # OK, it was already disabled
+#    def disable2(self, napp):
+#        """Disable a NApp if it is enabled."""
+#        path = self._enabled / napp.username / napp.name
+#        try:
+#            path.unlink()
+#            napp.enabled = False
+#        except FileNotFoundError:
+#            pass  # OK, it was already disabled
 
-    def disable(self):
+    def disable(self, napp_uri):
         """Disable a NApp if it is enabled."""
-        enabled = self._enabled / self.user / self.napp
+        napp = NApp.create_from_uri(napp_uri)
+        enabled = self._enabled / napp.username / napp.name
         try:
             enabled.unlink()
+            log.info("NApp disabled: %s", napp.id)
             if self._controller is not None:
-                self._controller.unload_napp(self.user, self.napp)
+                self._controller.unload_napp(napp.username, napp.name)
         except FileNotFoundError:
             pass  # OK, it was already disabled
 
-    def enable(self):
+    def enable(self, napp_uri):
         """Enable a NApp if not already enabled.
 
         Raises:
             FileNotFoundError: If NApp is not installed.
             PermissionError: No filesystem permission to enable NApp.
         """
-        enabled = self._enabled / self.user / self.napp
-        installed = self._installed / self.user / self.napp
-
-        if not installed.is_dir():
-            raise FileNotFoundError('Install NApp {} first.'.format(
-                self.napp_id))
-        elif not enabled.exists():
-            self._check_module(enabled.parent)
-            try:
-                # Create symlink
-                enabled.symlink_to(installed)
-                if self._controller is not None:
-                    self._controller.load_napp(self.user, self.napp)
-            except FileExistsError:
-                pass  # OK, NApp was already enabled
-            except PermissionError:
-                raise PermissionError('Permission error on enabling NApp. Try '
-                                      'with sudo.')
-
-    def enable2(self, napp):
-        """Enable a NApp if not already enabled.
-
-        Raises:
-            FileNotFoundError: If NApp is not installed.
-            PermissionError: No filesystem permission to enable NApp.
-        """
+        napp = NApp.create_from_uri(napp_uri)
         enabled = self._enabled / napp.username / napp.name
         installed = self._installed / napp.username / napp.name
 
         if not installed.is_dir():
-            raise FileNotFoundError('Install NApp {} first.'.format(napp))
+            log.error("Failed to enable NApp %s. NApp not installed.",
+                      napp.id)
         elif not enabled.exists():
             self._create_module(enabled.parent)
             try:
                 # Create symlink
                 enabled.symlink_to(installed)
+                if self._controller is not None:
+                    self._controller.load_napp(napp.username, napp.name)
+                log.info("NApp enabled: %s", napp.id)
             except FileExistsError:
                 pass  # OK, NApp was already enabled
             except PermissionError:
-                raise PermissionError('Permission error on enabling NApp. Try '
-                                      'with sudo.')
+                log.error("Failed to enable NApp %s. Permission denied.",
+                          napp.id)
+
+#    def enable2(self, napp):
+#        """Enable a NApp if not already enabled.
+#
+#        Raises:
+#            FileNotFoundError: If NApp is not installed.
+#            PermissionError: No filesystem permission to enable NApp.
+#        """
+#        enabled = self._enabled / napp.username / napp.name
+#        installed = self._installed / napp.username / napp.name
+#
+#        if not installed.is_dir():
+#            raise FileNotFoundError('Install NApp {} first.'.format(napp))
+#        elif not enabled.exists():
+#            self._create_module(enabled.parent)
+#            try:
+#                # Create symlink
+#                enabled.symlink_to(installed)
+#            except FileExistsError:
+#                pass  # OK, NApp was already enabled
+#            except PermissionError:
+#                raise PermissionError('Permission error on enabling NApp. Try '
+#                                      'with sudo.')
 
     @staticmethod
     def _create_module(folder):
@@ -202,10 +331,13 @@ class NAppsManager:
             folder.mkdir()
             (folder / '__init__.py').touch()
 
-#    def is_installed(self):
-#        """Whether a NApp is installed."""
-#        return (self.user, self.napp) in self.get_installed()
-#
+    def is_installed(self):
+        """Whether a NApp is installed."""
+        return (self.user, self.napp) in self.get_installed()
+
+    def is_installed2(self, napp):
+        return napp in self.get_installed2()
+
 #    def get_disabled(self):
 #        """Sorted list of (author, napp_name) of disabled napps.
 #
@@ -234,16 +366,27 @@ class NAppsManager:
 #    def is_enabled(self):
 #        """Whether a NApp is enabled."""
 #        return (self.user, self.napp) in self.get_enabled()
+
 #
-#    def uninstall(self):
-#        """Delete code inside NApp directory, if existent."""
-#        if self.is_installed():
-#            installed = self._installed / self.user / self.napp
-#            if installed.is_symlink():
-#                installed.unlink()
-#            else:
-#                shutil.rmtree(str(installed))
-#
+    def uninstall(self):
+        """Delete code inside NApp directory, if existent."""
+        if self.is_installed():
+            installed = self._installed / self.user / self.napp
+            if installed.is_symlink():
+                installed.unlink()
+            else:
+                shutil.rmtree(str(installed))
+
+    def uninstall2(self, napp):
+        """Delete code inside NApp directory, if existent."""
+        if self.is_installed2(napp):
+            installed = self._installed / napp.username / napp.name
+            if installed.is_symlink():
+                installed.unlink()
+            else:
+                shutil.rmtree(str(installed))
+
+
 #    @staticmethod
 #    def valid_name(username):
 #        """Check the validity of the given 'name'.
@@ -288,74 +431,93 @@ class NAppsManager:
 #        self._check_module(installed.parent)
 #        installed.symlink_to(folder.resolve())
 #
-#    def _get_local_folder(self, root=None):
-#        """Return local NApp root folder.
-#
-#        Search for kytos.json in _./_ folder and _./user/napp_.
-#
-#        Args:
-#            root (pathlib.Path): Where to begin searching.
-#
-#        Raises:
-#            FileNotFoundError: If there is no such local NApp.
-#
-#        Return:
-#            pathlib.Path: NApp root folder.
-#        """
-#        if root is None:
-#            root = Path()
-#        for folders in ['.'], [self.user, self.napp]:
-#            kytos_json = root / Path(*folders) / 'kytos.json'
-#            if kytos_json.exists():
-#                with kytos_json.open() as f:
-#                    meta = json.load(f)
-#                    if meta['author'] == self.user and \
-#                            meta['name'] == self.napp:
-#                        return kytos_json.parent
-#        raise FileNotFoundError('kytos.json not found.')
-#
-#    def install_remote(self):
-#        """Download, extract and install NApp."""
-#        package, pkg_folder = None, None
-#        try:
-#            package = self._download()
-#            pkg_folder = self._extract(package)
-#            napp_folder = self._get_local_folder(pkg_folder)
-#            dst = self._installed / self.user / self.napp
-#            self._check_module(dst.parent)
-#            shutil.move(str(napp_folder), str(dst))
-#        finally:
-#            # Delete temporary files
-#            if package:
-#                Path(package).unlink()
-#            if pkg_folder and pkg_folder.exists():
-#                shutil.rmtree(str(pkg_folder))
-#
-#    def _download(self):
-#        """Download NApp package from server.
-#
-#        Raises:
-#            urllib.error.HTTPError: If download is not successful.
-#
-#        Return:
-#            str: Downloaded temp filename.
-#        """
-#        repo = self._config.get('napps', 'repo')
-#        uri = os.path.join(repo, self.user, '{}-latest.napp'.format(self.napp))
-#        return urllib.request.urlretrieve(uri)[0]
-#
-#    @staticmethod
-#    def _extract(filename):
-#        """Extract package to a temporary folder.
-#
-#        Return:
-#            pathlib.Path: Temp dir with package contents.
-#        """
-#        tmp = tempfile.mkdtemp(prefix='kytos')
-#        with tarfile.open(filename, 'r:xz') as tar:
-#            tar.extractall(tmp)
-#        return Path(tmp)
-#
+    def _get_local_folder(self, napp, root=None):
+        """Return local NApp root folder.
+
+        Search for kytos.json in _./_ folder and _./user/napp_.
+
+        Args:
+            root (pathlib.Path): Where to begin searching.
+
+        Raises:
+            FileNotFoundError: If there is no such local NApp.
+
+        Return:
+            pathlib.Path: NApp root folder.
+        """
+        if root is None:
+            root = Path()
+        for folders in ['.'], [napp.username, napp.name]:
+            kytos_json = root / Path(*folders) / 'kytos.json'
+            if kytos_json.exists():
+                with kytos_json.open() as f:
+                    meta = json.load(f)
+                    if meta['username'] == napp.username and \
+                            meta['name'] == napp.name:
+                        return kytos_json.parent
+        raise FileNotFoundError('kytos.json not found.')
+
+    def install_remote(self):
+        """Download, extract and install NApp."""
+        package, pkg_folder = None, None
+        try:
+            package = self.download()
+            pkg_folder = self._extract(package)
+            napp_folder = self._get_local_folder(pkg_folder)
+            dst = self._installed / self.user / self.napp
+            self._check_module(dst.parent)
+            shutil.move(str(napp_folder), str(dst))
+        finally:
+            # Delete temporary files
+            if package:
+                Path(package).unlink()
+            if pkg_folder and pkg_folder.exists():
+                shutil.rmtree(str(pkg_folder))
+
+    def install_remote2(self, napp):
+        """Download, extract and install NApp."""
+        package, pkg_folder = None, None
+        try:
+            package = self.download(napp)
+            pkg_folder = self._extract(package)
+            napp_folder = self._get_local_folder(napp, pkg_folder)
+            dst = self._installed / napp.username / napp.name
+            self._create_module(dst.parent)
+            shutil.move(str(napp_folder), str(dst))
+        finally:
+            # Delete temporary files
+            if package:
+                Path(package).unlink()
+            if pkg_folder and pkg_folder.exists():
+                shutil.rmtree(str(pkg_folder))
+
+
+    def download(self, napp):
+        """Download NApp package from server.
+
+        Raises:
+            urllib.error.HTTPError: If download is not successful.
+
+        Return:
+            str: Downloaded temp filename.
+        """
+        repo = eval(self._config.napps_repositories)[0]
+        uri = os.path.join(repo, napp.username,
+                           '{}-latest.napp'.format(napp.name))
+        return urllib.request.urlretrieve(uri)[0]
+
+    @staticmethod
+    def _extract(filename):
+        """Extract package to a temporary folder.
+
+        Return:
+            pathlib.Path: Temp dir with package contents.
+        """
+        tmp = tempfile.mkdtemp(prefix='kytos')
+        with tarfile.open(filename, 'r:xz') as tar:
+            tar.extractall(tmp)
+        return Path(tmp)
+
 #    @classmethod
 #    def create_napp(cls):
 #        """Bootstrap a basic NApp strucutre for you to develop your NApp.

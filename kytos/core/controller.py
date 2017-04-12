@@ -158,7 +158,7 @@ class Controller(object):
                 self.log.error("Kytos start aborted.")
                 sys.exit()
 
-        self.log.info("Loading kytos apps...")
+        self.log.info("Loading Kytos NApps...")
         self.load_napps()
         self.started_at = now()
 
@@ -483,7 +483,7 @@ class Controller(object):
 
     def load_napps(self):
         """Load all NApps enabled on the NApps dir."""
-        napps = NAppsManager(self.options)
+        napps = NAppsManager(self)
         for username, napp_name in napps.get_enabled():
             try:
                 self.log.info("Loading NApp %s/%s", username, napp_name)
@@ -503,6 +503,7 @@ class Controller(object):
         if napp is None:
             self.log.warn('NApp %s/%s was not loaded', username, napp_name)
         else:
+            self.log.info("Shutting down NApp %s/%s...", username, napp_name)
             napp.shutdown()
             # Removing listeners from that napp
             for event_type, napp_listeners in napp._listeners.items():  # noqa

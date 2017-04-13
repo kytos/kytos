@@ -110,13 +110,13 @@ class KytosOpenFlowRequestHandler(BaseRequestHandler):
                 while len(raw_header) < header_len:
                     remaining = header_len - len(raw_header)
                     raw_header += self.request.recv(remaining)
-                    if len(raw_header) == 0:
+                    if not raw_header:
                         break
             except InterruptedError as exception:
                 self.exception = exception
                 break
             else:
-                if len(raw_header) == 0:
+                if not raw_header:
                     break
 
             log.debug("New message from %s:%s at thread %s", self.ip,

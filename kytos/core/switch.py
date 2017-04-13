@@ -142,8 +142,7 @@ class Interface(object):
             return ''
         elif speed >= 10**9:
             return '{} Gbps'.format(round(speed / 10**9))
-        else:
-            return '{} Mbps'.format(round(speed / 10**6))
+        return '{} Mbps'.format(round(speed / 10**6))
 
     def as_dict(self):
         """Return a dictionary with Interface attributes.
@@ -227,9 +226,9 @@ class Connection(object):
         try:
             if self.socket:
                 self.socket.send(buffer)
-        except (OSError, SocketError) as exception:
+        except (OSError, SocketError):
             self.close()
-            raise exception
+            raise
 
     def close(self):
         """Close the socket from connection instance."""
@@ -450,13 +449,9 @@ class Switch(object):
             shoudl_flood (bool): True if the ethernet_frame should flood.
         """
         last_flood = self.last_flood(ethernet_frame)
+        diff = (now() - last_flood).microseconds
 
-        if last_flood is None:
-            return True
-        elif (now() - last_flood).microseconds > FLOOD_TIMEOUT:
-            return True
-        else:
-            return False
+        return last_flood is None or diff > FLOOD_TIMEOUT
 
     def update_flood_table(self, ethernet_frame):
         """Update a flood table using the given ethernet frame.

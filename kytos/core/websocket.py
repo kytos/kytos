@@ -36,7 +36,7 @@ class LogWebSocket:
         self.stream.seek(0)
         msg = self.stream.read().split('\n')[:-1]
 
-        if len(msg) == 0:
+        if not msg:
             return
 
         self.buff.extend(msg)

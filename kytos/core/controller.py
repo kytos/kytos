@@ -26,7 +26,7 @@ from kytos.core.config import KytosConfig
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
-from kytos.core.napps_manager import NAppsManager
+from kytos.core.napps.manager import NAppsManager
 from kytos.core.switch import Switch
 from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
 from kytos.core.websocket import LogWebSocket
@@ -156,12 +156,12 @@ class Controller(object):
             try:
                 thread.start()
             except OSError as e:
-                self.log.error("Error starting thread {}".format(thread))
+                self.log.error("Error starting thread %s", thread)
                 self.log.error(e)
                 self.log.error("Kytos start aborted.")
                 sys.exit()
 
-        self.log.info("Loading kytos apps...")
+        self.log.info("Loading Kytos NApps...")
         self.load_napps()
         self.started_at = now()
 
@@ -225,8 +225,7 @@ class Controller(object):
         """
         if self.started_at:
             return "Running since %s" % self.started_at
-        else:
-            return "Stopped"
+        return "Stopped"
 
     def uptime(self):
         """Return the uptime of kytos server.
@@ -476,7 +475,7 @@ class Controller(object):
                                 'main.py')
             module = SourceFileLoader(mod_name, path)
 
-            napp = module.load_module().Main(controller=self)
+            napp = module.load_module().Main(controller=self)  # noqa
             self.napps[(username, napp_name)] = napp
 
             for event, listeners in napp._listeners.items():  # noqa
@@ -486,14 +485,13 @@ class Controller(object):
 
     def load_napps(self):
         """Load all NApps enabled on the NApps dir."""
-        napps = NAppsManager(self.options.napps)
-        for username, napp_name in napps.get_enabled():
+        napps = NAppsManager(self)
+        for napp in napps.list_enabled():
             try:
-                self.log.info("Loading NApp %s/%s", username, napp_name)
-                self.load_napp(username, napp_name)
+                self.log.info("Loading NApp %s", napp.id)
+                self.load_napp(napp.username, napp.name)
             except FileNotFoundError as e:
-                self.log.error("Could not load NApp %s/%s: %s", username,
-                               napp_name, e)
+                self.log.error("Could not load NApp %s: %s", napp.id, e)
 
     def unload_napp(self, username, napp_name):
         """Unload a specific NApp.
@@ -504,15 +502,16 @@ class Controller(object):
         """
         napp = self.napps.pop((username, napp_name), None)
         if napp is None:
-            self.log.warn('NApp %s/%s was not loaded', username, napp_name)
+            self.log.warning('NApp %s/%s was not loaded', username, napp_name)
         else:
+            self.log.info("Shutting down NApp %s/%s...", username, napp_name)
             napp.shutdown()
             # Removing listeners from that napp
             for event_type, napp_listeners in napp._listeners.items():  # noqa
                 event_listeners = self.events_listeners[event_type]
                 for listener in napp_listeners:
                     event_listeners.remove(listener)
-                if len(event_listeners) == 0:
+                if not event_listeners:
                     del self.events_listeners[event_type]
 
     def unload_napps(self):

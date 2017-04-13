@@ -155,7 +155,7 @@ class Flow(object):
         flow = Flow()
 
         for attribute_name, value in flow_fields.items():
-            if attribute_name is "actions":
+            if attribute_name == "actions":
                 continue
             setattr(flow, attribute_name, value)
 

@@ -29,7 +29,7 @@ class APIServer:
         """Method used to run the APIServer."""
         try:
             self.server.run(self.app, *args, **kwargs)
-        except OSError as e:
+        except OSError:
             pass
 
     def register_rest_endpoint(self, url, function, methods):
@@ -83,11 +83,13 @@ class APIServer:
                                   self.shutdown_api.__name__,
                                   self.shutdown_api, methods=['GET'])
 
-    def status_api(self):
+    @staticmethod
+    def status_api():
         """Display json with kytos status using the route '/kytos/status'."""
         return '{"response": "running"}', 201
 
-    def stop_api_server(self):
+    @staticmethod
+    def stop_api_server():
         """Method used to send a shutdown request to stop Api Server."""
         try:
             urlopen('http://127.0.0.1:8181/kytos/shutdown')

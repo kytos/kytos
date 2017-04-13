@@ -30,3 +30,7 @@ port = 6633
 # Where should the controller look for network apps ?
 # This directory has both core napps and user installed napps.
 napps = {{ prefix }}/var/lib/kytos/napps
+
+napps_repositories = [
+    "https://napps.kytos.io/repo/"
+    ]

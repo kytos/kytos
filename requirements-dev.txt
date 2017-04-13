@@ -10,3 +10,5 @@ radon >= 1.4.0
 
 # Code coverage
 coverage >= 4.1
+
+tox

@@ -169,6 +169,10 @@ class NAppsManager:
     @staticmethod
     def _list_all(napps_dir):
         """List all NApps found in ``napps_dir``."""
+        if not napps_dir.exists():
+            log.warning("NApps dir (%s) doesn't exist.", napps_dir)
+            return []
+
         jsons = napps_dir.glob('*/*/kytos.json')
         return [NApp.create_from_json(j) for j in jsons]
 

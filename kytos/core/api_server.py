@@ -1,6 +1,6 @@
 """Module used to handle a API Server."""
+import logging
 import os
-
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -11,7 +11,7 @@ from flask_socketio import SocketIO
 class APIServer:
     """Api server used to provide Kytos Controller routes."""
 
-    def __init__(self, app_name):
+    def __init__(self, app_name, debug=False):
         """Contructor of APIServer.
 
         This method will instantiate a server with SocketIO+Flask.
@@ -21,9 +21,22 @@ class APIServer:
         """
         dirname = os.path.dirname(os.path.abspath(__file__))
         self.flask_dir = os.path.join(dirname, '../web-ui/source')
+        self.log = logging.getLogger('werkzeug')
+        self.set_debug(debug)
 
         self.app = Flask(app_name, root_path=self.flask_dir)
-        self.server = SocketIO(self.app)
+        self.server = SocketIO(self.app, async_mode='threading')
+
+    def set_debug(self, debug=False):
+        """Method used to set debug mode.
+
+        Args:
+            debug(bool): Boolean value to turn on/off debug mode.
+        """
+        if debug is True:
+            self.log.setLevel(logging.DEBUG)
+        else:
+            self.log.setLevel(logging.WARNING)
 
     def run(self, *args, **kwargs):
         """Method used to run the APIServer."""
@@ -111,5 +124,5 @@ class APIServer:
         return 'Server shutting down...', 200
 
     def web_ui(self):
-        """Method userd to serve the index.html page for the admin-ui."""
+        """Method used to serve the index.html page for the admin-ui."""
         return send_from_directory(self.flask_dir, 'index.html')

@@ -93,7 +93,7 @@ class Controller(object):
 
         self.log = None
 
-        self.api_server = APIServer(__name__)
+        self.api_server = APIServer(__name__, self.options.debug)
 
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
@@ -139,7 +139,8 @@ class Controller(object):
 
         thrds = {'tcp_server': Thread(name='TCP server',
                                       target=self.server.serve_forever),
-                 'api_server': Thread(target=self.api_server.run,
+                 'api_server': Thread(name='API server',
+                                      target=self.api_server.run,
                                       args=['0.0.0.0', 8181]),
                  'raw_event_handler': Thread(name='RawEvent Handler',
                                              target=raw_event_handler),
@@ -168,6 +169,18 @@ class Controller(object):
     def register_rest_endpoint(self, *options, **kwargs):
         """Method used to return the endpoints registered by APIServer."""
         self.api_server.register_rest_endpoint(*options, **kwargs)
+
+    def restart(self, graceful=True):
+        """Restart Kytos SDN Controller.
+
+        Args:
+            graceful(bool): Represents the way that Kytos will restart.
+        """
+        if self.started_at is not None:
+            self.stop(graceful)
+            self.__init__(self.options)
+
+        self.start()
 
     def stop(self, graceful=True):
         """Method used to shutdown all services used by kytos.

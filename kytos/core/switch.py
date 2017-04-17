@@ -225,7 +225,7 @@ class Connection(object):
         """
         try:
             if self.socket:
-                self.socket.send(buffer)
+                self.socket.sendall(buffer)
         except (OSError, SocketError):
             self.close()
             raise

@@ -17,7 +17,7 @@ import logging
 import os
 import re
 import sys
-from importlib.machinery import SourceFileLoader
+from importlib.util import module_from_spec, spec_from_file_location
 from threading import Thread
 
 from kytos.core.api_server import APIServer
@@ -473,9 +473,12 @@ class Controller(object):
             mod_name = '.'.join(['napps', username, napp_name, 'main'])
             path = os.path.join(self.options.napps, username, napp_name,
                                 'main.py')
-            module = SourceFileLoader(mod_name, path)
+            napp_spec = spec_from_file_location(mod_name, path)
+            napp_module = module_from_spec(napp_spec)
+            sys.modules[napp_spec.name] = napp_module
+            napp_spec.loader.exec_module(napp_module)
+            napp = napp_module.Main(controller=self)
 
-            napp = module.load_module().Main(controller=self)  # noqa
             self.napps[(username, napp_name)] = napp
 
             for event, listeners in napp._listeners.items():  # noqa

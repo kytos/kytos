@@ -33,6 +33,8 @@ from kytos.core.websocket import LogWebSocket
 
 __all__ = ('Controller',)
 
+LOCK_PATH = '/tmp/lockytos'
+
 
 class Controller(object):
     """Main class of Kytos.
@@ -116,6 +118,34 @@ class Controller(object):
         self.log = logging.getLogger(__name__)
 
     def start(self):
+        """Create lockfile and call start_controller method."""
+        pid = os.getpid()
+
+        # Checks if a lockfile exists. Creates a new file.
+        try:
+            lockfile = open(LOCK_PATH, mode='x')
+        except OSError:
+            # This happens if there is a lockfile already.
+            # We shall check if the process that created the lockfile is still
+            # running.
+            try:
+                existing_file = open(LOCK_PATH, mode='r')
+                old_pid = int(existing_file.read())
+                os.kill(old_pid, 0)
+                # If kill() doesn't returns an error, it is still running.
+                # Otherwise, overwrite the file and proceed.
+                self.log.info("Failed to create a lockfile."
+                              "Is kytos running?")
+                exit(1)
+            except OSError:
+                lockfile = open(LOCK_PATH, mode='w')
+
+        # Identifies the process that created the lockfile.
+        lockfile.write(str(pid))
+        lockfile.close()
+        self.start_controller()
+
+    def start_controller(self):
         """Start the controller.
 
         Starts a thread with the KytosServer (TCP Server).
@@ -203,6 +233,7 @@ class Controller(object):
             - finish reading the events on all buffers;
             - stop each running handler;
             - stop all running threads;
+            - remove the pid lockfile;
             - stop the KytosServer;
         """
         self.log.info("Stopping Kytos")
@@ -225,6 +256,7 @@ class Controller(object):
         self.started_at = None
         self.unload_napps()
         self.buffers = KytosBuffers()
+        os.remove(LOCK_PATH)
         self.server.server_close()
 
     def status(self):

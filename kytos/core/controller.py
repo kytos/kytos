@@ -119,6 +119,7 @@ class Controller(object):
 
     def start(self):
         """Create lockfile and call start_controller method."""
+        self.enable_logs()
         pid = os.getpid()
 
         # Checks if a lockfile exists. Creates a new file.
@@ -134,8 +135,9 @@ class Controller(object):
                 os.kill(old_pid, 0)
                 # If kill() doesn't returns an error, it is still running.
                 # Otherwise, overwrite the file and proceed.
-                self.log.info("Failed to create a lockfile."
-                              "Is kytos running?")
+                self.log.info("Failed to create a lockfile. "
+                              "Is kytos already running?")
+                self.log.info("Aborting")
                 exit(1)
             except OSError:
                 lockfile = open(LOCK_PATH, mode='w')
@@ -154,7 +156,6 @@ class Controller(object):
         """
         self.api_server.register_kytos_routes()
         self.api_server.register_web_ui()
-        self.enable_logs()
         self.register_websockets()
         self.log.info("Starting Kytos - Kytos Controller")
         self.server = KytosServer((self.options.listen,

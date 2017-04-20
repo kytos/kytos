@@ -1,7 +1,10 @@
 """Module with main classes related to Switches."""
 import json
 import logging
+from enum import Enum
+from errno import EBADFD, ENOTCONN
 from socket import error as SocketError
+from socket import SHUT_RDWR
 
 from pyof.v0x01.common.phy_port import PortFeatures
 
@@ -191,6 +194,25 @@ class Interface(object):
         return json.dumps(self.as_dict())
 
 
+class CONNECTION_STATE(Enum):
+    """Enum of possible general connections states."""
+
+    NEW = 0
+    SETUP = 1
+    ESTABLISHED = 2
+    FAILED = 3
+    FINISHED = 4
+
+
+class ProtocolInfo:
+    """Class to hold simple protocol information for the connection."""
+
+    def __init__(self):
+        self.name = None
+        self.version = None
+        self.state = None
+
+
 class Connection(object):
     """Connection class to abstract a network connections."""
 
@@ -207,6 +229,22 @@ class Connection(object):
         self.port = port
         self.socket = socket
         self.switch = switch
+        self.state = CONNECTION_STATE.NEW
+        self.protocol = ProtocolInfo()
+        self.remaining_data = b''
+
+    @property
+    def state(self):
+        """Return the state of the connection."""
+        return self._state
+
+    @state.setter
+    def state(self, new_state):
+        if new_state not in CONNECTION_STATE:
+            raise Exception('Unknown State', new_state)
+        self._state = new_state # noqa
+        log.info('Connection %s changed state: %s',
+                 self.id, self.state)
 
     @property
     def id(self):
@@ -226,14 +264,22 @@ class Connection(object):
         try:
             if self.is_connected():
                 self.socket.sendall(buffer)
-        except (OSError, SocketError):
+        except (OSError, SocketError) as exception:
+            log.debug('Could not send packet. Exception: %s', exception)
             self.close()
 
     def close(self):
         """Close the socket from connection instance."""
         if self.socket:
-            self.socket.close()
+            log.debug('Shutting down Connection %s', self.id)
+            try:
+                self.socket.shutdown(SHUT_RDWR)
+                self.socket.close()
+            except OSError as e:
+                if e.errno not in (ENOTCONN, EBADFD):
+                    raise e
             self.socket = None
+            log.debug('Connection Closed: %s', self.id)
 
         if self.switch and self.switch.connection is self:
             self.switch.connection = None

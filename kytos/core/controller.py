@@ -355,9 +355,10 @@ class Controller(object):
 
             message = triggered_event.content['message']
             destination = triggered_event.destination
-            destination.send(message.pack())
-            self.notify_listeners(triggered_event)
-            self.log.debug("MsgOutEvent handler called")
+            if destination:
+                destination.send(message.pack())
+                self.notify_listeners(triggered_event)
+                self.log.debug("MsgOutEvent handler called")
 
     def app_event_handler(self):
         """Handle app events.

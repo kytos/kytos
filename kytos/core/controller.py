@@ -138,7 +138,7 @@ class Controller(object):
                 self.log.info("Failed to create a pidfile. "
                               "Is kytos already running?")
                 self.log.info("Aborting")
-                exit(1)
+                exit(os.EX_CANTCREAT)
             except OSError:
                 pidfile = open(self.options.pidfile, mode='w')
 

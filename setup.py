@@ -9,6 +9,7 @@ import sys
 from abc import abstractmethod
 from subprocess import call
 
+from distutils.command.clean import clean
 from setuptools import Command, find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
@@ -44,13 +45,14 @@ class SimpleCommand(Command):
         pass
 
 
-class Cleaner(SimpleCommand):
+class Cleaner(clean):
     """Custom clean command to tidy up the project root."""
 
     description = 'clean build, dist, pyc and egg from package and docs'
 
     def run(self):
         """Clean build, dist, pyc and egg from package and docs."""
+        super().run()
         call('rm -vrf ./build ./dist ./*.egg-info', shell=True)
         call('find . -name __pycache__ -type d | xargs rm -rf', shell=True)
         call('make -C docs/ clean', shell=True)

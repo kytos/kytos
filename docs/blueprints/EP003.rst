@@ -23,7 +23,7 @@ The main guidelines are:
 Basic Tests
 ===========
 
-Considering the above described guidelines, bellow are some tasks that need to be done:
+Considering the above described guidelines, below are some tasks that need to be done:
 
 * **Struct size**: assert the basic class size according to OFSpec (structs asserts) (``get_size`` method);
 * **Pack**:

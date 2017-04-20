@@ -37,7 +37,7 @@ Removing NApps
 
 To remove a Napp from *Kytos* all the administrator has to do is to delete the
 Napp from ``/var/lib/kytos/napps/kyco/``. Before removing the directory it is
-recomended to stop *Kyco*.
+recommended to stop *Kyco*.
 
 .. code-block:: shell
 

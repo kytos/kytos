@@ -53,7 +53,7 @@ can just add the *virtualenvwrapper* plugin to your plugins list
 -  Automatically activate virtualenv when ``cd``'ing into git repository with a
    matching name.
 
-We also recommend adding the bellow code to your
+We also recommend adding the below code to your
 ``~/.virtualenvs/postmkvirtualenv`` file:
 
 .. code:: shell
@@ -78,7 +78,7 @@ it.
 The standard setup finishes here.
 
 If you are using ``oh-my-zsh`` plugin then every time you enter on the project
-directory, the virtualenvironment will be automaticaly loaded. If you are using
+directory, the virtualenvironment will be automatically loaded. If you are using
 bash, then you need to run the ``workon`` command to activate the environment:
 
 .. code:: shell

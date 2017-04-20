@@ -259,7 +259,7 @@ class Controller(object):
         self.buffers = KytosBuffers()
         try:
             os.remove(self.options.pidfile)
-        except:
+        except FileNotFoundError:
             self.log.info("Could not find kytosd pid file.")
         self.server.server_close()
 

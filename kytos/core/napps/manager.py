@@ -1,7 +1,6 @@
 """Manage Network Application files."""
 import json
 import logging
-import os
 import shutil
 import urllib
 from pathlib import Path
@@ -90,7 +89,6 @@ class NAppsManager:
             dst = self._installed / napp.username / napp.name
             self._create_module(dst.parent)
             shutil.move(str(napp_folder), str(dst))
-            os.chmod(dst, mode=0o755)
         finally:
             if pkg_folder and pkg_folder.exists():
                 shutil.rmtree(str(pkg_folder))

@@ -4,10 +4,10 @@ import os
 import re
 import sys
 import tarfile
-import tempfile
 import urllib
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
+from random import randint
 from threading import Event, Thread
 
 from kytos.core.helpers import listen_to
@@ -128,7 +128,9 @@ class NApp:
         Return:
             pathlib.Path: Temp dir with package contents.
         """
-        tmp = tempfile.mkdtemp(prefix='kytos-napp-')
+        random_string = '{:0d}'.format(randint(0, 10**6))
+        tmp = '/tmp/kytos-napp-' + Path(filename).stem + '-' + random_string
+        os.mkdir(tmp)
         with tarfile.open(filename, 'r:xz') as tar:
             tar.extractall(tmp)
         return Path(tmp)

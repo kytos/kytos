@@ -246,7 +246,7 @@ class OutputAction(FlowAction):
     """FlowAction represents a change in forwarding network into a port."""
 
     def __init__(self, output_port):
-        """Contructor receive the parameters bellow.
+        """Contructor receive the parameters below
 
         Parameters:
             output_port (int): Specific port number.

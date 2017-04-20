@@ -82,7 +82,7 @@ function dragged(d) {
 
 function dragended(d) {
   if (!d3.event.active) simulation.alphaTarget(0);
-  // uncomment the lines bellow to disable de fixed drag behavior
+  // uncomment the lines below to disable de fixed drag behavior
   //if ( d.type == 'interface' ) {
       //release_node(d);
   //}

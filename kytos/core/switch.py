@@ -224,11 +224,10 @@ class Connection(object):
             buffer (bytes): Message buffer that will be sent.
         """
         try:
-            if self.socket:
+            if self.is_connected():
                 self.socket.sendall(buffer)
         except (OSError, SocketError):
             self.close()
-            raise
 
     def close(self):
         """Close the socket from connection instance."""
@@ -236,7 +235,7 @@ class Connection(object):
             self.socket.close()
             self.socket = None
 
-        if self.switch.connection is self:
+        if self.switch and self.switch.connection is self:
             self.switch.connection = None
 
     def is_connected(self):

@@ -55,7 +55,7 @@ class Cleaner(clean):
         super().run()
         call('rm -vrf ./build ./dist ./*.egg-info', shell=True)
         call('find . -name __pycache__ -type d | xargs rm -rf', shell=True)
-        call('make -C docs/ clean', shell=True)
+        call('test -d docs && make -C docs/ clean', shell=True)
 
 
 class TestCoverage(SimpleCommand):

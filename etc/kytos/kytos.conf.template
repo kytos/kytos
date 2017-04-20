@@ -9,7 +9,7 @@ workdir = {{ prefix }}/var/lib/kytos
 
 # PID file to write. When the controller starts, it will save the his pid on
 # this file.
-pidfile = {{ prefix }}/var/run/kytosd.pid
+pidfile = {{ prefix }}/var/run/kytos/kytosd.pid
 
 # This controller can be started in two modes: 'daemon' mode or 'interactive'
 # mode. On daemon mode, the process will detach from terminal when starts,

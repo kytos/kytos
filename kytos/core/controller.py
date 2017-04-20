@@ -119,8 +119,7 @@ class Controller(object):
         """Create pidfile and call start_controller method."""
         self.enable_logs()
         pid = os.getpid()
-        # Create directory if it does not exist.
-        os.makedirs(os.path.dirname(self.options.pidfile), exist_ok=True)
+
         # Checks if a pidfile exists. Creates a new file.
         try:
             pidfile = open(self.options.pidfile, mode='x')
@@ -135,12 +134,17 @@ class Controller(object):
                 # If kill() doesn't return an error, older instance is still
                 # running.
                 # Otherwise, overwrite the file and proceed.
-                self.log.info("Failed to create a pidfile. "
+                self.log.info("Failed to create a pidfile: "
                               "Is kytos already running?")
                 self.log.info("Aborting")
                 exit(os.EX_CANTCREAT)
             except OSError:
-                pidfile = open(self.options.pidfile, mode='w')
+                try:
+                    pidfile = open(self.options.pidfile, mode='w')
+                except OSError:
+                    self.log.info("Failed to create a pidfile: "
+                                  "Permission denied.")
+                    exit(os.EX_NOPERM)
 
         # Identifies the process that created the pidfile.
         pidfile.write(str(pid))

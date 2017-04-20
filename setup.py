@@ -7,9 +7,10 @@ import os
 import re
 import sys
 from abc import abstractmethod
+# Disabling checks due to https://github.com/PyCQA/pylint/issues/73
+from distutils.command.clean import clean  # pylint: disable=E0401,E0611
 from subprocess import call
 
-from distutils.command.clean import clean
 from setuptools import Command, find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install

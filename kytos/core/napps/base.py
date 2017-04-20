@@ -4,19 +4,23 @@ import os
 import re
 import sys
 import tarfile
+import urllib
 from abc import ABCMeta, abstractmethod
+from pathlib import Path
 from random import randint
 from threading import Event, Thread
 
 from kytos.core.helpers import listen_to
 from kytos.core.logs import NAppLog
 
-__all__ = 'KytosNApp',
+__all__ = ('KytosNApp',)
 
-log = NAppLog()
+log = NAppLog()  # noqa - no caps to be more friendly
 
 
 class NApp:
+    """Class to represent a NApp."""
+
     def __init__(self, username=None, name=None, version=None,
                  repository=None):
         self.username = username
@@ -34,10 +38,12 @@ class NApp:
         return hash(self.id)
 
     def __eq__(self, other):
-        return (isinstance(other, self.__class__) and self.id == other.id)
+        """Compare username/name strings."""
+        return isinstance(other, self.__class__) and self.id == other.id
 
     @property
     def id(self):
+        """username/name string."""
         return str(self)
 
     @property
@@ -47,7 +53,7 @@ class NApp:
         if self._has_valid_repository():
             return "{}/{}-{}".format(self.repository, self.id, version)
             # Use the next line after Diraol fix redirect using ":" for version
-            #return "{}/{}:{}".format(self.repository, self.id, version)
+            # return "{}/{}:{}".format(self.repository, self.id, version)
 
     @property
     def package_url(self):
@@ -76,7 +82,7 @@ class NApp:
     @staticmethod
     def create_from_uri(uri):
         """Return a new NApp instance from an unique identifier."""
-        regex =  r'^(((https?://|file://)(.+))/)?(.+?)/(.+?)/?(:(.+))?$'
+        regex = r'^(((https?://|file://)(.+))/)?(.+?)/(.+?)/?(:(.+))?$'
         match = re.match(regex, uri)
 
         if match:
@@ -122,7 +128,7 @@ class NApp:
         Return:
             pathlib.Path: Temp dir with package contents.
         """
-        random_string = '{:0d}'.format(random.randint(0, 10**6))
+        random_string = '{:0d}'.format(randint(0, 10**6))
         tmp = '/tmp/kytos-napp-' + Path(filename).stem + '-' + random_string
         os.mkdir(tmp)
         with tarfile.open(filename, 'r:xz') as tar:
@@ -135,8 +141,8 @@ class NApp:
 
     def _update_repo_file(self, destination=None):
         """Create or update the file '.repo' inside NApp package."""
-        with open("{}/.repo".format(destination), 'w') as fp:
-            fp.write(self.repository + '\n')
+        with open("{}/.repo".format(destination), 'w') as repo_file:
+            repo_file.write(self.repository + '\n')
 
 
 class KytosNApp(Thread, metaclass=ABCMeta):
@@ -175,9 +181,6 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
         self.load_json()
 
-    def __str__(self):
-        return "{}/{}".format(self.username, self.name)
-
     def load_json(self):
         """Method used to update object attributes based on kytos.json."""
         current_file = sys.modules[self.__class__.__module__].__file__
@@ -207,8 +210,6 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         It should not be overriden.
         """
         log.info("Running NApp: %s", self)
-        # TODO: If the setup method is blocking, then the execute method will
-        #       never be called. Should we execute it inside a new thread?
         self.setup()
         self.execute()
         while self.__interval > 0 and not self.__event.is_set():
@@ -216,7 +217,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
             self.execute()
 
     @listen_to('kytos/core.shutdown')
-    def _shutdown_handler(self, event):
+    def _shutdown_handler(self, event):  # noqa - all listeners receive event
         """Method used to listen shutdown event from kytos.
 
         This method listens the kytos/core.shutdown event and call the shutdown

@@ -4,7 +4,7 @@ import logging
 import logging.handlers
 import re
 
-__all__ = 'LogManager', 'NAppLog'
+__all__ = ('LogManager', 'NAppLog')
 
 FORMAT = '%(asctime)s - %(levelname)s [%(name)s] (%(threadName)s) %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO)

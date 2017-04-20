@@ -6,6 +6,6 @@ from kytos.core.napps import KytosNApp
 
 from .metadata import __version__
 
-__all__ = 'Controller', 'KytosEvent', 'KytosNApp', 'log', '__version__'
+__all__ = ('Controller', 'KytosEvent', 'KytosNApp', 'log', '__version__')
 
 log = NAppLog()

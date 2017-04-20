@@ -116,6 +116,38 @@ class Controller(object):
         self.log = logging.getLogger(__name__)
 
     def start(self):
+        """Create pidfile and call start_controller method."""
+        self.enable_logs()
+        pid = os.getpid()
+        # Create directory if it does not exist.
+        os.makedirs(os.path.dirname(self.options.pidfile), exist_ok=True)
+        # Checks if a pidfile exists. Creates a new file.
+        try:
+            pidfile = open(self.options.pidfile, mode='x')
+        except OSError:
+            # This happens if there is a pidfile already.
+            # We shall check if the process that created the pidfile is still
+            # running.
+            try:
+                existing_file = open(self.options.pidfile, mode='r')
+                old_pid = int(existing_file.read())
+                os.kill(old_pid, 0)
+                # If kill() doesn't return an error, older instance is still
+                # running.
+                # Otherwise, overwrite the file and proceed.
+                self.log.info("Failed to create a pidfile. "
+                              "Is kytos already running?")
+                self.log.info("Aborting")
+                exit(os.EX_CANTCREAT)
+            except OSError:
+                pidfile = open(self.options.pidfile, mode='w')
+
+        # Identifies the process that created the pidfile.
+        pidfile.write(str(pid))
+        pidfile.close()
+        self.start_controller()
+
+    def start_controller(self):
         """Start the controller.
 
         Starts a thread with the KytosServer (TCP Server).
@@ -124,7 +156,6 @@ class Controller(object):
         """
         self.api_server.register_kytos_routes()
         self.api_server.register_web_ui()
-        self.enable_logs()
         self.register_websockets()
         self.log.info("Starting Kytos - Kytos Controller")
         self.server = KytosServer((self.options.listen,
@@ -203,6 +234,7 @@ class Controller(object):
             - finish reading the events on all buffers;
             - stop each running handler;
             - stop all running threads;
+            - remove the pidfile;
             - stop the KytosServer;
         """
         self.log.info("Stopping Kytos")
@@ -225,6 +257,10 @@ class Controller(object):
         self.started_at = None
         self.unload_napps()
         self.buffers = KytosBuffers()
+        try:
+            os.remove(self.options.pidfile)
+        except FileNotFoundError:
+            self.log.info("Could not find kytosd pid file.")
         self.server.server_close()
 
     def status(self):

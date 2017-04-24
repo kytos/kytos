@@ -129,7 +129,7 @@ class InstallMode(install, CommonInstall):
 
     def run(self):
         """Install the package in an install mode."""
-        super().run()
+        self.do_egg_install()
         self.generate_file_from_template(TEMPLATE_FILES, BASE_ENV,
                                          prefix=BASE_ENV)
 

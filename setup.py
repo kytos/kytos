@@ -9,6 +9,7 @@ import sys
 from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
 from distutils.command.clean import clean  # pylint: disable=E0401,E0611
+from pathlib import Path, PurePosixPath
 from subprocess import call
 
 from setuptools import Command, find_packages, setup
@@ -97,6 +98,26 @@ class CommonInstall:
     """Class with common method used by children classes."""
 
     @staticmethod
+    def add_jinja2_to_path():
+        """Add Jinja2 into sys.path.
+
+        As Jinja2 may be installed during this setup, it will not be available
+        on runtime to be used here. So, we need to look for it and append it on
+        the sys.path.
+        """
+        #: First we find the 'site_pkg' directory
+        site_pkg = None
+        for path in sys.path:
+            if PurePosixPath(path).stem == 'site-packages':
+                site_pkg = Path(path)
+                break
+
+        #: Then we get the 'Jinja2' egg directory and append it into the
+        #: current sys.path.
+        jinja2path = site_pkg.glob('Jinja2*').__next__()
+        sys.path.append(str(jinja2path))
+
+    @staticmethod
     def generate_file_from_template(templates,
                                     destination=os.path.dirname(__file__),
                                     **kwargs):
@@ -110,7 +131,9 @@ class CommonInstall:
             destination (string): Directory in which the config file will
                                   be placed.
         """
-        from jinja2 import Template
+        CommonInstall.add_jinja2_to_path()
+        from jinja2 import Template  # pylint: disable=import-error
+
         for path in templates:
             with open(path, 'r', encoding='utf-8') as src_file:
                 content = Template(src_file.read()).render(**kwargs)

@@ -16,9 +16,6 @@ from setuptools import Command, find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
-if 'bdist_wheel' in sys.argv:
-    raise RuntimeError("This setup.py does not support wheels")
-
 
 BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
 ETC_FILES = ['etc/kytos/logging.ini']

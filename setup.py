@@ -131,8 +131,11 @@ class CommonInstall:
             destination (string): Directory in which the config file will
                                   be placed.
         """
-        CommonInstall.add_jinja2_to_path()
-        from jinja2 import Template  # pylint: disable=import-error
+        try:
+            from jinja2 import Template  # pylint: disable=import-error
+        except ImportError:
+            CommonInstall.add_jinja2_to_path()
+            from jinja2 import Template  # pylint: disable=import-error
 
         for path in templates:
             with open(path, 'r', encoding='utf-8') as src_file:

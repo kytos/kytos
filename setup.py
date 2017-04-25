@@ -9,7 +9,7 @@ import sys
 from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
 from distutils.command.clean import clean  # pylint: disable=E0401,E0611
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from subprocess import call
 
 from setuptools import Command, find_packages, setup
@@ -108,13 +108,13 @@ class CommonInstall:
         #: First we find the 'site_pkg' directory
         site_pkg = None
         for path in sys.path:
-            if PurePosixPath(path).stem == 'site-packages':
+            if Path(path).stem == 'site-packages':
                 site_pkg = Path(path)
                 break
 
         #: Then we get the 'Jinja2' egg directory and append it into the
         #: current sys.path.
-        jinja2path = site_pkg.glob('Jinja2*').__next__()
+        jinja2path = next(site_pkg.glob('Jinja2*'))
         sys.path.append(str(jinja2path))
 
     @staticmethod

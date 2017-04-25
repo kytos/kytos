@@ -153,9 +153,9 @@ class InstallMode(install, CommonInstall):
     Kytos SDN Platform will also be created, based on templates.
     """
 
-    def run(self):
+    def do_egg_install(self):
         """Install the package in an install mode."""
-        super().run()
+        super().do_egg_install()
         self.generate_file_from_template(TEMPLATE_FILES, BASE_ENV,
                                          prefix=BASE_ENV)
 

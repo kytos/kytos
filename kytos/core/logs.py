@@ -1,24 +1,27 @@
 """Handle logs displayed by Kytos SDN Platform."""
 import inspect
-import logging
-import logging.handlers
 import re
+from configparser import RawConfigParser
+from logging import Formatter, StreamHandler, config, getLogger
 
 __all__ = ('LogManager', 'NAppLog')
-
-FORMAT = '%(asctime)s - %(levelname)s [%(name)s] (%(threadName)s) %(message)s'
-logging.basicConfig(format=FORMAT, level=logging.INFO)
 
 
 class LogManager:
     """Manage handlers for all loggers."""
 
+    configuration = None
+
     @classmethod
-    def add_syslog(cls):
-        """Output all logs to syslog."""
-        handler = logging.handlers.SysLogHandler(address='/dev/log')
-        cls._add_handler(handler)
-        return handler
+    def load_logging_file(cls, logging_file):
+        """Loadding logs configuration from a file.
+
+        Args:
+           logging_file(str): Address of logging configuration file.
+        """
+        cls.configuration = RawConfigParser()
+        cls.configuration.read(logging_file)
+        config.fileConfig(logging_file)
 
     @classmethod
     def add_stream_handler(cls, stream):
@@ -27,14 +30,25 @@ class LogManager:
         Args:
             stream: Object that supports ``write()`` and ``flush()``.
         """
-        handler = logging.StreamHandler(stream)
+        handler = StreamHandler(stream)
         cls._add_handler(handler)
         return handler
 
-    @staticmethod
-    def _add_handler(handler):
-        handler.setFormatter(logging.Formatter(FORMAT))
-        logging.getLogger().addHandler(handler)
+    @classmethod
+    def _add_handler(cls, handler):
+        """Method used to add a new handler to loggers.
+
+        Args:
+            handler(Handler): Handle to be added.
+        """
+        options = {}
+        if cls.configuration:
+            options = dict(cls.configuration.items('formatter_console'))
+
+        fmt = Formatter(options.get('format', None),
+                        options.get('datefmt', None))
+        handler.setFormatter(fmt)
+        getLogger().addHandler(handler)
 
 
 class NAppLog:
@@ -56,7 +70,7 @@ class NAppLog:
     def __getattribute__(self, name):
         """Detect NApp ID and use its logger."""
         napp_id = detect_napp_id()
-        logger = logging.getLogger(napp_id)
+        logger = getLogger(napp_id)
         return logger.__getattribute__(name)
 
 

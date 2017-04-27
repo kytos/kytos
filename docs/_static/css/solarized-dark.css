@@ -13,6 +13,7 @@
 }
 
 /* pygments style */
+#kytos-theme-content-container .highlight * { font-weight: normal; }
 #kytos-theme-content-container .highlight .hll { background-color: #ffffcc }
 #kytos-theme-content-container .highlight { background: #002B36!important; color: #93A1A1; }
 #kytos-theme-content-container .highlight pre { background: none; color: #93A1A1; border: 0; }

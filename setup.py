@@ -119,6 +119,12 @@ class CommonInstall:
                     dst_file.write(content)
 
     @staticmethod
+    def create_pid_folder():
+        """Create the folder in /var/run to hold the pidfile."""
+        pid_folder = os.path.join(BASE_ENV, 'var/run/kytos')
+        os.makedirs(pid_folder, mode=0o777, exist_ok=True)
+
+    @staticmethod
     def create_paths():
         """Method used to create the paths used by Kytos in develop mode."""
         directories = [os.path.join(BASE_ENV, 'etc/kytos')]
@@ -148,6 +154,7 @@ class InstallMode(install, CommonInstall):
             self.do_egg_install()
         self.generate_file_from_template(TEMPLATE_FILES, BASE_ENV,
                                          prefix=BASE_ENV)
+        self.create_pid_folder()
 
 
 class DevelopMode(develop, CommonInstall):
@@ -168,6 +175,7 @@ class DevelopMode(develop, CommonInstall):
 
         for file_name in TEMPLATE_FILES:
             self.generate_file_link(file_name.replace('.template', ''))
+        self.create_pid_folder()
 
     @staticmethod
     def generate_file_link(file_name):

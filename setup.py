@@ -9,15 +9,11 @@ import sys
 from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
 from distutils.command.clean import clean  # pylint: disable=E0401,E0611
-from pathlib import Path
 from subprocess import call
 
 from setuptools import Command, find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
-
-if 'bdist_wheel' in sys.argv:
-    raise RuntimeError("This setup.py does not support wheels")
 
 
 BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
@@ -97,28 +93,8 @@ class Linter(SimpleCommand):
 class CommonInstall:
     """Class with common method used by children classes."""
 
-    @staticmethod
-    def add_jinja2_to_path():
-        """Add Jinja2 into sys.path.
-
-        As Jinja2 may be installed during this setup, it will not be available
-        on runtime to be used here. So, we need to look for it and append it on
-        the sys.path.
-        """
-        #: First we find the 'site_pkg' directory
-        site_pkg = None
-        for path in sys.path:
-            if Path(path).stem == 'site-packages':
-                site_pkg = Path(path)
-                break
-
-        #: Then we get the 'Jinja2' egg directory and append it into the
-        #: current sys.path.
-        jinja2path = next(site_pkg.glob('Jinja2*'))
-        sys.path.append(str(jinja2path))
-
-    @staticmethod
-    def generate_file_from_template(templates,
+    @classmethod
+    def generate_file_from_template(cls, templates,
                                     destination=os.path.dirname(__file__),
                                     **kwargs):
         """Create a config file based on a template file.
@@ -131,12 +107,9 @@ class CommonInstall:
             destination (string): Directory in which the config file will
                                   be placed.
         """
-        try:
-            from jinja2 import Template  # pylint: disable=import-error
-        except ImportError:
-            CommonInstall.add_jinja2_to_path()
-            from jinja2 import Template  # pylint: disable=import-error
+        from jinja2 import Template
 
+        cls.create_paths()
         for path in templates:
             with open(path, 'r', encoding='utf-8') as src_file:
                 content = Template(src_file.read()).render(**kwargs)
@@ -144,6 +117,14 @@ class CommonInstall:
                                         path.replace('.template', ''))
                 with open(dst_path, 'w') as dst_file:
                     dst_file.write(content)
+
+    @staticmethod
+    def create_paths():
+        """Method used to create the paths used by Kytos in develop mode."""
+        directories = [os.path.join(BASE_ENV, 'etc/kytos')]
+        for directory in directories:
+            if not os.path.exists(directory):
+                os.makedirs(directory)
 
 
 class InstallMode(install, CommonInstall):
@@ -154,8 +135,17 @@ class InstallMode(install, CommonInstall):
     """
 
     def run(self):
-        """Install the package in an install mode."""
-        super().run()
+        """Install the package in install mode.
+
+        super().run() does not install dependencies when running
+        ``python setup.py install`` (pypa/setuptools#456).
+        """
+        if 'bdist_wheel' in sys.argv:
+            # do not use eggs, but wheels
+            super().run()
+        else:
+            # force install of deps' eggs during setup.py install
+            self.do_egg_install()
         self.generate_file_from_template(TEMPLATE_FILES, BASE_ENV,
                                          prefix=BASE_ENV)
 
@@ -171,7 +161,6 @@ class DevelopMode(develop, CommonInstall):
         """Install the package in a developer mode."""
         super().run()
 
-        self.create_paths()
         self.generate_file_from_template(TEMPLATE_FILES, prefix=BASE_ENV)
 
         for file_name in ETC_FILES:
@@ -190,16 +179,9 @@ class DevelopMode(develop, CommonInstall):
         if not os.path.exists(dst):
             os.symlink(src, dst)
 
-    @staticmethod
-    def create_paths():
-        """Method used to create the paths used by Kytos in develop mode."""
-        directories = [os.path.join(BASE_ENV, 'etc/kytos')]
-        for directory in directories:
-            if not os.path.exists(directory):
-                os.makedirs(directory)
 
-
-requirements = [i.strip() for i in open("requirements.txt").readlines()]
+setup_requires = ['jinja2']
+install_requires = [i.strip() for i in open("requirements.txt").readlines()]
 
 # We are parsing the metadata file as if it was a text file because if we
 # import it as a python module, necessarily the kytos.core module would be
@@ -219,7 +201,8 @@ setup(name='kytos',
       author_email=metadata.get('__author_email__'),
       license=metadata.get('__license__'),
       test_suite='tests',
-      install_requires=requirements,
+      setup_requires=setup_requires,
+      install_requires=install_requires,
       dependency_links=[
           'https://github.com/cemsbr/python-daemon/tarball/latest_release'
           '#egg=python-daemon-2.1.2'

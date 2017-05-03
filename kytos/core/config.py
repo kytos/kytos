@@ -5,6 +5,7 @@ line. If you specify a config file, then and option configured inside this file
 will be overridden by the option on command line.
 """
 
+import json
 import os
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from configparser import ConfigParser
@@ -113,4 +114,16 @@ class KytosConfig():
         if 'test' in argv:
             argv.pop(argv.index('test'))
 
-        self.options['daemon'] = self.parser.parse_args(argv)
+        self.options['daemon'] = self._parse_options(argv)
+
+    def _parse_options(self, argv):
+        """Method used to create a Namespace using the given argv.
+
+        Args:
+            argv(dict): Python Dict used to create the namespace.
+        Returns:
+            options(Namespace): Namespace with the args given
+        """
+        options = self.parser.parse_args(argv)
+        options.napps_repositories = json.loads(options.napps_repositories)
+        return options

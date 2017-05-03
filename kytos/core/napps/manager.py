@@ -79,8 +79,7 @@ class NAppsManager:
             return False
 
         if not napp.repository:
-            # Check here what is configured repo
-            pass
+            napp.repository = self._controller.options.napps_repositories[0]
 
         pkg_folder = None
         try:
@@ -94,6 +93,10 @@ class NAppsManager:
                 shutil.rmtree(str(pkg_folder))
 
         log.info("New NApp installed: %s", napp)
+
+        napp = NApp.create_from_json(dst/'kytos.json')
+        for napp_dependency_uri in napp.napp_dependencies:
+            self.install(napp_dependency_uri, enable)
 
         if enable:
             return self.enable(napp_uri)
@@ -184,7 +187,7 @@ class NAppsManager:
             folder (pathlib.Path): Module path.
         """
         if not folder.exists():
-            folder.mkdir()
+            folder.mkdir(parents=True, exist_ok=True, mode=0o755)
             (folder / '__init__.py').touch()
 
     @staticmethod

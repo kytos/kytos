@@ -30,6 +30,7 @@ class NApp:
         self.description = None
         self.tags = []
         self.enabled = False
+        self.napp_dependencies = []
 
     def __str__(self):
         return "{}/{}".format(self.username, self.name)
@@ -119,7 +120,7 @@ class NApp:
 
     def as_json(self):
         """Dump all NApp attributes on a json format."""
-        pass
+        return json.dumps(self.__dict__)
 
     @staticmethod
     def _extract(filename):

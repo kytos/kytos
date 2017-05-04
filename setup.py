@@ -9,6 +9,7 @@ import sys
 from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
 from distutils.command.clean import clean  # pylint: disable=E0401,E0611
+from pathlib import Path
 from subprocess import call
 
 from setuptools import Command, find_packages, setup
@@ -93,9 +94,27 @@ class Linter(SimpleCommand):
 class CommonInstall:
     """Class with common method used by children classes."""
 
+    @staticmethod
+    def build_sass():
+        """Method to build the web-ui sass into a css file."""
+        import sass
+        flask_dir = Path(__file__).parent / 'kytos/web-ui/source'
+        infile = flask_dir / 'sass/main.scss'
+        cssdir = flask_dir / 'static/css'
+        outfile = cssdir / 'style.css'
+        outmap = cssdir / 'style.css.map'
+        compiled = sass.compile(filename=str(infile),
+                                source_map_filename=str(outmap))
+
+        with open(outfile, 'w') as output:
+            output.write(compiled[0])
+
+        with open(outmap, 'w') as output:
+            output.write(compiled[1])
+
     @classmethod
     def generate_file_from_template(cls, templates,
-                                    destination=os.path.dirname(__file__),
+                                    destination=Path(__file__).parent,
                                     **kwargs):
         """Create a config file based on a template file.
 
@@ -113,8 +132,7 @@ class CommonInstall:
         for path in templates:
             with open(path, 'r', encoding='utf-8') as src_file:
                 content = Template(src_file.read()).render(**kwargs)
-                dst_path = os.path.join(destination,
-                                        path.replace('.template', ''))
+                dst_path = Path(destination) / path.replace('.template', '')
                 with open(dst_path, 'w') as dst_file:
                     dst_file.write(content)
 
@@ -146,6 +164,8 @@ class InstallMode(install, CommonInstall):
         super().run() does not install dependencies when running
         ``python setup.py install`` (pypa/setuptools#456).
         """
+        self.build_sass()
+
         if 'bdist_wheel' in sys.argv:
             # do not use eggs, but wheels
             super().run()
@@ -166,6 +186,7 @@ class DevelopMode(develop, CommonInstall):
 
     def run(self):
         """Install the package in a developer mode."""
+        self.build_sass()
         super().run()
 
         self.generate_file_from_template(TEMPLATE_FILES, prefix=BASE_ENV)
@@ -188,7 +209,7 @@ class DevelopMode(develop, CommonInstall):
             os.symlink(src, dst)
 
 
-setup_requires = ['jinja2']
+setup_requires = ['jinja2', 'libsass']
 install_requires = [i.strip() for i in open("requirements.txt").readlines()]
 
 # We are parsing the metadata file as if it was a text file because if we

@@ -1,4 +1,5 @@
 ipython
+libsass
 lockfile
 python-openflow>=2017.1b1.post1
 flask-socketio

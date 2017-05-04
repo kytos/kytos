@@ -118,6 +118,9 @@ class Controller(object):
         self.enable_logs()
         pid = os.getpid()
 
+        # Creates directory if it doesn't exist
+        os.makedirs(os.path.dirname(self.options.pidfile), exist_ok=True)
+
         # Checks if a pidfile exists. Creates a new file.
         try:
             pidfile = open(self.options.pidfile, mode='x')

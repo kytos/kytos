@@ -13,11 +13,13 @@ Basic usage:
     controller = Controller(config.options)
     controller.start()
 """
+import atexit
 import logging
 import os
 import re
 import sys
 from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
 from threading import Thread
 
 from kytos.core.api_server import APIServer
@@ -119,7 +121,12 @@ class Controller(object):
         pid = os.getpid()
 
         # Creates directory if it doesn't exist
-        os.makedirs(os.path.dirname(self.options.pidfile), exist_ok=True)
+        # System can erase /var/run's content
+        pid_folder = Path(self.options.pidfile).parent
+        self.log.info(pid_folder)
+        if not pid_folder.exists():
+            pid_folder.mkdir()
+            pid_folder.chmod(0o1777)
 
         # Checks if a pidfile exists. Creates a new file.
         try:
@@ -132,19 +139,20 @@ class Controller(object):
                 existing_file = open(self.options.pidfile, mode='r')
                 old_pid = int(existing_file.read())
                 os.kill(old_pid, 0)
-                # If kill() doesn't return an error, older instance is still
-                # running.
+                # If kill() doesn't return an error, there's a process running
+                # with the same PID. We assume it is Kytos and quit.
                 # Otherwise, overwrite the file and proceed.
-                self.log.info("Failed to create a pidfile: "
-                              "Is kytos already running?")
-                self.log.info("Aborting")
+                self.log.error("PID file %s exists. Delete it if Kytos is not"
+                               "running. Aborting.")
                 exit(os.EX_CANTCREAT)
             except OSError:
                 try:
                     pidfile = open(self.options.pidfile, mode='w')
-                except OSError:
-                    self.log.info("Failed to create a pidfile: "
-                                  "Permission denied.")
+                    # Make sure the file is deleted when controller stops
+                    atexit.register(Path(self.options.pidfile).unlink)
+                except OSError as e:
+                    self.log.error("Failed to create pidfile %s: %s",
+                                   self.options.pidfile, e)
                     exit(os.EX_NOPERM)
 
         # Identifies the process that created the pidfile.
@@ -239,7 +247,6 @@ class Controller(object):
             - finish reading the events on all buffers;
             - stop each running handler;
             - stop all running threads;
-            - remove the pidfile;
             - stop the KytosServer;
         """
         self.log.info("Stopping Kytos")
@@ -262,10 +269,6 @@ class Controller(object):
         self.started_at = None
         self.unload_napps()
         self.buffers = KytosBuffers()
-        try:
-            os.remove(self.options.pidfile)
-        except FileNotFoundError:
-            self.log.info("Could not find kytosd pid file.")
         self.server.server_close()
 
     def status(self):

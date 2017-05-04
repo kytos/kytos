@@ -122,7 +122,9 @@ class CommonInstall:
     def create_pid_folder():
         """Create the folder in /var/run to hold the pidfile."""
         pid_folder = os.path.join(BASE_ENV, 'var/run/kytos')
-        os.makedirs(pid_folder, mode=0o777, exist_ok=True)
+        os.makedirs(pid_folder, exist_ok=True)
+        if BASE_ENV == '/':  # system install
+            os.chmod(pid_folder, 0o1777)  # permissions like /tmp
 
     @staticmethod
     def create_paths():

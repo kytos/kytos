@@ -18,6 +18,7 @@ import os
 import re
 import sys
 from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
 from threading import Thread
 
 from kytos.core.api_server import APIServer
@@ -119,7 +120,11 @@ class Controller(object):
         pid = os.getpid()
 
         # Creates directory if it doesn't exist
-        os.makedirs(os.path.dirname(self.options.pidfile), exist_ok=True)
+        # System can erase /var/run's content
+        pid_folder = Path(self.options.pidfile).parent
+        if not pid_folder.exists():
+            pid_folder.mkdir()
+            pid_folder.chmod(0o1777)
 
         # Checks if a pidfile exists. Creates a new file.
         try:

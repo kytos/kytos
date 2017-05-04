@@ -5,7 +5,7 @@ from socket import error as SocketError
 from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 from threading import current_thread
 
-from pyof.v0x01.common.header import Header
+from pyof.v0x01.common.header import Header, Type
 
 from kytos.core.events import KytosEvent
 from kytos.core.switch import Connection
@@ -88,6 +88,7 @@ class KytosOpenFlowRequestHandler(BaseRequestHandler):
         self.connection = Connection(self.ip, self.port, self.request)
         self.request.settimeout(30)
         self.exception = None
+        self.holded_events = []
 
         event = KytosEvent(name='kytos/core.connection.new',
                            content={'source': self.connection})
@@ -140,6 +141,21 @@ class KytosOpenFlowRequestHandler(BaseRequestHandler):
             event = KytosEvent(name='kytos/core.messages.openflow.new',
                                content=content)
 
+            self.send_event(event)
+
+    def send_event(self, event):
+        """Put the event on the buffer or save it for later."""
+        if self.connection.switch is None:
+            message_type = event.content.get('header').message_type
+            if (message_type == Type.OFPT_HELLO or
+                    message_type == Type.OFPT_FEATURES_REPLY):
+                self.server.controller.buffers.raw.put(event)
+            else:
+                self.holded_events.append(event)
+        else:
+            while self.holded_events:
+                holded_event = self.holded_events.pop(0)
+                self.server.controller.buffers.raw.put(holded_event)
             self.server.controller.buffers.raw.put(event)
 
     def finish(self):

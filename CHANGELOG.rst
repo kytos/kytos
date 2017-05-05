@@ -12,7 +12,7 @@ Added
 - Lockfile (PID-file) creation to prevent multiple instances running at the
   same time.
 - Controller.restart method.
-- kytos/tryfirst docker image was created and added to dockerhub.dockerhub
+- kytos/tryfirst docker image was created and added to dockerhub.
 - A jupyter console was added to execute python code when the controller is
   run in foreground.
 - Continuous Integration with Code Quality Score and test coverage.
@@ -42,20 +42,14 @@ Deprecated
 - 'author' attribute, in the NApps context, is being renamed to 'username' and
   will be removed in future releases.
 
-Removed
-=======
-
 Fixed
 =====
 - Friendly messages are now displayed when some exceptions are raised.
 - Kytos configuration is now loaded properly from kytos.conf
 - Several adjustments and bug fixes.
 
-Security
-========
 
-
-[2017.1b1] - "bethania" beta1 - 2017-24-03
+[2017.1b1] - "bethania" beta1 - 2017-03-24
 ******************************************
 Added
 =====
@@ -75,7 +69,7 @@ Changed
 - Improved controller's install and setup
 
 
-[2016.1a1] - alpha1 - 2016-11-09
+[2016.1a1] - alpha1 - 2016-09-11
 ********************************
 Added
 =======

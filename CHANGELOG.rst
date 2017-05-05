@@ -60,7 +60,7 @@ Changed
 
 Deprecated
 ==========
-- 'author' attribute, in the NApps context, is being renamed to 'username' and
+- 'author' attribute, in the NApps context, was replaced by 'username' and
   will be removed in future releases.
 
 Fixed

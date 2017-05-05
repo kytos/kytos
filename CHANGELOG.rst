@@ -7,9 +7,52 @@ All notable changes to the kytos project will be documented in this file.
 ******************************************
 Added
 =====
-- Continuous Integration with:
-  - Code quality score
-  - Test coverage
+- Python bdist_wheel generation to make the install process via 'pip' easier
+  and faster.
+- Lockfile (PID-file) creation to prevent multiple instances running at the
+  same time.
+- Controller.restart method.
+- kytos/tryfirst docker image was created and added to dockerhub.dockerhub
+- A jupyter console was added to execute python code when the controller is
+  run in foreground.
+- Continuous Integration with Code Quality Score and test coverage.
+  (for the Python files in the project).
+- Administration User Interface was moved to kytos, and it's accessible
+  at port 8181 when kytos is running.
+- Blueprints were moved to kytos/docs/blueprints folder.
+
+Changed
+=======
+- Updated requirements.txt.
+- Improvements in TCP Server:
+    - Now makes sure the switch is fully connected before accepting data.
+    - Makes sure the switch is still connected before sending any data.
+    - Uses sendall() to make sure data is being correcly sent.
+- NApps module was refactored.
+- Improved 'clean' option of setup.py.
+- Improved tests and style checks for developers.
+- Kytos setup process improved, reading necessary metadata before installing.
+- Kytos core package was refactored.
+- Documentation updates.
+- NApp information is now obtained from kytos.json when loading a NApp.
+- Improved log management.
+
+Deprecated
+==========
+- 'author' attribute, in the NApps context, is being renamed to 'username' and
+  will be removed in future releases.
+
+Removed
+=======
+
+Fixed
+=====
+- Friendly messages are now displayed when some exceptions are raised.
+- Kytos configuration is now loaded properly from kytos.conf
+- Several adjustments and bug fixes.
+
+Security
+========
 
 
 [2017.1b1] - "bethania" beta1 - 2017-24-03

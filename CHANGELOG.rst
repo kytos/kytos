@@ -34,7 +34,7 @@ Added
   same time.
 - Controller.restart method.
 - kytos/tryfirst docker image was created and added to dockerhub.
-- A jupyter console was added to execute python code when the controller is
+- An improved console was added to execute python code when the controller is
   run in foreground.
 - Continuous Integration with Code Quality Score and test coverage.
   (for the Python files in the project).

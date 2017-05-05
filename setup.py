@@ -211,6 +211,21 @@ class DevelopMode(develop, CommonInstall):
             os.symlink(src, dst)
 
 
+try:
+    # Install dependencies' wheels (faster, don't compile libsass, etc)
+    import pip
+    pip_reqs = pip.req.parse_requirements('requirements.txt', session=False)
+    pip.main(['install', *[str(r.req) for r in pip_reqs]])
+except ImportError:
+    # No pip, slow install compiling stuff
+    print('Without Python pip, the installation will be very slow due to'
+          'some third-party packages.\n'
+          'We recommend to answer "n" (no), install pip and run this install '
+          'again.\n')
+    answer = input('Do you want to proceed (y/[n])? ').lower()
+    if answer not in ['y', 'yes']:
+        sys.exit()
+
 setup_requires = ['jinja2', 'libsass']
 install_requires = [i.strip() for i in open("requirements.txt").readlines()]
 

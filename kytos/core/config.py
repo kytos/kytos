@@ -85,7 +85,8 @@ class KytosConfig():
                     'foreground': False,
                     'debug': False}
         """
-        defaults = {'pidfile': os.path.join(BASE_ENV, 'var/run/kytos/kytosd.pid'),
+        defaults = {'pidfile': os.path.join(BASE_ENV,
+                                            'var/run/kytos/kytosd.pid'),
                     'workdir': os.path.join(BASE_ENV, 'var/lib/kytos'),
                     'napps': os.path.join(BASE_ENV, 'var/lib/kytos/napps/'),
                     'installed_napps': os.path.join(BASE_ENV,

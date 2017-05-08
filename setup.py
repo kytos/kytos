@@ -12,6 +12,11 @@ from distutils.command.clean import clean  # pylint: disable=E0401,E0611
 from pathlib import Path
 from subprocess import call
 
+try:
+    import pip
+except ModuleNotFoundError:
+    print('Please install python3-pip and run setup.py again.')
+    exit(-1)
 from setuptools import Command, find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
@@ -211,23 +216,10 @@ class DevelopMode(develop, CommonInstall):
             os.symlink(src, dst)
 
 
-try:
-    # Install dependencies' wheels (faster, don't compile libsass, etc)
-    import pip
-    pip_reqs = pip.req.parse_requirements('requirements.txt', session=False)
-    pip.main(['install', *[str(r.req) for r in pip_reqs]])
-except ImportError:
-    # No pip, slow install compiling stuff
-    print('Without Python pip, the installation will be very slow due to'
-          'some third-party packages.\n'
-          'We recommend to answer "n" (no), install pip and run this install '
-          'again.\n')
-    answer = input('Do you want to proceed (y/[n])? ').lower()
-    if answer not in ['y', 'yes']:
-        sys.exit()
+# Install dependencies' wheels (faster, don't compile libsass, etc)
 
-setup_requires = ['jinja2', 'libsass']
-install_requires = [i.strip() for i in open("requirements.txt").readlines()]
+pip_reqs = pip.req.parse_requirements('requirements.txt', session=False)
+pip.main(['install', *[str(r.req) for r in pip_reqs]])
 
 # We are parsing the metadata file as if it was a text file because if we
 # import it as a python module, necessarily the kytos.core module would be
@@ -247,12 +239,6 @@ setup(name='kytos',
       author_email=metadata.get('__author_email__'),
       license=metadata.get('__license__'),
       test_suite='tests',
-      setup_requires=setup_requires,
-      install_requires=install_requires,
-      dependency_links=[
-          'https://github.com/cemsbr/python-daemon/tarball/latest_release'
-          '#egg=python-daemon-2.1.2'
-      ],
       scripts=['bin/kytosd'],
       include_package_data=True,
       data_files=[(os.path.join(BASE_ENV, 'etc/kytos'), ETC_FILES)],

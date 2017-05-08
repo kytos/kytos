@@ -3,7 +3,7 @@
 
   var connected=false;
   var current_line = 0;
-  var socket = io.connect('http://localhost:8181/logs');
+  var socket = io.connect('/logs');
 
   socket.on('connect', function(){
     turn_on_led()

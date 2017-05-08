@@ -128,6 +128,9 @@ class Controller(object):
             pid_folder.mkdir()
             pid_folder.chmod(0o1777)
 
+        # Make sure the file is deleted when controller stops
+        atexit.register(Path(self.options.pidfile).unlink)
+
         # Checks if a pidfile exists. Creates a new file.
         try:
             pidfile = open(self.options.pidfile, mode='x')
@@ -148,8 +151,6 @@ class Controller(object):
             except OSError:
                 try:
                     pidfile = open(self.options.pidfile, mode='w')
-                    # Make sure the file is deleted when controller stops
-                    atexit.register(Path(self.options.pidfile).unlink)
                 except OSError as e:
                     self.log.error("Failed to create pidfile %s: %s",
                                    self.options.pidfile, e)

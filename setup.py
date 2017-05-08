@@ -13,15 +13,15 @@ from distutils.command.clean import clean  # pylint: disable=E0401,E0611
 from pathlib import Path
 from subprocess import call
 
+from setuptools import Command, find_packages, setup
+from setuptools.command.develop import develop
+from setuptools.command.install import install
+
 try:
     import pip
 except ModuleNotFoundError:
     print('Please install python3-pip and run setup.py again.')
     exit(-1)
-from setuptools import Command, find_packages, setup
-from setuptools.command.develop import develop
-from setuptools.command.install import install
-
 
 BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
 ETC_FILES = ['etc/kytos/logging.ini']
@@ -222,7 +222,6 @@ class DevelopMode(develop, CommonInstall):
 
 
 # Install dependencies' wheels (faster, don't compile libsass, etc)
-
 pip_reqs = pip.req.parse_requirements('requirements.txt', session=False)
 pip.main(['install', *[str(r.req) for r in pip_reqs]])
 

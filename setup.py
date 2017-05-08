@@ -13,12 +13,11 @@ from distutils.command.clean import clean  # pylint: disable=E0401,E0611
 from pathlib import Path
 from subprocess import call
 
-from setuptools import Command, find_packages, setup
-from setuptools.command.develop import develop
-from setuptools.command.install import install
-
 try:
     import pip
+    from setuptools import Command, find_packages, setup
+    from setuptools.command.develop import develop
+    from setuptools.command.install import install
 except ModuleNotFoundError:
     print('Please install python3-pip and run setup.py again.')
     exit(-1)

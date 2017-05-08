@@ -75,7 +75,7 @@ class KytosConfig():
 
         When installed via pip, defaults values are:
 
-        defaults = {'pidfile': '/var/run/kytosd.pid',
+        defaults = {'pidfile': '/var/run/kytos/kytosd.pid',
                     'workdir': '/var/lib/kytos',
                     'napps': '/var/lib/kytos/napps/',
                     'conf': '/etc/kytos/kytos.conf',
@@ -85,7 +85,7 @@ class KytosConfig():
                     'foreground': False,
                     'debug': False}
         """
-        defaults = {'pidfile': os.path.join(BASE_ENV, 'var/run/kytosd.pid'),
+        defaults = {'pidfile': os.path.join(BASE_ENV, 'var/run/kytos/kytosd.pid'),
                     'workdir': os.path.join(BASE_ENV, 'var/lib/kytos'),
                     'napps': os.path.join(BASE_ENV, 'var/lib/kytos/napps/'),
                     'installed_napps': os.path.join(BASE_ENV,

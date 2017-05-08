@@ -5,6 +5,7 @@ descriptions.
 """
 import os
 import re
+import shutil
 import sys
 from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
@@ -176,6 +177,10 @@ class InstallMode(install, CommonInstall):
             self.do_egg_install()
         self.generate_file_from_template(TEMPLATE_FILES, BASE_ENV,
                                          prefix=BASE_ENV)
+        # data_files is not enough when installing from PyPI
+        for file in ETC_FILES:
+            shutil.copy2(file, Path(BASE_ENV) / file)
+
         self.create_pid_folder()
 
 

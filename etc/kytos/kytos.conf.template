@@ -21,7 +21,7 @@ daemon = False
 debug = False
 
 # Logging config file. Please specify the full path of logging config file.
-logging = {{prefix}}/etc/kytos/logging.ini
+logging = {{ prefix }}/etc/kytos/logging.ini
 
 listen = 0.0.0.0
 

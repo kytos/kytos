@@ -128,6 +128,9 @@ class CommonInstall:
         """
         from jinja2 import Template
 
+        if kwargs.get('prefix').endswith('/'):
+            kwargs['prefix'] = kwargs['prefix'][:-1]
+
         cls.create_paths()
         for path in templates:
             with open(path, 'r', encoding='utf-8') as src_file:

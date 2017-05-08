@@ -106,10 +106,10 @@ class CommonInstall:
         compiled = sass.compile(filename=str(infile),
                                 source_map_filename=str(outmap))
 
-        with open(outfile, 'w') as output:
+        with open(outfile, 'wb') as output:
             output.write(compiled[0])
 
-        with open(outmap, 'w') as output:
+        with open(outmap, 'wb') as output:
             output.write(compiled[1])
 
     @classmethod

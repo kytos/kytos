@@ -1,5 +1,4 @@
 ipython
-libsass
 lockfile
 python-openflow>=2017.1b2
 kytos-utils>=2017.1b2

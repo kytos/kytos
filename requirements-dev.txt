@@ -1,5 +1,8 @@
 # For developers, the packages below are required.
 
+# Web
+libsass
+
 # For running doctests (during "python setup.py test")
 Sphinx >= 1.4.5
 sphinx_bootstrap_theme

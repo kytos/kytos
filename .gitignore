@@ -100,7 +100,7 @@ aux_*.sh
 .sass-cache
 node_modules
 include
-kytos/web-ui/source/static/css/*
+kytos/web-ui/static/css/style.*
 
 # ignore templates
 etc/kytos/kytos.conf

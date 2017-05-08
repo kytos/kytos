@@ -175,7 +175,7 @@ class InstallMode(install, CommonInstall):
             # force install of deps' eggs during setup.py install
             self.do_egg_install()
         self.generate_file_from_template(TEMPLATE_FILES, BASE_ENV,
-                                         prefix=BASE_ENV)
+                                         prefix=BASE_ENV + '/')
         self.create_pid_folder()
 
 
@@ -191,7 +191,7 @@ class DevelopMode(develop, CommonInstall):
         self.build_sass()
         super().run()
 
-        self.generate_file_from_template(TEMPLATE_FILES, prefix=BASE_ENV)
+        self.generate_file_from_template(TEMPLATE_FILES, prefix=BASE_ENV + '/')
 
         for file_name in ETC_FILES:
             self.generate_file_link(file_name)

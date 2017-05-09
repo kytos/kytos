@@ -113,7 +113,7 @@ class KytosOpenFlowRequestHandler(BaseRequestHandler):
                     raw_header += self.request.recv(remaining)
                     if not raw_header:
                         break
-            except InterruptedError as exception:
+            except (InterruptedError, ConnectionResetError) as exception:
                 self.exception = exception
                 break
             else:
@@ -130,7 +130,7 @@ class KytosOpenFlowRequestHandler(BaseRequestHandler):
                 while len(binary_data) < body_len:
                     remaining = body_len - len(binary_data)
                     binary_data += self.request.recv(remaining)
-            except (SocketError, OSError) as exception:
+            except (SocketError, OSError, ConnectionResetError) as exception:
                 self.exception = exception
                 break
 

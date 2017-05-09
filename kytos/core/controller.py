@@ -115,9 +115,15 @@ class Controller(object):
         LogManager.load_logging_file(self.options.logging)
         self.log = logging.getLogger(__name__)
 
-    def start(self):
+    def start(self, restart=False):
         """Create pidfile and call start_controller method."""
         self.enable_logs()
+        if not restart:
+            self.create_pidfile()
+        self.start_controller()
+
+    def create_pidfile(self):
+        """Method used to create a pidfile."""
         pid = os.getpid()
 
         # Creates directory if it doesn't exist
@@ -147,19 +153,18 @@ class Controller(object):
                 # Otherwise, overwrite the file and proceed.
                 self.log.error("PID file %s exists. Delete it if Kytos is not"
                                "running. Aborting.")
-                exit(os.EX_CANTCREAT)
+                sys.exit(os.EX_CANTCREAT)
             except OSError:
                 try:
                     pidfile = open(self.options.pidfile, mode='w')
                 except OSError as e:
                     self.log.error("Failed to create pidfile %s: %s",
                                    self.options.pidfile, e)
-                    exit(os.EX_NOPERM)
+                    sys.exit(os.EX_NOPERM)
 
         # Identifies the process that created the pidfile.
         pidfile.write(str(pid))
         pidfile.close()
-        self.start_controller()
 
     def start_controller(self):
         """Start the controller.
@@ -225,7 +230,7 @@ class Controller(object):
             self.stop(graceful)
             self.__init__(self.options)
 
-        self.start()
+        self.start(restart=True)
 
     def stop(self, graceful=True):
         """Method used to shutdown all services used by kytos.

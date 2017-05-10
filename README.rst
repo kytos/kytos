@@ -72,9 +72,8 @@ After *kytos* installation, all config files will be located at
 
 *Kytos* also accepts a configuration file as argument to change its default
 behaviour. You can view and modify the main config file at
-``/etc/kytos/kytos.conf``.
-
-.. note:: We have also a logging.ini config file but is not working yet.
+``/etc/kytos/kytos.conf``, and the logging config file at
+``/etc/kytos/logging.ini``.
 
 For more information about the config options please visit the `Kytos's
 Administrator Guide

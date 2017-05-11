@@ -21,7 +21,16 @@ class LogManager:
         """
         cls.configuration = RawConfigParser()
         cls.configuration.read(logging_file)
-        config.fileConfig(logging_file)
+
+        try:
+            config.fileConfig(logging_file)
+        except FileNotFoundError:
+            cls.configuration.set('handler_syslog', 'args', '[]')
+            config.fileConfig(cls.configuration)
+
+            log = getLogger(__name__)
+            msg = 'Syslog file not found, running Kytos without syslog.'
+            log.warning(msg)
 
     @classmethod
     def add_stream_handler(cls, stream):

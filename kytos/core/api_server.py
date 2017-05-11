@@ -20,7 +20,7 @@ class APIServer:
             app_name(string): String representing a App Name
         """
         dirname = os.path.dirname(os.path.abspath(__file__))
-        self.flask_dir = os.path.join(dirname, '../web-ui/source')
+        self.flask_dir = os.path.join(dirname, '../web-ui')
         self.log = logging.getLogger('werkzeug')
         self.set_debug(debug)
 

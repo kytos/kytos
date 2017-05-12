@@ -12,7 +12,7 @@ class APIServer:
     """Api server used to provide Kytos Controller routes."""
 
     def __init__(self, app_name, debug=False):
-        """Contructor of APIServer.
+        """Constructor of APIServer.
 
         This method will instantiate a server with SocketIO+Flask.
 
@@ -22,18 +22,19 @@ class APIServer:
         dirname = os.path.dirname(os.path.abspath(__file__))
         self.flask_dir = os.path.join(dirname, '../web-ui')
         self.log = logging.getLogger('werkzeug')
+        self.log.setLevel(logging.WARNING)
         self.set_debug(debug)
 
         self.app = Flask(app_name, root_path=self.flask_dir)
         self.server = SocketIO(self.app, async_mode='threading')
 
-    def set_debug(self, debug=False):
+    def set_debug(self, debug):
         """Method used to set debug mode.
 
         Args:
             debug(bool): Boolean value to turn on/off debug mode.
         """
-        if debug is True:
+        if debug:
             self.log.setLevel(logging.DEBUG)
         else:
             self.log.setLevel(logging.WARNING)

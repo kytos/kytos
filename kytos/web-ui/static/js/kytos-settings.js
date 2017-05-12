@@ -25,7 +25,7 @@ var default_settings = {
         }
       },
       /* Other settings */
-      enable_log: true,
+      enable_log: false,
     },
     server_host = window.location.hostname,
     api_url = "http://" + server_host + ":8181/kytos/",

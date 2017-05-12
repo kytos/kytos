@@ -72,8 +72,10 @@
   }
 
   function request_log_changes(){
-    if (connected)  socket.emit('show logs', {"current_line": current_line})
+    if (connected && $('#enable_log')[0].checked) {
+      socket.emit('show logs', {"current_line": current_line})
+    }
   }
-  setInterval(request_log_changes, 3000)
+  setInterval(request_log_changes, 3000);
 }());
 

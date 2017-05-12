@@ -17,6 +17,7 @@ try:
     import pip
     from setuptools import Command, find_packages, setup
     from setuptools.command.develop import develop
+    from setuptools.command.egg_info import egg_info
     from setuptools.command.install import install
 except ModuleNotFoundError:
     print('Please install python3-pip and run setup.py again.')
@@ -47,6 +48,64 @@ class SimpleCommand(Command):
     def finalize_options(self):
         """Post-process options."""
         pass
+
+
+class SASSBuild(SimpleCommand):
+    """Build CSS from SASS."""
+
+    description = 'Force CSS (re)build.'
+
+    _cssdir = Path(__file__).parent / 'kytos/web-ui/static/css'
+    style_css = _cssdir / 'style.css'
+
+    def run(self):
+        """Only build."""
+        self.build()
+
+    @classmethod
+    def build(cls):
+        """Build the web-UI CSS from SASS."""
+        # Can't make tox in scrutinizer use libsass unless written in
+        # requirements.txt, but our users don't need it.
+        try:
+            import sass
+        except ModuleNotFoundError:
+            pip.main(['install', 'libsass'])
+            import sass
+
+        sassdir = Path(__file__).parent / 'web-ui-src/sass'
+        main_scss = sassdir / 'main.scss'
+        style_map = cls._cssdir / 'style.css.map'
+        compiled = sass.compile(filename=str(main_scss),
+                                source_map_filename=str(style_map))
+        for content, filename in zip(compiled, (cls.style_css, style_map)):
+            with open(filename, 'w', encoding='utf-8') as output:
+                output.write(content)
+
+
+class EggInfo(egg_info):
+    """Prepare files to be packed."""
+
+    def run(self):
+        """Build css."""
+        self._install_deps_wheels()
+        self._check_sass()
+        super().run()
+
+    @staticmethod
+    def _install_deps_wheels():
+        """Python wheels are much faster (no compiling)."""
+        reqs = pip.req.parse_requirements('requirements.txt', session=False)
+        print('Installing dependencies...')
+        pip.main(['install', *[str(r.req) for r in reqs]])
+
+    @staticmethod
+    def _check_sass():
+        """Do not build CSS if it exists (e.g. installing from PyPI source)."""
+        if SASSBuild.style_css.exists():
+            print('CSS already built. Not overriding it.')
+        else:
+            SASSBuild.build()
 
 
 class Cleaner(clean):
@@ -98,24 +157,6 @@ class Linter(SimpleCommand):
 
 class CommonInstall:
     """Class with common method used by children classes."""
-
-    @staticmethod
-    def build_sass():
-        """Method to build the web-ui sass into a css file."""
-        import sass
-        flask_dir = Path(__file__).parent / 'kytos/web-ui/source'
-        infile = flask_dir / 'sass/main.scss'
-        cssdir = flask_dir / 'static/css'
-        outfile = cssdir / 'style.css'
-        outmap = cssdir / 'style.css.map'
-        compiled = sass.compile(filename=str(infile),
-                                source_map_filename=str(outmap))
-
-        with open(outfile, 'w', encoding='utf-8') as output:
-            output.write(compiled[0])
-
-        with open(outmap, 'w', encoding='utf-8') as output:
-            output.write(compiled[1])
 
     @classmethod
     def generate_file_from_template(cls, templates,
@@ -171,8 +212,6 @@ class InstallMode(install, CommonInstall):
         super().run() does not install dependencies when running
         ``python setup.py install`` (pypa/setuptools#456).
         """
-        self.build_sass()
-
         if 'bdist_wheel' in sys.argv:
             # do not use eggs, but wheels
             super().run()
@@ -197,7 +236,6 @@ class DevelopMode(develop, CommonInstall):
 
     def run(self):
         """Install the package in a developer mode."""
-        self.build_sass()
         super().run()
 
         self.generate_file_from_template(TEMPLATE_FILES, prefix=BASE_ENV)
@@ -219,10 +257,6 @@ class DevelopMode(develop, CommonInstall):
         if not os.path.exists(dst):
             os.symlink(src, dst)
 
-
-# Install dependencies' wheels (faster, don't compile libsass, etc)
-pip_reqs = pip.req.parse_requirements('requirements.txt', session=False)
-pip.main(['install', *[str(r.req) for r in pip_reqs]])
 
 # We are parsing the metadata file as if it was a text file because if we
 # import it as a python module, necessarily the kytos.core module would be
@@ -252,7 +286,9 @@ setup(name='kytos',
           'develop': DevelopMode,
           'install': InstallMode,
           'doctest': DocTest,
-          'lint': Linter
+          'lint': Linter,
+          'egg_info': EggInfo,
+          'build_sass': SASSBuild
       },
       zip_safe=False,
       classifiers=[

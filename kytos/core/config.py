@@ -89,6 +89,7 @@ class KytosConfig():
                                             'var/run/kytos/kytosd.pid'),
                     'workdir': os.path.join(BASE_ENV, 'var/lib/kytos'),
                     'napps': os.path.join(BASE_ENV, 'var/lib/kytos/napps/'),
+                    'napps_repositories': "['https://napps.kytos.io/repo/']",
                     'installed_napps': os.path.join(BASE_ENV,
                                                     'var/lib/kytos/napps/',
                                                     '.installed'),

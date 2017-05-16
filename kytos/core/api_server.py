@@ -107,7 +107,8 @@ class APIServer:
         This method must be called by kytos using the method
         stop_api_server, otherwise this request will be ignored.
         """
-        allowed_host = ['127.0.0.1:'+self.port, 'localhost:'+self.port]
+        allowed_host = ['127.0.0.1:'+str(self.port),
+                        'localhost:'+str(self.port)]
         if request.host not in allowed_host:
             return "", 403
 

@@ -27,7 +27,7 @@ class LogManager:
         """
         if Path(config_file).exists():
             cls._PARSER.read(config_file)
-            cls._set_debug(debug)
+            cls._set_debug_mode(debug)
             cls._use_config_file(config_file)
         else:
             log.warning('Log config file "%s" does not exist. Using default '
@@ -35,10 +35,11 @@ class LogManager:
                         config_file)
 
     @classmethod
-    def _set_debug(cls, debug=False):
-        if debug == 'True':
+    def _set_debug_mode(cls, debug=False):
+        if debug is True:
             cls._PARSER.set('logger_root', 'level', 'DEBUG')
             cls._PARSER.set('logger_api_server', 'level', 'DEBUG')
+            log.info('Setting log configuration with debug mode.')
 
     @classmethod
     def _use_config_file(cls, config_file):

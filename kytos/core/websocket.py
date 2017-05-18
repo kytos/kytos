@@ -16,7 +16,7 @@ class LogWebSocket:
            buffer_max_size(int): Max size used by stream.
         """
         self.stream = kwargs.get('stream', StringIO())
-        self.buffer_max_size = kwargs.get('buffer_max_size', 5000)
+        self.buffer_max_size = kwargs.get('buffer_max_size', 100)
         self.buff = []
         self._set_log_level(logging.ERROR)
 
@@ -49,7 +49,13 @@ class LogWebSocket:
     def handle_messages(self, json):
         """Method used to send logs to clients."""
         current_line = json.get('current_line', 0)
+        max_lines = json.get('max_lines', 50)
         self.update_buffer()
-        result = {"buff":  self.buff[current_line:],
+
+        # Don't send more than max_lines. If remaining lines exceed max_lines,
+        # we send the latest messages
+        total_new_lines = len(self.buff) - current_line
+        new_lines = min(total_new_lines, max_lines)
+        result = {"buff":  self.buff[-new_lines:],
                   "last_line": len(self.buff)}
         emit('show logs', result)

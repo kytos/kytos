@@ -4,6 +4,8 @@
   var connected=false;
   var current_line = 0;
   var socket = io.connect('/logs');
+  // prevent browser from crashing with too many lines
+  var max_lines = 50;
 
   socket.on('connect', function(){
     turn_on_led()
@@ -61,8 +63,8 @@
   }
 
   function add_log_message(msg, src_tag) {
-    if ($('#tab_logs div.log_message').length >= 500) {
-      $('#tab_logs').find('#tab_logs:first').remove();
+    if ($('#tab_logs .log_message').length >= max_lines) {
+      $('#tab_logs').find('.log_message:first').remove();
     }
     $('<div/>', {
         text: msg,
@@ -73,7 +75,8 @@
 
   function request_log_changes(){
     if (connected && $('#enable_log')[0].checked) {
-      socket.emit('show logs', {"current_line": current_line})
+      socket.emit('show logs', {"current_line": current_line,
+                                "max_lines": max_lines})
     }
   }
   setInterval(request_log_changes, 3000);

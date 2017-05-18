@@ -23,7 +23,7 @@ class LogManager:
         cls.configuration.read(logging_file)
 
         try:
-            config.fileConfig(logging_file)
+            config.fileConfig(logging_file, disable_existing_loggers=False)
         except FileNotFoundError:
             cls.configuration.set('handler_syslog', 'args', '[]')
             config.fileConfig(cls.configuration)

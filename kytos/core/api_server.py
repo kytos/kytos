@@ -21,12 +21,12 @@ class APIServer:
         """
         dirname = os.path.dirname(os.path.abspath(__file__))
         self.flask_dir = os.path.join(dirname, '../web-ui')
-        self.log = logging.getLogger('werkzeug')
+        self.log = logging.getLogger('geventwebsocket.handler')
         self.log.setLevel(logging.WARNING)
         self.set_debug(debug)
 
         self.app = Flask(app_name, root_path=self.flask_dir)
-        self.server = SocketIO(self.app, async_mode='threading')
+        self.server = SocketIO(self.app)
 
     def set_debug(self, debug):
         """Method used to set debug mode.

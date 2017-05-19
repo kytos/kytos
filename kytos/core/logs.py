@@ -3,6 +3,7 @@ import inspect
 import re
 from configparser import RawConfigParser
 from logging import Formatter, StreamHandler, config, getLogger
+from pathlib import Path
 
 __all__ = ('LogManager', 'NAppLog')
 
@@ -10,27 +11,24 @@ __all__ = ('LogManager', 'NAppLog')
 class LogManager:
     """Manage handlers for all loggers."""
 
-    configuration = None
+    _CONFIG = RawConfigParser()
+    _DEFAULT_FMT = 'formatter_console'
 
     @classmethod
-    def load_logging_file(cls, logging_file):
-        """Loadding logs configuration from a file.
+    def load_logging_file(cls, config_file):
+        """Load log configuration file.
 
         Args:
-           logging_file(str): Address of logging configuration file.
+           config_file (str, Path): Configuration file path.
         """
-        cls.configuration = RawConfigParser()
-        cls.configuration.read(logging_file)
-
-        try:
-            config.fileConfig(logging_file, disable_existing_loggers=False)
-        except FileNotFoundError:
-            cls.configuration.set('handler_syslog', 'args', '[]')
-            config.fileConfig(cls.configuration)
-
-            log = getLogger(__name__)
-            msg = 'Syslog file not found, running Kytos without syslog.'
-            log.warning(msg)
+        config_file = Path(config_file)
+        if config_file.exists():
+            config.fileConfig(config_file, disable_existing_loggers=False)
+            cls._CONFIG.read(config_file)
+        else:
+            getLogger(__name__).warning('Log config file "%s" does not exist. '
+                                        'Using default Python configuration.',
+                                        config_file)
 
     @classmethod
     def add_stream_handler(cls, stream):
@@ -45,18 +43,18 @@ class LogManager:
 
     @classmethod
     def _add_handler(cls, handler):
-        """Method used to add a new handler to loggers.
+        """Add handler to loggers.
+
+        Use formatter_console if exists.
 
         Args:
             handler(Handler): Handle to be added.
         """
-        options = {}
-        if cls.configuration:
-            options = dict(cls.configuration.items('formatter_console'))
-
-        fmt = Formatter(options.get('format', None),
-                        options.get('datefmt', None))
-        handler.setFormatter(fmt)
+        if cls._CONFIG.has_section(cls._DEFAULT_FMT):
+            fmt_conf = cls._CONFIG[cls._DEFAULT_FMT]
+            fmt = Formatter(fmt_conf.get('format', None),
+                            fmt_conf.get('datefmt', None))
+            handler.setFormatter(fmt)
         getLogger().addHandler(handler)
 
 

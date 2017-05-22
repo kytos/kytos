@@ -112,7 +112,7 @@ class Controller(object):
 
     def enable_logs(self):
         """Method used to register kytos log and enable the logs."""
-        LogManager.load_logging_file(self.options.logging)
+        LogManager.load_config_file(self.options.logging)
         self.log = logging.getLogger(__name__)
 
     def start(self, restart=False):

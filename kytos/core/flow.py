@@ -151,17 +151,17 @@ class Flow(object):
         Returns:
             flow (:class:`~kytos.core.flow.Flow`): Flow built from json.
         """
-        flow_fields = dict_content.get('flow', {})
         flow = Flow()
 
-        for attribute_name, value in flow_fields.items():
+        for attribute_name, value in dict_content.items():
+            # "actions" key has a list of actions as value, and each action on
+            # the list must be created separately
             if attribute_name == "actions":
-                continue
-            setattr(flow, attribute_name, value)
-
-        for dict_action in flow_fields.get('actions', []):
-            action = OutputAction.from_dict(dict_action)
-            flow.actions.append(action)
+                for action_dict in value:
+                    action = OutputAction.from_dict(action_dict)
+                    flow.actions.append(action)
+            else:
+                setattr(flow, attribute_name, value)
 
         return flow
 

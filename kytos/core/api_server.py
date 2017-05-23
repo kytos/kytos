@@ -5,7 +5,7 @@ from urllib.error import URLError
 from urllib.request import urlopen
 
 from flask import Flask, request, send_from_directory
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room
 
 
 class APIServer:
@@ -27,6 +27,12 @@ class APIServer:
 
         self.app = Flask(app_name, root_path=self.flask_dir)
         self.server = SocketIO(self.app, async_mode='threading')
+        self._enable_websocket_rooms()
+
+    def _enable_websocket_rooms(self):
+        socket = self.server
+        socket.on_event('join', join_room)
+        socket.on_event('leave', leave_room)
 
     def set_debug(self, debug):
         """Method used to set debug mode.

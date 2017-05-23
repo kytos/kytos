@@ -31,7 +31,6 @@ from kytos.core.logs import LogManager
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.switch import Switch
 from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
-from kytos.core.websocket import LogWebSocket
 
 __all__ = ('Controller',)
 
@@ -91,8 +90,6 @@ class Controller(object):
 
         self.started_at = None
 
-        self.websockets = {}
-
         self.log = None
 
         self.api_server = APIServer(__name__, self.options.debug)
@@ -102,17 +99,10 @@ class Controller(object):
         #: from napps.<username>.<napp_name> import ?....
         sys.path.append(os.path.join(self.options.napps, os.pardir))
 
-    def register_websockets(self):
-        """Method used to register all websockets."""
-        log = LogWebSocket()
-        self.websockets['log'] = log
-        LogManager.add_stream_handler(log.stream)
-
-        self.api_server.register_websockets(self.websockets)
-
     def enable_logs(self):
         """Method used to register kytos log and enable the logs."""
         LogManager.load_config_file(self.options.logging)
+        LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
 
     def start(self, restart=False):
@@ -174,7 +164,6 @@ class Controller(object):
         """
         self.api_server.register_kytos_routes()
         self.api_server.register_web_ui()
-        self.register_websockets()
         self.log.info("Starting Kytos - Kytos Controller")
         self.server = KytosServer((self.options.listen,
                                    int(self.options.port)),

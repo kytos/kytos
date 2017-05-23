@@ -64,11 +64,10 @@ class TestLogManager(LogTester):
         LogManager.add_handler(handler)
         handler.setFormatter.assert_called_once()
 
-    def test_add_stream_handler(self):
+    def test_add_websocket(self):
         """A stream should be used in a handler added to the root logger."""
-        stream = Mock()
-        handler = LogManager.add_stream_handler(stream)
-        self.assertEqual(stream, handler.stream)
+        socket = Mock()
+        handler = LogManager.enable_websocket(socket)
         self.assertIn(handler, logging.root.handlers)
 
     @staticmethod

@@ -19,6 +19,8 @@ Removed
 
 Fixed
 =====
+- Web interface:
+  - Fixed memory and CPU usage
 
 Security
 ========

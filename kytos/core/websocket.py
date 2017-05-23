@@ -1,61 +1,50 @@
-"""Module to abstract a WebSockets."""
+"""WebSocket abstraction."""
 import logging
-from io import StringIO
 
-from flask_socketio import emit
+__all__ = ('WebSocketHandler')
 
 
-class LogWebSocket:
-    """Class used to send logs using socketio."""
+class WebSocketHandler:
+    """Log handler that logs to web socket."""
 
-    def __init__(self, **kwargs):
-        """The constructor of LogWebSocket receive the parameters below.
+    @classmethod
+    def get_handler(cls, socket):
+        """Output logs to a web socket, filtering unwanted messages.
 
         Args:
-           stream(StringIO()):   buffer used to store the logs
-           buffer_max_size(int): Max size used by stream.
+            socket: socketio socket.
+            stream: Object that supports ``write()`` and ``flush()``.
         """
-        self.stream = kwargs.get('stream', StringIO())
-        self.buffer_max_size = kwargs.get('buffer_max_size', 100)
-        self.buff = []
-        self._set_log_level(logging.ERROR)
+        stream = WebSocketStream(socket)
+        handler = logging.StreamHandler(stream)
+        handler.addFilter(cls._filter_web_requests)
+        return handler
 
     @staticmethod
-    def _set_log_level(level):
-        for name in 'engineio', 'socketio':
-            log = logging.getLogger(name)
-            log.setLevel(level)
+    def _filter_web_requests(record):
+        """Only allow web server messages with level higher than info.
 
-    @property
-    def events(self):
-        """Method used to return all channels used by LogWebsocket instance."""
-        return [('show logs', self.handle_messages, '/logs')]
+        Do not print web requests (INFO level) to avoid infinit loop when
+        printing the logs in the web interface with long-polling mode.
+        """
+        return record.name != 'werkzeug' or record.levelno > logging.INFO
 
-    def update_buffer(self):
-        """Method used to update the buffer from stream of logs."""
-        self.stream.seek(0)
-        msg = self.stream.read().split('\n')[:-1]
 
-        if not msg:
-            return
+class WebSocketStream:
+    """Make loggers write to web socket."""
 
-        self.buff.extend(msg)
-        self.stream.truncate(0)
+    def __init__(self, socketio):
+        """Receive the socket to write to."""
+        super().__init__()
+        self._io = socketio
+        self._content = ''
 
-        if len(self.buff) >= self.buffer_max_size:
-            new_size = self.buffer_max_size/2
-            self.buff = self.buff[new_size:]
+    def write(self, content):
+        """Store a new line."""
+        self._content += content
 
-    def handle_messages(self, json):
-        """Method used to send logs to clients."""
-        current_line = json.get('current_line', 0)
-        max_lines = json.get('max_lines', 50)
-        self.update_buffer()
-
-        # Don't send more than max_lines. If remaining lines exceed max_lines,
-        # we send the latest messages
-        total_new_lines = len(self.buff) - current_line
-        new_lines = min(total_new_lines, max_lines)
-        result = {"buff":  self.buff[-new_lines:],
-                  "last_line": len(self.buff)}
-        emit('show logs', result)
+    def flush(self):
+        """Send lines and reset the content."""
+        lines = self._content.split('\n')[:-1]
+        self._content = ''
+        self._io.emit('show logs', lines, room='log')

@@ -69,16 +69,6 @@ class APIServer:
             self.app.add_url_rule(new_endpoint_url, function.__name__,
                                   function, methods=methods)
 
-    def register_websockets(self, websockets):
-        """Method used to register all channels from websockets given."""
-        for websocket in websockets.values():
-            for event, function, namespace in websocket.events:
-                self.register_websocket(event, function, namespace)
-
-    def register_websocket(self, name, function, namespace='/'):
-        """Method used to register websocket channel."""
-        self.server.on_event(name, function, namespace)
-
     def register_web_ui(self):
         """Method used to register routes to the admin-ui homepage."""
         self.app.add_url_rule('/', self.web_ui.__name__, self.web_ui)

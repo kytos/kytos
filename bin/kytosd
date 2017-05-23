@@ -3,6 +3,7 @@
 import daemon
 import IPython
 import signal
+import sys
 
 from IPython.terminal.embed import InteractiveShellEmbed
 from IPython.terminal.prompts import Prompts, Token
@@ -55,7 +56,14 @@ if __name__ == '__main__':
     config = KytosConfig()
     controller = Controller(config.options['daemon'])
     if controller.options.foreground:
-        controller.start()
+
+        try:
+            controller.start()
+        except SystemExit as e:
+            controller.log.error(e)
+            controller.log.info("Kytos start aborted.")
+            sys.exit()
+
         address = controller.server.server_address[0]
         port = controller.server.server_address[1]
         banner1 += " tcp://{}:{}\n".format(address, port)
@@ -73,5 +81,9 @@ if __name__ == '__main__':
         controller.stop()
     else:
         with daemon.DaemonContext():
-            controller.start()
-        print('Kytos daemon started.')
+            try:
+                controller.start()
+            except SystemExit as e:
+                controller.log.error(e)
+                controller.log.info("Kytos daemon start aborted.")
+                sys.exit()

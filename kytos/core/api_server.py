@@ -1,6 +1,7 @@
 """Module used to handle a API Server."""
 import logging
 import os
+import sys
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -43,8 +44,10 @@ class APIServer:
         """Method used to run the APIServer."""
         try:
             self.server.run(self.app, *args, **kwargs)
-        except OSError:
-            pass
+        except OSError as e:
+            msg = "Couldn't start API Server: {}".format(e)
+            self.log.critical(msg)
+            sys.exit(msg)
 
     def register_rest_endpoint(self, url, function, methods):
         r"""Register a new rest endpoint in Api Server.

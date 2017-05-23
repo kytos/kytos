@@ -54,6 +54,11 @@ class NAppsManager:
                 log.error("Failed to enable NApp %s. Permission denied.",
                           napp.id)
 
+    def enable_all(self):
+        """Enable all napps already installed and disabled."""
+        for napp in self.list_disabled():
+            self.enable(napp.id)
+
     def disable(self, napp_uri):
         """Disable a NApp if it is enabled."""
         napp = NApp.create_from_uri(napp_uri)
@@ -65,6 +70,11 @@ class NAppsManager:
                 self._controller.unload_napp(napp.username, napp.name)
         except FileNotFoundError:
             pass  # OK, it was already disabled
+
+    def disable_all(self):
+        """Disable all napps already installed and enabled."""
+        for napp in self.list_enabled():
+            self.disable(napp.id)
 
     def install(self, napp_uri, enable=True):
         """Install and enable a NApp from his repository.

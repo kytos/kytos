@@ -35,7 +35,6 @@ class WebSocketStream:
 
     def __init__(self, socketio):
         """Receive the socket to write to."""
-        super().__init__()
         self._io = socketio
         self._content = ''
 

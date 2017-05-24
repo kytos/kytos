@@ -5,11 +5,11 @@ var channels = new Set();
   var max_lines = 50;
   var ws_led = $('.nav.sidebar .websocket-status');
 
-  socket.on('connect', connect);
-  socket.on('disconnect', disconnect);
+  socket.on('connect', on_connect);
+  socket.on('disconnect', on_disconnect);
   socket.on('show logs', update_log);
 
-  function connect() {
+  function on_connect() {
     console.log('Socket connected.');
     // restore channel subscriptions
     for (let channel of channels) {
@@ -19,7 +19,7 @@ var channels = new Set();
           .removeClass('status-offline');
   }
 
-  function disconnect() {
+  function on_disconnect() {
     console.log('Socket disconnected.');
     ws_led.removeClass('status-online')
           .addClass('status-offline');

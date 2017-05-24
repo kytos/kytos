@@ -50,7 +50,7 @@
     }
   })
 
-  var ws_led = $('.nav.sidebar .websocket-status')
+  var ws_led = $('#statusicons .websocket-status')
 
   function turn_on_led(){
     ws_led.addClass('status-online');

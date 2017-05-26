@@ -1,8 +1,10 @@
 """Handle logs displayed by Kytos SDN Platform."""
 import inspect
+import logging
 import re
 from configparser import RawConfigParser
-from logging import Formatter, config, getLogger
+# noqa so it does not conflict with grouped imports
+from logging import Formatter, config, getLogger  # noqa
 from pathlib import Path
 
 from kytos.core.websocket import WebSocketHandler
@@ -93,7 +95,25 @@ class LogManager:
             fmt = Formatter(fmt_conf.get('format', None),
                             fmt_conf.get('datefmt', None))
             handler.setFormatter(fmt)
+        handler.addFilter(cls.filter_session_disconnected)
         getLogger().addHandler(handler)
+
+    @staticmethod
+    def filter_session_disconnected(record):
+        """Remove harmless session disconnected error.
+
+        Despite this error, everything seems to be working. As we can't catch
+        it anywhere, we filter it.
+        """
+        msg_end = "KeyError: 'Session is disconnected'"
+        return not (record.name == 'werkzeug' and record.levelname == 'ERROR'
+                    and record.args and isinstance(record.args[0], str)
+                    and record.args[0].endswith(msg_end))
+
+
+# Add filter to all pre-existing handlers
+for root_handler in logging.root.handlers:
+    root_handler.addFilter(LogManager.filter_session_disconnected)
 
 
 class NAppLog:

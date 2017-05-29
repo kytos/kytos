@@ -58,8 +58,8 @@ class APIServer:
             methods (list):      List of request methods allowed.
                                  e.g: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH']
         """
-        if url not in self.rest_endpoints:
-            new_endpoint_url = "/kytos{}".format(url)
+        new_endpoint_url = "/kytos{}".format(url)
+        if new_endpoint_url not in self.rest_endpoints:
             self.app.add_url_rule(new_endpoint_url, function.__name__,
                                   function, methods=methods)
 

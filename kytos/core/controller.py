@@ -112,7 +112,7 @@ class Controller(object):
 
     def enable_logs(self):
         """Method used to register kytos log and enable the logs."""
-        LogManager.load_logging_file(self.options.logging)
+        LogManager.load_config_file(self.options.logging)
         self.log = logging.getLogger(__name__)
 
     def start(self, restart=False):
@@ -151,16 +151,15 @@ class Controller(object):
                 # If kill() doesn't return an error, there's a process running
                 # with the same PID. We assume it is Kytos and quit.
                 # Otherwise, overwrite the file and proceed.
-                self.log.error("PID file %s exists. Delete it if Kytos is not"
-                               "running. Aborting.")
-                sys.exit(os.EX_CANTCREAT)
+                error_msg = ("PID file {} exists. Delete it if Kytos is not "
+                             "running. Aborting.")
+                sys.exit(error_msg.format(self.options.pidfile))
             except OSError:
                 try:
                     pidfile = open(self.options.pidfile, mode='w')
                 except OSError as e:
-                    self.log.error("Failed to create pidfile %s: %s",
-                                   self.options.pidfile, e)
-                    sys.exit(os.EX_NOPERM)
+                    error_msg = "Failed to create pidfile {}: {}."
+                    sys.exit(error_msg.format(self.options.pidfile, e))
 
         # Identifies the process that created the pidfile.
         pidfile.write(str(pid))
@@ -207,10 +206,8 @@ class Controller(object):
             try:
                 thread.start()
             except OSError as e:
-                self.log.error("Error starting thread %s", thread)
-                self.log.error(e)
-                self.log.error("Kytos start aborted.")
-                sys.exit()
+                error_msg = "Error starting thread {}: {}."
+                sys.exit(error_msg.format(thread, e))
 
         self.log.info("Loading Kytos NApps...")
         self.load_napps()

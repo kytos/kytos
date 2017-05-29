@@ -3,34 +3,57 @@ import inspect
 import re
 from configparser import RawConfigParser
 from logging import Formatter, StreamHandler, config, getLogger
+from pathlib import Path
 
 __all__ = ('LogManager', 'NAppLog')
+log = getLogger(__name__)
 
 
 class LogManager:
     """Manage handlers for all loggers."""
 
-    configuration = None
+    _PARSER = RawConfigParser()
+    _DEFAULT_FMT = 'formatter_console'
 
     @classmethod
-    def load_logging_file(cls, logging_file):
-        """Loadding logs configuration from a file.
+    def load_config_file(cls, config_file):
+        """Load log configuration file.
+
+        Check whether file exists and if there's an OSError, try removing
+        syslog handler.
 
         Args:
-           logging_file(str): Address of logging configuration file.
+           config_file (str, Path): Configuration file path.
         """
-        cls.configuration = RawConfigParser()
-        cls.configuration.read(logging_file)
+        if Path(config_file).exists():
+            cls._PARSER.read(config_file)
+            cls._use_config_file(config_file)
+        else:
+            log.warning('Log config file "%s" does not exist. Using default '
+                        'Python logging configuration.',
+                        config_file)
 
+    @classmethod
+    def _use_config_file(cls, config_file):
+        """Use parsed logging configuration."""
         try:
-            config.fileConfig(logging_file)
-        except FileNotFoundError:
-            cls.configuration.set('handler_syslog', 'args', '[]')
-            config.fileConfig(cls.configuration)
+            config.fileConfig(cls._PARSER, disable_existing_loggers=False)
+            log.info('Logging config file "%s" loaded successfully.',
+                     config_file)
+        except OSError:
+            cls._catch_config_file_exception(config_file)
 
-            log = getLogger(__name__)
-            msg = 'Syslog file not found, running Kytos without syslog.'
-            log.warning(msg)
+    @classmethod
+    def _catch_config_file_exception(cls, config_file):
+        """Try not using syslog handler (for when it is not installed)."""
+        if 'handler_syslog' in cls._PARSER:
+            log.warning('Failed to load "%s". Trying to disable syslog '
+                        'handler.', config_file)
+            cls._PARSER.remove_section('handler_syslog')
+            cls._use_config_file(config_file)
+        else:
+            log.warning('Failed to load "%s". Using default Python '
+                        'logging configuration.', config_file)
 
     @classmethod
     def add_stream_handler(cls, stream):
@@ -40,23 +63,23 @@ class LogManager:
             stream: Object that supports ``write()`` and ``flush()``.
         """
         handler = StreamHandler(stream)
-        cls._add_handler(handler)
+        cls.add_handler(handler)
         return handler
 
     @classmethod
-    def _add_handler(cls, handler):
-        """Method used to add a new handler to loggers.
+    def add_handler(cls, handler):
+        """Add handler to loggers.
+
+        Use formatter_console if it exists.
 
         Args:
             handler(Handler): Handle to be added.
         """
-        options = {}
-        if cls.configuration:
-            options = dict(cls.configuration.items('formatter_console'))
-
-        fmt = Formatter(options.get('format', None),
-                        options.get('datefmt', None))
-        handler.setFormatter(fmt)
+        if cls._PARSER.has_section(cls._DEFAULT_FMT):
+            fmt_conf = cls._PARSER[cls._DEFAULT_FMT]
+            fmt = Formatter(fmt_conf.get('format', None),
+                            fmt_conf.get('datefmt', None))
+            handler.setFormatter(fmt)
         getLogger().addHandler(handler)
 
 
@@ -78,7 +101,7 @@ class NAppLog:
 
     def __getattribute__(self, name):
         """Detect NApp ID and use its logger."""
-        napp_id = detect_napp_id()
+        napp_id = _detect_napp_id()
         logger = getLogger(napp_id)
         return logger.__getattribute__(name)
 
@@ -87,7 +110,7 @@ class NAppLog:
 NAPP_ID_RE = re.compile(r'.*napps/(.*?)/(.*?)/')
 
 
-def detect_napp_id():
+def _detect_napp_id():
     """Get the last called NApp in caller's stack.
 
     We use the last innermost NApp because a NApp *A* may call a NApp *B* and,

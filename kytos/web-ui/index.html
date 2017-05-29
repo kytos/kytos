@@ -68,125 +68,68 @@
           <img src="static/images/logo-circle-white.png" class="hidden-lg hidden-md visible-sm visible-xs" height="45" alt="Kytos"/>
         </a>
       </div>
-     <!--
-      <div id="navbar" class="navbar-collapse collapse">
-        <div class="left-nav-toggle">
-          <a href=""> <i class="fa fa-bars"></i> </a>
-        </div>
-        <form class="navbar-form navbar-left">
-          <input type="text" class="form-control" placeholder="Search data for analysis" style="width: 175px">
-          </form>
-          <ul class="nav navbar-nav navbar-right">
-            <li class=" profil-link">
-              <a href="login.html">
-                <img src="static/images/avatar.jpg" class="img-circle" alt="">
-              </a>
-            </li>
-          </ul>
-      </div>
-     -->
-    </div>
-  </nav>
-<!-- END OF NAVBAR -->
-<!-- MAIN CONTENT (MC) -->
-  <div class="container-fluid">
-      <div class="row">
 
-        <!-- MC: CHART AREA -->
-        <section class="content">
-          <div id='chart'>
-            <div id='background-map'></div>
-            <div id='topology-chart'></div>
-          </div>
-        </section>
-        <!-- END MC: CHART AREA -->
+<!-- CONTROLS KYTOS -->
+<div id="controlsKytos" class="row-fluid">
+      
+<style>
 
-        <!-- MC: BOTTOM PANEL -->
-        <section id="terminal" class="terminal">
+.navbar {
+}
+#settingsLayouts {
+ display: block;
+ width: 200px;
+}
+#controlsKytos {
+ position: relative;
+ color: #FFF;
+}
+#controlsKytos .btn-kytos-default {
+padding:0px;
+background:none;
+border: 1px outset #FFF;
+color:#FFF;
+}
 
-          <div  id="statusicons">
-           <ul class="nav">
-            <li class="nav-kytos-api-status">
-              <i class="fa fa-power-off api-status" aria-hidden="true"></i>
-              <span class='hidden-sm hidden-xs'>Kytos </span>API
-            </li>
-            <li class='nav-kytos-websocket-status'>
-              <i class="fa fa-power-off websocket-status" aria-hidden="true"></i>
-              <span class='hidden-sm hidden-xs'>Kytos Websocket</span>
-              <span class='show-sm show-xs'>WS</span>
-            </li>
-          </ul>
-         </div><!-- #statusicons -->
-
-          <div class="terminal-header">
-            <div class="terminal-title">
-              <ul class="nav nav-pills kytos-nav-pills terminal-tabs">
-                <li id='tab_terminal_button' class="active"><a  data-toggle="pill" href="#tab_terminal"><i class="fa fa-terminal"></i> Terminal</a></li>
-                <li id='tab_context_button'><a data-callback-min-max="show_switch_context()" data-toggle="pill" href="#tab_context" ><i class="fa fa-eye"></i> Context</a></li>
-                <li><a data-toggle="pill" href="#tab_switches" onClick= populate_switches_carousel() ><i class="fa fa-circle-o"></i> Switches</a></li>
-                <li><a data-toggle="pill" href="#tab_logs"><i class="fa fa-list"></i> Logs</a></li>
-                <li><a data-toggle="pill" href="#tab_notifications"><i class="fa fa-bell-o"></i> Notifications</a></li>
-                <li><a data-toggle="pill" href="#tab_settings"><i class="fa fa-cogs"></i> Settings</a></li>
-              </ul>
-            </div>
-            <div class="terminal-status-bar">
-              <span class='terminal-status-background'>&nbsp;</span>
-            </div>
-            <div class="terminal-actions">
-              <a href="#" data-action="max" class="terminal-max"><i class="glyphicon glyphicon-fullscreen"></i></a>
-              <a href="#" data-action="med" class="terminal-med"><i class="glyphicon glyphicon-menu-up"></i></a>
-              <a href="#" data-action="min" class="terminal-min"><i class="glyphicon glyphicon-menu-down"></i></a>
-            </div>
-          </div>
-          <div class="terminal-body tab-content">
-            <div id="tab_terminal" class="tab-pane fade in active">Terminal content</div>
-            <div id="tab_switches" class="tab-pane fade in">
-              <div class="owl-carousel owl-theme">
-              </div>
-            </div>
-            <div id="tab_context" class="tab-pane fade">
-              <div id="context_target">
-                <div id="orientation_text">
-                  Click on an element on the topology chart to show its context here.
-                </div>
-              </div>
-            </div>
-            <div id="tab_logs" class="tab-pane fade"></div>
-            <div id="tab_notifications" class="tab-pane fade">Notifications</div>
-            <div id="tab_settings" class="tab-pane fade">
-              <div class="row-fluid">
-                <div class="col-settings col-md-3 col-xs-6">
-                  <h1>Display elements:</h1>
-                  <p class="help">Select the elements to be displayed</p>
+#controlsKytos .help { display: none; }
+</style>
+         
+                <div class="col-md-2 col-xs-6">
+                  <p class="help">Select the elements to be displayed.</p>
             <div class="checkbox" data-label-width="0"  data-size="mini">
               <label for="show_topology">
-                <input id='show_topology' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#topology-chart").toggle()'> Topology
+                <input id='show_topology' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#topology-chart").toggle()' title="Show or hide the Topology"> Topology
               </label>
               <label for="show_unused_interfaces">
-                <input id='show_unused_interfaces' type="checkbox" data-label-width="0" data-size="mini" checked="checked" data-on-color="primary" onchange="toggle_unused_interfaces();"> Unused interfaces
+                <input id='show_unused_interfaces' type="checkbox" data-label-width="0" data-size="mini" checked="checked" data-on-color="primary" onchange="toggle_unused_interfaces();" title="Show or hide the Unused interfaces"> Unused interfaces
               </label>
               <label for="show_disconnected_hosts">
-                <input id='show_disconnected_hosts' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange="toggle_disconnected_hosts();"> Disconnected hosts
+                <input id='show_disconnected_hosts'  rel="tooltip" type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange="toggle_disconnected_hosts();" title="Show or hide the Disconnected hosts"> Disconnected hosts
               </label>
             </div>
                 </div>
-                <div class="col-settings col-md-3 col-xs-6">
-                  <h1>Layout Settings</h1>
+
+
+                <div class="col-md-2 col-xs-6">
                   <p class="help">Save and restore layouts.</p>
-                  <div class="mt">
-                    <button type="button" class="btn btn-sm btn-kytos-default" data-toggle="modal" data-target="#saveLayout">Save Layout</button>
-                  </div>
-                  <div class="dropup mt" id="savedLayouts">
-                    <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <span class="layout-name disabled-option">Saved Layouts</span>
+             <div class="mt right">
+              <button type="button" class="btn btn-sm btn-kytos-default" data-toggle="modal" data-target="#saveLayout" title="Save this layout">
+                <i class="fa fa-save fa-3x hidden-lg hidden-md"></i>
+                <i class="fa fa-save hidden-xs hidden-sm"></i>
+              </button>
+             </div>
+             <div class="dropdown" id="savedLayouts">
+                    <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <span class="layout-name disabled-option">Restore Layout</span>
                       <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     </ul>
-                  </div>
+             </div>
                 </div>
-                <div class="col-settings col-md-3 col-xs-6">
-                  <h1>Label Settings</h1>
+
+
+                <div class="col-md-2 col-xs-6">
                   <p class="help">Select which labels you want to show.</p>
             <div class="checkbox" data-label-width="0"  data-size="mini">
               <div class="dropup mt" id="switch_label">
@@ -229,10 +172,9 @@
                     </label>
                   </div>
                 </div>
-                <div class="col-settings col-md-3 col-xs-6">
-                  <h1>Other Settings</h1>
-                  <p class="help">,,,</p>
-            <div class="checkbox" data-label-width="0"  data-size="mini">
+
+<div class="col-md-2 col-xs-6">
+           <div class="checkbox" data-label-width="0"  data-size="mini">
               <label for="show_map">
                 <input id='show_map' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#background-map").toggle()'> Show Map
               </label>
@@ -240,14 +182,94 @@
                 <input id="map_opacity" data-slider-id='map_opacity_slider' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="0.1" data-slider-value="1"/>
               </label>
             </div>
+</div><!-- .col-md -->
+
+
+
+
+</div><!-- END CONTROLS KYTOS -->
+
+      <div id="navbar" class="nav navbar-nav navbar-right navbar-collapse collapse">
+        <div class="right-nav-toggle">
+          <a href=""> <i class="fa fa-bars"></i> </a>
+        </div>
+      </div>
+
+    </div>
+  </nav>
+<!-- END OF NAVBAR -->
+<!-- MAIN CONTENT (MC) -->
+  <div class="container-fluid">
+      <div class="row">
+
+        <!-- MC: CHART AREA -->
+        <section class="content">
+          <div id='chart'>
+            <div id='background-map'></div>
+            <div id='topology-chart'></div>
+          </div>
+        </section>
+        <!-- END MC: CHART AREA -->
+
+        <!-- MC: BOTTOM PANEL -->
+        <section id="terminal" class="terminal">
+
+          <div  id="statusicons">
+           <ul class="nav">
+            <li class="nav-kytos-api-status">
+              <i class="fa fa-power-off api-status" aria-hidden="true"></i>
+              <span class='hidden-sm hidden-xs'>Kytos </span>API
+            </li>
+            <li class='nav-kytos-websocket-status'>
+              <i class="fa fa-power-off websocket-status" aria-hidden="true"></i>
+              <span class='hidden-sm hidden-xs'>Kytos Websocket</span>
+              <span class='show-sm show-xs'>WS</span>
+            </li>
+          </ul>
+         </div><!-- #statusicons -->
+
+          <div class="terminal-header">
+            <div class="terminal-title">
+              <ul class="nav nav-pills kytos-nav-pills terminal-tabs">
+                <li id='tab_terminal_button' class="active"><a  data-toggle="pill" href="#tab_terminal"><i class="fa fa-terminal"></i> Terminal</a></li>
+                <li id='tab_context_button'><a data-callback-min-max="show_switch_context()" data-toggle="pill" href="#tab_context" ><i class="fa fa-eye"></i> Context</a></li>
+                <li><a data-toggle="pill" href="#tab_switches" onClick= populate_switches_carousel() ><i class="fa fa-circle-o"></i> Switches</a></li>
+                <li><a data-toggle="pill" href="#tab_logs"><i class="fa fa-list"></i> Logs</a></li>
+                <li><a data-toggle="pill" href="#tab_notifications"><i class="fa fa-bell-o"></i> Notifications</a></li>
+              </ul>
+            </div>
+            <div class="terminal-status-bar">
+              <span class='terminal-status-background'>&nbsp;</span>
+            </div>
+            <div class="terminal-actions">
+              <a href="#" data-action="max" class="terminal-max"><i class="glyphicon glyphicon-fullscreen"></i></a>
+              <a href="#" data-action="med" class="terminal-med"><i class="glyphicon glyphicon-menu-up"></i></a>
+              <a href="#" data-action="min" class="terminal-min"><i class="glyphicon glyphicon-menu-down"></i></a>
+            </div>
+          </div>
+          <div class="terminal-body tab-content">
+            <div id="tab_terminal" class="tab-pane fade in active">Terminal content</div>
+            <div id="tab_switches" class="tab-pane fade in">
+              <div class="owl-carousel owl-theme">
+              </div>
+            </div>
+            <div id="tab_context" class="tab-pane fade">
+              <div id="context_target">
+                <div id="orientation_text">
+                  Click on an element on the topology chart to show its context here.
+                </div>
+              </div>
+            </div>
+            <div id="tab_logs" class="tab-pane fade">
+
             <div class="checkbox" data-label-width="0"  data-size="mini">
               <label for="enable_log">
                 <input id='enable_log' type="checkbox" data-label-width="0" data-size="mini"> Enable Logs
               </label>
             </div>
-                </div>
-              </div>
+
             </div>
+            <div id="tab_notifications" class="tab-pane fade">Notifications</div>
           </div>
         </section>
         <!-- END MC: BOTTOM PANEL -->

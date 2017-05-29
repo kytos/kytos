@@ -3,9 +3,7 @@
     font-size: 11px;
     border: 0;
     margin-top: 0;
-//    margin-left: 200px;
     padding: 0;
-//    width: calc(100% - 200px);
     width: 100%;
     position: fixed;
     bottom: 0;
@@ -14,8 +12,8 @@
     color: #adadad;
     z-index: 100;
     @media (max-width: $screen-sm-max) {
-        margin-left: 100px;
-        width: calc(100% - 102px);
+//      margin-left: 100px;
+//      width: calc(100% - 102px);
     }
 
     #statusicons {

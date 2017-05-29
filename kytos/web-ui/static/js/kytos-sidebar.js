@@ -1,5 +1,5 @@
 ;(function(){
-  $(".left-nav-toggle").click(function(e){
+  $(".right-nav-toggle").click(function(e){
       e.stopPropagation();
       e.preventDefault();
       $('.nav.sidebar').toggleClass('hidden');

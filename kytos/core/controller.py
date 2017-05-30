@@ -14,6 +14,7 @@ Basic usage:
     controller.start()
 """
 import atexit
+import json
 import logging
 import os
 import re
@@ -89,13 +90,19 @@ class Controller(object):
         #: The key is the switch dpid, while the value is a Switch object.
         self.switches = {}  # dpid: Switch()
 
+        #: datetime.datetime: Time when the controller finished starting.
         self.started_at = None
 
+        #: dict: Hash with all websockets used by Kytos.
         self.websockets = {}
 
+        #: logging.Logger: Logger instance used by Kytos.
         self.log = None
 
+        #: API Server used to expose rest endpoints.
         self.api_server = APIServer(__name__, self.options.debug)
+
+        self.register_kytos_endpoints()
 
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
@@ -172,8 +179,6 @@ class Controller(object):
         Starts a thread for each buffer handler.
         Load the installed apps.
         """
-        self.api_server.register_kytos_routes()
-        self.api_server.register_web_ui()
         self.register_websockets()
         self.log.info("Starting Kytos - Kytos Controller")
         self.server = KytosServer((self.options.listen,
@@ -213,9 +218,30 @@ class Controller(object):
         self.load_napps()
         self.started_at = now()
 
+    def register_kytos_endpoints(self):
+        """Register all rest endpoint served by kytos.
+
+        -   Register APIServer endpoints
+        -   Register WebUI endpoints
+        -   Register '/kytos/config' endpoint
+        """
+        self.api_server.register_api_server_routes()
+        self.api_server.register_web_ui()
+        self.api_server.register_rest_endpoint('/config/',
+                                               self.configuration_endpoint,
+                                               methods=['GET'])
+
     def register_rest_endpoint(self, *options, **kwargs):
         """Method used to return the endpoints registered by APIServer."""
         self.api_server.register_rest_endpoint(*options, **kwargs)
+
+    def configuration_endpoint(self):
+        """Return the configuration options used by Kytos.
+
+        Returns:
+            string: Json with current configurations used by kytos.
+        """
+        return json.dumps(self.options.__dict__)
 
     def restart(self, graceful=True):
         """Restart Kytos SDN Controller.

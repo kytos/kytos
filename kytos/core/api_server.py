@@ -83,30 +83,29 @@ class APIServer:
         """Return string with routes registered by Api Server."""
         return [x.rule for x in self.app.url_map.iter_rules()]
 
-    def register_kytos_routes(self):
+    def register_api_server_routes(self):
         """Register initial routes from kytos using ApiServer.
 
-        Initial routes are: ['/kytos/status', '/kytos/shutdown']
+        Initial routes are: ['/kytos/status/', '/kytos/shutdown/']
         """
         if '/kytos/status/' not in self.rest_endpoints:
-            self.app.add_url_rule('/kytos/status/', self.status_api.__name__,
-                                  self.status_api, methods=['GET'])
+            self.register_rest_endpoint('/status/',
+                                        self.status_api, methods=['GET'])
 
         if '/kytos/shutdown' not in self.rest_endpoints:
-            self.app.add_url_rule('/kytos/shutdown',
-                                  self.shutdown_api.__name__,
-                                  self.shutdown_api, methods=['GET'])
+            self.register_rest_endpoint('/shutdown/',
+                                        self.shutdown_api, methods=['GET'])
 
     @staticmethod
     def status_api():
-        """Display json with kytos status using the route '/kytos/status'."""
+        """Display json with kytos status using the route '/kytos/status/'."""
         return '{"response": "running"}', 201
 
     @staticmethod
     def stop_api_server():
         """Method used to send a shutdown request to stop Api Server."""
         try:
-            urlopen('http://127.0.0.1:8181/kytos/shutdown')
+            urlopen('http://127.0.0.1:8181/kytos/shutdown/')
         except URLError:
             pass
 

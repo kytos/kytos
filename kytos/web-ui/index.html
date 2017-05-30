@@ -74,8 +74,11 @@
       
 <style>
 
+/* FIXME: need migrate to SASS */ 
+
 #controlsKytos {
  margin-top: 15px;
+ color: #DFDFDF;
 }
 
 #controlsKytos .help {
@@ -84,18 +87,7 @@
 }
 
 #controlsKytos label {
- color: #DFDFDF;
-}
-
-#controlsKytos .btn-kytos-default {
- height: 2em;
- width: 2em;
- padding: 0px;
- border-radius: 1em;
- font-size: 1em;
- color: #EEE;
- border: 1px solid #554077;
- background: #554077;
+ color: #545454;
 }
 
 #settingsLayouts .right {
@@ -120,19 +112,76 @@
  opacity: 0.5;
 }
 
-#settingsLayouts .btn-kytos-default:hover {
- border-color: #DFDFDF;
- color: #DFDFDF;
+#controlsKytos .btn-kytos-default {
+ height: 2em;
+ width: 2em;
+ padding: 0px;
+ border-radius: 1em;
+ font-size: 1em;
+ color: #EEE;
+ border: 1px solid #554077;
+ background: #554077;
 }
+
+#settingsLayouts .btn-kytos-default:hover {
+ border-color: #FFF;
+ color: #FFF;
+}
+
 #settingsLayouts .btn-kytos-default:active {
  border-color: #FFF;
  color: #554077;
  background-color: #FFF;
 }
 
-</style>
-         
+.input-kytos-default {
+ color: #DFDFDF;
+ background: #191A1A;
+ border: 2px solid #554077;
+}
 
+.input-kytos-default:focus,
+.input-kytos-default:active,
+.input-kytos-default:hover {
+ color: #DFDFDF;
+ background: #000;
+ border: 2px solid #DFDFDF;
+}
+
+#controlsKytos .checkbox { display: inline; }
+
+#controlsKytos .checkbox input[type="checkbox"] {
+  opacity: 0;
+  z-index: 1;
+  cursor: pointer;
+}
+#controlsKytos .checkbox label::before {
+ height: 2em;
+ width: 2em;
+ padding: 0.5em;
+ border-radius: 1em;
+ font-size: 1em;
+ border: 1px solid #554077;
+ color: #EEE;
+ background: #554077;
+}
+#controlsKytos .checkbox label:hover::before {
+ border-color: #FFF;
+ color: #FFF;
+ background: #554077;
+}
+#controlsKytos .checkbox input[checked="checked"] + label::before {
+ border-color: #DFDFDF;
+ color: #554077;
+ background: #DFDFDF !important;
+}
+
+#f06e::before { font-family: "FontAwesome"; content: "\f06e"; }
+#f071::before { font-family: "FontAwesome"; content: "\f071"; }
+#f1e6::before { font-family: "FontAwesome"; content: "\f1e6"; }
+#f279::before { font-family: "FontAwesome"; content: "\f279"; }
+
+</style>
 
                 <div id="settingsLayouts" class="col-md-2 col-xs-6">
 
@@ -153,27 +202,32 @@
                 </div>
 
 
-                <div class="col-md-2 col-xs-6">
+                <div id="settingsDisplays" class="col-md-2 col-xs-6">
                   <p class="help">Select the elements to be displayed.</p>
-            <div class="checkbox" data-label-width="0"  data-size="mini">
-              <label for="show_topology">
-                <input id='show_topology' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#topology-chart").toggle()' data-top="tooltip" title="Show or hide the Topology"> Topology
-              </label>
-              <label for="show_unused_interfaces">
-                <input id='show_unused_interfaces' type="checkbox" data-label-width="0" data-size="mini" checked="checked" data-on-color="primary" onchange="toggle_unused_interfaces();" data-top="tooltip" title="Show or hide the Unused interfaces"> Unused interfaces
-              </label>
-              <label for="show_disconnected_hosts">
-                <input id='show_disconnected_hosts'  rel="tooltip" type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange="toggle_disconnected_hosts();" data-top="tooltip" title="Show or hide the Disconnected hosts"> Disconnected hosts
+
+             <span>Display:</span>
+            <div class="checkbox">
+              <label for="show_topology" id="f06e"> 
+              <input id='show_topology' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#topology-chart").toggle()' data-top="tooltip" title="Show or hide the Topology">
               </label>
             </div>
-                </div>
+            <div class="checkbox">
+              <label for="show_unused_interfaces" id="f071"> 
+              <input id='show_unused_interfaces' type="checkbox" data-label-width="0" data-size="mini" checked="checked" data-on-color="primary" onchange="toggle_unused_interfaces();" data-top="tooltip" title="Show or hide the Unused interfaces">
+              </label>
+            </div>
+            <div class="checkbox">
+              <label for="show_disconnected_hosts" id="f1e6"> 
+              <input id='show_disconnected_hosts'  rel="tooltip" type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange="toggle_disconnected_hosts();" data-top="tooltip" title="Show or hide the Disconnected hosts">
+              </label>
+            </div>
+                </div><!-- #settingsDisplays -->
 
                 <div class="col-md-2 col-xs-6">
                   <p class="help">Select which labels you want to show.</p>
             <div class="checkbox" data-label-width="0"  data-size="mini">
               <div class="mt" id="switch_label">
                 <label for='switch_label_dropdown'>
-                  Switch:
                   <button class="btn btn-sm input-kytos-default dropdown-toggle" type="button" id="switch_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class="layout-name disabled-option">Switch Labels</span>
                     <span class="caret"></span>
@@ -186,7 +240,6 @@
                   </ul>
                 </label>
                   <label for='host_label_dropdown'>
-                    Host:
                     <button class="btn btn-sm input-kytos-default dropdown-toggle" type="button" id="host_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       <span class="layout-name disabled-option">Host Labels</span>
                       <span class="caret"></span>
@@ -200,28 +253,30 @@
                   </label>
               </div>
             </div>
+
                   <div class="radio">
                     <label for="nodes_labels_1">
                       <input type="radio" name="nodes_labels" id="nodes_labels_1" value="address" data-label-width="0"  data-size="mini"  class="switch-radio" checked>
-                        Address
                     </label>
                     <label for="nodes_labels_2">
                       <input type="radio" name="nodes_labels" id="nodes_labels_2" value="name"  data-label-width="0"  data-size="mini"  class="switch-radio">
-                        Name
                     </label>
                   </div>
                 </div>
 
-<div class="col-md-2 col-xs-6">
-           <div class="checkbox" data-label-width="0"  data-size="mini">
-              <label for="show_map">
-                <input id='show_map' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#background-map").toggle()'> Show Map
+
+              <div id="settingsMaps" class="col-md-3 col-xs-6">
+                  <p class="help">Select the elements to be displayed.</p>
+            <div class="checkbox" data-label-width="0"  data-size="mini">
+
+   <label for="show_map" id="f279">
+                <input id='show_map' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#background-map").toggle()' data-top="tooltip" title="Show or hide the Map">
               </label>
               <label for='map_opacity'>
                 <input id="map_opacity" data-slider-id='map_opacity_slider' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="0.1" data-slider-value="1"/>
               </label>
             </div>
-</div><!-- .col-md -->
+                </div>
 
 </div><!-- END CONTROLS KYTOS -->
 

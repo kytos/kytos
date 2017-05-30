@@ -12,7 +12,7 @@ function update_tabs_sizes(){
 
   $(".terminal").kterminal();
 
-  $("[type='checkbox'], [type='radio']").bootstrapSwitch();
+  $("[data-type='checkbox'], [type='radio']").bootstrapSwitch();
 
   $("a,div").focus(function(){
     $(this).blur();

@@ -7,3 +7,7 @@
       $('#terminal').toggleClass('with-out-left-bar')
   });
 }());
+
+$(function () {
+	  $('[data-top="tooltip"]').tooltip()
+})

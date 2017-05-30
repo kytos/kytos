@@ -74,52 +74,76 @@
       
 <style>
 
-.navbar {
-}
-#settingsLayouts {
- display: block;
- width: 200px;
-}
 #controlsKytos {
- position: relative;
- color: #FFF;
-}
-#controlsKytos .btn-kytos-default {
-padding:0px;
-background:none;
-border: 1px outset #FFF;
-color:#FFF;
+ margin-top: 15px;
 }
 
-#controlsKytos .help { display: none; }
+#controlsKytos .help {
+ display: none; 
+ transition: 0.3s;
+}
+
+#controlsKytos label {
+ color: #DFDFDF;
+}
+
+#controlsKytos .btn-kytos-default {
+ height: 2em;
+ width: 2em;
+ padding: 0px;
+ border-radius: 1em;
+ font-size: 1em;
+ color: #EEE;
+ border: 1px solid #554077;
+ background: #554077;
+}
+
+#settingsLayouts .right {
+ float: left;
+ margin: 0;
+}
+
+#savedLayouts {
+ margin-left: 40px;
+}
+
+.ui-tooltip,
+#settingsLayouts:hover p.help {
+ display: block;
+ position: absolute;
+ color: #FFF;
+ background: #000;
+ border-radius: 1em;
+ padding: 0.5em;
+ margin: 0.5em;
+ text-align: center;
+ opacity: 0.5;
+}
+
+#settingsLayouts .btn-kytos-default:hover {
+ border-color: #DFDFDF;
+ color: #DFDFDF;
+}
+#settingsLayouts .btn-kytos-default:active {
+ border-color: #FFF;
+ color: #554077;
+ background-color: #FFF;
+}
+
 </style>
          
-                <div class="col-md-2 col-xs-6">
-                  <p class="help">Select the elements to be displayed.</p>
-            <div class="checkbox" data-label-width="0"  data-size="mini">
-              <label for="show_topology">
-                <input id='show_topology' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#topology-chart").toggle()' title="Show or hide the Topology"> Topology
-              </label>
-              <label for="show_unused_interfaces">
-                <input id='show_unused_interfaces' type="checkbox" data-label-width="0" data-size="mini" checked="checked" data-on-color="primary" onchange="toggle_unused_interfaces();" title="Show or hide the Unused interfaces"> Unused interfaces
-              </label>
-              <label for="show_disconnected_hosts">
-                <input id='show_disconnected_hosts'  rel="tooltip" type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange="toggle_disconnected_hosts();" title="Show or hide the Disconnected hosts"> Disconnected hosts
-              </label>
-            </div>
-                </div>
 
 
-                <div class="col-md-2 col-xs-6">
-                  <p class="help">Save and restore layouts.</p>
+                <div id="settingsLayouts" class="col-md-2 col-xs-6">
+
              <div class="mt right">
-              <button type="button" class="btn btn-sm btn-kytos-default" data-toggle="modal" data-target="#saveLayout" title="Save this layout">
+              <button type="button" class="btn btn-sm btn-kytos-default" data-toggle="modal" data-target="#saveLayout" data-top="tooltip" title="Save this layout">
                 <i class="fa fa-save fa-3x hidden-lg hidden-md"></i>
                 <i class="fa fa-save hidden-xs hidden-sm"></i>
               </button>
              </div>
              <div class="dropdown" id="savedLayouts">
-                    <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-sm input-kytos-default dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-top="tooltip" title="Restore a layout">
                       <span class="layout-name disabled-option">Restore Layout</span>
                       <span class="caret"></span>
                     </button>
@@ -130,16 +154,31 @@ color:#FFF;
 
 
                 <div class="col-md-2 col-xs-6">
+                  <p class="help">Select the elements to be displayed.</p>
+            <div class="checkbox" data-label-width="0"  data-size="mini">
+              <label for="show_topology">
+                <input id='show_topology' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#topology-chart").toggle()' data-top="tooltip" title="Show or hide the Topology"> Topology
+              </label>
+              <label for="show_unused_interfaces">
+                <input id='show_unused_interfaces' type="checkbox" data-label-width="0" data-size="mini" checked="checked" data-on-color="primary" onchange="toggle_unused_interfaces();" data-top="tooltip" title="Show or hide the Unused interfaces"> Unused interfaces
+              </label>
+              <label for="show_disconnected_hosts">
+                <input id='show_disconnected_hosts'  rel="tooltip" type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange="toggle_disconnected_hosts();" data-top="tooltip" title="Show or hide the Disconnected hosts"> Disconnected hosts
+              </label>
+            </div>
+                </div>
+
+                <div class="col-md-2 col-xs-6">
                   <p class="help">Select which labels you want to show.</p>
             <div class="checkbox" data-label-width="0"  data-size="mini">
-              <div class="dropup mt" id="switch_label">
+              <div class="mt" id="switch_label">
                 <label for='switch_label_dropdown'>
                   Switch:
-                  <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="switch_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <button class="btn btn-sm input-kytos-default dropdown-toggle" type="button" id="switch_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class="layout-name disabled-option">Switch Labels</span>
                     <span class="caret"></span>
                   </button>
-                  <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenu">
                     <li><a href="#" data-value="Name" onclick="toggle_labels('switch', 'name');">Name</a></li>
                     <li><a href="#" data-value="DPID" onclick="toggle_labels('switch', 'dpid');">DPID</a></li>
                     <li><a href="#" data-value="Address" onclick="toggle_labels('switch', 'address');">Address</a></li>
@@ -148,11 +187,11 @@ color:#FFF;
                 </label>
                   <label for='host_label_dropdown'>
                     Host:
-                    <button class="btn btn-sm btn-kytos-default dropdown-toggle" type="button" id="host_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-sm input-kytos-default dropdown-toggle" type="button" id="host_label_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       <span class="layout-name disabled-option">Host Labels</span>
                       <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu">
                       <li><a href="#" data-value="Name" onclick="toggle_labels('host', 'name');">Name</a></li>
                       <li><a href="#" data-value="Mac" onclick="toggle_labels('host', 'mac');">MAC</a></li>
                       <li><a href="#" data-value="Address" onclick="toggle_labels('host', 'address');">Address</a></li>
@@ -183,9 +222,6 @@ color:#FFF;
               </label>
             </div>
 </div><!-- .col-md -->
-
-
-
 
 </div><!-- END CONTROLS KYTOS -->
 

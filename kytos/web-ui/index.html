@@ -201,7 +201,6 @@
              </div>
                 </div>
 
-
                 <div id="settingsDisplays" class="col-md-2 col-xs-6">
                   <p class="help">Select the elements to be displayed.</p>
 
@@ -222,6 +221,19 @@
               </label>
             </div>
                 </div><!-- #settingsDisplays -->
+
+              <div id="settingsMaps" class="col-md-3 col-xs-6">
+                  <p class="help">Select the elements to be displayed.</p>
+            <div class="checkbox" data-label-width="0"  data-size="mini">
+
+   <label for="show_map" id="f279">
+                <input id='show_map' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#background-map").toggle()' data-top="tooltip" title="Show or hide the Map">
+              </label>
+              <label for='map_opacity'>
+                <input id="map_opacity" data-slider-id='map_opacity_slider' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="0.1" data-slider-value="1"/>
+              </label>
+            </div>
+                </div>
 
                 <div class="col-md-2 col-xs-6">
                   <p class="help">Select which labels you want to show.</p>
@@ -267,20 +279,6 @@
 -->
             
            </div>
-
-
-              <div id="settingsMaps" class="col-md-3 col-xs-6">
-                  <p class="help">Select the elements to be displayed.</p>
-            <div class="checkbox" data-label-width="0"  data-size="mini">
-
-   <label for="show_map" id="f279">
-                <input id='show_map' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#background-map").toggle()' data-top="tooltip" title="Show or hide the Map">
-              </label>
-              <label for='map_opacity'>
-                <input id="map_opacity" data-slider-id='map_opacity_slider' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="0.1" data-slider-value="1"/>
-              </label>
-            </div>
-                </div>
 
 </div><!-- END CONTROLS KYTOS -->
 

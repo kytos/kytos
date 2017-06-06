@@ -6,6 +6,7 @@
   index
   administrator/index
   developer/index
+  blueprints/index
   get_involved
   getting_help
   hacking

@@ -1,18 +1,20 @@
+######################
 Updating specification
-#######################
+######################
 
 
-Status:
-#######
+Status
+######
+
 Accepted
 
 
 Note: all the (draft) code is available at https://transfer.sh/ac8jc/version-inheritance.tar.gz.
 
-Problem Description
-===================
+Description
+###########
 
-Suppose there are only two versions: _v1_ and _v2_ in the package _example_.
+Suppose there are only two versions: ``v1`` and ``2`` in the package ``example``.
 The code in this section follows an approach similar to what we tried to do before our current approach. It didn't work well because of the problems to be presented.
 
 .. code:: bash
@@ -33,9 +35,9 @@ The code in this section follows an approach similar to what we tried to do befo
 
 Different Enums
 ---------------
-In the _v2_ specification, a value was changed and a name, added.
+In the ``v2`` specification, a value was changed and a name, added.
 
-File _example/v1/myenum.py_
+File ``example/v1/myenum.py``
 
 .. code:: python
 
@@ -44,7 +46,7 @@ File _example/v1/myenum.py_
   class MyEnum(Enum):
       ENUM_01 = 1
 
-File _example/v2/myenum.py_
+File ``example/v2/myenum.py``
 
 .. code:: python
 
@@ -57,9 +59,9 @@ File _example/v2/myenum.py_
 
 Different class attributes
 --------------------------
-_attr_0_ was removed and _attr_z_, renamed.
+``attr_0`` was removed and ``attr_z``, renamed.
 
-File _example/v1/myclass.py_
+File ``example/v1/myclass.py``
 
 .. code:: python
 
@@ -78,7 +80,7 @@ File _example/v1/myclass.py_
               self.attr_a = MyEnum.ENUM_01
 
 
-File _example/v2/myclass.py_
+File ``example/v2/myclass.py``
 
 .. code:: python
 
@@ -98,7 +100,7 @@ Problems found
 Let's run a simple program to print the instance attributes.
 The only relevant difference is in the second line:
 
-File _v1.py_
+File ``v1.py``
 
 .. code:: python
 
@@ -108,7 +110,7 @@ File _v1.py_
   pprint.pprint(MyClass().__dict__)
 
 
-File _v2.py_
+File ``v2.py``
 
 .. code:: python
 
@@ -119,13 +121,13 @@ File _v2.py_
   print('ENUM_01 is 10 in v2, not 1.')
 
 
-Output of _v1.py_ (run in the same folder)
+Output of ``v1.py`` (run in the same folder)
 
 .. code:: bash
 
   {'attr_a': <MyEnum.ENUM_01: 1>}
 
-Output of _v2.py_ (run in the same folder)
+Output of ``v2.py`` (run in the same folder)
 
 .. code:: bash
 
@@ -134,16 +136,16 @@ Output of _v2.py_ (run in the same folder)
 
 We can notice the following problems:
 
-1. _v2/myclass.py_ imports ``MyEnum`` from ``v2.myenum`` but ``v1.myenum`` is used instead. This happens because the code in _v1/myclass.py_ (parent class) uses ``v1.myenum`` in its constructor;
+1. ``v2/myclass.py`` imports ``MyEnum`` from ``v2.myenum`` but ``v1.myenum`` is used instead. This happens because the code in ``v1/myclass.py`` (parent class) uses ``v1.myenum`` in its constructor;
 2. Some class attributes were rewritten because the child class ``__ordered__`` is empty. The worst case is when no class attributes are changed (== ctrl+c, ctrl+v == difficult to maintain).
 
 Other problems that don't happen in the example:
 
-1. If a class is not changed at all, we must create a file in _v2_ so the user can import from ``example.v2``.
-2. [[Issue 157 | https://github.com/kytos/python-openflow/issues/157]]: currently, OF version is hard coded, so it will be _v0x01_ when extended by _v0x01_ (and not overridden)
+1. If a class is not changed at all, we must create a file in ``v2`` so the user can import from ``example.v2``.
+2. `Issue 157 <https://github.com/kytos/python-openflow/issues/157>`_: currently, OF version is hard coded, so it will be ``v0x01`` when extended by ``v0x01`` (and not overridden)
 
 Solution
-========
+########
 
 This may not be the best approach, but certainly will stimulate better solutions.
 
@@ -152,7 +154,7 @@ Enum manipulation
 
 This is more like a tip than a "solution":
 
-File _v2/myenum.py_
+File ``v2/myenum.py``
 
 .. code:: python
 
@@ -174,9 +176,9 @@ File _v2/myenum.py_
 Class attributes (Problem 2)
 ----------------------------
 
-This approach is simple and requires only a small change in the _MetaStruct_ class:
+This approach is simple and requires only a small change in the ``MetaStruct`` class:
 
-File _v2/myclass.py_
+File ``v2/myclass.py``
 
 .. code:: python
 
@@ -208,7 +210,7 @@ File _v2/myclass.py_
       # One cannot use a method here because this class is not defined yet.
       __ordered__ = update_version(MyClassV1)
 
-Changes in the _MetaStruct_ class of _pyof/foundation/base.py_. Basically, we add one if clause.
+Changes in the ``MetaStruct`` class of ``pyof/foundation/base.py``. Basically, we add one if clause.
 
 .. code:: diff
 
@@ -235,4 +237,4 @@ Changes in the _MetaStruct_ class of _pyof/foundation/base.py_. Basically, we ad
 Parent's Enum (Problem 1)
 -------------------------
 
-This is discussed in [[Version Inheritance]]
+This is discussed in :doc:`EP005`

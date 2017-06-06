@@ -4,7 +4,7 @@ from queue import Queue
 
 from kytos.core.events import KytosEvent
 
-__all__ = ('KytosBuffers')
+__all__ = ('KytosBuffers', )
 
 log = logging.getLogger(__name__)
 

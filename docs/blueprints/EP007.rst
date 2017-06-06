@@ -1,15 +1,15 @@
-###################################
-Blueprint: Enhancement Proposal 007
-###################################
+########################
+Enhancement Proposal 007
+########################
 
 
-Objective:
+Objective
 ##########
 Proposes the OpenFlow handshake process on Kytos.
 
 
-Affected projects:
-==================
+Affected projects
+##################
 
     ::
 
@@ -19,9 +19,9 @@ Affected projects:
 
 
 Description
-============
+###########
 
-The handshake is the process by which the Controller and Switches establish 
+The handshake is the process by which the Controller and Switches establish
 OpenFlow connections between each other. It is based on the OpenFlow
 specification.
 
@@ -40,16 +40,16 @@ While the second stage is implemented by napps/of_core.
 First stage - transport connection
 ----------------------------------
 
-A server listens on a specific address\:port. For TCP connections, a custom 
-``socketserver.TCPServer`` is used. It is responsible for new requests, and 
+A server listens on a specific address\:port. For TCP connections, a custom
+``socketserver.TCPServer`` is used. It is responsible for new requests, and
 connection maintenance through the use of underlying TCP or TLS timeouts.
 
 During this first stage the connection is identified by the tuple
 ``(ip, port)``, and is not yet related to a specific switch object.
 
 When a new TLS or TCP connection is established with ``Kytos``, the server
-instantiates a new ``KytosRequestHandler`` to be used with this connection, 
-and generates a  ``kytos/core.server.newconnection`` event carrying the 
+instantiates a new ``KytosRequestHandler`` to be used with this connection,
+and generates a  ``kytos/core.server.newconnection`` event carrying the
 connection  ``(ip, port)`` identification tuple.
 
 The controller will then respond to the event adding this new connection to
@@ -57,11 +57,11 @@ the controller ``connections`` attribute, and finally generate a
 ``.kytos/core.connection.new`` event.
 
 At this point, the transport connection between the controller and the switch
-is established, and it's maintenance is being managed. All requests from the 
+is established, and it's maintenance is being managed. All requests from the
 connection are being passed on to the ``KytosRequestHandler``
-instance of the connection who should read the packet from the request buffer, 
-and trigger a ``kytos/core.server.message.in``, carrying the whole binary 
-message packet. It is not the server's nor the handler's responsability to 
+instance of the connection who should read the packet from the request buffer,
+and trigger a ``kytos/core.server.message.in``, carrying the whole binary
+message packet. It is not the server's nor the handler's responsability to
 understand/parse the binary message received in the request.
 
 When messages are writen to the connection buffer, the server should trigger
@@ -78,16 +78,16 @@ in the ``kytos/core.server.message.in`` events.
 
 When a Hello packet is received, the app should handle the negotiation process,
 and according to its conclusions, set connection attributes like
-``connection.pack`` and ``connection.unpack`` to the correct parser 
-module/version functions (ex: ``connection.unpack = pyof.v0x01.unpack_message`` 
+``connection.pack`` and ``connection.unpack`` to the correct parser
+module/version functions (ex: ``connection.unpack = pyof.v0x01.unpack_message``
 could be an option) to be used with this connection, and trigger a
-``kytos/of_core.hello_complete``. If the negotiation fails, a 
+``kytos/of_core.hello_complete``. If the negotiation fails, a
 ``kytos/of_core.hello_failed`` event should be triggered.
 
 Listening to those events, other methods would either send a
 ``FeaturesRequest``, or a ``HelloFailed``.
 
-To ensure that the connection is not closed before the ``HelloFailed`` packet 
+To ensure that the connection is not closed before the ``HelloFailed`` packet
 is sent, during the queuing of the ``HelloFailed``, a method could be
 configured to listen to ``kytos/core.server.message.out`` events looking for
 the queued packet, and only then terminate the connection.

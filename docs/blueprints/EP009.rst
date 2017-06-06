@@ -1,35 +1,36 @@
-###################################
-Blueprint: Enhancement Proposal 009
-###################################
+########################
+Enhancement Proposal 009
+########################
 
 
-Objective: 
-##########
+Objective
+#########
 Offer a more high\-level message packing/unpacking interface to the user
 
 
-Affected projects:
-==================
+Affected projects
+#################
+
     ::
 
         python-openflow
         kytos
         kytos-napps
 
-Description:
-============
+Description
+###########
 
 - The user should not have to understand how the message is structured.
 - Only the content of the message is important to the user.
 
-Current Implementation:
------------------------
+Current Implementation
+----------------------
 The returned message from unpacking a binary buffer is an instance of a certain
 class that depends on the message type.
 
 Attributes of the class inherit hierarchical structure of the protocol, even
 when it is not necessary: ``packet.header.version`` instead of simply
-``packet.version``, or ``packet.header.message_type`` instead 
+``packet.version``, or ``packet.header.message_type`` instead
 of ``packet.type``. The header is usually treated separated from its body.
 
 Changes on attributes are allowed but not checked. A Hello instance with a
@@ -44,49 +45,49 @@ simple eases the task of implementing new specifications of the protocol.
 
     match = Match(in_port=80,
                   dl_src='01:02:03:04:05:06',
-                  dl_dst='01:02:03:04:05:06', 
+                  dl_dst='01:02:03:04:05:06',
                   dl_vlan=1,
-                  dl_vlan_pcp=1, 
+                  dl_vlan_pcp=1,
                   dl_type=1,
-                  nw_tos=1, 
+                  nw_tos=1,
                   nw_proto=1,
-                  nw_src='192.168.0.1', 
+                  nw_src='192.168.0.1',
                   nw_dst='192.168.0.1',
-                  tp_src=80, 
+                  tp_src=80,
                   tp_dst=80)
 
     body = FlowStatsRequest(match=_get_match(), table_id=1, out_port=80)
 
     packet = StatsRequest(xid=12,
                            body_type=StatsTypes.OFPST_FLOW,
-                           flags=0, 
+                           flags=0,
                            body=body)
 
 ... and in the end, we still don't know if packet is a compliant packet, and
 the pack method must be explicitly called.
 
-Proposal:
----------
+Proposal
+--------
 
     ::
 
                 d = {
                       'xid': 12,
-                      'flags': 0, 
+                      'flags': 0,
                       'match': {'in_port':80,
                                 'dl_src':'01:02:03:04:05:06',
-                                'dl_dst':'01:02:03:04:05:06', 
+                                'dl_dst':'01:02:03:04:05:06',
                                 'dl_vlan':1,
-                                'dl_vlan_pcp':1, 
+                                'dl_vlan_pcp':1,
                                 'dl_type':1,
-                                'nw_tos':1, 
+                                'nw_tos':1,
                                 'nw_proto':1,
-                                'nw_src':'192.168.0.1', 
+                                'nw_src':'192.168.0.1',
                                 'nw_dst':'192.168.0.1',
-                                'tp_src':80, 
-                                'tp_dst':80       
-                      }, 
-                      'table_id': 1, 
+                                'tp_src':80,
+                                'tp_dst':80
+                      },
+                      'table_id': 1,
                       'out_port': 80
                 }
 
@@ -113,7 +114,7 @@ Proposal:
         + invalid message Exception.
 
         + validation and pack upon instantiation.
-    
+
     - Once it is instantiated, it should not be altered.
 
         + If something needs to be changed, a new instance is created and thus
@@ -121,13 +122,13 @@ Proposal:
           should lead to exception. Making a reply based on a request is shown
           as an example below.
 
-    - Attributes that do not hold content, like the header's length attribute 
+    - Attributes that do not hold content, like the header's length attribute
       for example, should not be exposed to the user.
 
 **Other comments**:
-    - After the OF negotiation, ``this_connection.protocol`` could be 
-      linked to the correct version of pyof needed for this connection. Then 
-      the apps could simply use ``connection.protocol.Packet`` to deal with 
+    - After the OF negotiation, ``this_connection.protocol`` could be
+      linked to the correct version of pyof needed for this connection. Then
+      the apps could simply use ``connection.protocol.Packet`` to deal with
       packets.
 
 
@@ -149,7 +150,7 @@ Proposal:
   ::
 
     # load binary and attributes references:
-    
+
     ref_binary, ref_attributes = raw_packets_refs[4]['hello'][0]
 
   ::
@@ -165,26 +166,26 @@ Proposal:
 
     new_attributes = some_packet.attributes.copy().update({'xid': 2})
 
-    hello_packets = [ 
+    hello_packets = [
         # for testing
         OFPacket(**ref_attributes),
         OFPacket(ref_binary),
-        
+
         # from a dict
         OFPacket(**d),
-        
+
         # from some other packet
         OFPacket(**new_attributes),
 
         # as parameters
-        pyof04.OFPacket(type='hello', 
-                        xid=1, 
+        pyof04.OFPacket(type='hello',
+                        xid=1,
                         version_bitmap=[1, 4])
         # using the proper version for the connection
-        this.connection.protocol.Hello(xid=1, 
+        this.connection.protocol.Hello(xid=1,
                                        version_bitmap=[1, 4])
     ]
-    
+
 Easy pack/unpack testing:
 
 ::

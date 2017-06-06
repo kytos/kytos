@@ -56,7 +56,7 @@ class APIServer:
         Parameters:
             url (string):        String with partner of route. e.g.: '/status'
             function (function): Function pointer used to handle the requests.
-            methods (list):      List of request methods allowed.
+            methods (:class:`list`):  List of request methods allowed.
                                  e.g: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH']
         """
         new_endpoint_url = "/kytos{}".format(url)

@@ -71,117 +71,6 @@
 
 <!-- CONTROLS KYTOS -->
 <div id="controlsKytos" class="row-fluid">
-      
-<style>
-
-/* FIXME: need migrate to SASS */ 
-
-#controlsKytos {
- margin-top: 15px;
- color: #DFDFDF;
-}
-
-#controlsKytos .help {
- display: none; 
- transition: 0.3s;
-}
-
-#controlsKytos label {
- color: #545454;
-}
-
-#settingsLayouts .right {
- float: left;
- margin: 0;
-}
-
-#savedLayouts {
- margin-left: 40px;
-}
-
-.ui-tooltip,
-#settingsLayouts:hover p.help {
- display: block;
- position: absolute;
- color: #FFF;
- background: #000;
- border-radius: 1em;
- padding: 0.5em;
- margin: 0.5em;
- text-align: center;
- opacity: 0.5;
-}
-
-#controlsKytos .btn-kytos-default {
- height: 2em;
- width: 2em;
- padding: 0px;
- border-radius: 1em;
- font-size: 1em;
- color: #EEE;
- border: 1px solid #554077;
- background: #554077;
-}
-
-#settingsLayouts .btn-kytos-default:hover {
- border-color: #FFF;
- color: #FFF;
-}
-
-#settingsLayouts .btn-kytos-default:active {
- border-color: #FFF;
- color: #554077;
- background-color: #FFF;
-}
-
-.input-kytos-default {
- color: #DFDFDF;
- background: #191A1A;
- border: 2px solid #554077;
-}
-
-.input-kytos-default:focus,
-.input-kytos-default:active,
-.input-kytos-default:hover {
- color: #DFDFDF;
- background: #000;
- border: 2px solid #DFDFDF;
-}
-
-#controlsKytos .checkbox { display: inline; }
-
-#controlsKytos .checkbox input[type="checkbox"] {
-  opacity: 0;
-  z-index: 1;
-  cursor: pointer;
-}
-#controlsKytos .checkbox label::before {
- height: 2em;
- width: 2em;
- padding: 0.5em;
- border-radius: 1em;
- font-size: 1em;
- border: 1px solid #554077;
- color: #EEE;
- background: #554077;
-}
-#controlsKytos .checkbox label:hover::before {
- border-color: #FFF;
- color: #FFF;
- background: #554077;
-}
-#controlsKytos .checkbox input[checked="checked"] + label::before {
- border-color: #DFDFDF;
- color: #554077;
- background: #DFDFDF !important;
-}
-
-#f06e::before { font-family: "FontAwesome"; content: "\f06e"; }
-#f071::before { font-family: "FontAwesome"; content: "\f071"; }
-#f1e6::before { font-family: "FontAwesome"; content: "\f1e6"; }
-#f279::before { font-family: "FontAwesome"; content: "\f279"; }
-
-</style>
 
                 <div id="settingsLayouts" class="col-md-2 col-xs-6">
 
@@ -230,7 +119,7 @@
                 <input id='show_map' type="checkbox" data-label-width="0" data-size="mini" checked="checked" onchange='$("#background-map").toggle()' data-top="tooltip" title="Show or hide the Map">
               </label>
               <label for='map_opacity'>
-                <input id="map_opacity" data-slider-id='map_opacity_slider' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="0.1" data-slider-value="1"/>
+                <input id="map_opacity" data-slider-id='map_opacity_slider' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="0.1" data-slider-value="1" data-slider-tooltip-position="bottom" />
               </label>
             </div>
                 </div>

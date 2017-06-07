@@ -1,0 +1,116 @@
+
+#controlsKytos {
+
+ margin-top: 15px;
+ color: #DFDFDF;
+
+  .help {
+    display: none; 
+    transition: 0.3s;
+   }
+
+   label {
+    color: #545454;
+   }
+
+   .btn-kytos-default {
+    height: 2em;
+    width: 2em;
+    padding: 0px;
+    border-radius: 1em;
+    font-size: 1em;
+    color: #EEE;
+    border: 1px solid #554077;
+    background: #554077;
+   }
+
+   .checkbox { display: inline; }
+
+   .checkbox input[type="checkbox"] {
+    opacity: 0;
+    z-index: 1;
+    cursor: pointer;
+   }
+
+   .checkbox label::before {
+    height: 2em;
+    width: 2em;
+    padding: 0.5em;
+    border-radius: 1em;
+    font-size: 1em;
+    border: 1px solid #554077;
+    color: #EEE;
+    background: #554077;
+   }
+
+   .checkbox label:hover::before {
+    border-color: #FFF;
+    color: #FFF;
+    background: #554077;
+   }
+
+   .checkbox input[checked="checked"] + label::before {
+    border-color: #DFDFDF;
+    color: #554077;
+    background: #DFDFDF !important;
+   }
+
+/* Icons to Control Kytos */
+#f06e::before { font-family: "FontAwesome"; content: "\f06e"; }
+#f071::before { font-family: "FontAwesome"; content: "\f071"; }
+#f1e6::before { font-family: "FontAwesome"; content: "\f1e6"; }
+#f279::before { font-family: "FontAwesome"; content: "\f279"; }
+
+   .ui-helper-hidden-accessible {
+    display: none;
+   }
+
+} /* end #controlsKytos */
+
+#settingsLayouts .right {
+ float: left;
+ margin: 0;
+}
+
+#savedLayouts {
+ margin-left: 40px;
+}
+
+.ui-tooltip,
+#settingsLayouts:hover p.help {
+ display: block;
+ position: absolute;
+ color: #FFF;
+ background: #000;
+ border-radius: 1em;
+ padding: 0.5em;
+ margin: 0.5em;
+ text-align: center;
+ opacity: 0.5;
+}
+
+#settingsLayouts .btn-kytos-default:hover {
+ border-color: #FFF;
+ color: #FFF;
+}
+
+#settingsLayouts .btn-kytos-default:active {
+ border-color: #FFF;
+ color: #554077;
+ background-color: #FFF;
+}
+
+.input-kytos-default {
+ color: #DFDFDF;
+ background: #191A1A;
+ border: 2px solid #554077;
+}
+
+.input-kytos-default:focus,
+.input-kytos-default:active,
+.input-kytos-default:hover {
+ color: #DFDFDF;
+ background: #000;
+ border: 2px solid #DFDFDF;
+}
+

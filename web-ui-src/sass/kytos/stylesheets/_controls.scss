@@ -61,10 +61,6 @@
 #f1e6::before { font-family: "FontAwesome"; content: "\f1e6"; }
 #f279::before { font-family: "FontAwesome"; content: "\f279"; }
 
-   .ui-helper-hidden-accessible {
-    display: none;
-   }
-
 } /* end #controlsKytos */
 
 #settingsLayouts .right {
@@ -114,3 +110,6 @@
  border: 2px solid #DFDFDF;
 }
 
+.ui-helper-hidden-accessible {
+ display: none;
+}

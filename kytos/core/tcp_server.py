@@ -1,6 +1,5 @@
 """Basic TCP Server that will listen to port 6633."""
 import logging
-
 from socket import error as SocketError
 from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 from threading import current_thread

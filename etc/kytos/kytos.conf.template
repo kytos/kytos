@@ -23,11 +23,18 @@ debug = False
 # Logging config file. Please specify the full path of logging config file.
 logging = {{ prefix }}/etc/kytos/logging.ini
 
+
+# The listen parameter tells kytos controller to accept incoming requests
+# only in the specified address. Default is 0.0.0.0.
 listen = 0.0.0.0
 
+# The port parameter tells kytos controller to accept and to send
+# openflow packets using TCP protocol. Default is 6633.
 port = 6633
 
-# Port used by api server. Default port is 8181
+# The api_port parameter tells kytos controller to expose a port to accept
+# incoming requests and to send a response from kytos API REST.
+# Default is 8181.
 api_port = 8181
 
 # Where should the controller look for network apps ?

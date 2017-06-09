@@ -80,6 +80,16 @@
       height: 245px;
       padding-bottom : 20px;
       overflow-y: scroll;
+
+      #button_log {
+        display: block;
+        position: absolute;
+        right: 3em;
+        line-height: 2em;
+        background: #000;
+        padding: 0.5em;
+        border-radius: 0.5em;
+      }
     }
 
     .terminal-header {

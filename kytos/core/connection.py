@@ -1,7 +1,7 @@
 """Module with main classes related to Connections."""
 import logging
 from enum import Enum
-from errno import EBADFD, ENOTCONN
+from errno import EBADF, ENOTCONN
 from socket import error as SocketError
 from socket import SHUT_RDWR
 
@@ -93,7 +93,7 @@ class Connection(object):
                 self.socket.shutdown(SHUT_RDWR)
                 self.socket.close()
             except OSError as e:
-                if e.errno not in (ENOTCONN, EBADFD):
+                if e.errno not in (ENOTCONN, EBADF):
                     raise e
             self.socket = None
             log.debug('Connection Closed: %s', self.id)

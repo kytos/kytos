@@ -316,7 +316,8 @@ class Switch(object):
     def is_connected(self):
         """Verify if the switch is connected to a socket."""
         return (self.connection is not None and
-                self.connection.is_connected() and self.is_active())
+                self.connection.is_alive() and
+                self.connection.is_established() and self.is_active())
 
     def update_connection(self, connection):
         """Update switch connection.

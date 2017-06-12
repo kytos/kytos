@@ -79,7 +79,7 @@ class Connection(object):
             buffer (bytes): Message buffer that will be sent.
         """
         try:
-            if self.is_connected():
+            if self.is_alive():
                 self.socket.sendall(buffer)
         except (OSError, SocketError) as exception:
             log.debug('Could not send packet. Exception: %s', exception)
@@ -101,9 +101,13 @@ class Connection(object):
         if self.switch and self.switch.connection is self:
             self.switch.connection = None
 
-    def is_connected(self):
-        """Return True if it is connected.False otherwise."""
+    def is_alive(self):
+        """Return True if the connection socket is alive. False otherwise."""
         return self.socket is not None
+
+    def is_established(self):
+        """Return True if the connection is established. False otherwise."""
+        return self.state == CONNECTION_STATE.ESTABLISHED
 
     def update_switch(self, switch):
         """Update switch with this instance of Connection.

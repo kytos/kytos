@@ -25,11 +25,12 @@ from threading import Thread
 from kytos.core.api_server import APIServer
 from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
+from kytos.core.connection import CONNECTION_STATE
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
 from kytos.core.napps.manager import NAppsManager
-from kytos.core.switch import CONNECTION_STATE, Switch
+from kytos.core.switch import Switch
 from kytos.core.tcp_server import KytosRequestHandler, KytosServer
 from kytos.core.websocket import LogWebSocket
 

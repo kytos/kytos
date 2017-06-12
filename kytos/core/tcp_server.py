@@ -4,8 +4,8 @@ from socket import error as SocketError
 from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 from threading import current_thread
 
+from kytos.core.connection import CONNECTION_STATE, Connection
 from kytos.core.events import KytosEvent
-from kytos.core.switch import CONNECTION_STATE, Connection
 
 __all__ = ('KytosServer', 'KytosRequestHandler')
 
@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 class KytosServer(ThreadingMixIn, TCPServer):
     """Abstraction of a TCPServer to listen to packages from the network.
 
-    The KytosServer will listen on the specified port (defaults to 6633)
+    The KytosServer will listen on the specified port
     for any new TCP request from the network and then instantiate the
     specified RequestHandler to handle the new request.
     It creates a new thread for each Handler.
@@ -29,7 +29,7 @@ class KytosServer(ThreadingMixIn, TCPServer):
 
         Args:
             server_address (tuple): Address which the server is listening.
-                default ( ('127.0.0.1', 80) )
+                example: ('127.0.0.1', 80)
             RequestHandlerClass (RequestHandlerClass):
                 Class that will be instantiated to handle each request.
             controller (KytosController): The controller instance.
@@ -130,7 +130,7 @@ class KytosRequestHandler(BaseRequestHandler):
             content = {'source': self.connection,
                        'new_data': new_data}
             event_name = \
-                f'kytos/core.{self.connection.protocol.name}.data.in'
+                f'kytos/core.{self.connection.protocol.name}.raw.in'
             event = KytosEvent(name=event_name,
                                content=content)
 

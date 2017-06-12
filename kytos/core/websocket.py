@@ -43,7 +43,7 @@ class LogWebSocket:
         self.stream.truncate(0)
 
         if len(self.buff) >= self.buffer_max_size:
-            new_size = self.buffer_max_size/2
+            new_size = int(self.buffer_max_size/2)
             self.buff = self.buff[new_size:]
 
     def handle_messages(self, json):

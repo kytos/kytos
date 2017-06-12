@@ -25,12 +25,13 @@ from threading import Thread
 from kytos.core.api_server import APIServer
 from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
+from kytos.core.connection import CONNECTION_STATE
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.switch import Switch
-from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
+from kytos.core.tcp_server import KytosRequestHandler, KytosServer
 from kytos.core.websocket import LogWebSocket
 
 __all__ = ('Controller',)
@@ -178,7 +179,7 @@ class Controller(object):
         self.log.info("Starting Kytos - Kytos Controller")
         self.server = KytosServer((self.options.listen,
                                    int(self.options.port)),
-                                  KytosOpenFlowRequestHandler,
+                                  KytosRequestHandler,
                                   self)
 
         raw_event_handler = self.raw_event_handler
@@ -366,10 +367,22 @@ class Controller(object):
 
             message = triggered_event.content['message']
             destination = triggered_event.destination
-            if destination:
-                destination.send(message.pack())
+            if (destination and
+                    not destination.state == CONNECTION_STATE.FINISHED):
+                packet = message.pack()
+                destination.send(packet)
+                self.log.debug('Connection %s: OUT OFP, ' +
+                               'version: %s, type: %s, xid: %s',
+                               destination.id,
+                               message.header.version,
+                               message.header.message_type,
+                               message.header.xid)
+                self.log.debug(packet.hex())
                 self.notify_listeners(triggered_event)
                 self.log.debug("MsgOutEvent handler called")
+            else:
+                self.log.info(
+                    "connection closed. Cannot send message")
 
     def app_event_handler(self):
         """Handle app events.

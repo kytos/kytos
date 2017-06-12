@@ -4,38 +4,32 @@ from socket import error as SocketError
 from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 from threading import current_thread
 
-from pyof.v0x01.common.header import Header, Type
-
+from kytos.core.connection import CONNECTION_STATE, Connection
 from kytos.core.events import KytosEvent
-from kytos.core.switch import Connection
 
-__all__ = ('KytosServer', 'KytosOpenFlowRequestHandler')
+__all__ = ('KytosServer', 'KytosRequestHandler')
 
 log = logging.getLogger(__name__)
 
 
 class KytosServer(ThreadingMixIn, TCPServer):
-    """Abstraction a TCPServer to listen packages from the network.
+    """Abstraction of a TCPServer to listen to packages from the network.
 
-    This is a TCP Server that will be listening on the specific port
-    (defaults to 6633) for any package that comes from the network and then
-    stabilishes the socket connection to the devices (switches) when needed,
-    considering a thread per connection and keeping the connection alive.
+    The KytosServer will listen on the specified port
+    for any new TCP request from the network and then instantiate the
+    specified RequestHandler to handle the new request.
+    It creates a new thread for each Handler.
     """
 
-    # daemon_threads = True
     allow_reuse_address = True
     main_threads = {}
 
-    def __init__(self, server_address, RequestHandlerClass,
-                 # Change after definitions on #62
-                 # controller_put_raw_event):
-                 controller):
-        """Constructor of KytosServer receive the parameters below.
+    def __init__(self, server_address, RequestHandlerClass, controller):
+        """Constructor of KytosServer.
 
-        Parameters:
+        Args:
             server_address (tuple): Address which the server is listening.
-                default ( ('127.0.0.1', 80) )
+                example: ('127.0.0.1', 80)
             RequestHandlerClass (RequestHandlerClass):
                 Class that will be instantiated to handle each request.
             controller (KytosController): The controller instance.
@@ -43,13 +37,10 @@ class KytosServer(ThreadingMixIn, TCPServer):
         """
         super().__init__(server_address, RequestHandlerClass,
                          bind_and_activate=False)
-        # Registering the register_event 'endpoint' on the server to be
-        #   accessed on the RequestHandler
         self.controller = controller
-        # self.controller_put_raw_event = controller_put_raw_event
 
     def serve_forever(self, poll_interval=0.5):
-        """Handle requests until an explicit shutdown() request."""
+        """Handle requests until an explicit shutdown() is called."""
         try:
             self.server_bind()
             self.server_activate()
@@ -57,120 +48,109 @@ class KytosServer(ThreadingMixIn, TCPServer):
                      self.server_address[1])
             super().serve_forever(poll_interval)
         except Exception:
-            log.error("Maybe you have already a Kytos instance.")
-            log.error('Failed to start Kytos daemon.')
+            log.error('Failed to start Kytos TCP Server.')
             self.server_close()
             raise
 
 
-class KytosOpenFlowRequestHandler(BaseRequestHandler):
+class KytosRequestHandler(BaseRequestHandler):
     """The socket/request handler class for our controller.
 
-    It is instantiated once per connection between each switche and the
+    It is instantiated once per connection between each switch and the
     controller.
-    The setup class will dispatch a KytosEvent (SwitchUp?) on the controller,
-    that will be processed by the Controller Core (or a Core App).
-    The finish class will close the connection and dispatch a KytonEvents
-    (SwitchDown?) on the controller. Or this method will be called by the
-    handler of this (SwitchDown) event?
+    The setup method will dispatch a KytosEvent (kytos/core.connection.new) on
+    the controller, that will be processed by a Core App.
+    The finish method will close the connection and dispatch a KytonEvents
+    (kytos/core.connection.closed) on the controller.
     """
 
-    def setup(self):
-        """Method used to create a new connection with client.
+    known_ports = {
+        6633: 'openflow'
+    }
 
-        This method builds a new connection, makes a new KytosEvent named
-        'kytos/core.connection.new' and put this in a raw buffer.
+    def __init__(self, request, client_address, server):
+        """Initialize the request handler."""
+        super().__init__(request, client_address, server)
+        self.connection = None
+
+    def setup(self):
+        """Method used to setup the new connection.
+
+        This method builds a new controller Connection, and places a
+        'kytos/core.connection.new' KytosEvent in the app buffer.
         """
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
 
-        self.connection = Connection(self.ip, self.port, self.request)
-        self.request.settimeout(30)
-        self.exception = None
-        self.holded_events = []
-
-        event = KytosEvent(name='kytos/core.connection.new',
-                           content={'source': self.connection})
-
-        self.server.controller.buffers.raw.put(event)
         log.info("New connection from %s:%s", self.ip, self.port)
 
-    def handle(self):
-        """Handle each request generically and put that in a raw event buffer.
+        self.connection = Connection(self.ip, self.port, self.request) # noqa
+        server_port = self.server.server_address[1]
+        if server_port in self.known_ports:
+            protocol_name = self.known_ports[server_port]
+        else:
+            protocol_name = f'{server_port:04d}'
+        self.connection.protocol.name = protocol_name
 
-        This method read the Header of openflow package, read the binary data,
-        then create a new KytosEvent and put this in a raw event buffer.
+        self.request.settimeout(30)
+        self.exception = None
+
+        event_name = \
+            f'kytos/core.{self.connection.protocol.name}.connection.new'
+        event = KytosEvent(name=event_name,
+                           content={'source': self.connection})
+
+        self.server.controller.buffers.app.put(event)
+
+    def handle(self):
+        """Handle each request and places its data in the raw event buffer.
+
+        This method loops reading the binary data from the connection socket,
+        and placing a 'kytos/core.messages.new' KytosEvent in the raw event
+        buffer.
         """
         curr_thread = current_thread()
-        header_len = 8
+        MAX_SIZE = 2**16
         while True:
-            header = Header()
-            binary_data, raw_header = b'', b''
             try:
-                while len(raw_header) < header_len:
-                    remaining = header_len - len(raw_header)
-                    raw_header += self.request.recv(remaining)
-                    if not raw_header:
-                        break
-            except (InterruptedError, ConnectionResetError) as exception:
+                new_data = self.request.recv(MAX_SIZE)
+            except (SocketError, OSError, InterruptedError,
+                    ConnectionResetError) as exception:
                 self.exception = exception
+                log.debug('Socket handler exception while reading: %s',
+                          exception)
                 break
-            else:
-                if not raw_header:
-                    break
+            if new_data == b'':
+                self.exception = 'Request closed by client.'
+                break
 
-            log.debug("New message from %s:%s at thread %s", self.ip,
+            log.debug("New data from %s:%s at thread %s", self.ip,
                       self.port, curr_thread.name)
 
-            header.unpack(raw_header)
-            body_len = header.length - header_len
-            log.debug('Reading the binary_data')
-            try:
-                while len(binary_data) < body_len:
-                    remaining = body_len - len(binary_data)
-                    binary_data += self.request.recv(remaining)
-            except (SocketError, OSError, ConnectionResetError) as exception:
-                self.exception = exception
-                break
-
             content = {'source': self.connection,
-                       'header': header,
-                       'binary_data': binary_data}
-
-            event = KytosEvent(name='kytos/core.messages.openflow.new',
+                       'new_data': new_data}
+            event_name = \
+                f'kytos/core.{self.connection.protocol.name}.raw.in'
+            event = KytosEvent(name=event_name,
                                content=content)
 
-            self.send_event(event)
-
-    def send_event(self, event):
-        """Put the event on the buffer or save it for later."""
-        if self.connection.switch is None:
-            message_type = event.content.get('header').message_type
-            if (message_type == Type.OFPT_HELLO or
-                    message_type == Type.OFPT_FEATURES_REPLY):
-                self.server.controller.buffers.raw.put(event)
-            else:
-                self.holded_events.append(event)
-        else:
-            while self.holded_events:
-                holded_event = self.holded_events.pop(0)
-                self.server.controller.buffers.raw.put(holded_event)
             self.server.controller.buffers.raw.put(event)
 
     def finish(self):
         """Method is called when the client connection is finished.
 
-        When this method is called the request is closed, a new KytosEvent is
-        built with kytos/core.connection.lost name and put this in a app
-        buffer.
+        This method closes the connection socket and generates a
+        'kytos/core.connection.lost' KytosEvent in the App buffer.
         """
-        log.info("Client %s:%s disconnected. Reason: %s",
+        log.info("Connection lost with Client %s:%s. Reason: %s",
                  self.ip, self.port, self.exception)
-        self.request.close()
+        self.connection.state = CONNECTION_STATE.FINISHED
+        self.connection.close()
         content = {'source': self.connection}
         if self.exception:
             content['exception'] = self.exception
-
-        event = KytosEvent(name='kytos/core.connection.lost',
+        event_name = \
+            f'kytos/core.{self.connection.protocol.name}.connection.lost'
+        event = KytosEvent(name=event_name,
                            content=content)
         self.server.controller.buffers.app.put(event)

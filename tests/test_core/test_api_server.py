@@ -1,6 +1,5 @@
 """APIServer tests."""
 
-import logging
 import unittest
 
 from kytos.core.api_server import APIServer
@@ -49,14 +48,6 @@ class TestAPIServer(unittest.TestCase):
         actual_endpoints = self.api_server.rest_endpoints
         self.assertListEqual(sorted(expected_endpoints),
                              sorted(actual_endpoints))
-
-    def test_set_debug(self):
-        """Test whether set_debug is setting debug level."""
-        self.api_server.set_debug(True)
-        self.assertEqual(self.api_server.log.level, logging.DEBUG)
-
-        self.api_server.set_debug(False)
-        self.assertEqual(self.api_server.log.level, logging.WARNING)
 
     @staticmethod
     def __custom_endpoint():

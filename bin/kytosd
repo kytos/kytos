@@ -67,7 +67,9 @@ if __name__ == '__main__':
         address = controller.server.server_address[0]
         port = controller.server.server_address[1]
         banner1 += " tcp://{}:{}\n".format(address, port)
-        banner1 += "WEB UI........: http://0.0.0.0:8181/"
+
+        api_port = controller.api_server.port
+        banner1 += "WEB UI........: http://{}:{}/".format(address, api_port)
 
         cfg = Config()
         cfg.TerminalInteractiveShell.autocall = 2

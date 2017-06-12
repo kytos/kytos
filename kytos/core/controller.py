@@ -101,7 +101,8 @@ class Controller(object):
         self.log = None
 
         #: API Server used to expose rest endpoints.
-        self.api_server = APIServer(__name__, self.options.debug)
+        self.api_server = APIServer(__name__, self.options.listen,
+                                    self.options.api_port)
 
         self.register_kytos_endpoints()
 
@@ -120,7 +121,7 @@ class Controller(object):
 
     def enable_logs(self):
         """Method used to register kytos log and enable the logs."""
-        LogManager.load_config_file(self.options.logging)
+        LogManager.load_logging_file(self.options.logging, self.options.debug)
         self.log = logging.getLogger(__name__)
 
     def start(self, restart=False):
@@ -195,8 +196,7 @@ class Controller(object):
         thrds = {'tcp_server': Thread(name='TCP server',
                                       target=self.server.serve_forever),
                  'api_server': Thread(name='API server',
-                                      target=self.api_server.run,
-                                      args=['0.0.0.0', 8181]),
+                                      target=self.api_server.run),
                  'raw_event_handler': Thread(name='RawEvent Handler',
                                              target=raw_event_handler),
                  'msg_in_event_handler': Thread(name='MsgInEvent Handler',

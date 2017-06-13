@@ -118,6 +118,39 @@ class TestLogManager(LogTester):
         LogManager.load_config_file('existent_file')
         self._assert_string_in_logs('Using default Python logging config')
 
+    @patch('kytos.core.logs.LogManager._PARSER')
+    @patch('kytos.core.logs.Path')
+    @patch('kytos.core.logs.config')
+    def test_set_debug_mode(self, config, Path, parser):
+        """Test set_debug_mode with debug = True."""
+        Path.return_value.exists.return_value = True
+        config.fileConfig.side_effect = OSError
+
+        self._mock_logger()
+        LogManager.load_config_file('existent_file', debug=True)
+
+        expected_message = 'Setting log configuration with debug mode.'
+        self._assert_string_in_logs(expected_message)
+
+        parser.set('logger_root', 'level', 'DEBUG')
+        parser.set.assert_called_with('logger_root', 'level', 'DEBUG')
+
+        parser.set('logger_api_server', 'level', 'DEBUG')
+        parser.set.assert_called_with('logger_api_server', 'level', 'DEBUG')
+
+    @patch('kytos.core.logs.LogManager._PARSER')
+    @patch('kytos.core.logs.Path')
+    @patch('kytos.core.logs.config')
+    def test_set_debug_mode_with_false(self, config, Path, parser):
+        """Test set_debug_mode with debug = False."""
+        Path.return_value.exists.return_value = True
+        config.fileConfig.side_effect = OSError
+
+        self._mock_logger()
+        LogManager.load_config_file('existent_file', debug=False)
+
+        parser.set.assert_not_called()
+
 
 class TestNAppLog(LogTester):
     """Test the log used by NApps."""

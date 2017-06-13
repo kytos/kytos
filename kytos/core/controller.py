@@ -14,6 +14,7 @@ Basic usage:
     controller.start()
 """
 import atexit
+import json
 import logging
 import os
 import re
@@ -25,12 +26,13 @@ from threading import Thread
 from kytos.core.api_server import APIServer
 from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
+from kytos.core.connection import CONNECTION_STATE
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.switch import Switch
-from kytos.core.tcp_server import KytosOpenFlowRequestHandler, KytosServer
+from kytos.core.tcp_server import KytosRequestHandler, KytosServer
 
 __all__ = ('Controller',)
 
@@ -88,11 +90,17 @@ class Controller(object):
         #: The key is the switch dpid, while the value is a Switch object.
         self.switches = {}  # dpid: Switch()
 
+        #: datetime.datetime: Time when the controller finished starting.
         self.started_at = None
 
+        #: logging.Logger: Logger instance used by Kytos.
         self.log = None
 
-        self.api_server = APIServer(__name__, self.options.debug)
+        #: API Server used to expose rest endpoints.
+        self.api_server = APIServer(__name__, self.options.listen,
+                                    self.options.api_port)
+
+        self.register_kytos_endpoints()
 
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
@@ -101,7 +109,7 @@ class Controller(object):
 
     def enable_logs(self):
         """Method used to register kytos log and enable the logs."""
-        LogManager.load_config_file(self.options.logging)
+        LogManager.load_config_file(self.options.logging, self.options.debug)
         LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
 
@@ -162,12 +170,10 @@ class Controller(object):
         Starts a thread for each buffer handler.
         Load the installed apps.
         """
-        self.api_server.register_kytos_routes()
-        self.api_server.register_web_ui()
         self.log.info("Starting Kytos - Kytos Controller")
         self.server = KytosServer((self.options.listen,
                                    int(self.options.port)),
-                                  KytosOpenFlowRequestHandler,
+                                  KytosRequestHandler,
                                   self)
 
         raw_event_handler = self.raw_event_handler
@@ -178,8 +184,7 @@ class Controller(object):
         thrds = {'tcp_server': Thread(name='TCP server',
                                       target=self.server.serve_forever),
                  'api_server': Thread(name='API server',
-                                      target=self.api_server.run,
-                                      args=['0.0.0.0', 8181]),
+                                      target=self.api_server.run),
                  'raw_event_handler': Thread(name='RawEvent Handler',
                                              target=raw_event_handler),
                  'msg_in_event_handler': Thread(name='MsgInEvent Handler',
@@ -202,9 +207,30 @@ class Controller(object):
         self.load_napps()
         self.started_at = now()
 
+    def register_kytos_endpoints(self):
+        """Register all rest endpoint served by kytos.
+
+        -   Register APIServer endpoints
+        -   Register WebUI endpoints
+        -   Register '/kytos/config' endpoint
+        """
+        self.api_server.register_api_server_routes()
+        self.api_server.register_web_ui()
+        self.api_server.register_rest_endpoint('/config/',
+                                               self.configuration_endpoint,
+                                               methods=['GET'])
+
     def register_rest_endpoint(self, *options, **kwargs):
         """Method used to return the endpoints registered by APIServer."""
         self.api_server.register_rest_endpoint(*options, **kwargs)
+
+    def configuration_endpoint(self):
+        """Return the configuration options used by Kytos.
+
+        Returns:
+            string: Json with current configurations used by kytos.
+        """
+        return json.dumps(self.options.__dict__)
 
     def restart(self, graceful=True):
         """Restart Kytos SDN Controller.
@@ -355,10 +381,22 @@ class Controller(object):
 
             message = triggered_event.content['message']
             destination = triggered_event.destination
-            if destination:
-                destination.send(message.pack())
+            if (destination and
+                    not destination.state == CONNECTION_STATE.FINISHED):
+                packet = message.pack()
+                destination.send(packet)
+                self.log.debug('Connection %s: OUT OFP, ' +
+                               'version: %s, type: %s, xid: %s',
+                               destination.id,
+                               message.header.version,
+                               message.header.message_type,
+                               message.header.xid)
+                self.log.debug(packet.hex())
                 self.notify_listeners(triggered_event)
                 self.log.debug("MsgOutEvent handler called")
+            else:
+                self.log.info(
+                    "connection closed. Cannot send message")
 
     def app_event_handler(self):
         """Handle app events.

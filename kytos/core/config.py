@@ -128,4 +128,9 @@ class KytosConfig():
         """
         options = self.parser.parse_args(argv)
         options.napps_repositories = json.loads(options.napps_repositories)
+        options.debug = True if options.debug in ['True', True] else False
+        options.daemon = True if options.daemon in ['True', True] else False
+        options.port = int(options.port)
+        options.api_port = int(options.api_port)
+
         return options

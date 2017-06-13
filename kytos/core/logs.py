@@ -16,7 +16,7 @@ class LogManager:
     _DEFAULT_FMT = 'formatter_console'
 
     @classmethod
-    def load_config_file(cls, config_file):
+    def load_config_file(cls, config_file, debug='False'):
         """Load log configuration file.
 
         Check whether file exists and if there's an OSError, try removing
@@ -27,11 +27,19 @@ class LogManager:
         """
         if Path(config_file).exists():
             cls._PARSER.read(config_file)
+            cls._set_debug_mode(debug)
             cls._use_config_file(config_file)
         else:
             log.warning('Log config file "%s" does not exist. Using default '
                         'Python logging configuration.',
                         config_file)
+
+    @classmethod
+    def _set_debug_mode(cls, debug=False):
+        if debug is True:
+            cls._PARSER.set('logger_root', 'level', 'DEBUG')
+            cls._PARSER.set('logger_api_server', 'level', 'DEBUG')
+            log.info('Setting log configuration with debug mode.')
 
     @classmethod
     def _use_config_file(cls, config_file):

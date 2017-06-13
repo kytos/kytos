@@ -1,15 +1,17 @@
-#############################
-Blueprint: OpenFlow Handshake
-#############################
+##################
+OpenFlow Handshake
+##################
 
 
-Status:
-#######
+Status
+######
+
 Accepted
 
 
 Abstract
-========
+########
+
 This blueprint describes the *OpenFlow* handshake process on **Kytos**.
 
 The handshake is the process in which the Controller and the Switches establishes the connection between each other.
@@ -17,7 +19,7 @@ The handshake is the process in which the Controller and the Switches establishe
 It will follow the OpenFlow specification, but internally **Kytos** has some specificities.
 
 Description
-============
+###########
 
 Internally **Kytos** will represent each switch with a ``Switch`` object. This object will be identified by the switch ``dpid``.
 
@@ -54,7 +56,8 @@ While we do not receive the ``FeaturesReply`` message with the switch ``dpid``, 
 The expected behavior is that the first 8-bytes packet that the controller will receive on a new connection is a OpenFlow ``Hello`` message, that will trigger the handshake process. This ``Hello`` message will generate a KytosMessageInHello event, that will be handled by the ``hello_in`` controller method. It will check the OpenFlow version and generate a ``KytosMessageOutHello`` event. This event will be consumed and a Hello message will be sent to the switch, and also the ``send_features_request`` method on the controller will be triggered by this ``KytosMessageOutHello`` event, generating a ``KytosMessageOutFeaturesRequest`` event that will send the ``FeaturesRequest`` message to the switch.
 
 Second stage
------------
+------------
+
 Then, the expected is that the switch reply to this ``FeaturesRequest`` with a ``FeaturesReply`` message, that will generate a ``KytosMessageInFeaturesReply`` event. This event will be consumed on the ``features_reply_in`` method from the controller.
 
 The ``features_reply_in`` method will create a new instance of ``Switch``, call the ``add_new_switch`` controller method, passing the created object as argument. This method will add the switch dpid on the right ``connections`` item, and will also add the switch on the ``switches`` attribute. The ``features_reply_in`` will also generate three new events:
@@ -63,6 +66,11 @@ The ``features_reply_in`` method will create a new instance of ``Switch``, call 
 * ``KytosMessageOutSetConfig`` event (With the default directives to Delete/Clean the switch configs)
 * ``KytosMessageOutBarrierRequest`` As a "checkpoint" of the end of the handshake process.
 
+Solution
+########
+
+
 Related Issues
-==========
+##############
+
 https://github.com/kytos/kytos/issues/49

@@ -1,15 +1,17 @@
-#####################################
-Blueprint: Multipart Request Creation
-#####################################
+##########################
+Multipart Request Creation
+##########################
 
 
-Status:
-#######
+Status
+######
+
 Proposed
 
 
-Abstract:
-#########
+Abstract
+########
+
 The process of creating a Multipart Request using the lib involves, as it is
 now, many steps. It is designed to follow the specification for the creation of
 a common Request message and inserting a type and body in it. This blueprint
@@ -17,8 +19,8 @@ proposes an option for the NApp developer to create Multipart Requests in an
 easier way, given types and bodies are directly related and standardized.
 
 
-Affected projects:
-==================
+Affected projects
+#################
 
     ::
 
@@ -27,6 +29,7 @@ Affected projects:
 
 Description
 ###########
+
 Although MultipartReplies are created by the switch and need only to be
 unpacked correctly, the process of creating multipart requests now involves:
 
@@ -43,8 +46,8 @@ the specific request needed.
 Multipart Requests fall in one of three cases. For each case, the needed steps
 to create and pack requests are shown below:
 
-Case 1: Requests with empty body:
-=================================
+Case 1: Requests with empty body
+================================
 
 .. code:: python
 
@@ -54,8 +57,8 @@ Case 1: Requests with empty body:
   request = MultipartRequest(multipart_type = MTypes.EXAMPLE_EMPTY_BODY)
   data = request.pack()
 
-Case 2: Requests with a single struct body:
-===========================================
+Case 2: Requests with a single struct body
+==========================================
 
 .. code:: python
 
@@ -69,8 +72,8 @@ Case 2: Requests with a single struct body:
   request.body = specific_req
   data = request.pack()
 
-Case 3: Requests with an array of structs as body:
-==================================================
+Case 3: Requests with an array of structs as body
+=================================================
 
 .. code:: python
 
@@ -93,8 +96,8 @@ Solution
 The ideal solution would be simplifying the creation for each case, making the
 Multipart common message and type transparent to the NApp developer, like in:
 
-Case 1: Requests with empty body:
-=================================
+Case 1: Requests with empty body
+================================
 
 .. code:: python
 
@@ -103,8 +106,8 @@ Case 1: Requests with empty body:
   request = SpecificRequestBody()
   data = request.pack()
 
-Case 2: Requests with a single struct body:
-===========================================
+Case 2: Requests with a single struct body
+==========================================
 
 .. code:: python
 
@@ -113,8 +116,8 @@ Case 2: Requests with a single struct body:
   request = SpecificRequestBody(some_data=1)
   data = request.pack()
 
-Case 3: Requests with an array of structs as body:
-==================================================
+Case 3: Requests with an array of structs as body
+=================================================
 
 .. code:: python
 
@@ -128,11 +131,7 @@ Cases 1 and 2 are clear and straightforward regarding implementation, but case
 3 needs special care.
 
 
-Whiteboard
-##########
-
-
 Related Issues
-======
+##############
 
 - https://github.com/kytos/python-openflow/issues/308

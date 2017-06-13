@@ -1,5 +1,3 @@
-.. _kyco-napps-management:
-
 NApps management
 ----------------
 

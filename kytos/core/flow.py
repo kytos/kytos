@@ -289,7 +289,7 @@ class OutputAction(FlowAction):
         """Return the (unambiguous) representation of the object.
 
         Returns:
-            id (string): string to represent the instance object.
+            string: string to represent the instance object.
         """
         hash_result = hashlib.md5()
         hash_result.update(str(self.as_dict()).encode('utf-8'))

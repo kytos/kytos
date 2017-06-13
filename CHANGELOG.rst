@@ -25,6 +25,8 @@ Fixed
   - Fixed memory and CPU usage
 - Now Kytos can register endpoints with different methods for the same URL.
 - Now it's possible to start in debug mode using the command kytosd -D
+- Fix starting debug mode using the command kytos -D
+- Removed sphinx warnings and improved documentation to have blueprints links.
 
 Security
 ========

@@ -11,4 +11,4 @@ lorem ipsum
   :hidden:
 
   listened_events
-  ../kyco
+  ../kytos

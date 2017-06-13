@@ -1,14 +1,13 @@
 """Module with main classes related to Switches."""
 import json
 import logging
-from socket import error as SocketError
 
 from pyof.v0x01.common.phy_port import PortFeatures
 
 from kytos.core.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
 from kytos.core.helpers import now
 
-__all__ = ('Interface', 'Connection', 'Switch')
+__all__ = ('Interface', 'Switch')
 
 log = logging.getLogger(__name__)
 
@@ -189,67 +188,6 @@ class Interface(object):
             json (string): Json filled with interface attributes.
         """
         return json.dumps(self.as_dict())
-
-
-class Connection(object):
-    """Connection class to abstract a network connections."""
-
-    def __init__(self, address, port, socket, switch=None):
-        """The constructor method have the below parameters.
-
-        Parameters:
-          address (HWAddress): Source address.
-          port (int): Port number.
-          socket (socket): socket.
-          switch (:class:`~.core.switch.Switch`): switch with this connection.
-        """
-        self.address = address
-        self.port = port
-        self.socket = socket
-        self.switch = switch
-
-    @property
-    def id(self):
-        """Return id from Connection instance.
-
-        Returns:
-            id (string): Connection id.
-        """
-        return (self.address, self.port)
-
-    def send(self, buffer):
-        """Send a buffer message using the socket from the connection instance.
-
-        Parameters:
-            buffer (bytes): Message buffer that will be sent.
-        """
-        try:
-            if self.is_connected():
-                self.socket.sendall(buffer)
-        except (OSError, SocketError):
-            self.close()
-
-    def close(self):
-        """Close the socket from connection instance."""
-        if self.socket:
-            self.socket.close()
-            self.socket = None
-
-        if self.switch and self.switch.connection is self:
-            self.switch.connection = None
-
-    def is_connected(self):
-        """Return True if it is connected.False otherwise."""
-        return self.socket is not None
-
-    def update_switch(self, switch):
-        """Update switch with this instance of Connection.
-
-        Parameters:
-          switch (:class:`~.core.switch.Switch`): switch instance.
-        """
-        self.switch = switch
-        self.switch.connection = self
 
 
 class Switch(object):
@@ -507,7 +445,7 @@ class Switch(object):
         return {'id': self.id,
                 'name': self.id,
                 'dpid': self.dpid,
-                'connection':  connection,
+                'connection': connection,
                 'ofp_version': self.ofp_version,
                 'type': 'switch',
                 'manufacturer': self.description.get('manufacturer', ''),

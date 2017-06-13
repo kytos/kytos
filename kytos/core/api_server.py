@@ -12,38 +12,30 @@ from flask_socketio import SocketIO
 class APIServer:
     """Api server used to provide Kytos Controller routes."""
 
-    def __init__(self, app_name, debug=False):
+    def __init__(self, app_name, listen='0.0.0.0', port=8181):
         """Constructor of APIServer.
 
         This method will instantiate a server with SocketIO+Flask.
 
         Parameters:
             app_name(string): String representing a App Name
+            listen (string): host name used by api server instance
+            port (int): Port number used by api server instance
         """
         dirname = os.path.dirname(os.path.abspath(__file__))
         self.flask_dir = os.path.join(dirname, '../web-ui')
         self.log = logging.getLogger('werkzeug')
-        self.log.setLevel(logging.WARNING)
-        self.set_debug(debug)
+
+        self.listen = listen
+        self.port = port
 
         self.app = Flask(app_name, root_path=self.flask_dir)
         self.server = SocketIO(self.app, async_mode='threading')
 
-    def set_debug(self, debug):
-        """Method used to set debug mode.
-
-        Args:
-            debug(bool): Boolean value to turn on/off debug mode.
-        """
-        if debug:
-            self.log.setLevel(logging.DEBUG)
-        else:
-            self.log.setLevel(logging.WARNING)
-
-    def run(self, *args, **kwargs):
-        """Method used to run the APIServer."""
+    def run(self):
+        """Run the Flask API Server."""
         try:
-            self.server.run(self.app, *args, **kwargs)
+            self.server.run(self.app, self.listen, self.port)
         except OSError as e:
             msg = "Couldn't start API Server: {}".format(e)
             self.log.critical(msg)
@@ -86,30 +78,29 @@ class APIServer:
         """Return string with routes registered by Api Server."""
         return [x.rule for x in self.app.url_map.iter_rules()]
 
-    def register_kytos_routes(self):
+    def register_api_server_routes(self):
         """Register initial routes from kytos using ApiServer.
 
-        Initial routes are: ['/kytos/status', '/kytos/shutdown']
+        Initial routes are: ['/kytos/status/', '/kytos/shutdown/']
         """
         if '/kytos/status/' not in self.rest_endpoints:
-            self.app.add_url_rule('/kytos/status/', self.status_api.__name__,
-                                  self.status_api, methods=['GET'])
+            self.register_rest_endpoint('/status/',
+                                        self.status_api, methods=['GET'])
 
         if '/kytos/shutdown' not in self.rest_endpoints:
-            self.app.add_url_rule('/kytos/shutdown',
-                                  self.shutdown_api.__name__,
-                                  self.shutdown_api, methods=['GET'])
+            self.register_rest_endpoint('/shutdown/',
+                                        self.shutdown_api, methods=['GET'])
 
     @staticmethod
     def status_api():
-        """Display json with kytos status using the route '/kytos/status'."""
+        """Display json with kytos status using the route '/kytos/status/'."""
         return '{"response": "running"}', 201
 
-    @staticmethod
-    def stop_api_server():
+    def stop_api_server(self):
         """Method used to send a shutdown request to stop Api Server."""
         try:
-            urlopen('http://127.0.0.1:8181/kytos/shutdown')
+            url = 'http://{}:{}/kytos/shutdown'.format('127.0.0.1', self.port)
+            urlopen(url)
         except URLError:
             pass
 
@@ -119,7 +110,8 @@ class APIServer:
         This method must be called by kytos using the method
         stop_api_server, otherwise this request will be ignored.
         """
-        allowed_host = ['127.0.0.1:8181', 'localhost:8181']
+        allowed_host = ['127.0.0.1:'+str(self.port),
+                        'localhost:'+str(self.port)]
         if request.host not in allowed_host:
             return "", 403
 

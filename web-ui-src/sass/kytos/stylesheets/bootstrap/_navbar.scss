@@ -1,18 +1,11 @@
-
-.navbar {
-    min-height: 60px;
-}
-
 .navbar-default .navbar-brand,
 .navbar-default .navbar-brand:focus {
     @include kytos-anim-easing(300ms);
     background-color: $kytos-cover-color;
-    height: 60px;
     padding: 3px 20px;
     font-weight: 400;
     letter-spacing: 10px;
     color: #FFFFFF;
-    width: 200px;
     @media (max-width: $screen-sm-max) {
         width: 100px;
     }
@@ -32,32 +25,29 @@ padding : 14px;
 }
 
 .navbar-brand {
-padding: 0;
-text-align: center!important;
-display: table;
-vertical-align: middle;
-float: left
-}
-.navbar-brand img {
-  margin : 5px auto;
+    padding: 0;
+    text-align: center !important;
+    display: table;
+    vertical-align: middle;
+    float: left
 }
 
 .navbar-default {
     border-bottom: none;
-    background-color: #FFFFFF;
+    background: none;
 }
 
-.left-nav-toggle {
-    float: left;
-    padding: 9px 14px;
+.right-nav-toggle {
+    float: right;
+    padding: 0px 10px;
 }
 
-.left-nav-toggle:hover a {
+.right-nav-toggle:hover a {
     color: $kytos-cover-color;
 }
 
-.left-nav-toggle a {
-    font-size: 30px;
+.right-nav-toggle a {
+    font-size: 20px;
     color: #949ba2;
 }
 
@@ -65,7 +55,7 @@ float: left
     color: #6a727a;
 }
 
-.left-nav-toggle a:hover,
-.left-nav-toggle a:focus {
+.right-nav-toggle a:hover,
+.right-nav-toggle a:focus {
     text-decoration: none;
 }

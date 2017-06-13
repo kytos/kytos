@@ -23,7 +23,7 @@ function scrollBehavior(){
 }
 
 ;(function() {
-  api_led = $('.nav.sidebar .api-status');
+  api_led = $('#statusicons .api-status');
   function update_api_status(){
     $.get(api_status)
       .done(function() {

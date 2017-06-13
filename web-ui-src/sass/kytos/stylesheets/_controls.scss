@@ -1,11 +1,9 @@
 
 #controlsKytos {
  color: #DFDFDF;
- margin-top: 3px;
 
   .help {
     display: none; 
-    transition: 0.3s;
    }
 
    label {
@@ -61,10 +59,6 @@
 
 } /* end #controlsKytos */
 
-#settingsDisplays, #settingsMaps {
- margin-top: 3px;
-}
-
 #settingsLayouts .right {
  float: left;
  margin: 0;
@@ -116,4 +110,15 @@
 
 .ui-helper-hidden-accessible {
  display: none;
+}
+
+.group-kytos {
+ background: rgba(0, 0, 0, 0.5);
+ width: auto;
+ float: left;
+ padding: 4px;
+}
+
+#settingsMaps .group-kytos {
+padding-right: 20px;
 }

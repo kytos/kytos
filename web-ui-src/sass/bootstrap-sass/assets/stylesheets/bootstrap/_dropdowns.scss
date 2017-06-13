@@ -31,7 +31,7 @@
 .dropdown-menu {
   position: absolute;
   top: 100%;
-  left: 0;
+//  left: 0;
   z-index: $zindex-dropdown;
   display: none; // none by default, but block on "open" of the menu
   float: left;

@@ -1,11 +1,12 @@
 .content{
     @include kytos-anim-easing(300ms);
     margin-top: 0;
-    margin-left: 200px;
+//    margin-left: 200px;
     position: relative;
     padding: 0;
     color : #fff;
     @media (max-width: $screen-sm-max) {
-        margin-left: 100px;
+//      margin-left: 100px;
     }
 }
+

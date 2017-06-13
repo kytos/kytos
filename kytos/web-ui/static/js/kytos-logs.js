@@ -3,7 +3,7 @@ var channels = new Set();
 
 ;(function() {
   var max_lines = 50;
-  var ws_led = $('.nav.sidebar .websocket-status');
+  var ws_led = $('#statusicons .websocket-status')
 
   socket.on('connect', on_connect);
   socket.on('disconnect', on_disconnect);

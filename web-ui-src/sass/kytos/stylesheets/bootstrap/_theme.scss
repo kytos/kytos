@@ -5,7 +5,6 @@
  */
 
  body {
-     padding-top: 60px;
      background : #2f323b;
      @include kytos-anim-easing(300ms);
  }
@@ -97,9 +96,9 @@
 
 // Apply the mixin to the buttons
 .back-to-top-button { @include btn-styles($kytos-cover-color); color : #fff;  border-color: transparent; }
-.btn-kytos-default { @include btn-styles($btn-default-bg); color : #000!important; border-color: #ccc; }
-.btn-kytos-primary { @include btn-styles($kytos-cover-color); color: #fff!important;
-  i.fa { color : #fff!important; }
+.btn-kytos-default { @include btn-styles($btn-default-bg); color : #000; border-color: #ccc; }
+.btn-kytos-primary { @include btn-styles($kytos-cover-color); color: #fff;
+  i.fa { color : #fff; }
 }
 .btn-kytos-success { @include btn-styles($emerald); }
 .btn-kytos-info    { @include btn-styles($peter-river); }

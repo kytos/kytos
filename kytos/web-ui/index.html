@@ -114,7 +114,7 @@
               </a>
             </li>
             <li class="nav-middle-spacer">&nbsp;</li>
-            <li class="nav-kytos-api-status">
+	    <li class="nav-kytos-api-status">
               <i class="fa fa-power-off api-status" aria-hidden="true"></i>
               <span class='hidden-sm hidden-xs'>Kytos </span>API
             </li>
@@ -269,7 +269,7 @@
             </div>
             <div class="checkbox" data-label-width="0"  data-size="mini">
               <label for="enable_log">
-                <input id='enable_log' type="checkbox" data-label-width="0" data-size="mini"> Enable Logs
+                <input id='enable_log' type="checkbox" data-label-width="0" data-size="mini" onchange="toggle_log(this.checked)"> Enable Logs
               </label>
             </div>
                 </div>
@@ -294,7 +294,7 @@
     <script src="static/js/vendors/jquery-ui.min.js"></script>
     <script src="static/js/vendors/jquery.mCustomScrollbar.js"></script>
     <script src="static/js/vendors/mapbox-gl.js"></script>
-    <script src="static/js/vendors/socket.io.min.js"></script>
+    <script src="static/js/vendors/socket.io.js"></script>
     <script src="static/js/kytos-settings.js"></script>
     <script src="static/js/kytos-control-panel.js"></script>
     <script src="static/js/kytos-helper.js"></script>

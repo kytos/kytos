@@ -6,7 +6,7 @@ from urllib.error import URLError
 from urllib.request import urlopen
 
 from flask import Flask, request, send_from_directory
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room
 
 
 class APIServer:
@@ -31,6 +31,12 @@ class APIServer:
 
         self.app = Flask(app_name, root_path=self.flask_dir)
         self.server = SocketIO(self.app, async_mode='threading')
+        self._enable_websocket_rooms()
+
+    def _enable_websocket_rooms(self):
+        socket = self.server
+        socket.on_event('join', join_room)
+        socket.on_event('leave', leave_room)
 
     def run(self):
         """Run the Flask API Server."""
@@ -57,16 +63,6 @@ class APIServer:
         if new_endpoint_url not in self.rest_endpoints:
             self.app.add_url_rule(new_endpoint_url, function.__name__,
                                   function, methods=methods)
-
-    def register_websockets(self, websockets):
-        """Method used to register all channels from websockets given."""
-        for websocket in websockets.values():
-            for event, function, namespace in websocket.events:
-                self.register_websocket(event, function, namespace)
-
-    def register_websocket(self, name, function, namespace='/'):
-        """Method used to register websocket channel."""
-        self.server.on_event(name, function, namespace)
 
     def register_web_ui(self):
         """Method used to register routes to the admin-ui homepage."""

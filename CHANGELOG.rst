@@ -21,7 +21,9 @@ Removed
 
 Fixed
 =====
-- Fix start debug mode using the command kytos -D
+- Web interface:
+  - Fixed memory and CPU usage
+- Fix starting debug mode using the command kytos -D
 
 Security
 ========

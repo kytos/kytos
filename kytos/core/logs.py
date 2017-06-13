@@ -2,8 +2,10 @@
 import inspect
 import re
 from configparser import RawConfigParser
-from logging import Formatter, StreamHandler, config, getLogger
+from logging import Formatter, config, getLogger
 from pathlib import Path
+
+from kytos.core.websocket import WebSocketHandler
 
 __all__ = ('LogManager', 'NAppLog')
 log = getLogger(__name__)
@@ -64,13 +66,16 @@ class LogManager:
                         'logging configuration.', config_file)
 
     @classmethod
-    def add_stream_handler(cls, stream):
-        """Output all logs to the given stream.
+    def enable_websocket(cls, socket):
+        """Output logs to a web socket.
 
         Args:
-            stream: Object that supports ``write()`` and ``flush()``.
+            socket: socketio's socket.
+
+        Returns:
+            logging.StreanHandler: Handler with the socket as stream.
         """
-        handler = StreamHandler(stream)
+        handler = WebSocketHandler.get_handler(socket)
         cls.add_handler(handler)
         return handler
 

@@ -64,11 +64,10 @@ class TestLogManager(LogTester):
         LogManager.add_handler(handler)
         handler.setFormatter.assert_called_once()
 
-    def test_add_stream_handler(self):
+    def test_add_websocket(self):
         """A stream should be used in a handler added to the root logger."""
-        stream = Mock()
-        handler = LogManager.add_stream_handler(stream)
-        self.assertEqual(stream, handler.stream)
+        socket = Mock()
+        handler = LogManager.enable_websocket(socket)
         self.assertIn(handler, logging.root.handlers)
 
     @staticmethod
@@ -151,6 +150,53 @@ class TestLogManager(LogTester):
         LogManager.load_config_file('existent_file', debug=False)
 
         parser.set.assert_not_called()
+
+    def test_no_session_disconnected_logging(self):
+        """Should not log harmless werkzeug "session is disconnected" msg."""
+        logging.root.handlers = []
+
+        handler = logging.StreamHandler(Mock())
+        LogManager.add_handler(handler)
+
+        # Message based on the log output that ends with traceback plaintext as
+        # seen in lib/python3.6/site-packages/werkzeug/serving.py:225 of
+        # Werkzeug==0.12.1
+        msg = "lorem ipsum KeyError: 'Session is disconnected'"
+        logger = logging.getLogger('werkzeug')
+        logger.setLevel(logging.ERROR)
+        with patch.object(handler, 'emit'):
+            logger.error('lorem ipsum %s', msg)
+            self.assertEqual(0, handler.emit.call_count)
+
+    def test_no_session_disconnected_logging_old_loggers(self):
+        """Should not log harmless werkzeug "session is disconnected" msg.
+
+        Message based on the log output that ends with traceback plaintext as
+        seen in lib/python3.6/site-packages/werkzeug/serving.py:225 of
+        Werkzeug==0.12.1:
+
+            - logger name: werkzeug
+            - level: ERROR
+            - only argument: ends with "KeyError: 'Session is disconnected'"
+        """
+        msg = "lorem ipsum KeyError: 'Session is disconnected'"
+        logger = logging.getLogger('werkzeug')
+        assert logger.getEffectiveLevel() <= logging.ERROR
+
+        # Mocking all existent handlers' emit function
+        patchers = [patch.object(handler, 'emit')
+                    for handler in logging.root.handlers]
+        assert patchers  # make sure there were root handlers already
+        emits = [patcher.start() for patcher in patchers]
+
+        logger.error('lorem ipsum %s', msg)
+        # Assert no handler emitted the log message
+        for emit in emits:
+            self.assertEqual(0, emit.call_count, emit.mock_calls)
+
+        # Restoring original state
+        for patcher in patchers:
+            patcher.stop()
 
 
 class TestNAppLog(LogTester):

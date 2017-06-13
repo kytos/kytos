@@ -1,84 +1,74 @@
+var socket = io();
+var channels = new Set();
+
 ;(function() {
-  console.log("kytos-logs started")
-
-  var connected=false;
-  var current_line = 0;
-  var socket = io.connect('/logs');
-  // prevent browser from crashing with too many lines
   var max_lines = 50;
-
-  socket.on('connect', function(){
-    turn_on_led()
-    connected = true;
-    console.log('connected')
-    request_log_changes()
-  })
-
-  socket.on('start logs', function(data){
-    if ($('#enable_log')[0].checked)
-    {
-      received_msgs = data.buff
-      current_line = data.last_line
-
-      $.each(received_msgs, function(index, msg){
-        add_log_message(msg, 'controller')
-      });
-    }
-  })
-
-  socket.on('connect_error',function(){
-    connected = false;
-    turn_off_led()
-    console.log('error');
-  })
-
-  socket.on('disconnect', function(data) {
-    connected = false;
-    turn_off_led()
-    console.log('disconnected')
-  })
-
-  socket.on('show logs', function(data){
-    if ($('#enable_log')[0].checked)
-    {
-      received_msgs = data.buff
-      current_line = data.last_line
-
-      $.each(received_msgs, function(index, msg){
-        add_log_message(msg, 'controller')
-      });
-    }
-  })
-
   var ws_led = $('#statusicons .websocket-status')
 
-  function turn_on_led(){
-    ws_led.addClass('status-online');
-    ws_led.removeClass('status-offline');
-  }
+  socket.on('connect', on_connect);
+  socket.on('disconnect', on_disconnect);
+  socket.on('show logs', update_log);
 
-  function turn_off_led(data){
-      ws_led.removeClass('status-online');
-      ws_led.addClass('status-offline');
-  }
-
-  function add_log_message(msg, src_tag) {
-    if ($('#tab_logs .log_message').length >= max_lines) {
-      $('#tab_logs').find('.log_message:first').remove();
+  function on_connect() {
+    console.log('Socket connected.');
+    // restore channel subscriptions
+    for (let channel of channels) {
+      join_channel(channel, true);
     }
-    $('<div/>', {
-        text: msg,
-        "class": 'log_message ' + src_tag
-    }).appendTo('#tab_logs');
-    $('#tab_logs').scrollTop($('#tab_logs').get(0).scrollHeight);
+    ws_led.addClass('status-online')
+          .removeClass('status-offline');
   }
 
-  function request_log_changes(){
-    if (connected && $('#enable_log')[0].checked) {
-      socket.emit('show logs', {"current_line": current_line,
-                                "max_lines": max_lines})
-    }
+  function on_disconnect() {
+    console.log('Socket disconnected.');
+    ws_led.removeClass('status-online')
+          .addClass('status-offline');
   }
-  setInterval(request_log_changes, 3000);
+
+  function update_log(new_lines) {
+    // Remove some lines if more than max_lines
+    var old_lines = $('#tab_logs .log_message');
+    var total_lines = old_lines.length + new_lines.length;
+
+    if (total_lines > max_lines) {
+      var excess = total_lines - max_lines;
+      $('#tab_logs .log_message').slice(0, excess).remove();
+    }
+
+    // Format log lines
+    var formatted = new_lines.map(function(line) {
+      return $('<div/>', {
+        text: line,
+        class: 'log_message controller'
+      });
+    });
+
+    $('#tab_logs').append(formatted)
+                  .scrollTop($('#tab_logs')[0].scrollHeight);
+  }
 }());
 
+function join_channel(channel, force = false) {
+  if (socket.connected && (!channels.has(channel) || force)) {
+     socket.emit('join', channel, function() {
+       channels.add(channel);
+       console.log('Subscribed to ' + channel);
+     });
+  }
+  console.log('Subscriptions: ' + channels);
+}
+
+function leave_channel(channel) {
+  if (channels.has(channel) && socket.connected) {
+     socket.emit('leave', channel, function() {
+       channels.delete(channel);
+       console.log('Unsubscribed from ' + channel);
+     });
+  }
+  console.log('Subscriptions: ' + channels);
+}
+
+function toggle_log(enabled) {
+  channel = 'log';
+  enabled ? join_channel(channel) : leave_channel(channel);
+}

@@ -1,11 +1,12 @@
 """Module used to handle a API Server."""
 import logging
 import os
+import sys
 from urllib.error import URLError
 from urllib.request import urlopen
 
 from flask import Flask, request, send_from_directory
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room
 
 
 class APIServer:
@@ -30,13 +31,21 @@ class APIServer:
 
         self.app = Flask(app_name, root_path=self.flask_dir)
         self.server = SocketIO(self.app, async_mode='threading')
+        self._enable_websocket_rooms()
+
+    def _enable_websocket_rooms(self):
+        socket = self.server
+        socket.on_event('join', join_room)
+        socket.on_event('leave', leave_room)
 
     def run(self):
-        """Method used to run the APIServer."""
+        """Run the Flask API Server."""
         try:
             self.server.run(self.app, self.listen, self.port)
-        except OSError:
-            pass
+        except OSError as e:
+            msg = "Couldn't start API Server: {}".format(e)
+            self.log.critical(msg)
+            sys.exit(msg)
 
     def register_rest_endpoint(self, url, function, methods):
         r"""Register a new rest endpoint in Api Server.
@@ -54,16 +63,6 @@ class APIServer:
         if new_endpoint_url not in self.rest_endpoints:
             self.app.add_url_rule(new_endpoint_url, function.__name__,
                                   function, methods=methods)
-
-    def register_websockets(self, websockets):
-        """Method used to register all channels from websockets given."""
-        for websocket in websockets.values():
-            for event, function, namespace in websocket.events:
-                self.register_websocket(event, function, namespace)
-
-    def register_websocket(self, name, function, namespace='/'):
-        """Method used to register websocket channel."""
-        self.server.on_event(name, function, namespace)
 
     def register_web_ui(self):
         """Method used to register routes to the admin-ui homepage."""
@@ -84,7 +83,7 @@ class APIServer:
             self.register_rest_endpoint('/status/',
                                         self.status_api, methods=['GET'])
 
-        if '/kytos/shutdown' not in self.rest_endpoints:
+        if '/kytos/shutdown/' not in self.rest_endpoints:
             self.register_rest_endpoint('/shutdown/',
                                         self.shutdown_api, methods=['GET'])
 

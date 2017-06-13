@@ -1,8 +1,7 @@
 
 #controlsKytos {
-
- margin-top: 15px;
  color: #DFDFDF;
+ margin-top: 3px;
 
   .help {
     display: none; 
@@ -14,13 +13,13 @@
    }
 
    .btn-kytos-default {
-    height: 2em;
-    width: 2em;
+    height: 25px;
+    width: 25px;
     padding: 0px;
-    border-radius: 1em;
     font-size: 1em;
     color: #EEE;
     border: 1px solid #554077;
+    border-radius: 0px;
     background: #554077;
    }
 
@@ -33,10 +32,9 @@
    }
 
    .checkbox label::before {
-    height: 2em;
-    width: 2em;
-    padding: 0.5em;
-    border-radius: 1em;
+    height: 25px;
+    width: 25px;
+    padding: 5px;
     font-size: 1em;
     border: 1px solid #554077;
     color: #EEE;
@@ -63,6 +61,10 @@
 
 } /* end #controlsKytos */
 
+#settingsDisplays, #settingsMaps {
+ margin-top: 3px;
+}
+
 #settingsLayouts .right {
  float: left;
  margin: 0;
@@ -78,11 +80,11 @@
  position: absolute;
  color: #FFF;
  background: #000;
- border-radius: 1em;
  padding: 0.5em;
  margin: 0.5em;
  text-align: center;
  opacity: 0.5;
+ border-radius: 3px;
 }
 
 #settingsLayouts .btn-kytos-default:hover {
@@ -99,7 +101,9 @@
 .input-kytos-default {
  color: #DFDFDF;
  background: #191A1A;
- border: 2px solid #554077;
+ border: 1px solid #554077;
+ min-width: 110px;
+ min-height: 25px;
 }
 
 .input-kytos-default:focus,
@@ -107,7 +111,7 @@
 .input-kytos-default:hover {
  color: #DFDFDF;
  background: #000;
- border: 2px solid #DFDFDF;
+ border: 1px solid #DFDFDF;
 }
 
 .ui-helper-hidden-accessible {

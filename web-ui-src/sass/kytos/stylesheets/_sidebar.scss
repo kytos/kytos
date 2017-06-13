@@ -49,12 +49,19 @@
       flex-shrink: 1;
     }
 
+    .nav-kytos-api-status {
+      align-self: "flex-end";
+      margin: 4px 0;
+      flex-basis: 0;
+    }
+
     .nav-kytos-websocket-status {
       align-self: "flex-end";
       flex-basis: 0;
       margin: 4px 0;
     }
 
+    .api-status,
     .websocket-status {
       padding: 8px 5px 8px 25px;
       height: 16px;

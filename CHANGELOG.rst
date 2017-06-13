@@ -8,7 +8,7 @@ All notable changes to the kytos project will be documented in this file.
 Added
 =====
 - '/kytos/configuration/' endpoint to display kytos configuration.
-- Add 'api_port' in kytos.conf, with default value equals 8181.
+- Add 'api_port' in kytos.conf. The default value is 8181.
 
 Changed
 =======
@@ -23,7 +23,8 @@ Fixed
 =====
 - Web interface:
   - Fixed memory and CPU usage
-- Fix starting debug mode using the command kytos -D
+- Now Kytos can register endpoints with different methods for the same URL.
+- Now it's possible to start in debug mode using the command kytosd -D
 
 Security
 ========

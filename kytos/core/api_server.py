@@ -84,7 +84,7 @@ class APIServer:
             self.register_rest_endpoint('/status/',
                                         self.status_api, methods=['GET'])
 
-        if '/kytos/shutdown' not in self.rest_endpoints:
+        if '/kytos/shutdown/' not in self.rest_endpoints:
             self.register_rest_endpoint('/shutdown/',
                                         self.shutdown_api, methods=['GET'])
 

@@ -60,8 +60,8 @@ class Connection(object):
         if new_state not in CONNECTION_STATE:
             raise Exception('Unknown State', new_state)
         self._state = new_state # noqa
-        log.info('Connection %s changed state: %s',
-                 self.id, self.state)
+        log.debug('Connection %s changed state: %s',
+                  self.id, self.state)
 
     @property
     def id(self):

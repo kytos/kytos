@@ -45,6 +45,8 @@ Fixed
 - Now Kytos can register endpoints with different methods for the same URL.
 - Now it's possible to start in debug mode using the command kytosd -D
 - Several bug fixes
+- Fix starting debug mode using the command kytos -D
+- Removed sphinx warnings and improved documentation to have blueprints links.
 
 
 [2017.1b2] - "bethania" beta2 - 2017-05-05

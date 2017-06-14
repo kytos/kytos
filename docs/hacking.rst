@@ -2,8 +2,8 @@
 Hacking
 #######
 
-.. note:: Before reading this file, please read the :doc:`CONTRIBUTE` section
-    that contains the main guidelines of the project.
+.. note:: Before reading this file, please read the :doc:`kytos:contributing`
+    section that contains the main guidelines of the project.
 
 Development Environment Setup
 *****************************
@@ -48,8 +48,8 @@ If you are using `oh-my-zsh <https://github.com/robbyrussell/oh-my-zsh>`__, you
 can just add the *virtualenvwrapper* plugin to your plugins list
 (inside ``~/.zshrc``). This plugin will:
 
--  Load Python's
-  `virtualenvwrapper shell tools <http://virtualenvwrapper.readthedocs.org/en/latest/command_ref.html>`__;
+-  Load Python's `virtualenvwrapper shell tools <http://virtualenvwrapper.readthedocs.org/en/latest/command_ref.html>`__;
+
 -  Automatically activate virtualenv when ``cd``'ing into git repository with a
    matching name.
 

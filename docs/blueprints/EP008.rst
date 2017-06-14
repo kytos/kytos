@@ -1,27 +1,28 @@
-###################################
-Blueprint: Enhancement Proposal 008
-###################################
+########################
+Enhancement Proposal 008
+########################
 
 
-Objective:
-##########
+Objective
+#########
 Proposes a simpler way to specify pack/unpack tests and also to capture/dump
 binary message packets used in the controller comunications.
 
 
-Affected projects:
-==================
+Affected projects
+#################
+
     ::
 
         python-openflow
 
 
-Description:
-============
+Description
+###########
 
-Current implementation:
------------------------
-Binary raw openflow packets are stored in multiple files, adding 
+Current implementation
+----------------------
+Binary raw openflow packets are stored in multiple files, adding
 unnecessary complexity (and time/inefficiency) to the access of those binary
 files and also to the project structure.
 ``raw/v0x01/ofpt_hello.dat`` contains ``0100 0008 0000 0001`` for example.
@@ -33,8 +34,8 @@ at each class definition:
 - A minimum length for the packet.
 
 
-Proposal:
----------
+Proposal
+--------
 A single dictionary containing multiple binary messages
 
 ::
@@ -86,12 +87,12 @@ We would have then not only examples for testing/debugging, but also message
 and protocol usage statistics.
 For now, as a simple testing platform, a ``socketserver.TCPServer`` may act as
 a middle-man, passing communication between controller and switch, and dumping
-the packets exchanged in the connection. One could use this platform to dump 
+the packets exchanged in the connection. One could use this platform to dump
 communication from an existing controller implementation connected to a switch.
 
 NB:
-    Notice that it is proposed an attributes dictionary instead of a 
-    correspondent class with parameters attributes for those classes as is the 
-    current approach. This was done with the EP003 in mind, that talks about 
+    Notice that it is proposed an attributes dictionary instead of a
+    correspondent class with parameters attributes for those classes as is the
+    current approach. This was done with the EP003 in mind, that talks about
     what is exposed to the user.
 

@@ -1,5 +1,3 @@
-.. _kyco-administrator-guide-configuration:
-
 Configuration
 -------------
 

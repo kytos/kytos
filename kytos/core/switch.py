@@ -52,7 +52,7 @@ class Interface(object):
         """Return id from Interface intance.
 
         Returns:
-            id (string): Interface id.
+            string: Interface id.
         """
         return "{}:{}".format(self.switch.dpid, self.port_number)
 
@@ -279,7 +279,7 @@ class Switch(object):
         """Return id from Switch instance.
 
         Returns:
-            id (string): the switch id is the data_path_id from switch.
+            string: the switch id is the data_path_id from switch.
         """
         return "{}".format(self.dpid)
 
@@ -405,7 +405,7 @@ class Switch(object):
         Parameters:
             mac (HWAddress): Mac address from switch.
         Returns:
-            ports (list): A list of ports. None otherswise.
+            :class:`list`: A list of ports. None otherswise.
         """
         try:
             return list(self.mac2port[mac.value])

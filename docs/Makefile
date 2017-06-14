@@ -61,7 +61,7 @@ clean:
 
 .PHONY: html
 html:
-	sphinx-apidoc -o . ../kytos/ -d10 -M
+	sphinx-apidoc -o . ../kytos/ -d10 -M -T
 	sed -i "/Submodules/,+1d" *.rst
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
@@ -69,7 +69,7 @@ html:
 
 .PHONY: dirhtml
 dirhtml:
-	sphinx-apidoc -o . ../kytos/ -d10 -M
+	sphinx-apidoc -o . ../kytos/ -d10 -M -T
 	sed -i "/Submodules/,+1d" *.rst
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo
@@ -240,7 +240,7 @@ dummy:
 	@echo "Build finished. Dummy builder generates no files."
 
 livehtml:
-	sphinx-apidoc -o . ../kytos/ -d10 -M
+	sphinx-apidoc -o . ../kytos/ -d10 -M -T
 	sed -i "/Submodules/,+1d" *.rst
 	sphinx-autobuild -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml -z ../kytos
 	@echo

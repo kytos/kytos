@@ -8,10 +8,11 @@ All notable changes to the kytos project will be documented in this file.
 Added
 =====
 - '/kytos/configuration/' endpoint to display kytos configuration.
-- Add 'api_port' in kytos.conf. The default value is 8181.
+- Added 'api_port' in kytos.conf, with default value equals 8181.
 
 Changed
 =======
+- Changed docs to show a dropdown button with all kytos releases.
 
 Deprecated
 ==========

@@ -37,6 +37,7 @@ Changed
 - Log manager refactored
 - Improvements in the web interface style, layout and usability
 - Setup proccess now requires `pip`
+- Kytos documentation now shows a dropdown with each release documentation.
 
 Fixed
 =====

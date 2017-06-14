@@ -87,6 +87,7 @@ class Connection(object):
 
     def close(self):
         """Close the socket from connection instance."""
+        self.state = CONNECTION_STATE.FINISHED
         if self.socket:
             log.debug('Shutting down Connection %s', self.id)
             try:
@@ -103,11 +104,28 @@ class Connection(object):
 
     def is_alive(self):
         """Return True if the connection socket is alive. False otherwise."""
-        return self.socket is not None
+        return self.socket is not None and self.state not in (
+            CONNECTION_STATE.FINISHED, CONNECTION_STATE.FAILED)
+
+    def is_new(self):
+        """Return True if the connection is new. False otherwise."""
+        return self.state == CONNECTION_STATE.NEW
 
     def is_established(self):
         """Return True if the connection is established. False otherwise."""
         return self.state == CONNECTION_STATE.ESTABLISHED
+
+    def is_during_setup(self):
+        """Return True if the connection is in setup state. False otherwise."""
+        return self.state == CONNECTION_STATE.SETUP
+
+    def set_established_state(self):
+        """Sets the connection state to Established."""
+        self.state = CONNECTION_STATE.ESTABLISHED
+
+    def set_setup_state(self):
+        """Sets the connection state to Setup."""
+        self.state = CONNECTION_STATE.SETUP
 
     def update_switch(self, switch):
         """Update switch with this instance of Connection.

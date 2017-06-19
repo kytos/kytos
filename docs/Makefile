@@ -6,6 +6,8 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
+VERSIONS      = master,bethania
+MAIN_REF      = master
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -53,6 +55,18 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 	@echo "  coverage   to run coverage check of the documentation (if enabled)"
 	@echo "  dummy      to check syntax errors of document sources"
+	@echo "  versions   to make all docs HTML files"
+
+.PHONY: versions
+versions:
+	rm kytos -rf && mkdir kytos
+	for version in `echo $(VERSIONS) | sed 's/,/ /g'`; do \
+		git checkout $$version \
+		&& make SPHINXOPTS="-A versions=\"$(VERSIONS)\" -A current_version=\"$$version\"" \
+		&& mv _build/dirhtml kytos/$$version; \
+	done
+	cp kytos/$(MAIN_REF)/* kytos/ -R
+
 
 .PHONY: clean
 clean:
@@ -61,7 +75,7 @@ clean:
 
 .PHONY: html
 html:
-	sphinx-apidoc -o . ../kytos/ -d10 -M
+	sphinx-apidoc -o . ../kytos/ -d10 -M -T
 	sed -i "/Submodules/,+1d" *.rst
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
@@ -69,7 +83,7 @@ html:
 
 .PHONY: dirhtml
 dirhtml:
-	sphinx-apidoc -o . ../kytos/ -d10 -M
+	sphinx-apidoc -o . ../kytos/ -d10 -M -T
 	sed -i "/Submodules/,+1d" *.rst
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo
@@ -240,7 +254,7 @@ dummy:
 	@echo "Build finished. Dummy builder generates no files."
 
 livehtml:
-	sphinx-apidoc -o . ../kytos/ -d10 -M
+	sphinx-apidoc -o . ../kytos/ -d10 -M -T
 	sed -i "/Submodules/,+1d" *.rst
 	sphinx-autobuild -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml -z ../kytos
 	@echo

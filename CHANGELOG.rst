@@ -24,26 +24,31 @@ Security
 ========
 
 
-[2017.1b3] - "bethania" beta3 - 2017-06-14
+[2017.1b3] - "bethania" beta3 - 2017-06-16
 ******************************************
 Added
 =====
-- '/kytos/configuration/' endpoint to display kytos configuration.
-- Add 'api_port' in kytos.conf. The default value is 8181.
+- Endpoint to display kytos configuration ('/kytos/configuration/').
+- Setting to setup Kytos API Port on kytos.conf ('api_port' default to 8181).
+- Documentation Blueprints tree.
 
 Changed
 =======
-- OpenFlow specific code moved to NApps: Kytos now acts as an all-purpose controller.
+- OpenFlow specific code moved to NApps: Kytos now acts as an all-purpose
+  controller.
 - Log manager refactored
 - Improvements in the web interface style, layout and usability
 - Setup proccess now requires `pip`
+- Kytos documentation now shows a dropdown with each release documentation.
 
 Fixed
 =====
 - Web interface:
   - Fixed memory and CPU usage
-- Now Kytos can register endpoints with different methods for the same URL.
-- Now it's possible to start in debug mode using the command kytosd -D
+- Now Kytos accepts to register different methods [POST, GET, etc] on the same
+  endpoint.
+- Now it's possible to start kytos in debug mode using `kytosd -D`.
+- Removed documentation warnings.
 - Several bug fixes
 
 

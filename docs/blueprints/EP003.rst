@@ -1,14 +1,16 @@
+#####################
 python-openflow Tests
 #####################
 
 
-Status:
-#######
+Status
+######
+
 Accepted
 
 
 Abstract
-========
+########
 
 Here we have the main Tests guidelines of the ``python-openflow`` library.
 
@@ -21,7 +23,7 @@ The main guidelines are:
 * All reimplemented methods must be tested.
 
 Basic Tests
-===========
+###########
 
 Considering the above described guidelines, below are some tasks that need to be done:
 
@@ -40,14 +42,14 @@ Considering the above described guidelines, below are some tasks that need to be
 
   * Look for constrains defined on the OpenFlow specification for each attribute (Not all attributes have constrains);
   * Main constrains: value limitation based on pre-defined constants
- 
+
 Solution
-========
+########
 
 Issues
-======
+######
 
-- https://github.com/kytos/python-openflow/issues/8 
+- https://github.com/kytos/python-openflow/issues/8
 - https://github.com/kytos/python-openflow/issues/9
 - https://github.com/kytos/python-openflow/issues/10
 - https://github.com/kytos/python-openflow/issues/122

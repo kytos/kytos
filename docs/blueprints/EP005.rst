@@ -1,14 +1,16 @@
+###########################
 Version inheritance problem
 ###########################
 
 
-Status:
-#######
+Status
+######
+
 Accepted
 
 
-Problem Description
-===================
+Description
+###########
 
 A **library** that implements a **Protocol** have to deal with multiple versions of this protocol while it evolves.
 In order to reduce code duplication, avoid the need of unnecessary code rewriting, and improve the development speed, we might want a development workflow that allows us to import prior versions of specific classes aiming their reuse.

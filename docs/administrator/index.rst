@@ -1,5 +1,3 @@
-.. _kyco-administrator-guide:
-
 ###################
 Administrator Guide
 ###################

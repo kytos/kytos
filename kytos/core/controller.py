@@ -296,7 +296,7 @@ class Controller(object):
         "Running since 'Started_At'", otherwise "Stopped".
 
         Returns:
-            status (string): String with kytos status.
+            string: String with kytos status.
         """
         if self.started_at:
             return "Running since %s" % self.started_at
@@ -322,7 +322,7 @@ class Controller(object):
         then send the event to each registered listener.
 
         Parameters:
-            event (KytosEvent): An instance of a KytosEvent.
+            event (~kytos.core.KytosEvent): An instance of a KytosEvent.
         """
         for event_regex, listeners in self.events_listeners.items():
             if re.match(event_regex, event.name):
@@ -520,8 +520,9 @@ class Controller(object):
         connection on the same ip:port.
 
         Parameters:
-            event (KytosEvent): The received event (kytos/core.connection.new)
-            with the needed infos.
+            event (~kytos.core.KytosEvent): The received event
+                                            (kytos/core.connection.new)
+                                            with the needed infos.
         """
         self.log.info("Handling KytosEvent:kytos/core.connection.new ...")
 

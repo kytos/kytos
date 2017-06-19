@@ -28,7 +28,7 @@ Security
 ******************************************
 Added
 =====
-- Endpoint to display kytos configuration ('/kytos/configuration/').
+- Endpoint to display kytos configuration ('/kytos/config/').
 - Setting to setup Kytos API Port on kytos.conf ('api_port' default to 8181).
 - Documentation Blueprints tree.
 

@@ -11,10 +11,10 @@ from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
 from distutils.command.clean import clean  # pylint: disable=E0401,E0611
 from pathlib import Path
-from subprocess import call
+from subprocess import call, check_call
 
 try:
-    import pip
+    import pip # noqa: This is just for checking if pip is installed
     from setuptools import Command, find_packages, setup
     from setuptools.command.develop import develop
     from setuptools.command.egg_info import egg_info
@@ -70,7 +70,7 @@ class SASSBuild(SimpleCommand):
         try:
             import sass
         except ModuleNotFoundError:
-            pip.main(['install', 'libsass'])
+            check_call([sys.executable, '-m', 'pip', 'install', 'libsass'])
             import sass
 
         sassdir = Path(__file__).parent / 'web-ui-src/sass'
@@ -95,9 +95,9 @@ class EggInfo(egg_info):
     @staticmethod
     def _install_deps_wheels():
         """Python wheels are much faster (no compiling)."""
-        reqs = pip.req.parse_requirements('requirements.txt', session=False)
         print('Installing dependencies...')
-        pip.main(['install', *[str(r.req) for r in reqs]])
+        check_call([sys.executable, '-m', 'pip', 'install', '-r',
+                    'requirements.txt'])
 
     @staticmethod
     def _check_sass():

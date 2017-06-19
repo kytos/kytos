@@ -120,11 +120,11 @@ class Connection(object):
         return self.state == CONNECTION_STATE.SETUP
 
     def set_established_state(self):
-        """Sets the connection state to Established."""
+        """Set the connection state to Established."""
         self.state = CONNECTION_STATE.ESTABLISHED
 
     def set_setup_state(self):
-        """Sets the connection state to Setup."""
+        """Set the connection state to Setup."""
         self.state = CONNECTION_STATE.SETUP
 
     def update_switch(self, switch):

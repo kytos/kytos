@@ -386,12 +386,12 @@ class Controller(object):
                 packet = message.pack()
                 destination.send(packet)
                 self.log.debug('Connection %s: OUT OFP, ' +
-                               'version: %s, type: %s, xid: %s',
+                               'version: %s, type: %s, xid: %s - %s',
                                destination.id,
                                message.header.version,
                                message.header.message_type,
-                               message.header.xid)
-                self.log.debug(packet.hex())
+                               message.header.xid,
+                               packet.hex())
                 self.notify_listeners(triggered_event)
                 self.log.debug("MsgOutEvent handler called")
             else:

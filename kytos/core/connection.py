@@ -60,8 +60,8 @@ class Connection(object):
         if new_state not in CONNECTION_STATE:
             raise Exception('Unknown State', new_state)
         self._state = new_state # noqa
-        log.info('Connection %s changed state: %s',
-                 self.id, self.state)
+        log.debug('Connection %s changed state: %s',
+                  self.id, self.state)
 
     @property
     def id(self):
@@ -79,7 +79,7 @@ class Connection(object):
             buffer (bytes): Message buffer that will be sent.
         """
         try:
-            if self.is_connected():
+            if self.is_alive():
                 self.socket.sendall(buffer)
         except (OSError, SocketError) as exception:
             log.debug('Could not send packet. Exception: %s', exception)
@@ -87,6 +87,7 @@ class Connection(object):
 
     def close(self):
         """Close the socket from connection instance."""
+        self.state = CONNECTION_STATE.FINISHED
         if self.socket:
             log.debug('Shutting down Connection %s', self.id)
             try:
@@ -101,9 +102,30 @@ class Connection(object):
         if self.switch and self.switch.connection is self:
             self.switch.connection = None
 
-    def is_connected(self):
-        """Return True if it is connected.False otherwise."""
-        return self.socket is not None
+    def is_alive(self):
+        """Return True if the connection socket is alive. False otherwise."""
+        return self.socket is not None and self.state not in (
+            CONNECTION_STATE.FINISHED, CONNECTION_STATE.FAILED)
+
+    def is_new(self):
+        """Return True if the connection is new. False otherwise."""
+        return self.state == CONNECTION_STATE.NEW
+
+    def is_established(self):
+        """Return True if the connection is established. False otherwise."""
+        return self.state == CONNECTION_STATE.ESTABLISHED
+
+    def is_during_setup(self):
+        """Return True if the connection is in setup state. False otherwise."""
+        return self.state == CONNECTION_STATE.SETUP
+
+    def set_established_state(self):
+        """Set the connection state to Established."""
+        self.state = CONNECTION_STATE.ESTABLISHED
+
+    def set_setup_state(self):
+        """Set the connection state to Setup."""
+        self.state = CONNECTION_STATE.SETUP
 
     def update_switch(self, switch):
         """Update switch with this instance of Connection.

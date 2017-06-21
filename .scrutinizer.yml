@@ -14,3 +14,11 @@ build:
     dependencies:
         override:
             - true
+    tests:
+        override:
+            -
+                command: coverage run setup.py test
+                coverage:
+                    file: .coverage
+                    config: .coveragerc
+                    format: py-cc

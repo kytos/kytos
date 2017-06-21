@@ -112,8 +112,10 @@ class LogManager:
 
 
 # Add filter to all pre-existing handlers
+handler_filter = LogManager.filter_session_disconnected
 for root_handler in logging.root.handlers:
-    root_handler.addFilter(LogManager.filter_session_disconnected)
+    if handler_filter not in root_handler.filters:
+        root_handler.addFilter(handler_filter)
 
 
 class NAppLog:

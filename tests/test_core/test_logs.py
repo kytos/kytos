@@ -56,9 +56,9 @@ class TestLogManager(LogTester):
     @staticmethod
     @patch('kytos.core.logs.LogManager._PARSER')
     @patch('kytos.core.logs.Path')
-    def test_custom_formatter(Path, parser):
+    def test_custom_formatter(path, parser):
         """Should use a custom formatter instead of Python's default."""
-        Path.return_value.exists.return_value = False
+        path.return_value.exists.return_value = False
         # Make sure we have the custome formatter section
         parser.__contains__.return_value = True
         handler = Mock()
@@ -86,19 +86,19 @@ class TestLogManager(LogTester):
         new_handler.handle.assert_called_once()
 
     @patch('kytos.core.logs.Path')
-    def test_non_existent_config_file(self, Path):
+    def test_non_existent_config_file(self, path):
         """If config file doesn't exist, warn instead of raising exception."""
         self._mock_logger()
-        Path.return_value.exists.return_value = False
+        path.return_value.exists.return_value = False
         LogManager.load_config_file('non_existent_file')
         self._assert_string_in_logs('Log config file "%s" does not exist.')
 
     @patch.object(LogManager, '_PARSER')
     @patch('kytos.core.logs.config')
     @patch('kytos.core.logs.Path')
-    def test_no_syslog(self, Path, config, parser):
+    def test_no_syslog(self, path, config, parser):
         """Must log when there's no syslog and try again without it."""
-        Path.return_value.exists.return_value = True
+        path.return_value.exists.return_value = True
         config.fileConfig.side_effect = [OSError, None]
         parser.__contains__.return_value = True  # must have syslog section
         self._mock_logger()
@@ -111,9 +111,9 @@ class TestLogManager(LogTester):
 
     @patch('kytos.core.logs.Path')
     @patch('kytos.core.logs.config')
-    def test_config_file_exception(self, config, Path):
+    def test_config_file_exception(self, config, path):
         """Test other errors (e.g. /dev/log permission)."""
-        Path.return_value.exists.return_value = True
+        path.return_value.exists.return_value = True
         config.fileConfig.side_effect = OSError
 
         self._mock_logger()
@@ -123,9 +123,9 @@ class TestLogManager(LogTester):
     @patch.object(LogManager, '_PARSER')
     @patch('kytos.core.logs.Path')
     @patch('kytos.core.logs.config')
-    def test_set_debug_mode(self, config, Path, parser):
+    def test_set_debug_mode(self, config, path, parser):
         """Test set_debug_mode with debug = True."""
-        Path.return_value.exists.return_value = True
+        path.return_value.exists.return_value = True
         config.fileConfig.side_effect = OSError
 
         self._mock_logger()
@@ -143,9 +143,9 @@ class TestLogManager(LogTester):
     @patch('kytos.core.logs.LogManager._PARSER')
     @patch('kytos.core.logs.Path')
     @patch('kytos.core.logs.config')
-    def test_set_debug_mode_with_false(self, config, Path, parser):
+    def test_set_debug_mode_with_false(self, config, path, parser):
         """Test set_debug_mode with debug = False."""
-        Path.return_value.exists.return_value = True
+        path.return_value.exists.return_value = True
         config.fileConfig.side_effect = OSError
 
         self._mock_logger()
@@ -153,7 +153,7 @@ class TestLogManager(LogTester):
 
         parser.set.assert_not_called()
 
-    def test_no_session_disconnected_logging(self):
+    def test_handler_filter(self):
         """Should not log harmless werkzeug "session is disconnected" msg."""
         logging.root.handlers = []
 
@@ -171,7 +171,7 @@ class TestLogManager(LogTester):
             self.assertEqual(0, handler.emit.call_count)
 
     @staticmethod
-    def test_filter_must_be_added_to_old_handlers():
+    def test_old_handler_filter():
         """Should not log harmless werkzeug "session is disconnected" msg.
 
         The filter should be added to all root handlers, even the ones that

@@ -158,11 +158,13 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         the events attribute, then creates a dict containing the event_name
         and the list of methods that are responsible for handling such event.
 
-        At the end, the setUp method is called as a complement of the init
+        At the end, the setup method is called as a complement of the init
         process.
         """
         Thread.__init__(self, daemon=False)
         self.controller = controller
+        self.setup()
+        self.load_json()
         self._listeners = {'kytos/core.shutdown': [self._shutdown_handler]}
         #: int: Seconds to sleep before next call to :meth:`execute`. If
         #: negative, run :meth:`execute` only once.
@@ -179,8 +181,6 @@ class KytosNApp(Thread, metaclass=ABCMeta):
                 if event_name not in self._listeners:
                     self._listeners[event_name] = []
                 self._listeners[event_name].append(method)
-
-        self.load_json()
 
     def load_json(self):
         """Method used to update object attributes based on kytos.json."""
@@ -211,7 +211,6 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         It should not be overriden.
         """
         log.info("Running NApp: %s", self)
-        self.setup()
         self.execute()
         while self.__interval > 0 and not self.__event.is_set():
             self.__event.wait(self.__interval)
@@ -235,8 +234,8 @@ class KytosNApp(Thread, metaclass=ABCMeta):
     def setup(self):
         """Replace the 'init' method for the KytosApp subclass.
 
-        The setup method is automatically called by the run method.
-        Users shouldn't call this method directly.
+        The setup method is automatically called on the NApp __init__().
+        Users aren't supposed to call this method directly.
         """
         pass
 

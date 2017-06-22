@@ -570,10 +570,12 @@ class Controller(object):
 
             self.napps[(username, napp_name)] = napp
 
+            # This start method is inherited from the Threading class.
+            # It is not directly defined/declared on the KytosNApp class.
+            napp.start()
+
             for event, listeners in napp._listeners.items():  # noqa
                 self.events_listeners.setdefault(event, []).extend(listeners)
-
-            napp.start()
 
     def load_napps(self):
         """Load all NApps enabled on the NApps dir."""

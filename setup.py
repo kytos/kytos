@@ -11,10 +11,11 @@ from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
 from distutils.command.clean import clean  # pylint: disable=E0401,E0611
 from pathlib import Path
-from subprocess import call
+from subprocess import call, check_call
 
 try:
-    import pip
+    import pip  # noqa: This is just for checking if pip is installed
+    import pkg_resources
     from setuptools import Command, find_packages, setup
     from setuptools.command.develop import develop
     from setuptools.command.egg_info import egg_info
@@ -22,6 +23,20 @@ try:
 except ModuleNotFoundError:
     print('Please install python3-pip and run setup.py again.')
     exit(-1)
+try:
+    [pkg_resources.get_distribution(d)
+     for d in open('requirements.txt').readlines() if d and '#' not in d]
+except pkg_resources.DistributionNotFound:
+    print('installing dependencies')
+    check_call([sys.executable, '-m', 'pip', 'install', '-r',
+                'requirements.txt'])
+    print('running setup again', sys.argv)
+    if 'setup.py' in sys.argv[0]:
+        args = sys.argv
+    else:
+        args = [__file__, *sys.argv]
+    check_call([sys.executable, *args])
+    exit()
 
 BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
 ETC_FILES = ['etc/kytos/logging.ini']
@@ -70,7 +85,7 @@ class SASSBuild(SimpleCommand):
         try:
             import sass
         except ModuleNotFoundError:
-            pip.main(['install', 'libsass'])
+            check_call([sys.executable, '-m', 'pip', 'install', 'libsass'])
             import sass
 
         sassdir = Path(__file__).parent / 'web-ui-src/sass'
@@ -88,16 +103,8 @@ class EggInfo(egg_info):
 
     def run(self):
         """Build css."""
-        self._install_deps_wheels()
         self._check_sass()
         super().run()
-
-    @staticmethod
-    def _install_deps_wheels():
-        """Python wheels are much faster (no compiling)."""
-        reqs = pip.req.parse_requirements('requirements.txt', session=False)
-        print('Installing dependencies...')
-        pip.main(['install', *[str(r.req) for r in reqs]])
 
     @staticmethod
     def _check_sass():

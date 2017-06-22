@@ -1,10 +1,12 @@
 """Test the logs module."""
+import imp
 import logging
 from copy import copy
 from inspect import FrameInfo
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+from kytos.core import logs
 from kytos.core.logs import LogManager, NAppLog
 
 
@@ -54,9 +56,9 @@ class TestLogManager(LogTester):
     @staticmethod
     @patch('kytos.core.logs.LogManager._PARSER')
     @patch('kytos.core.logs.Path')
-    def test_custom_formatter(Path, parser):
+    def test_custom_formatter(path, parser):
         """Should use a custom formatter instead of Python's default."""
-        Path.return_value.exists.return_value = False
+        path.return_value.exists.return_value = False
         # Make sure we have the custome formatter section
         parser.__contains__.return_value = True
         handler = Mock()
@@ -84,19 +86,19 @@ class TestLogManager(LogTester):
         new_handler.handle.assert_called_once()
 
     @patch('kytos.core.logs.Path')
-    def test_non_existent_config_file(self, Path):
+    def test_non_existent_config_file(self, path):
         """If config file doesn't exist, warn instead of raising exception."""
         self._mock_logger()
-        Path.return_value.exists.return_value = False
+        path.return_value.exists.return_value = False
         LogManager.load_config_file('non_existent_file')
         self._assert_string_in_logs('Log config file "%s" does not exist.')
 
-    @patch('kytos.core.logs.LogManager._PARSER')
+    @patch.object(LogManager, '_PARSER')
     @patch('kytos.core.logs.config')
     @patch('kytos.core.logs.Path')
-    def test_no_syslog(self, Path, config, parser):
+    def test_no_syslog(self, path, config, parser):
         """Must log when there's no syslog and try again without it."""
-        Path.return_value.exists.return_value = True
+        path.return_value.exists.return_value = True
         config.fileConfig.side_effect = [OSError, None]
         parser.__contains__.return_value = True  # must have syslog section
         self._mock_logger()
@@ -109,21 +111,21 @@ class TestLogManager(LogTester):
 
     @patch('kytos.core.logs.Path')
     @patch('kytos.core.logs.config')
-    def test_config_file_exception(self, config, Path):
+    def test_config_file_exception(self, config, path):
         """Test other errors (e.g. /dev/log permission)."""
-        Path.return_value.exists.return_value = True
+        path.return_value.exists.return_value = True
         config.fileConfig.side_effect = OSError
 
         self._mock_logger()
         LogManager.load_config_file('existent_file')
         self._assert_string_in_logs('Using default Python logging config')
 
-    @patch('kytos.core.logs.LogManager._PARSER')
+    @patch.object(LogManager, '_PARSER')
     @patch('kytos.core.logs.Path')
     @patch('kytos.core.logs.config')
-    def test_set_debug_mode(self, config, Path, parser):
+    def test_set_debug_mode(self, config, path, parser):
         """Test set_debug_mode with debug = True."""
-        Path.return_value.exists.return_value = True
+        path.return_value.exists.return_value = True
         config.fileConfig.side_effect = OSError
 
         self._mock_logger()
@@ -141,9 +143,9 @@ class TestLogManager(LogTester):
     @patch('kytos.core.logs.LogManager._PARSER')
     @patch('kytos.core.logs.Path')
     @patch('kytos.core.logs.config')
-    def test_set_debug_mode_with_false(self, config, Path, parser):
+    def test_set_debug_mode_with_false(self, config, path, parser):
         """Test set_debug_mode with debug = False."""
-        Path.return_value.exists.return_value = True
+        path.return_value.exists.return_value = True
         config.fileConfig.side_effect = OSError
 
         self._mock_logger()
@@ -151,11 +153,11 @@ class TestLogManager(LogTester):
 
         parser.set.assert_not_called()
 
-    def test_no_session_disconnected_logging(self):
+    def test_handler_filter(self):
         """Should not log harmless werkzeug "session is disconnected" msg."""
         logging.root.handlers = []
 
-        handler = logging.StreamHandler(Mock())
+        handler = Mock(level=logging.WARNING)
         LogManager.add_handler(handler)
 
         # Message based on the log output that ends with traceback plaintext as
@@ -168,8 +170,12 @@ class TestLogManager(LogTester):
             logger.error('lorem ipsum %s', msg)
             self.assertEqual(0, handler.emit.call_count)
 
-    def test_no_session_disconnected_logging_old_loggers(self):
+    @staticmethod
+    def test_old_handler_filter():
         """Should not log harmless werkzeug "session is disconnected" msg.
+
+        The filter should be added to all root handlers, even the ones that
+        already existed before importing the "logs" module.
 
         Message based on the log output that ends with traceback plaintext as
         seen in lib/python3.6/site-packages/werkzeug/serving.py:225 of
@@ -179,24 +185,17 @@ class TestLogManager(LogTester):
             - level: ERROR
             - only argument: ends with "KeyError: 'Session is disconnected'"
         """
-        msg = "lorem ipsum KeyError: 'Session is disconnected'"
-        logger = logging.getLogger('werkzeug')
-        assert logger.getEffectiveLevel() <= logging.ERROR
+        old_handler = Mock()
+        old_handler.filters = []
 
-        # Mocking all existent handlers' emit function
-        patchers = [patch.object(handler, 'emit')
-                    for handler in logging.root.handlers]
-        assert patchers  # make sure there were root handlers already
-        emits = [patcher.start() for patcher in patchers]
+        logging.root.addHandler(old_handler)
+        old_handler.addFilter.assert_not_called()
+        # Importing the module should add the filter to existent root handlers.
+        imp.reload(logs)
+        old_handler.addFilter.assert_called_once_with(
+            logs.LogManager.filter_session_disconnected)
 
-        logger.error('lorem ipsum %s', msg)
-        # Assert no handler emitted the log message
-        for emit in emits:
-            self.assertEqual(0, emit.call_count, emit.mock_calls)
-
-        # Restoring original state
-        for patcher in patchers:
-            patcher.stop()
+        logging.root.removeHandler(old_handler)
 
 
 class TestNAppLog(LogTester):

@@ -70,7 +70,8 @@ class SASSBuild(SimpleCommand):
         try:
             import sass
         except ModuleNotFoundError:
-            check_call([sys.executable, '-m', 'pip', 'install', 'libsass'])
+            check_call([sys.executable, '-m', 'pip', 'install', '-r',
+                        'requirements-build.txt'])
             import sass
 
         sassdir = Path(__file__).parent / 'web-ui-src/sass'

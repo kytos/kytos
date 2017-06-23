@@ -38,7 +38,7 @@ Changed
   controller.
 - Log manager refactored
 - Improvements in the web interface style, layout and usability
-- Setup proccess now requires `pip`
+- Setup process now requires `pip`
 - Kytos documentation now shows a dropdown with each release documentation.
 
 Fixed
@@ -76,7 +76,7 @@ Changed
 - Improvements in TCP Server:
     - Now makes sure the switch is fully connected before accepting data.
     - Makes sure the switch is still connected before sending any data.
-    - Uses sendall() to make sure data is being correcly sent.
+    - Uses sendall() to make sure data is being correctly sent.
 - NApps module was refactored.
 - Improved 'clean' option of setup.py.
 - Improved tests and style checks for developers.
@@ -114,7 +114,7 @@ Changed
 - Websocket to send logs to web interface
 - Improved log management
 - Corrections on setup and installation controller's code
-- Improved NApps management - uinstall, disable and unload
+- Improved NApps management - uninstall, disable and unload
 - Improved controller's install and setup
 
 

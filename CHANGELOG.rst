@@ -7,6 +7,8 @@ All notable changes to the kytos project will be documented in this file.
 ********************************
 Added
 =====
+- Added NAppDirListener class to manage napps when enabled or disabled by
+  kytos-utils.
 
 Changed
 =======

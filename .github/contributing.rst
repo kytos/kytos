@@ -1,0 +1,1 @@
+../docs/developer/how_to_contribute.rst

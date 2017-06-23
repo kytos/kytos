@@ -28,6 +28,8 @@ Security
 Added
 =====
 - `@rest` decorator can also be used before `@classmethod` or `@staticmethod`
+- GH Contributing guidelines
+- Issue/PR GH templates
 
 Changed
 =======

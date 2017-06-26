@@ -124,6 +124,9 @@ class KytosRequestHandler(BaseRequestHandler):
                 self.exception = 'Request closed by client.'
                 break
 
+            if not self.connection.is_alive():
+                continue
+
             log.debug("New data from %s:%s at thread %s", self.ip,
                       self.port, curr_thread.name)
 

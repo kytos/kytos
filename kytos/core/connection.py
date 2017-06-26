@@ -88,6 +88,9 @@ class Connection(object):
     def close(self):
         """Close the socket from connection instance."""
         self.state = CONNECTION_STATE.FINISHED
+        if self.switch and self.switch.connection is self:
+            self.switch.connection = None
+
         log.debug('Shutting down Connection %s', self.id)
 
         try:
@@ -100,9 +103,6 @@ class Connection(object):
                 raise e
         except AttributeError as e:
             log.debug('Socket Already Closed: %s', self.id)
-
-        if self.switch and self.switch.connection is self:
-            self.switch.connection = None
 
     def is_alive(self):
         """Return True if the connection socket is alive. False otherwise."""

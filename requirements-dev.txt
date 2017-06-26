@@ -4,8 +4,8 @@
 libsass
 
 # For running doctests (during "python setup.py test")
-Sphinx >= 1.4.5
-sphinx_bootstrap_theme
+Sphinx == 1.5.6
+sphinx_bootstrap_theme == 0.4.14
 
 # Linters, also in test target
 # Pylama still not compatible with pydocstyle version 2.

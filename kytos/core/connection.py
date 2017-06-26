@@ -68,7 +68,7 @@ class Connection(object):
         """Return id from Connection instance.
 
         Returns:
-            id (string): Connection id.
+            string: Connection id.
         """
         return (self.address, self.port)
 

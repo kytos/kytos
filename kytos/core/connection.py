@@ -88,16 +88,18 @@ class Connection(object):
     def close(self):
         """Close the socket from connection instance."""
         self.state = CONNECTION_STATE.FINISHED
-        if self.socket:
-            log.debug('Shutting down Connection %s', self.id)
-            try:
-                self.socket.shutdown(SHUT_RDWR)
-                self.socket.close()
-            except OSError as e:
-                if e.errno not in (ENOTCONN, EBADF):
-                    raise e
+        log.debug('Shutting down Connection %s', self.id)
+
+        try:
+            self.socket.shutdown(SHUT_RDWR)
+            self.socket.close()
             self.socket = None
             log.debug('Connection Closed: %s', self.id)
+        except OSError as e:
+            if e.errno not in (ENOTCONN, EBADF):
+                raise e
+        except AttributeError as e:
+            log.debug('Socket Already Closed: %s', self.id)
 
         if self.switch and self.switch.connection is self:
             self.switch.connection = None

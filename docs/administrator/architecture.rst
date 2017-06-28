@@ -20,11 +20,11 @@ interface aims to be intuitive and very easy to use.
 
 Network Applications
 ++++++++++++++++++++
-The *napps* can be divided into two categories, *core napps* and *user napps*.
+The *napps* can be divided into two categories, *kytos napps* and *user napps*.
 
-core napps
-~~~~~~~~~~
-The *core napps* are those needed for the controller to deal with main
+kytos napps
+~~~~~~~~~~~
+The *kytos napps* are those needed for the controller to deal with main
 operations with a switch using a certain protocol. ex:
 - *of_core napp* is responsible for providing interaction
 with OpenFlow switches, and deals with things like OF connection handling,

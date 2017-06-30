@@ -1,15 +1,18 @@
 """Module to monitor installed napps."""
 import logging
+import re
 
-from watchdog.events import FileSystemEventHandler
+from watchdog.events import RegexMatchingEventHandler
 from watchdog.observers import Observer
 
 log = logging.getLogger(__name__)
 
 
-class NAppDirListener(FileSystemEventHandler):
+class NAppDirListener(RegexMatchingEventHandler):
     """Class to handle directory changes."""
 
+    regexes = [re.compile(r".*\/kytos\/napps\/[a-zA-Z][^/]+\/[a-zA-Z].*")]
+    ignore_regexes = [re.compile(r".*\.installed")]
     _controller = None
 
     def __init__(self, controller):
@@ -18,6 +21,7 @@ class NAppDirListener(FileSystemEventHandler):
         Args:
             controller(kytos.core.controller): A controller instance.
         """
+        super(NAppDirListener, self).__init__()
         self._controller = controller
         self.napps_path = self._controller.options.napps
         self.observer = Observer()

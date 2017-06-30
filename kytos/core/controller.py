@@ -105,7 +105,8 @@ class Controller(object):
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
         #: from napps.<username>.<napp_name> import ?....
-        sys.path.append(os.path.join(self.options.napps, os.pardir))
+        sys.path.append(os.path.abspath(
+            os.path.join(self.options.napps, os.pardir)))
 
     def enable_logs(self):
         """Method used to register kytos log and enable the logs."""

@@ -23,10 +23,13 @@ class Interface(object):
             name (string): name from this interface.
             port_number (int): port number from this interface.
             switch (:class:`~.core.switch.Switch`): Switch with this interface.
-            address (HWAddress): Port address from this interface.
-            state (PortState): Port Stat from interface.
-            features (PortFeatures): Port feature used to calculate link
-                                     utilization from this interface.
+            address (:class:`pyof.foundation.basic_types.HWAddress`):
+                Port address from this interface.
+            state (:class:`pyof.v0x01.common.phy_port.PortState`):
+                Port Stat from interface.
+            features (:class:`pyof.v0x01.common.phy_port.PortFeatures`):
+                Port feature used to calculate link utilization from this
+                interface.
         """
         self.name = name
         self.port_number = int(port_number)
@@ -60,10 +63,13 @@ class Interface(object):
         """Return a tuple with existent endpoint, None otherwise.
 
         Parameters:
-            endpoint (HWAddress,Interface): endpoint instance.
+            endpoint \
+            (:class:`pyof.foundation.basic_types.HWAddress`, \
+            :class:`~kytos.core.switch.Interface`):
+                endpoint instance.
 
         Returns:
-            item (tuple): A tuple with endpoint and time of last update.
+            tuple: A tuple with endpoint and time of last update.
         """
         for item in self.endpoints:
             if endpoint == item[0]:
@@ -81,7 +87,10 @@ class Interface(object):
         """Create a new endpoint to Interface instance.
 
         Parameters:
-            endpoint (HWAddress): A target endpoint.
+            endpoint \
+            (:class:`pyof.foundation.basic_types.HWAddress`, \
+            :class:`~kytos.core.switch.Interface`):
+                A target endpoint.
         """
         exists = self.get_endpoint(endpoint)
         if not exists:
@@ -91,7 +100,10 @@ class Interface(object):
         """Delete a existent endpoint in Interface instance.
 
         Parameters:
-            endpoint (HWAddress): A target endpoint.
+            endpoint \
+            (:class:`pyof.foundation.basic_types.HWAddress`, \
+            :class:`~kytos.core.switch.Interface`):
+                A target endpoint.
         """
         exists = self.get_endpoint(endpoint)
         if exists:
@@ -101,7 +113,10 @@ class Interface(object):
         """Update or create new endpoint to Interface instance.
 
         Parameters:
-            endpoint (HWAddress): A target endpoint.
+            endpoint \
+            (:class:`pyof.foundation.basic_types.HWAddress`, \
+            :class:`~kytos.core.switch.Interface`):
+                A target endpoint.
         """
         exists = self.get_endpoint(endpoint)
         if exists:
@@ -112,7 +127,7 @@ class Interface(object):
         """Return the link speed in bits per second, None otherwise.
 
         Returns:
-            speed (int): Link speed in bits per second.
+            int: Link speed in bits per second.
         """
         fs = self.features
         PF = PortFeatures
@@ -133,8 +148,7 @@ class Interface(object):
         """Return Human-Readable string for link speed.
 
         Returns:
-            human_speed (string): String with link speed.
-            e.g: '350 Gbps' or '350 Mbps'.
+            string: String with link speed. e.g: '350 Gbps' or '350 Mbps'.
         """
         speed = self.get_speed()
         if speed is None:
@@ -159,7 +173,7 @@ class Interface(object):
              'speed': '350 Mbps'}
 
         Returns:
-            dictionary (dict): Dictionary filled with interface attributes.
+            dict: Dictionary filled with interface attributes.
         """
         return {'id': self.id,
                 'name': self.name,
@@ -185,7 +199,7 @@ class Interface(object):
              "speed": "350 Mbps"}
 
         Returns:
-            json (string): Json filled with interface attributes.
+            string: Json filled with interface attributes.
         """
         return json.dumps(self.as_dict())
 
@@ -229,11 +243,14 @@ class Switch(object):
         """Contructor of switches have the below parameters.
 
         Parameters:
-            dpid (DPID): datapath_id of the switch
-            connection (:class:`~.core.switch.Connection`):
-                Connection used by switch.
-            ofp_version (string): Current talked OpenFlow version.
-            features (FeaturesReply): FeaturesReply instance.
+          dpid (:class:`pyof.foundation.basic_types.DPID`):
+              datapath_id of the switch
+          connection (:class:`~.core.switch.Connection`):
+              Connection used by switch.
+          ofp_version (string): Current talked OpenFlow version.
+          features \
+          (:class:`pyof.v0x01.controller2switch.features_reply.FeaturesReply`):
+              FeaturesReply instance.
         """
         self.dpid = dpid
         self.connection = connection
@@ -265,8 +282,8 @@ class Switch(object):
         """Update switch'descriptions from Switch instance.
 
         Parameters:
-            desc (DescStats):
-                Description Class with new values of switch'descriptions.
+            desc (:class:`pyof.v0x01.controller2switch.common.DescStats`):
+                Description Class with new values of switch's descriptions.
         """
         self.description['manufacturer'] = desc.mfr_desc.value
         self.description['hardware'] = desc.hw_desc.value
@@ -361,7 +378,8 @@ class Switch(object):
         """Link the mac address with a port number.
 
         Parameters:
-            mac (HWAddress): mac address from switch.
+            mac (:class:`pyof.foundation.basic_types.HWAddress`):
+                mac address from switch.
             port (int): port linked in mac address.
         """
         if mac.value in self.mac2port:
@@ -373,6 +391,12 @@ class Switch(object):
         """Return the timestamp when the ethernet_frame was flooded.
 
         This method is usefull to check if a frame was flooded before or not.
+
+        Parameters:
+           ethernet_frame (:class:`pyof.foundation.basic_types.Ethernet`):
+               Ethernet instance to be verified.
+        Returns:
+           datetime.datetime.now: Last time when the ethernetframe was flooded.
         """
         try:
             return self.flood_table[ethernet_frame.get_hash()]
@@ -383,9 +407,10 @@ class Switch(object):
         """Verify if the ethernet frame should flood.
 
         Parameters:
-            ethernet_frame (Ethernet): Ethernet instance to be verified.
+            ethernet_frame (:class:`pyof.foundation.basic_types.Ethernet`):
+                Ethernet instance to be verified.
         Returns:
-            shoudl_flood (bool): True if the ethernet_frame should flood.
+            bool: True if the ethernet_frame should flood.
         """
         last_flood = self.last_flood(ethernet_frame)
         diff = (now() - last_flood).microseconds
@@ -396,7 +421,8 @@ class Switch(object):
         """Update a flood table using the given ethernet frame.
 
         Parameters:
-            ethernet_frame (Ethernet): Ethernet frame to be updated.
+            ethernet_frame (:class:`pyof.foundation.basic_types.Ethernet`):
+                Ethernet frame to be updated.
         """
         self.flood_table[ethernet_frame.get_hash()] = now()
 
@@ -404,7 +430,8 @@ class Switch(object):
         """"Return all ports from specific mac address.
 
         Parameters:
-            mac (HWAddress): Mac address from switch.
+            mac (:class:`pyof.foundation.basic_types.HWAddress`):
+                Mac address from switch.
         Returns:
             :class:`list`: A list of ports. None otherswise.
         """
@@ -435,7 +462,7 @@ class Switch(object):
 
 
         Returns:
-            dictionary (dict): Dictionary filled with interface attributes.
+            dict: Dictionary filled with interface attributes.
         """
         connection = ""
         if self.connection is not None:
@@ -475,6 +502,6 @@ class Switch(object):
              "connection": ""}
 
         Returns:
-            json (string): Json filled with switch'attributes.
+            string: Json filled with switch'attributes.
         """
         return json.dumps(self.as_dict())

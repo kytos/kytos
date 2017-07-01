@@ -50,11 +50,11 @@ class Controller(object):
     """
 
     def __init__(self, options=None):
-        """Init method of Controller class.
+        """Init method of Controller class takes the parameters below.
 
         Parameters:
-            options (ParseArgs.args): 'options' attribute from an instance of
-                KytosConfig class
+            options (:attr:`ParseArgs.args`): :attr:`options` attribute from an
+                instance of :class:`~kytos.core.config.KytosConfig` class.
         """
         if options is None:
             options = KytosConfig().options['daemon']
@@ -217,7 +217,7 @@ class Controller(object):
 
         -   Register APIServer endpoints
         -   Register WebUI endpoints
-        -   Register '/kytos/config' endpoint
+        -   Register ``/kytos/config`` endpoint
         """
         self.api_server.register_api_server_routes()
         self.api_server.register_web_ui()
@@ -316,7 +316,7 @@ class Controller(object):
             - (kytos.start_at - datetime.now) if Kytos Server is running.
 
         Returns:
-           interval (datetime.timedelta): The uptime interval
+           datetime.timedelta: The uptime interval.
         """
         return now() - self.started_at if self.started_at else 0
 
@@ -424,11 +424,11 @@ class Controller(object):
         """Return a specific switch by dpid.
 
         Parameters:
-            dpid (:class:`pyof.foundation.DPID`): dpid object used to identify
-                                                  a switch.
+            dpid (:class:`pyof.foundation.basic_types.DPID`):
+                dpid object used to identify a switch.
 
         Returns:
-            switch (:class:`~.core.switch.Switch`): Switch with dpid specified.
+            :class:`~kytos.core.switch.Switch`: Switch with dpid specified.
         """
         return self.switches.get(dpid)
 
@@ -436,13 +436,14 @@ class Controller(object):
         """Return switch or create it if necessary.
 
         Parameters:
-            dpid (:class:`pyof.foundation.DPID`): dpid object used to identify
-                                                  a switch.
-            connection (:class:`~.core.switch.Connection`): connection used by
-                switch. If a switch has a connection that will be updated.
+            dpid (:class:`pyof.foundation.basic_types.DPID`):
+                dpid object used to identify a switch.
+            connection (:class:`~kytos.core.connection.Connection`):
+                connection used by switch. If a switch has a connection that
+                will be updated.
 
         Returns:
-            switch (:class:`~.core.switch.Switch`): new or existent switch.
+            :class:`~kytos.core.switch.Switch`: new or existent switch.
         """
         self.create_or_update_connection(connection)
         switch = self.get_switch_by_dpid(dpid)
@@ -470,8 +471,8 @@ class Controller(object):
         """Update a connection.
 
         Parameters:
-            connection (:class:`~.core.switch.Connection`): Instance of
-                connection that will be updated.
+            connection (:class:`~kytos.core.connection.Connection`):
+                Instance of connection that will be updated.
         """
         self.connections[connection.id] = connection
 
@@ -482,8 +483,8 @@ class Controller(object):
             id (int): id from a connection.
 
         Returns:
-            connection (:class:`~.core.switch.Connection`): Instance of
-            connection or None Type.
+            :class:`~kytos.core.connection.Connection`:
+            Instance of connection or None Type.
         """
         return self.connections.get(conn_id)
 
@@ -491,9 +492,8 @@ class Controller(object):
         """Close a existent connection and remove it.
 
         Parameters:
-            connection (:class:`~.core.switch.Connection`): Instance of
-                                                            connection that
-                                                            will be removed.
+            connection (:class:`~kytos.core.connection.Connection`):
+                Instance of connection that will be removed.
         """
         if connection is None:
             return False
@@ -507,9 +507,9 @@ class Controller(object):
     def remove_switch(self, switch):
         """Remove a existent switch.
 
-        Parameters:
-            switch (:class:`~.core.switch.Switch`): Instance of switch that
-                                                    will be removed.
+        Args:
+            switch (:class:`~kytos.core.switch.Switch`):
+                Instance of switch that will be removed.
         """
         try:
             del self.switches[switch.dpid]
@@ -526,9 +526,9 @@ class Controller(object):
         connection on the same ip:port.
 
         Parameters:
-            event (~kytos.core.KytosEvent): The received event
-                                            (kytos/core.connection.new)
-                                            with the needed infos.
+            event (~kytos.core.KytosEvent):
+                The received event (``kytos/core.connection.new``) with the
+                needed infos.
         """
         self.log.info("Handling KytosEvent:kytos/core.connection.new ...")
 
@@ -558,7 +558,7 @@ class Controller(object):
             username (str): NApp username present in napp's path.
             napp_name (str): Name of the NApp to be loaded.
 
-        Raise:
+        Raises:
             FileNotFoundError: if napps' main.py is not found.
         """
         if (username, napp_name) in self.napps:

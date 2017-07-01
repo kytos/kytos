@@ -4,7 +4,7 @@ from queue import Queue
 
 from kytos.core.events import KytosEvent
 
-__all__ = ('KytosBuffers', )
+__all__ = ('KytosBuffers', 'KytosEventBuffer')
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +29,10 @@ class KytosEventBuffer(object):
 
         Reject new events is True when a kytos/core.shutdown message was
         received.
+
+        Args:
+            event (:class:`~kytos.core.buffers.KytosEventBuffer`):
+                KytosEventBuffer sent to queue.
         """
         if not self._reject_new_events:
             self._queue.put(event)
@@ -40,7 +44,12 @@ class KytosEventBuffer(object):
             self._reject_new_events = True
 
     def get(self):
-        """Remove and return a event from top of queue."""
+        """Remove and return a event from top of queue.
+
+        Returns:
+            :class:`~kytos.core.buffers.KytosEventBuffer`:
+                Event removed from top of queue.
+        """
         event = self._queue.get()
 
         log.debug('[buffer: %s] Removed: %s', self.name, event.name)
@@ -50,10 +59,10 @@ class KytosEventBuffer(object):
     def task_done(self):
         """Indicate that a formerly enqueued task is complete.
 
-        If a :func:`~kytos.core.KytosEventBuffer.join` is currently blocking,
-        it will resume if all itens in KytosEventBuffer have been processed
-        (meaning that a task_done() call was received for every item that had
-        been put() into the KytosEventBuffer).
+        If a :func:`~kytos.core.buffers.KytosEventBuffer.join` is currently
+        blocking, it will resume if all itens in KytosEventBuffer have been
+        processed (meaning that a task_done() call was received for every item
+        that had been put() into the KytosEventBuffer).
         """
         self._queue.task_done()
 
@@ -83,10 +92,17 @@ class KytosBuffers(object):
     def __init__(self):
         """Constructor of KytosBuffer build four KytosEventBuffers.
 
-        RawEvent:   KytosEventBuffer with events received from network.
-        MsgInEvent: KytosEventBuffer with events to be received.
-        MsgOutEvent: KytosEventBuffer with events to be sent.
-        AppEvent: KytosEventBuffer with events sent to NApps.
+        :attr:`raw`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
+        received from network.
+
+        :attr:`msg_in`: :class:`~kytos.core.buffers.KytosEventBuffer` with
+        events to be received.
+
+        :attr:`msg_out`: :class:`~kytos.core.buffers.KytosEventBuffer` with
+        events to be sent.
+
+        :attr:`app`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
+        sent to NApps.
         """
         self.raw = KytosEventBuffer('raw_event')
         self.msg_in = KytosEventBuffer('msg_in_event')
@@ -94,7 +110,7 @@ class KytosBuffers(object):
         self.app = KytosEventBuffer('app_event')
 
     def send_stop_signal(self):
-        """Method usd to send a kytos/core.shutdown event to all buffers."""
+        """Method to send a ``kytos/core.shutdown`` event to all buffers."""
         log.info('Stop signal received by Kytos buffers.')
         log.info('Sending KytosShutdownEvent to all apps.')
         event = KytosEvent(name='kytos/core.shutdown')

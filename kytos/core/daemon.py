@@ -17,7 +17,7 @@
 #     def __init__(self, **kwargs):
 #         """Constructor of NoDaemonContext receive the parameters below.
 #
-#         Parameters:
+#         Args:
 #             signal_map (dict): dictionary with signals used in kytos.
 #             pidfile (string): address of a pidfile to be used in kytos.
 #             working_dir (string): working directory to be used in kytos.

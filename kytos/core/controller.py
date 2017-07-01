@@ -52,7 +52,7 @@ class Controller(object):
     def __init__(self, options=None):
         """Init method of Controller class takes the parameters below.
 
-        Parameters:
+        Args:
             options (:attr:`ParseArgs.args`): :attr:`options` attribute from an
                 instance of :class:`~kytos.core.config.KytosConfig` class.
         """
@@ -327,7 +327,7 @@ class Controller(object):
         name of the event with the keys of events_listeners. If a match occurs,
         then send the event to each registered listener.
 
-        Parameters:
+        Args:
             event (~kytos.core.KytosEvent): An instance of a KytosEvent.
         """
         for event_regex, listeners in self.events_listeners.items():
@@ -423,7 +423,7 @@ class Controller(object):
     def get_switch_by_dpid(self, dpid):
         """Return a specific switch by dpid.
 
-        Parameters:
+        Args:
             dpid (:class:`pyof.foundation.basic_types.DPID`):
                 dpid object used to identify a switch.
 
@@ -435,7 +435,7 @@ class Controller(object):
     def get_switch_or_create(self, dpid, connection):
         """Return switch or create it if necessary.
 
-        Parameters:
+        Args:
             dpid (:class:`pyof.foundation.basic_types.DPID`):
                 dpid object used to identify a switch.
             connection (:class:`~kytos.core.connection.Connection`):
@@ -470,7 +470,7 @@ class Controller(object):
     def create_or_update_connection(self, connection):
         """Update a connection.
 
-        Parameters:
+        Args:
             connection (:class:`~kytos.core.connection.Connection`):
                 Instance of connection that will be updated.
         """
@@ -479,7 +479,7 @@ class Controller(object):
     def get_connection_by_id(self, conn_id):
         """Return a existent connection by id.
 
-        Parameters:
+        Args:
             id (int): id from a connection.
 
         Returns:
@@ -491,7 +491,7 @@ class Controller(object):
     def remove_connection(self, connection):
         """Close a existent connection and remove it.
 
-        Parameters:
+        Args:
             connection (:class:`~kytos.core.connection.Connection`):
                 Instance of connection that will be removed.
         """
@@ -525,7 +525,7 @@ class Controller(object):
         It also clear all references to the connection since it is a new
         connection on the same ip:port.
 
-        Parameters:
+        Args:
             event (~kytos.core.KytosEvent):
                 The received event (``kytos/core.connection.new``) with the
                 needed infos.
@@ -544,7 +544,7 @@ class Controller(object):
     def add_new_switch(self, switch):
         """Add a new switch on the controller.
 
-        Parameters:
+        Args:
             switch (Switch): A Switch object
         """
         self.switches[switch.dpid] = switch

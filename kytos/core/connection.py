@@ -36,7 +36,7 @@ class Connection(object):
     def __init__(self, address, port, socket, switch=None):
         """The constructor method have the below parameters.
 
-        Parameters:
+        Args:
             address (:class:`pyof.foundation.basic_types.HWAddress`):
                 Source address.
             port (int): Port number.
@@ -77,7 +77,7 @@ class Connection(object):
     def send(self, buffer):
         """Send a buffer message using the socket from the connection instance.
 
-        Parameters:
+        Args:
             buffer (bytes): Message buffer that will be sent.
         """
         try:
@@ -134,7 +134,7 @@ class Connection(object):
     def update_switch(self, switch):
         """Update switch with this instance of Connection.
 
-        Parameters:
+        Args:
           switch (:class:`~.core.switch.Switch`): switch instance.
         """
         self.switch = switch

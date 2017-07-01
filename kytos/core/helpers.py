@@ -77,7 +77,7 @@ def listen_to(event, *events):
 def now(tzone=timezone.utc):
     """Return the current datetime (default to UTC).
 
-    Parameters:
+    Args:
         tzone (datetime.timezone): Specific time zone used in datetime.
 
     Returns:
@@ -89,7 +89,7 @@ def now(tzone=timezone.utc):
 def run_on_thread(method):
     """Decorator to run the decorated method inside a new thread.
 
-    Parameters:
+    Args:
         method (function): function used to run as a new thread.
 
     Returns:

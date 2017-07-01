@@ -23,7 +23,7 @@ class Flow(object):
                  actions=None):
         """Constructor receive the parameters below.
 
-        Parameters:
+        Args:
             idle_timeout (int): Idle time before discarding in seconds.
             hard_timeout (int): Max time before discarding in seconds.
             priority (int): Priority level of flow entry.
@@ -137,7 +137,7 @@ class Flow(object):
     def from_json(json_content):
         """Build a Flow object from a json.
 
-        Parameters:
+        Args:
             json_content (string): Json string with flow attributes.
 
         Returns:
@@ -150,7 +150,7 @@ class Flow(object):
     def from_dict(dict_content):
         """Build a Flow object from a python dict.
 
-        Parameters:
+        Args:
             dict_content (dict): Python dictionary with flow attributes.
 
         Returns:
@@ -174,7 +174,7 @@ class Flow(object):
     def from_flow_stats(flow_stats):
         """Build a new Flow Object from a stats_reply.
 
-        Parameters:
+        Args:
             stats_reply \
             (:class:`pyof/v0x01/controller2switch/stats_reply.StatsReply`):
                 Stats Reply Object.
@@ -205,7 +205,7 @@ class Flow(object):
     def as_flow_mod(self, flow_type=FlowModCommand.OFPFC_ADD):
         """Transform a Flow object into a flow_mod message.
 
-        Parameters:
+        Args:
             flow_type \
             (:class:`pyof.v0x01.controller2switch.flow_mod.FlowModCommand`):
                 type of flow_mod to be converted.
@@ -246,7 +246,7 @@ class FlowAction(object):
     def from_dict(dict_content):
         """Build one of the FlowActions from a dictionary.
 
-        Parameters:
+        Args:
             dict_content (dict): Python dictionary to build a FlowAction.
         """
         pass
@@ -258,7 +258,7 @@ class OutputAction(FlowAction):
     def __init__(self, output_port):
         """Constructor receive the parameters below.
 
-        Parameters:
+        Args:
             output_port (int): Specific port number.
         """
         self.output_port = output_port
@@ -285,7 +285,7 @@ class OutputAction(FlowAction):
     def from_dict(dict_content):
         """Build an OutputAction from a dictionary.
 
-        Parameters:
+        Args:
           dict_content (dict): Python dictionary with OutputAction attribute.
 
         Returns:
@@ -323,7 +323,7 @@ class DLChangeAction(FlowAction):
     def __init__(self, dl_src=None, dl_dst=None):
         """Constructor receive the parameters below.
 
-        Parameters:
+        Args:
             dl_src (:class:`pyof.foundation.basic_types.HWAddress`):
                 Ethernet source address.
             dl_dst (:class:`pyof.foundation.basic_types.HWAddress`):
@@ -339,7 +339,7 @@ class NWChangeAction(FlowAction):
     def __init__(self, nw_src, nw_dst):
         """Contructor receive the parameters below.
 
-        Parameters:
+        Args:
             nw_src (:class:`pyof.foundation.basic_types.IPAddress`):
                 IP source address.
             nw_dst (:class:`pyof.foundation.basic_types.IPAddress`):

@@ -77,11 +77,11 @@ def listen_to(event, *events):
 def now(tzone=timezone.utc):
     """Return the current datetime (default to UTC).
 
-    Paramenters:
+    Parameters:
         tzone (datetime.timezone): Specific time zone used in datetime.
 
     Returns:
-        now (datetime.datetime): Date time with specific time zone.
+        datetime.datetime: Date time with specific time zone.
     """
     return datetime.now(tzone)
 

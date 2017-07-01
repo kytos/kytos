@@ -30,10 +30,10 @@ class KytosServer(ThreadingMixIn, TCPServer):
         Args:
             server_address (tuple): Address which the server is listening.
                 example: ('127.0.0.1', 80)
-            RequestHandlerClass (RequestHandlerClass):
+            RequestHandlerClass(socketserver.BaseRequestHandler):
                 Class that will be instantiated to handle each request.
-            controller (KytosController): The controller instance.
-
+            controller (:class:`~kytos.core.controller.Controller`):
+                The controller instance.
         """
         super().__init__(server_address, RequestHandlerClass,
                          bind_and_activate=False)
@@ -58,10 +58,10 @@ class KytosRequestHandler(BaseRequestHandler):
 
     It is instantiated once per connection between each switch and the
     controller.
-    The setup method will dispatch a KytosEvent (kytos/core.connection.new) on
-    the controller, that will be processed by a Core App.
+    The setup method will dispatch a KytosEvent (``kytos/core.connection.new``)
+    on the controller, that will be processed by a Core App.
     The finish method will close the connection and dispatch a KytonEvents
-    (kytos/core.connection.closed) on the controller.
+    (``kytos/core.connection.closed``) on the controller.
     """
 
     known_ports = {
@@ -69,7 +69,16 @@ class KytosRequestHandler(BaseRequestHandler):
     }
 
     def __init__(self, request, client_address, server):
-        """Initialize the request handler."""
+        """Contructor takes the parameters below.
+
+        Args:
+            request (socket.socket):
+                Request sent by client.
+            client_address (tuple):
+                Client address, tuple with host and port.
+            server (socketserver.BaseServer):
+                Server used to send messages to client.
+        """
         super().__init__(request, client_address, server)
         self.connection = None
 
@@ -77,7 +86,7 @@ class KytosRequestHandler(BaseRequestHandler):
         """Method used to setup the new connection.
 
         This method builds a new controller Connection, and places a
-        'kytos/core.connection.new' KytosEvent in the app buffer.
+        ``kytos/core.connection.new`` KytosEvent in the app buffer.
         """
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
@@ -106,7 +115,7 @@ class KytosRequestHandler(BaseRequestHandler):
         """Handle each request and places its data in the raw event buffer.
 
         This method loops reading the binary data from the connection socket,
-        and placing a 'kytos/core.messages.new' KytosEvent in the raw event
+        and placing a ``kytos/core.messages.new`` KytosEvent in the raw event
         buffer.
         """
         curr_thread = current_thread()
@@ -143,7 +152,7 @@ class KytosRequestHandler(BaseRequestHandler):
         """Method is called when the client connection is finished.
 
         This method closes the connection socket and generates a
-        'kytos/core.connection.lost' KytosEvent in the App buffer.
+        ``kytos/core.connection.lost`` KytosEvent in the App buffer.
         """
         log.info("Connection lost with Client %s:%s. Reason: %s",
                  self.ip, self.port, self.exception)

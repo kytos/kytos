@@ -57,7 +57,8 @@ class APIServer:
             url (string):        String with partner of route. e.g.: '/status'
             function (function): Function pointer used to handle the requests.
             methods (:class:`list`):  List of request methods allowed.
-                                 e.g: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH']
+                e.g: [``'GET'``, ``'PUT'``, ``'POST'``, ``'DELETE'``,
+                ``'PATCH'``]
         """
         new_endpoint_url = "/kytos{}".format(url)
 
@@ -88,7 +89,7 @@ class APIServer:
     def register_api_server_routes(self):
         """Register initial routes from kytos using ApiServer.
 
-        Initial routes are: ['/kytos/status/', '/kytos/shutdown/']
+        Initial routes are: [``/kytos/status/``, ``/kytos/shutdown/``]
         """
         if '/kytos/status/' not in self.rest_endpoints:
             self.register_rest_endpoint('/status/',
@@ -100,7 +101,7 @@ class APIServer:
 
     @staticmethod
     def status_api():
-        """Display json with kytos status using the route '/kytos/status/'."""
+        """Display kytos status using the route ``/kytos/status/``."""
         return '{"response": "running"}', 201
 
     def stop_api_server(self):

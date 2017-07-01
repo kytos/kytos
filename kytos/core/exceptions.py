@@ -15,7 +15,7 @@ class KytosSwitchOfflineException(Exception):
     def __init__(self, switch):
         """Constructor receive the parameters below.
 
-        Parameters:
+        Args:
             switch (:class:`~kytos.core.switch.Switch`): A switch offline.
         """
         super().__init__()
@@ -34,7 +34,7 @@ class KytosEventException(Exception):
     def __init__(self, message="KytosEvent exception", event=None):
         """Constructor receive the parameters below.
 
-        Parameters:
+        Args:
             message (string): message from KytosEventException.
             event (:class:`~kytos.core.events.KytosEvent`): Event malformed.
         """
@@ -68,7 +68,7 @@ class KytosNAppException(Exception):
     def __init__(self, message="KytosNApp exception"):
         """Constructor receive the paramters below.
 
-        Parameters:
+        Args:
             message (string): message from KytosNAppException.
         """
         super().__init__()

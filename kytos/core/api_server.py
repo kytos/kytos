@@ -17,7 +17,7 @@ class APIServer:
 
         This method will instantiate a server with SocketIO+Flask.
 
-        Parameters:
+        Args:
             app_name(string): String representing a App Name
             listen (string): host name used by api server instance
             port (int): Port number used by api server instance
@@ -53,7 +53,7 @@ class APIServer:
         To register new endpoints is needed to have a url, function to handle
         the requests and type of method allowed.
 
-        Parameters:
+        Args:
             url (string):        String with partner of route. e.g.: '/status'
             function (function): Function pointer used to handle the requests.
             methods (:class:`list`):  List of request methods allowed.

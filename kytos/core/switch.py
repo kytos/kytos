@@ -19,7 +19,7 @@ class Interface(object):
                  features=None):
         """The contructor of Interface have the below parameters.
 
-        Parameters:
+        Args:
             name (string): name from this interface.
             port_number (int): port number from this interface.
             switch (:class:`~.core.switch.Switch`): Switch with this interface.
@@ -62,7 +62,7 @@ class Interface(object):
     def get_endpoint(self, endpoint):
         """Return a tuple with existent endpoint, None otherwise.
 
-        Parameters:
+        Args:
             endpoint \
             (:class:`pyof.foundation.basic_types.HWAddress`, \
             :class:`~kytos.core.switch.Interface`):
@@ -86,7 +86,7 @@ class Interface(object):
     def add_endpoint(self, endpoint):
         """Create a new endpoint to Interface instance.
 
-        Parameters:
+        Args:
             endpoint \
             (:class:`pyof.foundation.basic_types.HWAddress`, \
             :class:`~kytos.core.switch.Interface`):
@@ -99,7 +99,7 @@ class Interface(object):
     def delete_endpoint(self, endpoint):
         """Delete a existent endpoint in Interface instance.
 
-        Parameters:
+        Args:
             endpoint \
             (:class:`pyof.foundation.basic_types.HWAddress`, \
             :class:`~kytos.core.switch.Interface`):
@@ -112,7 +112,7 @@ class Interface(object):
     def update_endpoint(self, endpoint):
         """Update or create new endpoint to Interface instance.
 
-        Parameters:
+        Args:
             endpoint \
             (:class:`pyof.foundation.basic_types.HWAddress`, \
             :class:`~kytos.core.switch.Interface`):
@@ -242,7 +242,7 @@ class Switch(object):
                  features=None):
         """Contructor of switches have the below parameters.
 
-        Parameters:
+        Args:
           dpid (:class:`pyof.foundation.basic_types.DPID`):
               datapath_id of the switch
           connection (:class:`~.core.switch.Connection`):
@@ -281,7 +281,7 @@ class Switch(object):
     def update_description(self, desc):
         """Update switch'descriptions from Switch instance.
 
-        Parameters:
+        Args:
             desc (:class:`pyof.v0x01.controller2switch.common.DescStats`):
                 Description Class with new values of switch's descriptions.
         """
@@ -318,7 +318,7 @@ class Switch(object):
     def get_flow_by_id(self, flow_id):
         """Return a Flow using the flow_id given. None if not found in flows.
 
-        Parameters:
+        Args:
             flow_id (int): identifier from specific flow stored.
         """
         for flow in self.flows:
@@ -339,7 +339,7 @@ class Switch(object):
     def update_connection(self, connection):
         """Update switch connection.
 
-        Parameters:
+        Args:
             connection (:class:`~.core.switch.Connection`):
                 New connection to this instance of switch.
         """
@@ -353,7 +353,7 @@ class Switch(object):
     def send(self, buffer):
         """Send a buffer data to the real switch.
 
-        Parameters:
+        Args:
           buffer (bytes): bytes to be sent to the switch throught its
                             connection.
         """
@@ -367,7 +367,7 @@ class Switch(object):
     def update_interface(self, interface):
         """Update a interface from switch instance.
 
-        Parameters:
+        Args:
             interface (:class:`~kytos.core.switch.Interface`):
                 Interface object to be storeged.
         """
@@ -377,7 +377,7 @@ class Switch(object):
     def update_mac_table(self, mac, port_number):
         """Link the mac address with a port number.
 
-        Parameters:
+        Args:
             mac (:class:`pyof.foundation.basic_types.HWAddress`):
                 mac address from switch.
             port (int): port linked in mac address.
@@ -392,7 +392,7 @@ class Switch(object):
 
         This method is usefull to check if a frame was flooded before or not.
 
-        Parameters:
+        Args:
            ethernet_frame (:class:`pyof.foundation.basic_types.Ethernet`):
                Ethernet instance to be verified.
         Returns:
@@ -406,7 +406,7 @@ class Switch(object):
     def should_flood(self, ethernet_frame):
         """Verify if the ethernet frame should flood.
 
-        Parameters:
+        Args:
             ethernet_frame (:class:`pyof.foundation.basic_types.Ethernet`):
                 Ethernet instance to be verified.
         Returns:
@@ -420,7 +420,7 @@ class Switch(object):
     def update_flood_table(self, ethernet_frame):
         """Update a flood table using the given ethernet frame.
 
-        Parameters:
+        Args:
             ethernet_frame (:class:`pyof.foundation.basic_types.Ethernet`):
                 Ethernet frame to be updated.
         """
@@ -429,7 +429,7 @@ class Switch(object):
     def where_is_mac(self, mac):
         """"Return all ports from specific mac address.
 
-        Parameters:
+        Args:
             mac (:class:`pyof.foundation.basic_types.HWAddress`):
                 Mac address from switch.
         Returns:

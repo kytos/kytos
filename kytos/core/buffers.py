@@ -15,7 +15,7 @@ class KytosEventBuffer(object):
     def __init__(self, name, event_base_class=None):
         """Contructor of KytosEventBuffer receive the parameters below.
 
-        Parameters:
+        Args:
             name (string): name of KytosEventBuffer.
             event_base_class (class): Class of KytosEvent.
         """

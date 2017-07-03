@@ -102,12 +102,6 @@ class Controller(object):
 
         self.register_kytos_endpoints()
 
-        #: Adding the napps 'enabled' directory into the PATH
-        #: Now you can access the enabled napps with:
-        #: from napps.<username>.<napp_name> import ?....
-        sys.path.append(os.path.abspath(
-            os.path.join(self.options.napps, os.pardir)))
-
     def enable_logs(self):
         """Method used to register kytos log and enable the logs."""
         LogManager.load_config_file(self.options.logging, self.options.debug)
@@ -544,6 +538,14 @@ class Controller(object):
         """
         self.switches[switch.dpid] = switch
 
+    def _load_module(self, mod_name, mod_path):
+            napp_spec = spec_from_file_location(mod_name,
+                                                os.path.join(
+                                                    mod_path, '__init__.py'))
+            napp_module = module_from_spec(napp_spec)
+            sys.modules[napp_spec.name] = napp_module
+            return napp_spec, napp_module
+
     def load_napp(self, username, napp_name):
         """Load a single app.
 
@@ -560,12 +562,14 @@ class Controller(object):
             message = 'NApp %s/%s was already loaded'
             self.log.warning(message, username, napp_name)
         else:
-            mod_name = '.'.join(['napps', username, napp_name, 'main'])
-            path = os.path.join(self.options.napps, username, napp_name,
-                                'main.py')
-            napp_spec = spec_from_file_location(mod_name, path)
-            napp_module = module_from_spec(napp_spec)
-            sys.modules[napp_spec.name] = napp_module
+            name = 'napps'
+            path = self.options.napps
+            self._load_module(name, path)
+            for name_path in username, napp_name:
+                name = '.'.join([name, name_path])
+                path = os.path.join(path, name_path)
+                napp_spec, napp_module = self._load_module(name, path)
+
             napp_spec.loader.exec_module(napp_module)
             napp = napp_module.Main(controller=self)
 

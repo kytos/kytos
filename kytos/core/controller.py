@@ -562,7 +562,7 @@ class Controller(object):
             message = 'NApp %s/%s was already loaded'
             self.log.warning(message, username, napp_name)
         else:
-            name = 'napps'
+            name = 'kytos.napps'
             path = self.options.napps
             self._load_module(name, path)
             for name_path in username, napp_name:

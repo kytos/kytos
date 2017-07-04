@@ -37,12 +37,10 @@ class Connection(object):
         """The constructor method have the below parameters.
 
         Args:
-            address (:class:`pyof.foundation.basic_types.HWAddress`):
-                Source address.
+            address (|hw_address|): Source address.
             port (int): Port number.
             socket (socket): socket.
-            switch (:class:`~kytos.core.switch.Switch`):
-                switch with this connection.
+            switch (:class:`~.Switch`): switch with this connection.
         """
         self.address = address
         self.port = port
@@ -135,7 +133,7 @@ class Connection(object):
         """Update switch with this instance of Connection.
 
         Args:
-          switch (:class:`~.core.switch.Switch`): switch instance.
+          switch (:class:`~.Switch`): switch instance.
         """
         self.switch = switch
         self.switch.connection = self

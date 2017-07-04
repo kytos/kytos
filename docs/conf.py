@@ -379,8 +379,11 @@ texinfo_documents = [
 # Note: links to Python doc only work if you are online or have python.inv
 #     file. To download it, run:
 #     curl https://docs.python.org/3/objects.inv >python.inv
-intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
-                       'kytos': ('http://docs.kytos.io/kytos', None)}
+intersphinx_mapping = {'python-openflow': (
+                           'http://docs.kytos.io/python-openflow', None),
+                       'kytos': ('http://docs.kytos.io/kytos', None),
+                       'python': ('https://docs.python.org/3', None)}
+
 
 # Napoleon settings from http://www.sphinx-doc.org/en/stable/ext/napoleon.html
 napoleon_google_docstring = True
@@ -395,3 +398,44 @@ autoclass_content = 'both'
 # Order methods before attributes/properties on a class
 autodoc_member_order = 'groupwise'
 todo_include_todos = True
+
+rst_epilog = """
+.. |flow_mod| replace::
+   :class:`~pyof.v0x01.controller2switch.flow_mod.FlowMod`
+
+.. |flow_mod_command| replace::
+   :class:`~pyof.v0x01.controller2switch.flow_mod.FlowModCommand`
+
+.. |hw_address| replace::
+   :class:`~pyof.foundation.basic_types.HWAddress`
+
+.. |features_reply| replace::
+   :class:`~pyof.v0x01.controller2switch.features_reply.FeaturesReply`
+
+.. |ip_address| replace::
+   :class:`~pyof.foundation.basic_types.IPAddress`
+
+.. |DPID| replace::
+   :class:`~pyof.foundation.basic_types.DPID`
+
+.. |list_of_actions| replace::
+   :class:`~pyof.v0x01.common.action.ListOfActions`
+
+.. |stats_reply_v0x01| replace::
+   :class:`~pyof.v0x01.controller2switch.stats_reply.StatsReply`
+
+.. |action_output| replace::
+   :class:`~pyof.v0x01.common.action.ActionOutput`
+
+.. |ethernet| replace::
+   :class:`~pyof.foundation.network_types.Ethernet`
+
+.. |port_stats| replace::
+   :class:`~pyof.v0x01.common.phy_port.PortState`
+
+.. |port_features| replace::
+   :class:`~pyof.v0x01.common.phy_port.PortFeatures`
+
+.. |desc_stats| replace::
+   :class:`~pyof.v0x01.controller2switch.common.DescStats`
+"""

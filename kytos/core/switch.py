@@ -23,13 +23,10 @@ class Interface(object):
             name (string): name from this interface.
             port_number (int): port number from this interface.
             switch (:class:`~.core.switch.Switch`): Switch with this interface.
-            address (:class:`pyof.foundation.basic_types.HWAddress`):
-                Port address from this interface.
-            state (:class:`pyof.v0x01.common.phy_port.PortState`):
-                Port Stat from interface.
-            features (:class:`pyof.v0x01.common.phy_port.PortFeatures`):
-                Port feature used to calculate link utilization from this
-                interface.
+            address (|hw_address|): Port address from this interface.
+            state (|port_stats|): Port Stat from interface.
+            features (|port_features|): Port feature used to calculate link
+                utilization from this interface.
         """
         self.name = name
         self.port_number = int(port_number)
@@ -63,10 +60,7 @@ class Interface(object):
         """Return a tuple with existent endpoint, None otherwise.
 
         Args:
-            endpoint \
-            (:class:`pyof.foundation.basic_types.HWAddress`, \
-            :class:`~kytos.core.switch.Interface`):
-                endpoint instance.
+            endpoint(|hw_address|, :class:`.Interface`): endpoint instance.
 
         Returns:
             tuple: A tuple with endpoint and time of last update.
@@ -87,10 +81,7 @@ class Interface(object):
         """Create a new endpoint to Interface instance.
 
         Args:
-            endpoint \
-            (:class:`pyof.foundation.basic_types.HWAddress`, \
-            :class:`~kytos.core.switch.Interface`):
-                A target endpoint.
+            endpoint(|hw_address|, :class:`.Interface`): A target endpoint.
         """
         exists = self.get_endpoint(endpoint)
         if not exists:
@@ -100,10 +91,7 @@ class Interface(object):
         """Delete a existent endpoint in Interface instance.
 
         Args:
-            endpoint \
-            (:class:`pyof.foundation.basic_types.HWAddress`, \
-            :class:`~kytos.core.switch.Interface`):
-                A target endpoint.
+            endpoint (|hw_address|, :class:`.Interface`): A target endpoint.
         """
         exists = self.get_endpoint(endpoint)
         if exists:
@@ -113,10 +101,7 @@ class Interface(object):
         """Update or create new endpoint to Interface instance.
 
         Args:
-            endpoint \
-            (:class:`pyof.foundation.basic_types.HWAddress`, \
-            :class:`~kytos.core.switch.Interface`):
-                A target endpoint.
+            endpoint(|hw_address|, :class:`.Interface`): A target endpoint.
         """
         exists = self.get_endpoint(endpoint)
         if exists:
@@ -243,14 +228,11 @@ class Switch(object):
         """Contructor of switches have the below parameters.
 
         Args:
-          dpid (:class:`pyof.foundation.basic_types.DPID`):
-              datapath_id of the switch
-          connection (:class:`~.core.switch.Connection`):
-              Connection used by switch.
+          dpid (|DPID|): datapath_id of the switch
+          connection (:class:`~.Connection`): Connection used by switch.
           ofp_version (string): Current talked OpenFlow version.
-          features \
-          (:class:`pyof.v0x01.controller2switch.features_reply.FeaturesReply`):
-              FeaturesReply instance.
+          features (|features_reply|): FeaturesReply instance.
+
         """
         self.dpid = dpid
         self.connection = connection
@@ -282,7 +264,7 @@ class Switch(object):
         """Update switch'descriptions from Switch instance.
 
         Args:
-            desc (:class:`pyof.v0x01.controller2switch.common.DescStats`):
+            desc (|desc_stats|):
                 Description Class with new values of switch's descriptions.
         """
         self.description['manufacturer'] = desc.mfr_desc.value
@@ -310,8 +292,7 @@ class Switch(object):
         """Get interface by port number from Switch instance.
 
         Returns:
-            interface (:class:`~.core.switch.Interface`):
-                Interface from specific port.
+            :class:`~.core.switch.Interface`: Interface from specific port.
         """
         return self.interfaces.get(port_no)
 
@@ -378,8 +359,7 @@ class Switch(object):
         """Link the mac address with a port number.
 
         Args:
-            mac (:class:`pyof.foundation.basic_types.HWAddress`):
-                mac address from switch.
+            mac (|hw_address|): mac address from switch.
             port (int): port linked in mac address.
         """
         if mac.value in self.mac2port:
@@ -393,8 +373,7 @@ class Switch(object):
         This method is usefull to check if a frame was flooded before or not.
 
         Args:
-            ethernet_frame (:class:`pyof.foundation.network_types.Ethernet`):
-                Ethernet instance to be verified.
+            ethernet_frame (|ethernet|): Ethernet instance to be verified.
         Returns:
             datetime.datetime.now:
                 Last time when the ethernet_frame was flooded.
@@ -408,8 +387,7 @@ class Switch(object):
         """Verify if the ethernet frame should flood.
 
         Args:
-            ethernet_frame (:class:`pyof.foundation.network_types.Ethernet`):
-                Ethernet instance to be verified.
+            ethernet_frame (|ethernet|): Ethernet instance to be verified.
         Returns:
             bool: True if the ethernet_frame should flood.
         """
@@ -422,8 +400,7 @@ class Switch(object):
         """Update a flood table using the given ethernet frame.
 
         Args:
-            ethernet_frame (:class:`pyof.foundation.network_types.Ethernet`):
-                Ethernet frame to be updated.
+            ethernet_frame (|ethernet|): Ethernet frame to be updated.
         """
         self.flood_table[ethernet_frame.get_hash()] = now()
 
@@ -431,8 +408,7 @@ class Switch(object):
         """"Return all ports from specific mac address.
 
         Args:
-            mac (:class:`pyof.foundation.basic_types.HWAddress`):
-                Mac address from switch.
+            mac (|hw_address|): Mac address from switch.
         Returns:
             :class:`list`: A list of ports. None otherswise.
         """

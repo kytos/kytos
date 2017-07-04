@@ -424,8 +424,7 @@ class Controller(object):
         """Return a specific switch by dpid.
 
         Args:
-            dpid (:class:`pyof.foundation.basic_types.DPID`):
-                dpid object used to identify a switch.
+            dpid (|DPID|): dpid object used to identify a switch.
 
         Returns:
             :class:`~kytos.core.switch.Switch`: Switch with dpid specified.
@@ -436,8 +435,7 @@ class Controller(object):
         """Return switch or create it if necessary.
 
         Args:
-            dpid (:class:`pyof.foundation.basic_types.DPID`):
-                dpid object used to identify a switch.
+            dpid (|DPID|): dpid object used to identify a switch.
             connection (:class:`~kytos.core.connection.Connection`):
                 connection used by switch. If a switch has a connection that
                 will be updated.

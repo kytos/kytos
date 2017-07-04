@@ -31,7 +31,7 @@ from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
 from kytos.core.napps.manager import NAppsManager
-from kytos.core.napps.napps_dir_listener import NAppDirListener
+from kytos.core.napps.napp_dir_listener import NAppDirListener
 from kytos.core.switch import Switch
 from kytos.core.tcp_server import KytosRequestHandler, KytosServer
 

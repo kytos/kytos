@@ -21,7 +21,7 @@ class NAppDirListener(RegexMatchingEventHandler):
         Args:
             controller(kytos.core.controller): A controller instance.
         """
-        super(NAppDirListener, self).__init__()
+        super().__init__()
         self._controller = controller
         self.napps_path = self._controller.options.napps
         self.observer = Observer()

@@ -2,7 +2,7 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
-from kytos.core.napps.napps_dir_listener import NAppDirListener
+from kytos.core.napps.napp_dir_listener import NAppDirListener
 
 
 class TestNAppDirListener(TestCase):

@@ -81,7 +81,7 @@ def now(tzone=timezone.utc):
         tzone (datetime.timezone): Specific time zone used in datetime.
 
     Returns:
-        datetime.datetime: Date time with specific time zone.
+        datetime.datetime.now: Date time with specific time zone.
     """
     return datetime.now(tzone)
 

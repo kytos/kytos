@@ -29,21 +29,16 @@ class Flow(object):
             priority (int): Priority level of flow entry.
             table_id (int): The index of a single table or 0xff for all tables.
             buffer_id (int): Buffered packet to apply.
-            dl_src (:class:`pyof.foundation.basic_types.HWAddress`):
-                Ethernet source address.
-            dl_dst (:class:`pyof.foundation.basic_types.HWAddress`):
-                Ethernet destination address.
+            dl_src (|hw_address|): Ethernet source address.
+            dl_dst (|hw_address|): Ethernet destination address.
             dl_vlan (int): Input VLAN id.
             dl_type (int): Ethernet frame type.
             nw_proto (int): IP protocol or lower 8 bits of ARP opcode.
-            nw_src (:class:`pyof.foundation.basic_types.IPAddress`):
-                IP source address.
-            nw_dst (:class:`pyof.foundation.basic_types.IPAddress`):
-                IP destination address.
+            nw_src (|ip_address|): IP source address.
+            nw_dst (|ip_address|): IP destination address.
             tp_src (int): TCP/UDP source port.
             tp_dst (int): TCP/UDP destination port.
-            actions (:class:`pyof.v0x01.common.action.ListOfAction`):
-                List of action to apply.
+            actions (|list_of_actions|): List of action to apply.
         """
         if actions is None:
             actions = []
@@ -141,7 +136,7 @@ class Flow(object):
             json_content (string): Json string with flow attributes.
 
         Returns:
-            :class:`~kytos.core.flow.Flow`: Flow built from json.
+            :class:`Flow`: Flow built from json.
         """
         dict_content = json.loads(json_content)
         return Flow.from_dict(dict_content)
@@ -154,7 +149,7 @@ class Flow(object):
             dict_content (dict): Python dictionary with flow attributes.
 
         Returns:
-            :class:`~kytos.core.flow.Flow`: Flow built from json.
+            :class:`Flow`: Flow built from json.
         """
         flow = Flow()
 
@@ -175,12 +170,10 @@ class Flow(object):
         """Build a new Flow Object from a stats_reply.
 
         Args:
-            stats_reply \
-            (:class:`pyof/v0x01/controller2switch/stats_reply.StatsReply`):
-                Stats Reply Object.
+            stats_reply (|stats_reply_v0x01|): Stats Reply Object.
 
         Returns:
-            :class:`~kytos.core.flow.Flow`: Flow built from json.
+            :class:`Flow`: Flow built from json.
         """
         flow = Flow()
         flow.idle_timeout = flow_stats.idle_timeout.value
@@ -206,13 +199,10 @@ class Flow(object):
         """Transform a Flow object into a flow_mod message.
 
         Args:
-            flow_type \
-            (:class:`pyof.v0x01.controller2switch.flow_mod.FlowModCommand`):
+            flow_type (|flow_mod_command|):
                 type of flow_mod to be converted.
-
         Returns:
-            :class:`pyof.v0x01.controller2switch.flow_mod.FlowMod`:
-                Instance of FlowMod with Flow attributes.
+            |flow_mod|: Instance of FlowMod with Flow attributes.
         """
         flow_mod = FlowMod()
         flow_mod.command = flow_type
@@ -267,8 +257,7 @@ class OutputAction(FlowAction):
         """Build a Action Output from this action.
 
         Returns:
-            :class:`pyof.v0x01.common.action.ActionOutput`:
-                A instance of ActionOutput.
+            |action_output|: A instance of ActionOutput.
         """
         return ActionOutput(port=self.output_port)
 
@@ -289,7 +278,7 @@ class OutputAction(FlowAction):
           dict_content (dict): Python dictionary with OutputAction attribute.
 
         Returns:
-          :class:`~kytos.core.flow.OutputAction`: A instance of OutputAction.
+          :class:`OutputAction`: A instance of OutputAction.
         """
         return OutputAction(output_port=dict_content['port'])
 
@@ -312,7 +301,7 @@ class OutputAction(FlowAction):
             ofp_action (ActionOutput): Action used to create OutputAction.
 
         Returns:
-            :class:`~kytos.core.flow.OutputAction`: A instance of OutputAction.
+            :class:`OutputAction`: A instance of OutputAction.
         """
         return OutputAction(output_port=ofp_action.port.value)
 
@@ -324,10 +313,8 @@ class DLChangeAction(FlowAction):
         """Constructor receive the parameters below.
 
         Args:
-            dl_src (:class:`pyof.foundation.basic_types.HWAddress`):
-                Ethernet source address.
-            dl_dst (:class:`pyof.foundation.basic_types.HWAddress`):
-                Ethernet destination address.
+            dl_src (|hw_address|): Ethernet source address.
+            dl_dst (|hw_address|): Ethernet destination address.
         """
         self.dl_src = dl_src
         self.dl_dst = dl_dst
@@ -340,10 +327,8 @@ class NWChangeAction(FlowAction):
         """Contructor receive the parameters below.
 
         Args:
-            nw_src (:class:`pyof.foundation.basic_types.IPAddress`):
-                IP source address.
-            nw_dst (:class:`pyof.foundation.basic_types.IPAddress`):
-                IP destination address.
+            nw_src (|ip_address|): IP source address.
+            nw_dst (|ip_address|): IP destination address.
         """
         self.nw_src = nw_src
         self.nw_dst = nw_dst

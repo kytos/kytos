@@ -4,7 +4,7 @@ from queue import Queue
 
 from kytos.core.events import KytosEvent
 
-__all__ = ('KytosBuffers', 'KytosEventBuffer')
+__all__ = ('KytosBuffers', )
 
 log = logging.getLogger(__name__)
 
@@ -31,8 +31,8 @@ class KytosEventBuffer(object):
         received.
 
         Args:
-            event (:class:`~kytos.core.buffers.KytosEventBuffer`):
-                KytosEventBuffer sent to queue.
+            event (:class:`~kytos.core.events.KytosEvent`):
+                KytosEvent sent to queue.
         """
         if not self._reject_new_events:
             self._queue.put(event)
@@ -47,7 +47,7 @@ class KytosEventBuffer(object):
         """Remove and return a event from top of queue.
 
         Returns:
-            :class:`~kytos.core.buffers.KytosEventBuffer`:
+            :class:`~kytos.core.events.KytosEvent`:
                 Event removed from top of queue.
         """
         event = self._queue.get()
@@ -110,7 +110,7 @@ class KytosBuffers(object):
         self.app = KytosEventBuffer('app_event')
 
     def send_stop_signal(self):
-        """Method to send a ``kytos/core.shutdown`` event to all buffers."""
+        """Send a ``kytos/core.shutdown`` event to each buffer."""
         log.info('Stop signal received by Kytos buffers.')
         log.info('Sending KytosShutdownEvent to all apps.')
         event = KytosEvent(name='kytos/core.shutdown')

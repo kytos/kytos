@@ -1,7 +1,7 @@
 """WebSocket abstraction."""
 import logging
 
-__all__ = ('WebSocketHandler')
+__all__ = ('WebSocketHandler', )
 
 
 class WebSocketHandler:

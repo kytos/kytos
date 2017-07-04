@@ -33,7 +33,7 @@ class KytosServer(ThreadingMixIn, TCPServer):
             RequestHandlerClass(socketserver.BaseRequestHandler):
                 Class that will be instantiated to handle each request.
             controller (:class:`~kytos.core.controller.Controller`):
-                The controller instance.
+                An instance of Kytos Controller class.
         """
         super().__init__(server_address, RequestHandlerClass,
                          bind_and_activate=False)

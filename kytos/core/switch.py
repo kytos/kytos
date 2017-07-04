@@ -393,10 +393,11 @@ class Switch(object):
         This method is usefull to check if a frame was flooded before or not.
 
         Args:
-           ethernet_frame (:class:`pyof.foundation.basic_types.Ethernet`):
-               Ethernet instance to be verified.
+            ethernet_frame (:class:`pyof.foundation.network_types.Ethernet`):
+                Ethernet instance to be verified.
         Returns:
-           datetime.datetime.now: Last time when the ethernetframe was flooded.
+            datetime.datetime.now:
+                Last time when the ethernet_frame was flooded.
         """
         try:
             return self.flood_table[ethernet_frame.get_hash()]
@@ -407,7 +408,7 @@ class Switch(object):
         """Verify if the ethernet frame should flood.
 
         Args:
-            ethernet_frame (:class:`pyof.foundation.basic_types.Ethernet`):
+            ethernet_frame (:class:`pyof.foundation.network_types.Ethernet`):
                 Ethernet instance to be verified.
         Returns:
             bool: True if the ethernet_frame should flood.
@@ -421,7 +422,7 @@ class Switch(object):
         """Update a flood table using the given ethernet frame.
 
         Args:
-            ethernet_frame (:class:`pyof.foundation.basic_types.Ethernet`):
+            ethernet_frame (:class:`pyof.foundation.network_types.Ethernet`):
                 Ethernet frame to be updated.
         """
         self.flood_table[ethernet_frame.get_hash()] = now()

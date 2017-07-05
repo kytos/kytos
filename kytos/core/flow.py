@@ -23,22 +23,22 @@ class Flow(object):
                  actions=None):
         """Constructor receive the parameters below.
 
-        Parameters:
-           idle_timeout (int): Idle time before discarding in seconds.
-           hard_timeout (int): Max time before discarding in seconds.
-           priority (int): Priority level of flow entry.
-           table_id (int): The index of a single table or 0xff for all tables.
-           buffer_id (int): Buffered packet to apply.
-           dl_src (HWAddress): Ethernet source address.
-           dl_dst (HWAddress): Ethernet destination address.
-           dl_vlan (int): Input VLAN id.
-           dl_type (int): Ethernet frame type.
-           nw_proto (int): IP protocol or lower 8 bits of ARP opcode.
-           nw_src (IPAddress): IP source address.
-           nw_dst (IPAddress): IP destination address.
-           tp_src (int): TCP/UDP source port.
-           tp_dst (int): TCP/UDP destination port.
-           actions (ListOfAction): List of action to apply.
+        Args:
+            idle_timeout (int): Idle time before discarding in seconds.
+            hard_timeout (int): Max time before discarding in seconds.
+            priority (int): Priority level of flow entry.
+            table_id (int): The index of a single table or 0xff for all tables.
+            buffer_id (int): Buffered packet to apply.
+            dl_src (|hw_address|): Ethernet source address.
+            dl_dst (|hw_address|): Ethernet destination address.
+            dl_vlan (int): Input VLAN id.
+            dl_type (int): Ethernet frame type.
+            nw_proto (int): IP protocol or lower 8 bits of ARP opcode.
+            nw_src (|ip_address|): IP source address.
+            nw_dst (|ip_address|): IP destination address.
+            tp_src (int): TCP/UDP source port.
+            tp_dst (int): TCP/UDP destination port.
+            actions (|list_of_actions|): List of action to apply.
         """
         if actions is None:
             actions = []
@@ -67,7 +67,7 @@ class Flow(object):
         strings.
 
         Returns:
-            hash (string): Hash of object.
+            string: Hash of object.
         """
         hash_result = hashlib.md5()
         hash_result.update(str(self.idle_timeout).encode('utf-8'))
@@ -94,7 +94,7 @@ class Flow(object):
         """Return the representation of a flow as a python dictionary.
 
         Returns:
-            dictionary (dict): Dictionary using flow attributes.
+            dict: Dictionary using flow attributes.
         """
         dictionary_rep = {"flow": {"self.id": self.id,
                                    "idle_timeout": self.idle_timeout,
@@ -124,7 +124,7 @@ class Flow(object):
         """Return the representation of a flow in a json format.
 
         Returns:
-            json (string): Json string using flow attributes.
+            string: Json string using flow attributes.
         """
         return json.dumps(self.as_dict())
 
@@ -132,11 +132,11 @@ class Flow(object):
     def from_json(json_content):
         """Build a Flow object from a json.
 
-        Parameters:
+        Args:
             json_content (string): Json string with flow attributes.
 
         Returns:
-            flow (:class:`~kytos.core.flow.Flow`): Flow built from json.
+            :class:`Flow`: Flow built from json.
         """
         dict_content = json.loads(json_content)
         return Flow.from_dict(dict_content)
@@ -145,11 +145,11 @@ class Flow(object):
     def from_dict(dict_content):
         """Build a Flow object from a python dict.
 
-        Parameters:
+        Args:
             dict_content (dict): Python dictionary with flow attributes.
 
         Returns:
-            flow (:class:`~kytos.core.flow.Flow`): Flow built from json.
+            :class:`Flow`: Flow built from json.
         """
         flow = Flow()
 
@@ -169,11 +169,11 @@ class Flow(object):
     def from_flow_stats(flow_stats):
         """Build a new Flow Object from a stats_reply.
 
-        Parameters:
-         stats_reply (StatsReply): Stats Reply Object.
+        Args:
+            stats_reply (|stats_reply_v0x01|): Stats Reply Object.
 
         Returns:
-         flow (:class:`~kytos.core.flow.Flow`): Flow built from json.
+            :class:`Flow`: Flow built from json.
         """
         flow = Flow()
         flow.idle_timeout = flow_stats.idle_timeout.value
@@ -198,11 +198,11 @@ class Flow(object):
     def as_flow_mod(self, flow_type=FlowModCommand.OFPFC_ADD):
         """Transform a Flow object into a flow_mod message.
 
-        Parameters:
-            flow_type (FlowModCommand): type of flow_mod to be converted.
-
+        Args:
+            flow_type (|flow_mod_command|):
+                type of flow_mod to be converted.
         Returns:
-            flow_mod (FlowMod): Instance of FlowMod with Flow attributes.
+            |flow_mod|: Instance of FlowMod with Flow attributes.
         """
         flow_mod = FlowMod()
         flow_mod.command = flow_type
@@ -236,7 +236,7 @@ class FlowAction(object):
     def from_dict(dict_content):
         """Build one of the FlowActions from a dictionary.
 
-        Parameters:
+        Args:
             dict_content (dict): Python dictionary to build a FlowAction.
         """
         pass
@@ -248,7 +248,7 @@ class OutputAction(FlowAction):
     def __init__(self, output_port):
         """Constructor receive the parameters below.
 
-        Parameters:
+        Args:
             output_port (int): Specific port number.
         """
         self.output_port = output_port
@@ -257,8 +257,7 @@ class OutputAction(FlowAction):
         """Build a Action Output from this action.
 
         Returns:
-            output_action (:class:`~kytos.core.flow.OutputAction`):
-                A instance of OutputAction.
+            |action_output|: A instance of ActionOutput.
         """
         return ActionOutput(port=self.output_port)
 
@@ -275,12 +274,11 @@ class OutputAction(FlowAction):
     def from_dict(dict_content):
         """Build an OutputAction from a dictionary.
 
-        Parameters:
+        Args:
           dict_content (dict): Python dictionary with OutputAction attribute.
 
         Returns:
-          output_action (:class:`~kytos.core.flow.OutputAction`):
-                A instance of OutputAction.
+          :class:`OutputAction`: A instance of OutputAction.
         """
         return OutputAction(output_port=dict_content['port'])
 
@@ -303,8 +301,7 @@ class OutputAction(FlowAction):
             ofp_action (ActionOutput): Action used to create OutputAction.
 
         Returns:
-            output_action (:class:`~kytos.core.flow.OutputAction`):
-                A instance of OutputAction.
+            :class:`OutputAction`: A instance of OutputAction.
         """
         return OutputAction(output_port=ofp_action.port.value)
 
@@ -315,9 +312,9 @@ class DLChangeAction(FlowAction):
     def __init__(self, dl_src=None, dl_dst=None):
         """Constructor receive the parameters below.
 
-        Parameters:
-           dl_src (HWAddress): Ethernet source address.
-           dl_dst (HWAddress): Ethernet destination address.
+        Args:
+            dl_src (|hw_address|): Ethernet source address.
+            dl_dst (|hw_address|): Ethernet destination address.
         """
         self.dl_src = dl_src
         self.dl_dst = dl_dst
@@ -329,9 +326,9 @@ class NWChangeAction(FlowAction):
     def __init__(self, nw_src, nw_dst):
         """Contructor receive the parameters below.
 
-        Parameters:
-           nw_src (IPAddress): IP source address.
-           nw_dst (IPAddress): IP destination address.
+        Args:
+            nw_src (|ip_address|): IP source address.
+            nw_dst (|ip_address|): IP destination address.
         """
         self.nw_src = nw_src
         self.nw_dst = nw_dst

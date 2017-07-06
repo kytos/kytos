@@ -27,7 +27,8 @@ class LogManager:
         syslog handler.
 
         Args:
-           config_file (str, Path): Configuration file path.
+            config_file (:class:`str`, :class:`pathlib.Path`):
+                Configuration file path.
         """
         if Path(config_file).exists():
             cls._PARSER.read(config_file)
@@ -75,7 +76,7 @@ class LogManager:
             socket: socketio's socket.
 
         Returns:
-            logging.StreanHandler: Handler with the socket as stream.
+            logging.StreamHandler: Handler with the socket as stream.
         """
         handler = WebSocketHandler.get_handler(socket)
         cls.add_handler(handler)
@@ -88,7 +89,7 @@ class LogManager:
         Use formatter_console if it exists.
 
         Args:
-            handler(Handler): Handle to be added.
+            handler (:mod:`logging.handlers`): Handle to be added.
         """
         if cls._PARSER.has_section(cls._DEFAULT_FMT):
             fmt_conf = cls._PARSER[cls._DEFAULT_FMT]

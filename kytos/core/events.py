@@ -30,7 +30,7 @@ class KytosEvent(object):
     def set_destination(self, destination):
         """Update the destination of KytosEvent.
 
-        Parameters:
+        Args:
             destination (string): destination of  KytosEvent.
         """
         self.content['destination'] = destination
@@ -43,7 +43,7 @@ class KytosEvent(object):
     def set_source(self, source):
         """Update the source of KytosEvent.
 
-        Parameters:
+        Args:
             source (string): source of KytosEvent.
         """
         self.content['source'] = source

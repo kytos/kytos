@@ -19,14 +19,14 @@ class Interface(object):
                  features=None):
         """The contructor of Interface have the below parameters.
 
-        Parameters:
+        Args:
             name (string): name from this interface.
             port_number (int): port number from this interface.
             switch (:class:`~.core.switch.Switch`): Switch with this interface.
-            address (HWAddress): Port address from this interface.
-            state (PortState): Port Stat from interface.
-            features (PortFeatures): Port feature used to calculate link
-                                     utilization from this interface.
+            address (|hw_address|): Port address from this interface.
+            state (|port_stats|): Port Stat from interface.
+            features (|port_features|): Port feature used to calculate link
+                utilization from this interface.
         """
         self.name = name
         self.port_number = int(port_number)
@@ -59,11 +59,11 @@ class Interface(object):
     def get_endpoint(self, endpoint):
         """Return a tuple with existent endpoint, None otherwise.
 
-        Parameters:
-            endpoint (HWAddress,Interface): endpoint instance.
+        Args:
+            endpoint(|hw_address|, :class:`.Interface`): endpoint instance.
 
         Returns:
-            item (tuple): A tuple with endpoint and time of last update.
+            tuple: A tuple with endpoint and time of last update.
         """
         for item in self.endpoints:
             if endpoint == item[0]:
@@ -80,8 +80,8 @@ class Interface(object):
     def add_endpoint(self, endpoint):
         """Create a new endpoint to Interface instance.
 
-        Parameters:
-            endpoint (HWAddress): A target endpoint.
+        Args:
+            endpoint(|hw_address|, :class:`.Interface`): A target endpoint.
         """
         exists = self.get_endpoint(endpoint)
         if not exists:
@@ -90,8 +90,8 @@ class Interface(object):
     def delete_endpoint(self, endpoint):
         """Delete a existent endpoint in Interface instance.
 
-        Parameters:
-            endpoint (HWAddress): A target endpoint.
+        Args:
+            endpoint (|hw_address|, :class:`.Interface`): A target endpoint.
         """
         exists = self.get_endpoint(endpoint)
         if exists:
@@ -100,8 +100,8 @@ class Interface(object):
     def update_endpoint(self, endpoint):
         """Update or create new endpoint to Interface instance.
 
-        Parameters:
-            endpoint (HWAddress): A target endpoint.
+        Args:
+            endpoint(|hw_address|, :class:`.Interface`): A target endpoint.
         """
         exists = self.get_endpoint(endpoint)
         if exists:
@@ -112,7 +112,7 @@ class Interface(object):
         """Return the link speed in bits per second, None otherwise.
 
         Returns:
-            speed (int): Link speed in bits per second.
+            int: Link speed in bits per second.
         """
         fs = self.features
         PF = PortFeatures
@@ -133,8 +133,7 @@ class Interface(object):
         """Return Human-Readable string for link speed.
 
         Returns:
-            human_speed (string): String with link speed.
-            e.g: '350 Gbps' or '350 Mbps'.
+            string: String with link speed. e.g: '350 Gbps' or '350 Mbps'.
         """
         speed = self.get_speed()
         if speed is None:
@@ -159,7 +158,7 @@ class Interface(object):
              'speed': '350 Mbps'}
 
         Returns:
-            dictionary (dict): Dictionary filled with interface attributes.
+            dict: Dictionary filled with interface attributes.
         """
         return {'id': self.id,
                 'name': self.name,
@@ -185,7 +184,7 @@ class Interface(object):
              "speed": "350 Mbps"}
 
         Returns:
-            json (string): Json filled with interface attributes.
+            string: Json filled with interface attributes.
         """
         return json.dumps(self.as_dict())
 
@@ -228,12 +227,12 @@ class Switch(object):
                  features=None):
         """Contructor of switches have the below parameters.
 
-        Parameters:
-            dpid (DPID): datapath_id of the switch
-            connection (:class:`~.core.switch.Connection`):
-                Connection used by switch.
-            ofp_version (string): Current talked OpenFlow version.
-            features (FeaturesReply): FeaturesReply instance.
+        Args:
+          dpid (|DPID|): datapath_id of the switch
+          connection (:class:`~.Connection`): Connection used by switch.
+          ofp_version (string): Current talked OpenFlow version.
+          features (|features_reply|): FeaturesReply instance.
+
         """
         self.dpid = dpid
         self.connection = connection
@@ -264,9 +263,9 @@ class Switch(object):
     def update_description(self, desc):
         """Update switch'descriptions from Switch instance.
 
-        Parameters:
-            desc (DescStats):
-                Description Class with new values of switch'descriptions.
+        Args:
+            desc (|desc_stats|):
+                Description Class with new values of switch's descriptions.
         """
         self.description['manufacturer'] = desc.mfr_desc.value
         self.description['hardware'] = desc.hw_desc.value
@@ -293,15 +292,14 @@ class Switch(object):
         """Get interface by port number from Switch instance.
 
         Returns:
-            interface (:class:`~.core.switch.Interface`):
-                Interface from specific port.
+            :class:`~.core.switch.Interface`: Interface from specific port.
         """
         return self.interfaces.get(port_no)
 
     def get_flow_by_id(self, flow_id):
         """Return a Flow using the flow_id given. None if not found in flows.
 
-        Parameters:
+        Args:
             flow_id (int): identifier from specific flow stored.
         """
         for flow in self.flows:
@@ -322,7 +320,7 @@ class Switch(object):
     def update_connection(self, connection):
         """Update switch connection.
 
-        Parameters:
+        Args:
             connection (:class:`~.core.switch.Connection`):
                 New connection to this instance of switch.
         """
@@ -336,7 +334,7 @@ class Switch(object):
     def send(self, buffer):
         """Send a buffer data to the real switch.
 
-        Parameters:
+        Args:
           buffer (bytes): bytes to be sent to the switch throught its
                             connection.
         """
@@ -350,7 +348,7 @@ class Switch(object):
     def update_interface(self, interface):
         """Update a interface from switch instance.
 
-        Parameters:
+        Args:
             interface (:class:`~kytos.core.switch.Interface`):
                 Interface object to be storeged.
         """
@@ -360,8 +358,8 @@ class Switch(object):
     def update_mac_table(self, mac, port_number):
         """Link the mac address with a port number.
 
-        Parameters:
-            mac (HWAddress): mac address from switch.
+        Args:
+            mac (|hw_address|): mac address from switch.
             port (int): port linked in mac address.
         """
         if mac.value in self.mac2port:
@@ -373,6 +371,12 @@ class Switch(object):
         """Return the timestamp when the ethernet_frame was flooded.
 
         This method is usefull to check if a frame was flooded before or not.
+
+        Args:
+            ethernet_frame (|ethernet|): Ethernet instance to be verified.
+        Returns:
+            datetime.datetime.now:
+                Last time when the ethernet_frame was flooded.
         """
         try:
             return self.flood_table[ethernet_frame.get_hash()]
@@ -382,10 +386,10 @@ class Switch(object):
     def should_flood(self, ethernet_frame):
         """Verify if the ethernet frame should flood.
 
-        Parameters:
-            ethernet_frame (Ethernet): Ethernet instance to be verified.
+        Args:
+            ethernet_frame (|ethernet|): Ethernet instance to be verified.
         Returns:
-            shoudl_flood (bool): True if the ethernet_frame should flood.
+            bool: True if the ethernet_frame should flood.
         """
         last_flood = self.last_flood(ethernet_frame)
         diff = (now() - last_flood).microseconds
@@ -395,16 +399,16 @@ class Switch(object):
     def update_flood_table(self, ethernet_frame):
         """Update a flood table using the given ethernet frame.
 
-        Parameters:
-            ethernet_frame (Ethernet): Ethernet frame to be updated.
+        Args:
+            ethernet_frame (|ethernet|): Ethernet frame to be updated.
         """
         self.flood_table[ethernet_frame.get_hash()] = now()
 
     def where_is_mac(self, mac):
         """"Return all ports from specific mac address.
 
-        Parameters:
-            mac (HWAddress): Mac address from switch.
+        Args:
+            mac (|hw_address|): Mac address from switch.
         Returns:
             :class:`list`: A list of ports. None otherswise.
         """
@@ -435,7 +439,7 @@ class Switch(object):
 
 
         Returns:
-            dictionary (dict): Dictionary filled with interface attributes.
+            dict: Dictionary filled with interface attributes.
         """
         connection = ""
         if self.connection is not None:
@@ -475,6 +479,6 @@ class Switch(object):
              "connection": ""}
 
         Returns:
-            json (string): Json filled with switch'attributes.
+            string: Json filled with switch'attributes.
         """
         return json.dumps(self.as_dict())

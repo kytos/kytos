@@ -36,11 +36,11 @@ class Connection(object):
     def __init__(self, address, port, socket, switch=None):
         """The constructor method have the below parameters.
 
-        Parameters:
-          address (HWAddress): Source address.
-          port (int): Port number.
-          socket (socket): socket.
-          switch (:class:`~.core.switch.Switch`): switch with this connection.
+        Args:
+            address (|hw_address|): Source address.
+            port (int): Port number.
+            socket (socket): socket.
+            switch (:class:`~.Switch`): switch with this connection.
         """
         self.address = address
         self.port = port
@@ -75,7 +75,7 @@ class Connection(object):
     def send(self, buffer):
         """Send a buffer message using the socket from the connection instance.
 
-        Parameters:
+        Args:
             buffer (bytes): Message buffer that will be sent.
         """
         try:
@@ -132,8 +132,8 @@ class Connection(object):
     def update_switch(self, switch):
         """Update switch with this instance of Connection.
 
-        Parameters:
-          switch (:class:`~.core.switch.Switch`): switch instance.
+        Args:
+          switch (:class:`~.Switch`): switch instance.
         """
         self.switch = switch
         self.switch.connection = self

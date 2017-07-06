@@ -75,15 +75,18 @@ class KytosConfig():
 
         When installed via pip, defaults values are:
 
-        defaults = {'pidfile': '/var/run/kytos/kytosd.pid',
-                    'workdir': '/var/lib/kytos',
-                    'napps': '/var/lib/kytos/napps/',
-                    'conf': '/etc/kytos/kytos.conf',
-                    'logging': '/etc/kytos/logging.ini',
-                    'listen': '0.0.0.0',
-                    'port': 6633,
-                    'foreground': False,
-                    'debug': False}
+        .. code-block:: python
+
+            defaults = {'pidfile': '/var/run/kytos/kytosd.pid',
+                        'workdir': '/var/lib/kytos',
+                        'napps': '/var/lib/kytos/napps/',
+                        'conf': '/etc/kytos/kytos.conf',
+                        'logging': '/etc/kytos/logging.ini',
+                        'listen': '0.0.0.0',
+                        'port': 6633,
+                        'foreground': False,
+                        'debug': False}
+
         """
         defaults = {'pidfile': os.path.join(BASE_ENV,
                                             'var/run/kytos/kytosd.pid'),

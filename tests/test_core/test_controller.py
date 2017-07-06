@@ -6,40 +6,21 @@ from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from kytos.core import Controller
+from kytos.core.config import KytosConfig
 
 
 class TestController(TestCase):
     """Controller tests."""
 
     def setUp(self):
-        """Instantiate a controller with custom options."""
-        class CustomOption:
-            """Class to represent a custom option used by Kytos."""
-
-            def __init__(self, **kwargs):
-                """Construtor method of CustomOption."""
-                self.__dict__.update(kwargs)
-
-        options_dict = {'api_port': '8181',
-                        'conf': '/etc/kytos/kytos.conf',
-                        'daemon': 'False',
-                        'debug': 'False',
-                        'foreground': True,
-                        'installed_napps': '/var/lib/kytos/napps/.installed',
-                        'listen': '0.0.0.0',
-                        'logging': '/etc/kytos/logging.ini',
-                        'napps': '/var/lib/kytos/napps',
-                        'napps_repositories': ['https://www.sample.com/repo/'],
-                        'pidfile': '/var/run/kytos/kytosd.pid',
-                        'port': '6633',
-                        'workdir': '/var/lib/kytos'}
-
-        self.options = options_dict
-        self.controller = Controller(CustomOption(**options_dict))
+        """Instantiate a controller."""
+        self.options = KytosConfig().options['daemon']
+        self.controller = Controller(self.options)
 
     def test_configuration_endpoint(self):
         """Should return the attribute options as json."""
-        expected = json.dumps(self.options)
+        serializable_options = vars(self.options)
+        expected = json.dumps(serializable_options)
         actual = self.controller.configuration_endpoint()
         self.assertEqual(expected, actual)
 

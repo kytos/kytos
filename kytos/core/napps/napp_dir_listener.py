@@ -1,6 +1,7 @@
 """Module to monitor installed napps."""
 import logging
 import re
+from pathlib import Path
 
 from watchdog.events import RegexMatchingEventHandler
 from watchdog.observers import Observer
@@ -16,7 +17,11 @@ class NAppDirListener(RegexMatchingEventHandler):
     _controller = None
 
     def __init__(self, controller):
-        """Contructor of class NAppDirListener.
+        """Require controller to get NApps dir, load and unload NApps.
+
+        In order to watch the NApps dir for modifications, it must be created
+        if it doesn't exist (in this case, kytos-utils had not been run before
+        kytosd). We use the same dir permissions as in kytos-utils.
 
         Args:
             controller(kytos.core.controller): A controller instance.
@@ -24,6 +29,7 @@ class NAppDirListener(RegexMatchingEventHandler):
         super().__init__()
         self._controller = controller
         self.napps_path = self._controller.options.napps
+        Path(self.napps_path).mkdir(mode=0o755, parents=True, exist_ok=True)
         self.observer = Observer()
 
     def start(self):

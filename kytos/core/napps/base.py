@@ -163,12 +163,12 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         """
         Thread.__init__(self, daemon=False)
         self.controller = controller
-        self.setup()
         self.load_json()
         self._listeners = {'kytos/core.shutdown': [self._shutdown_handler]}
         #: int: Seconds to sleep before next call to :meth:`execute`. If
         #: negative, run :meth:`execute` only once.
         self.__interval = -1
+        self.setup()
 
         handler_methods = [getattr(self, method_name) for method_name in
                            dir(self) if method_name[0] != '_' and

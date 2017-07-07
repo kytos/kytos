@@ -14,3 +14,6 @@ build:
     dependencies:
         override:
             - true
+    tests:
+        before:
+            - sed -i 's|.*http.*watchdog.*||' requirements.txt

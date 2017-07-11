@@ -30,6 +30,7 @@ from kytos.core.connection import CONNECTION_STATE
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
+from kytos.core.napps.base import NApp
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.napps.napp_dir_listener import NAppDirListener
 from kytos.core.switch import Switch
@@ -608,7 +609,12 @@ class Controller(object):
             self.log.warning('NApp %s/%s was not loaded', username, napp_name)
         else:
             self.log.info("Shutting down NApp %s/%s...", username, napp_name)
-            napp.shutdown()
+            napp_id = NApp(username, napp_name).id
+            event = KytosEvent(name='kytos/core.shutdown.' + napp_id)
+            napp_shutdown_fn = self.events_listeners[event.name][0]
+            # Call listener before removing it from events_listeners
+            napp_shutdown_fn(event)
+
             # Removing listeners from that napp
             for event_type, napp_listeners in napp._listeners.items():  # noqa
                 event_listeners = self.events_listeners[event_type]

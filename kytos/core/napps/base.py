@@ -10,7 +10,6 @@ from pathlib import Path
 from random import randint
 from threading import Event, Thread
 
-from kytos.core.helpers import listen_to
 from kytos.core.logs import NAppLog
 
 __all__ = ('KytosNApp',)
@@ -163,9 +162,14 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         """
         Thread.__init__(self, daemon=False)
         self.controller = controller
+        self.username = None  # loaded from json
+        self.name = None      # loaded from json
         self._load_json()
         # Force a listener with a private method.
-        self._listeners = {'kytos/core.shutdown': [self._shutdown_handler]}
+        napp_id = NApp(self.username, self.name).id
+        self._listeners = {
+            'kytos/core.shutdown': [self._shutdown_handler],
+            'kytos/core.shutdown.' + napp_id: [self._shutdown_handler]}
         #: int: Seconds to sleep before next call to :meth:`execute`. If
         #: negative, run :meth:`execute` only once.
         self.__interval = -1

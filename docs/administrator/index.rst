@@ -3,16 +3,16 @@ Administrator Guide
 ###################
 
 Welcome to the **Administrator Guide**, here you will find all information and
-references about *Kyco*.
+references about *Kythos*.
+
+.. include:: intro.rst
 
 .. include:: architecture.rst
 
-.. include:: requirements.rst
-
-.. include:: napps.rst
+.. include:: quickstart.rst
 
 .. include:: configuration.rst
 
-.. include:: notifications.rst
+.. include:: napps_management.rst
 
-.. include:: logging_and_troubleshooting.rst
+.. include:: web_ui.rst

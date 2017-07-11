@@ -37,7 +37,7 @@ Today *Kytos* is in PyPI, so you can easily install it via `pip3` and also
 include this project in your `requirements.txt` (don't worry if you don't
 recognize this file).
 
-If you do not have Python3.6 <http://www.python.org/downloads/>`_ and `pip3
+If you do not have `Python3.6 <http://www.python.org/downloads/>`_ and `pip3
 <https://pip.pypa.io/en/latest/installing/>`_ you can install it on
 Debian-based SO by running:
 
@@ -56,43 +56,15 @@ Once you have `pip3` and `Python 3.6`, you can include this project in your
 Run
 ===
 
-Once *Kytos* is installed, you can:
-
-start the kytos daemon in the foreground, and access its console:
+Once *Kytos* is installed, you can start the kytos daemon in the foreground,
+and access its console:
 
 .. code-block:: shell
 
    $ kytosd -f
 
-install and enable kytos napps (must have kytos daemon running):
+or the command below to run kytos daemon in background.
 
 .. code-block:: shell
 
-     $ kytos napps install user/napp
-
--------------------------------------------------------------------------------
-
-NB:
-  Notice that in order to have basic openflow funcionality, Kytos needs at
-  least the *kytos/of_core napp* installed and loaded. For full OpenFlow
-  functionality, including web-ui features you should install the following
-  napps:
-
-  - kytos/of_core
-  - kytos/of_l2ls
-  - kytos/of_lldp
-  - kytos/of_stats
-  - kytos/of_topology
-  - kytos/of_flow_manager
-  - kytos/of_ipv6drop
-  - kytos/web_topology_layout
-
-  to do it, run:
-
-  .. code-block:: shell
-
-     $ kytos napps install kytos/of_core kytos/of_l2ls \
-     kytos/of_lldp kytos/of_stats kytos/of_topology \
-     kytos/of_flow_manager kytos/of_ipv6drop \
-     kytos/web_topology_layout
-
+   $ kytosd

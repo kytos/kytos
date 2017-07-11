@@ -1,5 +1,5 @@
 Configuration
--------------
+*************
 
 *Kyco* has several configuration parameters that allows the user to setup the
 controller according to his needs. To configure the *Kyco* you can edit the
@@ -31,7 +31,7 @@ The following parameters are available at ``/etc/kyco/kyco.conf``:
 +-------------+---------------+--------------------------+
 
 Parameters Description
-^^^^^^^^^^^^^^^^^^^^^^
+======================
 
 This section describes all available parameters that can be used during the
 *Kyco* startup. Please note that some parameters are available only at command

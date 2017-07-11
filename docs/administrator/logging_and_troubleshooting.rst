@@ -1,3 +1,5 @@
+:orphan:
+
 Logging and troubleshooting
 ---------------------------
 

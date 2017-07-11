@@ -1,12 +1,12 @@
 Architecture Overview
----------------------
+*********************
 
 *Kytos* is a modular SDN controller, composed by the *Kytos Core*
 and by applications called *Networks Applications* (or *napp*), which means
 it has several parts that working together will compose a Kytos Controller.
 
 Kytos Core
-++++++++++
+==========
 
 The *Kytos Core* is responsible for the main core operations of the
 controller like keeping track of the connected switches, enabling,
@@ -19,11 +19,13 @@ A web interface is being developed to manage the controller. This web
 interface aims to be intuitive and very easy to use.
 
 Network Applications
-++++++++++++++++++++
+====================
+
 The *napps* can be divided into two categories, *kytos napps* and *user napps*.
 
 kytos napps
-~~~~~~~~~~~
+-----------
+
 The *kytos napps* are those needed for the controller to deal with main
 operations with a switch using a certain protocol. ex:
 - *of_core napp* is responsible for providing interaction
@@ -42,7 +44,7 @@ Several core applications were developed. Kytos's developer team is
 constantly developing new core application to improve Kytos's features.
 
 user napps
-~~~~~~~~~~
+----------
 The applications stack are general applications, created by Kytos’s users.
 These applications can be installed, loaded and unloaded on the fly by the
 user. Also, these applications make use of the OpenFlow library and information

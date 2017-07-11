@@ -32,7 +32,8 @@ function draw_background_map(callback=undefined) {
           scrollWheelZoom: true,
           maxZoom: 20,
           minZoom: 2,
-          loadingControl: true
+          loadingControl: true,
+          zoomControl:false
       }).on('load', function(){ if (callback) { callback(); }
       }).setView([default_settings.map_center[1], default_settings.map_center[0]],
                  default_settings.map_zoom);

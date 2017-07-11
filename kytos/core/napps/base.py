@@ -228,7 +228,6 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         """
         if not self.__event.is_set():
             self.__event.set()
-            self.shutdown()
 
     @abstractmethod
     def setup(self):

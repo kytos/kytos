@@ -10,7 +10,6 @@ from pathlib import Path
 from random import randint
 from threading import Event, Thread
 
-from kytos.core.helpers import listen_to
 from kytos.core.logs import NAppLog
 
 __all__ = ('KytosNApp',)
@@ -163,13 +162,20 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         """
         Thread.__init__(self, daemon=False)
         self.controller = controller
-        self.load_json()
-        self._listeners = {'kytos/core.shutdown': [self._shutdown_handler]}
+        self.username = None  # loaded from json
+        self.name = None      # loaded from json
+        self._load_json()
+        # Force a listener with a private method.
+        napp_id = NApp(self.username, self.name).id
+        self._listeners = {
+            'kytos/core.shutdown': [self._shutdown_handler],
+            'kytos/core.shutdown.' + napp_id: [self._shutdown_handler]}
         #: int: Seconds to sleep before next call to :meth:`execute`. If
         #: negative, run :meth:`execute` only once.
         self.__interval = -1
         self.setup()
 
+        #: Add non-private methods that listen to events.
         handler_methods = [getattr(self, method_name) for method_name in
                            dir(self) if method_name[0] != '_' and
                            callable(getattr(self, method_name)) and
@@ -182,7 +188,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
                     self._listeners[event_name] = []
                 self._listeners[event_name].append(method)
 
-    def load_json(self):
+    def _load_json(self):
         """Method used to update object attributes based on kytos.json."""
         current_file = sys.modules[self.__class__.__module__].__file__
         json_path = os.path.join(os.path.dirname(current_file), 'kytos.json')
@@ -216,7 +222,6 @@ class KytosNApp(Thread, metaclass=ABCMeta):
             self.__event.wait(self.__interval)
             self.execute()
 
-    @listen_to('kytos/core.shutdown')
     def _shutdown_handler(self, event):  # noqa - all listeners receive event
         """Method used to listen shutdown event from kytos.
 

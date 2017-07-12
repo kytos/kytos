@@ -1,8 +1,8 @@
 Quickstart
-----------
+**********
 
 Docker
-++++++
+======
 
 You do not need to install Kytos to try it.
 
@@ -22,7 +22,7 @@ and you will have your instance of a basic openflow controller built with
 Kytos SDN Platform.
 
 Install
-+++++++
+=======
 
 In order to install and run kytos you need:
 
@@ -37,7 +37,7 @@ In order to install and run kytos you need:
    $ python3.6 -m pip install kytos
 
 Run
-+++
+===
 
 once kytos is installed, you can:
 
@@ -66,7 +66,7 @@ NB:
 	- kytos/of_topology
 	- kytos/of_flow_manager
 	- kytos/of_ipv6drop
-	- kytos/web_topology_layout 
+	- kytos/web_topology_layout
 
 	to do it, run:
 

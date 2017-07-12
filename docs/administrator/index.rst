@@ -3,7 +3,7 @@ Administrator Guide
 ###################
 
 Welcome to the **Administrator Guide**, here you will find all information and
-references about *Kythos*.
+references about *Kytos*.
 
 .. include:: intro.rst
 

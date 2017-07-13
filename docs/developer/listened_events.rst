@@ -1,17 +1,22 @@
 Listened Events
 ***************
 
-This section describe where each event can be listened in Kytos Project. The
+This section describes how each event is handled in Kytos Project. The
 kytos module has the decorator :func:`~kytos.core.helpers.listen_to` used to
-listen each event. There are two types of events: **kytos event message** and
-**openflow event message**.
+tell methods to listen to each event. There are two types of event messages in
+Kytos now: **Kytos Event Message** and **OpenFlow Event Message**.
+
+.. note::
+
+  As Kytos does not depend on any specific protocol, you can generate and listen to
+  Event Messages of any kind, related to an implemented protocol.
 
 Kytos Event Message
 ===================
 
-Kytos Event Message is sent by :class:`~kytos.core.controller.Controller`
-class that is used to handle events by controller. The kytos events and all
-classes or NApps who can listen these events are listed below.
+A Kytos Event Message is sent by :class:`~kytos.core.controller.Controller`
+class, which handles all controller events. The Kytos Events are listed below,
+with all classes and NApps who can listen to these Events.
 
 +-----------------------------------+-------------------------------------------------+-------------------------------------------------------------------+
 | Event Message                     |                  Classes                        |                         Methods                                   |
@@ -35,11 +40,11 @@ classes or NApps who can listen these events are listed below.
 Openflow Event Message
 ======================
 
-A Openflow Event Message is created by any NApp and it is sent using the
-controller buffer. That openflow event message is listened by any
+An Openflow Event Message can be created by any OpenFlow NApp and it is sent using the
+controller's buffer. Once generated, the OpenFlow Event Message can be handled by any
 :class:`~kytos.core.napps.base.KytosNApp` subclasses with the decorator
-:func:`~kyco.core.helpers.listen_to`. All type of openflow event message and NApps
-that can listen that are listed below.
+:func:`~kyco.core.helpers.listen_to`. The OpenFlow Event Messages currently implemented in Kytos NApps
+are listed below.
 
 +-------------------+-----------------------------------------------------------+-----------------------+
 | Type of Message   |               Event Message                               |    NApps              |

@@ -16,7 +16,6 @@ build:
             - true
     tests:
         before:
-            - sed -i 's|.*http.*watchdog.*||' requirements.txt
             - pip install coverage
         override:
             -

@@ -5,13 +5,7 @@ Docker
 ======
 
 You may try kytos without installing it by running our docker image.
-Just install docker from your package provider and run:
-
-.. code-block:: shell
-
-
-You do not need to install Kytos to try it.
-We have prepared a docker image for you to try Kytos, so all you have to do is:
+Just install docker from your package provider and:
 
 run kytos/tryfirst docker image:
   .. code-block:: shell
@@ -51,7 +45,7 @@ Once you have `pip3` and `Python 3.6`, you can include this project in your
 
 .. code-block:: shell
 
-   $ sudo python3.6 -m pip3 install kytos
+   $ sudo python3.6 -m pip install kytos
 
 Run
 ===

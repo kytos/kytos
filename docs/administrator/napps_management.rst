@@ -1,9 +1,9 @@
 NApps management
 ****************
 
-As mentioned earlier, *Kytos* is composed of several modules. One of these
-modules is the Network Application (Napp), which can be a core Napp,
-responsible to *Kytos* basic operations and Napps developed by other users.
+As mentioned earlier, *Kytos* is composed of several modules. Some of these
+modules are the Network Applications (Napps); they may be core Napps,
+responsible to *Kytos* basic operations or Napps developed by other users.
 This section will describe some basic operations regarding the Napps (i.e.
 install, uninstall and enable or disable, list, etc).
 
@@ -25,6 +25,8 @@ command below.
 .. code-block:: shell
 
      $ kytos napps install kytos/of_core kytos/of_l2ls
+
+.. note:: Newly installed Napps are enabled by default.
 
 Uninstall
 =========

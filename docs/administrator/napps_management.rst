@@ -1,44 +1,47 @@
-NApps management
+NApps Management
 ****************
 
 As mentioned earlier, *Kytos* is composed of several modules. One of these
-modules is the Network Application (Napp), which can be a core Napp,
-responsible to *Kytos* basic operations and Napps developed by other users.
-This section will describe some basic operations regarding the Napps (i.e.
-install, uninstall and enable or disable, list, etc).
+modules is the Network Application (Napp), which can be a core Kytos Napp,
+responsible for *Kytos* basic operations, or a NApp developed by users.
+This section will describe the necessary NApp management operations using
+the ``kytos napps`` command.
 
-.. note:: To manage napps you must have kytos daemon running.
+.. note:: To manage NApps you must have a Kytos instance running.
 
 Install
 =======
 
-In order to install one or more napps you should run the command below, where
-<napps> is a list of napps or a single napp with the format ``user/napp_name``.
+Installs and enables one or more NApps in your environment. <napps> is the ID of the
+NApp(s), in the format ``user/napp_name``.
 
 .. code-block:: shell
 
      $ kytos napps install <napps>
 
-For intance you can install ``kytos/of_core`` and ``kytos/of_l2ls`` using the
-command below.
+For example, you can install ``kytos/of_core`` and ``kytos/of_l2ls`` using the
+command:
 
 .. code-block:: shell
 
      $ kytos napps install kytos/of_core kytos/of_l2ls
 
+Kytos will look for the NApp in the current directory. If not found, it will
+search for the NApp in the NApps Servers defined in the configuration. The NApp
+will be downloaded and installed.
+
 Uninstall
 =========
 
-In order to uninstall one or more napps already installed you should run the
-command below, where <napps> is a list of napps or a single napp with the
-format ``user/napp_name``.
+Uninstalls one or more previously installed NApps. <napps> is the ID of the
+NApp(s), in the format ``user/napp_name``.
 
 .. code-block:: shell
 
      $ kytos napps uninstall <napps>
 
-For intance you can uninstall ``kytos/of_core`` and ``kytos/of_l2ls`` using the
-command below.
+For example, you can uninstall ``kytos/of_core`` and ``kytos/of_l2ls`` using the
+command:
 
 .. code-block:: shell
 
@@ -47,24 +50,23 @@ command below.
 Enable
 ======
 
-In order to enable one or more napps already installed you should run the
-command below, where <napps> is a list of napps or a single napp with the
-format ``user/napp_name``.
+Enables one or more previously installed NApps. <napps> is the ID of the
+NApp(s), in the format ``user/napp_name``.
 
 .. code-block:: shell
 
      $ kytos napps enable <napps>
 
 
-For intance you can enable ``kytos/of_core`` and ``kytos/of_l2ls`` using the
-command below.
+For example, you can enable ``kytos/of_core`` and ``kytos/of_l2ls`` using the
+command:
 
 .. code-block:: shell
 
      $ kytos napps enable kytos/of_core kytos/of_l2ls
 
 
-If you want enable all napps disabled you can run:
+If you want to enable all disabled NApps at once, you can run:
 
 .. code-block:: shell
 
@@ -74,23 +76,22 @@ If you want enable all napps disabled you can run:
 Disable
 =======
 
-In order to disable one or more napps enabled you should run the command below,
-where <napps> is a list of napps or a single napp with the format
-``user/napp_name``.
+Disables one or more previously enabled NApps. <napps> is the ID of the
+NApp(s), in the format ``user/napp_name``.
 
 .. code-block:: shell
 
      $ kytos napps disable <napps>
 
-For intance you can disable ``kytos/of_core`` and ``kytos/of_l2ls`` using the
-command below.
+For example, you can disable ``kytos/of_core`` and ``kytos/of_l2ls`` using the
+command:
 
 .. code-block:: shell
 
      $ kytos napps disable kytos/of_core kytos/of_l2ls
 
 
-If you want disable all napps enabled you can run:
+If you want to disable all enabled NApps at once, you can run:
 
 .. code-block:: shell
 
@@ -100,8 +101,7 @@ If you want disable all napps enabled you can run:
 List
 ====
 
-In order to know the status of each napp installed you can use the command
-below to list all napps.
+Prints a list of all installed NApps along with their respective description and status.
 
 .. code-block:: shell
 
@@ -120,14 +120,14 @@ below to list all napps.
 Search
 ======
 
-If you want search for a napp installed or stored by NApps server you can run
-the command below, where <search> is the word that you are looking for.
+Search for <pattern> among installed NApps and in the NApps Server, printing a list with
+all NApps matching the pattern along with their respective description and status
 
 .. code-block:: shell
 
   $ kytos napps search <search>
 
-For instance, if you want search for ``kytos`` you can run:
+For example, if you want to search for ``kytos`` you can run:
 
 .. code-block:: shell
 
@@ -135,41 +135,27 @@ For instance, if you want search for ``kytos`` you can run:
 
   Status |          NApp ID          |                         Description
   =======+===========================+============================================================
-   [--]  | ajoaoff/my_first_napp     | This is my first NApp, I have built it while doing a Kyt...
    [ie]  | kytos/of_core             | OpenFlow Core of Kytos Controller, responsible for main ...
    [--]  | kytos/of_flow_manager     | NApp that manages switches flows.
-   [ie]  | kytos/of_ipv6drop         | Install flows to DROP IPv6 packets on all switches.
+   [i-]  | kytos/of_ipv6drop         | Install flows to DROP IPv6 packets on all switches.
    [ie]  | kytos/of_l2ls             | An L2 learning switch application for OpenFlow switches.
-   [ie]  | kytos/of_lldp             | App responsible by send packet with lldp protocol to net...
+   [i-]  | kytos/of_lldp             | App responsible by send packet with lldp protocol to net...
    [--]  | kytos/of_stats            | Provide statistics of openflow switches.
    [--]  | kytos/of_topology         | A simple app that update links between machines and swit...
    [--]  | kytos/web_topology_layout | Manage endpoints related to the web interface settings a...
-   [--]  | renanrb/my_first_napp     | This is my first NApp, I have built it while doing a Kyt...
 
   Status: (i)nstalled, (e)nabled
 
 
-Configure
-=========
+.. important::
+  
+  In order to have basic OpenFlow funcionality, Kytos needs at least
+  the *kytos/of_core NApp* installed and enabled. To install flows in
+  switches for data exchange and include the web-ui features you should
+  install and enable the following napps:
 
-Notice that in order to have basic openflow funcionality, Kytos needs at least
-the *kytos/of_core napp* installed and loaded. For full OpenFlow functionality,
-including web-ui features you should install the following napps:
-
-* kytos/of_core
-* kytos/of_l2ls
-* kytos/of_lldp
-* kytos/of_stats
-* kytos/of_topology
-* kytos/of_flow_manager
-* kytos/of_ipv6drop
-* kytos/web_topology_layout
-
-to do it, run:
-
-.. code-block:: shell
-
-   $ kytos napps install kytos/of_core kytos/of_l2ls \
-   kytos/of_lldp kytos/of_stats kytos/of_topology \
-   kytos/of_flow_manager kytos/of_ipv6drop \
-   kytos/web_topology_layout
+  * kytos/of_l2ls
+  * kytos/of_lldp
+  * kytos/of_stats
+  * kytos/of_topology
+  * kytos/web_topology_layout

@@ -2,9 +2,9 @@ Configuration
 *************
 
 *Kytos* has several configuration parameters that allows the user to setup the
-controller according to his needs. To configure the *Kytos* you can edit the
-configuration file, located in ``/etc/kytos/kytos.conf`` or changing the
-parameters at command line during the startup.
+controller according to his needs. To configure *Kytos* you can edit the
+configuration file, located in ``/etc/kytos/kytos.conf``, or change the
+parameters in the command line during the startup.
 
 The following parameters are available at ``/etc/kytos/kytos.conf``:
 
@@ -21,7 +21,7 @@ The following parameters are available at ``/etc/kytos/kytos.conf``:
 +---------------------+---------------+--------------------------------------+
 | logging             | File Path     | ``/etc/kytos/logging.ini``           |
 +---------------------+---------------+--------------------------------------+
-| napps_repositories  | 1 to 65535    | ``["https://napps.kytos.io/repo/"]`` |
+| napps_repositories  | List of URLs  | ``["https://napps.kytos.io/repo/"]`` |
 +---------------------+---------------+--------------------------------------+
 | listen              | IP Address    | ``0.0.0.0``                          |
 +---------------------+---------------+--------------------------------------+
@@ -37,47 +37,47 @@ The following parameters are available at ``/etc/kytos/kytos.conf``:
 Parameters Description
 ======================
 
-This section describes all available parameters that can be used during the
+This section describes all available parameters that can be changed during the
 *Kytos* startup. Please note that some parameters are available only at command
-line and others only in configuration file and subsequent parameter settings on
-the commandline will overwrite settings in this configuration file.
+line and others only at the configuration file. Parameters set in
+the command line will overwrite settings defined in the configuration file.
 
-**pidfile** (-p, --pidfile): This parameter specify the file where the
-Process ID (PID) is stored. It can be used to allow other programs or scripts
-to send signals to the *Kytos's*  PID.
+**pidfile** (-p, --pidfile): This parameter specify the file to store the
+Process ID (PID). It can be used to allow other programs or scripts
+to send signals to *Kytos* by knowing the PID.
 
 **workdir** (-w, --workdir): This is the base directory used by *Kytos*
 to store all files used during its operation.
 
-**napps** (-n, --napps): The location where napps will be stored after
-installation.
+**napps** (-n, --napps): The location where napps are stored after
+installation. *Kytos-utils* will look for napps in this folder.
 
 **conf** (-c, --conf): The configuration file path. This parameters
-can be used to point *Kytos* to read other configuration file.
+can be used to point *Kytos* to read another configuration file.
 
 **logging**: This entry specifies a file with configurations used by
 *Kytos* to format log outputs. This parameter is not available at command line.
 
-**napps_repositories**: This is a list of repositories where *Kytos* can
+**napps_repositories**: This is a list of repositories from where *Kytos* can
 download new NApps.
 
-**listen** (-l, --listen): The local IP address which *Kytos*
+**listen** (-l, --listen): The local IP address where *Kytos*
 will be listening for new connections.
 
-**port** (-p, --port): The local TCP port which *Kytos* will be
+**port** (-p, --port): The local TCP port where *Kytos* will be
 listening for new connections.
 
 **api_port**: This entry specifies which port will be used to expose the
-API Rest served by *Kytos*.
+REST API endpoints provided by *Kytos*.
 
 **daemon** (-d, --daemon): This entry specifies if *Kytos* will
 start as daemon or not. If this entry is set as ``True`` when the *Kytos* starts
 it will detach from the current terminal and run in background. If set as
-``False`` a console will be provided just after the *Kytos* startup.
+``False`` a console will be provided right after the *Kytos* startup.
 
 **debug** (-D, --debug): This entry is used to tells *Kytos*
-to start in Debug Mode. When this entry is set to ``True`` a more detailed
-log is generated
+to start in Debug Mode. When this entry is set to ``True``, more detailed
+log messages are generated
 
 -v (--version): This command line parameter is used to display the *Kytos*
 version.

@@ -71,7 +71,7 @@ class SASSBuild(SimpleCommand):
             import sass
         except ModuleNotFoundError:
             check_call([sys.executable, '-m', 'pip', 'install', '-r',
-                        'requirements-build.txt'])
+                        'requirements/build.in'])
             import sass
 
         sassdir = Path(__file__).parent / 'web-ui-src/sass'
@@ -98,7 +98,7 @@ class EggInfo(egg_info):
         """Python wheels are much faster (no compiling)."""
         print('Installing dependencies...')
         check_call([sys.executable, '-m', 'pip', 'install', '-r',
-                    'requirements.txt'])
+                    'requirements/run.in'])
 
     @staticmethod
     def _check_sass():
@@ -283,6 +283,31 @@ setup(name='kytos',
       include_package_data=True,
       data_files=[(os.path.join(BASE_ENV, 'etc/kytos'), ETC_FILES)],
       packages=find_packages(exclude=['tests']),
+      dependency_links=[
+          'https://github.com/diraol/watchdog/archive/master.zip#egg=watchdog'
+      ],
+      extras_require={
+          'dev': [
+              'coverage',
+              'pip-tools',
+              'libsass',
+              'tox',
+              # Some sphinx versions are not compiling docs
+              'Sphinx ~= 1.5.0',
+              # Avoid red navbar
+              'sphinx_bootstrap_theme ~= 0.4.0',
+              'pydocstyle ~= 1.1.1',
+              'pylama ~= 7.3.3',
+              'pylama_pylint ~= 3.0.1',
+              'radon ~= 1.5.0',
+          ],
+          'docs': [
+              'Sphinx~=1.5.0',
+              'sphinx-autobuild',
+              'sphinx-rtd-theme',
+              'sphinx_bootstrap_theme~=0.4.0'
+          ]
+      },
       cmdclass={
           'clean': Cleaner,
           'coverage': TestCoverage,

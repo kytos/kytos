@@ -11,11 +11,11 @@ The following parameters are available at ``/etc/kytos/kytos.conf``:
 +---------------------+---------------+--------------------------------------+
 | Paramenter          | Value         |       Default                        |
 +=====================+===============+======================================+
-| pidfile             | File Path     | ``/var/run/kytosd.pid``              |
+| pidfile             | File Path     | ``/var/run/kytos/kytosd.pid``              |
 +---------------------+---------------+--------------------------------------+
 | workdir             | File Path     | ``/var/lib/kytos``                   |
 +---------------------+---------------+--------------------------------------+
-| napps               | File Path     | ``/var/lib/kytos/napps/``            |
+| napps               | File Path     | ``/var/lib/kytos/napps``            |
 +---------------------+---------------+--------------------------------------+
 | conf                | File Path     | ``/etc/kytos/kytos.conf``            |
 +---------------------+---------------+--------------------------------------+
@@ -79,5 +79,5 @@ it will detach from the current terminal and run in background. If set as
 to start in Debug Mode. When this entry is set to ``True`` a more detailed
 log is generated
 
--v (--version): This command line parameter is used to display the *Kytos*
+\-v (--version): This command line parameter is used to display the *Kytos*
 version.

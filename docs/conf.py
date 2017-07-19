@@ -51,7 +51,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'references'
+master_doc = 'index'
 
 # General information about the project.
 project_short_name = u'Kytos'
@@ -376,13 +376,11 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 # Example configuration for intersphinx: refer to the Python standard library.
-# Note: links to Python doc only work if you are online or have python.inv
-#     file. To download it, run:
-#     curl https://docs.python.org/3/objects.inv >python.inv
-intersphinx_mapping = {'python-openflow': (
-                           'http://docs.kytos.io/python-openflow', None),
-                       'kytos': ('http://docs.kytos.io/kytos', None),
-                       'python': ('https://docs.python.org/3', None)}
+# Note: links to Python doc only work if you are online
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'tutorial': ('https://tutorials.kytos.io', None),
+    'python-openflow': ('https://docs.kytos.io/python-openflow', None)}
 
 
 # Napoleon settings from http://www.sphinx-doc.org/en/stable/ext/napoleon.html

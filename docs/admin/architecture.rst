@@ -1,5 +1,6 @@
-Architecture Overview
-*********************
+************
+Architecture
+************
 
 *Kytos* is a modular SDN controller, composed by the *Kytos Core*
 and by applications called *Networks Applications* (or *NApp*), which means
@@ -60,3 +61,4 @@ load and run it.
 ** The Python-OpenFlow library is an implementation of the OpenFlow protocol in
 Python. This library is used to pack/unpack and create/parse OpenFlow messages
 and is widely used by our OpenFlow Kytos/user NApps.
+

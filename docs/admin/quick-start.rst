@@ -1,24 +1,6 @@
-Quickstart
-**********
-
-Docker
-======
-
-You may try kytos without installing it by running our docker image.
-Just install docker from your package provider and run:
-
-.. code-block:: shell
-
-   $ sudo docker run -it --privileged kytos/tryfirst
-
-To run Kytos inside the docker image:
-
-.. code-block:: shell
-
-   $ kytosd -f
-
-You will then have your instance of a basic OpenFlow controller built with
-Kytos SDN Platform.
+***********
+Quick Start
+***********
 
 Install
 =======
@@ -46,6 +28,25 @@ Once you have `pip3` and `Python 3.6`, you can include this project in your
 
   $ sudo python3.6 -m pip install kytos
 
+Docker
+======
+
+You may try kytos without installing it by running our docker image.
+Just install docker from your package provider and run:
+
+.. code-block:: shell
+
+   $ sudo docker run -it --privileged kytos/tryfirst
+
+To run Kytos inside the docker image:
+
+.. code-block:: shell
+
+   $ kytosd -f
+
+You will then have your instance of a basic OpenFlow controller built with
+Kytos SDN Platform.
+
 Run
 ===
 
@@ -62,7 +63,6 @@ or run kytos daemon in background using only:
 
   $ kytosd
 
-
 Logging and Troubleshooting
 ===========================
 
@@ -74,8 +74,8 @@ All configurations regarding *Kytos* is defined at ``/etc/kytos/logging.ini``.
 This file contains configuration about messages formatting and how messages
 levels shuld be handled by syslog.
 
-If you are running Kytos in interactive mode, all log messages will be visible in
-the Kytos console.
+If you are running Kytos in interactive mode, all log messages will be visible
+in the Kytos console.
 
 Troubleshooting
 ---------------
@@ -113,8 +113,8 @@ properly listening:
     # netstat -anp | grep 6633
     tcp        0      0 0.0.0.0:6633            0.0.0.0:*               LISTEN      22774/python3.6
 
-If there is no process listening to the configured port, check if the *Kytos* is
-running. You can use the ``ps`` command:
+If there is no process listening to the configured port, check if the *Kytos*
+is running. You can use the ``ps`` command:
 
 .. code-block:: shell
 
@@ -122,5 +122,6 @@ running. You can use the ``ps`` command:
     root      7026  4850  0 10:08 pts/0    00:00:00 python3 ./kytosd
 
 If there is another process listening in the configured port (i.e. 6633), you
-must finish it before running Kytos, or choose another TCP port or IP address for *Kytos* to listen at by
-changing the configuration file entries or in command line.
+must finish it before running Kytos, or choose another TCP port or IP address
+for *Kytos* to listen at by changing the configuration file entries or in
+command line.

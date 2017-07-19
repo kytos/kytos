@@ -256,6 +256,7 @@ dummy:
 livehtml:
 	sphinx-apidoc -o . ../kytos/ -d10 -M -T
 	sed -i "/Submodules/,+1d" *.rst
-	sphinx-autobuild -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml -z ../kytos
+	sphinx-autobuild --re-ignore "\.[^.]+" -r ".+~" -b dirhtml \
+	    $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml -z ../kytos
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."

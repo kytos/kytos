@@ -1,3 +1,4 @@
+***************
 Listened Events
 ***************
 
@@ -40,11 +41,11 @@ with all classes and NApps who can listen to these Events.
 Openflow Event Message
 ======================
 
-An Openflow Event Message can be created by any OpenFlow NApp and it is sent using the
-controller's buffer. Once generated, the OpenFlow Event Message can be handled by any
-:class:`~kytos.core.napps.base.KytosNApp` subclasses with the decorator
-:func:`~kyco.core.helpers.listen_to`. The OpenFlow Event Messages currently implemented in Kytos NApps
-are listed below.
+An Openflow Event Message can be created by any OpenFlow NApp and it is sent
+using the controller's buffer. Once generated, the OpenFlow Event Message can
+be handled by any :class:`~kytos.core.napps.base.KytosNApp` subclasses with the
+decorator :func:`~kyco.core.helpers.listen_to`. The OpenFlow Event Messages
+currently implemented in Kytos NApps are listed below.
 
 +-------------------+-----------------------------------------------------------+-----------------------+
 | Type of Message   |               Event Message                               |    NApps              |
@@ -70,3 +71,4 @@ are listed below.
 +                   +-----------------------------------------------------------+-----------------------+
 |                   | kytos/of_core.v0x01.messages.in.ofpt_port_status          | - kytos/of_topology   |
 +-------------------+-----------------------------------------------------------+-----------------------+
+

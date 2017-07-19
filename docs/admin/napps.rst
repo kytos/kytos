@@ -1,5 +1,6 @@
-NApps Management
-****************
+***************
+NApp Management
+***************
 
 As mentioned earlier, *Kytos* is composed of several modules. One of these
 modules is the Network Application (Napp), which can be a core Kytos Napp,
@@ -9,11 +10,55 @@ the ``kytos napps`` command.
 
 .. note:: To manage NApps you must have a Kytos instance running.
 
+Search
+======
+
+Search for <pattern> among installed NApps and in the NApps Server, printing a list with
+all NApps matching the pattern along with their respective description and status
+
+.. code-block:: shell
+
+  $ kytos napps search <search>
+
+For example, if you want to search for ``kytos`` you can run:
+
+.. code-block:: shell
+
+  $ kytos napps search kytos
+
+  Status |          NApp ID          |                         Description
+  =======+===========================+============================================================
+   [ie]  | kytos/of_core             | OpenFlow Core of Kytos Controller, responsible for main ...
+   [--]  | kytos/of_flow_manager     | NApp that manages switches flows.
+   [i-]  | kytos/of_ipv6drop         | Install flows to DROP IPv6 packets on all switches.
+   [ie]  | kytos/of_l2ls             | An L2 learning switch application for OpenFlow switches.
+   [i-]  | kytos/of_lldp             | App responsible by send packet with lldp protocol to net...
+   [--]  | kytos/of_stats            | Provide statistics of openflow switches.
+   [--]  | kytos/of_topology         | A simple app that update links between machines and swit...
+   [--]  | kytos/web_topology_layout | Manage endpoints related to the web interface settings a...
+
+  Status: (i)nstalled, (e)nabled
+
+
+.. important::
+
+  In order to have basic OpenFlow funcionality, Kytos needs at least
+  the *kytos/of_core NApp* installed and enabled. To install flows in
+  switches for data exchange and include the web-ui features you should
+  install and enable the following napps:
+
+  * kytos/of_l2ls
+  * kytos/of_lldp
+  * kytos/of_stats
+  * kytos/of_topology
+  * kytos/web_topology_layout
+
+
 Install
 =======
 
-Installs and enables one or more NApps in your environment. <napps> is the ID of the
-NApp(s), in the format ``user/napp_name``.
+It downloads, installs and enable one or more NApps in your environment.
+<napps> is the ID of the NApp(s), in the format ``user/napp_name``.
 
 .. code-block:: shell
 
@@ -97,7 +142,6 @@ If you want to disable all enabled NApps at once, you can run:
 
      $ kytos napps disable all
 
-
 List
 ====
 
@@ -116,46 +160,9 @@ Prints a list of all installed NApps along with their respective description and
 
    Status: (i)nstalled, (e)nabled
 
+..
+  TODO: I DONT kown what insert here.
 
-Search
-======
-
-Search for <pattern> among installed NApps and in the NApps Server, printing a list with
-all NApps matching the pattern along with their respective description and status
-
-.. code-block:: shell
-
-  $ kytos napps search <search>
-
-For example, if you want to search for ``kytos`` you can run:
-
-.. code-block:: shell
-
-  $ kytos napps search kytos
-
-  Status |          NApp ID          |                         Description
-  =======+===========================+============================================================
-   [ie]  | kytos/of_core             | OpenFlow Core of Kytos Controller, responsible for main ...
-   [--]  | kytos/of_flow_manager     | NApp that manages switches flows.
-   [i-]  | kytos/of_ipv6drop         | Install flows to DROP IPv6 packets on all switches.
-   [ie]  | kytos/of_l2ls             | An L2 learning switch application for OpenFlow switches.
-   [i-]  | kytos/of_lldp             | App responsible by send packet with lldp protocol to net...
-   [--]  | kytos/of_stats            | Provide statistics of openflow switches.
-   [--]  | kytos/of_topology         | A simple app that update links between machines and swit...
-   [--]  | kytos/web_topology_layout | Manage endpoints related to the web interface settings a...
-
-  Status: (i)nstalled, (e)nabled
-
-
-.. important::
-  
-  In order to have basic OpenFlow funcionality, Kytos needs at least
-  the *kytos/of_core NApp* installed and enabled. To install flows in
-  switches for data exchange and include the web-ui features you should
-  install and enable the following napps:
-
-  * kytos/of_l2ls
-  * kytos/of_lldp
-  * kytos/of_stats
-  * kytos/of_topology
-  * kytos/web_topology_layout
+  Configuring
+  ===========
+  Don't remember what the admin should configure.

@@ -40,7 +40,7 @@ Description
     structs.
 
 - raw/
-    Raw openflow message dumps to be used by the test suite.
+    Raw OpenFlow message dumps to be used by the test suite.
 
 - tests/
     Package with python-openflow test suite.
@@ -89,27 +89,28 @@ provide you anything.
   >>> [i for i in dir() if i not in old_dir]
   []
 
+nothing is imported...
 
-pyof Objects;
-+++++++++++++
+pyof Objects
+++++++++++++
 pyof objects are instances of GenericStruct or GenericType or other classes
 derived from these.
 
 They provide the methods ``pack`` ``unpack`` and ``get_size``.
 
-initialization;
-+++++++++++++++
+initialization
+++++++++++++++
 ``GenericType``s accepts as argument an initial value.
 ``GenericStruct``s derivatives usually accepts as argument initial values
 for its class attributes.
 
-packing;
-++++++++
+packing
++++++++
 To pack a pyof object, simply call its ``pack()`` method, which returns a
 ``bytes`` object of the binary representation.
 
-unpacking;
-++++++++++
+unpacking
++++++++++
 To unpack a buffer as pyof object, simply initialize a new object and
 call its ``unpack()`` method, passing the buffer as the argument. The buffer
 buffer will be unpacked in place setting the attributes of the object
@@ -121,16 +122,16 @@ New definitions:
 ``python-openflow`` provides some base classes and basic types classes meant to
 be used in a new message/struct class definition.
 
-Difference between "structs" and "messages";
-++++++++++++++++++++++++++++++++++++++++++++
+Difference between "structs" and "messages"
++++++++++++++++++++++++++++++++++++++++++++
 Messages are GenericStruct derivatives who carry a header attribute containing
 an openflow header struct.
 
 Unlike GenericStructs their unpack method accepts a buffer argument with its
 packed body (without the associated header).
 
-How to code a new struct/message;
-+++++++++++++++++++++++++++++++++
+How to code a new struct/message
+++++++++++++++++++++++++++++++++
 To implement a new struct, you need to:
 - define a new class which derives from ``GenericStruct``;
 - define class attributes in pack order (with optional initial values) whose
@@ -187,8 +188,8 @@ which can be used like this for example:
 
 
 
-How to start a new "pyof version";
-++++++++++++++++++++++++++++++++++
+How to start a new "pyof version"
++++++++++++++++++++++++++++++++++
 
 - Create a new package under ``pyof`` named after the version you are
   interested in implementing, like ``v0xff`` for example.

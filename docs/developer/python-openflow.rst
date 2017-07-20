@@ -4,8 +4,8 @@ python-openflow
 Basic lib organization
 ======================
 
-Repository File Tree:
-+++++++++++++++++++++
+Repository file tree
+++++++++++++++++++++
 
 ::
 
@@ -54,8 +54,8 @@ importing
 To use the python-openflow module you need to import its classes directly
 from its submodule.
 
-How to do it:
-~~~~~~~~~~~~~
+how to do it
+~~~~~~~~~~~~
 To create a v0x04 Hello message for example, you need to import its class
 from the ``pyof.v0x04.symmetric.hello`` submodule using the statement:
 
@@ -64,8 +64,8 @@ from the ``pyof.v0x04.symmetric.hello`` submodule using the statement:
   >>> from pyof.v0x01.symmetric.hello import Hello
   >>> hello_message = Hello()
 
-How not to do it:
-~~~~~~~~~~~~~~~~~
+how NOT to do it
+~~~~~~~~~~~~~~~~
 Importing only ``pyof``, a version subpackage like ``pyof.v0x01``,
 or even a message category subpackage like ``pyof.v0x01.symmetric`` doesn't
 provide you anything.
@@ -95,13 +95,12 @@ pyof Objects
 ++++++++++++
 pyof objects are instances of GenericStruct or GenericType or other classes
 derived from these.
-
 They provide the methods ``pack`` ``unpack`` and ``get_size``.
 
 initialization
 ++++++++++++++
-``GenericType``s accepts as argument an initial value.
-``GenericStruct``s derivatives usually accepts as argument initial values
+``GenericType``s accept as argument an initial value.
+``GenericStruct``s derivatives usually accept as argument initial values
 for its class attributes.
 
 packing
@@ -112,23 +111,23 @@ To pack a pyof object, simply call its ``pack()`` method, which returns a
 unpacking
 +++++++++
 To unpack a buffer as pyof object, simply initialize a new object and
-call its ``unpack()`` method, passing the buffer as the argument. The buffer
+call its ``unpack()`` method, passing the buffer as the argument. The
 buffer will be unpacked in place setting the attributes of the object
 instance used to make the call.
 
 
-New definitions:
-================
-``python-openflow`` provides some base classes and basic types classes meant to
+New definitions
+===============
+``python-openflow`` provides some base classes and basic type classes meant to
 be used in a new message/struct class definition.
 
 Difference between "structs" and "messages"
 +++++++++++++++++++++++++++++++++++++++++++
 Messages are GenericStruct derivatives who carry a header attribute containing
-an openflow header struct.
+an OpenFlow header struct.
 
-Unlike GenericStructs their unpack method accepts a buffer argument with its
-packed body (without the associated header).
+Unlike ``GenericStruct``s their unpack method accepts a buffer argument with
+its packed body (without the associated header).
 
 How to code a new struct/message
 ++++++++++++++++++++++++++++++++
@@ -137,7 +136,7 @@ To implement a new struct, you need to:
 - define class attributes in pack order (with optional initial values) whose
   type are pyof objects themselves.
 
-example:
+Struct example:
 
 .. code:: python
 
@@ -149,7 +148,7 @@ example:
             my_second_attribute = UBInt16(0)
             my_third_attribute = UBInt8(255)
 
-which can be used like this for example:
+which can be used like this:
 
 .. code:: python
 
@@ -164,7 +163,7 @@ which can be used like this for example:
     >>> my_struct_2.my_second_attribute
     UBInt16(2)
 
-or to use it in a new message:
+Message example:
 
 .. code:: python
 
@@ -176,7 +175,7 @@ or to use it in a new message:
             header = Header(message_type=255)
             my_struct_field = MyNewStruct()
 
-which can be used like this for example:
+which can be used like this:
 
 .. code:: python
 
@@ -196,12 +195,12 @@ How to start a new "pyof version"
 - Create new subpackages for your message categories.
 - Implement your new message as described before.
 
-your file tree should look like this
-::
+your file tree should look like this::
+
   - pyof/
     + foundation/
     - v0xff/
       - my_message_category/
-          __init__.py
-          mynewmessage.py
+        __init__.py
+        mynewmessage.py
       __init__.py

@@ -1,8 +1,8 @@
 How to Contribute
 =================
 
-We'd love for you to help us improving Kytos! Being a developer or not, your
-feedback is important for us to, for example, fix bugs, add new features and
+We'd love you to help us improve Kytos! Being a developer or not, your
+feedback is important for us to fix bugs, add new features and
 make it easier to create and share Network Applications.
 
 To give us your feedback, check the most appropriate instructions in the next
@@ -95,6 +95,8 @@ file is changed:
 .. IMPORTANT::
   If you add or remove a page and see inconsistent results, try hitting
   `ctrl+c`, running ``make clean`` and then ``make livehtml`` again.
+
+.. _contributing-submission-guidelines:
 
 Submission Guidelines
 ---------------------

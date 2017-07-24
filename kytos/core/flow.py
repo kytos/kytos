@@ -18,9 +18,9 @@ class Flow(object):
 
     def __init__(self, idle_timeout=0, hard_timeout=0, cookie=0, #noqa
                  priority=0, table_id=0xff, buffer_id=None, in_port=None,
-                 dl_src=None, dl_dst=None, dl_vlan=None, dl_type=None,
-                 nw_proto=None, nw_src=None, nw_dst=None, tp_src=None,
-                 tp_dst=None, actions=None):
+                 dl_src=None, dl_dst=None, dl_vlan=None, dl_vlan_pcp=None,
+                 dl_type=None, nw_proto=None, nw_src=None, nw_dst=None,
+                 tp_src=None, tp_dst=None, actions=None):
         """Constructor receive the parameters below.
 
         Args:
@@ -33,6 +33,7 @@ class Flow(object):
             dl_src (|hw_address|): Ethernet source address.
             dl_dst (|hw_address|): Ethernet destination address.
             dl_vlan (int): Input VLAN id.
+            dl_vlan_pcp (int): Input VLAN priority.
             dl_type (int): Ethernet frame type.
             nw_proto (int): IP protocol or lower 8 bits of ARP opcode.
             nw_src (|ip_address|): IP source address.
@@ -53,6 +54,7 @@ class Flow(object):
         self.dl_src = dl_src
         self.dl_dst = dl_dst
         self.dl_vlan = dl_vlan
+        self.dl_vlan_pcp = dl_vlan_pcp
         self.dl_type = dl_type
         self.nw_proto = nw_proto
         self.nw_src = nw_src
@@ -82,6 +84,7 @@ class Flow(object):
         hash_result.update(str(self.dl_src).encode('utf-8'))
         hash_result.update(str(self.dl_dst).encode('utf-8'))
         hash_result.update(str(self.dl_vlan).encode('utf-8'))
+        hash_result.update(str(self.dl_vlan_pcp).encode('utf-8'))
         hash_result.update(str(self.dl_type).encode('utf-8'))
         hash_result.update(str(self.nw_proto).encode('utf-8'))
         hash_result.update(str(self.nw_src).encode('utf-8'))
@@ -110,6 +113,7 @@ class Flow(object):
                                    "dl_src": self.dl_src,
                                    "dl_dst": self.dl_dst,
                                    "dl_vlan": self.dl_vlan,
+                                   "dl_vlan_pcp": self.dl_vlan_pcp,
                                    "dl_type": self.dl_type,
                                    "nw_src": self.nw_src,
                                    "nw_dst": self.nw_dst,
@@ -189,6 +193,7 @@ class Flow(object):
         flow.dl_src = flow_stats.match.dl_src.value
         flow.dl_dst = flow_stats.match.dl_dst.value
         flow.dl_vlan = flow_stats.match.dl_vlan.value
+        flow.dl_vlan_pcp = flow_stats.match.dl_vlan_pcp.value
         flow.dl_type = flow_stats.match.dl_type.value
         flow.nw_src = flow_stats.match.nw_src.value
         flow.nw_dst = flow_stats.match.nw_dst.value
@@ -221,7 +226,8 @@ class Flow(object):
 
         flow_mod.match = Match()
         match_attributes = ['in_port', 'dl_src', 'dl_dst', 'dl_vlan',
-                            'dl_type', 'nw_src', 'nw_dst', 'tp_dst']
+                            'dl_vlan_pcp', 'dl_type', 'nw_src', 'nw_dst',
+                            'tp_dst']
 
         for attribute_name in match_attributes:
             value = getattr(self, attribute_name)

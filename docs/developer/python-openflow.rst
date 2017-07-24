@@ -20,6 +20,12 @@ Repository file tree
 Description
 +++++++++++
 
+Each openflow version is a subpackage inside the ``pyof`` package. It contains
+the version classes for messages and structures, which are organized according
+to the categories defined in the spec, like 'common', 'asynchronous', etc.
+Structures that are used by more than one category are usually placed in the
+'common' category.
+
 - docs/
     Sphinx documentation.
 
@@ -32,12 +38,12 @@ Description
     like the null terminated string ``foundation.basic_types.Char``.
 
 - pyof/v0x01/
-    Subpackage containing OpenFlow version 1.0 (0x01) classes for messages and
-    structs.
+    Subpackage containing OpenFlow version 1.0 (0x01) classes for messages,
+    structs and enumerations.
 
 - pyof/v0x04/
-    Subpackage containing OpenFlow version 1.3 (0x04) classes for messages and
-    structs.
+    Subpackage containing OpenFlow version 1.3 (0x04) classes for messages,
+    structs and enumerations.
 
 - raw/
     Raw OpenFlow message dumps to be used by the test suite.
@@ -114,6 +120,9 @@ To unpack a buffer as pyof object, simply initialize a new object and
 call its ``unpack()`` method, passing the buffer as the argument. The
 buffer will be unpacked in place setting the attributes of the object
 instance used to make the call.
+Exceptions to this case are ``GenericMessage``s derivatives, whose
+``unpack()`` method receives as argument a buffer containing only the
+message body.
 
 
 New definitions
@@ -127,16 +136,16 @@ Messages are GenericStruct derivatives who carry a header attribute containing
 an OpenFlow header struct.
 
 Unlike ``GenericStruct``s their unpack method accepts a buffer argument with
-its packed body (without the associated header).
+its binary body (without the associated header).
 
 How to code a new struct/message
 ++++++++++++++++++++++++++++++++
 To implement a new struct, you need to:
 - define a new class which derives from ``GenericStruct``;
-- define class attributes in pack order (with optional initial values) whose
-  type are pyof objects themselves.
+- define class attributes in following the order in which they must be packed
+  (with optional initial values) whose type are pyof objects themselves.
 
-Struct example:
+Struct example (``myexamplestruct.py``):
 
 .. code:: python
 
@@ -147,6 +156,10 @@ Struct example:
             my_first_attribute = UBInt8(255)
             my_second_attribute = UBInt16(0)
             my_third_attribute = UBInt8(255)
+
+            def __init__(self, my_third_attribute=None):
+                super().__init__()
+            	self.my_third_attribute = my_third_attribute
 
 which can be used like this:
 
@@ -170,6 +183,7 @@ Message example:
     >>> from pyof.foundation.base import GenericMessage
     >>> from pyof.foundation.basic_types import UBInt8, UBInt16
     >>> from pyof.v0x04.common.header import Header
+    >>> from myexamplestruct import MyNewStruct
 
     >>> class MyNewMessage(GenericMessage):
             header = Header(message_type=255)
@@ -195,12 +209,12 @@ How to start a new "pyof version"
 - Create new subpackages for your message categories.
 - Implement your new message as described before.
 
-your file tree should look like this::
+Your file tree should look like this::
 
   - pyof/
     + foundation/
     - v0xff/
+      __init__.py
       - my_message_category/
         __init__.py
         mynewmessage.py
-      __init__.py

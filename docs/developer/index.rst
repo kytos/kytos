@@ -18,6 +18,8 @@ the `tutorials <http://tutorials.kytos.io/>`__ made by Kytos Team.
 
 .. include:: api.rst
 
+.. include:: python-openflow.rst
+
 .. include:: ../getting_help.rst
 
 .. include:: ../AUTHORS.rst

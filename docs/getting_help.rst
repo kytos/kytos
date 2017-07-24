@@ -16,7 +16,7 @@ We also have two mailing lists:
   in which the development of the project is discussed.
 
 
-Found an Issue?
+Submit an Issue
 ---------------
 
 If you find a bug or a mistake in the documentation, you can help us by

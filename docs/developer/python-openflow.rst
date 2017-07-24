@@ -105,8 +105,8 @@ They provide the methods ``pack`` ``unpack`` and ``get_size``.
 
 initialization
 ++++++++++++++
-``GenericType``s accept as argument an initial value.
-``GenericStruct``s derivatives usually accept as argument initial values
+``GenericType`` derivatives accept as argument an initial value.
+``GenericStruct`` derivatives usually accept as argument initial values
 for its class attributes.
 
 packing
@@ -135,7 +135,7 @@ Difference between "structs" and "messages"
 Messages are GenericStruct derivatives who carry a header attribute containing
 an OpenFlow header struct.
 
-Unlike ``GenericStruct``s their unpack method accepts a buffer argument with
+Unlike ``GenericStruct`` s their unpack method accepts a buffer argument with
 its binary body (without the associated header).
 
 How to code a new struct/message
@@ -143,7 +143,7 @@ How to code a new struct/message
 To implement a new struct, you need to:
 - define a new class which derives from ``GenericStruct``;
 - define class attributes in following the order in which they must be packed
-  (with optional initial values) whose type are pyof objects themselves.
+(with optional initial values) whose type are pyof objects themselves.
 
 Struct example (``myexamplestruct.py``):
 

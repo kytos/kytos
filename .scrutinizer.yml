@@ -12,11 +12,9 @@ build:
         postgresql: false
         redis: false
     dependencies:
-        override:
-            - true
-    tests:
         before:
-            - pip install coverage
+            - pip install coverage git+git://github.com/diraol/watchdog.git#egg=watchdog
+    tests:
         override:
             -
                 command: 'tox'

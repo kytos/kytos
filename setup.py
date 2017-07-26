@@ -294,6 +294,8 @@ setup(name='kytos',
               'tox',
               # Some sphinx versions are not compiling docs
               'Sphinx ~= 1.5.0',
+              'sphinx-autobuild',
+              'sphinx-rtd-theme',
               # Avoid red navbar
               'sphinx_bootstrap_theme ~= 0.4.0',
               'pydocstyle ~= 1.1.1',
@@ -301,12 +303,6 @@ setup(name='kytos',
               'pylama_pylint ~= 3.0.1',
               'radon ~= 1.5.0',
           ],
-          'docs': [
-              'Sphinx~=1.5.0',
-              'sphinx-autobuild',
-              'sphinx-rtd-theme',
-              'sphinx_bootstrap_theme~=0.4.0'
-          ]
       },
       cmdclass={
           'clean': Cleaner,

@@ -9,4 +9,4 @@ python-daemon>=2.1.2
 # Maybe we need to remove this on the future
 setuptools>=34.0.0
 jinja2
-https://github.com/diraol/watchdog/archive/master.zip#egg=watchdog
+watchdog

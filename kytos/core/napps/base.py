@@ -148,8 +148,6 @@ class NApp:
 class KytosNApp(Thread, metaclass=ABCMeta):
     """Base class for any KytosNApp to be developed."""
 
-    __event = Event()
-
     def __init__(self, controller, **kwargs):
         """Contructor of KytosNapps.
 
@@ -170,6 +168,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         self._listeners = {
             'kytos/core.shutdown': [self._shutdown_handler],
             'kytos/core.shutdown.' + napp_id: [self._shutdown_handler]}
+        self.__event = Event()
         #: int: Seconds to sleep before next call to :meth:`execute`. If
         #: negative, run :meth:`execute` only once.
         self.__interval = -1
@@ -212,7 +211,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         self.__interval = interval
 
     def run(self):
-        """Call the setup and the execute method.
+        """Call the execute method, looping as needed.
 
         It should not be overriden.
         """

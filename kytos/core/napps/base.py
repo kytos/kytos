@@ -82,7 +82,7 @@ class NApp:
     @staticmethod
     def create_from_uri(uri):
         """Return a new NApp instance from an unique identifier."""
-        regex = r'^(((https?://|file://)(.+))/)?(.+?)/(.+?)/?(:(.+))?$'
+        regex = r'^(((https?://|file://)(.+))/)?(.+?)/(.+?)/?(-(.+))?$'
         match = re.match(regex, uri)
 
         if match:

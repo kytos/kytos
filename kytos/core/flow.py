@@ -16,16 +16,17 @@ class Flow(object):
     actions that should occur in case any match happen.
     """
 
-    def __init__(self, idle_timeout=0, hard_timeout=0, priority=0,  # noqa
-                 table_id=0xff, buffer_id=None, in_port=None, dl_src=None,
-                 dl_dst=None, dl_vlan=None, dl_type=None, nw_proto=None,
-                 nw_src=None, nw_dst=None, tp_src=None, tp_dst=None,
-                 actions=None):
+    def __init__(self, idle_timeout=0, hard_timeout=0, cookie=0, #noqa
+                 priority=0, table_id=0xff, buffer_id=None, in_port=None,
+                 dl_src=None, dl_dst=None, dl_vlan=None, dl_type=None,
+                 nw_proto=None, nw_src=None, nw_dst=None, tp_src=None,
+                 tp_dst=None, actions=None):
         """Constructor receive the parameters below.
 
         Args:
             idle_timeout (int): Idle time before discarding in seconds.
             hard_timeout (int): Max time before discarding in seconds.
+            cookie (int): Opaque controller-issued identifier.
             priority (int): Priority level of flow entry.
             table_id (int): The index of a single table or 0xff for all tables.
             buffer_id (int): Buffered packet to apply.
@@ -44,6 +45,7 @@ class Flow(object):
             actions = []
         self.idle_timeout = idle_timeout
         self.hard_timeout = hard_timeout
+        self.cookie = cookie
         self.priority = priority
         self.table_id = table_id
         self.buffer_id = buffer_id
@@ -72,6 +74,7 @@ class Flow(object):
         hash_result = hashlib.md5()
         hash_result.update(str(self.idle_timeout).encode('utf-8'))
         hash_result.update(str(self.hard_timeout).encode('utf-8'))
+        hash_result.update(str(self.cookie).encode('utf-8'))
         hash_result.update(str(self.priority).encode('utf-8'))
         hash_result.update(str(self.table_id).encode('utf-8'))
         hash_result.update(str(self.buffer_id).encode('utf-8'))
@@ -99,6 +102,7 @@ class Flow(object):
         dictionary_rep = {"flow": {"self.id": self.id,
                                    "idle_timeout": self.idle_timeout,
                                    "hard_timeout": self.hard_timeout,
+                                   "cookie": self.cookie,
                                    "priority": self.priority,
                                    "table_id": self.table_id,
                                    "buffer_id": self.buffer_id,
@@ -178,6 +182,7 @@ class Flow(object):
         flow = Flow()
         flow.idle_timeout = flow_stats.idle_timeout.value
         flow.hard_timeout = flow_stats.hard_timeout.value
+        flow.cookie = flow_stats.cookie.value
         flow.priority = flow_stats.priority.value
         flow.table_id = flow_stats.table_id.value
         flow.in_port = flow_stats.match.in_port.value
@@ -207,7 +212,7 @@ class Flow(object):
         flow_mod = FlowMod()
         flow_mod.command = flow_type
         flow_mod_attributes = ['buffer_id', 'idle_timeout', 'hard_timeout',
-                               'priority']
+                               'cookie', 'priority']
 
         for attribute_name in flow_mod_attributes:
             value = getattr(self, attribute_name)

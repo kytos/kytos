@@ -11,10 +11,10 @@ from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
 from distutils.command.clean import clean  # pylint: disable=E0401,E0611
 from pathlib import Path
-from subprocess import call, check_call
+from subprocess import CalledProcessError, call, check_call
 
 try:
-    import pip # noqa: This is just for checking if pip is installed
+    import pip  # noqa: This is just for checking if pip is installed
     from setuptools import Command, find_packages, setup
     from setuptools.command.develop import develop
     from setuptools.command.egg_info import egg_info
@@ -32,6 +32,12 @@ class SimpleCommand(Command):
     """Make Command implementation simpler."""
 
     user_options = []
+
+    def __init__(self, *args, **kwargs):
+        """Store arguments so it's possible to call other commands later."""
+        super().__init__(*args, **kwargs)
+        self._args = args
+        self._kwargs = kwargs
 
     @abstractmethod
     def run(self):
@@ -129,8 +135,8 @@ class TestCoverage(SimpleCommand):
 
     def run(self):
         """Run unittest quietly and display coverage report."""
-        cmd = 'coverage3 run setup.py test && coverage3 report'
-        call(cmd, shell=True)
+        cmd = 'coverage3 run --source=kytos setup.py test && coverage3 report'
+        check_call(cmd, shell=True)
 
 
 class DocTest(SimpleCommand):
@@ -140,8 +146,8 @@ class DocTest(SimpleCommand):
 
     def run(self):
         """Run doctests using Sphinx Makefile."""
-        cmd = 'make -C docs/ doctest'
-        call(cmd, shell=True)
+        cmd = 'make -C docs/ default doctest'
+        check_call(cmd, shell=True)
 
 
 class Linter(SimpleCommand):
@@ -152,7 +158,22 @@ class Linter(SimpleCommand):
     def run(self):
         """Run pylama."""
         print('Pylama is running. It may take several seconds...')
-        call('pylama setup.py tests kytos', shell=True)
+        try:
+            check_call('pylama setup.py tests kytos', shell=True)
+            print('No linter error found.')
+        except CalledProcessError:
+            print('Linter check failed. Fix the error(s) above and try again.')
+
+
+class CITest(SimpleCommand):
+    """Run all CI tests."""
+
+    description = 'run all CI tests: unit and doc tests, linter'
+
+    def run(self):
+        """Run unit tests with coverage, doc tests and linter."""
+        for command in TestCoverage, DocTest, Linter:
+            command(*self._args, **self._kwargs).run()
 
 
 class CommonInstall:
@@ -289,30 +310,31 @@ setup(name='kytos',
       extras_require={
           'dev': [
               'coverage',
-              'pip-tools',
               'libsass',
-              'tox',
+              'pip-tools',
               # Some sphinx versions are not compiling docs
               'Sphinx ~= 1.5.0',
               'sphinx-autobuild',
-              'sphinx-rtd-theme',
               # Avoid red navbar
+              'sphinx-rtd-theme',
               'sphinx_bootstrap_theme ~= 0.4.0',
               'pydocstyle ~= 1.1.1',
               'pylama ~= 7.3.3',
               'pylama_pylint ~= 3.0.1',
               'radon ~= 1.5.0',
+              'tox',
           ],
       },
       cmdclass={
+          'build_sass': SASSBuild,
           'clean': Cleaner,
+          'ci': CITest,
           'coverage': TestCoverage,
           'develop': DevelopMode,
-          'install': InstallMode,
           'doctest': DocTest,
-          'lint': Linter,
           'egg_info': EggInfo,
-          'build_sass': SASSBuild
+          'install': InstallMode,
+          'lint': Linter
       },
       zip_safe=False,
       classifiers=[

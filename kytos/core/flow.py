@@ -17,10 +17,10 @@ class Flow(object):
     """
 
     def __init__(self, idle_timeout=0, hard_timeout=0, cookie=0, #noqa
-                 priority=0, table_id=0xff, buffer_id=None, in_port=None,
-                 dl_src=None, dl_dst=None, dl_vlan=None, dl_vlan_pcp=None,
-                 dl_type=None, nw_proto=None, nw_src=None, nw_dst=None,
-                 tp_src=None, tp_dst=None, actions=None):
+                 priority=0, table_id=0xff, buffer_id=None, wildcards=None,
+                 in_port=None, dl_src=None, dl_dst=None, dl_vlan=None,
+                 dl_vlan_pcp=None, dl_type=None, nw_proto=None, nw_src=None,
+                 nw_dst=None, tp_src=None, tp_dst=None, actions=None):
         """Constructor receive the parameters below.
 
         Args:
@@ -30,6 +30,7 @@ class Flow(object):
             priority (int): Priority level of flow entry.
             table_id (int): The index of a single table or 0xff for all tables.
             buffer_id (int): Buffered packet to apply.
+            wildcards (|flow_wildcards|): Wildcards fields.
             dl_src (|hw_address|): Ethernet source address.
             dl_dst (|hw_address|): Ethernet destination address.
             dl_vlan (int): Input VLAN id.
@@ -50,6 +51,7 @@ class Flow(object):
         self.priority = priority
         self.table_id = table_id
         self.buffer_id = buffer_id
+        self.wildcards = wildcards
         self.in_port = in_port
         self.dl_src = dl_src
         self.dl_dst = dl_dst
@@ -80,6 +82,7 @@ class Flow(object):
         hash_result.update(str(self.priority).encode('utf-8'))
         hash_result.update(str(self.table_id).encode('utf-8'))
         hash_result.update(str(self.buffer_id).encode('utf-8'))
+        hash_result.update(str(self.wildcards).encode('utf-8'))
         hash_result.update(str(self.in_port).encode('utf-8'))
         hash_result.update(str(self.dl_src).encode('utf-8'))
         hash_result.update(str(self.dl_dst).encode('utf-8'))
@@ -109,6 +112,7 @@ class Flow(object):
                                    "priority": self.priority,
                                    "table_id": self.table_id,
                                    "buffer_id": self.buffer_id,
+                                   "wildcards": self.wildcards,
                                    "in_port": self.in_port,
                                    "dl_src": self.dl_src,
                                    "dl_dst": self.dl_dst,
@@ -189,6 +193,7 @@ class Flow(object):
         flow.cookie = flow_stats.cookie.value
         flow.priority = flow_stats.priority.value
         flow.table_id = flow_stats.table_id.value
+        flow.wildcards = flow_stats.match.wildcards.value
         flow.in_port = flow_stats.match.in_port.value
         flow.dl_src = flow_stats.match.dl_src.value
         flow.dl_dst = flow_stats.match.dl_dst.value
@@ -225,9 +230,9 @@ class Flow(object):
                 setattr(flow_mod, attribute_name, value)
 
         flow_mod.match = Match()
-        match_attributes = ['in_port', 'dl_src', 'dl_dst', 'dl_vlan',
-                            'dl_vlan_pcp', 'dl_type', 'nw_src', 'nw_dst',
-                            'tp_dst']
+        match_attributes = ['wildcards', 'in_port', 'dl_src', 'dl_dst',
+                            'dl_vlan', 'dl_vlan_pcp', 'dl_type', 'nw_src',
+                            'nw_dst', 'tp_dst']
 
         for attribute_name in match_attributes:
             value = getattr(self, attribute_name)

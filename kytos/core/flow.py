@@ -230,9 +230,9 @@ class Flow(object):
                 setattr(flow_mod, attribute_name, value)
 
         flow_mod.match = Match()
-        match_attributes = ['wildcards', 'in_port', 'dl_src', 'dl_dst',
-                            'dl_vlan', 'dl_vlan_pcp', 'dl_type', 'nw_src',
-                            'nw_dst', 'tp_dst']
+        match_attributes = ['in_port', 'dl_src', 'dl_dst', 'dl_vlan',
+                            'dl_vlan_pcp', 'dl_type', 'nw_src', 'nw_dst',
+                            'tp_dst']
 
         for attribute_name in match_attributes:
             value = getattr(self, attribute_name)

@@ -438,4 +438,7 @@ rst_epilog = """
 
 .. |desc_stats| replace::
    :class:`~pyof.v0x01.controller2switch.common.DescStats`
+
+.. |flow_wildcards| replace::
+   :class:`~pyof.v0x01.common.flow_match.FlowWildCards`
 """

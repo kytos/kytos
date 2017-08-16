@@ -1,5 +1,6 @@
-Configuration
-*************
+***********
+Configuring
+***********
 
 *Kytos* has several configuration parameters that allows the user to setup the
 controller according to his needs. To configure *Kytos* you can edit the
@@ -81,3 +82,4 @@ log messages are generated
 
 -v (--version): This command line parameter is used to display the *Kytos*
 version.
+

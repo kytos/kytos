@@ -587,6 +587,7 @@ class Controller(object):
             # This start method is inherited from the Threading class.
             # It is not directly defined/declared on the KytosNApp class.
             napp.start()
+            self.api_server.register_napp_endpoints(napp)
 
             # pylint: disable=protected-access
             for event, listeners in napp._listeners.items():

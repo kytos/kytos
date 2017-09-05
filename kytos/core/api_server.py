@@ -126,7 +126,7 @@ class APIServer:
     # BEGIN decorator methods
 
     @staticmethod
-    def decorator(rule, **options):
+    def decorate_as_endpoint(rule, **options):
         """Decorator for REST endpoints using Flask.
 
         Example for URL ``/api/myusername/mynapp/sayhello/World``:

@@ -14,7 +14,7 @@ from kytos.core.logs import NAppLog
 
 __all__ = ('KytosNApp',)
 
-log = NAppLog()  # noqa - no caps to be more friendly
+LOG = NAppLog()
 
 
 class NApp:
@@ -42,7 +42,7 @@ class NApp:
         return isinstance(other, self.__class__) and self.id == other.id
 
     @property
-    def id(self):
+    def id(self):  # pylint: disable=invalid-name
         """username/name string."""
         return str(self)
 
@@ -215,13 +215,14 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
         It should not be overriden.
         """
-        log.info("Running NApp: %s", self)
+        LOG.info("Running NApp: %s", self)
         self.execute()
         while self.__interval > 0 and not self.__event.is_set():
             self.__event.wait(self.__interval)
             self.execute()
 
-    def _shutdown_handler(self, event):  # noqa - all listeners receive event
+    # all listeners receive event
+    def _shutdown_handler(self, event):  # pylint: disable=unused-argument
         """Method used to listen shutdown event from kytos.
 
         This method listens the kytos/core.shutdown event and call the shutdown

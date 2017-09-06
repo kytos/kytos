@@ -4,12 +4,12 @@ from socket import error as SocketError
 from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 from threading import current_thread
 
-from kytos.core.connection import CONNECTION_STATE, Connection
+from kytos.core.connection import Connection, ConnectionState
 from kytos.core.events import KytosEvent
 
 __all__ = ('KytosServer', 'KytosRequestHandler')
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class KytosServer(ThreadingMixIn, TCPServer):
@@ -44,11 +44,11 @@ class KytosServer(ThreadingMixIn, TCPServer):
         try:
             self.server_bind()
             self.server_activate()
-            log.info("Kytos listening at %s:%s", self.server_address[0],
+            LOG.info("Kytos listening at %s:%s", self.server_address[0],
                      self.server_address[1])
             super().serve_forever(poll_interval)
         except Exception:
-            log.error('Failed to start Kytos TCP Server.')
+            LOG.error('Failed to start Kytos TCP Server.')
             self.server_close()
             raise
 
@@ -88,12 +88,12 @@ class KytosRequestHandler(BaseRequestHandler):
         This method builds a new controller Connection, and places a
         ``kytos/core.connection.new`` KytosEvent in the app buffer.
         """
-        self.ip = self.client_address[0]
+        self.addr = self.client_address[0]
         self.port = self.client_address[1]
 
-        log.info("New connection from %s:%s", self.ip, self.port)
+        LOG.info("New connection from %s:%s", self.addr, self.port)
 
-        self.connection = Connection(self.ip, self.port, self.request) # noqa
+        self.connection = Connection(self.addr, self.port, self.request)
         server_port = self.server.server_address[1]
         if server_port in self.known_ports:
             protocol_name = self.known_ports[server_port]
@@ -119,14 +119,14 @@ class KytosRequestHandler(BaseRequestHandler):
         buffer.
         """
         curr_thread = current_thread()
-        MAX_SIZE = 2**16
+        max_size = 2**16
         while True:
             try:
-                new_data = self.request.recv(MAX_SIZE)
+                new_data = self.request.recv(max_size)
             except (SocketError, OSError, InterruptedError,
                     ConnectionResetError) as exception:
                 self.exception = exception
-                log.debug('Socket handler exception while reading: %s',
+                LOG.debug('Socket handler exception while reading: %s',
                           exception)
                 break
             if new_data == b'':
@@ -136,7 +136,7 @@ class KytosRequestHandler(BaseRequestHandler):
             if not self.connection.is_alive():
                 continue
 
-            log.debug("New data from %s:%s at thread %s", self.ip,
+            LOG.debug("New data from %s:%s at thread %s", self.addr,
                       self.port, curr_thread.name)
 
             content = {'source': self.connection,
@@ -154,9 +154,9 @@ class KytosRequestHandler(BaseRequestHandler):
         This method closes the connection socket and generates a
         ``kytos/core.connection.lost`` KytosEvent in the App buffer.
         """
-        log.info("Connection lost with Client %s:%s. Reason: %s",
-                 self.ip, self.port, self.exception)
-        self.connection.state = CONNECTION_STATE.FINISHED
+        LOG.info("Connection lost with Client %s:%s. Reason: %s",
+                 self.addr, self.port, self.exception)
+        self.connection.state = ConnectionState.FINISHED
         self.connection.close()
         content = {'source': self.connection}
         if self.exception:

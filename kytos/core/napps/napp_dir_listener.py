@@ -6,7 +6,7 @@ from pathlib import Path
 from watchdog.events import RegexMatchingEventHandler
 from watchdog.observers import Observer
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class NAppDirListener(RegexMatchingEventHandler):
@@ -36,12 +36,12 @@ class NAppDirListener(RegexMatchingEventHandler):
         """Method to start handle directory changes."""
         self.observer.schedule(self, self.napps_path, True)
         self.observer.start()
-        log.info('NAppDirListener Started...')
+        LOG.info('NAppDirListener Started...')
 
     def stop(self):
         """Method to stop handle directory changes."""
         self.observer.stop()
-        log.info('NAppDirListener Stopped...')
+        LOG.info('NAppDirListener Stopped...')
 
     def _get_napp(self, absolute_path):
         """Method used to get a username and napp_name from absolute path.
@@ -63,7 +63,7 @@ class NAppDirListener(RegexMatchingEventHandler):
                 observer.
         """
         napp = self._get_napp(event.src_path)
-        log.debug('The NApp "%s/%s" was enabled.', *napp)
+        LOG.debug('The NApp "%s/%s" was enabled.', *napp)
         self._controller.load_napp(*napp)
 
     def on_deleted(self, event):
@@ -74,5 +74,5 @@ class NAppDirListener(RegexMatchingEventHandler):
                 observer.
         """
         napp = self._get_napp(event.src_path)
-        log.debug('The NApp "%s/%s" was disabled.', *napp)
+        LOG.debug('The NApp "%s/%s" was disabled.', *napp)
         self._controller.unload_napp(*napp)

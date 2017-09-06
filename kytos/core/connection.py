@@ -5,12 +5,12 @@ from errno import EBADF, ENOTCONN
 from socket import error as SocketError
 from socket import SHUT_RDWR
 
-__all__ = ('Connection', 'ConnectionProtocol', 'CONNECTION_STATE')
+__all__ = ('Connection', 'ConnectionProtocol', 'ConnectionState')
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
-class CONNECTION_STATE(Enum):
+class ConnectionState(Enum):
     """Enum of possible general connections states."""
 
     NEW = 0
@@ -46,7 +46,7 @@ class Connection(object):
         self.port = port
         self.socket = socket
         self.switch = switch
-        self.state = CONNECTION_STATE.NEW
+        self.state = ConnectionState.NEW
         self.protocol = ConnectionProtocol()
         self.remaining_data = b''
 
@@ -57,14 +57,16 @@ class Connection(object):
 
     @state.setter
     def state(self, new_state):
-        if new_state not in CONNECTION_STATE:
+        if new_state not in ConnectionState:
             raise Exception('Unknown State', new_state)
-        self._state = new_state # noqa
-        log.debug('Connection %s changed state: %s',
+        # pylint: disable=attribute-defined-outside-init
+        self._state = new_state
+        # pylint: enable=attribute-defined-outside-init
+        LOG.debug('Connection %s changed state: %s',
                   self.id, self.state)
 
     @property
-    def id(self):
+    def id(self):  # pylint: disable=invalid-name
         """Return id from Connection instance.
 
         Returns:
@@ -82,52 +84,52 @@ class Connection(object):
             if self.is_alive():
                 self.socket.sendall(buffer)
         except (OSError, SocketError) as exception:
-            log.debug('Could not send packet. Exception: %s', exception)
+            LOG.debug('Could not send packet. Exception: %s', exception)
             self.close()
 
     def close(self):
         """Close the socket from connection instance."""
-        self.state = CONNECTION_STATE.FINISHED
+        self.state = ConnectionState.FINISHED
         if self.switch and self.switch.connection is self:
             self.switch.connection = None
 
-        log.debug('Shutting down Connection %s', self.id)
+        LOG.debug('Shutting down Connection %s', self.id)
 
         try:
             self.socket.shutdown(SHUT_RDWR)
             self.socket.close()
             self.socket = None
-            log.debug('Connection Closed: %s', self.id)
-        except OSError as e:
-            if e.errno not in (ENOTCONN, EBADF):
-                raise e
-        except AttributeError as e:
-            log.debug('Socket Already Closed: %s', self.id)
+            LOG.debug('Connection Closed: %s', self.id)
+        except OSError as exception:
+            if exception.errno not in (ENOTCONN, EBADF):
+                raise exception
+        except AttributeError as exception:
+            LOG.debug('Socket Already Closed: %s', self.id)
 
     def is_alive(self):
         """Return True if the connection socket is alive. False otherwise."""
         return self.socket is not None and self.state not in (
-            CONNECTION_STATE.FINISHED, CONNECTION_STATE.FAILED)
+            ConnectionState.FINISHED, ConnectionState.FAILED)
 
     def is_new(self):
         """Return True if the connection is new. False otherwise."""
-        return self.state == CONNECTION_STATE.NEW
+        return self.state == ConnectionState.NEW
 
     def is_established(self):
         """Return True if the connection is established. False otherwise."""
-        return self.state == CONNECTION_STATE.ESTABLISHED
+        return self.state == ConnectionState.ESTABLISHED
 
     def is_during_setup(self):
         """Return True if the connection is in setup state. False otherwise."""
-        return self.state == CONNECTION_STATE.SETUP
+        return self.state == ConnectionState.SETUP
 
     def set_established_state(self):
         """Set the connection state to Established."""
-        self.state = CONNECTION_STATE.ESTABLISHED
+        self.state = ConnectionState.ESTABLISHED
 
     def set_setup_state(self):
         """Set the connection state to Setup."""
-        self.state = CONNECTION_STATE.SETUP
+        self.state = ConnectionState.SETUP
 
     def update_switch(self, switch):
         """Update switch with this instance of Connection.

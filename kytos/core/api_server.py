@@ -42,8 +42,8 @@ class APIServer:
         """Run the Flask API Server."""
         try:
             self.server.run(self.app, self.listen, self.port)
-        except OSError as e:
-            msg = "Couldn't start API Server: {}".format(e)
+        except OSError as exception:
+            msg = "Couldn't start API Server: {}".format(exception)
             self.log.critical(msg)
             sys.exit(msg)
 

@@ -4,13 +4,15 @@ import logging
 import re
 from configparser import RawConfigParser
 # noqa so it does not conflict with grouped imports
-from logging import Formatter, config, getLogger  # noqa
+# pylint: disable=ungrouped-imports
+from logging import Formatter, config, getLogger
+# pylint: enable=ungrouped-imports
 from pathlib import Path
 
 from kytos.core.websocket import WebSocketHandler
 
 __all__ = ('LogManager', 'NAppLog')
-log = getLogger(__name__)
+LOG = getLogger(__name__)
 
 
 class LogManager:
@@ -35,7 +37,7 @@ class LogManager:
             cls._set_debug_mode(debug)
             cls._use_config_file(config_file)
         else:
-            log.warning('Log config file "%s" does not exist. Using default '
+            LOG.warning('Log config file "%s" does not exist. Using default '
                         'Python logging configuration.',
                         config_file)
 
@@ -44,14 +46,14 @@ class LogManager:
         if debug is True:
             cls._PARSER.set('logger_root', 'level', 'DEBUG')
             cls._PARSER.set('logger_api_server', 'level', 'DEBUG')
-            log.info('Setting log configuration with debug mode.')
+            LOG.info('Setting log configuration with debug mode.')
 
     @classmethod
     def _use_config_file(cls, config_file):
         """Use parsed logging configuration."""
         try:
             config.fileConfig(cls._PARSER, disable_existing_loggers=False)
-            log.info('Logging config file "%s" loaded successfully.',
+            LOG.info('Logging config file "%s" loaded successfully.',
                      config_file)
         except OSError:
             cls._catch_config_file_exception(config_file)
@@ -60,12 +62,12 @@ class LogManager:
     def _catch_config_file_exception(cls, config_file):
         """Try not using syslog handler (for when it is not installed)."""
         if 'handler_syslog' in cls._PARSER:
-            log.warning('Failed to load "%s". Trying to disable syslog '
+            LOG.warning('Failed to load "%s". Trying to disable syslog '
                         'handler.', config_file)
             cls._PARSER.remove_section('handler_syslog')
             cls._use_config_file(config_file)
         else:
-            log.warning('Failed to load "%s". Using default Python '
+            LOG.warning('Failed to load "%s". Using default Python '
                         'logging configuration.', config_file)
 
     @classmethod
@@ -113,10 +115,10 @@ class LogManager:
 
 
 # Add filter to all pre-existing handlers
-handler_filter = LogManager.filter_session_disconnected
+HANDLER_FILTER = LogManager.filter_session_disconnected
 for root_handler in logging.root.handlers:
-    if handler_filter not in root_handler.filters:
-        root_handler.addFilter(handler_filter)
+    if HANDLER_FILTER not in root_handler.filters:
+        root_handler.addFilter(HANDLER_FILTER)
 
 
 class NAppLog:

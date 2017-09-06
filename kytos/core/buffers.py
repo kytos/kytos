@@ -6,7 +6,7 @@ from kytos.core.events import KytosEvent
 
 __all__ = ('KytosBuffers', )
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class KytosEventBuffer(object):
@@ -36,10 +36,10 @@ class KytosEventBuffer(object):
         """
         if not self._reject_new_events:
             self._queue.put(event)
-            log.debug('[buffer: %s] Added: %s', self.name, event.name)
+            LOG.debug('[buffer: %s] Added: %s', self.name, event.name)
 
         if event.name == "kytos/core.shutdown":
-            log.info('[buffer: %s] Stop mode enabled. Rejecting new events.',
+            LOG.info('[buffer: %s] Stop mode enabled. Rejecting new events.',
                      self.name)
             self._reject_new_events = True
 
@@ -52,7 +52,7 @@ class KytosEventBuffer(object):
         """
         event = self._queue.get()
 
-        log.debug('[buffer: %s] Removed: %s', self.name, event.name)
+        LOG.debug('[buffer: %s] Removed: %s', self.name, event.name)
 
         return event
 
@@ -111,8 +111,8 @@ class KytosBuffers(object):
 
     def send_stop_signal(self):
         """Send a ``kytos/core.shutdown`` event to each buffer."""
-        log.info('Stop signal received by Kytos buffers.')
-        log.info('Sending KytosShutdownEvent to all apps.')
+        LOG.info('Stop signal received by Kytos buffers.')
+        LOG.info('Sending KytosShutdownEvent to all apps.')
         event = KytosEvent(name='kytos/core.shutdown')
         self.raw.put(event)
         self.msg_in.put(event)

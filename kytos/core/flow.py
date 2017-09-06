@@ -16,7 +16,7 @@ class Flow(object):
     actions that should occur in case any match happen.
     """
 
-    def __init__(self, idle_timeout=0, hard_timeout=0, cookie=0, #noqa
+    def __init__(self, idle_timeout=0, hard_timeout=0, cookie=0,  # noqa
                  priority=0, table_id=0xff, buffer_id=None, wildcards=None,
                  in_port=None, dl_src=None, dl_dst=None, dl_vlan=None,
                  dl_vlan_pcp=None, dl_type=None, nw_proto=None, nw_src=None,
@@ -66,7 +66,7 @@ class Flow(object):
         self.actions = actions
 
     @property
-    def id(self):
+    def id(self):  # pylint: disable=invalid-name
         """Return the hash of the object.
 
         Calculates the hash of the object by using the hashlib we use md5 of
@@ -299,7 +299,7 @@ class OutputAction(FlowAction):
         return OutputAction(output_port=dict_content['port'])
 
     @property
-    def id(self):
+    def id(self):  # pylint: disable=invalid-name
         """Return the (unambiguous) representation of the object.
 
         Returns:

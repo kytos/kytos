@@ -26,7 +26,7 @@ from threading import Thread
 from kytos.core.api_server import APIServer
 from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
-from kytos.core.connection import CONNECTION_STATE
+from kytos.core.connection import ConnectionState
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
@@ -133,9 +133,14 @@ class Controller(object):
         # System can erase /var/run's content
         pid_folder = Path(self.options.pidfile).parent
         self.log.info(pid_folder)
+
+        # Pylint incorrectly infers Path objects
+        # https://github.com/PyCQA/pylint/issues/224
+        # pylint: disable=no-member
         if not pid_folder.exists():
             pid_folder.mkdir()
             pid_folder.chmod(0o1777)
+        # pylint: enable=no-member
 
         # Make sure the file is deleted when controller stops
         atexit.register(Path(self.options.pidfile).unlink)
@@ -160,9 +165,9 @@ class Controller(object):
             except OSError:
                 try:
                     pidfile = open(self.options.pidfile, mode='w')
-                except OSError as e:
+                except OSError as exception:
                     error_msg = "Failed to create pidfile {}: {}."
-                    sys.exit(error_msg.format(self.options.pidfile, e))
+                    sys.exit(error_msg.format(self.options.pidfile, exception))
 
         # Identifies the process that created the pidfile.
         pidfile.write(str(pid))
@@ -204,9 +209,9 @@ class Controller(object):
         for thread in self._threads.values():
             try:
                 thread.start()
-            except OSError as e:
+            except OSError as exception:
                 error_msg = "Error starting thread {}: {}."
-                sys.exit(error_msg.format(thread, e))
+                sys.exit(error_msg.format(thread, exception))
 
         self.log.info("Loading Kytos NApps...")
         self.napp_dir_listener.start()
@@ -393,7 +398,7 @@ class Controller(object):
             message = triggered_event.content['message']
             destination = triggered_event.destination
             if (destination and
-                    not destination.state == CONNECTION_STATE.FINISHED):
+                    not destination.state == ConnectionState.FINISHED):
                 packet = message.pack()
                 destination.send(packet)
                 self.log.debug('Connection %s: OUT OFP, ' +
@@ -583,8 +588,10 @@ class Controller(object):
             # It is not directly defined/declared on the KytosNApp class.
             napp.start()
 
-            for event, listeners in napp._listeners.items():  # noqa
+            # pylint: disable=protected-access
+            for event, listeners in napp._listeners.items():
                 self.events_listeners.setdefault(event, []).extend(listeners)
+            # pylint: enable=protected-access
 
     def load_napps(self):
         """Load all NApps enabled on the NApps dir."""
@@ -593,8 +600,9 @@ class Controller(object):
             try:
                 self.log.info("Loading NApp %s", napp.id)
                 self.load_napp(napp.username, napp.name)
-            except FileNotFoundError as e:
-                self.log.error("Could not load NApp %s: %s", napp.id, e)
+            except FileNotFoundError as exception:
+                self.log.error("Could not load NApp %s: %s",
+                               napp.id, exception)
 
     def unload_napp(self, username, napp_name):
         """Unload a specific NApp.
@@ -616,12 +624,14 @@ class Controller(object):
             napp_shutdown_fn(event)
 
             # Removing listeners from that napp
-            for event_type, napp_listeners in napp._listeners.items():  # noqa
+            # pylint: disable=protected-access
+            for event_type, napp_listeners in napp._listeners.items():
                 event_listeners = self.events_listeners[event_type]
                 for listener in napp_listeners:
                     event_listeners.remove(listener)
                 if not event_listeners:
                     del self.events_listeners[event_type]
+            # pylint: enable=protected-access
 
     def unload_napps(self):
         """Unload all loaded NApps that are not core NApps."""

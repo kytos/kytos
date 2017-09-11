@@ -331,7 +331,7 @@ class Controller(object):
         Args:
             event (~kytos.core.KytosEvent): An instance of a KytosEvent.
         """
-        for event_regex, listeners in self.events_listeners.items():
+        for event_regex, listeners in dict(self.events_listeners).items():
             # Do not match if the event has more characters
             # e.g. "shutdown" won't match "shutdown.kytos/of_core"
             if event_regex[-1] != '$' or event_regex[-2] == '\\':

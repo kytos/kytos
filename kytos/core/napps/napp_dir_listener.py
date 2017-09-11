@@ -29,7 +29,8 @@ class NAppDirListener(RegexMatchingEventHandler):
         super().__init__()
         self._controller = controller
         self.napps_path = self._controller.options.napps
-        Path(self.napps_path).mkdir(mode=0o755, parents=True, exist_ok=True)
+        mode = 0o777 if self.napps_path.startswith('/var') else 0o755
+        Path(self.napps_path).mkdir(mode=mode, parents=True, exist_ok=True)
         self.observer = Observer()
 
     def start(self):

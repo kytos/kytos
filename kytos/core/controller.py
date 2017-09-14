@@ -19,6 +19,7 @@ import logging
 import os
 import re
 import sys
+import warnings
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from threading import Thread
@@ -231,9 +232,10 @@ class Controller(object):
                                                self.configuration_endpoint,
                                                methods=['GET'])
 
-    def register_rest_endpoint(self, *options, **kwargs):
-        """Method used to return the endpoints registered by APIServer."""
-        self.api_server.register_rest_endpoint(*options, **kwargs)
+    def register_rest_endpoint(self, *options, **kwargs):  # noqa
+        """Deprecated in favor of @rest decorator."""
+        warnings.warn("From now on, use @rest decorator.", DeprecationWarning,
+                      stacklevel=2)
 
     def configuration_endpoint(self):
         """Return the configuration options used by Kytos.

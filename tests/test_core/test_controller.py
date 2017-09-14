@@ -1,8 +1,9 @@
 """Test kytos.core.controller module."""
 import json
 import logging
+import warnings
 from copy import copy
-from unittest import TestCase, skip
+from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from kytos.core import Controller
@@ -24,23 +25,6 @@ class TestController(TestCase):
         expected = json.dumps(serializable_options)
         actual = self.controller.configuration_endpoint()
         self.assertEqual(expected, actual)
-
-    @skip('Will be renamed to /api/kytos/core/')
-    def test_register_configuration_endpoint(self):
-        """Should register the endpoint '/kytos/config/'."""
-        expected_endpoint = '/kytos/config/'
-        actual_endpoints = self.controller.api_server.rest_endpoints
-        self.assertIn(expected_endpoint, actual_endpoints)
-
-    @skip('Will be renamed to /api/kytos/core/')
-    def test_register_kytos_endpoints(self):
-        """Verify all endpoints registered by Controller."""
-        expected_endpoints = ['/kytos/config/', '/kytos/shutdown/',
-                              '/kytos/status/', '/index.html', '/',
-                              '/static/<path:filename>']
-        actual_endpoints = self.controller.api_server.rest_endpoints
-        self.assertListEqual(sorted(expected_endpoints),
-                             sorted(actual_endpoints))
 
     @staticmethod
     @patch('kytos.core.controller.LogManager')
@@ -89,3 +73,13 @@ class TestController(TestCase):
         napp = Mock(_listeners={})
         self.controller.napps[(username, napp_name)] = napp
         return listener
+
+    def test_deprecation_warning(self):
+        """Deprecated method should suggest @rest decorator."""
+        with warnings.catch_warnings(record=True) as wrngs:
+            warnings.simplefilter("always")  # trigger all warnings
+            self.controller.register_rest_endpoint('x', lambda x: x, ['GET'])
+            self.assertEqual(1, len(wrngs))
+            warning = wrngs[0]
+            self.assertEqual(warning.category, DeprecationWarning)
+            self.assertIn('@rest', str(warning.message))

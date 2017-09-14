@@ -1,8 +1,8 @@
 """APIServer tests."""
-
 import unittest
-from unittest import skip
-from unittest.mock import Mock, sentinel
+import warnings
+# Disable not-grouped imports that conflicts with isort
+from unittest.mock import Mock, sentinel  # pylint: disable=C0412
 
 from kytos.core.api_server import APIServer
 from kytos.core.napps import rest
@@ -15,45 +15,16 @@ class TestAPIServer(unittest.TestCase):
         """Instantiate a APIServer."""
         self.api_server = APIServer('CustomName', False)
 
-    @skip('Will be renamed to /api/kytos/core/')
-    def test_register_rest_endpoint(self):
-        """Test whether register_rest_endpoint is registering an endpoint."""
-        self.api_server.register_rest_endpoint('/custom_method/',
-                                               self.__custom_endpoint,
-                                               methods=['GET'])
-
-        expected_endpoint = '/kytos/custom_method/'
-        actual_endpoints = self.api_server.rest_endpoints
-        self.assertIn(expected_endpoint, actual_endpoints)
-
-    @skip('Will be renamed to /api/kytos/core/')
-    def test_register_api_server_routes(self):
-        """Server routes should include status and shutdown endpoints."""
-        self.api_server.register_api_server_routes()
-
-        expecteds = ['/kytos/status/', '/kytos/shutdown/',
-                     '/static/<path:filename>']
-
-        actual_endpoints = self.api_server.rest_endpoints
-
-        self.assertListEqual(sorted(expecteds), sorted(actual_endpoints))
-
-    @skip('Will be renamed to /api/kytos/core/')
-    def test_rest_endpoints(self):
-        """Test whether rest_endpoint returns all registered endpoints."""
-        endpoints = ['/custom/', '/custom_2/', '/custom_3/']
-
-        for endpoint in endpoints:
-            self.api_server.register_rest_endpoint(endpoint,
-                                                   self.__custom_endpoint,
-                                                   methods=['GET'])
-
-        expected_endpoints = ['/kytos{}'.format(e) for e in endpoints]
-        expected_endpoints.append('/static/<path:filename>')
-
-        actual_endpoints = self.api_server.rest_endpoints
-        self.assertListEqual(sorted(expected_endpoints),
-                             sorted(actual_endpoints))
+    def test_deprecation_warning(self):
+        """Deprecated method should suggest @rest decorator."""
+        with warnings.catch_warnings(record=True) as wrngs:
+            warnings.simplefilter("always")  # trigger all warnings
+            self.api_server.register_rest_endpoint(
+                'rule', lambda x: x, ['POST'])
+            self.assertEqual(1, len(wrngs))
+            warning = wrngs[0]
+            self.assertEqual(warning.category, DeprecationWarning)
+            self.assertIn('@rest', str(warning.message))
 
     @staticmethod
     def __custom_endpoint():

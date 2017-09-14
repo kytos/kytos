@@ -2,6 +2,7 @@
 import logging
 import os
 import sys
+import warnings
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -53,20 +54,10 @@ class APIServer:
             self.log.critical(msg)
             sys.exit(msg)
 
-    def register_rest_endpoint(self, url, function, methods):
-        r"""Register a new rest endpoint in Api Server.
-
-        To register new endpoints is needed to have a url, function to handle
-        the requests and type of method allowed.
-
-        Args:
-            url (string):        String with partner of route. e.g.: '/status'
-            function (function): Function pointer used to handle the requests.
-            methods (:class:`list`):  List of request methods allowed.
-                e.g: [``'GET'``, ``'PUT'``, ``'POST'``, ``'DELETE'``,
-                ``'PATCH'``]
-        """
-        self._start_endpoint(url, function, methods=methods)
+    def register_rest_endpoint(self, url, function, methods):  # noqa
+        """Deprecated in favor of @rest decorator."""
+        warnings.warn("From now on, use @rest decorator.", DeprecationWarning,
+                      stacklevel=2)
 
     def register_web_ui(self):
         """Method used to register routes to the admin-ui homepage."""

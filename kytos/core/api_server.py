@@ -148,8 +148,13 @@ class APIServer:
         APIServer and NApp instances.
         """
         def store_route_params(function):
-            """Store ``Flask`` ``@route`` parameters in a method attribute."""
-            function.route_params = rule, options
+            """Store ``Flask`` ``@route`` parameters in a method attribute.
+
+            There can be many @route decorators in a single function.
+            """
+            if not hasattr(function, 'route_params'):
+                function.route_params = []
+            function.route_params.append((rule, options))
             return function
         return store_route_params
 
@@ -159,8 +164,9 @@ class APIServer:
         URLs will be prefixed with ``/api/{username}/{napp_name}/``.
         """
         for method in self._get_decorated_methods(napp):
-            rule, options = method.route_params
-            self._start_endpoint(rule, method, **options)
+            for rule, options in method.route_params:
+                absolute_rule = self._get_absolute_rule(rule, napp)
+                self._start_endpoint(absolute_rule, method, **options)
 
     @staticmethod
     def _get_decorated_methods(napp):

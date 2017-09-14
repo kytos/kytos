@@ -18,6 +18,7 @@ class APIServer:
     """Api server used to provide Kytos Controller routes."""
 
     _NAPP_PREFIX = "/api/{napp.username}/{napp.name}/"
+    _CORE_PREFIX = "/api/kytos/core/"
 
     def __init__(self, app_name, listen='0.0.0.0', port=8181):
         """Constructor of APIServer.
@@ -59,28 +60,26 @@ class APIServer:
         warnings.warn("From now on, use @rest decorator.", DeprecationWarning,
                       stacklevel=2)
 
-    def register_web_ui(self):
+    def start_api(self):
+        """Start this APIServer instance API.
+
+        Start /api/kytos/core/shutdown/ and status/ endpoints, web UI.
+        """
+        self.register_core_endpoint('shutdown/', self.shutdown_api)
+        self.register_core_endpoint('status/', self.status_api)
+        self._register_web_ui()
+
+    def register_core_endpoint(self, rule, function):
+        """Register an endpoint with the URL /api/kytos/core/<rule>.
+
+        Not used by NApps, but controller.
+        """
+        self._start_endpoint(self._CORE_PREFIX + rule, function)
+
+    def _register_web_ui(self):
         """Method used to register routes to the admin-ui homepage."""
         self.app.add_url_rule('/', self.web_ui.__name__, self.web_ui)
         self.app.add_url_rule('/index.html', self.web_ui.__name__, self.web_ui)
-
-    @property
-    def rest_endpoints(self):
-        """Return string with routes registered by Api Server."""
-        return [x.rule for x in self.app.url_map.iter_rules()]
-
-    def register_api_server_routes(self):
-        """Register initial routes from kytos using ApiServer.
-
-        Initial routes are: [``/kytos/status/``, ``/kytos/shutdown/``]
-        """
-        if '/kytos/status/' not in self.rest_endpoints:
-            self.register_rest_endpoint('/status/',
-                                        self.status_api, methods=['GET'])
-
-        if '/kytos/shutdown/' not in self.rest_endpoints:
-            self.register_rest_endpoint('/shutdown/',
-                                        self.shutdown_api, methods=['GET'])
 
     @staticmethod
     def status_api():

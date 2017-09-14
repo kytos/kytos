@@ -66,21 +66,7 @@ class APIServer:
                 e.g: [``'GET'``, ``'PUT'``, ``'POST'``, ``'DELETE'``,
                 ``'PATCH'``]
         """
-        new_endpoint_url = "/kytos{}".format(url)
-
-        for endpoint in self.app.url_map.iter_rules():
-            if endpoint.rule == new_endpoint_url:
-                for method in methods:
-                    if method in endpoint.methods:
-                        message = ("Method '{}' already registered for " +
-                                   "URL '{}'").format(method, new_endpoint_url)
-                        self.log.warning(message)
-                        self.log.warning("WARNING: Overlapping endpoint was " +
-                                         "NOT registered.")
-                        return
-
-        self.app.add_url_rule(new_endpoint_url, function.__name__, function,
-                              methods=methods)
+        self._start_endpoint(url, function, methods=methods)
 
     def register_web_ui(self):
         """Method used to register routes to the admin-ui homepage."""

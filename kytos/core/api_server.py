@@ -8,9 +8,15 @@ from urllib.request import urlopen
 from flask import Flask, request, send_from_directory
 from flask_socketio import SocketIO, join_room, leave_room
 
+#: list: Default Flask HTTP methods used when no mehtods are specified by the
+# user. Used to warn multiple declarations of the same URL and HTTP method.
+_DEFAULT_METHODS = ('GET',)
+
 
 class APIServer:
     """Api server used to provide Kytos Controller routes."""
+
+    _NAPP_PREFIX = "/api/{napp.username}/{napp.name}/"
 
     def __init__(self, app_name, listen='0.0.0.0', port=8181):
         """Constructor of APIServer.
@@ -24,7 +30,7 @@ class APIServer:
         """
         dirname = os.path.dirname(os.path.abspath(__file__))
         self.flask_dir = os.path.join(dirname, '../web-ui')
-        self.log = logging.getLogger('werkzeug')
+        self.log = logging.getLogger('api_server')
 
         self.listen = listen
         self.port = port
@@ -60,21 +66,7 @@ class APIServer:
                 e.g: [``'GET'``, ``'PUT'``, ``'POST'``, ``'DELETE'``,
                 ``'PATCH'``]
         """
-        new_endpoint_url = "/kytos{}".format(url)
-
-        for endpoint in self.app.url_map.iter_rules():
-            if endpoint.rule == new_endpoint_url:
-                for method in methods:
-                    if method in endpoint.methods:
-                        message = ("Method '{}' already registered for " +
-                                   "URL '{}'").format(method, new_endpoint_url)
-                        self.log.warning(message)
-                        self.log.warning("WARNING: Overlapping endpoint was " +
-                                         "NOT registered.")
-                        return
-
-        self.app.add_url_rule(new_endpoint_url, function.__name__, function,
-                              methods=methods)
+        self._start_endpoint(url, function, methods=methods)
 
     def register_web_ui(self):
         """Method used to register routes to the admin-ui homepage."""
@@ -130,3 +122,78 @@ class APIServer:
     def web_ui(self):
         """Method used to serve the index.html page for the admin-ui."""
         return send_from_directory(self.flask_dir, 'index.html')
+
+    # BEGIN decorator methods
+
+    @staticmethod
+    def decorate_as_endpoint(rule, **options):
+        """Decorator for REST endpoints using Flask.
+
+        Example for URL ``/api/myusername/mynapp/sayhello/World``:
+
+        .. code-block:: python3
+
+           from flask.json import jsonify
+           from kytos.core.napps import rest
+
+           @rest('sayhello/<string:name>')
+           def say_hello(name):
+               return jsonify({"data": f"Hello, {name}!"})
+
+        ``@rest`` parameters are the same as Flask's ``@app.route``. You can
+        also add ``methods=['POST']``, for example.
+
+        As we don't have the NApp instance now, we store the parameters in a
+        method attribute in order to add the route later, after we have both
+        APIServer and NApp instances.
+        """
+        def store_route_params(function):
+            """Store ``Flask`` ``@route`` parameters in a method attribute.
+
+            There can be many @route decorators in a single function.
+            """
+            if not hasattr(function, 'route_params'):
+                function.route_params = []
+            function.route_params.append((rule, options))
+            return function
+        return store_route_params
+
+    def register_napp_endpoints(self, napp):
+        """Add all NApp REST endpoints with @rest decorator.
+
+        URLs will be prefixed with ``/api/{username}/{napp_name}/``.
+        """
+        for method in self._get_decorated_methods(napp):
+            for rule, options in method.route_params:
+                absolute_rule = self._get_absolute_rule(rule, napp)
+                self._start_endpoint(absolute_rule, method, **options)
+
+    @staticmethod
+    def _get_decorated_methods(napp):
+        """Return ``napp``'s methods having the @rest decorator."""
+        for name in dir(napp):
+            if not name.startswith('_'):  # discarding private names
+                pub_attr = getattr(napp, name)
+                if callable(pub_attr) and hasattr(pub_attr, 'route_params'):
+                    yield pub_attr
+
+    @classmethod
+    def _get_absolute_rule(cls, rule, napp):
+        """Prefix the rule, e.g. "flow" to "/api/user/napp/flow"."""
+        # Flask does require 2 slashes if specified, so we remove a starting
+        # slash if applicable.
+        relative_rule = rule[1:] if rule.startswith('/') else rule
+        return cls._NAPP_PREFIX.format(napp=napp) + relative_rule
+
+    # END decorator methods
+
+    def _start_endpoint(self, rule, function, **options):
+        """Start ``function``'s endpoint.
+
+        Forward parameters to ``Flask.add_url_rule`` mimicking Flask
+        ``@route`` decorator.
+        """
+        endpoint = options.pop('endpoint', None)
+        self.app.add_url_rule(rule, endpoint, function, **options)
+        self.log.info('Started %s - %s', rule,
+                      ', '.join(options.get('methods', _DEFAULT_METHODS)))

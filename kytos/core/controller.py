@@ -19,6 +19,7 @@ import logging
 import os
 import re
 import sys
+import warnings
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from threading import Thread
@@ -102,7 +103,7 @@ class Controller(object):
         self.api_server = APIServer(__name__, self.options.listen,
                                     self.options.api_port)
 
-        self.register_kytos_endpoints()
+        self._register_endpoints()
 
         #: Observer that handle NApps when they are enabled or disabled.
         self.napp_dir_listener = NAppDirListener(self)
@@ -218,22 +219,22 @@ class Controller(object):
         self.load_napps()
         self.started_at = now()
 
-    def register_kytos_endpoints(self):
+    def _register_endpoints(self):
         """Register all rest endpoint served by kytos.
 
         -   Register APIServer endpoints
         -   Register WebUI endpoints
-        -   Register ``/kytos/config`` endpoint
+        -   Register ``/api/kytos/core/config`` endpoint
         """
-        self.api_server.register_api_server_routes()
-        self.api_server.register_web_ui()
-        self.api_server.register_rest_endpoint('/config/',
-                                               self.configuration_endpoint,
-                                               methods=['GET'])
+        self.api_server.start_api()
+        # Register controller endpoints as /api/kytos/core/...
+        self.api_server.register_core_endpoint('config/',
+                                               self.configuration_endpoint)
 
-    def register_rest_endpoint(self, *options, **kwargs):
-        """Method used to return the endpoints registered by APIServer."""
-        self.api_server.register_rest_endpoint(*options, **kwargs)
+    def register_rest_endpoint(self, *options, **kwargs):  # noqa
+        """Deprecated in favor of @rest decorator."""
+        warnings.warn("From now on, use @rest decorator.", DeprecationWarning,
+                      stacklevel=2)
 
     def configuration_endpoint(self):
         """Return the configuration options used by Kytos.

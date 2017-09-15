@@ -2,6 +2,7 @@
 import logging
 import os
 import sys
+import warnings
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -17,6 +18,7 @@ class APIServer:
     """Api server used to provide Kytos Controller routes."""
 
     _NAPP_PREFIX = "/api/{napp.username}/{napp.name}/"
+    _CORE_PREFIX = "/api/kytos/core/"
 
     def __init__(self, app_name, listen='0.0.0.0', port=8181):
         """Constructor of APIServer.
@@ -53,43 +55,31 @@ class APIServer:
             self.log.critical(msg)
             sys.exit(msg)
 
-    def register_rest_endpoint(self, url, function, methods):
-        r"""Register a new rest endpoint in Api Server.
+    def register_rest_endpoint(self, url, function, methods):  # noqa
+        """Deprecated in favor of @rest decorator."""
+        warnings.warn("From now on, use @rest decorator.", DeprecationWarning,
+                      stacklevel=2)
 
-        To register new endpoints is needed to have a url, function to handle
-        the requests and type of method allowed.
+    def start_api(self):
+        """Start this APIServer instance API.
 
-        Args:
-            url (string):        String with partner of route. e.g.: '/status'
-            function (function): Function pointer used to handle the requests.
-            methods (:class:`list`):  List of request methods allowed.
-                e.g: [``'GET'``, ``'PUT'``, ``'POST'``, ``'DELETE'``,
-                ``'PATCH'``]
+        Start /api/kytos/core/shutdown/ and status/ endpoints, web UI.
         """
-        self._start_endpoint(url, function, methods=methods)
+        self.register_core_endpoint('shutdown/', self.shutdown_api)
+        self.register_core_endpoint('status/', self.status_api)
+        self._register_web_ui()
 
-    def register_web_ui(self):
+    def register_core_endpoint(self, rule, function):
+        """Register an endpoint with the URL /api/kytos/core/<rule>.
+
+        Not used by NApps, but controller.
+        """
+        self._start_endpoint(self._CORE_PREFIX + rule, function)
+
+    def _register_web_ui(self):
         """Method used to register routes to the admin-ui homepage."""
         self.app.add_url_rule('/', self.web_ui.__name__, self.web_ui)
         self.app.add_url_rule('/index.html', self.web_ui.__name__, self.web_ui)
-
-    @property
-    def rest_endpoints(self):
-        """Return string with routes registered by Api Server."""
-        return [x.rule for x in self.app.url_map.iter_rules()]
-
-    def register_api_server_routes(self):
-        """Register initial routes from kytos using ApiServer.
-
-        Initial routes are: [``/kytos/status/``, ``/kytos/shutdown/``]
-        """
-        if '/kytos/status/' not in self.rest_endpoints:
-            self.register_rest_endpoint('/status/',
-                                        self.status_api, methods=['GET'])
-
-        if '/kytos/shutdown/' not in self.rest_endpoints:
-            self.register_rest_endpoint('/shutdown/',
-                                        self.shutdown_api, methods=['GET'])
 
     @staticmethod
     def status_api():

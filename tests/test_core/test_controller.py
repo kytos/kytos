@@ -25,7 +25,7 @@ class TestController(TestCase):
         actual = self.controller.configuration_endpoint()
         self.assertEqual(expected, actual)
 
-    def test_register_configuration_endpoint(self):
+    def test_register_config_endpoint(self):
         """Should register the endpoint '/kytos/config/'."""
         expected_endpoint = '/kytos/config/'
         actual_endpoints = self.controller.api_server.rest_endpoints
@@ -43,19 +43,19 @@ class TestController(TestCase):
     @staticmethod
     @patch('kytos.core.controller.LogManager')
     @patch('kytos.core.logs.Path')
-    def test_websocket_log_should_be_enabled(Path, LogManager):
+    def test_websocket_log_usage(path, log_manager):
         """Assert that the web socket log is used."""
         # Save original state
         handlers_bak = copy(logging.root.handlers)
 
         # Minimum to instantiate Controller
         options = Mock(napps='')
-        Path.return_value.exists.return_value = False
+        path.return_value.exists.return_value = False
         controller = Controller(options)
 
         # The test
         controller.enable_logs()
-        LogManager.enable_websocket.assert_called_once()
+        log_manager.enable_websocket.assert_called_once()
 
         # Restore original state
         logging.root.handlers = handlers_bak

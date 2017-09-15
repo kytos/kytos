@@ -107,8 +107,9 @@ class NApp:
         Raises:
             urllib.error.HTTPError: If download is not successful.
 
-        Return:
+        Returns:
             str: Downloaded temp filename.
+
         """
         if self.package_url:
             package_filename = urllib.request.urlretrieve(self.package_url)[0]
@@ -188,7 +189,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
                 self._listeners[event_name].append(method)
 
     def _load_json(self):
-        """Method used to update object attributes based on kytos.json."""
+        """Update object attributes based on kytos.json."""
         current_file = sys.modules[self.__class__.__module__].__file__
         json_path = os.path.join(os.path.dirname(current_file), 'kytos.json')
         with open(json_path, encoding='utf-8') as data_file:
@@ -223,7 +224,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
     # all listeners receive event
     def _shutdown_handler(self, event):  # pylint: disable=unused-argument
-        """Method used to listen shutdown event from kytos.
+        """Listen shutdown event from kytos.
 
         This method listens the kytos/core.shutdown event and call the shutdown
         method from napp subclass implementation.
@@ -255,7 +256,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
     @abstractmethod
     def shutdown(self):
-        """Called before the app is unloaded, before the controller is stopped.
+        """Run before the app is unloaded and the controller, stopped.
 
         The user implementation of this method should do the necessary routine
         for the user App and also it is a good moment to break the loop of the

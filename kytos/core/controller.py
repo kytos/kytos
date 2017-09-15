@@ -51,6 +51,8 @@ class Controller(object):
         - manage the buffers handlers, considering one thread per handler.
     """
 
+    # Created issue #568 for the disabled checks.
+    # pylint: disable=too-many-instance-attributes,too-many-public-methods
     def __init__(self, options=None):
         """Init method of Controller class takes the parameters below.
 
@@ -114,7 +116,7 @@ class Controller(object):
         sys.path.append(os.path.join(self.options.napps, os.pardir))
 
     def enable_logs(self):
-        """Method used to register kytos log and enable the logs."""
+        """Register kytos log and enable the logs."""
         LogManager.load_config_file(self.options.logging, self.options.debug)
         LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
@@ -127,7 +129,7 @@ class Controller(object):
         self.start_controller()
 
     def create_pidfile(self):
-        """Method used to create a pidfile."""
+        """Create a pidfile."""
         pid = os.getpid()
 
         # Creates directory if it doesn't exist
@@ -231,8 +233,9 @@ class Controller(object):
         self.api_server.register_core_endpoint('config/',
                                                self.configuration_endpoint)
 
-    def register_rest_endpoint(self, *options, **kwargs):  # noqa
-        """Deprecated in favor of @rest decorator."""
+    def register_rest_endpoint(self, url, function, methods):
+        """Deprecate in favor of @rest decorator."""
+        # pylint: disable=all
         warnings.warn("From now on, use @rest decorator.", DeprecationWarning,
                       stacklevel=2)
 
@@ -241,6 +244,7 @@ class Controller(object):
 
         Returns:
             string: Json with current configurations used by kytos.
+
         """
         return json.dumps(self.options.__dict__)
 
@@ -257,7 +261,7 @@ class Controller(object):
         self.start(restart=True)
 
     def stop(self, graceful=True):
-        """Method used to shutdown all services used by kytos.
+        """Shutdown all services used by kytos.
 
         This method should:
             - stop all Websockets
@@ -310,6 +314,7 @@ class Controller(object):
 
         Returns:
             string: String with kytos status.
+
         """
         if self.started_at:
             return "Running since %s" % self.started_at
@@ -324,6 +329,7 @@ class Controller(object):
 
         Returns:
            datetime.timedelta: The uptime interval.
+
         """
         return now() - self.started_at if self.started_at else 0
 
@@ -439,6 +445,7 @@ class Controller(object):
 
         Returns:
             :class:`~kytos.core.switch.Switch`: Switch with dpid specified.
+
         """
         return self.switches.get(dpid)
 
@@ -453,6 +460,7 @@ class Controller(object):
 
         Returns:
             :class:`~kytos.core.switch.Switch`: new or existent switch.
+
         """
         self.create_or_update_connection(connection)
         switch = self.get_switch_by_dpid(dpid)
@@ -492,8 +500,9 @@ class Controller(object):
             id (int): id from a connection.
 
         Returns:
-            :class:`~kytos.core.connection.Connection`:
-            Instance of connection or None Type.
+            :class:`~kytos.core.connection.Connection`: Instance of connection
+                or None Type.
+
         """
         return self.connections.get(conn_id)
 
@@ -569,6 +578,7 @@ class Controller(object):
 
         Raises:
             FileNotFoundError: if napps' main.py is not found.
+
         """
         if (username, napp_name) in self.napps:
             message = 'NApp %s/%s was already loaded'

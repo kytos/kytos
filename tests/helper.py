@@ -23,8 +23,10 @@ def do_handshake(client):
 
     Args:
         client (socket): a socket object connected on the controller.
+
     Returns:
         The client with the handshake process done.
+
     """
     # -- STEP 1: Sending Hello message
     client.send(Hello(xid=3).pack())
@@ -77,6 +79,7 @@ def new_controller(options=None):
 
     Returns:
         controller: Running Controler
+
     """
     if options is None:
         options = get_config().options['daemon']
@@ -95,6 +98,7 @@ def new_client(options=None):
     Returns:
         client (socket): Client connected to the Kytos controller before
             handshake
+
     """
     if options is None:
         options = get_config().options['daemon']
@@ -112,6 +116,7 @@ def new_handshaked_client(options=None):
     Returns:
         client (socket): Client connected to the Kytos controller with
             handshake done
+
     """
     if options is None:
         options = get_config().options['daemon']

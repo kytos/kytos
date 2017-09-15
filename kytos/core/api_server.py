@@ -21,9 +21,7 @@ class APIServer:
     _CORE_PREFIX = "/api/kytos/core/"
 
     def __init__(self, app_name, listen='0.0.0.0', port=8181):
-        """Constructor of APIServer.
-
-        This method will instantiate a server with SocketIO+Flask.
+        """Start a Flask+SocketIO server.
 
         Args:
             app_name(string): String representing a App Name
@@ -55,8 +53,9 @@ class APIServer:
             self.log.critical(msg)
             sys.exit(msg)
 
-    def register_rest_endpoint(self, url, function, methods):  # noqa
-        """Deprecated in favor of @rest decorator."""
+    def register_rest_endpoint(self, url, function, methods):
+        """Deprecate in favor of @rest decorator."""
+        # pylint: disable=all
         warnings.warn("From now on, use @rest decorator.", DeprecationWarning,
                       stacklevel=2)
 
@@ -77,7 +76,7 @@ class APIServer:
         self._start_endpoint(self._CORE_PREFIX + rule, function)
 
     def _register_web_ui(self):
-        """Method used to register routes to the admin-ui homepage."""
+        """Register routes to the admin-ui homepage."""
         self.app.add_url_rule('/', self.web_ui.__name__, self.web_ui)
         self.app.add_url_rule('/index.html', self.web_ui.__name__, self.web_ui)
 
@@ -87,7 +86,7 @@ class APIServer:
         return '{"response": "running"}', 201
 
     def stop_api_server(self):
-        """Method used to send a shutdown request to stop Api Server."""
+        """Send a shutdown request to stop Api Server."""
         try:
             url = 'http://{}:{}/kytos/shutdown'.format('127.0.0.1', self.port)
             urlopen(url)
@@ -110,14 +109,14 @@ class APIServer:
         return 'Server shutting down...', 200
 
     def web_ui(self):
-        """Method used to serve the index.html page for the admin-ui."""
+        """Serve the index.html page for the admin-ui."""
         return send_from_directory(self.flask_dir, 'index.html')
 
     # BEGIN decorator methods
 
     @staticmethod
     def decorate_as_endpoint(rule, **options):
-        """Decorator for REST endpoints using Flask.
+        """Decorate methods as REST endpoints.
 
         Example for URL ``/api/myusername/mynapp/sayhello/World``:
 

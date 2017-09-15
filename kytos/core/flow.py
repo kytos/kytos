@@ -16,12 +16,13 @@ class Flow(object):
     actions that should occur in case any match happen.
     """
 
+    # pylint: disable=too-many-arguments,too-many-locals
     def __init__(self, idle_timeout=0, hard_timeout=0, cookie=0,  # noqa
                  priority=0, table_id=0xff, buffer_id=None, wildcards=None,
                  in_port=None, dl_src=None, dl_dst=None, dl_vlan=None,
                  dl_vlan_pcp=None, dl_type=None, nw_proto=None, nw_src=None,
                  nw_dst=None, tp_src=None, tp_dst=None, actions=None):
-        """Constructor receive the parameters below.
+        """Assign parameters to attributes.
 
         Args:
             idle_timeout (int): Idle time before discarding in seconds.
@@ -74,6 +75,7 @@ class Flow(object):
 
         Returns:
             string: Hash of object.
+
         """
         hash_result = hashlib.md5()
         hash_result.update(str(self.idle_timeout).encode('utf-8'))
@@ -104,6 +106,7 @@ class Flow(object):
 
         Returns:
             dict: Dictionary using flow attributes.
+
         """
         dictionary_rep = {"flow": {"self.id": self.id,
                                    "idle_timeout": self.idle_timeout,
@@ -137,6 +140,7 @@ class Flow(object):
 
         Returns:
             string: Json string using flow attributes.
+
         """
         return json.dumps(self.as_dict())
 
@@ -149,6 +153,7 @@ class Flow(object):
 
         Returns:
             :class:`Flow`: Flow built from json.
+
         """
         dict_content = json.loads(json_content)
         return Flow.from_dict(dict_content)
@@ -162,6 +167,7 @@ class Flow(object):
 
         Returns:
             :class:`Flow`: Flow built from json.
+
         """
         flow = Flow()
 
@@ -186,6 +192,7 @@ class Flow(object):
 
         Returns:
             :class:`Flow`: Flow built from json.
+
         """
         flow = Flow()
         flow.idle_timeout = flow_stats.idle_timeout.value
@@ -218,6 +225,7 @@ class Flow(object):
                 type of flow_mod to be converted.
         Returns:
             |flow_mod|: Instance of FlowMod with Flow attributes.
+
         """
         flow_mod = FlowMod()
         flow_mod.command = flow_type
@@ -262,7 +270,7 @@ class OutputAction(FlowAction):
     """FlowAction represents a change in forwarding network into a port."""
 
     def __init__(self, output_port):
-        """Constructor receive the parameters below.
+        """Require an output port.
 
         Args:
             output_port (int): Specific port number.
@@ -274,6 +282,7 @@ class OutputAction(FlowAction):
 
         Returns:
             |action_output|: A instance of ActionOutput.
+
         """
         return ActionOutput(port=self.output_port)
 
@@ -282,6 +291,7 @@ class OutputAction(FlowAction):
 
         Returns:
             dictionary (dict): Dict that represent a OutputAction.
+
         """
         return {"type": "action_output",
                 "port": self.output_port}
@@ -291,10 +301,11 @@ class OutputAction(FlowAction):
         """Build an OutputAction from a dictionary.
 
         Args:
-          dict_content (dict): Python dictionary with OutputAction attribute.
+            dict_content (dict): Python dictionary with OutputAction attribute.
 
         Returns:
-          :class:`OutputAction`: A instance of OutputAction.
+            :class:`OutputAction`: A instance of OutputAction.
+
         """
         return OutputAction(output_port=dict_content['port'])
 
@@ -304,6 +315,7 @@ class OutputAction(FlowAction):
 
         Returns:
             string: string to represent the instance object.
+
         """
         hash_result = hashlib.md5()
         hash_result.update(str(self.as_dict()).encode('utf-8'))
@@ -318,6 +330,7 @@ class OutputAction(FlowAction):
 
         Returns:
             :class:`OutputAction`: A instance of OutputAction.
+
         """
         return OutputAction(output_port=ofp_action.port.value)
 
@@ -326,7 +339,7 @@ class DLChangeAction(FlowAction):
     """FlowAction that represents a change in hardware address."""
 
     def __init__(self, dl_src=None, dl_dst=None):
-        """Constructor receive the parameters below.
+        """Require source and destination DLs.
 
         Args:
             dl_src (|hw_address|): Ethernet source address.

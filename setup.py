@@ -218,7 +218,7 @@ class CommonInstall:
 
     @staticmethod
     def create_paths():
-        """Method used to create the paths used by Kytos in develop mode."""
+        """Create the paths used by Kytos in develop mode."""
         directories = [os.path.join(BASE_ENV, 'etc/kytos')]
         for directory in directories:
             if not os.path.exists(directory):
@@ -275,7 +275,7 @@ class DevelopMode(develop, CommonInstall):
 
     @staticmethod
     def generate_file_link(file_name):
-        """Method used to create a symbolic link from a file name."""
+        """Create a symbolic link from a file name."""
         current_directory = os.path.dirname(__file__)
         src = os.path.join(os.path.abspath(current_directory), file_name)
         dst = os.path.join(BASE_ENV, file_name)

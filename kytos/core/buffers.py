@@ -49,6 +49,7 @@ class KytosEventBuffer(object):
         Returns:
             :class:`~kytos.core.events.KytosEvent`:
                 Event removed from top of queue.
+
         """
         event = self._queue.get()
 
@@ -87,10 +88,10 @@ class KytosEventBuffer(object):
 
 
 class KytosBuffers(object):
-    """KytosBuffers represents a set of KytosEventBuffer used in Kytos."""
+    """Set of KytosEventBuffer used in Kytos."""
 
     def __init__(self):
-        """Constructor of KytosBuffer build four KytosEventBuffers.
+        """Build four KytosEventBuffers.
 
         :attr:`raw`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
         received from network.

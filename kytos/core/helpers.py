@@ -4,13 +4,13 @@ from threading import Thread
 
 from kytos.core.napps import rest
 
-__all__ = 'listen_to', 'now', 'rest', 'run_on_thread'
+__all__ = ('listen_to', 'now', 'rest', 'run_on_thread')
 
 # APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
 
 
 def listen_to(event, *events):
-    """Decorator for Event Listener methods.
+    """Decorate Event Listener methods.
 
     This decorator was built to be used on NAPPs methods to define which
     type of event the method will handle. With this, we will be able to
@@ -63,10 +63,11 @@ def listen_to(event, *events):
         Returns:
             A method with a `events` attribute (list of events to be listened)
             and also decorated to run on a new thread.
+
         """
         @run_on_thread
         def threaded_handler(*args):
-            """Decorating the handler to run from a new thread."""
+            """Decorate the handler to run from a new thread."""
             handler(*args)
 
         threaded_handler.events = [event]
@@ -84,12 +85,13 @@ def now(tzone=timezone.utc):
 
     Returns:
         datetime.datetime.now: Date time with specific time zone.
+
     """
     return datetime.now(tzone)
 
 
 def run_on_thread(method):
-    """Decorator to run the decorated method inside a new thread.
+    """Decorate to run the decorated method inside a new thread.
 
     Args:
         method (function): function used to run as a new thread.
@@ -98,6 +100,7 @@ def run_on_thread(method):
         Decorated method that will run inside a new thread.
         When the decorated method is called, it will not return the created
         thread to the caller.
+
     """
     def threaded_method(*args):
         """Ensure the handler method runs inside a new thread."""

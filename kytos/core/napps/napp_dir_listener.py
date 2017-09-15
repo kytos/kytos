@@ -34,24 +34,25 @@ class NAppDirListener(RegexMatchingEventHandler):
         self.observer = Observer()
 
     def start(self):
-        """Method to start handle directory changes."""
+        """Start handling directory changes."""
         self.observer.schedule(self, self.napps_path, True)
         self.observer.start()
         LOG.info('NAppDirListener Started...')
 
     def stop(self):
-        """Method to stop handle directory changes."""
+        """Stop handling directory changes."""
         self.observer.stop()
         LOG.info('NAppDirListener Stopped...')
 
     def _get_napp(self, absolute_path):
-        """Method used to get a username and napp_name from absolute path.
+        """Get a username and napp_name from absolute path.
 
         Args:
             absolute_path(str): String with absolute path.
 
         Returns:
             tuple: Tuple with username and napp_name.
+
         """
         relative_path = absolute_path.replace(self.napps_path, '')
         return tuple(relative_path.split('/')[1:3])

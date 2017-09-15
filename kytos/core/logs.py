@@ -79,6 +79,7 @@ class LogManager:
 
         Returns:
             logging.StreamHandler: Handler with the socket as stream.
+
         """
         handler = WebSocketHandler.get_handler(socket)
         cls.add_handler(handler)
@@ -155,8 +156,8 @@ def _detect_napp_id():
     when *B* uses the logger, the logger's name should be *B*.
 
     Returns:
-        str: NApp ID.
-        None: If no NApp is found in the caller's stack.
+        str, None: NApp ID or None if no NApp is found in the caller's stack.
+
     """
     for frame in inspect.stack():
         if not frame.filename == __file__:

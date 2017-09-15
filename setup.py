@@ -164,6 +164,7 @@ class Linter(SimpleCommand):
             print('No linter error found.')
         except CalledProcessError:
             print('Linter check failed. Fix the error(s) above and try again.')
+            exit(-1)
 
 
 class CITest(SimpleCommand):

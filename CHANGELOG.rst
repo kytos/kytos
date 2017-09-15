@@ -7,12 +7,21 @@ All notable changes to the kytos project will be documented in this file.
 ********************************
 Added
 =====
+- ``@rest`` decorator for REST API methods. Examples:
+
+  - ``@rest('flow/<flow_id>')`` (only ``GET`` HTTP method by default);
+  - ``@rest('flows/', methods=['GET', 'POST'])``.
 
 Changed
 =======
+- API URLs renamed:
+
+  - For NApps, the pattern is ``/api/<username>/<napp>/`` + what is defined in ``@rest`` decorator;
+  - Core endpoints starts with ``/api/kytos/core/``. E.g. ``/kytos/config`` changed to ``/api/kytos/core/config``.
 
 Deprecated
 ==========
+- Method ``register_rest_endpoint`` of ``Controller`` and ``APIServer`` in favor of ``@rest`` decorator.
 
 Removed
 =======

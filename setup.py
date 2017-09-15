@@ -14,7 +14,8 @@ from pathlib import Path
 from subprocess import CalledProcessError, call, check_call
 
 try:
-    import pip  # noqa: This is just for checking if pip is installed
+    # Used to check whether pip is installed
+    import pip  # pylint: disable=unused-import
     from setuptools import Command, find_packages, setup
     from setuptools.command.develop import develop
     from setuptools.command.egg_info import egg_info
@@ -156,10 +157,10 @@ class Linter(SimpleCommand):
     description = 'lint Python source code'
 
     def run(self):
-        """Run pylama."""
-        print('Pylama is running. It may take several seconds...')
+        """Run yala."""
+        print('Yala is running. It may take several seconds...')
         try:
-            check_call('pylama setup.py tests kytos', shell=True)
+            check_call('yala setup.py kytos tests', shell=True)
             print('No linter error found.')
         except CalledProcessError:
             print('Linter check failed. Fix the error(s) above and try again.')
@@ -289,16 +290,16 @@ class DevelopMode(develop, CommonInstall):
 # some modules that are dependencies from this project and that were not yet
 # installed, since the requirements installation from this project hasn't yet
 # happened.
-meta_file = open("kytos/core/metadata.py").read()
-metadata = dict(re.findall(r"(__[a-z]+__)\s*=\s*'([^']+)'", meta_file))
+META_FILE = open("kytos/core/metadata.py").read()
+METADATA = dict(re.findall(r"(__[a-z]+__)\s*=\s*'([^']+)'", META_FILE))
 
 setup(name='kytos',
-      version=metadata.get('__version__'),
-      description=metadata.get('__description__'),
-      url=metadata.get('__url__'),
-      author=metadata.get('__author__'),
-      author_email=metadata.get('__author_email__'),
-      license=metadata.get('__license__'),
+      version=METADATA.get('__version__'),
+      description=METADATA.get('__description__'),
+      url=METADATA.get('__url__'),
+      author=METADATA.get('__author__'),
+      author_email=METADATA.get('__author_email__'),
+      license=METADATA.get('__license__'),
       test_suite='tests',
       scripts=['bin/kytosd'],
       include_package_data=True,
@@ -318,10 +319,7 @@ setup(name='kytos',
               # Avoid red navbar
               'sphinx-rtd-theme',
               'sphinx_bootstrap_theme ~= 0.4.0',
-              'pydocstyle ~= 1.1.1',
-              'pylama ~= 7.3.3',
-              'pylama_pylint ~= 3.0.1',
-              'radon ~= 1.5.0',
+              'yala',
               'tox',
           ],
       },

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from kytos.core.napps import NApp
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class NAppsManager:
@@ -38,7 +38,7 @@ class NAppsManager:
         installed = self._installed / napp.username / napp.name
 
         if not installed.is_dir():
-            log.error("Failed to enable NApp %s. NApp not installed.",
+            LOG.error("Failed to enable NApp %s. NApp not installed.",
                       napp.id)
         elif not enabled.exists():
             self._create_module(enabled.parent)
@@ -47,11 +47,11 @@ class NAppsManager:
                 enabled.symlink_to(installed)
                 if self._controller is not None:
                     self._controller.load_napp(napp.username, napp.name)
-                log.info("NApp enabled: %s", napp.id)
+                LOG.info("NApp enabled: %s", napp.id)
             except FileExistsError:
                 pass  # OK, NApp was already enabled
             except PermissionError:
-                log.error("Failed to enable NApp %s. Permission denied.",
+                LOG.error("Failed to enable NApp %s. Permission denied.",
                           napp.id)
 
     def enable_all(self):
@@ -65,7 +65,7 @@ class NAppsManager:
         enabled = self._enabled / napp.username / napp.name
         try:
             enabled.unlink()
-            log.info("NApp disabled: %s", napp.id)
+            LOG.info("NApp disabled: %s", napp.id)
             if self._controller is not None:
                 self._controller.unload_napp(napp.username, napp.name)
         except FileNotFoundError:
@@ -85,7 +85,7 @@ class NAppsManager:
         napp = NApp.create_from_uri(napp_uri)
 
         if napp in self.list():
-            log.warning("Unable to install NApp %s. Already installed.", napp)
+            LOG.warning("Unable to install NApp %s. Already installed.", napp)
             return False
 
         if not napp.repository:
@@ -102,7 +102,7 @@ class NAppsManager:
             if pkg_folder and pkg_folder.exists():
                 shutil.rmtree(str(pkg_folder))
 
-        log.info("New NApp installed: %s", napp)
+        LOG.info("New NApp installed: %s", napp)
 
         napp = NApp.create_from_json(dst/'kytos.json')
         for napp_dependency_uri in napp.napp_dependencies:
@@ -118,7 +118,7 @@ class NAppsManager:
         napp = NApp.create_from_uri(napp_uri)
 
         if self.is_enabled(napp_uri):
-            log.warning("Unable to uninstall NApp %s. NApp currently in use.",
+            LOG.warning("Unable to uninstall NApp %s. NApp currently in use.",
                         napp)
             return False
 
@@ -128,9 +128,9 @@ class NAppsManager:
                 installed.unlink()
             else:
                 shutil.rmtree(str(installed))
-            log.info("NApp uninstalled: %s", napp)
+            LOG.info("NApp uninstalled: %s", napp)
         else:
-            log.warning("Unable to uninstall NApp %s. Already uninstalled.",
+            LOG.warning("Unable to uninstall NApp %s. Already uninstalled.",
                         napp)
         return True
 
@@ -166,15 +166,17 @@ class NAppsManager:
     def search(self, pattern, use_cache=False):
         """Search for NApps in NApp repositories matching a pattern."""
         # ISSUE #347, we need to loop here over all repositories
-        repo = eval(self._config.napps_repositories)[0]  # noqa
+        # pylint: disable=eval-used
+        repo = eval(self._config.napps_repositories)[0]
+        # pylint: enable=eval-used
 
         if use_cache:
             # ISSUE #346, we should use cache here
             pass
 
         result = urllib.request.urlretrieve("{}/.database".format(repo))[0]
-        with open(result, 'r') as fp:
-            napps_json = json.load(fp)
+        with open(result, 'r') as file_descriptor:
+            napps_json = json.load(file_descriptor)
 
         napps = [NApp.create_from_dict(napp_json) for napp_json in napps_json]
         return [napp for napp in napps if napp.match(pattern)]
@@ -183,7 +185,7 @@ class NAppsManager:
     def _list_all(napps_dir):
         """List all NApps found in ``napps_dir``."""
         if not napps_dir.exists():
-            log.warning("NApps dir (%s) doesn't exist.", napps_dir)
+            LOG.warning("NApps dir (%s) doesn't exist.", napps_dir)
             return []
 
         jsons = napps_dir.glob('*/*/kytos.json')
@@ -220,8 +222,8 @@ class NAppsManager:
         for folders in ['.'], [napp.username, napp.name]:
             kytos_json = root / Path(*folders) / 'kytos.json'
             if kytos_json.exists():
-                with kytos_json.open() as f:
-                    meta = json.load(f)
+                with kytos_json.open() as file_descriptor:
+                    meta = json.load(file_descriptor)
                     if meta['username'] == napp.username and \
                             meta['name'] == napp.name:
                         return kytos_json.parent

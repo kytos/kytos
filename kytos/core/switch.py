@@ -9,7 +9,7 @@ from kytos.core.helpers import now
 
 __all__ = ('Interface', 'Switch')
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class Interface(object):
@@ -48,7 +48,7 @@ class Interface(object):
         return False
 
     @property
-    def id(self):
+    def id(self):  # pylint: disable=invalid-name
         """Return id from Interface intance.
 
         Returns:
@@ -114,18 +114,18 @@ class Interface(object):
         Returns:
             int: Link speed in bits per second.
         """
-        fs = self.features
-        PF = PortFeatures
-        if fs and fs & PF.OFPPF_10GB_FD:
+        fts = self.features
+        pfts = PortFeatures
+        if fts and fts & pfts.OFPPF_10GB_FD:
             return 10 * 10**9
-        elif fs and fs & (PF.OFPPF_1GB_HD | PF.OFPPF_1GB_FD):
+        elif fts and fts & (pfts.OFPPF_1GB_HD | pfts.OFPPF_1GB_FD):
             return 10**9
-        elif fs and fs & (PF.OFPPF_100MB_HD | PF.OFPPF_100MB_FD):
+        elif fts and fts & (pfts.OFPPF_100MB_HD | pfts.OFPPF_100MB_FD):
             return 100 * 10**6
-        elif fs and fs & (PF.OFPPF_10MB_HD | PF.OFPPF_10MB_FD):
+        elif fts and fts & (pfts.OFPPF_10MB_HD | pfts.OFPPF_10MB_FD):
             return 10 * 10**6
         else:
-            log.warning("No speed port %s, sw %s, feats %s", self.port_number,
+            LOG.warning("No speed port %s, sw %s, feats %s", self.port_number,
                         self.switch.dpid[-3:], self.features)
         return None
 
@@ -274,7 +274,7 @@ class Switch(object):
         self.description['data_path'] = desc.dp_desc.value
 
     @property
-    def id(self):
+    def id(self):  # pylint: disable=invalid-name
         """Return id from Switch instance.
 
         Returns:
@@ -286,7 +286,7 @@ class Switch(object):
         """Disconnect the switch instance."""
         self.connection.close()
         self.connection = None
-        log.info("Switch %s is disconnected", self.dpid)
+        LOG.info("Switch %s is disconnected", self.dpid)
 
     def get_interface_by_port_no(self, port_no):
         """Get interface by port number from Switch instance.

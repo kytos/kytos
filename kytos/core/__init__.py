@@ -8,4 +8,5 @@ from .metadata import __version__
 
 __all__ = ('Controller', 'KytosEvent', 'KytosNApp', 'log', '__version__')
 
-log = NAppLog()
+# Kept lowercase to be more user friendly.
+log = NAppLog()  # pylint: disable=invalid-name

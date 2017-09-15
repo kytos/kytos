@@ -31,7 +31,7 @@ class LogTester(TestCase):
 
         Calling this function is required for ``_has_string_in_log``.
         """
-        self._patcher = patch('kytos.core.logs.log')
+        self._patcher = patch('kytos.core.logs.LOG')
         self._logger = self._patcher.start()
 
     def _assert_string_in_logs(self, string):

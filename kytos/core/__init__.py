@@ -6,7 +6,8 @@ from kytos.core.napps import KytosNApp, rest
 
 from .metadata import __version__
 
-__all__ = 'Controller', 'KytosEvent', 'KytosNApp', 'log', 'rest', '__version__'
+__all__ = ('Controller', 'KytosEvent', 'KytosNApp', 'log', 'rest',
+           '__version__')
 
 # Kept lowercase to be more user friendly.
 log = NAppLog()  # pylint: disable=invalid-name

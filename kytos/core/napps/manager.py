@@ -32,6 +32,7 @@ class NAppsManager:
         Raises:
             FileNotFoundError: If NApp is not installed.
             PermissionError: No filesystem permission to enable NApp.
+
         """
         napp = NApp.create_from_uri(napp_uri)
         enabled = self._enabled / napp.username / napp.name
@@ -214,8 +215,9 @@ class NAppsManager:
         Raises:
             FileNotFoundError: If there is no such local NApp.
 
-        Return:
+        Returns:
             pathlib.Path: NApp root folder.
+
         """
         if root is None:
             root = Path()

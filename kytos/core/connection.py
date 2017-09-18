@@ -24,7 +24,7 @@ class ConnectionProtocol:
     """Class to hold simple protocol information for the connection."""
 
     def __init__(self, name=None, version=None, state=None):
-        """Constructor for the connection protocol class."""
+        """Assign parameters to instance variables."""
         self.name = name
         self.version = version
         self.state = state
@@ -34,7 +34,7 @@ class Connection(object):
     """Connection class to abstract a network connections."""
 
     def __init__(self, address, port, socket, switch=None):
-        """The constructor method have the below parameters.
+        """Assign parameters to instance variables.
 
         Args:
             address (|hw_address|): Source address.
@@ -71,6 +71,7 @@ class Connection(object):
 
         Returns:
             string: Connection id.
+
         """
         return (self.address, self.port)
 

@@ -13,7 +13,7 @@ class KytosSwitchOfflineException(Exception):
     """Exception thrown when a switch is offline."""
 
     def __init__(self, switch):
-        """Constructor receive the parameters below.
+        """Require a switch.
 
         Args:
             switch (:class:`~kytos.core.switch.Switch`): A switch offline.
@@ -32,7 +32,7 @@ class KytosEventException(Exception):
     """Exception thrown when a KytosEvent have an illegal use."""
 
     def __init__(self, message="KytosEvent exception", event=None):
-        """Constructor receive the parameters below.
+        """Assign parameters to instance variables.
 
         Args:
             message (string): message from KytosEventException.
@@ -66,7 +66,7 @@ class KytosNAppException(Exception):
     """Exception raised on a KytosNApp."""
 
     def __init__(self, message="KytosNApp exception"):
-        """Constructor receive the paramters below.
+        """Assign the parameters to instance variables.
 
         Args:
             message (string): message from KytosNAppException.
@@ -83,7 +83,7 @@ class KytosNAppMissingInitArgument(KytosNAppException):
     """Exception thrown when NApp have a missing init argument."""
 
     def __init__(self, message="KytosNAppMissingInitArgument"):
-        """Constructor receive the parameters below.
+        """Assing parameters to instance variables.
 
         Args:
             message (str): Name of the missed argument.

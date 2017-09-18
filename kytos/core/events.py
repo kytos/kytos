@@ -11,7 +11,7 @@ class KytosEvent(object):
     """
 
     def __init__(self, name=None, content=None):
-        """Constructor of KytosEvent receive the parameters below.
+        """Create an event to be published.
 
         Args:
             name (string): The name of the event. You should prepend with
@@ -59,6 +59,7 @@ class KytosEvent(object):
         Returns:
             A python OpenfFlow message instance if it exists.
             None otherwise.
+
         """
         try:
             return self.content['message']

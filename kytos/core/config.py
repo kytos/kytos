@@ -16,10 +16,10 @@ BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
 
 
 class KytosConfig():
-    """KytosConfig class handle settings of Kytos."""
+    """Handle settings of Kytos."""
 
     def __init__(self):
-        """Constructor of KytosConfig.
+        """Parse the command line.
 
         The contructor set defaults parameters that can be used by KytosConfig.
         """
@@ -122,12 +122,14 @@ class KytosConfig():
         self.options['daemon'] = self._parse_options(argv)
 
     def _parse_options(self, argv):
-        """Method used to create a Namespace using the given argv.
+        """Create a Namespace using the given argv.
 
         Args:
             argv(dict): Python Dict used to create the namespace.
+
         Returns:
             options(Namespace): Namespace with the args given
+
         """
         options = self.parser.parse_args(argv)
         options.napps_repositories = json.loads(options.napps_repositories)

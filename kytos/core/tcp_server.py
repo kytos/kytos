@@ -25,7 +25,7 @@ class KytosServer(ThreadingMixIn, TCPServer):
     main_threads = {}
 
     def __init__(self, server_address, RequestHandlerClass, controller):
-        """Constructor of KytosServer.
+        """Create the object without starting the server.
 
         Args:
             server_address (tuple): Address which the server is listening.
@@ -83,7 +83,7 @@ class KytosRequestHandler(BaseRequestHandler):
         self.connection = None
 
     def setup(self):
-        """Method used to setup the new connection.
+        """Create a new controller connection.
 
         This method builds a new controller Connection, and places a
         ``kytos/core.connection.new`` KytosEvent in the app buffer.
@@ -149,7 +149,7 @@ class KytosRequestHandler(BaseRequestHandler):
             self.server.controller.buffers.raw.put(event)
 
     def finish(self):
-        """Method is called when the client connection is finished.
+        """Run when the client connection is finished.
 
         This method closes the connection socket and generates a
         ``kytos/core.connection.lost`` KytosEvent in the App buffer.

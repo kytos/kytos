@@ -15,9 +15,10 @@ LOG = logging.getLogger(__name__)
 class Interface(object):
     """Interface Class used to abstract the network interfaces."""
 
+    # pylint: disable=too-many-arguments
     def __init__(self, name, port_number, switch, address=None, state=None,
                  features=None):
-        """The contructor of Interface have the below parameters.
+        """Assign the parameters to instance attributes.
 
         Args:
             name (string): name from this interface.
@@ -37,7 +38,7 @@ class Interface(object):
         self.endpoints = []
 
     def __eq__(self, other):
-        """Method used to compare Interface class with another instance."""
+        """Compare Interface class with another instance."""
         if isinstance(other, str):
             return self.address == other
         elif isinstance(other, Interface):
@@ -53,6 +54,7 @@ class Interface(object):
 
         Returns:
             string: Interface id.
+
         """
         return "{}:{}".format(self.switch.dpid, self.port_number)
 
@@ -64,6 +66,7 @@ class Interface(object):
 
         Returns:
             tuple: A tuple with endpoint and time of last update.
+
         """
         for item in self.endpoints:
             if endpoint == item[0]:
@@ -113,6 +116,7 @@ class Interface(object):
 
         Returns:
             int: Link speed in bits per second.
+
         """
         fts = self.features
         pfts = PortFeatures
@@ -134,6 +138,7 @@ class Interface(object):
 
         Returns:
             string: String with link speed. e.g: '350 Gbps' or '350 Mbps'.
+
         """
         speed = self.get_speed()
         if speed is None:
@@ -159,6 +164,7 @@ class Interface(object):
 
         Returns:
             dict: Dictionary filled with interface attributes.
+
         """
         return {'id': self.id,
                 'name': self.name,
@@ -185,6 +191,7 @@ class Interface(object):
 
         Returns:
             string: Json filled with interface attributes.
+
         """
         return json.dumps(self.as_dict())
 
@@ -279,6 +286,7 @@ class Switch(object):
 
         Returns:
             string: the switch id is the data_path_id from switch.
+
         """
         return "{}".format(self.dpid)
 
@@ -293,6 +301,7 @@ class Switch(object):
 
         Returns:
             :class:`~.core.switch.Interface`: Interface from specific port.
+
         """
         return self.interfaces.get(port_no)
 
@@ -374,9 +383,11 @@ class Switch(object):
 
         Args:
             ethernet_frame (|ethernet|): Ethernet instance to be verified.
+
         Returns:
             datetime.datetime.now:
                 Last time when the ethernet_frame was flooded.
+
         """
         try:
             return self.flood_table[ethernet_frame.get_hash()]
@@ -388,8 +399,10 @@ class Switch(object):
 
         Args:
             ethernet_frame (|ethernet|): Ethernet instance to be verified.
+
         Returns:
             bool: True if the ethernet_frame should flood.
+
         """
         last_flood = self.last_flood(ethernet_frame)
         diff = (now() - last_flood).microseconds
@@ -405,12 +418,14 @@ class Switch(object):
         self.flood_table[ethernet_frame.get_hash()] = now()
 
     def where_is_mac(self, mac):
-        """"Return all ports from specific mac address.
+        """Return all ports from specific mac address.
 
         Args:
             mac (|hw_address|): Mac address from switch.
+
         Returns:
             :class:`list`: A list of ports. None otherswise.
+
         """
         try:
             return list(self.mac2port[mac.value])
@@ -437,9 +452,9 @@ class Switch(object):
                 'data_path': ""
                 }
 
-
         Returns:
             dict: Dictionary filled with interface attributes.
+
         """
         connection = ""
         if self.connection is not None:
@@ -480,5 +495,6 @@ class Switch(object):
 
         Returns:
             string: Json filled with switch'attributes.
+
         """
         return json.dumps(self.as_dict())

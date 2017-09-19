@@ -88,7 +88,7 @@ class APIServer:
     def stop_api_server(self):
         """Send a shutdown request to stop Api Server."""
         try:
-            url = 'http://{}:{}/kytos/shutdown'.format('127.0.0.1', self.port)
+            url = f'http://127.0.0.1:{self.port}/api/kytos/core/shutdown'
             urlopen(url)
         except URLError:
             pass

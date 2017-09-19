@@ -9,14 +9,12 @@ from urllib.request import urlopen
 from flask import Flask, request, send_from_directory
 from flask_socketio import SocketIO, join_room, leave_room
 
-#: list: Default Flask HTTP methods used when no mehtods are specified by the
-# user. Used to warn multiple declarations of the same URL and HTTP method.
-_DEFAULT_METHODS = ('GET',)
-
 
 class APIServer:
     """Api server used to provide Kytos Controller routes."""
 
+    #: tuple: Default Flask HTTP methods.
+    DEFAULT_METHODS = ('GET',)
     _NAPP_PREFIX = "/api/{napp.username}/{napp.name}/"
     _CORE_PREFIX = "/api/kytos/core/"
 
@@ -154,8 +152,8 @@ class APIServer:
         """
         for method in self._get_decorated_methods(napp):
             for rule, options in method.route_params:
-                absolute_rule = self._get_absolute_rule(rule, napp)
                 self._start_endpoint(absolute_rule, method, **options)
+                absolute_rule = self.get_absolute_rule(rule, napp)
 
     @staticmethod
     def _get_decorated_methods(napp):
@@ -167,8 +165,11 @@ class APIServer:
                     yield pub_attr
 
     @classmethod
-    def _get_absolute_rule(cls, rule, napp):
-        """Prefix the rule, e.g. "flow" to "/api/user/napp/flow"."""
+    def get_absolute_rule(cls, rule, napp):
+        """Prefix the rule, e.g. "flow" to "/api/user/napp/flow".
+
+        This code is used by kytos-utils when generating an OpenAPI skel.
+        """
         # Flask does require 2 slashes if specified, so we remove a starting
         # slash if applicable.
         relative_rule = rule[1:] if rule.startswith('/') else rule
@@ -185,4 +186,4 @@ class APIServer:
         endpoint = options.pop('endpoint', None)
         self.app.add_url_rule(rule, endpoint, function, **options)
         self.log.info('Started %s - %s', rule,
-                      ', '.join(options.get('methods', _DEFAULT_METHODS)))
+                      ', '.join(options.get('methods', self.DEFAULT_METHODS)))

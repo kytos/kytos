@@ -19,7 +19,6 @@ import logging
 import os
 import re
 import sys
-import warnings
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from threading import Thread
@@ -235,9 +234,7 @@ class Controller(object):
 
     def register_rest_endpoint(self, url, function, methods):
         """Deprecate in favor of @rest decorator."""
-        # pylint: disable=all
-        warnings.warn("From now on, use @rest decorator.", DeprecationWarning,
-                      stacklevel=2)
+        self.api_server.register_rest_endpoint(url, function, methods)
 
     def configuration_endpoint(self):
         """Return the configuration options used by Kytos.

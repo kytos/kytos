@@ -53,9 +53,11 @@ class APIServer:
 
     def register_rest_endpoint(self, url, function, methods):
         """Deprecate in favor of @rest decorator."""
-        # pylint: disable=all
         warnings.warn("From now on, use @rest decorator.", DeprecationWarning,
                       stacklevel=2)
+        if url.startswith('/'):
+            url = url[1:]
+        self._start_endpoint(f'/kytos/{url}', function, methods=methods)
 
     def start_api(self):
         """Start this APIServer instance API.

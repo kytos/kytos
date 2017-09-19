@@ -150,13 +150,13 @@ class APIServer:
 
         URLs will be prefixed with ``/api/{username}/{napp_name}/``.
         """
-        for method in self._get_decorated_methods(napp):
-            for rule, options in method.route_params:
-                self._start_endpoint(absolute_rule, method, **options)
+        for function in self._get_decorated_functions(napp):
+            for rule, options in function.route_params:
                 absolute_rule = self.get_absolute_rule(rule, napp)
+                self._start_endpoint(absolute_rule, function, **options)
 
     @staticmethod
-    def _get_decorated_methods(napp):
+    def _get_decorated_functions(napp):
         """Return ``napp``'s methods having the @rest decorator."""
         for name in dir(napp):
             if not name.startswith('_'):  # discarding private names

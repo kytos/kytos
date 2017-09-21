@@ -32,6 +32,6 @@ var default_settings = {
     api_stats = api_url + 'kytos/of_stats/',
     api_status = api_url + 'kytos/core/status/',
     layouts_url = api_url + "kytos/web_topology_layout/layouts/",
-    topology_url = api_url + "kytos/of_topology",
+    topology_url = api_url + "kytos/of_topology/topology",
     log_server_url = "ws://" + server_host + ":8765",
     mustache_dir = '/static/js/templates/';

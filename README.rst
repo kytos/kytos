@@ -117,7 +117,7 @@ Contributing
 ************
 
 If you want to contribute to this project, please read `Kytos Documentation
-<https://docs.kytos.io/kytos/contributing/>`__ website.
+<https://docs.kytos.io/kytos/developer/how_to_contribute/>`__ website.
 
 License
 *******

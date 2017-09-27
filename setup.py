@@ -309,6 +309,8 @@ setup(name='kytos',
       dependency_links=[
           'https://github.com/diraol/watchdog/archive/master.zip#egg=watchdog'
       ],
+      # Development install fails with 28.8.0 from "python -m venv"
+      install_requires=['setuptools != 28.8.0'],
       extras_require={
           'dev': [
               'coverage',

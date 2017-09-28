@@ -1,7 +1,7 @@
 ipython
 lockfile
-python-openflow>=2017.2b1
-kytos-utils>=2017.2b1
+python-openflow>2017.2b1
+kytos-utils>2017.2b1
 flask-socketio
 flask
 python-daemon>=2.1.2

@@ -632,6 +632,9 @@ class Controller(object):
             # Call listener before removing it from events_listeners
             napp_shutdown_fn(event)
 
+            # Remove rest endpoints from that napp
+            self.api_server.remove_napp_endpoints(napp)
+
             # Removing listeners from that napp
             # pylint: disable=protected-access
             for event_type, napp_listeners in napp._listeners.items():

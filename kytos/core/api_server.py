@@ -163,6 +163,9 @@ class APIServer:
         """Add all NApp REST endpoints with @rest decorator.
 
         URLs will be prefixed with ``/api/{username}/{napp_name}/``.
+
+        Args:
+            napp (Napp): Napp instance to register new endpoints.
         """
         for function in self._get_decorated_functions(napp):
             for rule, options in function.route_params:
@@ -201,3 +204,20 @@ class APIServer:
         self.app.add_url_rule(rule, endpoint, function, **options)
         self.log.info('Started %s - %s', rule,
                       ', '.join(options.get('methods', self.DEFAULT_METHODS)))
+
+    def remove_napp_endpoints(self, napp):
+        """Remove all decorated endpoints.
+
+        Args:
+            napp (Napp): Napp instance to look for rest-decorated methods.
+        """
+        napp_id = f'{napp.author}/{napp.name}'
+        for index, rule in enumerate(self.app.url_map.iter_rules()):
+            if rule.rule.startswith(f'/api/{napp_id}'):
+                del self.app.view_functions[rule.endpoint]
+                # pylint: disable=protected-access
+                self.app.url_map._rules.pop(index)
+                # pylint: enable=protected-access
+                self.log.info('Stopping endpoint %s - %s', rule,
+                              ','.join(rule.methods))
+        self.log.info(f'The Rest endpoints from %s were disabled.', napp_id)

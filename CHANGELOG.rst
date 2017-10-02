@@ -7,6 +7,7 @@ All notable changes to the kytos project will be documented in this file.
 ********************************
 Added
 =====
+- `@rest` decorator can also be used before `@classmethod` or `@staticmethod`
 
 Changed
 =======

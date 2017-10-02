@@ -79,6 +79,48 @@ class TestAPIDecorator(unittest.TestCase):
         server.app.add_url_rule.assert_called_once_with(
             '/api/test/MyNApp/rule', None, napp.my_endpoint)
 
+    @classmethod
+    def test_rule_from_classmethod(cls):
+        """Use class methods as endpoints as well."""
+        class MyNApp:  # pylint: disable=too-few-public-methods
+            """API decorator example usage."""
+
+            def __init__(self):
+                self.username = 'test'
+                self.name = 'MyNApp'
+
+            @rest('/rule')
+            @classmethod
+            def my_endpoint(cls):
+                """Do nothing."""
+                pass
+
+        napp = MyNApp()
+        server = cls._mock_api_server(napp)
+        server.app.add_url_rule.assert_called_once_with(
+            '/api/test/MyNApp/rule', None, napp.my_endpoint)
+
+    @classmethod
+    def test_rule_from_staticmethod(cls):
+        """Use static methods as endpoints as well."""
+        class MyNApp:  # pylint: disable=too-few-public-methods
+            """API decorator example usage."""
+
+            def __init__(self):
+                self.username = 'test'
+                self.name = 'MyNApp'
+
+            @rest('/rule')
+            @staticmethod
+            def my_endpoint():
+                """Do nothing."""
+                pass
+
+        napp = MyNApp()
+        server = cls._mock_api_server(napp)
+        server.app.add_url_rule.assert_called_once_with(
+            '/api/test/MyNApp/rule', None, napp.my_endpoint)
+
     @staticmethod
     def _mock_api_server(napp):
         """Instantiate APIServer, mock ``.app`` and start ``napp`` API."""

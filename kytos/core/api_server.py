@@ -211,10 +211,10 @@ class APIServer:
         Args:
             napp (Napp): Napp instance to look for rest-decorated methods.
         """
-        napp_id = f'{napp.author}/{napp.name}'
+        napp_id = f'{napp.username}/{napp.name}'
         for index, rule in enumerate(self.app.url_map.iter_rules()):
             if rule.rule.startswith(f'/api/{napp_id}'):
-                del self.app.view_functions[rule.endpoint]
+                self.app.view_functions.pop(rule.endpoint)
                 # pylint: disable=protected-access
                 self.app.url_map._rules.pop(index)
                 # pylint: enable=protected-access

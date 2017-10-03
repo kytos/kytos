@@ -141,9 +141,18 @@ class APIServer:
 
             There can be many @route decorators in a single function.
             """
-            if not hasattr(function, 'route_params'):
-                function.route_params = []
-            function.route_params.append((rule, options))
+            # To support any order: @classmethod, @rest or @rest, @classmethod
+            # class and static decorators return a descriptor with the function
+            # in __func__.
+            if isinstance(function, (classmethod, staticmethod)):
+                inner = function.__func__
+            else:
+                inner = function
+            # Add route parameters
+            if not hasattr(inner, 'route_params'):
+                inner.route_params = []
+            inner.route_params.append((rule, options))
+            # Return the same function, now with "route_params" attribute
             return function
         return store_route_params
 

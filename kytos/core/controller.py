@@ -123,7 +123,7 @@ class Controller(object):
     def start(self, restart=False):
         """Create pidfile and call start_controller method."""
         self.enable_logs()
-        if not restart:
+        if not restart and self.options.daemon is False:
             self.create_pidfile()
         self.start_controller()
 

@@ -1,7 +1,9 @@
+# Since the install procedure install the packages below from pypi, we cannot
+# pin versions outside pypi, i.e. latest git master branch version.
 ipython
 lockfile
-python-openflow>2017.2b1
-kytos-utils>2017.2b1
+python-openflow
+kytos-utils
 flask-socketio
 flask
 python-daemon>=2.1.2

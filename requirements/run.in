@@ -7,7 +7,7 @@ kytos-utils>=2017.2rc1
 flask-socketio
 flask_cors
 flask
-python-daemon>=2.1.2
+daemons
 # For some reason setuptools
 # Maybe we need to remove this on the future
 setuptools>=34.0.0

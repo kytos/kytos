@@ -13,9 +13,11 @@ from kytos.core.config import KytosConfig
 
 from traitlets.config.loader import Config
 
+
 class KytosPrompt(Prompts):
-     def in_prompt_tokens(self, cli=None):
-         return [(Token.Prompt, 'kytos $> ')]
+    def in_prompt_tokens(self, cli=None):
+        return [(Token.Prompt, 'kytos $> ')]
+
 
 controller = None
 kill_handler = None

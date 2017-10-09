@@ -24,7 +24,8 @@ class KytosServer(ThreadingMixIn, TCPServer):
     allow_reuse_address = True
     main_threads = {}
 
-    def __init__(self, server_address, RequestHandlerClass, controller):
+    def __init__(self, server_address, RequestHandlerClass, controller,
+                 protocol_name):
         """Create the object without starting the server.
 
         Args:
@@ -34,10 +35,12 @@ class KytosServer(ThreadingMixIn, TCPServer):
                 Class that will be instantiated to handle each request.
             controller (:class:`~kytos.core.controller.Controller`):
                 An instance of Kytos Controller class.
+            protocol_name (str): Southbound protocol name that will be used
         """
         super().__init__(server_address, RequestHandlerClass,
                          bind_and_activate=False)
         self.controller = controller
+        self.protocol_name = protocol_name
 
     def serve_forever(self, poll_interval=0.5):
         """Handle requests until an explicit shutdown() is called."""
@@ -65,7 +68,8 @@ class KytosRequestHandler(BaseRequestHandler):
     """
 
     known_ports = {
-        6633: 'openflow'
+        6633: 'openflow',
+        6653: 'openflow'
     }
 
     def __init__(self, request, client_address, server):
@@ -95,6 +99,9 @@ class KytosRequestHandler(BaseRequestHandler):
 
         self.connection = Connection(self.addr, self.port, self.request)
         server_port = self.server.server_address[1]
+        if self.server.protocol_name:
+            self.known_ports[server_port] = self.server.protocol_name
+
         if server_port in self.known_ports:
             protocol_name = self.known_ports[server_port]
         else:

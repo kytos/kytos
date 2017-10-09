@@ -9,6 +9,7 @@ CONNECTION_TIMEOUT = 70
 #: FLOOD_TIMEOUT in microseconds
 FLOOD_TIMEOUT = 100000
 #: Console Banner
+# pylint: disable=anomalous-backslash-in-string
 BANNER = """\033[95m
   _          _
  | |        | |
@@ -27,5 +28,7 @@ for now is still experimental.
 Kytos website.: https://kytos.io/
 Documentation.: https://docs.kytos.io/
 OF Address....:"""
+# pylint: enable=anomalous-backslash-in-string
+
 #: Console Exit Message
 EXIT_MSG = "Stopping Kytos daemon... Bye, see you!"

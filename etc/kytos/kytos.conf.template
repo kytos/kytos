@@ -32,6 +32,9 @@ listen = 0.0.0.0
 # openflow packets using TCP protocol. Default is 6633.
 port = 6633
 
+# Southbound protocol name of the TCP server. Don't use quotes in the string.
+protocol_name =
+
 # The api_port parameter tells kytos controller to expose a port to accept
 # incoming requests and to send a response from kytos API REST.
 # Default is 8181.

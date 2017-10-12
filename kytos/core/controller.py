@@ -186,7 +186,7 @@ class Controller(object):
         self.server = KytosServer((self.options.listen,
                                    int(self.options.port)),
                                   KytosRequestHandler,
-                                  self)
+                                  self, self.options.protocol_name)
 
         raw_event_handler = self.raw_event_handler
         msg_in_event_handler = self.msg_in_event_handler

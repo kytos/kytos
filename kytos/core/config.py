@@ -67,6 +67,10 @@ class KytosConfig():
                             action='store',
                             help="Specify the working directory")
 
+        parser.add_argument('-s', '--protocol_name',
+                            action='store',
+                            help="Specify the southbound protocol")
+
         self.conf_parser, self.parser = conf_parser, parser
         self.parse_args()
 
@@ -85,6 +89,7 @@ class KytosConfig():
                         'listen': '0.0.0.0',
                         'port': 6633,
                         'foreground': False,
+                        'protocol_name': '',
                         'debug': False}
 
         """
@@ -101,6 +106,7 @@ class KytosConfig():
                     'listen': '0.0.0.0',
                     'port': 6633,
                     'foreground': False,
+                    'protocol_name': '',
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()
@@ -137,5 +143,6 @@ class KytosConfig():
         options.daemon = True if options.daemon in ['True', True] else False
         options.port = int(options.port)
         options.api_port = int(options.api_port)
+        options.protocol_name = str(options.protocol_name)
 
         return options

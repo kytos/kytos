@@ -218,6 +218,5 @@ class APIServer:
                 # pylint: disable=protected-access
                 self.app.url_map._rules.pop(index)
                 # pylint: enable=protected-access
-                self.log.info('Stopping endpoint %s - %s', rule,
-                              ','.join(rule.methods))
+                self.log.info('Stopped %s - %s', rule, ','.join(rule.methods))
         self.log.info(f'The Rest endpoints from %s were disabled.', prefix)

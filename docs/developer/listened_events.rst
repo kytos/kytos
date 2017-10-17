@@ -31,7 +31,7 @@ with all classes and NApps who can listen to these Events.
 |                                   +-------------------------------------------------+-------------------------------------------------------------------+
 |                                   | :class:`~kytos.core.napps.base.KytosNApp`       | - :func:`~kytos.core.napps.KytosNApp._shutdown_handler`           |
 +-----------------------------------+-------------------------------------------------+-------------------------------------------------------------------+
-| kytos/core.switches.new           | NApp: kytos/of_ipv6drop                         | - :func:`kytos/of_ipv6drop.ipv6_drop`                             |
+| kytos/core.switch.new             | NApp: kytos/of_ipv6drop                         | - :func:`kytos/of_ipv6drop.ipv6_drop`                             |
 +-----------------------------------+-------------------------------------------------+-------------------------------------------------------------------+
 | kytos/core.messages.openflow.new  | Napp: kytos/of_core                             | - :func:`kytos/of_core.handle_core_new_connection`                |
 +-----------------------------------+-------------------------------------------------+-------------------------------------------------------------------+

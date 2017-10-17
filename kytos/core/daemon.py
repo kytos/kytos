@@ -24,7 +24,7 @@ class KytosDaemon(run.RunDaemon):  # pylint: disable=too-many-ancestors
             self.controller.log.error(exception)
             self.controller.log.info("Kytos daemon start aborted.")
         while True:
-            sleep(0.02)
+            sleep(0.5)
 
     def shutdown(self, signum):
         """Stop the controller and shutdown the process."""
@@ -32,4 +32,4 @@ class KytosDaemon(run.RunDaemon):  # pylint: disable=too-many-ancestors
         while True:
             if self.controller.status() == 'Stopped':
                 super().shutdown(signum)
-            sleep(0.02)
+            sleep(0.5)

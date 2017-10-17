@@ -83,9 +83,9 @@ class TestAPIDecorator(unittest.TestCase):
         rule.endpoint = endpoint
 
         server.app.url_map.iter_rules.return_value = [rule]
-        server.app.view_functions.pop.return_value = True
+        server.app.view_functions.pop.return_value = rule
         # pylint: disable=protected-access
-        server.app.url_map._rules.pop.return_value = True
+        server.app.url_map._rules.pop.return_value = rule
         # pylint: enable=protected-access
 
         server.remove_napp_endpoints(napp)

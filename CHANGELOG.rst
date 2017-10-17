@@ -11,6 +11,9 @@ Added
 
 Changed
 =======
+- Dependency installation/update for devs:
+  `pip install -Ur requirements/dev.txt`. To use cloned kytos repos as
+  dependencies, reinstall those repos with `pip install -e .` in the end.
 
 Deprecated
 ==========

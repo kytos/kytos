@@ -4,7 +4,9 @@
 #
 #    pip-compile --output-file requirements/dev.txt requirements/dev.in
 #
--e .
+-e git+git://github.com/kytos/kytos-utils.git#egg=kytos-utils
+-e file:///home/cemsbr/kytos/repos/kytos
+-e git+git://github.com/kytos/python-openflow.git#egg=python-openflow
 alabaster==0.7.10         # via sphinx
 argh==0.26.2              # via sphinx-autobuild, watchdog
 astroid==1.5.3            # via pylint
@@ -14,6 +16,7 @@ chardet==3.0.4            # via requests
 click==6.7                # via pip-tools
 colorama==0.3.9           # via radon
 coverage==4.4.1
+docopt==0.6.2             # via yala
 docutils==0.14            # via sphinx
 first==2.0.1              # via pip-tools
 flake8-polyfill==1.0.1    # via radon
@@ -29,7 +32,7 @@ mando==0.6.4              # via radon
 markupsafe==1.0           # via jinja2
 mccabe==0.6.1             # via flake8, pylint
 pathtools==0.1.2          # via sphinx-autobuild, watchdog
-pip-tools==1.9.0
+pip-tools==1.10.1
 pluggy==0.5.2             # via tox
 port-for==0.3.1           # via sphinx-autobuild
 py==1.4.34                # via tox
@@ -37,21 +40,22 @@ pycodestyle==2.3.1        # via flake8, yala
 pydocstyle==2.0.0         # via yala
 pyflakes==1.5.0           # via flake8
 pygments==2.2.0           # via sphinx
-pylint==1.7.2             # via yala
+pylint==1.7.4             # via yala
 pytz==2017.2              # via babel
 pyyaml==3.12              # via sphinx-autobuild, watchdog
 radon==2.1.1              # via yala
 requests==2.18.4          # via sphinx
-six==1.10.0               # via astroid, libsass, livereload, mando, pip-tools, pydocstyle, pylint, sphinx
+ruamel.yaml==0.15.34
+six==1.11.0               # via astroid, libsass, livereload, mando, pip-tools, pydocstyle, pylint, sphinx, tox
 snowballstemmer==1.2.1    # via pydocstyle, sphinx
 sphinx-autobuild==0.7.1
 sphinx-bootstrap-theme==0.4.14
 sphinx-rtd-theme==0.2.4
 sphinx==1.5.6
 tornado==4.5.2            # via livereload, sphinx-autobuild
-tox==2.8.2
+tox==2.9.1
 urllib3==1.22             # via requests
 virtualenv==15.1.0        # via tox
 watchdog==0.8.3           # via sphinx-autobuild
 wrapt==1.10.11            # via astroid
-yala==1.1.1
+yala==1.2.0

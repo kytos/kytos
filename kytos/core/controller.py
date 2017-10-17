@@ -467,7 +467,7 @@ class Controller(object):
             switch = Switch(dpid=dpid)
             self.add_new_switch(switch)
 
-            event = KytosEvent(name='kytos/core.switches.new',
+            event = KytosEvent(name='kytos/core.switch.new',
                                content={'switch': switch})
 
         old_connection = switch.connection

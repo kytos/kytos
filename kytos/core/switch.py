@@ -61,6 +61,7 @@ class Interface(object):
 
     @property
     def uni(self):
+        """Return if an interface is a user-to-network Interface."""
         return not self.nni
 
     def get_endpoint(self, endpoint):
@@ -77,13 +78,6 @@ class Interface(object):
             if endpoint == item[0]:
                 return item
         return None
-
-    #def is_link_between_switches(self):
-    #    """Return True if instance is link between switches.False otherwise."""
-    #    for endpoint, _ in self.endpoints:
-    #        if isinstance(endpoint, Interface):
-    #            return True
-    #    return False
 
     def add_endpoint(self, endpoint):
         """Create a new endpoint to Interface instance.
@@ -482,8 +476,8 @@ class Switch(object):
                 'hardware': self.description.get('hardware', ''),
                 'software': self.description.get('software'),
                 'data_path': self.description.get('data_path', ''),
-                'interfaces': { i.id: i.as_dict()
-                                for i in self.interfaces.values() }
+                'interfaces': {i.id: i.as_dict()
+                               for i in self.interfaces.values()}
                 }
 
     def as_json(self):

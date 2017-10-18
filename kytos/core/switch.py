@@ -35,6 +35,7 @@ class Interface(object):
         self.address = address
         self.state = state
         self.features = features
+        self.nni = False
         self.endpoints = []
 
     def __eq__(self, other):
@@ -58,6 +59,10 @@ class Interface(object):
         """
         return "{}:{}".format(self.switch.dpid, self.port_number)
 
+    @property
+    def uni(self):
+        return not self.nni
+
     def get_endpoint(self, endpoint):
         """Return a tuple with existent endpoint, None otherwise.
 
@@ -73,12 +78,12 @@ class Interface(object):
                 return item
         return None
 
-    def is_link_between_switches(self):
-        """Return True if instance is link between switches.False otherwise."""
-        for endpoint, _ in self.endpoints:
-            if isinstance(endpoint, Interface):
-                return True
-        return False
+    #def is_link_between_switches(self):
+    #    """Return True if instance is link between switches.False otherwise."""
+    #    for endpoint, _ in self.endpoints:
+    #        if isinstance(endpoint, Interface):
+    #            return True
+    #    return False
 
     def add_endpoint(self, endpoint):
         """Create a new endpoint to Interface instance.
@@ -160,6 +165,8 @@ class Interface(object):
              'mac': '00:7e:04:3b:c2:a6',
              'switch': '00:00:00:00:00:00:00:01',
              'type': 'interface',
+             'nni': False,
+             'uni': True,
              'speed': '350 Mbps'}
 
         Returns:
@@ -172,6 +179,8 @@ class Interface(object):
                 'mac': self.address,
                 'switch': self.switch.dpid,
                 'type': 'interface',
+                'nni': self.nni,
+                'uni': self.uni,
                 'speed': self.get_hr_speed()}
 
     def as_json(self):

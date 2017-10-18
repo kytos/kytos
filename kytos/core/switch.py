@@ -481,7 +481,10 @@ class Switch(object):
                 'serial': self.description.get('serial', ''),
                 'hardware': self.description.get('hardware', ''),
                 'software': self.description.get('software'),
-                'data_path': self.description.get('data_path', '')}
+                'data_path': self.description.get('data_path', ''),
+                'interfaces': { i.id: i.as_dict()
+                                for i in self.interfaces.values() }
+                }
 
     def as_json(self):
         """Return a json with switch'attributes.

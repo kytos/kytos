@@ -8,3 +8,4 @@ Authors
 - Diego Rabatone Oliveira <diraol AT ncc DOT unesp DOT br>
 - Macártur de Sousa Carvalho <macartur.sc AT gmail DOT com>
 - Raphael Cóbe <rmcobe AT ncc DOT unesp DOT br>
+- Renan Rodrigo <renanrb AT ime DOT usp DOT br>

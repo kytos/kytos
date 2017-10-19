@@ -27,14 +27,30 @@ Security
 ***************************************
 Added
 =====
-- `@rest` decorator can also be used before `@classmethod` or `@staticmethod`
+- `@rest` decorator can also be used before `@classmethod` or `@staticmethod`.
 - Remove napp endpoints when a napp is disabled.
+- TCP Server OpenFlow known ports.
+- Config to allow other personalized protocol names on TCP Server.
+- NNI and UNI attributes to Interface class.
+- Interfaces to Switch json output.
 
 Changed
 =======
 - Dependency installation/update for devs:
   `pip install -Ur requirements/dev.txt`. To use cloned kytos repos as
   dependencies, reinstall those repos with `pip install -e .` in the end.
+- Event name for a new switch. From `kytos/core.switches.new` to
+  `kytos/core.switch.new`.
+
+Removed
+=======
+- Flow class from flow module. It was moved to kytos/of_core NApp.
+
+Fixed
+=====
+- Some bug fixes in tests.
+- Several documentation fixes.
+- Several bug fixes.
 
 [2017.2b1] - "chico" beta1 - 2017-09-19
 ***************************************

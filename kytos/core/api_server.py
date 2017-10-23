@@ -37,6 +37,9 @@ class APIServer:
         self.server = SocketIO(self.app, async_mode='threading')
         self._enable_websocket_rooms()
 
+        # Disable trailing slash
+        self.app.url_map.strict_slashes = False
+
     def _enable_websocket_rooms(self):
         socket = self.server
         socket.on_event('join', join_room)

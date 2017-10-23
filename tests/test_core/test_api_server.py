@@ -64,6 +64,37 @@ class TestAPIDecorator(unittest.TestCase):
             '/api/test/MyNApp/' + rule, None, napp.my_endpoint, **options)
 
     @classmethod
+    def test_remove_napp_endpoints(cls):
+        """Test remove napp endpoints"""
+        class MyNApp:  # pylint: disable=too-few-public-methods
+            """API decorator example usage."""
+
+            def __init__(self):
+                self.username = 'test'
+                self.name = 'MyNApp'
+
+        napp = MyNApp()
+        server = cls._mock_api_server(napp)
+
+        rule = Mock()
+        rule.methods = ['GET', 'POST']
+        rule.rule.startswith.return_value = True
+        endpoint = 'username/napp_name'
+        rule.endpoint = endpoint
+
+        server.app.url_map.iter_rules.return_value = [rule]
+        server.app.view_functions.pop.return_value = rule
+        # pylint: disable=protected-access
+        server.app.url_map._rules.pop.return_value = rule
+        # pylint: enable=protected-access
+
+        server.remove_napp_endpoints(napp)
+        server.app.view_functions.pop.assert_called_once_with(endpoint)
+        # pylint: disable=protected-access
+        server.app.url_map._rules.pop.assert_called_once_with(0)
+        # pylint: enable=protected-access
+
+    @classmethod
     def test_rule_with_slash(cls):
         """There should be no double slashes in a rule."""
         class MyNApp(RESTNApp):  # pylint: disable=too-few-public-methods

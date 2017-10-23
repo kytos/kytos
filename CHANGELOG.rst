@@ -28,6 +28,7 @@ Security
 Added
 =====
 - `@rest` decorator can also be used before `@classmethod` or `@staticmethod`
+- Remove napp endpoints when a napp is disabled.
 
 Changed
 =======

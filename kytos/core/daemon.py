@@ -26,6 +26,23 @@ class KytosDaemon(run.RunDaemon):  # pylint: disable=too-many-ancestors
         while True:
             sleep(0.5)
 
+    def execute(self, args=None):
+        """Execute the daemon based on args given.
+
+        The KytosDaemon will run the first command allowed and ignore the
+        others. The allowed commands are: start, stop and status.
+        """
+        func = self.start
+        for command in ['start', 'stop', 'status']:
+            if args and command in args:
+                func = getattr(self, command)
+                break
+
+        if func.__name__ == 'status':
+            print(func())
+        else:
+            func()
+
     def status(self):
         """Return the KytosController status."""
         try:

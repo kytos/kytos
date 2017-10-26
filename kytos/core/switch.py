@@ -233,20 +233,17 @@ class Switch(object):
     featues of the switch.
     """
 
-    def __init__(self, dpid, connection=None, ofp_version='0x01',
-                 features=None):
+    def __init__(self, dpid, connection=None, features=None):
         """Contructor of switches have the below parameters.
 
         Args:
           dpid (|DPID|): datapath_id of the switch
           connection (:class:`~.Connection`): Connection used by switch.
-          ofp_version (string): Current talked OpenFlow version.
           features (|features_reply|): FeaturesReply instance.
 
         """
         self.dpid = dpid
         self.connection = connection
-        self.ofp_version = ofp_version
         self.features = features
         self.firstseen = now()
         self.lastseen = now()
@@ -292,6 +289,13 @@ class Switch(object):
 
         """
         return "{}".format(self.dpid)
+
+    @property
+    def ofp_version(self):
+        """Return the OFP version of this switch."""
+        if self.connection:
+            return '0x0' + str(self.connection.protocol.version)
+        return None
 
     def disconnect(self):
         """Disconnect the switch instance."""

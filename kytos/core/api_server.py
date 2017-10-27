@@ -212,16 +212,20 @@ class APIServer:
             napp (Napp): Napp instance to look for rest-decorated methods.
         """
         prefix = self._NAPP_PREFIX.format(napp=napp)
-
         indexes = []
+        endpoints = set()
         for index, rule in enumerate(self.app.url_map.iter_rules()):
             if rule.rule.startswith(prefix):
-                self.app.view_functions.pop(rule.endpoint)
+                endpoints.add(rule.endpoint)
                 indexes.append(index)
                 self.log.info('Stopped %s - %s', rule, ','.join(rule.methods))
+
+        for endpoint in endpoints:
+            self.app.view_functions.pop(endpoint)
 
         for index in reversed(indexes):
             # pylint: disable=protected-access
             self.app.url_map._rules.pop(index)
             # pylint: enable=protected-access
+
         self.log.info(f'The Rest endpoints from %s were disabled.', prefix)

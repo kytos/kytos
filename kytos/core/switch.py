@@ -12,7 +12,7 @@ __all__ = ('Interface', 'Switch')
 LOG = logging.getLogger(__name__)
 
 
-class Interface(object):
+class Interface:  # pylint: disable=too-many-instance-attributes
     """Interface Class used to abstract the network interfaces."""
 
     # pylint: disable=too-many-arguments
@@ -169,14 +169,14 @@ class Interface(object):
 
         """
         iface_dict = {'id': self.id,
-                'name': self.name,
-                'port_number': self.port_number,
-                'mac': self.address,
-                'switch': self.switch.dpid,
-                'type': 'interface',
-                'nni': self.nni,
-                'uni': self.uni,
-                'speed': self.get_hr_speed()}
+                      'name': self.name,
+                      'port_number': self.port_number,
+                      'mac': self.address,
+                      'switch': self.switch.dpid,
+                      'type': 'interface',
+                      'nni': self.nni,
+                      'uni': self.uni,
+                      'speed': self.get_hr_speed()}
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()
         return iface_dict
@@ -203,7 +203,7 @@ class Interface(object):
         return json.dumps(self.as_dict())
 
 
-class Switch(object):
+class Switch:  # pylint: disable=too-many-instance-attributes
     """Switch class is a abstraction from switches.
 
     A new Switch will be created every time the handshake process is done
@@ -485,8 +485,7 @@ class Switch(object):
                 'software': self.description.get('software'),
                 'data_path': self.description.get('data_path', ''),
                 'interfaces': {i.id: i.as_dict()
-                               for i in self.interfaces.values()}
-                }
+                               for i in self.interfaces.values()}}
 
     def as_json(self):
         """Return a json with switch'attributes.

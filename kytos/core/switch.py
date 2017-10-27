@@ -37,6 +37,7 @@ class Interface(object):
         self.features = features
         self.nni = False
         self.endpoints = []
+        self.stats = None
 
     def __eq__(self, other):
         """Compare Interface class with another instance."""
@@ -167,7 +168,7 @@ class Interface(object):
             dict: Dictionary filled with interface attributes.
 
         """
-        return {'id': self.id,
+        iface_dict = {'id': self.id,
                 'name': self.name,
                 'port_number': self.port_number,
                 'mac': self.address,
@@ -176,6 +177,9 @@ class Interface(object):
                 'nni': self.nni,
                 'uni': self.uni,
                 'speed': self.get_hr_speed()}
+        if self.stats:
+            iface_dict['stats'] = self.stats.as_dict()
+        return iface_dict
 
     def as_json(self):
         """Return a json with Interfaces attributes.

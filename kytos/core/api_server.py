@@ -7,6 +7,7 @@ from urllib.error import URLError
 from urllib.request import urlopen
 
 from flask import Flask, request, send_from_directory
+from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room
 
 
@@ -36,6 +37,8 @@ class APIServer:
         self.app = Flask(app_name, root_path=self.flask_dir)
         self.server = SocketIO(self.app, async_mode='threading')
         self._enable_websocket_rooms()
+        # ENABLE CROSS ORIGIN RESOURCE SHARING
+        CORS(self.app)
 
         # Disable trailing slash
         self.app.url_map.strict_slashes = False

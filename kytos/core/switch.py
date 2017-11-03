@@ -2,7 +2,8 @@
 import json
 import logging
 
-from pyof.v0x01.common.phy_port import PortFeatures
+from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
+from pyof.v0x04.common.port import PortFeatures as PortFeatures04
 
 from kytos.core.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
 from kytos.core.helpers import now
@@ -112,26 +113,47 @@ class Interface:  # pylint: disable=too-many-instance-attributes
         self.add_endpoint(endpoint)
 
     def get_speed(self):
-        """Return the link speed in bits per second, None otherwise.
+        """Return the link speed in bytes per second, None otherwise.
 
         Returns:
-            int: Link speed in bits per second.
+            int, None: Link speed in bytes per second or ``None``.
 
         """
-        fts = self.features
-        pfts = PortFeatures
-        if fts and fts & pfts.OFPPF_10GB_FD:
-            return 10 * 10**9
-        elif fts and fts & (pfts.OFPPF_1GB_HD | pfts.OFPPF_1GB_FD):
-            return 10**9
-        elif fts and fts & (pfts.OFPPF_100MB_HD | pfts.OFPPF_100MB_FD):
-            return 100 * 10**6
-        elif fts and fts & (pfts.OFPPF_10MB_HD | pfts.OFPPF_10MB_FD):
-            return 10 * 10**6
-        else:
+        speed = self._get_v0x01_v0x04_speed()
+        if speed is None and self.switch.connection.protocol.version == 0x04:
+            speed = self._get_v0x04_speed()
+        if speed is None:
             LOG.warning("No speed port %s, sw %s, feats %s", self.port_number,
                         self.switch.dpid[-3:], self.features)
-        return None
+        else:
+            return speed
+
+    def _get_v0x01_v0x04_speed(self):
+        """Check against all values of v0x01. They're part of v0x04."""
+        fts = self.features
+        pfts = PortFeatures01
+        if fts and fts & pfts.OFPPF_10GB_FD:
+            return 10 * 10**9 / 8
+        elif fts and fts & (pfts.OFPPF_1GB_HD | pfts.OFPPF_1GB_FD):
+            return 10**9 / 8
+        elif fts and fts & (pfts.OFPPF_100MB_HD | pfts.OFPPF_100MB_FD):
+            return 100 * 10**6 / 8
+        elif fts and fts & (pfts.OFPPF_10MB_HD | pfts.OFPPF_10MB_FD):
+            return 10 * 10**6 / 8
+
+    def _get_v0x04_speed(self):
+        """Check against higher enums of v0x04.
+
+        Must be called after :meth:`get_v0x01_speed` returns ``None``.
+        """
+        fts = self.features
+        pfts = PortFeatures04
+        if fts and fts & pfts.OFPPF_1TB_FD:
+            return 10**12 / 8
+        elif fts and fts & pfts.OFPPF_100GB_FD:
+            return 100 * 10**9 / 8
+        elif fts and fts & pfts.OFPPF_40GB_FD:
+            return 40 * 10**9 / 8
 
     def get_hr_speed(self):
         """Return Human-Readable string for link speed.
@@ -143,14 +165,17 @@ class Interface:  # pylint: disable=too-many-instance-attributes
         speed = self.get_speed()
         if speed is None:
             return ''
-        elif speed >= 10**9:
+        speed *= 8
+        if speed == 10**12:
+            return '1 Tbps'
+        if speed >= 10**9:
             return '{} Gbps'.format(round(speed / 10**9))
         return '{} Mbps'.format(round(speed / 10**6))
 
     def as_dict(self):
         """Return a dictionary with Interface attributes.
 
-        Example of output:
+        Speed is in bytes/sec. Example of output (100 Gbps):
 
         .. code-block:: python3
 
@@ -162,7 +187,7 @@ class Interface:  # pylint: disable=too-many-instance-attributes
              'type': 'interface',
              'nni': False,
              'uni': True,
-             'speed': '350 Mbps'}
+             'speed': 12500000000}
 
         Returns:
             dict: Dictionary filled with interface attributes.
@@ -176,7 +201,7 @@ class Interface:  # pylint: disable=too-many-instance-attributes
                       'type': 'interface',
                       'nni': self.nni,
                       'uni': self.uni,
-                      'speed': self.get_hr_speed()}
+                      'speed': self.get_speed()}
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()
         return iface_dict

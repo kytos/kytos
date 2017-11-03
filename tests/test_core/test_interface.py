@@ -32,23 +32,23 @@ class TestInterface(unittest.TestCase):
     def test_10_giga_speed(self):
         """10GB link."""
         self.iface.features = PortFeatures.OFPPF_10GB_FD
-        self.assertEqual(10 * 10**9, self.iface.get_speed())
+        self.assertEqual(10 * 10**9 / 8, self.iface.get_speed())
         self.assertEqual('10 Gbps', self.iface.get_hr_speed())
 
     def test_1_giga_speed(self):
         """1GB link."""
         self.iface.features = PortFeatures.OFPPF_1GB_FD
-        self.assertEqual(10**9, self.iface.get_speed())
+        self.assertEqual(10**9 / 8, self.iface.get_speed())
         self.assertEqual('1 Gbps', self.iface.get_hr_speed())
 
     def test_100_mega_speed(self):
         """100MB link."""
         self.iface.features = PortFeatures.OFPPF_100MB_FD
-        self.assertEqual(100 * 10**6, self.iface.get_speed())
+        self.assertEqual(100 * 10**6 / 8, self.iface.get_speed())
         self.assertEqual('100 Mbps', self.iface.get_hr_speed())
 
     def test_10_mega_speed(self):
         """10MB link."""
         self.iface.features = PortFeatures.OFPPF_10MB_FD
-        self.assertEqual(10 * 10**6, self.iface.get_speed())
+        self.assertEqual(10 * 10**6 / 8, self.iface.get_speed())
         self.assertEqual('10 Mbps', self.iface.get_hr_speed())

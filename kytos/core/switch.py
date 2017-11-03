@@ -112,22 +112,22 @@ class Interface:  # pylint: disable=too-many-instance-attributes
         self.add_endpoint(endpoint)
 
     def get_speed(self):
-        """Return the link speed in bits per second, None otherwise.
+        """Return the link speed in bytes per second, None otherwise.
 
         Returns:
-            int: Link speed in bits per second.
+            int: Link speed in bytes per second.
 
         """
         fts = self.features
         pfts = PortFeatures
         if fts and fts & pfts.OFPPF_10GB_FD:
-            return 10 * 10**9
+            return 10 * 10**9 / 8
         elif fts and fts & (pfts.OFPPF_1GB_HD | pfts.OFPPF_1GB_FD):
-            return 10**9
+            return 10**9 / 8
         elif fts and fts & (pfts.OFPPF_100MB_HD | pfts.OFPPF_100MB_FD):
-            return 100 * 10**6
+            return 100 * 10**6 / 8
         elif fts and fts & (pfts.OFPPF_10MB_HD | pfts.OFPPF_10MB_FD):
-            return 10 * 10**6
+            return 10 * 10**6 / 8
         else:
             LOG.warning("No speed port %s, sw %s, feats %s", self.port_number,
                         self.switch.dpid[-3:], self.features)
@@ -143,14 +143,15 @@ class Interface:  # pylint: disable=too-many-instance-attributes
         speed = self.get_speed()
         if speed is None:
             return ''
-        elif speed >= 10**9:
+        speed *= 8
+        if speed >= 10**9:
             return '{} Gbps'.format(round(speed / 10**9))
         return '{} Mbps'.format(round(speed / 10**6))
 
     def as_dict(self):
         """Return a dictionary with Interface attributes.
 
-        Example of output:
+        Speed is in bytes/sec. Example of output (100 Gbps):
 
         .. code-block:: python3
 
@@ -162,7 +163,7 @@ class Interface:  # pylint: disable=too-many-instance-attributes
              'type': 'interface',
              'nni': False,
              'uni': True,
-             'speed': '350 Mbps'}
+             'speed': 12500000000}
 
         Returns:
             dict: Dictionary filled with interface attributes.
@@ -176,7 +177,7 @@ class Interface:  # pylint: disable=too-many-instance-attributes
                       'type': 'interface',
                       'nni': self.nni,
                       'uni': self.uni,
-                      'speed': self.get_hr_speed()}
+                      'speed': self.get_speed()}
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()
         return iface_dict

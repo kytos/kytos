@@ -115,18 +115,29 @@ class Interface:  # pylint: disable=too-many-instance-attributes
     def get_speed(self):
         """Return the link speed in bytes per second, None otherwise.
 
+        If the switch was disconnected, we have :attr:`features` and speed is
+        still returned for common values between v0x01 and v0x04. For specific
+        v0x04 values (40 Gbps, 100 Gbps and 1 Tbps), the connection must be
+        active so we can make sure the protocol version is v0x04.
+
         Returns:
             int, None: Link speed in bytes per second or ``None``.
 
         """
         speed = self._get_v0x01_v0x04_speed()
-        if speed is None and self.switch.connection.protocol.version == 0x04:
+        # Don't use switch.is_connected() because we can have the protocol
+        if speed is None and self.switch.is_connected() and \
+                self.switch.connection.protocol.version == 0x04:
             speed = self._get_v0x04_speed()
         if speed is None:
+            # Use shorter switch ID with its beginning and end
+            if isinstance(self.switch.id, str) and len(self.switch.id) > 20:
+                switch_id = self.switch.id[:3] + '...' + self.switch.id[-3:]
+            else:
+                switch_id = self.switch.id
             LOG.warning("No speed port %s, sw %s, feats %s", self.port_number,
-                        self.switch.dpid[-3:], self.features)
-        else:
-            return speed
+                        switch_id, self.features)
+        return speed
 
     def _get_v0x01_v0x04_speed(self):
         """Check against all values of v0x01. They're part of v0x04."""

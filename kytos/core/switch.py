@@ -18,7 +18,7 @@ class Interface:  # pylint: disable=too-many-instance-attributes
 
     # pylint: disable=too-many-arguments
     def __init__(self, name, port_number, switch, address=None, state=None,
-                 features=None):
+                 features=None, speed=None):
         """Assign the parameters to instance attributes.
 
         Args:
@@ -29,6 +29,9 @@ class Interface:  # pylint: disable=too-many-instance-attributes
             state (|port_stats|): Port Stat from interface.
             features (|port_features|): Port feature used to calculate link
                 utilization from this interface.
+            speed (int, float): Interface speed in bytes per second. Defaults
+                to what is informed by the switch. Return ``None`` if not set
+                and switch does not inform the speed.
         """
         self.name = name
         self.port_number = int(port_number)
@@ -39,6 +42,7 @@ class Interface:  # pylint: disable=too-many-instance-attributes
         self.nni = False
         self.endpoints = []
         self.stats = None
+        self._custom_speed = speed
 
     def __eq__(self, other):
         """Compare Interface class with another instance."""
@@ -112,7 +116,36 @@ class Interface:  # pylint: disable=too-many-instance-attributes
             self.delete_endpoint(endpoint)
         self.add_endpoint(endpoint)
 
-    def get_speed(self):
+    @property
+    def speed(self):
+        """Return the link speed in bytes per second, None otherwise.
+
+        If the switch was disconnected, we have :attr:`features` and speed is
+        still returned for common values between v0x01 and v0x04. For specific
+        v0x04 values (40 Gbps, 100 Gbps and 1 Tbps), the connection must be
+        active so we can make sure the protocol version is v0x04.
+
+        Returns:
+            int, None: Link speed in bytes per second or ``None``.
+
+        """
+        if self._custom_speed is not None:
+            return self._custom_speed
+        return self.get_of_features_speed()
+
+    def set_custom_speed(self, bytes_per_second):
+        """Set a speed that overrides switch OpenFlow information.
+
+        If ``None`` is given, :attr:`speed` becomes the one given by the
+        switch.
+        """
+        self._custom_speed = bytes_per_second
+
+    def get_custom_speed(self):
+        """Return custom speed or ``None`` if not set."""
+        return self._custom_speed
+
+    def get_of_features_speed(self):
         """Return the link speed in bytes per second, None otherwise.
 
         If the switch was disconnected, we have :attr:`features` and speed is
@@ -126,18 +159,23 @@ class Interface:  # pylint: disable=too-many-instance-attributes
         """
         speed = self._get_v0x01_v0x04_speed()
         # Don't use switch.is_connected() because we can have the protocol
-        if speed is None and self.switch.is_connected() and \
-                self.switch.connection.protocol.version == 0x04:
+        if speed is None and self._is_v0x04():
             speed = self._get_v0x04_speed()
-        if speed is None:
-            # Use shorter switch ID with its beginning and end
-            if isinstance(self.switch.id, str) and len(self.switch.id) > 20:
-                switch_id = self.switch.id[:3] + '...' + self.switch.id[-3:]
-            else:
-                switch_id = self.switch.id
-            LOG.warning("No speed port %s, sw %s, feats %s", self.port_number,
-                        switch_id, self.features)
-        return speed
+        if speed is not None:
+            return speed
+        # Warn unknown speed
+        # Use shorter switch ID with its beginning and end
+        if isinstance(self.switch.id, str) and len(self.switch.id) > 20:
+            switch_id = self.switch.id[:3] + '...' + self.switch.id[-3:]
+        else:
+            switch_id = self.switch.id
+        LOG.warning("Couldn't get port %s speed, sw %s, feats %s",
+                    self.port_number, switch_id, self.features)
+
+    def _is_v0x04(self):
+        """Whether the switch is connected using OpenFlow 1.3."""
+        return self.switch.is_connected() and \
+            self.switch.connection.protocol.version == 0x04
 
     def _get_v0x01_v0x04_speed(self):
         """Check against all values of v0x01. They're part of v0x04."""
@@ -173,7 +211,7 @@ class Interface:  # pylint: disable=too-many-instance-attributes
             string: String with link speed. e.g: '350 Gbps' or '350 Mbps'.
 
         """
-        speed = self.get_speed()
+        speed = self.speed
         if speed is None:
             return ''
         speed *= 8
@@ -212,7 +250,7 @@ class Interface:  # pylint: disable=too-many-instance-attributes
                       'type': 'interface',
                       'nni': self.nni,
                       'uni': self.uni,
-                      'speed': self.get_speed()}
+                      'speed': self.speed}
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()
         return iface_dict

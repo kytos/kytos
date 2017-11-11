@@ -277,7 +277,7 @@ class Interface:  # pylint: disable=too-many-instance-attributes
         return json.dumps(self.as_dict())
 
 
-class Switch:  # pylint: disable=too-many-instance-attributes
+class Switch:
     """Switch class is a abstraction from switches.
 
     A new Switch will be created every time the handshake process is done
@@ -310,6 +310,9 @@ class Switch:  # pylint: disable=too-many-instance-attributes
     :class:`pyof.*.controller2switch.FeaturesReply` representing the current
     featues of the switch.
     """
+
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-public-methods
 
     def __init__(self, dpid, connection=None, features=None):
         """Contructor of switches have the below parameters.
@@ -446,8 +449,16 @@ class Switch:  # pylint: disable=too-many-instance-attributes
             interface (:class:`~kytos.core.switch.Interface`):
                 Interface object to be storeged.
         """
-        if interface.port_number not in self.interfaces:
-            self.interfaces[interface.port_number] = interface
+        self.interfaces[interface.port_number] = interface
+
+    def remove_interface(self, interface):
+        """Remove a interface from switch instance.
+
+        Args:
+            interface (:class:`~kytos.core.switch.Interface`):
+                Interface object to be removed.
+        """
+        del self.interfaces[interface.port_number]
 
     def update_mac_table(self, mac, port_number):
         """Link the mac address with a port number.

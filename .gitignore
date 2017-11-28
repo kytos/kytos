@@ -104,3 +104,4 @@ kytos/web-ui/static/css/style.*
 
 # ignore templates
 etc/kytos/kytos.conf
+etc/kytos/logging.ini

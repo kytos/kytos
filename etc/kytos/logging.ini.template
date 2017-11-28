@@ -20,7 +20,7 @@ formatter: console
 
 [handler_syslog]
 class: handlers.SysLogHandler
-args: ['/dev/log']
+args: {{syslog_args}}
 formatter: syslog
 
 [logger_root]

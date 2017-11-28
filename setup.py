@@ -26,7 +26,9 @@ except ModuleNotFoundError:
 
 BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
 ETC_FILES = ['etc/kytos/logging.ini']
-TEMPLATE_FILES = ['etc/kytos/kytos.conf.template']
+TEMPLATE_FILES = ['etc/kytos/kytos.conf.template',
+                  'etc/kytos/logging.ini.template']
+SYSLOG_ARGS = ['/dev/log'] if Path('/dev/log').exists() else []
 
 
 class SimpleCommand(Command):
@@ -244,8 +246,8 @@ class InstallMode(install, CommonInstall):
         else:
             # force install of deps' eggs during setup.py install
             self.do_egg_install()
-        self.generate_file_from_template(TEMPLATE_FILES, BASE_ENV,
-                                         prefix=BASE_ENV)
+        self.generate_file_from_template(TEMPLATE_FILES, prefix=BASE_ENV,
+                                         syslog_args=SYSLOG_ARGS)
         # data_files is not enough when installing from PyPI
         for file in ETC_FILES:
             shutil.copy2(file, Path(BASE_ENV) / file)
@@ -264,7 +266,8 @@ class DevelopMode(develop, CommonInstall):
         """Install the package in a developer mode."""
         super().run()
 
-        self.generate_file_from_template(TEMPLATE_FILES, prefix=BASE_ENV)
+        self.generate_file_from_template(TEMPLATE_FILES, prefix=BASE_ENV,
+                                         syslog_args=SYSLOG_ARGS)
 
         for file_name in ETC_FILES:
             self.generate_file_link(file_name)

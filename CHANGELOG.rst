@@ -23,7 +23,7 @@ Fixed
 Security
 ========
 
-[2017.2b2] - "chico" beta2 - 2017-10-20
+[2017.2b2] - "chico" beta2 - 2017-12-01
 ***************************************
 Added
 =====
@@ -33,6 +33,10 @@ Added
 - Config to allow other personalized protocol names on TCP Server.
 - NNI and UNI attributes to Interface class.
 - Interfaces to Switch json output.
+- Statistics information for switch interfaces.
+- Allow cross origin resource sharing (CORS).
+- Now supports speed information from OF 1.3 switchs.
+- Generate Events for reconnected switches.
 
 Changed
 =======
@@ -51,6 +55,11 @@ Fixed
 - Some bug fixes in tests.
 - Several documentation fixes.
 - Several bug fixes.
+- Rest API prefix changed to "api/<username>/<nappname>".
+- Now displays bandwidth values as bytes.
+- Remove rest api endpoint when a NApp is disabled.
+- Correctly update interface state and manage interfaces for switches.
+- Some bug fixes.
 
 [2017.2b1] - "chico" beta1 - 2017-09-19
 ***************************************

@@ -246,7 +246,8 @@ class InstallMode(install, CommonInstall):
         else:
             # force install of deps' eggs during setup.py install
             self.do_egg_install()
-        self.generate_file_from_template(TEMPLATE_FILES, prefix=BASE_ENV,
+        self.generate_file_from_template(TEMPLATE_FILES, BASE_ENV,
+                                         prefix=BASE_ENV,
                                          syslog_args=SYSLOG_ARGS)
         # data_files is not enough when installing from PyPI
         for file in ETC_FILES:

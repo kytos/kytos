@@ -461,14 +461,16 @@ class Controller(object):
         """
         self.create_or_update_connection(connection)
         switch = self.get_switch_by_dpid(dpid)
-        event = None
+        event_name = 'kytos/core.switch.'
 
         if switch is None:
             switch = Switch(dpid=dpid)
             self.add_new_switch(switch)
+            event_name += 'new'
+        else:
+            event_name += 'reconnected'
 
-            event = KytosEvent(name='kytos/core.switch.new',
-                               content={'switch': switch})
+        event = KytosEvent(name=event_name, content={'switch': switch})
 
         old_connection = switch.connection
         switch.update_connection(connection)
@@ -476,8 +478,7 @@ class Controller(object):
         if old_connection is not connection:
             self.remove_connection(old_connection)
 
-        if event:
-            self.buffers.app.put(event)
+        self.buffers.app.put(event)
 
         return switch
 

@@ -108,7 +108,7 @@ class KytosRequestHandler(BaseRequestHandler):
             protocol_name = f'{server_port:04d}'
         self.connection.protocol.name = protocol_name
 
-        self.request.settimeout(30)
+        self.request.settimeout(70)
         self.exception = None
 
         event_name = \

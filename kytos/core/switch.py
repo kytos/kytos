@@ -2,7 +2,8 @@
 import json
 import logging
 
-from pyof.v0x01.common.phy_port import PortFeatures
+from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
+from pyof.v0x04.common.port import PortFeatures as PortFeatures04
 
 from kytos.core.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
 from kytos.core.helpers import now
@@ -12,12 +13,12 @@ __all__ = ('Interface', 'Switch')
 LOG = logging.getLogger(__name__)
 
 
-class Interface(object):
+class Interface:  # pylint: disable=too-many-instance-attributes
     """Interface Class used to abstract the network interfaces."""
 
     # pylint: disable=too-many-arguments
     def __init__(self, name, port_number, switch, address=None, state=None,
-                 features=None):
+                 features=None, speed=None):
         """Assign the parameters to instance attributes.
 
         Args:
@@ -28,6 +29,9 @@ class Interface(object):
             state (|port_stats|): Port Stat from interface.
             features (|port_features|): Port feature used to calculate link
                 utilization from this interface.
+            speed (int, float): Interface speed in bytes per second. Defaults
+                to what is informed by the switch. Return ``None`` if not set
+                and switch does not inform the speed.
         """
         self.name = name
         self.port_number = int(port_number)
@@ -37,6 +41,8 @@ class Interface(object):
         self.features = features
         self.nni = False
         self.endpoints = []
+        self.stats = None
+        self._custom_speed = speed
 
     def __eq__(self, other):
         """Compare Interface class with another instance."""
@@ -110,27 +116,93 @@ class Interface(object):
             self.delete_endpoint(endpoint)
         self.add_endpoint(endpoint)
 
-    def get_speed(self):
-        """Return the link speed in bits per second, None otherwise.
+    @property
+    def speed(self):
+        """Return the link speed in bytes per second, None otherwise.
+
+        If the switch was disconnected, we have :attr:`features` and speed is
+        still returned for common values between v0x01 and v0x04. For specific
+        v0x04 values (40 Gbps, 100 Gbps and 1 Tbps), the connection must be
+        active so we can make sure the protocol version is v0x04.
 
         Returns:
-            int: Link speed in bits per second.
+            int, None: Link speed in bytes per second or ``None``.
 
         """
-        fts = self.features
-        pfts = PortFeatures
-        if fts and fts & pfts.OFPPF_10GB_FD:
-            return 10 * 10**9
-        elif fts and fts & (pfts.OFPPF_1GB_HD | pfts.OFPPF_1GB_FD):
-            return 10**9
-        elif fts and fts & (pfts.OFPPF_100MB_HD | pfts.OFPPF_100MB_FD):
-            return 100 * 10**6
-        elif fts and fts & (pfts.OFPPF_10MB_HD | pfts.OFPPF_10MB_FD):
-            return 10 * 10**6
+        if self._custom_speed is not None:
+            return self._custom_speed
+        return self.get_of_features_speed()
+
+    def set_custom_speed(self, bytes_per_second):
+        """Set a speed that overrides switch OpenFlow information.
+
+        If ``None`` is given, :attr:`speed` becomes the one given by the
+        switch.
+        """
+        self._custom_speed = bytes_per_second
+
+    def get_custom_speed(self):
+        """Return custom speed or ``None`` if not set."""
+        return self._custom_speed
+
+    def get_of_features_speed(self):
+        """Return the link speed in bytes per second, None otherwise.
+
+        If the switch was disconnected, we have :attr:`features` and speed is
+        still returned for common values between v0x01 and v0x04. For specific
+        v0x04 values (40 Gbps, 100 Gbps and 1 Tbps), the connection must be
+        active so we can make sure the protocol version is v0x04.
+
+        Returns:
+            int, None: Link speed in bytes per second or ``None``.
+
+        """
+        speed = self._get_v0x01_v0x04_speed()
+        # Don't use switch.is_connected() because we can have the protocol
+        if speed is None and self._is_v0x04():
+            speed = self._get_v0x04_speed()
+        if speed is not None:
+            return speed
+        # Warn unknown speed
+        # Use shorter switch ID with its beginning and end
+        if isinstance(self.switch.id, str) and len(self.switch.id) > 20:
+            switch_id = self.switch.id[:3] + '...' + self.switch.id[-3:]
         else:
-            LOG.warning("No speed port %s, sw %s, feats %s", self.port_number,
-                        self.switch.dpid[-3:], self.features)
-        return None
+            switch_id = self.switch.id
+        LOG.warning("Couldn't get port %s speed, sw %s, feats %s",
+                    self.port_number, switch_id, self.features)
+
+    def _is_v0x04(self):
+        """Whether the switch is connected using OpenFlow 1.3."""
+        return self.switch.is_connected() and \
+            self.switch.connection.protocol.version == 0x04
+
+    def _get_v0x01_v0x04_speed(self):
+        """Check against all values of v0x01. They're part of v0x04."""
+        fts = self.features
+        pfts = PortFeatures01
+        if fts and fts & pfts.OFPPF_10GB_FD:
+            return 10 * 10**9 / 8
+        elif fts and fts & (pfts.OFPPF_1GB_HD | pfts.OFPPF_1GB_FD):
+            return 10**9 / 8
+        elif fts and fts & (pfts.OFPPF_100MB_HD | pfts.OFPPF_100MB_FD):
+            return 100 * 10**6 / 8
+        elif fts and fts & (pfts.OFPPF_10MB_HD | pfts.OFPPF_10MB_FD):
+            return 10 * 10**6 / 8
+
+    def _get_v0x04_speed(self):
+        """Check against higher enums of v0x04.
+
+        Must be called after :meth:`get_v0x01_speed` returns ``None``.
+        """
+        fts = self.features
+        pfts = PortFeatures04
+        if fts and fts & pfts.OFPPF_1TB_FD:
+            return 10**12 / 8
+        elif fts and fts & pfts.OFPPF_100GB_FD:
+            return 100 * 10**9 / 8
+        elif fts and fts & pfts.OFPPF_40GB_FD:
+            return 40 * 10**9 / 8
 
     def get_hr_speed(self):
         """Return Human-Readable string for link speed.
@@ -139,17 +211,20 @@ class Interface(object):
             string: String with link speed. e.g: '350 Gbps' or '350 Mbps'.
 
         """
-        speed = self.get_speed()
+        speed = self.speed
         if speed is None:
             return ''
-        elif speed >= 10**9:
+        speed *= 8
+        if speed == 10**12:
+            return '1 Tbps'
+        if speed >= 10**9:
             return '{} Gbps'.format(round(speed / 10**9))
         return '{} Mbps'.format(round(speed / 10**6))
 
     def as_dict(self):
         """Return a dictionary with Interface attributes.
 
-        Example of output:
+        Speed is in bytes/sec. Example of output (100 Gbps):
 
         .. code-block:: python3
 
@@ -161,21 +236,24 @@ class Interface(object):
              'type': 'interface',
              'nni': False,
              'uni': True,
-             'speed': '350 Mbps'}
+             'speed': 12500000000}
 
         Returns:
             dict: Dictionary filled with interface attributes.
 
         """
-        return {'id': self.id,
-                'name': self.name,
-                'port_number': self.port_number,
-                'mac': self.address,
-                'switch': self.switch.dpid,
-                'type': 'interface',
-                'nni': self.nni,
-                'uni': self.uni,
-                'speed': self.get_hr_speed()}
+        iface_dict = {'id': self.id,
+                      'name': self.name,
+                      'port_number': self.port_number,
+                      'mac': self.address,
+                      'switch': self.switch.dpid,
+                      'type': 'interface',
+                      'nni': self.nni,
+                      'uni': self.uni,
+                      'speed': self.speed}
+        if self.stats:
+            iface_dict['stats'] = self.stats.as_dict()
+        return iface_dict
 
     def as_json(self):
         """Return a json with Interfaces attributes.
@@ -199,7 +277,7 @@ class Interface(object):
         return json.dumps(self.as_dict())
 
 
-class Switch(object):
+class Switch:
     """Switch class is a abstraction from switches.
 
     A new Switch will be created every time the handshake process is done
@@ -233,20 +311,20 @@ class Switch(object):
     featues of the switch.
     """
 
-    def __init__(self, dpid, connection=None, ofp_version='0x01',
-                 features=None):
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-public-methods
+
+    def __init__(self, dpid, connection=None, features=None):
         """Contructor of switches have the below parameters.
 
         Args:
           dpid (|DPID|): datapath_id of the switch
           connection (:class:`~.Connection`): Connection used by switch.
-          ofp_version (string): Current talked OpenFlow version.
           features (|features_reply|): FeaturesReply instance.
 
         """
         self.dpid = dpid
         self.connection = connection
-        self.ofp_version = ofp_version
         self.features = features
         self.firstseen = now()
         self.lastseen = now()
@@ -292,6 +370,13 @@ class Switch(object):
 
         """
         return "{}".format(self.dpid)
+
+    @property
+    def ofp_version(self):
+        """Return the OFP version of this switch."""
+        if self.connection:
+            return '0x0' + str(self.connection.protocol.version)
+        return None
 
     def disconnect(self):
         """Disconnect the switch instance."""
@@ -364,8 +449,16 @@ class Switch(object):
             interface (:class:`~kytos.core.switch.Interface`):
                 Interface object to be storeged.
         """
-        if interface.port_number not in self.interfaces:
-            self.interfaces[interface.port_number] = interface
+        self.interfaces[interface.port_number] = interface
+
+    def remove_interface(self, interface):
+        """Remove a interface from switch instance.
+
+        Args:
+            interface (:class:`~kytos.core.switch.Interface`):
+                Interface object to be removed.
+        """
+        del self.interfaces[interface.port_number]
 
     def update_mac_table(self, mac, port_number):
         """Link the mac address with a port number.
@@ -477,8 +570,7 @@ class Switch(object):
                 'software': self.description.get('software'),
                 'data_path': self.description.get('data_path', ''),
                 'interfaces': {i.id: i.as_dict()
-                               for i in self.interfaces.values()}
-                }
+                               for i in self.interfaces.values()}}
 
     def as_json(self):
         """Return a json with switch'attributes.

@@ -7,6 +7,7 @@ from urllib.error import URLError
 from urllib.request import urlopen
 
 from flask import Flask, request, send_from_directory
+from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room
 
 
@@ -36,6 +37,8 @@ class APIServer:
         self.app = Flask(app_name, root_path=self.flask_dir)
         self.server = SocketIO(self.app, async_mode='threading')
         self._enable_websocket_rooms()
+        # ENABLE CROSS ORIGIN RESOURCE SHARING
+        CORS(self.app)
 
         # Disable trailing slash
         self.app.url_map.strict_slashes = False
@@ -212,16 +215,20 @@ class APIServer:
             napp (Napp): Napp instance to look for rest-decorated methods.
         """
         prefix = self._NAPP_PREFIX.format(napp=napp)
-
         indexes = []
+        endpoints = set()
         for index, rule in enumerate(self.app.url_map.iter_rules()):
             if rule.rule.startswith(prefix):
-                self.app.view_functions.pop(rule.endpoint)
+                endpoints.add(rule.endpoint)
                 indexes.append(index)
                 self.log.info('Stopped %s - %s', rule, ','.join(rule.methods))
+
+        for endpoint in endpoints:
+            self.app.view_functions.pop(endpoint)
 
         for index in reversed(indexes):
             # pylint: disable=protected-access
             self.app.url_map._rules.pop(index)
             # pylint: enable=protected-access
+
         self.log.info(f'The Rest endpoints from %s were disabled.', prefix)

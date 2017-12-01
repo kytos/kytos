@@ -5,6 +5,7 @@ lockfile
 python-openflow
 kytos-utils
 flask-socketio
+flask_cors
 flask
 python-daemon>=2.1.2
 # For some reason setuptools

@@ -1,4 +1,4 @@
 include etc/kytos/kytos.conf.template
-include etc/kytos/logging.ini
+include etc/kytos/logging.ini.template
 include requirements/*.in
 recursive-include kytos *

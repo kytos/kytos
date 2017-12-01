@@ -25,7 +25,7 @@ except ModuleNotFoundError:
     exit(-1)
 
 BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
-ETC_FILES = ['etc/kytos/logging.ini']
+ETC_FILES = []
 TEMPLATE_FILES = ['etc/kytos/kytos.conf.template',
                   'etc/kytos/logging.ini.template']
 SYSLOG_ARGS = ['/dev/log'] if Path('/dev/log').exists() else []

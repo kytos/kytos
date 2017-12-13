@@ -59,47 +59,12 @@ class SimpleCommand(Command):
         pass
 
 
-class SASSBuild(SimpleCommand):
-    """Build CSS from SASS."""
-
-    description = 'Force CSS (re)build.'
-
-    _cssdir = Path(__file__).parent / 'kytos/web-ui/static/css'
-    style_css = _cssdir / 'style.css'
-
-    def run(self):
-        """Only build."""
-        self.build()
-
-    @classmethod
-    def build(cls):
-        """Build the web-UI CSS from SASS."""
-        # Can't make tox in scrutinizer use libsass unless written in
-        # requirements.txt, but our users don't need it.
-        try:
-            import sass
-        except ModuleNotFoundError:
-            check_call([sys.executable, '-m', 'pip', 'install', '-r',
-                        'requirements/build.in'])
-            import sass
-
-        sassdir = Path(__file__).parent / 'web-ui-src/sass'
-        main_scss = sassdir / 'main.scss'
-        style_map = cls._cssdir / 'style.css.map'
-        compiled = sass.compile(filename=str(main_scss),
-                                source_map_filename=str(style_map))
-        for content, filename in zip(compiled, (cls.style_css, style_map)):
-            with open(filename, 'w', encoding='utf-8') as output:
-                output.write(content)
-
-
 class EggInfo(egg_info):
     """Prepare files to be packed."""
 
     def run(self):
         """Build css."""
         self._install_deps_wheels()
-        self._check_sass()
         super().run()
 
     @staticmethod
@@ -108,14 +73,6 @@ class EggInfo(egg_info):
         print('Installing dependencies...')
         check_call([sys.executable, '-m', 'pip', 'install', '-r',
                     'requirements/run.in'])
-
-    @staticmethod
-    def _check_sass():
-        """Do not build CSS if it exists (e.g. installing from PyPI source)."""
-        if SASSBuild.style_css.exists():
-            print('CSS already built. Not overriding it.')
-        else:
-            SASSBuild.build()
 
 
 class Cleaner(clean):
@@ -317,7 +274,6 @@ setup(name='kytos',
       extras_require={
           'dev': [
               'coverage',
-              'libsass',
               'pip-tools',
               # Some sphinx versions are not compiling docs
               'Sphinx ~= 1.5.0',
@@ -330,7 +286,6 @@ setup(name='kytos',
           ],
       },
       cmdclass={
-          'build_sass': SASSBuild,
           'clean': Cleaner,
           'ci': CITest,
           'coverage': TestCoverage,

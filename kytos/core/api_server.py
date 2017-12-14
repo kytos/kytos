@@ -3,8 +3,10 @@ import logging
 import os
 import sys
 import warnings
-from urllib.error import URLError
-from urllib.request import urlopen
+import zipfile
+from datetime import datetime
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen, urlretrieve
 
 from flask import Flask, request, send_from_directory
 from flask_cors import CORS
@@ -34,7 +36,8 @@ class APIServer:
         self.listen = listen
         self.port = port
 
-        self.app = Flask(app_name, root_path=self.flask_dir)
+        self.app = Flask(app_name, root_path=self.flask_dir,
+                         static_folder="dist", static_url_path="/dist")
         self.server = SocketIO(self.app, async_mode='threading')
         self._enable_websocket_rooms()
         # ENABLE CROSS ORIGIN RESOURCE SHARING
@@ -42,6 +45,9 @@ class APIServer:
 
         # Disable trailing slash
         self.app.url_map.strict_slashes = False
+
+        # Update web-ui if necessary
+        self.update_web_ui(force=False)
 
     def _enable_websocket_rooms(self):
         socket = self.server
@@ -72,14 +78,17 @@ class APIServer:
         """
         self.register_core_endpoint('shutdown/', self.shutdown_api)
         self.register_core_endpoint('status/', self.status_api)
+        self.register_core_endpoint('web/update/',
+                                    self.update_web_ui,
+                                    methods=['POST'])
         self._register_web_ui()
 
-    def register_core_endpoint(self, rule, function):
+    def register_core_endpoint(self, rule, function, **options):
         """Register an endpoint with the URL /api/kytos/core/<rule>.
 
         Not used by NApps, but controller.
         """
-        self._start_endpoint(self._CORE_PREFIX + rule, function)
+        self._start_endpoint(self._CORE_PREFIX + rule, function, **options)
 
     def _register_web_ui(self):
         """Register routes to the admin-ui homepage."""
@@ -117,6 +126,41 @@ class APIServer:
     def web_ui(self):
         """Serve the index.html page for the admin-ui."""
         return send_from_directory(self.flask_dir, 'index.html')
+
+    def update_web_ui(self, force=True):
+        """Update the static files for the Web UI.
+
+        Download the latest files from the UI github repository and update them
+        in the ui folder.
+        The repository link is currently hardcoded here.
+        """
+        repository = "https://github.com/macartur/kytos"
+        uri = repository + "/releases/download/1.0.0/latest.zip"
+
+        if not os.path.exists(self.flask_dir) or force:
+            # download from github
+            try:
+                package = urlretrieve(uri)[0]
+            except HTTPError:
+                return f"Uri not found {uri}."
+
+            # test downloaded zip file
+            zip_ref = zipfile.ZipFile(package, 'r')
+
+            if zip_ref.testzip() is not None:
+                return f'Zip file from {uri} is corrupted.'
+
+            # backup the old web-ui files and create a new web-ui folder
+            if os.path.exists(self.flask_dir):
+                date = datetime.now().strftime("%Y%m%d%H%M%S")
+                os.rename(self.flask_dir, f"{self.flask_dir}-{date}")
+                os.mkdir(self.flask_dir)
+
+            # unzip and extract files to web-ui/*
+            zip_ref.extractall(self.flask_dir)
+            zip_ref.close()
+
+        return "updated the web ui"
 
     # BEGIN decorator methods
 

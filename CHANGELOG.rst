@@ -3,25 +3,16 @@ Changelog
 #########
 All notable changes to the kytos project will be documented in this file.
 
-[UNRELEASED] - Under development
-********************************
-Added
-=====
 
+[2017.2rc1] - "chico" release candidate 1 - 2017-12-15
+******************************************************
 Changed
 =======
+- Web User Interface totally updated, with new design and functionality:
 
-Deprecated
-==========
-
-Removed
-=======
-
-Fixed
-=====
-
-Security
-========
+  - Visual elements reorganized for better experience.
+  - Better information about switches and interfaces in the network.
+  - Extending interface functionalities became easier.
 
 [2017.2b2] - "chico" beta2 - 2017-12-01
 ***************************************

@@ -23,6 +23,12 @@ Fixed
 Security
 ========
 
+[2017.2rc1] - "chico" release candidate 1 - 2017-12-15
+******************************************************
+Added
+=====
+- Add endpoint to update web interface using the REST API.
+
 [2017.2b2] - "chico" beta2 - 2017-12-01
 ***************************************
 Added

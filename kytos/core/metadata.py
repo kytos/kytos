@@ -2,7 +2,7 @@
 
 The present metadata is intended to be used mainly on the setup.
 """
-__version__ = '2017.2rc1.post1'
+__version__ = '2017.2'
 __author__ = 'Kytos Team'
 __author_email__ = 'devel@lists.kytos.io'
 __license__ = 'MIT'

@@ -195,6 +195,8 @@ Milestone: Basic EPL and EVPL
 
 *Target Release:* 2018.1b1 (Mar/2018)
 
+*GH Issue*: https://github.com/kytos/mef_eline/issues/2
+
 *Features:*
 
   * EVC will be created after REST request
@@ -216,7 +218,8 @@ Milestone: Basic EPL and EVPL
   * Network-to-Network Interfaces (NNI) could use a VLAN range
   * For EVPL, any combination of service tag IDs (VLAN ID for Ethertype 0x8100
     or S-VID for 0x88a8) could be used (also known and VLAN ID Translation);
-  * NNI interfaces should be able to act as UNI (to terminate circuits)
+  * For EVPL, NNI interfaces should be able to act as UNI (to terminate
+    circuits)
 
 Milestone: Basic EPL and EVPL with explicit primary_links and backup_links
 --------------------------------------------------------------------------

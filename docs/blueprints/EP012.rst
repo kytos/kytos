@@ -188,6 +188,7 @@ link.get_available_vlan())
 
 Milestones
 ==========
+
 Milestone: Basic EPL and EVPL
 -----------------------------
 
@@ -209,6 +210,10 @@ Milestone: Basic EPL and EVPL
   * EVCs will be fully based on VLANs
   * EVCs might terminate on NNIs
 
+.. note::
+
+  *TODO*: specify which integrations tests should be executed to validate this
+  NApp.
 
 *Additional Information:*
 

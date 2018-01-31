@@ -186,11 +186,15 @@ link.get_available_vlan())
 
 *[if necessary more information here]*
 
+Milestones
+==========
 Milestone: Basic EPL and EVPL
 -----------------------------
 
 *Dependencies:* controller (Interface class)
+
 *Target Release:* 2018.1b1 (Mar/2018)
+
 *Features:*
 
   * EVC will be created after REST request
@@ -220,7 +224,9 @@ Milestone: Basic EPL and EVPL with explicit primary_links and backup_links
 *Dependencies:* 1. Pathfinder must support search with specific paths; 2.
 Topology must support static topology (topology with links and interfaces that
 are down)
+
 *Target Release:* TBA
+
 *Features:*
 
   * REST requests' explicit-provided primary and backup paths will be used.
@@ -229,7 +235,9 @@ Milestone:  Calendaring
 -----------------------
 
 *Dependencies:* 1. reloginho - thread looking for circuits to be activated
+
 *Target Release:* TBA
+
 *Features:*
 
   * EVC will support scheduling for activation and removal
@@ -243,7 +251,9 @@ Milestone: Link Protection
 --------------------------
 
 *Dependencies:*
+
 *Target Release:* TBA
+
 *Features:*
 
 
@@ -261,7 +271,9 @@ Milestone: Circuit Requirements
 -------------------------------
 
 *Dependencies:*
+
 *Target Release:* TBA
+
 *Features:*
 
   * For path definition, user might require specific link metrics (any path,

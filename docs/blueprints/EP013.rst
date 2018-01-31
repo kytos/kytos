@@ -1,0 +1,67 @@
+﻿Summary
+=======
+
+Title
+-----
+Topology NApp Improvements
+
+Authors
+-------
+Jeronimo Bezerra (Amlight), Vinicius Arcanjo (RNP), Antonio Francisco (ANSP),
+Rogerio Motitsuki (ANSP), Beraldo Leal, (Kytos), Renan Rodrigo (Kytos)
+
+Blueprint Status
+----------------
+work-in-progress
+
+Priority
+--------
+high
+
+Tags
+----
+topology, sdn
+
+Milestone Target
+----------------
+2018.1 (dalva)
+
+Implementation
+--------------
+not-started
+
+Assignees
+---------
+
+Approvers (PTL)
+---------------
+
+Version
+-------
+0.0.1
+
+Specifications
+--------------
+
+Description
+===========
+
+Atualmente a NApp de topologia nao preve um cenario de um mundo real. Os
+administradores de rede precisam fazer o aprovment da topologia manualmente.
+Nennhum equipamento de rede deve entrar ou sair dela, sem essa aprovacao.
+
+Por outro lado, em alguns casos talvez seja importante ter esta topologia
+montada dinamicamente. Porem temos ter que cuidado para que a NApp de topologia
+não fique responsavel por tarefas de inventário. O inventário deve ser feito
+por outra NApp.
+
+TODO: Beraldo e Renan irão documentar melhor este blueprint ASAP.
+
+Milestone: X
+------------
+
+*Dependencies:* 
+
+*Target Release:* TBA
+
+*Features:*

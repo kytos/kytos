@@ -3,7 +3,8 @@
 
 Title
 -----
-MEF E-Line (or Point-to-Point Ethernet Virtual Circuit) Service Provisioning NApp
+MEF E-Line (or Point-to-Point Ethernet Virtual Circuit) Service Provisioning
+NApp
 
 Authors
 -------
@@ -57,16 +58,16 @@ certification, used by many Internet service providers to standardize the
 language used in interactions with users and other ISPs. Each MEF CE service is
 composed by many basic items, such as number of User Network Interfaces (UNI),
 service restoration time and bandwidth profiles.
- 
+
 An E-Line is a service type defined by the MEF for connecting exactly 2 UNIs
 where those 2 UNIs can communicate only with one another. E-Lines are defined
 in MEF 6.2 and MEF 10.3.
 
 The MEF E-Line is composed of two point-to-point Ethernet services:
- 
+
   * EPL or Ethernet Private Line (Port Based)
   * EVPL or Ethernet Virtual Private Line (VLAN Based)
- 
+
 Both E-Line services are composed of two UNIs and the main distinction between
 EPL and EVPL is that EPL encapsulates all traffic between two UNIs while EVPL
 uses a virtual circuit distinguisher, such as VLAN VID or MPLS TAG to create
@@ -86,23 +87,9 @@ Provisioning Requirements
 In this section we describe the target behaviour. All code here is in
 pseudo-code.
 
-We must implement some endpoints to manage EVCs. For instance in order to
-create an EVC, the user must send a post request to:
-
-.. code:: bash
-
-  POST /kytos/mef_eline/v2.0/evc/
-
-With all information necessary to create the EVC:
-
-.. code:: bash
-
-  {UNI_A*, UNI_Z*, str name*, str bandwidth, datetime start_date, datetime
-  end_date, [str primary_links], [str backup_links], bool dynamic_backup_path,
-  tenant} 
-
 1. User submits request
-2. Solicitar à Pathfinder, os paths baseados nos requisitos de primary_links e backup_links; 
+2. Solicitar à Pathfinder, os paths baseados nos requisitos de primary_links e
+   backup_links;
 3. s-vid: E-Line requests a S-VID from the intf's TAG pool for UNI_A
 4. s-vid: E-Line requests a S-VID from the intf's TAG pool for UNI_Z
 5. Get lists of vNNIs: For each link from #2 -> link.get_vlan()
@@ -116,27 +103,42 @@ With all information necessary to create the EVC:
   down. Apenas retornando para o usuário alguma informação que o circuito foi
   criado porém não está operacional ainda.
 
+We must implement some endpoints to manage EVCs. For instance in order to
+create an EVC, the user must send a post request to:
+
+.. code:: bash
+
+  POST /kytos/mef_eline/v2.0/evc/
+
+With all information necessary to create the EVC:
+
+.. code:: bash
+
+  {UNI_A*, UNI_Z*, str name*, str bandwidth, datetime start_date, datetime
+  end_date, [str primary_links], [str backup_links], bool dynamic_backup_path,
+  tenant}
+
 .. code:: python
- 
+
   class TAG:
      tag_type
      value
-  
+
   class Interface:
      dpid
      port
-  
+
   class UNI(Interface):
     user_tag # TAG object
-  
+
   class NNI(Interface)
-  
+
   class vNNI(NNI)
     service_tag # TAG object
 
   class EVC:
     _requested  # dict with the user original request (input)
-    id = uuid() 
+    id = uuid()
     current_path  # circuit being used at the moment
     primary_path  # primary circuit offered to the user IF one or more vNNIs were provided in the request
     backup_path  # backup circuit offered to the user IF one or more vNNIs were provided in the request
@@ -151,7 +153,7 @@ With all information necessary to create the EVC:
     def discover_new_path()
     def change_path(path)
     def remove()
-                
+
 
 **Default values:**
 
@@ -173,14 +175,16 @@ With all information necessary to create the EVC:
 Interface tags pool mechanism
 -----------------------------
 
-*Para cada interface:*
+*Para cada objeto _interface_:*
 Cada objeto interface terá um pool de VLANs predefinidas ou não (1-4096) com
-métodos para fazer pop e push neste pool. Ela precisa fazer um tracking das
-VLANs disponíveis.
+métodos para fazer pop e push neste pool. Este objeto precisa fazer um tracking
+das VLANs disponíveis.
 
-*Para o link:*
-O objeto link deve obter  vlans em comum a duas NNIs. (Ex:
+*Para o objeto link:*
+O objeto link deve obter vlans em comum a duas NNIs. (Ex:
 link.get_available_vlan())
+
+*[if necessary more information here]*
 
 Milestone: Basic EPL and EVPL
 -----------------------------
@@ -200,17 +204,17 @@ Milestone: Basic EPL and EVPL
   * EVCs might terminate on NNIs
 
 
-Other:
+*Additional Information:*
 
   * EPL (Port based): All traffic received from UNIs will be encapsulated into
     a specific user-independent service tag
-  * EVPL: Permitir indicar dois UNIs (porta, switch E vlan) 
+  * EVPL: Permitir indicar dois UNIs (porta, switch E vlan)
   * Network-to-Network Interfaces (NNI) could use a VLAN range
   * For EVPL, any combination of service tag IDs (VLAN ID for Ethertype 0x8100
     or S-VID for 0x88a8) could be used (also known and VLAN ID Translation);
   * NNI interfaces should be able to act as UNI (to terminate circuits)
 
-Milestone: Basic EPL and EVPL with Explicit primary_links and backup_links
+Milestone: Basic EPL and EVPL with explicit primary_links and backup_links
 --------------------------------------------------------------------------
 
 *Dependencies:* 1. Pathfinder must support search with specific paths; 2.
@@ -221,20 +225,16 @@ are down)
 
   * REST requests' explicit-provided primary and backup paths will be used.
 
-*Other:*
-
-  * Permitir indicar o caminho (quais links). Sem implementação de Backups.
-    Possivelmente um flag backup (true / false) que padrão é false.
-  
 Milestone:  Calendaring
 -----------------------
+
 *Dependencies:* 1. reloginho - thread looking for circuits to be activated
 *Target Release:* TBA
 *Features:*
 
   * EVC will support scheduling for activation and removal
 
-*Other:*
+*Additional Information:*
 
   * Permitir o agendamento com a definição de horário e dia de ativação e
     horário e dia de desativação (sendo ambos opcionais).
@@ -242,37 +242,55 @@ Milestone:  Calendaring
 Milestone: Link Protection
 --------------------------
 
-Backup de NNIs (links)
-* Como será o auto-compute (Caso o usuário não defina o backup) ?
-* For path definition, user might require a set of links for the primary path;
-* For path definition, user might require a set of links for the backup path
+*Dependencies:*
+*Target Release:* TBA
+*Features:*
 
+
+  * Backup de NNIs (links)
+  * Como será o auto-compute (Caso o usuário não defina o backup) ?
+  * For path definition, user might require a set of links for the primary
+    path;
+  * For path definition, user might require a set of links for the backup path
 
 Backup de UNIs
-* Users might have redundant UNIs in different networking devices working in an active/backup approach;
-
+  * Users might have redundant UNIs in different networking devices working in
+    an active/backup approach;
 
 Milestone: Circuit Requirements
 -------------------------------
 
+*Dependencies:*
+*Target Release:* TBA
+*Features:*
 
-* For path definition, user might require specific link metrics (any path, limited by # of hops, using specific metrics (cost, average utilization, available bandwidth, one-way delay, loss seen, custom/affinity, etc.).
-* Users might request specific bandwidth profiles (bandwidth profiles have higher priority over metrics specified during the path definition and bandwidth profiles might have a queue associated with the circuit)
+  * For path definition, user might require specific link metrics (any path,
+    limited by # of hops, using specific metrics (cost, average utilization,
+    available bandwidth, one-way delay, loss seen, custom/affinity, etc.).
+  * Users might request specific bandwidth profiles (bandwidth profiles have
+    higher priority over metrics specified during the path definition and
+    bandwidth profiles might have a queue associated with the circuit)
+
 Future
-* Network-to-Network Interfaces (NNI) when using VLAN should be transparent to the user
-* Network-to-Network Interfaces (NNI) could use random MPLS label range
-* Network-to-Network Interfaces (NNI) could use predefined MPLS label range
-* Network-to-Network Interfaces (NNI) when using MPLS should be transparent to the user
-* Calendaring: Evento repetido. f.y.: from every night at 2am to 5am
-* EVPL with tag rewrite
-* C-VID range ?
-* (High Resilience Requirements) Cluster/Failover/HA/HP
-* (Security Requirements) Per-user and per-item ACLs
-* (Security Requirements) Autorizacao integrada com framework de autorizacao externo do kytos
-* Persistency
-* (Reports) Link, Port and Circuit Utilization for customizable intervals back to 10 years
-* (Reports) Number of flow entries per device (w/ triggers)
-* (Reports) Number of OF messages exchanged (w/ triggers)
+======
+  * Network-to-Network Interfaces (NNI) when using VLAN should be transparent
+    to the user
+  * Network-to-Network Interfaces (NNI) could use random MPLS label range
+  * Network-to-Network Interfaces (NNI) could use predefined MPLS label range
+  * Network-to-Network Interfaces (NNI) when using MPLS should be transparent
+    to the user
+  * Calendaring: Evento repetido. f.y.: from every night at 2am to 5am
+  * EVPL with tag rewrite
+  * C-VID range ?
+  * (High Resilience Requirements) Cluster/Failover/HA/HP
+  * (Security Requirements) Per-user and per-item ACLs
+  * (Security Requirements) Autorizacao integrada com framework de autorizacao
+    externo do kytos
+  * Persistency
+  * (Reports) Link, Port and Circuit Utilization for customizable intervals
+    back to 10 years
+  * (Reports) Number of flow entries per device (w/ triggers)
+  * (Reports) Number of OF messages exchanged (w/ triggers)
 
 Glossary
 ========
@@ -304,7 +322,7 @@ Glossary
   * ISP - Internet Service Provider.
   * L2VPN – Layer 2 Virtual Private Network, similar to EVC.
   * Linear Circuit – An EVC without any redundancy where all components are
-    single points of failure. 
+    single points of failure.
   * Link – A physical or virtual connection between two network devices. A Link
     might be a EVC over another Carrier Ethernet network or an optical fiber
     operating at 100Gbps.

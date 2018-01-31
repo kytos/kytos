@@ -1,4 +1,4 @@
-﻿Summary
+Summary
 =======
 
 Title
@@ -43,24 +43,83 @@ Version
 Specifications
 --------------
 
+**Topology resources**: Switches, Hosts, Interfaces and Links.
+
 Description
 ===========
 
-Atualmente a NApp de topologia nao preve um cenario de um mundo real. Os
-administradores de rede precisam fazer o aprovment da topologia manualmente.
-Nennhum equipamento de rede deve entrar ou sair dela, sem essa aprovacao.
+By the time of writing of this blueprint, our topology NApp is not completely
+aligned with real world networking scenarios. We need to add support to those
+scenarios while keeping the current features. We aim to provide the correct
+information for network administrators, researchers, students and enthusiasts
+as well.
+
+Being a NApp built towards research and development, the current approach is
+mostly academic. A more professional approach is proposed by this document.
+
+Network topology visualization
+------------------------------
+
+Academic approach:
+
+Professional approach:
 
 Por outro lado, em alguns casos talvez seja importante ter esta topologia
 montada dinamicamente. Porem temos ter que cuidado para que a NApp de topologia
 não fique responsavel por tarefas de inventário. O inventário deve ser feito
 por outra NApp.
 
-TODO: Beraldo e Renan irão documentar melhor este blueprint ASAP.
+Adding new resources to the network
+-----------------------------------
+
+Academic approach: Every new resource is added to the topology as soon as it
+is discovered. This allows the NApp to dinamically build the topology for an
+environment without external influence, and to respond quickly to changes.
+Experiments which expect fast network growth or dynamic resource allocation
+may need this feature.
+
+Professional approach: Every new resource discovered in the network triggers an
+alert to the network administrator. In this way, one can decide to approve the
+device and make it part of the topology or ignore it and take the proper
+actions. This adds a small layer of reliability to other services that depend
+on the topology NApp.
+
+Implementation design: Automatically adding resources is implemented and may
+need only some tweaks. For the profesional option, we can take different
+approaches: add the device to the topology, but mark it as 'authorization
+pending' or move it to a separate section of pending devices.
+For the first approach, authorizing a device removes the 'pending' mark. For
+the second approach, authorizing a device effectively inserts it in the
+topology.
+
+Removing resources from the network
+-----------------------------------
+
+Academic approach: A resource is removed from the topology as soon as it is
+unavailable. This simplified view can facilitate changes in experimental
+environments
+
+Professional approach: Resources should be only marked as unavailable, but not
+removed without strict orders from the network administrator. In a real network
+every resource must be mapped by the NApp as it is in the real world: a
+resource must be removed from the topology only if it is really removed from
+the physical network itself.
+
+Implementation design: Every resource in the topology may have flags marking
+them as:
+
+- Up: if the device is up and running, active in the topology;
+- Administratively Down: if the device is disabled by the network
+  administrator;
+- Down: if the resource is present in the real network but not working;
+- Absent: If the resource is no more available in the real network.
+
+Moreover, we need an endpoint to manually delete resources from the topology.
 
 Milestone: X
-------------
+============
 
-*Dependencies:* 
+*Dependencies:*
 
 *Target Release:* TBA
 

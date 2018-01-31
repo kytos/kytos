@@ -80,16 +80,16 @@ may need this feature.
 
 Professional approach: Every new resource discovered in the network triggers an
 alert to the network administrator. In this way, one can decide to approve the
-device and make it part of the topology or ignore it and take the proper
+resource and make it part of the topology or ignore it and take the proper
 actions. This adds a small layer of reliability to other services that depend
 on the topology NApp.
 
 Implementation design: Automatically adding resources is implemented and may
 need only some tweaks. For the profesional option, we can take different
-approaches: add the device to the topology, but mark it as 'authorization
-pending' or move it to a separate section of pending devices.
-For the first approach, authorizing a device removes the 'pending' mark. For
-the second approach, authorizing a device effectively inserts it in the
+approaches: add the resource to the topology, but mark it as 'authorization
+pending' or move it to a separate section of pending resources.
+For the first approach, authorizing a resource removes the 'pending' mark. For
+the second approach, authorizing a resource effectively inserts it in the
 topology.
 
 Removing resources from the network
@@ -97,7 +97,7 @@ Removing resources from the network
 
 Academic approach: A resource is removed from the topology as soon as it is
 unavailable. This simplified view can facilitate changes in experimental
-environments
+environments.
 
 Professional approach: Resources should be only marked as unavailable, but not
 removed without strict orders from the network administrator. In a real network
@@ -108,8 +108,8 @@ the physical network itself.
 Implementation design: Every resource in the topology may have flags marking
 them as:
 
-- Up: if the device is up and running, active in the topology;
-- Administratively Down: if the device is disabled by the network
+- Up: if the resource is up and running, active in the topology;
+- Administratively Down: if the resource is disabled by the network
   administrator;
 - Down: if the resource is present in the real network but not working;
 - Absent: If the resource is no more available in the real network.

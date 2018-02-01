@@ -57,28 +57,26 @@ as well.
 Being a NApp built towards research and development, the current approach is
 mostly academic. A more professional approach is proposed by this document.
 
-Network topology visualization
-------------------------------
+Network Topology Metadata
+-------------------------
 
-Academic approach:
+Current approach:
 
-Professional approach:
+New feature:
 
-Por outro lado, em alguns casos talvez seja importante ter esta topologia
-montada dinamicamente. Porem temos ter que cuidado para que a NApp de topologia
-não fique responsavel por tarefas de inventário. O inventário deve ser feito
-por outra NApp.
+Porem temos ter que cuidado para que a NApp de topologia não fique responsavel
+por tarefas de inventário. O inventário deve ser feito por outra NApp.
 
 Adding new resources to the network
 -----------------------------------
 
-Academic approach: Every new resource is added to the topology as soon as it
+Current approach: Every new resource is added to the topology as soon as it
 is discovered. This allows the NApp to dinamically build the topology for an
 environment without external influence, and to respond quickly to changes.
 Experiments which expect fast network growth or dynamic resource allocation
 may need this feature.
 
-Professional approach: Every new resource discovered in the network triggers an
+New feature: Every new resource discovered in the network triggers an
 alert to the network administrator. In this way, one can decide to approve the
 resource and make it part of the topology or ignore it and take the proper
 actions. This adds a small layer of reliability to other services that depend
@@ -95,11 +93,11 @@ topology.
 Removing resources from the network
 -----------------------------------
 
-Academic approach: A resource is removed from the topology as soon as it is
+Current approach: A resource is removed from the topology as soon as it is
 unavailable. This simplified view can facilitate changes in experimental
 environments.
 
-Professional approach: Resources should be only marked as unavailable, but not
+New feature: Resources should be only marked as unavailable, but not
 removed without strict orders from the network administrator. In a real network
 every resource must be mapped by the NApp as it is in the real world: a
 resource must be removed from the topology only if it is really removed from

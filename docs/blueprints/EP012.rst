@@ -233,7 +233,7 @@ Milestone: Basic EPL and EVPL with explicit primary_links and backup_links
 Topology must support static topology (topology with links and interfaces that
 are down)
 
-*Target Release:* TBA
+*Target Release:* 2018.1b1
 
 *Features:*
 

@@ -32,9 +32,11 @@ not-started
 
 Assignees
 ---------
+Renan Rodrigo
 
 Approvers (PTL)
 ---------------
+Beraldo Leal
 
 Version
 -------
@@ -42,8 +44,7 @@ Version
 
 Specifications
 --------------
-
-**Topology resources**: Switches, Hosts, Interfaces and Links.
+None
 
 Description
 ===========
@@ -55,40 +56,44 @@ information for network administrators, researchers, students and enthusiasts
 as well.
 
 Being a NApp built towards research and development, the current approach is
-mostly academic. A more professional approach is proposed by this document.
+mostly academic. A more realistic approach is proposed by this document.
+
+**Topology resources**: Switches, Hosts, Interfaces and Links.
 
 Network Topology Metadata
 -------------------------
 
-Current approach:
+We must provide some mechanism in order to allow customizations on the network.
+Currently our main entities are: "Switch", "Interface", "Link" and "Host". For
+a first moment we have "custom_properties" but they are not good enought. We
+must provide "custom_properties" or custom "metadata" for all those four
+entities.
 
-New feature:
+So the administrator or another NApps must be able to list, delete and create
+metadata on "key", "value" form for each one.
 
-Porem temos ter que cuidado para que a NApp de topologia não fique responsavel
-por tarefas de inventário. O inventário deve ser feito por outra NApp.
+We must provide an additional way than "configuration file" and create a more
+flexible way (REST API, for instance).
 
 Adding new resources to the network
 -----------------------------------
 
-Current approach: Every new resource is added to the topology as soon as it
-is discovered. This allows the NApp to dinamically build the topology for an
+Current approach: Every new resource is added to the topology as soon as it is
+discovered. This allows the NApp to dinamically build the topology for an
 environment without external influence, and to respond quickly to changes.
-Experiments which expect fast network growth or dynamic resource allocation
-may need this feature.
+Experiments which expect fast network growth or dynamic resource allocation may
+need this feature. We need to keep this.
 
-New feature: Every new resource discovered in the network triggers an
-alert to the network administrator. In this way, one can decide to approve the
-resource and make it part of the topology or ignore it and take the proper
-actions. This adds a small layer of reliability to other services that depend
-on the topology NApp.
+New feature: Every new resource discovered in the network triggers an alert to
+the network administrator. In this way, one can decide to approve the resource
+and make it part of the topology or ignore it and take the proper actions. This
+adds a small layer of reliability to other services that depend on the topology
+NApp.
 
 Implementation design: Automatically adding resources is implemented and may
-need only some tweaks. For the profesional option, we can take different
-approaches: add the resource to the topology, but mark it as 'authorization
-pending' or move it to a separate section of pending resources.
-For the first approach, authorizing a resource removes the 'pending' mark. For
-the second approach, authorizing a resource effectively inserts it in the
-topology.
+need only some tweaks. For the new feature, add the resource to the topology,
+but mark it as 'authorization pending'. Authorizing a resource removes the
+'pending' mark.
 
 Removing resources from the network
 -----------------------------------
@@ -97,28 +102,35 @@ Current approach: A resource is removed from the topology as soon as it is
 unavailable. This simplified view can facilitate changes in experimental
 environments.
 
-New feature: Resources should be only marked as unavailable, but not
-removed without strict orders from the network administrator. In a real network
-every resource must be mapped by the NApp as it is in the real world: a
-resource must be removed from the topology only if it is really removed from
-the physical network itself.
+New feature: Resources should be only marked as unavailable, but not removed
+without strict orders from the network administrator. In a real network every
+resource must be mapped by the NApp as it is in the real world: a resource must
+be removed from the topology only if it is really removed from the physical
+network itself.
 
-Implementation design: Every resource in the topology may have flags marking
-them as:
+Implementation design: Every resource in the topology MUST HAVE two basic flags:
 
-- Up: if the resource is up and running, active in the topology;
-- Administratively Down: if the resource is disabled by the network
-  administrator;
-- Down: if the resource is present in the real network but not working;
-- Absent: If the resource is no more available in the real network.
+.. code:: python
 
-Moreover, we need an endpoint to manually delete resources from the topology.
+  enabled # administrative status with True or False
+  active  # operational status with True or False
 
-Milestone: X
-============
+And a property method "status" to indicate the current status of a resource.
+For instance something like that:
 
-*Dependencies:*
+.. code:: python
 
-*Target Release:* TBA
+  @property
+  def status(self):
+    if enabled and active:
+      return "Up" # Part of an Enum
+    elif self.is_administative_down():
+      return "Administrative Down" # Part of an Enum
+    else:
+      return "Operational Down" # Part of an Enum
 
-*Features:*
+  def is_administrative_down():
+     return self.active
+
+Moreover, we need an endpoint to manually delete, list and create resources
+from the topology.

@@ -63,17 +63,17 @@ mostly academic. A more realistic approach is proposed by this document.
 Network Topology Metadata
 -------------------------
 
-We must provide some mechanism in order to allow customizations on the network.
-Currently our main entities are: "Switch", "Interface", "Link" and "Host". For
-a first moment we have "custom_properties" but they are not good enought. We
-must provide "custom_properties" or custom "metadata" for all those four
-entities.
+We must provide a mechanism to allow customization of the network through
+customized properties set for the resources. At first, we have the
+"custom_properties" field but they need some refactoring and improvement. We
+must provide "custom_properties" or custom "metadata" for all resources.
+The network administrator or another NApp can perform list, delete and create
+operations on the metadata, creating/retrieving/removing a ("key", "value")
+pair for each one.
 
-So the administrator or another NApps must be able to list, delete and create
-metadata on "key", "value" form for each one.
-
-We must provide an additional way than "configuration file" and create a more
-flexible way (REST API, for instance).
+We must have support for a configuration file with the metadata to be loaded
+with the NApp. We must also have support for REST operations to manipulate
+metadata.
 
 Adding new resources to the network
 -----------------------------------
@@ -108,7 +108,8 @@ resource must be mapped by the NApp as it is in the real world: a resource must
 be removed from the topology only if it is really removed from the physical
 network itself.
 
-Implementation design: Every resource in the topology MUST HAVE two basic flags:
+Implementation design: Every resource in the topology MUST HAVE two basic
+flags:
 
 .. code:: python
 
@@ -130,7 +131,7 @@ For instance something like that:
       return "Operational Down" # Part of an Enum
 
   def is_administrative_down():
-     return self.active
+     return not self.enabled
 
 Moreover, we need an endpoint to manually delete, list and create resources
 from the topology.

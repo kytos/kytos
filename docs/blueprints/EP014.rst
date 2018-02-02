@@ -32,9 +32,11 @@ not-started
 
 Assignees
 ---------
+Renan Rodrigo
 
 Approvers (PTL)
 ---------------
+Beraldo Leal
 
 Version
 -------
@@ -42,7 +44,6 @@ Version
 
 Specifications
 --------------
-
 
 Description
 ===========
@@ -69,18 +70,5 @@ that not contain any of the undesired links.
 Both parts may be implemented as a single method for simplicity and cleanness
 of the code.
 
-Both lists contain circuit 'names' or 'id's, as they are defined in the
+Both lists contain link 'names' or 'id's, as they are defined in the
 Topology NApp.
-
-Milestone: 2018.1b1
-===================
-
-*Dependencies:*
-
-EP013 - Topology NApp Improvements
-
-*Target Release:*
-
-2018.1b1 (dalva beta1)
-
-*Features:*

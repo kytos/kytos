@@ -124,6 +124,8 @@ class KytosConfig():
 
         if 'test' in argv:
             argv.pop(argv.index('test'))
+        if 'stop' in argv:
+            argv.pop(argv.index('stop'))
 
         self.options['daemon'] = self._parse_options(argv)
 
@@ -140,7 +142,10 @@ class KytosConfig():
         options = self.parser.parse_args(argv)
         options.napps_repositories = json.loads(options.napps_repositories)
         options.debug = True if options.debug in ['True', True] else False
-        options.daemon = True if options.daemon in ['True', True] else False
+        if options.foreground in ['True', True]:
+            options.daemon = False
+        else:
+            options.daemon = True
         options.port = int(options.port)
         options.api_port = int(options.api_port)
         options.protocol_name = str(options.protocol_name)

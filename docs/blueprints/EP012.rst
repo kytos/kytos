@@ -1,4 +1,4 @@
-﻿Summary
+Summary
 =======
 
 Title
@@ -53,33 +53,32 @@ https://napps.kytos.io/kytos/mef_eline
 
 Description
 ===========
-The Metro Ethernet Forum is responsible for the MEF Carrier Ethernet (CE)
-certification, used by many Internet service providers to standardize the
-language used in interactions with users and other ISPs. Each MEF CE service is
-composed by many basic items, such as number of User Network Interfaces (UNI),
-service restoration time and bandwidth profiles.
+The Metro Ethernet Forum (MEF) has created the MEF Carrier Ethernet (CE)
+certification aiming to standardize the language used in interactions between
+ISPs and users. Each MEF CE service is composed by many basic items, such as
+User Network Interfaces (UNI), service restoration time and bandwidth profiles.
 
-An E-Line is a service type defined by the MEF for connecting exactly 2 UNIs
-where those 2 UNIs can communicate only with one another. E-Lines are defined
-in MEF 6.2 and MEF 10.3.
+A MEF E-Line service or Ethernet Virtual Service (EVC) is a service type to
+connect exactly two UNIs where those two UNIs can communicate only with one
+another. The MEF E-Line service is defined by MEF 6.2 and MEF 10.3
+specifications.
 
-The MEF E-Line is composed of two point-to-point Ethernet services:
+The MEF E-Line services has two categories:
 
-  * EPL or Ethernet Private Line (Port Based)
-  * EVPL or Ethernet Virtual Private Line (VLAN Based)
+  * EPL or Ethernet Private Line (Port-based)
+  * EVPL or Ethernet Virtual Private Line (VLAN-based)
 
-Both E-Line services are composed of two UNIs and the main distinction between
-EPL and EVPL is that EPL encapsulates all traffic between two UNIs while EVPL
-uses a virtual circuit distinguisher, such as VLAN VID or MPLS TAG to create
-the virtual service.
+The main distinction between EPL and EVPL is that EPL encapsulates all traffic
+between two UNIs while EVPL uses a virtual circuit distinguisher, such as a
+VLAN VID or a MPLS TAG, to create the virtual service.
 
-This blueprint describes the requirements to implement this inside Kytos SDN
-Platform as a NApp or a set of NApps.
+This blueprint describes the requirements to support MEF E-Line services over
+the Kytos SDN Platform as a NApp or a set of NApps.
 
 REST API and WEB UI
 ===================
-Initially we will implement all REST API's as high priority, then the NApp
-should also be able to provide a Web interface for all the operations.
+Service provisioning and monitoring will be supported initially via REST API.
+The support for a web UI is planned for future releases.
 
 Provisioning Requirements
 =========================
@@ -87,36 +86,51 @@ Provisioning Requirements
 In this section we describe the target behaviour. All code here is in
 pseudo-code.
 
-1. User submits request
-2. Solicitar à Pathfinder, os paths baseados nos requisitos de primary_links e
-   backup_links;
-3. s-vid: E-Line requests a S-VID from the intf's TAG pool for UNI_A
-4. s-vid: E-Line requests a S-VID from the intf's TAG pool for UNI_Z
-5. Get lists of vNNIs: For each link from #2 -> link.get_vlan()
-6. Push to FlowManager (UNI_A, UNI_Z, lists of vNNIs)
-7. Event(EVC)
-8. Return to user
+1. User submits an EVC request via E-Line NApp's REST
+2. E-Line NApp requests a primary and a backup path to the Pathfinder NApp using
+   the attributes _primary_links_ and _backup_links_ submitted via REST
+3. UNI_A's SVID request:
+..1. For EPL: E-Line NApp requests a S-VID from the UNI_A interface's VID pool
+..2. For EVPL: E-Line Napp verifies if the UNI_A's C-VID is available to be used
+     as a S-VID
+4. UNI_Z's SVID request:
+..1. For EPL: E-Line NApp requests a S-VID from the UNI_Z interface's VID pool
+..2. For EVPL: E-Line NApp verifies if the UNI_Z's C-VID is available to be used
+     as a S-VID
+5. Get lists of vNNIs: For each link composing paths in #2, get a
+S-VID to be used
+   (link.get_vlan())
+6. Using the S-VIDs obtained, generate abstract flow entries to be
+sent to FlowManager
+6. Push abstract flow entries to FlowManager and FlowManager pushes
+OpenFlow entries to
+   datapaths
+7. E-Line NApp generates an event to notify all Kytos NApps of a new
+EVC creation
+8. Notify user of the status of its request
 
 .. note::
 
-  And we should create the circuits (EVC) ...mesmo que alguma interface esteja
-  down. Apenas retornando para o usuário alguma informação que o circuito foi
-  criado porém não está operacional ainda.
+  EVCs must be created even if there is a link or interface down in the path.
+  In this case, user should be notified that the EVC was created but it
+  is not operational.
 
-We must implement some endpoints to manage EVCs. For instance in order to
-create an EVC, the user must send a post request to:
+In order to create an EVC, the user must send a POST request using the
+following example:
 
 .. code:: bash
 
   POST /kytos/mef_eline/v2.0/evc/
 
-With all information necessary to create the EVC:
+Information necessary to create the EVC:
 
 .. code:: bash
 
   {UNI_A*, UNI_Z*, str name*, str bandwidth, datetime start_date, datetime
   end_date, [str primary_links], [str backup_links], bool dynamic_backup_path,
-  tenant}
+  tenant, service_level}
+
+**\*Required fields**
 
 .. code:: python
 
@@ -140,18 +154,20 @@ With all information necessary to create the EVC:
     _requested  # dict with the user original request (input)
     id = uuid()
     current_path  # circuit being used at the moment
-    primary_path  # primary circuit offered to the user IF one or more vNNIs were provided in the request
-    backup_path  # backup circuit offered to the user IF one or more vNNIs were provided in the request
-    creation_time = now()
-    owner = get_user()
-    status = [UP|DOWN] # (operation)
-    enabled = True or False # (administrative)
-    priority = Integer
-    # (...) everything else from request must be a property
+    primary_path  # primary circuit offered to user IF one or more links were provided in the request
+    backup_path  # backup circuit offered to the user IF one or more links were provided in the request
+    request_time = now()  # datetime of user request for a EVC
+    creation_time = now() | schedule()  # datetime when the circuit should be activated
+    owner = get_user(REST)
+    status = [UP|DOWN]  # (operation)
+    enabled = [True|False]  # (administrative)
+    priority = Integer  # service level provided in the request. "gold", "silver", ...
+    # (...) everything else from request must be @property
 
     def create()
     def discover_new_path()
     def change_path(path)
+    def reprovision()  # force EVC (re-)provisioning
     def remove()
 
 
@@ -165,26 +181,25 @@ With all information necessary to create the EVC:
   backup_links = # system provided
   bandwidth = None
 
-**\*Required fields**
-
 **Return Codes Examples:**
 
-        201: Circuit created
+        200: Circuit created
+        201: Circuit created but not active (link down)
         401: Permission denied
 
 Interface tags pool mechanism
 -----------------------------
 
-*Para cada objeto _interface_:*
-Cada objeto interface terá um pool de VLANs predefinidas ou não (1-4096) com
-métodos para fazer pop e push neste pool. Este objeto precisa fazer um tracking
-das VLANs disponíveis.
+*For each Interface object:*
+Each Interface object will have its own VLAN pool with pop() and push()
+methods. This pool will be used for EPLs. Administrator might predefine via
+configuration the VLAN pool to be used (for instance, VLAN 100 to 200).
 
-*Para o objeto link:*
-O objeto link deve obter vlans em comum a duas NNIs. (Ex:
-link.get_available_vlan())
-
-*[if necessary more information here]*
+*For each Link object:*
+Each Link object will have its own VLAN pool to be used by two
+directly-connected NNIs. pop() and push() methods should be available.
+Administrator might predefine via configuration the VLAN pool to be used
+(for instance, VLAN 100 to 200).
 
 Milestones
 ==========
@@ -200,15 +215,15 @@ Milestone: Basic EPL and EVPL
 
 *Features:*
 
-  * EVC will be created after REST request
-  * REST request must be include all options
+  * EVC will be created after a REST request
+  * REST request must include all options
   * EVCs will have two UNIs
   * EVCs won't have backup paths
   * EVCs won't have explicit-provided paths
   * EVCs won't have metrics
   * EVCs won't support bandwidth profiles
   * EVCs will be fully based on VLANs
-  * EVCs might terminate on NNIs
+  * EVCs might terminate on NNIs (NNI acting as UNI)
 
 .. note::
 
@@ -217,14 +232,8 @@ Milestone: Basic EPL and EVPL
 
 *Additional Information:*
 
-  * EPL (Port based): All traffic received from UNIs will be encapsulated into
-    a specific user-independent service tag
-  * EVPL: Permitir indicar dois UNIs (porta, switch E vlan)
-  * Network-to-Network Interfaces (NNI) could use a VLAN range
-  * For EVPL, any combination of service tag IDs (VLAN ID for Ethertype 0x8100
-    or S-VID for 0x88a8) could be used (also known and VLAN ID Translation);
-  * For EVPL, NNI interfaces should be able to act as UNI (to terminate
-    circuits)
+  * MEF E-Line Napp will have methods to validate all fields provided in the
+    REST request but only UNI_A and UNI_Z will be processed.
 
 Milestone: Basic EPL and EVPL with explicit primary_links and backup_links
 --------------------------------------------------------------------------
@@ -237,23 +246,31 @@ are down)
 
 *Features:*
 
-  * REST requests' explicit-provided primary and backup paths will be used.
+  * REST requests' explicit-provided _primary_links_ and
+_backup_links_ will be used.
+
+*Additional Information:*
+
+  * None
 
 Milestone:  Calendaring
 -----------------------
 
-*Dependencies:* 1. reloginho - thread looking for circuits to be activated
+*Dependencies:* 1. Calendaring Napp (thread looking for circuits to be
+activated)
 
 *Target Release:* TBA
 
 *Features:*
 
-  * EVC will support scheduling for activation and removal
+  * EVC will support scheduling for activation and removal, processing both REST
+  options start_date and end_date
+  * EVC will support of scheduling of specific routines and time intervals, such
+  as _every_night_, _every_tuesday_, _every_day_from_2am_to_5pm_, and others.
 
 *Additional Information:*
 
-  * Permitir o agendamento com a definição de horário e dia de ativação e
-    horário e dia de desativação (sendo ambos opcionais).
+  * None
 
 Milestone: Link Protection
 --------------------------
@@ -264,18 +281,12 @@ Milestone: Link Protection
 
 *Features:*
 
-
-  * Backup de NNIs (links)
-  * Como será o auto-compute (Caso o usuário não defina o backup) ?
-  * For path definition, user might require a set of links for the primary
-    path;
-  * For path definition, user might require a set of links for the backup path
-
-Backup de UNIs
+  * EVCs will have support for backup paths
+  * EVCs will have support for explicit-provided paths
   * Users might have redundant UNIs in different networking devices working in
     an active/backup approach;
 
-Milestone: Circuit Requirements
+Milestone: Metrics Requirements
 -------------------------------
 
 *Dependencies:*
@@ -299,13 +310,9 @@ Future
   * Network-to-Network Interfaces (NNI) could use predefined MPLS label range
   * Network-to-Network Interfaces (NNI) when using MPLS should be transparent
     to the user
-  * Calendaring: Evento repetido. f.y.: from every night at 2am to 5am
-  * EVPL with tag rewrite
-  * C-VID range ?
   * (High Resilience Requirements) Cluster/Failover/HA/HP
   * (Security Requirements) Per-user and per-item ACLs
-  * (Security Requirements) Autorizacao integrada com framework de autorizacao
-    externo do kytos
+  * (Security Requirements) Authorization
   * Persistency
   * (Reports) Link, Port and Circuit Utilization for customizable intervals
     back to 10 years

@@ -5,10 +5,11 @@ import sys
 import warnings
 import zipfile
 from datetime import datetime
+from glob import glob
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen, urlretrieve
 
-from flask import Flask, request, send_from_directory
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room
 
@@ -21,13 +22,15 @@ class APIServer:
     _NAPP_PREFIX = "/api/{napp.username}/{napp.name}/"
     _CORE_PREFIX = "/api/kytos/core/"
 
-    def __init__(self, app_name, listen='0.0.0.0', port=8181):
+    def __init__(self, app_name, listen='0.0.0.0', port=8181,
+                 napps_dir=None):
         """Start a Flask+SocketIO server.
 
         Args:
             app_name(string): String representing a App Name
             listen (string): host name used by api server instance
             port (int): Port number used by api server instance
+            napps_dir(string): napps path directory
         """
         dirname = os.path.dirname(os.path.abspath(__file__))
         self.flask_dir = os.path.join(dirname, '../web-ui')
@@ -48,6 +51,7 @@ class APIServer:
 
         # Update web-ui if necessary
         self.update_web_ui(force=False)
+        self.napps_dir = napps_dir
 
     def _enable_websocket_rooms(self):
         socket = self.server
@@ -94,6 +98,11 @@ class APIServer:
         """Register routes to the admin-ui homepage."""
         self.app.add_url_rule('/', self.web_ui.__name__, self.web_ui)
         self.app.add_url_rule('/index.html', self.web_ui.__name__, self.web_ui)
+        self.app.add_url_rule('/ui/<username>/<napp_name>/<path:filename>',
+                              self.static_web_ui.__name__, self.static_web_ui)
+        self.app.add_url_rule('/ui/<path:filename>',
+                              self.get_ui_components.__name__,
+                              self.get_ui_components)
 
     @staticmethod
     def status_api():
@@ -123,9 +132,33 @@ class APIServer:
 
         return 'Server shutting down...', 200
 
+    def static_web_ui(self, username, napp_name, filename):
+        """Serve static files from installed napps."""
+        path = f"{self.napps_dir}/{username}/{napp_name}/ui/{filename}"
+        if os.path.exists(path):
+            return send_file(path)
+        return "", 404
+
+    def get_ui_components(self, filename):
+        """Return all napps ui components."""
+        filename = '*' if filename == "all" else filename
+        path = f"{self.napps_dir}/*/*/ui/{filename}/*.kytos"
+        components = []
+        for name in glob(path):
+            group = name.split('/')
+            napp_name = f"{group[-5]}/{group[-4]}"
+            ui_context = f"{group[-2]}"
+            template_file = group[-1]
+            url = f"ui/{napp_name}/{ui_context}/{template_file}"
+            component_name = napp_name.replace('/', '-') + '-'
+            component_name += template_file.replace('.kytos', '')
+            component = {'name': component_name, 'url': url}
+            components.append(component)
+        return jsonify(components)
+
     def web_ui(self):
         """Serve the index.html page for the admin-ui."""
-        return send_from_directory(self.flask_dir, 'index.html')
+        return send_file(f"{self.flask_dir}/index.html")
 
     def update_web_ui(self, force=True):
         """Update the static files for the Web UI.

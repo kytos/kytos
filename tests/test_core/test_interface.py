@@ -5,7 +5,8 @@ from unittest.mock import Mock
 
 from pyof.v0x04.common.port import PortFeatures
 
-from kytos.core.switch import Interface, Switch
+from kytos.core.interface import Interface
+from kytos.core.switch import Switch
 
 logging.basicConfig(level=logging.CRITICAL)
 

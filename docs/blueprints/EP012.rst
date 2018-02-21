@@ -88,34 +88,25 @@ pseudo-code.
 
 1. User submits an EVC request via E-Line NApp's REST
 
-2. E-Line NApp requests a primary and a backup path to the Pathfinder NApp
+#. For EVPL: E-Line NApp verifies if UNI_A's requested C-VID and UNI_Z's requested C-VID are
+   available from the interfaces' pools.
+
+#. E-Line NApp requests a primary and a backup path to the Pathfinder NApp
    using the attributes _primary_links_ and _backup_links_ submitted via REST
 
-3. UNI_A's S-VID request:
+#. For each link composing paths in #3:
 
-..1. For EPL: E-Line NApp requests a S-VID from the UNI_A interface's VID pool
+   #. E-Line NApp requests a S-VID available from the link VLAN pool.
+   #. Using the S-VID obtained, generate abstract flow entries to be sent to
+      FlowManager
 
-..2. For EVPL: E-Line Napp verifies if the UNI_A's C-VID is available to be used as a S-VID
-
-4. UNI_Z's S-VID request:
-
-..1. For EPL: E-Line NApp requests a S-VID from the UNI_Z interface's VID pool
-
-..2. For EVPL: E-Line NApp verifies if the UNI_Z's C-VID is available to be used as a S-VID
-
-5. Get lists of vNNIs: For each link composing paths in #2, get a S-VID to be
-   used (link.get_vlan())
-
-6. Using the S-VIDs obtained, generate abstract flow entries to be sent to
-   FlowManager
-
-6. Push abstract flow entries to FlowManager and FlowManager pushes OpenFlow
+#. Push abstract flow entries to FlowManager and FlowManager pushes OpenFlow
    entries to datapaths
 
-7. E-Line NApp generates an event to notify all Kytos NApps of a new EVC
+#. E-Line NApp generates an event to notify all Kytos NApps of a new EVC
    creation
 
-8. Notify user of the status of its request
+#. Notify user of the status of its request
 
 .. note::
 

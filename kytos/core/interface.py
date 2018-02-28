@@ -6,8 +6,8 @@ from enum import IntEnum
 from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
 from pyof.v0x04.common.port import PortFeatures as PortFeatures04
 
+from kytos.core.common import GenericEntity
 from kytos.core.helpers import now
-from kytos.core.switch import GenericEntity
 
 __all__ = ('Interface',)
 

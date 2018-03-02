@@ -20,8 +20,11 @@ class Link(GenericEntity):
 
     def __eq__(self, other):
         """Check if two instances of Link are equal."""
-        return (self.endpoint_a == other.endpoint_a and
-                self.endpoint_b == other.endpoint_b)
+        return ((self.endpoint_a == other.endpoint_a and
+                 self.endpoint_b == other.endpoint_b) or
+                (self.endpoint_a == other.endpoint_b and
+                 self.endpoint_b == other.endpoint_a))
+
 
     def as_dict(self):
         """Return the Link as a dictionary."""

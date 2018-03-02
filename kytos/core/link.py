@@ -25,10 +25,20 @@ class Link(GenericEntity):
                 (self.endpoint_a == other.endpoint_b and
                  self.endpoint_b == other.endpoint_a))
 
+    @property
+    def id(self):  # pylint: disable=invalid-name
+        """Return id from Link intance.
+
+        Returns:
+            string: link id.
+
+        """
+        return "{}:{}".format(self.endpoint_a.id, self.endpoint_b.id)
 
     def as_dict(self):
         """Return the Link as a dictionary."""
-        return {'endpoint_a': self.endpoint_a.as_dict(),
+        return {'id': self.id,
+                'endpoint_a': self.endpoint_a.as_dict(),
                 'endpoint_b': self.endpoint_b.as_dict(),
                 'metadata': self.metadata,
                 'active': self.active,

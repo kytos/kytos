@@ -27,7 +27,9 @@ class Link(GenericEntity):
         """Return the Link as a dictionary."""
         return {'endpoint_a': self.endpoint_a.as_dict(),
                 'endpoint_b': self.endpoint_b.as_dict(),
-                'metadata': self.metadata}
+                'metadata': self.metadata,
+                'active': self.active,
+                'enabled': self.enabled}
 
     def as_json(self):
         """Return the Link as a JSON string."""

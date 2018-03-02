@@ -1,6 +1,14 @@
 """Module with common classes for the controller."""
 
+from enum import Enum
+
 __all__ = ('GenericEntity',)
+
+class EntityStatus(Enum):
+    """Enumeration of possible statuses for GenericEntity instances."""
+    UP = 1
+    DISABLED = 2
+    DOWN = 3
 
 
 class GenericEntity:
@@ -9,6 +17,20 @@ class GenericEntity:
     def __init__(self):
         """Create the GenericEntity object with empty metadata dictionary."""
         self.metadata = {}
+        self.active = True # operational status with True or False
+        self.enabled = False # administrative status with True or False
+
+    @property
+    def status(self):
+        if self.enabled and self.active:
+            return EntityStatus.UP
+        elif self.is_administrative_down():
+            return EntityStatus.DISABLED
+        else:
+            return EntityStatus.DOWN
+
+    def is_administrative_down(self):
+        return not self.enabled
 
     def add_metadata(self, key, value):
         """Add a new metadata (key, value)."""

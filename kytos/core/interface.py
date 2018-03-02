@@ -291,7 +291,10 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
              'nni': False,
              'uni': True,
              'speed': 12500000000,
-             'metadata': {}}
+             'metadata': {},
+             'active': True,
+             'enabled': False
+            }
 
         Returns:
             dict: Dictionary filled with interface attributes.
@@ -306,7 +309,9 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                       'nni': self.nni,
                       'uni': self.uni,
                       'speed': self.speed,
-                      'metadata': self.metadata}
+                      'metadata': self.metadata,
+                      'active': self.active,
+                      'enabled': self.enabled}
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()
         return iface_dict

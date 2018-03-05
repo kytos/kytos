@@ -319,7 +319,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
              'speed': 12500000000,
              'metadata': {},
              'active': True,
-             'enabled': False
+             'enabled': False,
+             'link': ""
             }
 
         Returns:
@@ -337,7 +338,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                       'speed': self.speed,
                       'metadata': self.metadata,
                       'active': self.active,
-                      'enabled': self.enabled}
+                      'enabled': self.enabled,
+                      'link': self.link.id if self.link else ""}
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()
         return iface_dict

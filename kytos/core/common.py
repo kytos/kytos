@@ -60,7 +60,7 @@ class GenericEntity:
         """Remove all metadata information."""
         self.metadata = {}
 
-    def extend_metadata(self, metadatas, force=False):
+    def extend_metadata(self, metadatas, force=True):
         """Extend the metadata information.
 
         If force is True any existing value is overwritten.

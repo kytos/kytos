@@ -6,6 +6,8 @@ interfaces.
 
 import json
 
+from uuid import uuid4
+
 from kytos.core.common import GenericEntity
 
 
@@ -16,6 +18,7 @@ class Link(GenericEntity):
         """Create a Link instance and set its attributes."""
         self.endpoint_a = endpoint_a
         self.endpoint_b = endpoint_b
+        self._uuid = uuid4()
         super().__init__()
 
     def __eq__(self, other):
@@ -33,7 +36,7 @@ class Link(GenericEntity):
             string: link id.
 
         """
-        return "{}:{}".format(self.endpoint_a.id, self.endpoint_b.id)
+        return "{}".format(self._uuid)
 
     def as_dict(self):
         """Return the Link as a dictionary."""

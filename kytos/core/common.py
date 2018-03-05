@@ -1,6 +1,16 @@
 """Module with common classes for the controller."""
 
+from enum import Enum
+
 __all__ = ('GenericEntity',)
+
+
+class EntityStatus(Enum):
+    """Enumeration of possible statuses for GenericEntity instances."""
+
+    UP = 1  # pylint: disable=invalid-name
+    DISABLED = 2
+    DOWN = 3
 
 
 class GenericEntity:
@@ -9,6 +19,21 @@ class GenericEntity:
     def __init__(self):
         """Create the GenericEntity object with empty metadata dictionary."""
         self.metadata = {}
+        self.active = True  # operational status with True or False
+        self.enabled = False  # administrative status with True or False
+
+    @property
+    def status(self):
+        """Return the current status of the Entity."""
+        if self.enabled and self.active:
+            return EntityStatus.UP
+        elif self.is_administrative_down():
+            return EntityStatus.DISABLED
+        return EntityStatus.DOWN
+
+    def is_administrative_down(self):
+        """Return True for disabled Entities."""
+        return not self.enabled
 
     def add_metadata(self, key, value):
         """Add a new metadata (key, value)."""
@@ -38,7 +63,7 @@ class GenericEntity:
         """Remove all metadata information."""
         self.metadata = {}
 
-    def extend_metadata(self, metadatas, force=False):
+    def extend_metadata(self, metadatas, force=True):
         """Extend the metadata information.
 
         If force is True any existing value is overwritten.

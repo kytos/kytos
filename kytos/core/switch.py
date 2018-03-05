@@ -282,7 +282,9 @@ class Switch(GenericEntity):
                 'hardware': "Open vSwitch",
                 'software': 2.5,
                 'data_path': "",
-                'metadata': {}
+                'metadata': {},
+                'active': True,
+                'enabled': False
                 }
 
         Returns:
@@ -308,7 +310,9 @@ class Switch(GenericEntity):
                 'data_path': self.description.get('data_path', ''),
                 'interfaces': {i.id: i.as_dict()
                                for i in self.interfaces.values()},
-                'metadata': self.metadata}
+                'metadata': self.metadata,
+                'active': self.active,
+                'enabled': self.enabled}
 
     def as_json(self):
         """Return a json with switch'attributes.

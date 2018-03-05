@@ -46,9 +46,10 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             port_number (int): port number from this interface.
             switch (:class:`~.core.switch.Switch`): Switch with this interface.
             address (|hw_address|): Port address from this interface.
-            state (|port_stats|): Port Stat from interface.
+            state (|port_stats|): Port Stat from interface. It will be
+            deprecated.
             features (|port_features|): Port feature used to calculate link
-                utilization from this interface.
+                utilization from this interface. It will be deprecated.
             speed (int, float): Interface speed in bytes per second. Defaults
                 to what is informed by the switch. Return ``None`` if not set
                 and switch does not inform the speed.
@@ -62,6 +63,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self.nni = False
         self.endpoints = []
         self.stats = None
+        self.link = None
         self._custom_speed = speed
         self.available_tags = []
 
@@ -169,6 +171,30 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         if exists:
             self.delete_endpoint(endpoint)
         self.add_endpoint(endpoint)
+
+    def update_link(self, link):
+        """Update link for this interface in a consistent way.
+
+        Verify of the other endpoint of the link has the same Link information
+        attached to it, and change it if necessary.
+
+        Warning: This method can potentially change information of other
+        Interface instances. Use it with caution.
+        """
+        if (link.endpoint_a != self and
+                link.endpoint_b != self):
+            return False
+
+        if self.link is None or self.link != link:
+            self.link = link
+
+        if link.endpoint_a == self:
+            endpoint = link.endpoint_b
+        else:
+            endpoint = link.endpoint_a
+
+        if endpoint.link is None or endpoint.link != link:
+            endpoint.link = link
 
     @property
     def speed(self):
@@ -291,7 +317,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
              'nni': False,
              'uni': True,
              'speed': 12500000000,
-             'metadata': {}}
+             'metadata': {},
+             'active': True,
+             'enabled': False,
+             'link': ""
+            }
 
         Returns:
             dict: Dictionary filled with interface attributes.
@@ -306,7 +336,10 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                       'nni': self.nni,
                       'uni': self.uni,
                       'speed': self.speed,
-                      'metadata': self.metadata}
+                      'metadata': self.metadata,
+                      'active': self.active,
+                      'enabled': self.enabled,
+                      'link': self.link.id if self.link else ""}
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()
         return iface_dict

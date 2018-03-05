@@ -5,7 +5,6 @@ interfaces.
 """
 
 import json
-
 from uuid import uuid4
 
 from kytos.core.common import GenericEntity

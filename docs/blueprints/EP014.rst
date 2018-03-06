@@ -12,7 +12,7 @@ Rogerio Motitsuki (ANSP), Beraldo Leal, (Kytos), Renan Rodrigo (Kytos)
 
 Blueprint Status
 ----------------
-work-in-progress
+finished
 
 Priority
 --------
@@ -28,7 +28,7 @@ Milestone Target
 
 Implementation
 --------------
-not-started
+finished
 
 Assignees
 ---------

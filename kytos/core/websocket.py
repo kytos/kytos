@@ -24,7 +24,7 @@ class WebSocketHandler:
     def _filter_web_requests(record):
         """Only allow web server messages with level higher than info.
 
-        Do not print web requests (INFO level) to avoid infinit loop when
+        Do not print web requests (INFO level) to avoid infinite loop when
         printing the logs in the web interface with long-polling mode.
         """
         return record.name != 'werkzeug' or record.levelno > logging.INFO

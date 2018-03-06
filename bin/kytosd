@@ -35,7 +35,7 @@ banner1 = """\033[95m
 Welcome to Kytos SDN Platform!
 
 We are doing a huge effort to make sure that this console will work fine. But
-for now is still experimental.
+for now it's still experimental.
 
 Kytos website.: https://kytos.io/
 Documentation.: https://docs.kytos.io/

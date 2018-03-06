@@ -71,6 +71,10 @@ class KytosConfig():
                             action='store',
                             help="Specify the southbound protocol")
 
+        parser.add_argument('-E', '--enable_entities_by_default',
+                            action='store_true',
+                            help="Enable all new Entities by default.")
+
         self.conf_parser, self.parser = conf_parser, parser
         self.parse_args()
 
@@ -90,6 +94,7 @@ class KytosConfig():
                         'port': 6633,
                         'foreground': False,
                         'protocol_name': '',
+                        'enable_entities_by_default': False,
                         'debug': False}
 
         """
@@ -107,6 +112,7 @@ class KytosConfig():
                     'port': 6633,
                     'foreground': False,
                     'protocol_name': '',
+                    'enable_entities_by_default': False,
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()
@@ -144,5 +150,8 @@ class KytosConfig():
         options.port = int(options.port)
         options.api_port = int(options.api_port)
         options.protocol_name = str(options.protocol_name)
+
+        result = options.enable_entities_by_default in ['True', True]
+        options.enable_entities_by_default = result
 
         return options

@@ -5,9 +5,6 @@ from kytos.core.config import KytosConfig
 
 __all__ = ('GenericEntity',)
 
-CONFIG = KytosConfig()
-OPTIONS = CONFIG.options['daemon']
-
 
 class EntityStatus(Enum):
     """Enumeration of possible statuses for GenericEntity instances."""
@@ -22,11 +19,12 @@ class GenericEntity:
 
     def __init__(self):
         """Create the GenericEntity object with empty metadata dictionary."""
+        options = KytosConfig().options['daemon']
         self.metadata = {}
         # operational status with True or False
         self.active = True
         # administrative status with True or False
-        self.enabled = OPTIONS.enable_entities_by_default
+        self.enabled = options.enable_entities_by_default
 
     @property
     def status(self):

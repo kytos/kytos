@@ -1,8 +1,12 @@
 """Module with common classes for the controller."""
-
 from enum import Enum
 
+from kytos.core.config import KytosConfig
+
 __all__ = ('GenericEntity',)
+
+CONFIG = KytosConfig()
+OPTIONS = CONFIG.options['daemon']
 
 
 class EntityStatus(Enum):
@@ -19,8 +23,10 @@ class GenericEntity:
     def __init__(self):
         """Create the GenericEntity object with empty metadata dictionary."""
         self.metadata = {}
-        self.active = True  # operational status with True or False
-        self.enabled = False  # administrative status with True or False
+        # operational status with True or False
+        self.active = True
+        # administrative status with True or False
+        self.enabled = OPTIONS.enable_entities_by_default
 
     @property
     def status(self):
@@ -34,6 +40,23 @@ class GenericEntity:
     def is_administrative_down(self):
         """Return True for disabled Entities."""
         return not self.enabled
+
+    def enable(self):
+        """Administratively enable the Entity.
+
+        Although this method only sets an 'enabled' flag, always prefer to use
+        it instead of setting it manually. This allows us to change the
+        behavior on the future.
+        """
+        self.enabled = True
+
+    def disable(self):
+        """Administratively disable the Entity.
+
+        This method can disable other related entities. For this behavior,
+        rewrite it on the child classes.
+        """
+        self.enabled = False
 
     def add_metadata(self, key, value):
         """Add a new metadata (key, value)."""

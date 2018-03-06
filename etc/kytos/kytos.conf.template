@@ -40,6 +40,10 @@ protocol_name =
 # Default is 8181.
 api_port = 8181
 
+# When a new entity (switch, interface or link) is created it is
+# administratively disabled by default. Change here to modify this behavior.
+# enable_entities_by_default = False
+
 # Where should the controller look for network apps ?
 # This directory has both core napps and user installed napps.
 napps = {{ prefix }}/var/lib/kytos/napps

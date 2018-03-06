@@ -37,6 +37,15 @@ class Link(GenericEntity):
         """
         return "{}".format(self._uuid)
 
+    def enable(self):
+        """Enable this link instance.
+
+        Also enable the link's interfaces and the switches they're attached to.
+        """
+        self.endpoint_a.enable()
+        self.endpoint_b.enable()
+        self.enabled = True
+
     def as_dict(self):
         """Return the Link as a dictionary."""
         return {'id': self.id,

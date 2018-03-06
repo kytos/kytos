@@ -100,6 +100,23 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         """Return if an interface is a user-to-network Interface."""
         return not self.nni
 
+    def enable(self):
+        """Enable this interface instance.
+
+        Also enable the switch instance this interface is attached to.
+        """
+        self.switch.enable()
+        self.enabled = True
+
+    def disable(self):
+        """Disable this interface instance.
+
+        Also disable the link related to this interface.
+        """
+        if self.link:
+            self.link.disable()
+        self.enabled = False
+
     def use_tag(self, tag):
         """Remove a specific tag from available_tags if it is there."""
         for available_tag in self.available_tags:

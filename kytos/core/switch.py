@@ -114,6 +114,15 @@ class Switch(GenericEntity):
             return '0x0' + str(self.connection.protocol.version)
         return None
 
+    def disable(self):
+        """Disable this switch instance.
+
+        Also disable this switch's interfaces and their respective links.
+        """
+        for interface in self.interfaces.values():
+            interface.disable()
+        self.enabled = False
+
     def disconnect(self):
         """Disconnect the switch instance."""
         self.connection.close()

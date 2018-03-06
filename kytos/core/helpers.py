@@ -25,7 +25,7 @@ def listen_to(event, *events):
 
     The event that will be listened to is always a string, but it can represent
     a regular expression to match against multiple Event Types. All listened
-    events is documented in :doc:`developer/listened_events` section.
+    events are documented in :doc:`developer/listened_events` section.
 
     Example of usage:
 
@@ -61,7 +61,7 @@ def listen_to(event, *events):
         """Decorate the handler method.
 
         Returns:
-            A method with a `events` attribute (list of events to be listened)
+            A method with an `events` attribute (list of events to be listened)
             and also decorated to run on a new thread.
 
         """

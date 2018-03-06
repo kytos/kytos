@@ -73,7 +73,7 @@ class KytosRequestHandler(BaseRequestHandler):
     }
 
     def __init__(self, request, client_address, server):
-        """Contructor takes the parameters below.
+        """Initialize a request handler object for each connection.
 
         Args:
             request (socket.socket):

@@ -386,10 +386,15 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 class UNI:
     """Class that represents an User-to-Network Interface."""
 
-    def __init__(self, user_tag, interface):
+    def __init__(self, interface, user_tag=None):
         self.user_tag = user_tag
         self.interface = interface
 
+    def is_valid(self):
+        """Check if TAG is possible for this interface TAG pool."""
+        if self.user_tag:
+            return self.interface.is_tag_available(self.user_tag)
+        return True
 
 class NNI:
     """Class that represents an Network-to-Network Interface."""

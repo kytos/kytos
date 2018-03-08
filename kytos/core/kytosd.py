@@ -1,27 +1,28 @@
 #!/usr/bin/env python3.6
 """Start Kytos SDN Platform core."""
-import daemon
-import IPython
 import signal
 import sys
 
+import daemon
 from IPython.terminal.embed import InteractiveShellEmbed
 from IPython.terminal.prompts import Prompts, Token
+from traitlets.config.loader import Config
 
 from kytos.core import Controller
 from kytos.core.config import KytosConfig
 
-from traitlets.config.loader import Config
-
 
 class KytosPrompt(Prompts):
+    """Configure Kytos prompt for interactive shell."""
+
     def in_prompt_tokens(self, cli=None):
+        """Kytos IPython prompt."""
         return [(Token.Prompt, 'kytos $> ')]
 
 
 def start_shell(controller):
     """Load Kytos interactive shell."""
-
+    # pylint: disable=anomalous-backslash-in-string
     banner1 = """\033[95m
       _          _
      | |        | |
@@ -34,8 +35,8 @@ def start_shell(controller):
     \033[0m
     Welcome to Kytos SDN Platform!
 
-    We are doing a huge effort to make sure that this console will work fine. But
-    for now it's still experimental.
+    We are doing a huge effort to make sure that this console will work fine
+    but for now it's still experimental.
 
     Kytos website.: https://kytos.io/
     Documentation.: https://docs.kytos.io/
@@ -64,8 +65,7 @@ def start_shell(controller):
 
 def main():
     """Start main Kytos Daemon."""
-
-    def stop_controller(signum, frame):
+    def stop_controller(signum, frame):     # pylint: disable=unused-argument
         """Stop the controller before quitting."""
         if controller:
             print('Stopping controller...')
@@ -81,8 +81,8 @@ def main():
     if controller.options.foreground:
         try:
             controller.start()
-        except SystemExit as e:
-            controller.log.error(e)
+        except SystemExit as exc:
+            controller.log.error(exc)
             controller.log.info("Kytos start aborted.")
             sys.exit()
 
@@ -93,11 +93,7 @@ def main():
         with daemon.DaemonContext():
             try:
                 controller.start()
-            except SystemExit as e:
-                controller.log.error(e)
+            except SystemExit as exc:
+                controller.log.error(exc)
                 controller.log.info("Kytos daemon start aborted.")
                 sys.exit()
-
-
-if __name__ == '__main__':
-    main()

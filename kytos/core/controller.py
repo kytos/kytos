@@ -13,17 +13,21 @@ Basic usage:
     controller = Controller(config.options)
     controller.start()
 """
+import asyncio
 import atexit
 import json
 import logging
 import os
 import re
 import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
-from threading import Thread
 
 from kytos.core.api_server import APIServer
+# from kytos.core.tcp_server import KytosRequestHandler, KytosServer
+from kytos.core.atcp_server import KytosServer, KytosServerProtocol
 from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 from kytos.core.connection import ConnectionState
@@ -34,7 +38,6 @@ from kytos.core.napps.base import NApp
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.napps.napp_dir_listener import NAppDirListener
 from kytos.core.switch import Switch
-from kytos.core.tcp_server import KytosRequestHandler, KytosServer
 
 __all__ = ('Controller',)
 
@@ -42,7 +45,7 @@ __all__ = ('Controller',)
 class Controller(object):
     """Main class of Kytos.
 
-    The main responsabilities of this class are:
+    The main responsibilities of this class are:
         - start a thread with :class:`~.core.tcp_server.KytosServer`;
         - manage KytosNApps (install, load and unload);
         - keep the buffers (instance of :class:`~.core.buffers.KytosBuffers`);
@@ -110,6 +113,9 @@ class Controller(object):
         #: Observer that handle NApps when they are enabled or disabled.
         self.napp_dir_listener = NAppDirListener(self)
 
+        self._loop = asyncio.get_event_loop()
+        self._pool = ThreadPoolExecutor()
+
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
         #: from napps.<username>.<napp_name> import ?....
@@ -119,7 +125,7 @@ class Controller(object):
         """Register kytos log and enable the logs."""
         LogManager.load_config_file(self.options.logging, self.options.debug)
         LogManager.enable_websocket(self.api_server.server)
-        self.log = logging.getLogger(__name__)
+        self.log = logging.getLogger("controller")
 
     def start(self, restart=False):
         """Create pidfile and call start_controller method."""
@@ -179,46 +185,63 @@ class Controller(object):
     def start_controller(self):
         """Start the controller.
 
-        Starts a thread with the KytosServer (TCP Server).
+        Starts the KytosServer (TCP Server) coroutine.
         Starts a thread for each buffer handler.
         Load the installed apps.
         """
         self.log.info("Starting Kytos - Kytos Controller")
         self.server = KytosServer((self.options.listen,
                                    int(self.options.port)),
-                                  KytosRequestHandler,
-                                  self, self.options.protocol_name)
+                                  KytosServerProtocol,
+                                  self,
+                                  self.options.protocol_name)
 
         raw_event_handler = self.raw_event_handler
         msg_in_event_handler = self.msg_in_event_handler
         msg_out_event_handler = self.msg_out_event_handler
         app_event_handler = self.app_event_handler
 
-        thrds = {'tcp_server': Thread(name='TCP server',
-                                      target=self.server.serve_forever),
-                 'api_server': Thread(name='API server',
-                                      target=self.api_server.run),
-                 'raw_event_handler': Thread(name='RawEvent Handler',
-                                             target=raw_event_handler),
-                 'msg_in_event_handler': Thread(name='MsgInEvent Handler',
-                                                target=msg_in_event_handler),
-                 'msg_out_event_handler': Thread(name='MsgOutEvent Handler',
-                                                 target=msg_out_event_handler),
-                 'app_event_handler': Thread(name='AppEvent Handler',
-                                             target=app_event_handler)}
+        self.log.info("Starting TCP server: %s", self.server)
+        self.server.serve_forever()
 
-        self._threads = thrds
-        # This is critical, if any of them started we should exit.
-        for thread in self._threads.values():
-            try:
-                thread.start()
-            except OSError as exception:
-                error_msg = "Error starting thread {}: {}."
-                sys.exit(error_msg.format(thread, exception))
+        def _stop_loop(_):
+            loop = asyncio.get_event_loop()
+            # print(_.result())
+            self.log.debug("Threads enumerated before loop.stop: %s",
+                           threading.enumerate())
+            loop.stop()
+
+        async def _run_event_handler_threads(executor):
+            log = logging.getLogger('controller.event_handler_threads')
+            log.debug('starting')
+            log.debug('creating tasks')
+            loop = asyncio.get_event_loop()
+            blocking_tasks = [
+                loop.run_in_executor(executor, raw_event_handler),
+                loop.run_in_executor(executor, msg_in_event_handler),
+                loop.run_in_executor(executor, msg_out_event_handler),
+                loop.run_in_executor(executor, app_event_handler),
+                loop.run_in_executor(executor, self.api_server.run)
+            ]
+            log.debug('waiting for tasks')
+            completed, pending = await asyncio.wait(blocking_tasks)
+            # results = [t.result() for t in completed]
+            # log.debug('results: {!r}'.format(results))
+            log.debug(f'completed: {len(completed)}, pending: {len(pending)}')
+
+        task = self._loop.create_task(_run_event_handler_threads(self._pool))
+        task.add_done_callback(_stop_loop)
+
+        self.log.info("ThreadPool started: %s", self._pool)
+
+        # ASYNC TODO: ensure all threads started correctly
+        # This is critical, if any of them failed starting we should exit.
+        # sys.exit(error_msg.format(thread, exception))
 
         self.log.info("Loading Kytos NApps...")
         self.napp_dir_listener.start()
         self.load_napps()
+
         self.started_at = now()
 
     def _register_endpoints(self):
@@ -283,26 +306,37 @@ class Controller(object):
         """
         self.log.info("Stopping Kytos")
 
-        if not graceful:
-            self.server.socket.close()
-
-        self.server.shutdown()
         self.buffers.send_stop_signal()
         self.api_server.stop_api_server()
         self.napp_dir_listener.stop()
 
-        for thread in self._threads.values():
-            self.log.info("Stopping thread: %s", thread.name)
-            thread.join()
+        self.log.info("Stopping threadpool: %s", self._pool)
+        self.log.debug("Threads enumerated before threadpool shutdown: %s",
+                       threading.enumerate())
 
-        for thread in self._threads.values():
-            while thread.is_alive():
-                pass
+        self._pool.shutdown(wait=graceful)
+
+        # self.server.socket.shutdown()
+        # self.server.socket.close()
+
+        # for thread in self._threads.values():
+        #     self.log.info("Stopping thread: %s", thread.name)
+        #     thread.join()
+
+        # for thread in self._threads.values():
+        #     while thread.is_alive():
+        #         self.log.info("Thread is alive: %s", thread.name)
+        #         pass
 
         self.started_at = None
         self.unload_napps()
         self.buffers = KytosBuffers()
-        self.server.server_close()
+
+        # ASYNC TODO: close connections
+        # self.server.server_close()
+
+        # Shutdown the TCP server and the main asyncio loop
+        self.server.shutdown()
 
     def status(self):
         """Return status of Kytos Server.
@@ -341,12 +375,16 @@ class Controller(object):
         Args:
             event (~kytos.core.KytosEvent): An instance of a KytosEvent.
         """
+        self.log.debug("looking for listeners for %s", event)
         for event_regex, listeners in dict(self.events_listeners).items():
+            # self.log.debug("listeners found for %s: %r => %s", event,
+            #                event_regex, [l.__qualname__ for l in listeners])
             # Do not match if the event has more characters
             # e.g. "shutdown" won't match "shutdown.kytos/of_core"
             if event_regex[-1] != '$' or event_regex[-2] == '\\':
                 event_regex += '$'
             if re.match(event_regex, event.name):
+                # self.log.debug('Calling listeners for %s', event)
                 for listener in listeners:
                     listener(event)
 
@@ -367,7 +405,7 @@ class Controller(object):
             self.log.debug("Raw Event handler called")
 
             if event.name == "kytos/core.shutdown":
-                self.log.debug("RawEvent handler stopped")
+                self.log.debug("Raw Event handler stopped")
                 break
 
     def msg_in_event_handler(self):
@@ -380,10 +418,10 @@ class Controller(object):
         while True:
             event = self.buffers.msg_in.get()
             self.notify_listeners(event)
-            self.log.debug("MsgInEvent handler called")
+            self.log.debug("Message In Event handler called")
 
             if event.name == "kytos/core.shutdown":
-                self.log.debug("MsgInEvent handler stopped")
+                self.log.debug("Message In Event handler stopped")
                 break
 
     def msg_out_event_handler(self):
@@ -397,7 +435,7 @@ class Controller(object):
             triggered_event = self.buffers.msg_out.get()
 
             if triggered_event.name == "kytos/core.shutdown":
-                self.log.debug("MsgOutEvent handler stopped")
+                self.log.debug("Message Out Event handler stopped")
                 break
 
             message = triggered_event.content['message']
@@ -414,10 +452,9 @@ class Controller(object):
                                message.header.xid,
                                packet.hex())
                 self.notify_listeners(triggered_event)
-                self.log.debug("MsgOutEvent handler called")
+                self.log.debug("Message Out Event handler called")
             else:
-                self.log.info(
-                    "connection closed. Cannot send message")
+                self.log.info("connection closed. Cannot send message")
 
     def app_event_handler(self):
         """Handle app events.
@@ -429,10 +466,10 @@ class Controller(object):
         while True:
             event = self.buffers.app.get()
             self.notify_listeners(event)
-            self.log.debug("AppEvent handler called")
+            self.log.debug("App Event handler called")
 
             if event.name == "kytos/core.shutdown":
-                self.log.debug("AppEvent handler stopped")
+                self.log.debug("App Event handler stopped")
                 break
 
     def get_switch_by_dpid(self, dpid):
@@ -520,6 +557,7 @@ class Controller(object):
             del self.connections[connection.id]
         except KeyError:
             return False
+        return True
 
     def remove_switch(self, switch):
         """Remove an existent switch.
@@ -532,6 +570,7 @@ class Controller(object):
             del self.switches[switch.dpid]
         except KeyError:
             return False
+        return True
 
     def new_connection(self, event):
         """Handle a kytos/core.connection.new event.
@@ -547,9 +586,10 @@ class Controller(object):
                 The received event (``kytos/core.connection.new``) with the
                 needed info.
         """
-        self.log.info("Handling KytosEvent:kytos/core.connection.new ...")
+        self.log.info(f"Handling {event}...")
 
         connection = event.source
+        self.log.debug(f'Event source: {event.source}')
 
         # Remove old connection (aka cleanup) if it exists
         if self.get_connection_by_id(connection.id):
@@ -594,8 +634,8 @@ class Controller(object):
 
             self.napps[(username, napp_name)] = napp
 
-            # This start method is inherited from the Threading class.
-            # It is not directly defined/declared on the KytosNApp class.
+            # ASYNC TODO: napp.start() is inherited from the Threading class,
+            # it is not  defined on the KytosNApp class.
             napp.start()
             self.api_server.register_napp_endpoints(napp)
 

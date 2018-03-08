@@ -105,5 +105,9 @@ def run_on_thread(method):
     def threaded_method(*args):
         """Ensure the handler method runs inside a new thread."""
         thread = Thread(target=method, args=args)
+
+        # Set daemon mode so that we don't have to wait for these threads
+        # to finish when exiting Kytos
+        thread.daemon = True
         thread.start()
     return threaded_method

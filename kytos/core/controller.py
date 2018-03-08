@@ -102,7 +102,8 @@ class Controller(object):
 
         #: API Server used to expose rest endpoints.
         self.api_server = APIServer(__name__, self.options.listen,
-                                    self.options.api_port)
+                                    self.options.api_port,
+                                    napps_dir=self.options.napps)
 
         self._register_endpoints()
 

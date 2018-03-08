@@ -396,6 +396,7 @@ class UNI:
             return self.interface.is_tag_available(self.user_tag)
         return True
 
+
 class NNI:
     """Class that represents an Network-to-Network Interface."""
 

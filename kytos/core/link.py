@@ -37,6 +37,15 @@ class Link(GenericEntity):
         """
         return "{}".format(self._uuid)
 
+    @property
+    def available_tags(self):
+        """Return the available tags for the link.
+
+        Based on the endpoint tags.
+        """
+        return [tag for tag in self.endpoint_a.available_tags if tag in
+                self.endpoint_b.available_tags]
+
     def enable(self):
         """Enable this link instance.
 
@@ -45,6 +54,34 @@ class Link(GenericEntity):
         self.endpoint_a.enable()
         self.endpoint_b.enable()
         self.enabled = True
+
+    def use_tag(self, tag):
+        """Remove a specific tag from available_tags if it is there."""
+        if self.is_tag_available(tag):
+            self.endpoint_a.use_tag(tag)
+            self.endpoint_b.use_tag(tag)
+            return True
+        return False
+
+    def is_tag_available(self, tag):
+        """Check if a tag is available."""
+        return (self.endpoint_a.is_tag_available(tag) and
+                self.endpoint_b.is_tag_available(tag))
+
+    def get_next_available_tag(self):
+        """Return the next available tag if exists."""
+        for tag in self.endpoint_a.available_tags:
+            if tag in self.endpoint_b.available_tags:
+                return tag
+        return False
+
+    def make_tag_available(self, tag):
+        """Add a specific tag in available_tags."""
+        if not self.is_tag_available(tag):
+            self.endpoint_a.make_tag_available(tag)
+            self.endpoint_b.make_tag_available(tag)
+        else:
+            return False
 
     def as_dict(self):
         """Return the Link as a dictionary."""

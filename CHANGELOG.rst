@@ -3,6 +3,52 @@ Changelog
 #########
 All notable changes to the kytos project will be documented in this file.
 
+UNRELEASED - Under development
+******************************
+Added
+=====
+
+Changed
+=======
+
+Deprecated
+==========
+
+Removed
+=======
+
+Fixed
+=====
+
+Security
+========
+
+[2018.1b1] - "dalva" beta1 - 2018-3-09
+**************************************
+Added
+=====
+- Added some new blueprints (EP012, EP013 and EP014)
+- Now, we have few Entities inside the core (Switch, Interface and Link)
+- Each Entity has metadata attribute (a dict)
+- Added link attribute to the Interface class
+- GenericEntity itself was added in this version also
+- Added 'active' and 'enable' flags to GenericEntity (EP013)
+- Added 'enable'/'disable' methods to child GenericEntity classes (EP013).
+- Define available_tags according to link's interfaces.
+- Endpoint ('/ui/all') to display a json with all napps ui components.
+- Endpoint ('/ui/<path:filename>') to get file with a specific napp component.
+- Now, kytosd is a python module, to make it easy to run with asyncio on the future;
+- This pre-release implements EP013 and EP014 as discussed on our last Kytos Dev Meeting.
+
+Changed
+=======
+- Moved Interface class to interface.py file
+- Small refactor of Switch class.
+
+Fixed
+=====
+- Some bug fixes
+
 [2017.2] - "chico" - 2017-12-21
 *******************************
 Changed

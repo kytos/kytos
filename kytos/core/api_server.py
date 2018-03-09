@@ -1,6 +1,7 @@
 """Module used to handle a API Server."""
 import logging
 import os
+import shutil
 import sys
 import warnings
 import zipfile
@@ -186,7 +187,7 @@ class APIServer:
             # backup the old web-ui files and create a new web-ui folder
             if os.path.exists(self.flask_dir):
                 date = datetime.now().strftime("%Y%m%d%H%M%S")
-                os.rename(self.flask_dir, f"{self.flask_dir}-{date}")
+                shutil.move(self.flask_dir, f"{self.flask_dir}-{date}")
                 os.mkdir(self.flask_dir)
 
             # unzip and extract files to web-ui/*

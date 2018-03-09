@@ -168,7 +168,7 @@ class APIServer:
         The repository link is currently hardcoded here.
         """
         repository = "https://github.com/kytos/ui"
-        uri = repository + "/releases/download/1.0.0/latest.zip"
+        uri = repository + "/releases/download/1.1.0/latest.zip"
 
         if not os.path.exists(self.flask_dir) or force:
             # download from github

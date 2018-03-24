@@ -6,7 +6,7 @@ from kytos.core.helpers import now
 class KytosEvent(object):
     """Base Event class.
 
-    The event data will be passed on the content attribute, which should be a
+    The event data will be passed in the `content` attribute, which should be a
     dictionary.
     """
 
@@ -14,9 +14,9 @@ class KytosEvent(object):
         """Create an event to be published.
 
         Args:
-            name (string): The name of the event. You should prepend with
+            name (string): The name of the event. You should prepend it with
                            the name of the napp.
-            content (dict): Dictionary with all event informations.
+            content (dict): Dictionary with any extra data for the event.
         """
         self.name = name
         self.content = content if content is not None else {}
@@ -31,7 +31,7 @@ class KytosEvent(object):
         """Update the destination of KytosEvent.
 
         Args:
-            destination (string): destination of  KytosEvent.
+            destination (string): destination of KytosEvent.
         """
         self.content['destination'] = destination
 
@@ -52,13 +52,11 @@ class KytosEvent(object):
     def message(self):
         """Return the message carried by the event if it exists.
 
-        If there is any OpenFlow message on the event, then it will be stored
-        on the 'message' key of the 'content' attribute. So, if there is any
-        message we return it, if not, we return None.
+        If there is any OpenFlow message on the event it'll be stored on
+        the 'message' key of the 'content' attribute.
 
         Returns:
-            A python OpenfFlow message instance if it exists.
-            None otherwise.
+            A python-openflow message instance if it exists, None otherwise.
 
         """
         try:

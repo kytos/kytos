@@ -522,7 +522,7 @@ class Controller(object):
             return False
 
     def remove_switch(self, switch):
-        """Remove a existent switch.
+        """Remove an existent switch.
 
         Args:
             switch (:class:`~kytos.core.switch.Switch`):
@@ -545,13 +545,13 @@ class Controller(object):
         Args:
             event (~kytos.core.KytosEvent):
                 The received event (``kytos/core.connection.new``) with the
-                needed infos.
+                needed info.
         """
         self.log.info("Handling KytosEvent:kytos/core.connection.new ...")
 
         connection = event.source
 
-        # Remove old connection (aka cleanup) if exists
+        # Remove old connection (aka cleanup) if it exists
         if self.get_connection_by_id(connection.id):
             self.remove_connection(connection.id)
 

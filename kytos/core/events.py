@@ -22,6 +22,12 @@ class KytosEvent(object):
         self.content = content if content is not None else {}
         self.timestamp = now()
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return f"KytosEvent({self.name!r}, {self.content!r})"
+
     @property
     def destination(self):
         """Return the destination of KytosEvent."""

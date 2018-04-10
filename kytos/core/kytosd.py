@@ -35,7 +35,7 @@ def start_shell(controller):
     \033[0m
     Welcome to Kytos SDN Platform!
 
-    We are doing a huge effort to make sure that this console will work fine
+    We are making a huge effort to make sure that this console will work fine
     but for now it's still experimental.
 
     Kytos website.: https://kytos.io/

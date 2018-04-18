@@ -101,7 +101,7 @@ class APIServer:
         self.app.add_url_rule('/index.html', self.web_ui.__name__, self.web_ui)
         self.app.add_url_rule('/ui/<username>/<napp_name>/<path:filename>',
                               self.static_web_ui.__name__, self.static_web_ui)
-        self.app.add_url_rule('/ui/<path:filename>',
+        self.app.add_url_rule('/ui/<path:section_name>',
                               self.get_ui_components.__name__,
                               self.get_ui_components)
 
@@ -140,19 +140,28 @@ class APIServer:
             return send_file(path)
         return "", 404
 
-    def get_ui_components(self, filename):
-        """Return all napps ui components."""
-        filename = '*' if filename == "all" else filename
-        path = f"{self.napps_dir}/*/*/ui/{filename}/*.kytos"
+    def get_ui_components(self, section_name):
+        """Return all napps ui components from an specific section.
+
+        The component name generated will have the following structure:
+        {username}-{nappname}-{component-section}-{filename}`
+
+        Args:
+            section_name (str): Specific section name
+
+        Returns:
+            str: Json with a list of all components found.
+
+        """
+        section_name = '*' if section_name == "all" else section_name
+        path = f"{self.napps_dir}/*/*/ui/{section_name}/*.kytos"
         components = []
         for name in glob(path):
-            group = name.split('/')
-            napp_name = f"{group[-5]}/{group[-4]}"
-            ui_context = f"{group[-2]}"
-            template_file = group[-1]
-            url = f"ui/{napp_name}/{ui_context}/{template_file}"
-            component_name = napp_name.replace('/', '-') + '-'
-            component_name += template_file.replace('.kytos', '')
+            dirs_name = name.split('/')
+            dirs_name.remove('ui')
+
+            component_name = '-'.join(dirs_name[-4:]).replace('.kytos', '')
+            url = f'ui/{"/".join(dirs_name[-4:])}'
             component = {'name': component_name, 'url': url}
             components.append(component)
         return jsonify(components)

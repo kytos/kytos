@@ -83,6 +83,9 @@ class APIServer:
         """
         self.register_core_endpoint('shutdown/', self.shutdown_api)
         self.register_core_endpoint('status/', self.status_api)
+        self.register_core_endpoint('web/update/<version>/',
+                                    self.update_web_ui,
+                                    methods=['POST'])
         self.register_core_endpoint('web/update/',
                                     self.update_web_ui,
                                     methods=['POST'])
@@ -170,7 +173,7 @@ class APIServer:
         """Serve the index.html page for the admin-ui."""
         return send_file(f"{self.flask_dir}/index.html")
 
-    def update_web_ui(self, force=True):
+    def update_web_ui(self, version='1.1.1', force=True):
         """Update the static files for the Web UI.
 
         Download the latest files from the UI github repository and update them
@@ -178,7 +181,7 @@ class APIServer:
         The repository link is currently hardcoded here.
         """
         repository = "https://github.com/kytos/ui"
-        uri = repository + "/releases/download/1.1.1/latest.zip"
+        uri = repository + f"/releases/download/{version}/latest.zip"
 
         if not os.path.exists(self.flask_dir) or force:
             # download from github

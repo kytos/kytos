@@ -23,6 +23,26 @@ Fixed
 Security
 ========
 
+[2018.1b2] - "dalva" beta2 - 2018-4-20
+**************************************
+Added
+=====
+- Added  `str` and `repr` methods for KytosEvent and Connection classes to be
+  easy to see logging and debugging information.
+- Added `web/update/<version>/` endpoint to update Kytos Web Interface with a
+  specific version.
+- Added asyncio support in tcp server and controller. API Server, ipython,
+  event handlers and event notifications are still running on separate threads.
+
+Changed
+=======
+- Changed the components name provided by Kytos NApps to use the pattern:
+  {username}-{nappname}-{component-section}-{filename}
+
+Fixed
+=====
+- Fixed some docstrings and comments
+
 [2018.1b1] - "dalva" beta1 - 2018-3-09
 **************************************
 Added

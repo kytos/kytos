@@ -1,4 +1,5 @@
 """Module used to handle a API Server."""
+import json
 import logging
 import os
 import shutil
@@ -83,6 +84,9 @@ class APIServer:
         """
         self.register_core_endpoint('shutdown/', self.shutdown_api)
         self.register_core_endpoint('status/', self.status_api)
+        self.register_core_endpoint('web/update/<version>/',
+                                    self.update_web_ui,
+                                    methods=['POST'])
         self.register_core_endpoint('web/update/',
                                     self.update_web_ui,
                                     methods=['POST'])
@@ -101,7 +105,7 @@ class APIServer:
         self.app.add_url_rule('/index.html', self.web_ui.__name__, self.web_ui)
         self.app.add_url_rule('/ui/<username>/<napp_name>/<path:filename>',
                               self.static_web_ui.__name__, self.static_web_ui)
-        self.app.add_url_rule('/ui/<path:filename>',
+        self.app.add_url_rule('/ui/<path:section_name>',
                               self.get_ui_components.__name__,
                               self.get_ui_components)
 
@@ -140,19 +144,28 @@ class APIServer:
             return send_file(path)
         return "", 404
 
-    def get_ui_components(self, filename):
-        """Return all napps ui components."""
-        filename = '*' if filename == "all" else filename
-        path = f"{self.napps_dir}/*/*/ui/{filename}/*.kytos"
+    def get_ui_components(self, section_name):
+        """Return all napps ui components from an specific section.
+
+        The component name generated will have the following structure:
+        {username}-{nappname}-{component-section}-{filename}`
+
+        Args:
+            section_name (str): Specific section name
+
+        Returns:
+            str: Json with a list of all components found.
+
+        """
+        section_name = '*' if section_name == "all" else section_name
+        path = f"{self.napps_dir}/*/*/ui/{section_name}/*.kytos"
         components = []
         for name in glob(path):
-            group = name.split('/')
-            napp_name = f"{group[-5]}/{group[-4]}"
-            ui_context = f"{group[-2]}"
-            template_file = group[-1]
-            url = f"ui/{napp_name}/{ui_context}/{template_file}"
-            component_name = napp_name.replace('/', '-') + '-'
-            component_name += template_file.replace('.kytos', '')
+            dirs_name = name.split('/')
+            dirs_name.remove('ui')
+
+            component_name = '-'.join(dirs_name[-4:]).replace('.kytos', '')
+            url = f'ui/{"/".join(dirs_name[-4:])}'
             component = {'name': component_name, 'url': url}
             components.append(component)
         return jsonify(components)
@@ -161,15 +174,24 @@ class APIServer:
         """Serve the index.html page for the admin-ui."""
         return send_file(f"{self.flask_dir}/index.html")
 
-    def update_web_ui(self, force=True):
+    def update_web_ui(self, version='latest', force=True):
         """Update the static files for the Web UI.
 
         Download the latest files from the UI github repository and update them
         in the ui folder.
         The repository link is currently hardcoded here.
         """
+        if version == 'latest':
+            try:
+                url = 'https://api.github.com/repos/kytos/ui/releases/latest'
+                response = urlopen(url)
+                data = response.readlines()[0]
+                version = json.loads(data)['tag_name']
+            except URLError:
+                version = '1.1.1'
+
         repository = "https://github.com/kytos/ui"
-        uri = repository + "/releases/download/1.1.0/latest.zip"
+        uri = repository + f"/releases/download/{version}/latest.zip"
 
         if not os.path.exists(self.flask_dir) or force:
             # download from github

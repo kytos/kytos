@@ -50,6 +50,13 @@ class Connection(object):
         self.protocol = ConnectionProtocol()
         self.remaining_data = b''
 
+    def __str__(self):
+        return f"Connection({self.address!r}, {self.port!r})"
+
+    def __repr__(self):
+        return f"Connection({self.address!r}, {self.port!r}," + \
+               f" {self.socket!r}, {self.switch!r}, {self.state!r})"
+
     @property
     def state(self):
         """Return the state of the connection."""

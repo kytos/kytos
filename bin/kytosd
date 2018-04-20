@@ -1,5 +1,19 @@
 #!/usr/bin/env python3.6
+"""Start Kytos SDN Platform core."""
+
+import asyncio
+
 from kytos.core import kytosd
 
-if __name__ == "__main__":
-    kytosd.main()
+
+def main():
+    loop = asyncio.get_event_loop()
+    loop.call_soon(kytosd.async_main)
+    try:
+        loop.run_forever()
+    finally:
+        loop.close()
+
+
+if __name__ == '__main__':
+    main()

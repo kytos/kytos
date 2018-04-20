@@ -62,8 +62,8 @@ class KytosRequestHandler(BaseRequestHandler):
     It is instantiated once per connection between each switch and the
     controller.
     The setup method will dispatch a KytosEvent (``kytos/core.connection.new``)
-    on the controller, that will be processed by a Core App.
-    The finish method will close the connection and dispatch a KytonEvents
+    on the controller that will be processed by a Core App.
+    The finish method will close the connection and dispatch a KytosEvent
     (``kytos/core.connection.closed``) on the controller.
     """
 
@@ -89,7 +89,7 @@ class KytosRequestHandler(BaseRequestHandler):
     def setup(self):
         """Create a new controller connection.
 
-        This method builds a new controller Connection, and places a
+        This method builds a new controller Connection and places a
         ``kytos/core.connection.new`` KytosEvent in the app buffer.
         """
         self.addr = self.client_address[0]
@@ -119,9 +119,9 @@ class KytosRequestHandler(BaseRequestHandler):
         self.server.controller.buffers.app.put(event)
 
     def handle(self):
-        """Handle each request and places its data in the raw event buffer.
+        """Handle each request and place its data in the raw event buffer.
 
-        This method loops reading the binary data from the connection socket,
+        This method loops reading the binary data from the connection socket
         and placing a ``kytos/core.messages.new`` KytosEvent in the raw event
         buffer.
         """

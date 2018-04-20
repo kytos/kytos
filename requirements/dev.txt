@@ -4,6 +4,7 @@
 #
 #    pip-compile --output-file requirements/dev.txt requirements/dev.in
 #
+-e git+git://github.com/kytos/sphinx-theme.git#egg=kytos-sphinx-theme
 -e git+git://github.com/kytos/kytos-utils.git#egg=kytos-utils
 -e .
 -e git+git://github.com/kytos/python-openflow.git#egg=python-openflow
@@ -41,11 +42,11 @@ pyflakes==1.5.0           # via flake8
 pygments==2.2.0           # via sphinx
 pylint==1.7.4             # via yala
 pytz==2017.2              # via babel
-pyyaml==3.12              # via sphinx-autobuild, watchdog
+pyyaml==3.12              # via sphinx-autobuild
 radon==2.1.1              # via yala
 requests==2.18.4          # via sphinx
 ruamel.yaml==0.15.34
-six==1.11.0               # via astroid, libsass, livereload, mando, pip-tools, pydocstyle, pylint, sphinx, tox
+six==1.11.0               # via astroid, livereload, mando, pip-tools, pydocstyle, pylint, sphinx, tox
 snowballstemmer==1.2.1    # via pydocstyle, sphinx
 sphinx-autobuild==0.7.1
 sphinx-bootstrap-theme==0.4.14

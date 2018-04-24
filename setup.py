@@ -275,12 +275,7 @@ setup(name='kytos',
           'dev': [
               'coverage',
               'pip-tools',
-              # Some sphinx versions are not compiling docs
-              'Sphinx ~= 1.5.0',
-              'sphinx-autobuild',
-              # Avoid red navbar
-              'sphinx-rtd-theme',
-              'sphinx_bootstrap_theme ~= 0.4.0',
+              'kytos_sphinx_theme',
               'yala',
               'tox',
           ],

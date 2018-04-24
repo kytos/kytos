@@ -54,7 +54,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project_short_name = u'Kytos'
+project_short_name = u'kytos'
 project = u'Kytos SDN Platform'
 copyright = u'2017, Kytos Project'
 author = u'Kytos Project'
@@ -175,6 +175,7 @@ html_last_updated_fmt = None
 # html_sidebars = {'**': ['custom_sidebar.html', 'searchbox.html']}
 # html_sidebars = {'**': ['custom_sidebar.html']}
 html_sidebars = {'**': ['globaltoc_sidebar.html']}
+html_context = { 'project_short_name': project_short_name}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.

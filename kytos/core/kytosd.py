@@ -13,6 +13,7 @@ from traitlets.config.loader import Config
 
 from kytos.core import Controller
 from kytos.core.config import KytosConfig
+from kytos.core.metadata import __version__
 
 
 class KytosPrompt(Prompts):
@@ -54,7 +55,8 @@ def start_shell(controller=None):
         banner1 += f" tcp://{address}:{port}\n"
 
         api_port = controller.api_server.port
-        banner1 += f"    WEB UI........: http://{address}:{api_port}/"
+        banner1 += f"    WEB UI........: http://{address}:{api_port}/\n"
+        banner1 += f"    Kytos Version.: {__version__}"
 
     banner1 += "\n"
 

@@ -6,7 +6,7 @@ SPHINXOPTS    = -W
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
-VERSIONS      = master,bethania
+VERSIONS      = master,2017.1,2017.2
 MAIN_REF      = master
 
 # User-friendly check for sphinx-build
@@ -61,12 +61,14 @@ help:
 versions:
 	rm kytos -rf && mkdir kytos
 	for version in `echo $(VERSIONS) | sed 's/,/ /g'`; do \
-		git checkout $$version \
+		git stash \
+		&& git checkout $$version \
+		&& git stash pop \
 		&& make SPHINXOPTS="-A versions=\"$(VERSIONS)\" -A current_version=\"$$version\"" \
 		&& mv _build/dirhtml kytos/$$version; \
 	done
 	cp kytos/$(MAIN_REF)/* kytos/ -R
-
+	git stash && git checkout master && git stash pop
 
 .PHONY: clean
 clean:

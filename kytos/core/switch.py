@@ -1,4 +1,5 @@
 """Module with main classes related to Switches."""
+import enum
 import json
 import logging
 
@@ -9,6 +10,14 @@ from kytos.core.helpers import now
 __all__ = ('Switch',)
 
 LOG = logging.getLogger(__name__)
+
+
+class SwitchStatus(enum.Enum):
+    """class to represent the status of a switch."""
+
+    UP = 1  # pylint: disable=invalid-name
+    ADMINISTRATIVE_DOWN = 2
+    OPERATION_DOWN = 3
 
 
 class Switch(GenericEntity):
@@ -106,6 +115,30 @@ class Switch(GenericEntity):
 
         """
         return "{}".format(self.dpid)
+
+    @property
+    def status(self):
+        """Return the status of switch instance.
+
+        Returns:
+            enum: value of SwitchStatus to indicate switch status.
+
+        """
+        if self.enabled and self.active:
+            return SwitchStatus.UP
+        elif self.is_administrative_down():
+            return SwitchStatus.ADMINISTRATIVE_DOWN
+
+        return SwitchStatus.OPERATION_DOWN
+
+    def is_administrative_down(self):
+        """Verify if the switch is administrative down.
+
+        Returns:
+            boolean: True if the switch is administrative down, otherwise False
+
+        """
+        return not self.enabled
 
     @property
     def ofp_version(self):

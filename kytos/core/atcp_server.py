@@ -11,7 +11,7 @@ LOG = logging.getLogger("atcp_server")
 
 def exception_handler(loop, context):
     """Exception handler to avoid tracebacks because of network timeouts."""
-    if isinstance(context['exception'], TimeoutError):
+    if isinstance(context.get('exception'), TimeoutError):
         LOG.info('Lost connection on socket %r', context['transport'])
     else:
         loop.default_exception_handler(context)

@@ -393,10 +393,6 @@ class Controller(object):
 
         This handler listen to the raw_buffer, get every event added to this
         buffer and sends it to the listeners listening to this event.
-
-        It also verify if there is a switch instantiated on that connection_id
-        `(ip, port)`. If a switch was found, then the `connection_id` attribute
-        is set to `None` and the `dpid` is replaced with the switch dpid.
         """
         self.log.info("Raw Event Handler started")
         while True:

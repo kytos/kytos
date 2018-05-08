@@ -606,43 +606,55 @@ class Controller(object):
         """
         self.switches[switch.dpid] = switch
 
-    def load_napp(self, username, napp_name):
-        """Load a single app.
-
-        Load a single NAPP based on its name.
-
-        Args:
-            username (str): NApp username present in napp's path.
-            napp_name (str): Name of the NApp to be loaded.
+    def _import_napp(self, username, napp_name):
+        """Import a NApp module.
 
         Raises:
-            FileNotFoundError: if napps' main.py is not found.
+            FileNotFoundError: if NApp's main.py is not found.
+            ModuleNotFoundError: if any NApp requirement is not installed.
 
+        """
+        mod_name = '.'.join(['napps', username, napp_name, 'main'])
+        path = os.path.join(self.options.napps, username, napp_name,
+                            'main.py')
+        napp_spec = spec_from_file_location(mod_name, path)
+        napp_module = module_from_spec(napp_spec)
+        sys.modules[napp_spec.name] = napp_module
+        napp_spec.loader.exec_module(napp_module)
+        return napp_module
+
+    def load_napp(self, username, napp_name):
+        """Load a single NApp.
+
+        Args:
+            username (str): NApp username (makes up NApp's path).
+            napp_name (str): Name of the NApp to be loaded.
         """
         if (username, napp_name) in self.napps:
             message = 'NApp %s/%s was already loaded'
             self.log.warning(message, username, napp_name)
-        else:
-            mod_name = '.'.join(['napps', username, napp_name, 'main'])
-            path = os.path.join(self.options.napps, username, napp_name,
-                                'main.py')
-            napp_spec = spec_from_file_location(mod_name, path)
-            napp_module = module_from_spec(napp_spec)
-            sys.modules[napp_spec.name] = napp_module
-            napp_spec.loader.exec_module(napp_module)
-            napp = napp_module.Main(controller=self)
+            return
 
-            self.napps[(username, napp_name)] = napp
+        try:
+            napp_module = self._import_napp(username, napp_name)
+        except ModuleNotFoundError as err:
+            self.log.error("Error loading NApp '%s/%s': %s",
+                           username, napp_name, err)
+            return
 
-            # ASYNC TODO: napp.start() is inherited from the Threading class,
-            # it is not  defined on the KytosNApp class.
-            napp.start()
-            self.api_server.register_napp_endpoints(napp)
+        napp = napp_module.Main(controller=self)
 
-            # pylint: disable=protected-access
-            for event, listeners in napp._listeners.items():
-                self.events_listeners.setdefault(event, []).extend(listeners)
-            # pylint: enable=protected-access
+        self.napps[(username, napp_name)] = napp
+
+        # ASYNC TODO: napp.start() is inherited from the Threading class,
+        # it is not defined on the KytosNApp class.
+        napp.start()
+        self.api_server.register_napp_endpoints(napp)
+
+        # pylint: disable=protected-access
+        for event, listeners in napp._listeners.items():
+            self.events_listeners.setdefault(event, []).extend(listeners)
+        # pylint: enable=protected-access
 
     def load_napps(self):
         """Load all NApps enabled on the NApps dir."""

@@ -4,7 +4,8 @@ from threading import Thread
 
 from kytos.core.napps import rest
 
-__all__ = ('listen_to', 'now', 'rest', 'run_on_thread')
+__all__ = ['listen_to', 'now', 'rest', 'run_on_thread', 'get_time']
+
 
 # APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
 
@@ -111,3 +112,35 @@ def run_on_thread(method):
         thread.daemon = True
         thread.start()
     return threaded_method
+
+
+def get_time(data=None):
+    """Receive a dictionary or a string and return a datatime instance.
+
+    data = {"year": 2006,
+            "month": 11,
+            "day": 21,
+            "hour": 16,
+            "minute": 30 ,
+            "second": 00}
+
+    or
+
+    data = "21/11/06 16:30:00"
+
+    2018-04-17T17:13:50Z
+
+    Args:
+        data (str, dict): python dict or string to be converted to datetime
+
+    Returns:
+        datetime: datetime instance.
+
+    """
+    if isinstance(data, str):
+        date = datetime.strptime(data, "%Y-%m-%dT%H:%M:%S")
+    elif isinstance(data, dict):
+        date = datetime(**data)
+    else:
+        return None
+    return date.replace(tzinfo=timezone.utc)

@@ -230,3 +230,8 @@ class NAppsManager:
                             meta['name'] == napp.name:
                         return kytos_json.parent
         raise FileNotFoundError('kytos.json not found.')
+
+    def reload(self, napp_uri, enable=True):
+        """Remove a NApp from your controller and reinstall."""
+        self.uninstall(napp_uri)
+        self.install(napp_uri, enable)

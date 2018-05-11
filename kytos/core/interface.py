@@ -396,6 +396,13 @@ class UNI:
             return self.interface.is_tag_available(self.user_tag)
         return True
 
+    def as_dict(self):
+        """Return UNI as a dictionary."""
+        intf_dict = self.interface.as_dict()
+        intf_dict['tag_type'] = self.user_tag.tag_type
+        intf_dict['tag_value'] = self.user_tag.value
+        return intf_dict
+
 
 class NNI:
     """Class that represents an Network-to-Network Interface."""

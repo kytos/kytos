@@ -7,6 +7,8 @@ UNRELEASED - Under development
 ******************************
 Added
 =====
+- Added `reload/<username>/<napp_name>` endpoint to reload the NApp code
+- Added `reload/all` endpoint to update the NApp code of all NApps
 
 Changed
 =======

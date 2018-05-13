@@ -22,6 +22,8 @@ import re
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from importlib import reload as reload_module
+from importlib import import_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
@@ -252,6 +254,12 @@ class Controller(object):
         # Register controller endpoints as /api/kytos/core/...
         self.api_server.register_core_endpoint('config/',
                                                self.configuration_endpoint)
+
+        self.api_server.register_core_endpoint(
+            'reload/<username>/<napp_name>/',
+            self.rest_reload_napp)
+        self.api_server.register_core_endpoint('reload/all',
+                                               self.rest_reload_all_napps)
 
     def register_rest_endpoint(self, url, function, methods):
         """Deprecate in favor of @rest decorator."""
@@ -737,3 +745,37 @@ class Controller(object):
         # items from it.
         for (username, napp_name) in list(self.napps.keys()):  # noqa
             self.unload_napp(username, napp_name)
+
+    def reload_napp(self, username, napp_name):
+        """Reload a NApp."""
+        self.unload_napp(username, napp_name)
+
+        mod_name = '.'.join(['napps', username, napp_name, 'main'])
+        try:
+            napp_module = import_module(mod_name)
+        except ModuleNotFoundError as err:
+            self.log.error("Module '%s' not found", mod_name)
+            return 400
+
+        try:
+            napp_module = reload_module(napp_module)
+            self.log.info("NApp '%s/%s' successfully reloaded",
+                          username, napp_name)
+        except ImportError as err:
+            self.log.error("Error reloading NApp '%s/%s': %s",
+                           username, napp_name, err)
+            return 400
+
+        self.load_napp(username, napp_name)
+        return 200
+
+    def rest_reload_napp(self, username, napp_name):
+        """Request reload a NApp."""
+        res = self.reload_napp(username, napp_name)
+        return 'reloaded', res
+
+    def rest_reload_all_napps(self):
+        """Request reload all NApps."""
+        for napp in self.napps:
+            self.reload_napp(*napp)
+        return 'reloaded', 200

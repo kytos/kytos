@@ -88,7 +88,7 @@ class Link(GenericEntity):
         return {'id': self.id,
                 'endpoint_a': self.endpoint_a.as_dict(),
                 'endpoint_b': self.endpoint_b.as_dict(),
-                'metadata': self.metadata,
+                'metadata': self.get_metadata_as_dict(),
                 'active': self.active,
                 'enabled': self.enabled}
 

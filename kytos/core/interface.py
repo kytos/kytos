@@ -32,6 +32,14 @@ class TAG:
     def __eq__(self, other):
         return self.tag_type == other.tag_type and self.value == other.value
 
+    def as_dict(self):
+        """Return a dictionary representating a tag object."""
+        return {'tag_type': self.tag_type, 'value': self.value}
+
+    def as_json(self):
+        """Return a json representating a tag object."""
+        return json.dumps(self.as_dict())
+
 
 class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     """Interface Class used to abstract the network interfaces."""
@@ -395,6 +403,15 @@ class UNI:
         if self.user_tag:
             return self.interface.is_tag_available(self.user_tag)
         return True
+
+    def as_dict(self):
+        """Return a dict representating a UNI object."""
+        return {'interface_id': self.interface.id,
+                'tag': self.user_tag.as_dict()}
+
+    def as_json(self):
+        """Return a json representating a UNI object."""
+        return json.dumps(self.as_dict())
 
 
 class NNI:

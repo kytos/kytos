@@ -207,8 +207,9 @@ class Controller(object):
         def _stop_loop(_):
             loop = asyncio.get_event_loop()
             # print(_.result())
-            self.log.debug("Threads enumerated before loop.stop: %s",
-                           threading.enumerate())
+            threads = threading.enumerate()
+            self.log.debug("%s threads before loop.stop: %s",
+                           len(threads), threads)
             loop.stop()
 
         async def _run_event_handler_threads(executor):
@@ -311,8 +312,10 @@ class Controller(object):
         self.napp_dir_listener.stop()
 
         self.log.info("Stopping threadpool: %s", self._pool)
-        self.log.debug("Threads enumerated before threadpool shutdown: %s",
-                       threading.enumerate())
+
+        threads = threading.enumerate()
+        self.log.debug("%s threads before threadpool shutdown: %s",
+                       len(threads), threads)
 
         self._pool.shutdown(wait=graceful)
 

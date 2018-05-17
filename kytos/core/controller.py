@@ -466,6 +466,29 @@ class Controller(object):
                 self.log.debug("App Event handler stopped")
                 break
 
+    def get_interface_by_id(self, interface_id):
+        """Find a Interface  with interface_id.
+
+        Args:
+            interface_id(str): Interface Identifier.
+
+        Returns:
+            Interface: Instance of Interface with the id given.
+
+        """
+        if interface_id is None:
+            return None
+
+        switch_id = ":".join(interface_id.split(":")[:-1])
+        interface_number = int(interface_id.split(":")[-1])
+
+        switch = self.switches.get(switch_id)
+
+        if not switch:
+            return None
+
+        return switch.interfaces.get(interface_number, None)
+
     def get_switch_by_dpid(self, dpid):
         """Return a specific switch by dpid.
 

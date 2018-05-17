@@ -114,7 +114,7 @@ class Controller(object):
         self.napp_dir_listener = NAppDirListener(self)
 
         self._loop = asyncio.get_event_loop()
-        self._pool = ThreadPoolExecutor()
+        self._pool = ThreadPoolExecutor(max_workers=1)
 
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
@@ -196,40 +196,36 @@ class Controller(object):
                                   self,
                                   self.options.protocol_name)
 
-        raw_event_handler = self.raw_event_handler
-        msg_in_event_handler = self.msg_in_event_handler
-        msg_out_event_handler = self.msg_out_event_handler
-        app_event_handler = self.app_event_handler
-
         self.log.info("Starting TCP server: %s", self.server)
         self.server.serve_forever()
 
         def _stop_loop(_):
             loop = asyncio.get_event_loop()
             # print(_.result())
-            self.log.debug("Threads enumerated before loop.stop: %s",
-                           threading.enumerate())
+            threads = threading.enumerate()
+            self.log.debug("%s threads before loop.stop: %s",
+                           len(threads), threads)
             loop.stop()
 
-        async def _run_event_handler_threads(executor):
-            log = logging.getLogger('controller.event_handler_threads')
+        async def _run_api_server_thread(executor):
+            log = logging.getLogger('controller.api_server_thread')
             log.debug('starting')
-            log.debug('creating tasks')
+            # log.debug('creating tasks')
             loop = asyncio.get_event_loop()
             blocking_tasks = [
-                loop.run_in_executor(executor, raw_event_handler),
-                loop.run_in_executor(executor, msg_in_event_handler),
-                loop.run_in_executor(executor, msg_out_event_handler),
-                loop.run_in_executor(executor, app_event_handler),
                 loop.run_in_executor(executor, self.api_server.run)
             ]
-            log.debug('waiting for tasks')
+            # log.debug('waiting for tasks')
             completed, pending = await asyncio.wait(blocking_tasks)
             # results = [t.result() for t in completed]
             # log.debug('results: {!r}'.format(results))
             log.debug(f'completed: {len(completed)}, pending: {len(pending)}')
 
-        task = self._loop.create_task(_run_event_handler_threads(self._pool))
+        task = self._loop.create_task(self.raw_event_handler())
+        task = self._loop.create_task(self.msg_in_event_handler())
+        task = self._loop.create_task(self.msg_out_event_handler())
+        task = self._loop.create_task(self.app_event_handler())
+        task = self._loop.create_task(_run_api_server_thread(self._pool))
         task.add_done_callback(_stop_loop)
 
         self.log.info("ThreadPool started: %s", self._pool)
@@ -311,8 +307,10 @@ class Controller(object):
         self.napp_dir_listener.stop()
 
         self.log.info("Stopping threadpool: %s", self._pool)
-        self.log.debug("Threads enumerated before threadpool shutdown: %s",
-                       threading.enumerate())
+
+        threads = threading.enumerate()
+        self.log.debug("%s threads before threadpool shutdown: %s",
+                       len(threads), threads)
 
         self._pool.shutdown(wait=graceful)
 
@@ -388,15 +386,15 @@ class Controller(object):
                 for listener in listeners:
                     listener(event)
 
-    def raw_event_handler(self):
+    async def raw_event_handler(self):
         """Handle raw events.
 
-        This handler listen to the raw_buffer, get every event added to this
-        buffer and sends it to the listeners listening to this event.
+        Listen to the raw_buffer and send all its events to the
+        corresponding listeners.
         """
         self.log.info("Raw Event Handler started")
         while True:
-            event = self.buffers.raw.get()
+            event = await self.buffers.raw.aget()
             self.notify_listeners(event)
             self.log.debug("Raw Event handler called")
 
@@ -404,15 +402,15 @@ class Controller(object):
                 self.log.debug("Raw Event handler stopped")
                 break
 
-    def msg_in_event_handler(self):
+    async def msg_in_event_handler(self):
         """Handle msg_in events.
 
-        This handler listen to the msg_in_buffer, get every event added to this
-        buffer and sends it to the listeners listening to this event.
+        Listen to the msg_in buffer and send all its events to the
+        corresponding listeners.
         """
         self.log.info("Message In Event Handler started")
         while True:
-            event = self.buffers.msg_in.get()
+            event = await self.buffers.msg_in.aget()
             self.notify_listeners(event)
             self.log.debug("Message In Event handler called")
 
@@ -420,15 +418,15 @@ class Controller(object):
                 self.log.debug("Message In Event handler stopped")
                 break
 
-    def msg_out_event_handler(self):
+    async def msg_out_event_handler(self):
         """Handle msg_out events.
 
-        This handler listen to the msg_out_buffer, get every event added to
-        this buffer and sends it to the listeners listening to this event.
+        Listen to the msg_out buffer and send all its events to the
+        corresponding listeners.
         """
         self.log.info("Message Out Event Handler started")
         while True:
-            triggered_event = self.buffers.msg_out.get()
+            triggered_event = await self.buffers.msg_out.aget()
 
             if triggered_event.name == "kytos/core.shutdown":
                 self.log.debug("Message Out Event handler stopped")
@@ -452,15 +450,15 @@ class Controller(object):
             else:
                 self.log.info("connection closed. Cannot send message")
 
-    def app_event_handler(self):
+    async def app_event_handler(self):
         """Handle app events.
 
-        This handler listen to the app_buffer, get every event added to this
-        buffer and sends it to the listeners listening to this event.
+        Listen to the app buffer and send all its events to the
+        corresponding listeners.
         """
         self.log.info("App Event Handler started")
         while True:
-            event = self.buffers.app.get()
+            event = await self.buffers.app.aget()
             self.notify_listeners(event)
             self.log.debug("App Event handler called")
 
@@ -642,8 +640,6 @@ class Controller(object):
 
         self.napps[(username, napp_name)] = napp
 
-        # ASYNC TODO: napp.start() is inherited from the Threading class,
-        # it is not defined on the KytosNApp class.
         napp.start()
         self.api_server.register_napp_endpoints(napp)
 

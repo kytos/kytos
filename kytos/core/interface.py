@@ -36,6 +36,16 @@ class TAG:
         """Return a dictionary representating a tag object."""
         return {'tag_type': self.tag_type, 'value': self.value}
 
+    @classmethod
+    def from_dict(cls, tag_dict):
+        """Return a TAG instance from python dictionary."""
+        return cls(tag_dict.get('tag_type'), tag_dict.get('value'))
+
+    @classmethod
+    def from_json(cls, tag_json):
+        """Return a TAG instance from json."""
+        return cls.from_dict(json.loads(tag_json))
+
     def as_json(self):
         """Return a json representating a tag object."""
         return json.dumps(self.as_dict())

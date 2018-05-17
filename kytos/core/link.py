@@ -8,6 +8,7 @@ import json
 from uuid import uuid4
 
 from kytos.core.common import GenericEntity
+from kytos.core.interface import TAGType
 
 
 class Link(GenericEntity):
@@ -82,6 +83,18 @@ class Link(GenericEntity):
             self.endpoint_b.make_tag_available(tag)
         else:
             return False
+
+    def available_vlans(self):
+        """Get all available vlans from each interface in the link."""
+        vlans_a = self._get_available_vlans(self.endpoint_a)
+        vlans_b = self._get_available_vlans(self.endpoint_a)
+        return [vlan for vlan in vlans_a if vlan in vlans_b]
+
+    @staticmethod
+    def _get_available_vlans(endpoint):
+        """Return all vlans from endpoint."""
+        tags = endpoint.available_tags
+        return [tag for tag in tags if tag.tag_type == TAGType.VLAN]
 
     def as_dict(self):
         """Return the Link as a dictionary."""

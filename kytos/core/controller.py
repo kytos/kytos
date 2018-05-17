@@ -699,3 +699,13 @@ class Controller(object):
         # items from it.
         for (username, napp_name) in list(self.napps.keys()):  # noqa
             self.unload_napp(username, napp_name)
+
+    def send_event(self, name, content):
+        """Send KytosEvent to other NApps.
+
+        Args:
+            name (str): KytosEvent name
+            content (dict): KytosEvent content payload
+
+        """
+        self.buffers.app.put(KytosEvent(name, content))

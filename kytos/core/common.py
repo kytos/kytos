@@ -76,6 +76,14 @@ class GenericEntity:
         """Try to get a specific metadata."""
         return self.metadata.get(key)
 
+    def get_metadata_as_dict(self):
+        """Get all metadata values as dict."""
+        metadata = dict(self.metadata)
+        for key, value in self.metadata.items():
+            if hasattr(value, 'as_dict'):
+                metadata[key] = value.as_dict()
+        return metadata
+
     def update_metadata(self, key, value):
         """Overwrite a specific metadata."""
         self.metadata[key] = value

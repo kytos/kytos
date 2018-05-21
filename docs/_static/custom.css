@@ -1,0 +1,201 @@
+/*
+#5d4796
+#5f21b7
+#352169
+
+#5d64d0
+#58488a
+#4A4090
+*/
+
+.rst-content dl:not(.docutils) dl.method code.descname,
+.rst-content dl:not(.docutils) dl.attribute code.descname {
+  color: #4A4090;
+}
+.rst-content dl:not(.docutils) dl dt {
+    margin-bottom: 6px;
+    border: none;
+    border-left: solid 3px #5d4796;
+    background: white;
+    color: #352169;
+}
+
+.rst-content tt.literal, .rst-content tt.literal, .rst-content code.literal {
+    color: #5d4796;
+}
+
+code, .rst-content tt, .rst-content code {
+    white-space: nowrap;
+    max-width: 100%;
+    background: #ebebeb;
+    border: solid 1px #5f21b7;
+    font-size: 75%;
+    padding: 0 5px;
+    font-family: Consolas,"Andale Mono WT","Andale Mono","Lucida Console","Lucida Sans Typewriter","DejaVu Sans Mono","Bitstream Vera Sans Mono","Liberation Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
+    color: #E74C3C;
+    overflow-x: auto;
+}
+
+.wy-side-nav-search input[type="text"] {
+ border-color: white;
+}
+.wy-side-nav-search {
+  background-color: #4A4090;
+}
+
+.wy-nav-top {
+  background: #4A4090;
+}
+
+a {
+  color: #6e5baa;
+  text-decoration: none;
+}
+
+.rst-content dl:not(.docutils) dt {
+    display: inline-block;
+    margin: 6px 0;
+    font-size: 90%;
+    line-height: normal;
+    background: #5d4796;
+    color: rgba(255,255,255, 0.5);
+    border-top: 3px solid #352169;
+    padding: 6px;
+    position: relative;
+}
+
+.rst-content dl:not(.docutils) code.descclassname {
+    display: none;
+/*
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    font-size: 100% !important;
+    color: #352169;
+*/
+}
+
+.rst-content dl:not(.docutils) code.descname {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    font-size: 100% !important;
+    color: white;
+    margin: 0px 5px 0px 0px;
+}
+
+.wy-nav-content {
+    padding: 1.618em 3.236em;
+    height: 100%;
+    max-width: 900px;
+    margin: auto;
+}
+
+
+/*** Custom for Docs Home ***/
+
+body {
+	background: linear-gradient(45deg, #68286a 0%,#322c5d 30%,#207cca 30%,#322c5d 30%);
+}
+
+#kytos-theme-content-container {
+	background: #FFF;
+	min-height: 100vh;
+}
+
+aside {
+	background: none;
+	background-color: transparent;
+    	background-size: contain;
+}
+
+.doc-dev .features-content {
+	background: url('./img/documentation/doc-wdev.svg');
+       	background-position: center bottom 100px;
+	background-repeat: no-repeat;
+	padding-bottom: 600px;
+}
+
+.doc-admin .features-content {
+	background: url('./img/documentation/doc-admin.svg');
+       	background-position: center bottom 100px;
+	background-repeat: no-repeat;
+	padding-bottom:  600px;
+}
+
+.footer {
+	background: none;
+	margin-top: -100px;
+}
+
+.footer hr {
+	margin-bottom: 0px;
+}
+
+div#social-kytos {
+	padding: 0px;
+	position: relative;
+	width: auto;
+}
+
+
+div#social-kytos a {
+	color: #FFF;
+	font-size: 0.8em;
+}
+
+div#social-kytos p {
+	font-size: 1em;
+	margin: 0px;
+	padding: 0px;
+}
+
+#sidebar h1 {
+	font-size: 1.9rem;
+}
+
+.features-content {
+	padding: 3rem 6rem 0;
+	color: #FFF;
+	padding-bottom: 120px;
+}
+.navbar-nav {
+	margin: 0px;
+	display: inline-block;
+	float: right;
+}
+
+.navbar-options li {
+    padding: 5px;
+    margin-right: 5px;
+    border: 1px solid transparent;
+    font-size: 0.7em;
+    opacity: 0.95;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    border-radius: 5px;
+}
+.navbar-options li.active {
+    border: 1px solid #00b4c4; 
+}
+.navbar-options li:hover {
+    border: 1px solid #FFF;
+}
+
+@media (min-width: 768px) and (max-width: 990px) {
+	  .footer, footer {
+		  position: relative;
+	  }
+	  footer * { color: #000; }
+}
+
+@media (max-width: 990px) {
+
+	.features-content { background: none !important; padding-bottom: 1rem !important; }
+
+	aside {
+		background: linear-gradient(45deg, #68286a 0%,#322c5d 30%,#207cca 30%,#322c5d 30%); 
+		margin-bottom: 3rem;
+	}
+
+}

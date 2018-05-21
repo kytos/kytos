@@ -175,7 +175,10 @@ html_last_updated_fmt = None
 # html_sidebars = {'**': ['custom_sidebar.html', 'searchbox.html']}
 # html_sidebars = {'**': ['custom_sidebar.html']}
 html_sidebars = {'**': ['globaltoc_sidebar.html']}
-html_context = { 'project_short_name': project_short_name}
+html_context = {
+    'project_short_name': project_short_name,
+    'css_files': ['_static/custom.css'],
+}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.

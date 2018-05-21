@@ -1,0 +1,9 @@
+{% extends "!globaltoc_sidebar.html" %}
+
+{% block sphinxsidebar %}
+  {% if static_page %}
+    {{super()}}
+  {%endif%}
+{% endblock %}
+
+

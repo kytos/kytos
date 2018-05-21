@@ -1,6 +1,13 @@
 {% extends "!layout.html" %}
 
 {% set active = pagename.split('/')[0] %}
+{% if pagename == "admin/index" or pagename == "developer/index" or pagename == "index"%}
+  {% set css_files = css_files + ["_static/custom.css"]%}
+  {% set static_page = False %}
+{%else %}
+  {% set static_page = True %}
+{% endif %}
+
 {% if  active == 'index' %}
   {% set docs_sidebar_size = "6" %}
 {% else %}
@@ -8,64 +15,62 @@
 {% endif %}
 
 {%- block content %}
- <aside class="docs-sidebar col-md-{{docs_sidebar_size}}">
-  {{ bsidebar() }}
- </aside>
- <div id="container-sphinx" class="container-fluid">
-  <div class="row col-md-offset-{{docs_sidebar_size}}">
-    <div class="content" id="kytos-theme-content-container">
-      {% block body %}{% endblock %}
-      <div class='row'>
-        <ul class='prev-next-nav'>
-          {% if pagename == "index" %}
-            {% set prev = false %}
-          {% endif %}
-          {% include "relations.html" %}
-        </ul>
+  {% if static_page %}
+    {{super()}}
+  {% else %}
+     <aside class="docs-sidebar col-md-{{docs_sidebar_size}}">
+      {{ bsidebar() }}
+     </aside>
+     <div id="container-sphinx" class="container-fluid">
+      <div class="row col-md-offset-{{docs_sidebar_size}}">
+        <div class="content" id="kytos-theme-content-container">
+          {% block body %}{% endblock %}
+          <div class='row'>
+            <ul class='prev-next-nav'>
+              {% if pagename == "index" %}
+                {% set prev = false %}
+              {% endif %}
+              {% include "relations.html" %}
+            </ul>
+          </div>
       </div>
-  </div>
- </div>
+     </div>
+  {% endif %}
 {%- endblock %}
 
 {%- block footer %}
-
-<footer class="footer col-md-{{docs_sidebar_size}}">
-  <div class="container-fluid footer-brand">
-    <div class="row-fluid">
-
-     <div id="social-kytos">
-       <div class="row docs-social">
-         <ul class="icon col-md-12">
-           <li class="col-md-4 center">
-              <i class="fa fa-comments"></i> <a href="irc://irc.freenode.net/#kytos-dev">Kytos @ freenode</a>
-           </li>
-           <li class="col-md-4 center">
-              <i class="fa fa-envelope"></i> <a href="https://lists.kytos.io/">lists.kytos.io</a>
-           </li>
-           <li class="col-md-4 center">
-              <i class="fa fa-slack"></i> <a href="https://join.slack.com/t/kytos/shared_invite/enQtMjk0MTM0NjQwOTE1LTkzODE2YTQ3NTQ0MGRlYzcyNTZjYjQ4Yjc2NmI5NWZmNmMxNjNiOTVkOTE0YTQwN2Q2NjZjNDkwODM5OWRjNGY">Kytos @ Channel</a>
-           </li>
-         </ul>
-       </div>
-
-         <div class="col-md-12">
-
-           <div class="text-center">
-             <hr>
-             <p>
-
-              © 2016 - 2018  Kytos is an Open Source software under MIT license.<br>
-
-             </p>
+  {% if static_page %}
+    {{super()}}
+  {% else %}
+    <footer class="footer col-md-{{docs_sidebar_size}}">
+      <div class="container-fluid footer-brand">
+        <div class="row-fluid">
+         <div id="social-kytos">
+           <div class="row docs-social">
+             <ul class="icon col-md-12">
+               <li class="col-md-4 center">
+                  <i class="fa fa-comments"></i> <a href="irc://irc.freenode.net/#kytos-dev">Kytos @ freenode</a>
+               </li>
+               <li class="col-md-4 center">
+                  <i class="fa fa-envelope"></i> <a href="https://lists.kytos.io/">lists.kytos.io</a>
+               </li>
+               <li class="col-md-4 center">
+                  <i class="fa fa-slack"></i> <a href="https://join.slack.com/t/kytos/shared_invite/enQtMjk0MTM0NjQwOTE1LTkzODE2YTQ3NTQ0MGRlYzcyNTZjYjQ4Yjc2NmI5NWZmNmMxNjNiOTVkOTE0YTQwN2Q2NjZjNDkwODM5OWRjNGY">Kytos @ Channel</a>
+               </li>
+             </ul>
            </div>
-
-         </div>
-
-       </div>
-     </div><!-- #social-kytos -->
-
-    </div>
-  </div>
-</footer>
-
+             <div class="col-md-12">
+               <div class="text-center">
+                 <hr>
+                 <p>
+                  © 2016 - 2018  Kytos is an Open Source software under MIT license.<br>
+                 </p>
+               </div>
+             </div>
+           </div>
+         </div><!-- #social-kytos -->
+        </div>
+      </div>
+    </footer>
+  {% endif %}
 {%- endblock %}

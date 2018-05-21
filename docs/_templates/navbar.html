@@ -1,47 +1,49 @@
-<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
-  <span class="icon-bar"></span>
-  <span class="icon-bar"></span>
-  <span class="icon-bar"></span>
-</button>
+{% extends "!navbar.html" %}
 
-<div class="row sidebar-header">
+{% block navbar%}
+  {% if static_page %}
+    {{super()}}
+  {% else %}
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
 
- <div class="navbar-header">
-   <a class="navbar-brand" href="http://docs.kytos.io/">
-    <img src="static/kytos/images/logo.png" alt="UI" title="UI">
-   </a>
- </div><!-- navbar-brand -->
-  <div class="navbar-options collapse navbar-collapse nav-collapse">
+    <div class="row sidebar-header">
 
-    <ul class="nav navbar-nav">
-      <li {% if active == "index" %} class='active' {% endif %}>
-        <a href="/index.html" title="Home">
-         <span>Home</span>
+     <div class="navbar-header">
+       <a class="navbar-brand" href="http://docs.kytos.io/">
+        <img src="static/kytos/images/logo.png" alt="UI" title="UI">
        </a>
-      </li>
-      <li {% if active == "admin" %} class='active' {% endif %}>
-       <a href="/admin/index.html" title="I'm Admin">
-        <span>I'm an admin</span>
-       </a>
-      </li>
-      <li  {% if active == "developer" %} class='active' {% endif %}>
-       <a href="/developer/index.html" title="I'm Dev">
-        <span>I'm a dev</span>
-       </a>
-      </li>
-    </ul>
-   </div>
+     </div><!-- navbar-brand -->
+      <div class="navbar-options collapse navbar-collapse nav-collapse">
 
-</div>
-<div class='row'>
-  <div class="row-fluid features-content">
-    {% set sidebar_content = active+"_sidebar.html"%}
-    {% if active == 'index'%}
-      {% include active+"_sidebar.html"%}
-    {%elif active == 'admin'%}
-      {% include active+"_sidebar.html"%}
-    {%elif active == "developer"%}
-      {% include active+"_sidebar.html"%}
-    {%endif%}
-  </div>
- </div>
+        <ul class="nav navbar-nav">
+          <li {% if active == "index" %} class='active' {% endif %}>
+            <a href="/index.html" title="Home">
+             <span>Home</span>
+           </a>
+          </li>
+          <li {% if active == "admin" %} class='active' {% endif %}>
+           <a href="/admin/index.html" title="I'm Admin">
+            <span>I'm an admin</span>
+           </a>
+          </li>
+          <li  {% if active == "developer" %} class='active' {% endif %}>
+           <a href="/developer/index.html" title="I'm Dev">
+            <span>I'm a dev</span>
+           </a>
+          </li>
+        </ul>
+       </div>
+
+    </div>
+    <div class='row'>
+      <div class="row-fluid features-content">
+        {% set sidebar_content = active+"_sidebar.html"%}
+        {% include sidebar_content %}
+      </div>
+     </div>
+ {% endif %}
+{% endblock %}

@@ -1,13 +1,12 @@
-.. include:: ../README.rst
+.. include:: ./home/index.rst
 
 .. toctree::
   :maxdepth: 3
   :hidden:
 
   self
-  admin/index
-  developer/index
-  help
-  involved
-  authors
-  license
+  ./home/quick_start
+  ./home/how_to_use
+  ./home/authors
+  ./home/contributing
+  ./home/license

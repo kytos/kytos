@@ -23,8 +23,8 @@ library was built. After some time stalled, the development took off in earlier
 For more information about this project, please visit `Kytos project website
 <https://kytos.io/>`_.
 
-QuickStart
-**********
+Quick Start
+***********
 
 Try First
 =========
@@ -124,6 +124,8 @@ License
 
 This software is under *MIT-License*. For more information please read
 ``LICENSE`` file.
+
+.. TAGs
 
 .. |Experimental| image:: https://img.shields.io/badge/stability-experimental-orange.svg
 .. |Tag| image:: https://img.shields.io/github/tag/kytos/kytos.svg

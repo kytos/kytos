@@ -1,14 +1,14 @@
 {% extends "!layout.html" %}
 
 {% set active = pagename.split('/')[0] %}
-{% if pagename == "admin/index" or pagename == "developer/index" or pagename == "index"%}
+{% if pagename == "admin/index" or pagename == "developer/index" or pagename == "index" or active == "home"%}
   {% set css_files = css_files + ["_static/custom.css"]%}
   {% set static_page = False %}
 {%else %}
   {% set static_page = True %}
 {% endif %}
 
-{% if  active == 'index' %}
+{% if  active == "index" or active == "home" %}
   {% set docs_sidebar_size = "6" %}
 {% else %}
   {% set docs_sidebar_size = "5" %}

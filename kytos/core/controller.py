@@ -236,7 +236,7 @@ class Controller(object):
 
         self.log.info("Loading Kytos NApps...")
         self.napp_dir_listener.start()
-        self.load_napps()
+        self.load_napps(self.options.napps_installed)
 
         self.started_at = now()
 
@@ -671,10 +671,18 @@ class Controller(object):
             self.events_listeners.setdefault(event, []).extend(listeners)
         # pylint: enable=protected-access
 
-    def load_napps(self):
-        """Load all NApps enabled on the NApps dir."""
-        napps = NAppsManager(self)
-        for napp in napps.list_enabled():
+    def load_napps(self, napps=None):
+        """Load all NApps enabled on the NApps dir.
+
+        Args:
+            napps ([str]): napps to be installed.
+
+        """
+        napps_mngr = NAppsManager(self)
+        if isinstance(napps, list):
+            for napp in napps:
+                napps_mngr.install(napp)
+        for napp in napps_mngr.list_enabled():
             try:
                 self.log.info("Loading NApp %s", napp.id)
                 self.load_napp(napp.username, napp.name)

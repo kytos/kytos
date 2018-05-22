@@ -55,6 +55,9 @@ class KytosConfig():
                             action='store',
                             help="Specify the napps directory")
 
+        parser.add_argument('-N', '--napps_installed',
+                            help="NApps to be installed. JSON list format.")
+
         parser.add_argument('-P', '--port',
                             action='store',
                             help="Port to be listened")
@@ -95,6 +98,7 @@ class KytosConfig():
                         'foreground': False,
                         'protocol_name': '',
                         'enable_entities_by_default': False,
+                        'napps_installed': "[]",
                         'debug': False}
 
         """
@@ -113,6 +117,7 @@ class KytosConfig():
                     'foreground': False,
                     'protocol_name': '',
                     'enable_entities_by_default': False,
+                    'napps_installed': "[]",
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()
@@ -145,6 +150,8 @@ class KytosConfig():
         """
         options = self.parser.parse_args(argv)
         options.napps_repositories = json.loads(options.napps_repositories)
+        options.napps_installed = options.napps_installed.replace('\'', '"')
+        options.napps_installed = json.loads(options.napps_installed)
         options.debug = True if options.debug in ['True', True] else False
         options.daemon = True if options.daemon in ['True', True] else False
         options.port = int(options.port)

@@ -11,14 +11,14 @@
 {% if  active == 'index' %}
   {% set docs_sidebar_size = "6" %}
 {% else %}
-  {% set docs_sidebar_size = "4" %}
+  {% set docs_sidebar_size = "5" %}
 {% endif %}
 
 {%- block content %}
   {% if static_page %}
     {{super()}}
   {% else %}
-     <aside class="docs-sidebar col-md-{{docs_sidebar_size}}">
+     <aside class="docs-sidebar sidebar-{{active}} col-md-{{docs_sidebar_size}}">
       {{ bsidebar() }}
      </aside>
      <div id="container-sphinx" class="container-fluid">

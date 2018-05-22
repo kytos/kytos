@@ -1,13 +1,3 @@
-/*
-#5d4796
-#5f21b7
-#352169
-
-#5d64d0
-#58488a
-#4A4090
-*/
-
 .rst-content dl:not(.docutils) dl.method code.descname,
 .rst-content dl:not(.docutils) dl.attribute code.descname {
   color: #4A4090;
@@ -92,15 +82,15 @@ a {
 }
 
 
-/*** Custom for Docs Home ***/
-
 body {
-	background: linear-gradient(45deg, #68286a 0%,#322c5d 30%,#207cca 30%,#322c5d 30%);
+    background: linear-gradient(45deg, #68286a 0%,#322c5d 30%,#207cca 30%,#322c5d 30%);
+    background-size: cover;
+    background-attachment: fixed;
 }
 
 #kytos-theme-content-container {
-	background: #FFF;
-	min-height: 100vh;
+    background: #FFF;
+    min-height: 100vh;
 }
 
 aside {
@@ -109,15 +99,15 @@ aside {
     	background-size: contain;
 }
 
-.doc-dev .features-content {
-	background: url('./img/documentation/doc-wdev.svg');
+.sidebar-developer .features-content {
+	background: url('./images/doc-wdev.svg');
        	background-position: center bottom 100px;
 	background-repeat: no-repeat;
 	padding-bottom: 600px;
 }
 
-.doc-admin .features-content {
-	background: url('./img/documentation/doc-admin.svg');
+.sidebar-admin .features-content {
+	background: url('./images/doc-admin.svg');
        	background-position: center bottom 100px;
 	background-repeat: no-repeat;
 	padding-bottom:  600px;
@@ -126,10 +116,12 @@ aside {
 .footer {
 	background: none;
 	margin-top: -100px;
+	padding: 1em;
 }
 
 .footer hr {
-	margin-bottom: 0px;
+	margin: 3px;
+	border-top: 1px solid #eee;
 }
 
 div#social-kytos {
@@ -138,10 +130,10 @@ div#social-kytos {
 	width: auto;
 }
 
-
 div#social-kytos a {
 	color: #FFF;
-	font-size: 0.8em;
+	font-size: 1em;
+	line-height: 1.3em;
 }
 
 div#social-kytos p {
@@ -160,9 +152,9 @@ div#social-kytos p {
 	padding-bottom: 120px;
 }
 .navbar-nav {
-	margin: 0px;
-	display: inline-block;
-	float: right;
+    margin: 0px;
+    display: inline-block;
+    float: right;
 }
 
 .navbar-options li {
@@ -181,6 +173,12 @@ div#social-kytos p {
 .navbar-options li:hover {
     border: 1px solid #FFF;
 }
+
+.navbar-brand { margin-left: 1.9em; }
+.navbar-toggle { top: 10px; right: 10px; position: absolute; }
+.navbar-collapse { float: right; width: 320px; }
+.navbar-collapse.in { width: 100%; } 
+
 
 @media (min-width: 768px) and (max-width: 990px) {
 	  .footer, footer {

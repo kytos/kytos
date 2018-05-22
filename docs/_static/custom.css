@@ -99,6 +99,13 @@ aside {
     	background-size: contain;
 }
 
+.sidebar-index {
+	background: url('./images/Robot.svg');
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
 .sidebar-developer .features-content {
 	background: url('./images/doc-wdev.svg');
        	background-position: center bottom 100px;

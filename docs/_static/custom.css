@@ -121,6 +121,8 @@ aside {
 }
 
 .footer {
+	position: fixed;
+	bottom: 0;
 	background: none;
 	margin-top: -100px;
 	padding: 1em;
@@ -151,12 +153,12 @@ div#social-kytos p {
 
 #sidebar h1 {
 	font-size: 1.9rem;
+	margin: 0px;
 }
 
 .features-content {
-	padding: 3rem 6rem 0;
+	padding: 3em 6em;
 	color: #FFF;
-	padding-bottom: 120px;
 }
 .navbar-nav {
     margin: 0px;

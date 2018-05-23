@@ -108,14 +108,14 @@ aside {
 
 .sidebar-developer .features-content {
 	background: url('./images/doc-wdev.svg');
-       	background-position: center bottom 100px;
+       	background-position: center;
 	background-repeat: no-repeat;
 	padding-bottom: 600px;
 }
 
 .sidebar-admin .features-content {
 	background: url('./images/doc-admin.svg');
-       	background-position: center bottom 100px;
+       	background-position: center;
 	background-repeat: no-repeat;
 	padding-bottom:  600px;
 }

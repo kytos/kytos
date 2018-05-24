@@ -93,7 +93,7 @@ aside {
 	background: url('./images/Robot.svg');
 	background-size: contain;
 	background-repeat: no-repeat;
-	background-position: center;
+	background-position: bottom;
 }
 
 .sidebar-developer .features-content {
@@ -108,6 +108,30 @@ aside {
        	background-position: center;
 	background-repeat: no-repeat;
 	padding-bottom:  600px;
+}
+
+.content-developer .section h1,
+.content-admin .section h1 {
+	background: url('./images/icon-devel.svg');
+        background-position: top left;
+	background-repeat: no-repeat;
+	padding-left: 90px;
+	margin-bottom: -30px;
+	height: 80px;
+}
+
+.content-developer .section p.first,
+.content-admin .section p.first {
+	margin-left: 90px;
+}
+
+.prev-next-nav li {
+	background: #008690;
+	border: 1px solid #008690;
+}
+
+.prev-next-nav li a {
+	color: #FFF;
 }
 
 .footer {

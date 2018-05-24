@@ -26,17 +26,6 @@ code, .rst-content tt, .rst-content code {
     overflow-x: auto;
 }
 
-.wy-side-nav-search input[type="text"] {
- border-color: white;
-}
-.wy-side-nav-search {
-  background-color: #4A4090;
-}
-
-.wy-nav-top {
-  background: #4A4090;
-}
-
 a {
   color: #6e5baa;
   text-decoration: none;
@@ -90,6 +79,7 @@ body {
 
 #kytos-theme-content-container {
     background: #FFF;
+    border: 4em solid #FBF9FD;
     min-height: 100vh;
 }
 
@@ -121,17 +111,19 @@ aside {
 }
 
 .footer {
-	position: fixed;
-	bottom: 0;
 	background: none;
-	margin-top: -100px;
-	padding: 1em;
+        padding: 0px;
+        margin: 0px;
+        margin-top: -100px;
+        overflow: hidden;
 }
 
 .footer hr {
 	margin: 3px;
-	border-top: 1px solid #eee;
+	border-top: 1px solid #35053F;
 }
+
+.fa { font: normal normal normal 16px/1 FontAwesome; }
 
 div#social-kytos {
 	padding: 0px;
@@ -141,7 +133,7 @@ div#social-kytos {
 
 div#social-kytos a {
 	color: #FFF;
-	font-size: 1em;
+	font-size: 0.8em;
 	line-height: 1.3em;
 }
 
@@ -188,21 +180,19 @@ div#social-kytos p {
 .navbar-collapse { float: right; width: 320px; }
 .navbar-collapse.in { width: 100%; } 
 
-
-@media (min-width: 768px) and (max-width: 990px) {
-	  .footer, footer {
-		  position: relative;
-	  }
-	  footer * { color: #000; }
-}
-
-@media (max-width: 990px) {
-
+@media (max-width: 979px) {
 	.features-content { background: none !important; padding-bottom: 1rem !important; }
-
 	aside {
 		background: linear-gradient(45deg, #68286a 0%,#322c5d 30%,#207cca 30%,#322c5d 30%); 
 		margin-bottom: 3rem;
 	}
+	#kytos-theme-content-container {
+ 	   border: 1em solid #FBF9FD;
+   	}
+	.footer { margin-top: 5px; }
+	.docs-social { display: none; }
+}
 
+@media (max-width: 451px) {
+	.features-content { padding: 2em; }
 }

@@ -110,19 +110,19 @@ aside {
 	padding-bottom:  600px;
 }
 
-.content-developer .section h1,
-.content-admin .section h1 {
+.content-developer .section,
+.content-admin .section {
 	background: url('./images/icon-devel.svg');
-        background-position: top left;
+    background-position: top left;
 	background-repeat: no-repeat;
-	padding-left: 90px;
-	margin-bottom: -30px;
-	height: 80px;
 }
 
+.content-developer .section h1,
+.content-admin .section h1,
 .content-developer .section p.first,
 .content-admin .section p.first {
 	margin-left: 90px;
+	margin-bottom: 0px;
 }
 
 .prev-next-nav li {

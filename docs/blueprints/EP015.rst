@@ -1,0 +1,85 @@
+Summary
+=======
+
+Title
+-----
+System tests for NApps validation.
+
+Authors
+-------
+Vinicius Arcanjo (RNP/Kytos), Beraldo Leal (Kytos), Macatur Souza (Kytos), Humberto Diogenes (Kytos)
+
+Blueprint Status
+----------------
+work-in-progress
+
+Priority
+--------
+high
+
+Tags
+----
+tests, system tests, sdn
+
+Milestone Target
+----------------
+TBD
+
+Implementation
+--------------
+Prototype in-progress
+
+Assignees
+---------
+Vinicius Arcanjo.
+
+Approvers (PTL)
+---------------
+Vinicius Arcanjo, Beraldo Leal, Macatur Souza, Humberto Diogenes.
+
+Version
+-------
+0.0.1
+
+
+Description
+===========
+This blueprint specifies both requirements for how a NApp should be validated,
+and which testing framework should be used. System (end-to-end) tests are supposed to
+help us to develop faster, and gain more confidence in significant changes. The definition of end-to-end system testing is not strict, but the goal is to test an environment as close to production as possible, including with actual (virtual) networking devices.
+
+System tests requeriments
+==============================
+
+#. A NApp should be able to be validated either individually or with other NApps.
+#. System tests, are meant to be run with actual or virtual switches, e.g.,
+   OpenvSwitch.
+#. Tests should be coded to test a functionally individually, don't try to validate multiple
+   things at once. As a rule of thumb, it's better to have more atomic tests.
+#. System tests should be shipped with the NApp. The user should be free, to manipulate
+   the topology and point to his environment and run the tests.
+#. Tests should be written in a way where the control plane and data plane can be
+   tested either together or individually. It's easier and more practical, to
+   start only with the control plane, but in the CI/CD pipeline, the goal is to have
+   a real end-to-end validation which will also validate the data plane with some
+   traffic, e.g., ping or something similar.
+#. In the test results, it should be explicit which version of the NApp is running,
+   and which switch platform and firmware release is under test. This is necessary for
+   users to make informed decisions if a NApp has been tested in a specific protocol (
+   currently, OF1.3/OF1.0) or a specific switch platform (OpenvSwitch v2.9, for example).
+#. System tests should be run in a CI/CD pipeline. The results should be publicly
+   available.
+#. Tests of NApps supported by Kytos team should run at least nightly, and ideally on
+   every pull request of each NApp.
+#. Developers should be able to run local system tests with Docker.
+
+System test framework
+==========================
+
+#. pytest is one of the most complete and modular testing frameworks in Python. A
+   Prototype will be started with pytest.
+
+Future
+======
+  * Matrix result of tests for multiple versions.
+  * Stress tests

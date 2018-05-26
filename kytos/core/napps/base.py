@@ -34,6 +34,9 @@ class NApp:
     def __str__(self):
         return "{}/{}".format(self.username, self.name)
 
+    def __repr__(self):
+        return f"NApp({self.username}/{self.name})"
+
     def __hash__(self):
         return hash(self.id)
 

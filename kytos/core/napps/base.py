@@ -24,7 +24,7 @@ class NApp:
                  repository=None):
         self.username = username
         self.name = name
-        self.version = version
+        self.version = version if version else 'latest'
         self.repository = repository
         self.description = None
         self.tags = []

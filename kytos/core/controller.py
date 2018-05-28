@@ -236,6 +236,7 @@ class Controller(object):
 
         self.log.info("Loading Kytos NApps...")
         self.napp_dir_listener.start()
+        self.pre_install_napps(self.options.napps_pre_installed)
         self.load_napps()
 
         self.started_at = now()
@@ -670,6 +671,20 @@ class Controller(object):
         for event, listeners in napp._listeners.items():
             self.events_listeners.setdefault(event, []).extend(listeners)
         # pylint: enable=protected-access
+
+    def pre_install_napps(self, napps, enable=True):
+        """Pre install and enable NApps.
+
+        Before installing, it'll check if it's installed yet.
+
+        Args:
+            napps ([str]): List of NApps to be pre-installed and enabled.
+        """
+        napps_mngr = NAppsManager(self)
+        installed = [str(napp) for napp in napps_mngr.list()]
+        napps_diff = [napp for napp in napps if napp not in installed]
+        for napp in napps_diff:
+            napps_mngr.install(napp, enable=enable)
 
     def load_napps(self):
         """Load all NApps enabled on the NApps dir."""

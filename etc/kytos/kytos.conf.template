@@ -51,3 +51,7 @@ napps = {{ prefix }}/var/lib/kytos/napps
 napps_repositories = [
     "https://napps.kytos.io/repo/"
     ]
+
+# Pre installed napps. List of Napps to be pre-installed and enabled.
+# Use double quotes in each NApp in the list, e.g., ["username/napp"].
+napps_pre_installed = []

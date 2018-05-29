@@ -113,6 +113,7 @@ class KytosConfig():
                     'foreground': False,
                     'protocol_name': '',
                     'enable_entities_by_default': False,
+                    'napps_pre_installed': [],
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()
@@ -153,5 +154,6 @@ class KytosConfig():
 
         result = options.enable_entities_by_default in ['True', True]
         options.enable_entities_by_default = result
+        options.napps_pre_installed = json.loads(options.napps_pre_installed)
 
         return options

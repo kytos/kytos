@@ -110,10 +110,15 @@ aside {
 	padding-bottom:  600px;
 }
 
-.content-developer .section,
-.content-admin .section {
+.content-developer .section {
 	background: url('./images/icon-devel.svg');
-    background-position: top left;
+	background-position: top left;
+	background-repeat: no-repeat;
+}
+
+.content-admin .section {
+	background: url('./images/icon-admin.svg');
+	background-position: top left;
 	background-repeat: no-repeat;
 }
 
@@ -215,8 +220,21 @@ div#social-kytos p {
    	}
 	.footer { margin-top: 5px; }
 	.docs-social { display: none; }
+	
+	.content-developer .section h1,
+	.content-admin .section h1,
+	.content-developer .section p.first,
+	.content-admin .section p.first {
+		margin-left: 0px;
+		margin-bottom: 5px;
+	}
+
 }
 
 @media (max-width: 451px) {
 	.features-content { padding: 2em; }
+	#kytos-theme-content-container {
+ 	   border: 0px;
+   	}
+
 }

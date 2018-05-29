@@ -128,6 +128,7 @@ This software is under *MIT-License*. For more information please read
 .. TAGs
 
 .. |Experimental| image:: https://img.shields.io/badge/stability-experimental-orange.svg
+   :target: https://github.com/kytos
 .. |Tag| image:: https://img.shields.io/github/tag/kytos/kytos.svg
    :target: https://github.com/kytos/kytos/tags
 .. |Release| image:: https://img.shields.io/github/release/kytos/kytos.svg

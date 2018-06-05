@@ -41,7 +41,11 @@
     </div>
     <div class='row'>
       <div class="row-fluid features-content">
-        {% set sidebar_content = active+"_sidebar.html"%}
+        {% if active == "home" %}
+          {% set sidebar_content = "index_sidebar.html"%}
+        {% else %}
+          {% set sidebar_content = active+"_sidebar.html"%}
+        {% endif %}
         {% include sidebar_content %}
       </div>
      </div>

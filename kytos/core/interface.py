@@ -408,6 +408,11 @@ class UNI:
         self.user_tag = user_tag
         self.interface = interface
 
+    def __eq__(self, other):
+        """Override the default implementation."""
+        return (self.user_tag == other.user_tag and
+                self.interface == other.interface)
+
     def is_valid(self):
         """Check if TAG is possible for this interface TAG pool."""
         if self.user_tag:

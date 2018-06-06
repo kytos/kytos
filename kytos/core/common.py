@@ -51,7 +51,7 @@ class GenericEntity:
         """Getter method to active attribute.
 
         Returns:
-            boolean: Active status, can be True or False.
+            boolean: Active status can be True or False.
 
         """
         return self.__active

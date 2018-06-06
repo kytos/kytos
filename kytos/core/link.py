@@ -21,6 +21,30 @@ class Link(GenericEntity):
         self._uuid = uuid4()
         super().__init__()
 
+    @property
+    def enabled(self):
+        """Override the enabled method.
+
+        We consider a link enabled whether all the interfaces are enabled.
+
+        Returns:
+            boolean: True if the interfaces are enabled, othewrise False.
+
+        """
+        return self.endpoint_a.enabled and self.endpoint_b.enabled
+
+    @property
+    def active(self):
+        """Override the active method.
+
+        We consider a link active whether all the interfaces are active.
+
+        Returns:
+            boolean: True if the interfaces are active, othewrise False.
+
+        """
+        return self.endpoint_a.active and self.endpoint_b.active
+
     def __eq__(self, other):
         """Check if two instances of Link are equal."""
         return ((self.endpoint_a == other.endpoint_a and

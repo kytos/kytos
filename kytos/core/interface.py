@@ -51,7 +51,8 @@ class TAG:
         return json.dumps(self.as_dict())
 
 
-class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes,too-many-public-methods
+class Interface(GenericEntity):
     """Interface Class used to abstract the network interfaces."""
 
     # pylint: disable=too-many-arguments
@@ -102,6 +103,30 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 self.address == other.address and \
                 self.switch.dpid == other.switch.dpid
         return False
+
+    @property
+    def enabled(self):
+        """Override enabled method.
+
+        This method will consider the switch.
+
+        Returns:
+            boolean: Enabled status can be True or False.
+
+        """
+        return self.switch.enabled and super().enabled
+
+    @property
+    def active(self):
+        """Override enabled method.
+
+        This method will consider the switch.
+
+        Returns:
+            boolean: Active status can be True or False.
+
+        """
+        return self.switch.active and super().active
 
     @property
     def id(self):  # pylint: disable=invalid-name
@@ -399,6 +424,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
         """
         return json.dumps(self.as_dict())
+# pylint: enable=too-many-instance-attributes,too-many-public-methods
 
 
 class UNI:

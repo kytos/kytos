@@ -22,9 +22,49 @@ class GenericEntity:
         options = KytosConfig().options['daemon']
         self.metadata = {}
         # operational status with True or False
-        self.active = True
+        self.__active = True
         # administrative status with True or False
-        self.enabled = options.enable_entities_by_default
+        self.__enabled = options.enable_entities_by_default
+
+    @property
+    def enabled(self):
+        """Getter method to active attribute.
+
+        Returns:
+            boolean: Enabled status can be True or False.
+
+        """
+        return self.__enabled
+
+    @enabled.setter
+    def enabled(self, boolean_value):
+        """Setter method to active attribute.
+
+        Args:
+            boolean_value: Boolean value to be setted in the enabled attribute.
+
+        """
+        self.__enabled = boolean_value
+
+    @property
+    def active(self):
+        """Getter method to active attribute.
+
+        Returns:
+            boolean: Active status can be True or False.
+
+        """
+        return self.__active
+
+    @active.setter
+    def active(self, boolean_value):
+        """Setter method to active attribute.
+
+        Args:
+            boolean_value: Boolean value to be setted in the active attribute.
+
+        """
+        self.__active = boolean_value
 
     @property
     def status(self):

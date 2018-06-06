@@ -22,14 +22,40 @@ class GenericEntity:
         options = KytosConfig().options['daemon']
         self.metadata = {}
         # operational status with True or False
-        self.active = True
+        self.__active = True
         # administrative status with True or False
-        self.enabled = options.enable_entities_by_default
+        self.__enabled = options.enable_entities_by_default
+
+    def is_enabled(self):
+        """Return whether the entity is enabled.
+
+        Returns:
+            boolean: True whether the entity is enabled, otherwise False.
+
+        """
+        return self.__enabled
+
+    def is_active(self):
+        """Return whether the entity is enabled.
+
+        Returns:
+            boolean: True whether the entity is active, otherwise False.
+
+        """
+        return self.__active
+
+    def activate(self):
+        """Activate the entity."""
+        self.__active = True
+
+    def deactivate(self):
+        """Deactivate the entity."""
+        self.__active = False
 
     @property
     def status(self):
         """Return the current status of the Entity."""
-        if self.enabled and self.active:
+        if self.is_enabled() and self.is_active():
             return EntityStatus.UP
         elif self.is_administrative_down():
             return EntityStatus.DISABLED
@@ -37,7 +63,7 @@ class GenericEntity:
 
     def is_administrative_down(self):
         """Return True for disabled Entities."""
-        return not self.enabled
+        return not self.is_enabled()
 
     def enable(self):
         """Administratively enable the Entity.
@@ -46,7 +72,7 @@ class GenericEntity:
         it instead of setting it manually. This allows us to change the
         behavior on the future.
         """
-        self.enabled = True
+        self.__enabled = True
 
     def disable(self):
         """Administratively disable the Entity.
@@ -54,7 +80,7 @@ class GenericEntity:
         This method can disable other related entities. For this behavior,
         rewrite it on the child classes.
         """
-        self.enabled = False
+        self.__enabled = False
 
     def add_metadata(self, key, value):
         """Add a new metadata (key, value)."""

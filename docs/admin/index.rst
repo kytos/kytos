@@ -12,7 +12,6 @@ Network Application (NApp).
 
 For more details, advanced users can later proceed to the :doc:`Admin Guide </admin/architecture>`.
 
-
 .. cssclass:: col-md-6
 
 Here, we will discuss the future of the project as well as which features we will focus our efforts on during the next release cycle. Kytos Summit is the main Kytos Project's event. In addition to a full schedule of technical and social talks, Kytos Summit provides an opportunity for developers, contributors and other interested people to meet in person and work together more closely.
@@ -22,6 +21,17 @@ Here, we will discuss the future of the project as well as which features we wil
 Kytos Summit is the main Kytos Project’s event. In addition to afull schedule of technical and social talks, Kytos Summit provides an opportunity for developers, contributors and other interested people to meet in person and work together more closely.
 
 .. raw:: html
+
+   <div class="col-md-6">
+   <ul class="prev-next-nav">
+     <li>
+       <a href="/admin/architecture" title="Read admin guide">
+         <span class="glyphicon glyphicon-chevron-right visible-sm"></span>
+         <span class="hidden-sm hidden-tablet">Read admin guide »</span>
+       </a>
+     </li>
+   </ul>
+   </div>
 
    <div class="col-md-6">
     <div class="box-tutorial col-md-5">

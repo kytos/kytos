@@ -129,12 +129,14 @@ aside {
 	margin-bottom: 0px;
 }
 
-.prev-next-nav li {
+.content-index .prev-next-nav li,
+.content-home .prev-next-nav li {
 	background: #008690;
 	border: 1px solid #008690;
 }
 
-.prev-next-nav li a {
+.content-index .prev-next-nav li a,
+.content-home .prev-next-nav li a {
 	color: #FFF;
         font-size: 0.8rem;
         line-height: 1.8rem;

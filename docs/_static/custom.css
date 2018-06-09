@@ -79,8 +79,12 @@ body {
 
 #kytos-theme-content-container {
     background: #FFF;
-    border: 4em solid #FBF9FD;
     min-height: 100vh;
+}
+
+.content-developer,
+.content-admin {
+   border: 4em solid #FBF9FD;
 }
 
 aside {
@@ -180,7 +184,38 @@ div#social-kytos p {
 .features-content {
 	padding: 3em 6em;
 	color: #FFF;
+	padding-bottom: 150px;
 }
+
+.box-tutorial {
+        margin: 1em 1em 0 0;
+        box-shadow: 0 0 1em #CCC;
+        text-align: center;
+        border-top: 3px solid #CCC;
+	cursor: pointer;
+}
+
+.box-tutorial:hover {
+	border-top: 3px solid #0c5d66;
+	box-shadow: 0 0 1em #0c5d66;
+}
+
+.box-tutorial span.easy { color: green; }
+.box-tutorial span.medium { color: orange; }
+.box-tutorial span.dificult { color: red; }
+
+.box-tutorial .info-tutorial span {
+       font-size: 0.8em;
+       margin-bottom: 1em;
+       border: 1px solid #CCC;
+       border-radius: 0 1em 1em 0;
+}
+
+.box-tutorial .info-tutorial span.first {
+       border-right: 0;
+       border-radius: 1em 0 0 1em;
+}
+
 .navbar-nav {
     margin: 0px;
     display: inline-block;
@@ -206,7 +241,7 @@ div#social-kytos p {
 
 .navbar-brand { margin-left: 1.9em; }
 .navbar-toggle { top: 10px; right: 10px; position: absolute; }
-.navbar-collapse { float: right; width: 320px; }
+.navbar-collapse { float: right; width: 330px; }
 .navbar-collapse.in { width: 100%; } 
 
 @media (max-width: 979px) {
@@ -238,3 +273,8 @@ div#social-kytos p {
    	}
 
 }
+
+@media (min-height: 800px) {
+	   footer { position: fixed !important; bottom: 10px; }
+}
+

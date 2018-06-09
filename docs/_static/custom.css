@@ -18,17 +18,12 @@ code, .rst-content tt, .rst-content code {
     white-space: nowrap;
     max-width: 100%;
     background: #ebebeb;
-    border: solid 1px #5f21b7;
+    border: none;
     font-size: 75%;
-    padding: 0 5px;
+    padding: 5px;
     font-family: Consolas,"Andale Mono WT","Andale Mono","Lucida Console","Lucida Sans Typewriter","DejaVu Sans Mono","Bitstream Vera Sans Mono","Liberation Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
     color: #E74C3C;
     overflow-x: auto;
-}
-
-a {
-  color: #6e5baa;
-  text-decoration: none;
 }
 
 .rst-content dl:not(.docutils) dt {
@@ -141,6 +136,8 @@ aside {
 
 .prev-next-nav li a {
 	color: #FFF;
+        font-size: 0.8rem;
+        line-height: 1.8rem;
 }
 
 .footer {
@@ -185,6 +182,7 @@ div#social-kytos p {
 	padding: 3em 6em;
 	color: #FFF;
 	padding-bottom: 150px;
+	margin-left: -1.3em;
 }
 
 .box-tutorial {

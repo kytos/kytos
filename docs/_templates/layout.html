@@ -26,12 +26,14 @@
 	 <div class="content content-{{active}}" id="kytos-theme-content-container">
           {% block body %}{% endblock %}
           <div class='row'>
+          {% if pagename != "developer/index" and pagename != "admin/index" %}
             <ul class='prev-next-nav'>
               {% if pagename == "index" %}
                 {% set prev = false %}
               {% endif %}
               {% include "relations.html" %}
             </ul>
+          {% endif %}
           </div>
       </div>
      </div>

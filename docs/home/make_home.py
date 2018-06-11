@@ -9,7 +9,6 @@ def create_toc_tree(directory, files):
     toc_tree_text = ['.. toctree::\n', '  :maxdepth: 3\n', '  :hidden:\n','\n']
     for file_name in files:
         if file_name == 'index':
-            toc_tree_text.append(f'  self\n')
             continue
         toc_tree_text.append(f'  {directory}/{file_name}\n')
 

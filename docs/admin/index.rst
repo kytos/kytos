@@ -42,7 +42,7 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
             <span class="col-md-6 dificult">Dificult</span>
          </div>
      </div>
-    
+
     <div class="box-tutorial col-md-5">
          <h3>How to use Kytos with mininet</h3>
          <p> </p>
@@ -51,7 +51,7 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
             <span class="col-md-6 easy">Easy</span>
          </div>
       </div>
-    
+
     <div class="box-tutorial col-md-5">
          <h3>Teste Medium</h3>
          <p> </p>
@@ -61,3 +61,15 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
          </div>
     </div>
    </div>
+
+.. toctree::
+  :maxdepth: 3
+  :hidden:
+
+  intro
+  architecture
+  configuring
+  intro
+  napps
+  quick-start
+  web-ui

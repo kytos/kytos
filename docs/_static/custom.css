@@ -80,6 +80,7 @@ body {
 .content-developer,
 .content-admin {
    border: 4em solid #FBF9FD;
+   padding-top: 1.5em !important; 
 }
 
 aside {
@@ -139,7 +140,7 @@ aside {
 .content-home .prev-next-nav li a {
 	color: #FFF;
         font-size: 0.8rem;
-        line-height: 1.8rem;
+        display: flex;
 }
 
 .footer {

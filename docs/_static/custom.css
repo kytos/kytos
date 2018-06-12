@@ -213,7 +213,7 @@ div#social-kytos p {
 
 .box-tutorial {
 	position: relative;
-        margin: 1em 1em 0 0;
+        margin: 3% 2.3% 0 0;
         box-shadow: 0 0 0.5em #E1E1E1;
         text-align: center;
         border-top: 3px solid #CCC;
@@ -221,6 +221,8 @@ div#social-kytos p {
 	min-height: 280px;
 	width: 31%;
 	float: left;
+	padding: 1em;
+	padding-top: 0;
 }
 
 .box-tutorial:hover {
@@ -281,7 +283,7 @@ div#social-kytos p {
 .navbar-collapse { float: right; width: 330px; }
 .navbar-collapse.in { width: 100%; } 
 
-@media (max-width: 979px) {
+@media (max-width: 990px) {
 	.features-content { background: none !important; padding-bottom: 1rem !important; }
 	aside {
 		background: linear-gradient(45deg, #68286a 0%,#322c5d 30%,#207cca 30%,#322c5d 30%); 
@@ -317,3 +319,39 @@ div#social-kytos p {
 	   footer { position: fixed !important; bottom: 10px; }
 }
 
+@media (min-width: 990px) and (max-width: 1570px) {
+  .navbar-header {
+      float: none;
+  }
+  .navbar-left,.navbar-right {
+      float: none !important;
+  }
+  .navbar-toggle {
+      display: block;
+  }
+  .navbar-collapse {
+      border-top: 1px solid transparent;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .navbar-fixed-top {
+      top: 0;
+      border-width: 0 0 1px;
+  }
+  .navbar-collapse.collapse {
+      display: none!important;
+  }
+  .navbar-nav {
+      float: none!important;
+      margin-top: 7.5px;
+  }
+  .navbar-nav>li {
+      float: none;
+  }
+  .navbar-nav>li>a {
+      padding-top: 10px;
+      padding-bottom: 10px;
+  }
+  .collapse.in{
+      display:block !important;
+  }
+}

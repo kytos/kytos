@@ -22,19 +22,19 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
 
 .. raw:: html
 
-   <div class="col-md-6">
-   <ul class="prev-next-nav">
-     <li>
-       <a href="/admin/architecture" title="Read admin guide">
-         <span class="glyphicon glyphicon-chevron-right visible-sm"></span>
-         <span class="hidden-sm hidden-tablet">Read admin guide »</span>
-       </a>
-     </li>
-   </ul>
-   </div>
+   <a href="/admin/architecture" class="button-content" title="Read admin guide">
+     <span class="glyphicon glyphicon-chevron-right"></span>
+     <span>Read admin guide</span>
+   </a>
 
-   <div class="col-md-6">
-    <div class="box-tutorial col-md-5">
+
+Tutorials
+#########
+
+
+.. raw:: html
+
+    <div class="box-tutorial col-md-3 col-sm-4">
          <h3>How to use Kytos</h3>
          <p> </p>
          <div class="info-tutorial col-md-12">
@@ -43,7 +43,7 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
          </div>
      </div>
 
-    <div class="box-tutorial col-md-5">
+    <div class="box-tutorial col-md-3 col-sm-4">
          <h3>How to use Kytos with mininet</h3>
          <p> </p>
          <div class="info-tutorial col-md-12">
@@ -52,7 +52,7 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
          </div>
       </div>
 
-    <div class="box-tutorial col-md-5">
+    <div class="box-tutorial col-md-3 col-sm-4">
          <h3>Teste Medium</h3>
          <p> </p>
          <div class="info-tutorial col-md-12">
@@ -60,7 +60,6 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
             <span class="col-md-6 medium">Medium</span>
          </div>
     </div>
-   </div>
 
 .. toctree::
   :maxdepth: 3

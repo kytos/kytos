@@ -110,13 +110,13 @@ aside {
 	padding-bottom:  600px;
 }
 
-.content-developer .section {
+.content-developer #developer-guide {
 	background: url('./images/icon-devel.svg');
 	background-position: top left;
 	background-repeat: no-repeat;
 }
 
-.content-admin .section {
+.content-admin #a-little-index-for-administrators {
 	background: url('./images/icon-admin.svg');
 	background-position: top left;
 	background-repeat: no-repeat;
@@ -141,6 +141,14 @@ aside {
 	color: #FFF;
         font-size: 0.8rem;
         display: flex;
+}
+
+.button-content {
+	border: 1px solid #00b4c4;
+	padding: 10px 15px;
+	font-size: 1em;
+	color: #00b4c4;
+	border-radius: 10px;
 }
 
 .footer {
@@ -188,12 +196,21 @@ div#social-kytos p {
 	margin-left: -1.3em;
 }
 
+.box-tutorial .info-tutorial {
+        position: absolute;
+        bottom: 5px;
+	width: 100%;
+        left: 50%;
+        margin-left: -50%;
+}
+
 .box-tutorial {
         margin: 1em 1em 0 0;
         box-shadow: 0 0 1em #CCC;
         text-align: center;
         border-top: 3px solid #CCC;
 	cursor: pointer;
+	min-height: 180px;
 }
 
 .box-tutorial:hover {

@@ -288,7 +288,9 @@ div#social-kytos p {
 	.features-content { padding: 2em; }
 	#kytos-theme-content-container {
  	   border: 0px;
+	   padding: 0.6em;
    	}
+	.navbar-brand { margin-left: 0px; }
 
 }
 

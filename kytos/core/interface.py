@@ -124,16 +124,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         Also enable the switch instance this interface is attached to.
         """
         self.switch.enable()
-        self.enabled = True
-
-    def disable(self):
-        """Disable this interface instance.
-
-        Also disable the link related to this interface.
-        """
-        if self.link:
-            self.link.disable()
-        self.enabled = False
+        self.__enabled = True
 
     def use_tag(self, tag):
         """Remove a specific tag from available_tags if it is there."""
@@ -372,8 +363,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                       'uni': self.uni,
                       'speed': self.speed,
                       'metadata': self.metadata,
-                      'active': self.active,
-                      'enabled': self.enabled,
+                      'active': self.is_active(),
+                      'enabled': self.is_enabled(),
                       'link': self.link.id if self.link else ""}
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()

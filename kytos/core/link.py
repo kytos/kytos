@@ -31,7 +31,7 @@ class Link(GenericEntity):
 
         """
         return (self.is_enabled() and self.endpoint_a.is_enabled() and
-                self.endpoint_b.is_enabled()
+                self.endpoint_b.is_enabled())
 
     def is_active(self):
         """Override the is_active method.
@@ -43,7 +43,7 @@ class Link(GenericEntity):
 
         """
         return (self.is_active() and self.endpoint_a.is_active() and
-                self.endpoint_b.is_active()
+                self.endpoint_b.is_active())
 
     def __eq__(self, other):
         """Check if two instances of Link are equal."""
@@ -117,8 +117,8 @@ class Link(GenericEntity):
                 'endpoint_a': self.endpoint_a.as_dict(),
                 'endpoint_b': self.endpoint_b.as_dict(),
                 'metadata': self.get_metadata_as_dict(),
-                'active': self.active,
-                'enabled': self.enabled}
+                'active': self.is_active(),
+                'enabled': self.is_enabled()}
 
     def as_json(self):
         """Return the Link as a JSON string."""

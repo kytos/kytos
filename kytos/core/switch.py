@@ -121,7 +121,7 @@ class Switch(GenericEntity):
         """
         for interface in self.interfaces.values():
             interface.disable()
-        self.enabled = False
+        self.__enabled = False
 
     def disconnect(self):
         """Disconnect the switch instance."""
@@ -320,8 +320,8 @@ class Switch(GenericEntity):
                 'interfaces': {i.id: i.as_dict()
                                for i in self.interfaces.values()},
                 'metadata': self.metadata,
-                'active': self.active,
-                'enabled': self.enabled}
+                'active': self.is_active(),
+                'enabled': self.is_enabled()}
 
     def as_json(self):
         """Return a json with switch'attributes.

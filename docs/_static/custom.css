@@ -96,18 +96,26 @@ aside {
 	background-position: bottom;
 }
 
-.sidebar-developer .features-content {
+#outer-clipart {
+	display: flex;
+        align-items: center;
+	justify-content: center;
+}
+
+#clipart-devel {
 	background: url('./images/doc-wdev.svg');
        	background-position: center;
 	background-repeat: no-repeat;
-	padding-bottom: 600px;
+	width: 300px;
+        padding-bottom: 470px;	
 }
 
-.sidebar-admin .features-content {
+#clipart-admin {
 	background: url('./images/doc-admin.svg');
        	background-position: center;
 	background-repeat: no-repeat;
-	padding-bottom:  600px;
+	min-width: 300px;
+	min-height: 470px;
 }
 
 .content-developer #developer-guide {
@@ -285,6 +293,7 @@ div#social-kytos p {
 
 @media (max-width: 990px) {
 	.features-content { background: none !important; padding-bottom: 1rem !important; }
+	#outer-clipart { display: none; }
 	aside {
 		background: linear-gradient(45deg, #68286a 0%,#322c5d 30%,#207cca 30%,#322c5d 30%); 
 		margin-bottom: 3rem;

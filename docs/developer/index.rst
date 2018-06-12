@@ -35,32 +35,47 @@ Tutorials
 
 .. raw:: html
 
-     <div class="box-tutorial col-md-3 col-sm-4">
-         <h3>How to use Kytos</h3>
-         <p> </p>
-         <div class="info-tutorial col-md-12">
-            <span class="first col-md-6">95 min</span>
-            <span class="col-md-6 dificult">Difficult</span>
-         </div>
-     </div>
-
-     <div class="box-tutorial col-md-3 col-sm-4">
-         <h3>How to use Kytos with mininet</h3>
-         <p> </p>
-         <div class="info-tutorial col-md-12">
-            <span class="first col-md-6">25 min</span>
+     <div class="row">
+     <div class="box-tutorial">
+      <a href="https://tutorials.kytos.io/napps/development_environment_setup/">
+         <h3>Setting up your dev environment</h3>
+         <p>In this tutorial you will learn how to setup the development environment to work on Kytos, build your NApps and run the Kytos Controller with Mininet.</p>
+      </a>
+      <div class="info-tutorial">
+            <span class="first col-md-6">15 min</span>
             <span class="col-md-6 easy">Easy</span>
          </div>
      </div>
 
-     <div class="box-tutorial col-md-3 col-sm-4">
-         <h3>Teste Medium</h3>
-         <p> </p>
-         <div class="info-tutorial col-md-12">
-            <span class="first col-md-6">30 min</span>
+     <div class="box-tutorial">
+       <a href="https://tutorials.kytos.io/napps/create_your_napp/">
+         <h3>How to create your own NApp: Part 1</h3>
+         <p>In this tutorial you will learn the basic structure of a Network Application and walk step by step by this structure to build your own NApp.</p>
+       </a>
+         <div class="info-tutorial">
+            <span class="first col-md-6">10 min</span>
+            <span class="col-md-6 easy">Easy</span>
+         </div>
+     </div>
+
+     <div class="box-tutorial">
+       <a href="https://tutorials.kytos.io/napps/create_looping_napp/">
+         <h3>How to create your own NApp: Part 2</h3>
+         <p>In this tutorial you will learn how to create a basic NApp with </p>
+       </a>
+         <div class="info-tutorial">
+            <span class="first col-md-6">15 min</span>
             <span class="col-md-6 medium">Medium</span>
          </div>
      </div>
+
+     <div class="row more-tutorial">
+       <a href="https://tutorials.kytos.io" class="button-content" title="More tutorials">
+         <span class="glyphicon glyphicon-chevron-right"></span>
+         <span>More tutorials</span>
+       </a>
+     </div>
+
 
 
 .. toctree::

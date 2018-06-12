@@ -122,6 +122,8 @@ aside {
 	background-repeat: no-repeat;
 }
 
+.content .section h1 { margin-top: 3.2rem; }
+
 .content-developer .section h1,
 .content-admin .section h1,
 .content-developer .section p.first,
@@ -141,6 +143,10 @@ aside {
 	color: #FFF;
         font-size: 0.8rem;
         display: flex;
+}
+
+.prev-next-nav {
+	margin-top: 0px;
 }
 
 .button-content {
@@ -197,6 +203,7 @@ div#social-kytos p {
 }
 
 .box-tutorial .info-tutorial {
+	padding:  0 2em;
         position: absolute;
         bottom: 5px;
 	width: 100%;
@@ -205,18 +212,23 @@ div#social-kytos p {
 }
 
 .box-tutorial {
+	position: relative;
         margin: 1em 1em 0 0;
-        box-shadow: 0 0 1em #CCC;
+        box-shadow: 0 0 0.5em #E1E1E1;
         text-align: center;
         border-top: 3px solid #CCC;
 	cursor: pointer;
-	min-height: 180px;
+	min-height: 280px;
+	width: 31%;
+	float: left;
 }
 
 .box-tutorial:hover {
 	border-top: 3px solid #0c5d66;
-	box-shadow: 0 0 1em #0c5d66;
+	box-shadow: 0 0 0.5em #0c5d66;
 }
+
+.more-tutorial { margin-top: 2em; }
 
 .box-tutorial span.easy { color: green; }
 .box-tutorial span.medium { color: orange; }
@@ -232,6 +244,13 @@ div#social-kytos p {
 .box-tutorial .info-tutorial span.first {
        border-right: 0;
        border-radius: 1em 0 0 1em;
+}
+
+.box-tutorial p {
+       font-size: 1em;
+       line-height: 1.5em;
+       margin: 1em;
+       margin-bottom: 4em;
 }
 
 .navbar-nav {

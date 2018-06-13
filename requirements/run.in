@@ -2,8 +2,8 @@
 # pin versions outside pypi, i.e. latest git master branch version.
 ipython
 lockfile
-python-openflow>=2018.1b2
-kytos-utils>=2018.1b2
+python-openflow>=2018.1b3
+kytos-utils>=2018.1b3
 flask-socketio
 flask_cors
 flask

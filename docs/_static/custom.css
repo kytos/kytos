@@ -181,6 +181,16 @@ aside {
 
 .fa { font: normal normal normal 16px/1 FontAwesome; }
 
+.icon-slack { 
+	width: 20px; 
+	height:  20px;
+	margin-bottom: -5px;
+	background: url('./images/icon-slack.svg');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
 div#social-kytos {
 	padding: 0px;
 	position: relative;

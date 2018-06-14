@@ -21,6 +21,30 @@ class Link(GenericEntity):
         self._uuid = uuid4()
         super().__init__()
 
+    def is_enabled(self):
+        """Override the is_enabled method.
+
+        We consider a link enabled whether all the interfaces are enabled.
+
+        Returns:
+            boolean: True if the interfaces are enabled, othewrise False.
+
+        """
+        return (self.is_enabled() and self.endpoint_a.is_enabled() and
+                self.endpoint_b.is_enabled())
+
+    def is_active(self):
+        """Override the is_active method.
+
+        We consider a link active whether all the interfaces are active.
+
+        Returns:
+            boolean: True if the interfaces are active, othewrise False.
+
+        """
+        return (self.is_active() and self.endpoint_a.is_active() and
+                self.endpoint_b.is_active())
+
     def __eq__(self, other):
         """Check if two instances of Link are equal."""
         return ((self.endpoint_a == other.endpoint_a and
@@ -46,15 +70,6 @@ class Link(GenericEntity):
         """
         return [tag for tag in self.endpoint_a.available_tags if tag in
                 self.endpoint_b.available_tags]
-
-    def enable(self):
-        """Enable this link instance.
-
-        Also enable the link's interfaces and the switches they're attached to.
-        """
-        self.endpoint_a.enable()
-        self.endpoint_b.enable()
-        self.enabled = True
 
     def use_tag(self, tag):
         """Remove a specific tag from available_tags if it is there."""
@@ -102,8 +117,8 @@ class Link(GenericEntity):
                 'endpoint_a': self.endpoint_a.as_dict(),
                 'endpoint_b': self.endpoint_b.as_dict(),
                 'metadata': self.get_metadata_as_dict(),
-                'active': self.active,
-                'enabled': self.enabled}
+                'active': self.is_active(),
+                'enabled': self.is_enabled()}
 
     def as_json(self):
         """Return the Link as a JSON string."""

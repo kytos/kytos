@@ -100,6 +100,7 @@ aside {
 	display: flex;
         align-items: center;
 	justify-content: center;
+	min-height: 50vh;
 }
 
 #clipart-devel {
@@ -279,17 +280,17 @@ div#social-kytos p {
     box-shadow: none;
     border-radius: 5px;
 }
-.navbar-options li.active {
+
+.navbar-options li {
+    border: 1px solid transparent;
+}
+.navbar-options li.active,
+.navbar-options li:hover {
     border: 1px solid #00b4c4; 
 }
-.navbar-options li:hover {
-    border: 1px solid #FFF;
-}
-
 .navbar-brand { margin-left: 1.9em; }
 .navbar-toggle { top: 10px; right: 10px; position: absolute; }
 .navbar-collapse { float: right; width: 330px; }
-.navbar-collapse.in { width: 100%; } 
 
 @media (max-width: 990px) {
 	.features-content { background: none !important; padding-bottom: 1rem !important; }
@@ -301,7 +302,10 @@ div#social-kytos p {
 	#kytos-theme-content-container {
  	   border: 1em solid #FBF9FD;
    	}
-	.footer { margin-top: 5px; }
+	.footer {
+		margin-top: 5px;
+		position: relative !important;
+	}
 	.docs-social { display: none; }
 	
 	.content-developer .section h1,
@@ -326,9 +330,64 @@ div#social-kytos p {
 
 @media (min-height: 800px) {
 	   footer { position: fixed !important; bottom: 10px; }
+	   #outer-clipart { min-height: 415px; }
+}
+
+@media (max-width: 769px) {
+   .navbar-options.collapsing li,
+   .navbar-options.in li:hover,
+   .navbar-options.in li { 
+   	border: none;
+   	border-bottom: 1px solid #151d24;
+   	border-radius: none;
+   	margin: 0px;
+   	padding: 1em;
+   	margin-right: -20px;
+   	margin-left: -20px;
+   }
+   .navbar-options.collapsing,
+   .navbar-collapse.in {
+   	width: 110%;
+   	top: 80px;
+   	margin-left: -30px;
+   	text-align: center;
+   	background: #2e373e;
+   	position: absolute;
+   	float: none;
+   }
+   
+   .navbar-options.collapsing ul,
+   .navbar-collapse.in ul {
+   	width: 100%;
+   }
 }
 
 @media (min-width: 990px) and (max-width: 1570px) {
+   .navbar-options.collapsing li,
+   .navbar-options.in li:hover,
+   .navbar-options.in li { 
+   	border: none;
+   	border-bottom: 1px solid #151d24;
+   	border-radius: none;
+   	margin: 0px;
+   	padding: 1em;
+   	margin-right: -20px;
+   	margin-left: -20px;
+   }
+   .navbar-options.collapsing,
+   .navbar-collapse.in {
+   	width: 110%;
+   	top: 80px;
+   	margin-left: -30px;
+   	text-align: center;
+   	background: #2e373e;
+   	position: absolute;
+   	float: none;
+   }
+   .navbar-options.collapsing ul,
+   .navbar-collapse.in ul {
+   	width: 100%;
+   }
   .navbar-header {
       float: none;
   }
@@ -350,8 +409,7 @@ div#social-kytos p {
       display: none!important;
   }
   .navbar-nav {
-      float: none!important;
-      margin-top: 7.5px;
+      float: right!important;
   }
   .navbar-nav>li {
       float: none;

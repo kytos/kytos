@@ -211,14 +211,7 @@ div#social-kytos p {
 	margin-left: -1.3em;
 }
 
-.box-tutorial .info-tutorial {
-	padding:  0 2em;
-        position: absolute;
-        bottom: 5px;
-	width: 100%;
-        left: 50%;
-        margin-left: -50%;
-}
+#tutorials .row { margin-left: 0; margin-right: 0; }
 
 .box-tutorial {
 	position: relative;
@@ -245,6 +238,15 @@ div#social-kytos p {
 .box-tutorial span.medium { color: orange; }
 .box-tutorial span.dificult { color: red; }
 
+.box-tutorial .info-tutorial {
+	padding:  0 2em;
+        position: absolute;
+        bottom: 5px;
+	width: 100%;
+        left: 50%;
+        margin-left: -50%;
+}
+
 .box-tutorial .info-tutorial span {
        font-size: 0.8em;
        margin-bottom: 1em;
@@ -256,6 +258,8 @@ div#social-kytos p {
        border-right: 0;
        border-radius: 1em 0 0 1em;
 }
+
+.box-tutorial h3 { line-height: 1.2em; }
 
 .box-tutorial p {
        font-size: 1em;

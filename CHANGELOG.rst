@@ -5,10 +5,6 @@ All notable changes to the kytos project will be documented in this file.
 
 UNRELEASED - Under development
 ******************************
-Added
-=====
-- Added `reload/<username>/<napp_name>` endpoint to reload the NApp code
-- Added `reload/all` endpoint to update the NApp code of all NApps
 
 Changed
 =======
@@ -24,6 +20,35 @@ Fixed
 
 Security
 ========
+
+[2018.1b3] - "dalva" beta3 - 2018-06-15
+**************************************
+Added
+=====
+- Added `reload/<username>/<napp_name>` endpoint to reload the NApp code
+- Added `reload/all` endpoint to update the NApp code of all NApps
+- Kytos console display the kytos version.
+- Added method __repr__ on Napp class.
+- Added method __eq__ on UNI class.
+- UNI and TAG has method as_dict and `as_json`.
+- Added method get_metadata `as_dict`.
+- Added method to return all available vlans.
+- Added method to return a specific interface by id.
+- Added pre-install napps method.
+- Added a better introduction of dev and admin guides.
+- Better handling of active/enabled in Switch/Interface/Links entities.
+
+Changed
+=======
+- Better handling of broken napps.
+- Refactored `load_napps` method.
+- Refactored `get_time` to return a datetime with UTC
+- Migrated event handler threads to the main asyncio loop.
+- Improve documentation to use kytos sphinx theme.
+
+Fixed
+=====
+- Some documentation docstrings.
 
 [2018.1b2] - "dalva" beta2 - 2018-4-20
 **************************************

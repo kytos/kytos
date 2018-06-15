@@ -18,17 +18,12 @@ code, .rst-content tt, .rst-content code {
     white-space: nowrap;
     max-width: 100%;
     background: #ebebeb;
-    border: solid 1px #5f21b7;
+    border: none;
     font-size: 75%;
-    padding: 0 5px;
+    padding: 5px;
     font-family: Consolas,"Andale Mono WT","Andale Mono","Lucida Console","Lucida Sans Typewriter","DejaVu Sans Mono","Bitstream Vera Sans Mono","Liberation Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
     color: #E74C3C;
     overflow-x: auto;
-}
-
-a {
-  color: #6e5baa;
-  text-decoration: none;
 }
 
 .rst-content dl:not(.docutils) dt {
@@ -79,8 +74,12 @@ body {
 
 #kytos-theme-content-container {
     background: #FFF;
-    border: 4em solid #FBF9FD;
     min-height: 100vh;
+}
+
+.content-developer,
+.content-admin {
+   border: 4em solid #FBF9FD;
 }
 
 aside {
@@ -130,13 +129,17 @@ aside {
 	margin-bottom: 0px;
 }
 
-.prev-next-nav li {
+.content-index .prev-next-nav li,
+.content-home .prev-next-nav li {
 	background: #008690;
 	border: 1px solid #008690;
 }
 
-.prev-next-nav li a {
+.content-index .prev-next-nav li a,
+.content-home .prev-next-nav li a {
 	color: #FFF;
+        font-size: 0.8rem;
+        line-height: 1.8rem;
 }
 
 .footer {
@@ -180,7 +183,39 @@ div#social-kytos p {
 .features-content {
 	padding: 3em 6em;
 	color: #FFF;
+	padding-bottom: 150px;
+	margin-left: -1.3em;
 }
+
+.box-tutorial {
+        margin: 1em 1em 0 0;
+        box-shadow: 0 0 1em #CCC;
+        text-align: center;
+        border-top: 3px solid #CCC;
+	cursor: pointer;
+}
+
+.box-tutorial:hover {
+	border-top: 3px solid #0c5d66;
+	box-shadow: 0 0 1em #0c5d66;
+}
+
+.box-tutorial span.easy { color: green; }
+.box-tutorial span.medium { color: orange; }
+.box-tutorial span.dificult { color: red; }
+
+.box-tutorial .info-tutorial span {
+       font-size: 0.8em;
+       margin-bottom: 1em;
+       border: 1px solid #CCC;
+       border-radius: 0 1em 1em 0;
+}
+
+.box-tutorial .info-tutorial span.first {
+       border-right: 0;
+       border-radius: 1em 0 0 1em;
+}
+
 .navbar-nav {
     margin: 0px;
     display: inline-block;
@@ -206,7 +241,7 @@ div#social-kytos p {
 
 .navbar-brand { margin-left: 1.9em; }
 .navbar-toggle { top: 10px; right: 10px; position: absolute; }
-.navbar-collapse { float: right; width: 320px; }
+.navbar-collapse { float: right; width: 330px; }
 .navbar-collapse.in { width: 100%; } 
 
 @media (max-width: 979px) {
@@ -238,3 +273,8 @@ div#social-kytos p {
    	}
 
 }
+
+@media (min-height: 800px) {
+	   footer { position: fixed !important; bottom: 10px; }
+}
+

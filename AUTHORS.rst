@@ -13,8 +13,10 @@ Contributors
 ------------
 
 - Raphael Cóbe <rmcobe AT ncc DOT unesp DOT br>
-- Antonio Francisco <ajoaoff@gmail.com>
-- Erick Vermot <erick.vermot@gmail.com>
-- Valessio Soares de Brito <contato@valessiobrito.com.br>
-- Vinicius Arcanjo <viniciusarcanjov@gmail.com>
-- Erick Vermot <erick.vermot@gmail.com>
+- Antonio Francisco <ajoaoff AT gmail.com>
+- Humberto Diógenes <hdiogenes AT gmail DOT com>
+- Luan Gonçalves <luanlg.cco AT gmail DOT com>
+- Thiago Lopes <thiagolopes AT ncc DOT unesp DOT br>
+- Valessio Soares de Brito <contato AT valessiobrito DOT com DOT br>
+- Vinicius Arcanjo <viniciusarcanjov AT gmail DOT com>
+- Erick Vermot <erick.vermot AT gmail DOT com>

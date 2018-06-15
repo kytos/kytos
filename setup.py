@@ -275,7 +275,6 @@ setup(name='kytos',
           'dev': [
               'coverage',
               'pip-tools',
-              'kytos_sphinx_theme',
               'yala',
               'tox',
           ],

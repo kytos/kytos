@@ -22,9 +22,9 @@ class GenericEntity:
         options = KytosConfig().options['daemon']
         self.metadata = {}
         # operational status with True or False
-        self.__active = True
+        self._active = True
         # administrative status with True or False
-        self.__enabled = options.enable_entities_by_default
+        self._enabled = options.enable_entities_by_default
 
     def is_enabled(self):
         """Return whether the entity is enabled.
@@ -33,7 +33,7 @@ class GenericEntity:
             boolean: True whether the entity is enabled, otherwise False.
 
         """
-        return self.__enabled
+        return self._enabled
 
     def is_active(self):
         """Return whether the entity is enabled.
@@ -42,15 +42,15 @@ class GenericEntity:
             boolean: True whether the entity is active, otherwise False.
 
         """
-        return self.__active
+        return self._active
 
     def activate(self):
         """Activate the entity."""
-        self.__active = True
+        self._active = True
 
     def deactivate(self):
         """Deactivate the entity."""
-        self.__active = False
+        self._active = False
 
     @property
     def status(self):
@@ -72,7 +72,7 @@ class GenericEntity:
         it instead of setting it manually. This allows us to change the
         behavior on the future.
         """
-        self.__enabled = True
+        self._enabled = True
 
     def disable(self):
         """Administratively disable the Entity.
@@ -80,7 +80,7 @@ class GenericEntity:
         This method can disable other related entities. For this behavior,
         rewrite it on the child classes.
         """
-        self.__enabled = False
+        self._enabled = False
 
     def add_metadata(self, key, value):
         """Add a new metadata (key, value)."""

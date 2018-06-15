@@ -124,7 +124,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         Also enable the switch instance this interface is attached to.
         """
         self.switch.enable()
-        self.__enabled = True
+        self._enabled = True
 
     def use_tag(self, tag):
         """Remove a specific tag from available_tags if it is there."""

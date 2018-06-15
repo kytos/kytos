@@ -121,7 +121,7 @@ class Switch(GenericEntity):
         """
         for interface in self.interfaces.values():
             interface.disable()
-        self.__enabled = False
+        self._enabled = False
 
     def disconnect(self):
         """Disconnect the switch instance."""

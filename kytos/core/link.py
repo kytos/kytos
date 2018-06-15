@@ -30,7 +30,7 @@ class Link(GenericEntity):
             boolean: True if the interfaces are enabled, othewrise False.
 
         """
-        return (self.is_enabled() and self.endpoint_a.is_enabled() and
+        return (self.__enabled and self.endpoint_a.is_enabled() and
                 self.endpoint_b.is_enabled())
 
     def is_active(self):
@@ -42,7 +42,7 @@ class Link(GenericEntity):
             boolean: True if the interfaces are active, othewrise False.
 
         """
-        return (self.is_active() and self.endpoint_a.is_active() and
+        return (self.__active and self.endpoint_a.is_active() and
                 self.endpoint_b.is_active())
 
     def __eq__(self, other):

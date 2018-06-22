@@ -84,7 +84,13 @@ Tutorials
    :hidden:
    :includehidden:
 
+   intro
+   architecture
+   setup_develop_environment
+   creating_a_napp
    how_to_contribute
    hacking
-   platform
+   security
    pyof
+
+

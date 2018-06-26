@@ -16,8 +16,7 @@ applications by its users. Thus, our intention is not only to build a new SDN
 solution, but also to build a community of developers around it, creating new
 applications that benefit from the SDN paradigm.
 
-The project was born in 2014, when the first version of the message parsing
-library was built. After some time stalled, the development took off in earlier
+The project was born in 2014 and has been under active development since
 2016.
 
 For more information about this project, please visit `Kytos project website
@@ -39,18 +38,13 @@ Just install docker from your package provider and run:
 Installing
 ==========
 
-We use python3.6. So in order to use this software please install python3.6
-into your environment beforehand.
+We use Python 3.6, so you'll have to install it into your environment beforehand:
 
-We are doing a huge effort to make Kytos and its components available on all
-common distros. So, we recommend you to download it from your distro
-repository.
+.. code-block:: shell
 
-But if you are trying to test, develop or just want a more recent version of
-our software no problem: Download now, the latest release (it still a beta
-software), from our repository:
+   $ apt-get install python3.6
 
-First you need to clone *kytos* repository:
+Then, the first step is to clone *kytos* repository:
 
 .. code-block:: shell
 
@@ -98,20 +92,20 @@ You can use ``-h`` or ``--help`` for more information about options to the
 command line.
 
 With the above commands your controller will be running and ready to be used.
-Please note that the commands need to be run as a user who has permission to
+Please note that you have to run it as an user with permission to
 open sockets at ports 6633 and 8181.
 
 The Web Admin User Interface
 ============================
 
-*Kytos* installs automatically a web based interface for administration. When
+*Kytos* installs automatically a web interface for administration. When
 *Kytos* is running, the Web UI runs in your localhost and can be accessed via
 browser, in `<http://localhost:8181>`_. Have fun (:
 
 Authors
 *******
 
-For a complete list of authors, please open ``AUTHORS.rst`` file.
+For a complete list of authors, please see ``AUTHORS.rst``.
 
 Contributing
 ************

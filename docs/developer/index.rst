@@ -34,7 +34,7 @@ made by Kytos Team.
 
 .. cssclass:: col-md-6
 
-Kytos Summit is the main Kytos Project’s event. In addition to afull schedule of technical and social talks, Kytos Summit provides an opportunity for developers, contributors and other interested people to meet in person and work together more closely.
+Kytos Summit is the main Kytos Project’s event. In addition to a full schedule of technical and social talks, Kytos Summit provides an opportunity for developers, contributors and other interested people to meet in person and work together more closely.
 
 .. raw:: html
 
@@ -44,7 +44,7 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
          <p> </p>
          <div class="info-tutorial col-md-12">
             <span class="first col-md-6">95 min</span>
-            <span class="col-md-6 dificult">Dificult</span>
+            <span class="col-md-6 dificult">Difficult</span>
          </div>
      </div>
 

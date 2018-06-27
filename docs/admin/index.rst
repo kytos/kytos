@@ -52,22 +52,13 @@ Tutorials
             <span class="col-md-6 dificult">Dificult</span>
          </div>
       </div>
-
-    <div class="box-tutorial col-md-3 col-sm-4">
-         <h3>Teste Medium</h3>
-         <p> </p>
-         <div class="info-tutorial col-md-12">
-            <span class="first col-md-6">30 min</span>
-            <span class="col-md-6 medium">Medium</span>
-         </div>
-    </div>
-
-    <div class="row more-tutorial">
-       <a href="https://tutorials.kytos.io" class="button-content" title="More tutorials">
-           <span class="glyphicon glyphicon-chevron-right"></span>
-           <span>More tutorials</span>
-       </a>
-    </div>
+     </div>
+     <div class="row more-tutorial">
+        <a href="https://tutorials.kytos.io" class="button-content" title="More tutorials">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+            <span>More tutorials</span>
+        </a>
+     </div>
 
 .. toctree::
   :maxdepth: 3

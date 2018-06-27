@@ -68,6 +68,7 @@ Tutorials
             <span class="col-md-6 medium">Medium</span>
          </div>
      </div>
+     </div>
 
      <div class="row more-tutorial">
        <a href="https://tutorials.kytos.io" class="button-content" title="More tutorials">

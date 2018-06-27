@@ -24,11 +24,9 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
    </a>
 
 
-Tutorials
-#########
-
-
 .. raw:: html
+
+    <h2>Tutorials</h2>
 
     <div class="row">
      <div class="box-tutorial col-md-4 col-sm-4">

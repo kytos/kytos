@@ -29,11 +29,9 @@ Kytos Summit provides an opportunity for developers, contributors and other inte
        </a>
 
 
-Tutorials
-#########
-
-
 .. raw:: html
+
+     <h2>Tutorials</h2>
 
      <div class="row">
      <div class="box-tutorial">
@@ -81,6 +79,7 @@ Tutorials
 
 .. toctree::
    :maxdepth: 3
+   :hidden:
 
    intro
    architecture

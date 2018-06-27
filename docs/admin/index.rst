@@ -65,9 +65,11 @@ Tutorials
   :hidden:
 
   intro
-  architecture
+  installing
+  production_environment
   configuring
-  intro
-  napps
-  quick-start
+  console
+  command_line
+  napp_manager
   web-ui
+  architecture

@@ -43,7 +43,6 @@ information. Using the following command you will create a basic structure.
 .. code-block:: shell
 
   (kytos-environment)$ kytos napps create
-
   --------------------------------------------------------------
   Welcome to the bootstrap process of your NApp.
   --------------------------------------------------------------
@@ -99,11 +98,74 @@ How to document your API Rest
 
 
 
-How to register your NApp in the NApps respository
-==================================================
 
 
 
+
+How to register yourself in the NApps respository
+=================================================
+
+To publish your NApp in the `Napps server <https://napps.kytos.io/>`_ you need
+to self register.Tto do that the tool `kytos` has a command
+line to make the registration. Below we have the steps to make the
+registration.
+
+First of all use the command below and pass the your user information.
+
+.. code-block:: shell
+
+  (kytos-environment)$ kytos users register
+  --------------------------------------------------------------
+  Welcome to the user registration process.
+  --------------------------------------------------------------
+  To continue you must fill the following fields.
+  Insert the field using the pattern below:
+    - start with letter
+    - insert only numbers and letters
+  Username (Required): <username>
+  Insert the field using the pattern below:
+    - insert only letters
+  First Name (Required): <first name>
+  Insert the field using the pattern below:
+    - insert only letters
+  Last Name: <last name>
+  Insert the field using the pattern below:
+    - insert only the caracters: [letters, numbers, _, %, &, -, $]
+    - must be at least 6 characters
+  Password (Required): <password>
+  Confirm your password: <password confirmation>
+  Insert the field using the pattern below:
+    - follow the format: <login>@<domain>
+      e.g. john@test.com
+  Email (Required): <email>
+  Insert the field using the pattern below:
+    - insert only numbers
+  Phone: <phone>
+  Insert the field using the pattern below:
+    - insert only letters
+  City: <city>
+  Insert the field using the pattern below:
+    - insert only letters
+  State: <state>
+  Insert the field using the pattern below:
+    - insert only letters
+  Country: <country>
+  User successfully created.
+
+- **username**: Username is the identifier in the server.
+- **first name**: The first name information.
+- **last name**: The last name information.
+- **password**: The password used to make changes in the server
+- **password confirmation**: The password confirmation.
+- **email**: Email to confirm the registration in the server.
+- **phone**: Phone number information.This field is optional.
+- **city**: City name information.This field is optional.
+- **state**: State information.This field is optional.
+- **country**: Country information. This field is optional.
+
+After created you can't use your user yet.You need to confirm your
+registration process in the email box passed.
+After that you can upload yours NApps.
 
 How to upload your NApp in the NApps repository
 ===============================================

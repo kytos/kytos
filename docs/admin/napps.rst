@@ -27,15 +27,17 @@ For example, if you want to search for ``kytos`` you can run:
   $ kytos napps search kytos
 
   Status |          NApp ID          |                         Description
-  =======+===========================+============================================================
-   [ie]  | kytos/of_core             | OpenFlow Core of Kytos Controller, responsible for main ...
-   [--]  | kytos/of_flow_manager     | NApp that manages switches flows.
-   [i-]  | kytos/of_ipv6drop         | Install flows to DROP IPv6 packets on all switches.
-   [ie]  | kytos/of_l2ls             | An L2 learning switch application for OpenFlow switches.
-   [i-]  | kytos/of_lldp             | App responsible by send packet with lldp protocol to net...
-   [--]  | kytos/of_stats            | Provide statistics of openflow switches.
-   [--]  | kytos/of_topology         | A simple app that update links between machines and swit...
-   [--]  | kytos/web_topology_layout | Manage endpoints related to the web interface settings a...
+  =======+===========================+==================================================================================
+  [ie]   | kytos/flow_manager        | Manage switches' flows through a REST API.
+  [ie]   | kytos/mef_eline           | NApp to provision circuits from user request
+  [ie]   | kytos/of_core             | OpenFlow Core of Kytos Controller, responsible for main OpenFlow operations.
+  [ie]   | kytos/of_l2ls             | A L2 learning switch application for OpenFlow switches.
+  [ie]   | kytos/of_lldp             | Discover network-to-network interfaces (NNIs) using the LLDP protocol.
+  [ie]   | kytos/of_stats            | Provide statistics of openflow switches.
+  [ie]   | kytos/pathfinder          | Keeps track of topology changes, and calculates the best path between two points.
+  [ie]   | kytos/status              | Provides basic information about the controller status
+  [ie]   | kytos/storehouse          | Persistence NApp with supports (not yet) multiple backends
+  [ie]   | kytos/topology            | Manage the network topology.
 
   Status: (i)nstalled, (e)nabled
 
@@ -51,7 +53,7 @@ For example, if you want to search for ``kytos`` you can run:
   * kytos/of_lldp
   * kytos/of_stats
   * kytos/of_topology
-  * kytos/web_topology_layout
+  * kytos/ui
 
 
 Install
@@ -161,8 +163,30 @@ Prints a list of all installed NApps along with their respective description and
    Status: (i)nstalled, (e)nabled
 
 ..
-  TODO: I DONT kown what insert here.
 
-  Configuring
-  ===========
-  Don't remember what the admin should configure.
+  Reload
+  ======
+
+  Reloads one or more previously installed NApps. <napps> is the ID of the
+  NApp(s), in the format ``user/napp_name``. This command allows to change a
+  code of an installed NApp and reload the code without having to restart the
+  kytos to persist the changes.
+
+  .. code-block:: shell
+
+       $ kytos napps reload <napps>
+
+
+  For example, you can reload ``kytos/of_core`` and ``kytos/of_l2ls`` using the
+  command:
+
+  .. code-block:: shell
+
+       $ kytos napps reload kytos/of_core kytos/of_l2ls
+
+
+  If you want to reload all NApps at once, you can run:
+
+  .. code-block:: shell
+
+       $ kytos napps reload all

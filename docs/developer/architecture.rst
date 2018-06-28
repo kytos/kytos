@@ -1,21 +1,17 @@
-*********************
+#####################
 Architecture Overview
-*********************
-
-To see a list of the events you can listen and react to, check the section
-:doc:`./listened_events`. Kytos' Python API follows.
+#####################
 
 .. toctree::
-  :hidden:
+   :maxdepth: 4
+   :hidden:
 
-  listened_events
+   setup_develop_environment
+   Kytos API <../kytos>
+   creating_a_napp
+   how_to_create_tests
+   how_to_contribute
+   hacking
+   security
+   pyof
 
-
-Kytos API
-=========
-
-.. toctree::
-  :maxdepth: 6
-  :includehidden:
-
-  ../kytos

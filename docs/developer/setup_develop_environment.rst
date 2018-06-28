@@ -113,6 +113,7 @@ First of all activate the virtual environment and update the pip package that
 is already installed in the virtualenv, with setuptools and wheel.
 
 .. code-block:: shell
+
     (kytos-environment) $ pip install --upgrade pip setuptools wheel
 
 Download the kytos project from github

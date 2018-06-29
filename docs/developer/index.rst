@@ -83,9 +83,3 @@ Kytos Summit provides an opportunity for developers, contributors and other inte
 
    intro
    architecture
-   setup_develop_environment
-   creating_a_napp
-   how_to_contribute
-   hacking
-   security
-   pyof

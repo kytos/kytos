@@ -77,6 +77,10 @@ body {
     min-height: 100vh;
 }
 
+#kytos-theme-content-container div.figure {
+   float: left;
+}
+
 .content-developer,
 .content-admin {
    border: 4em solid #FBF9FD;

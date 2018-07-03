@@ -2,20 +2,16 @@
 Installing
 **********
 
-We use python3.6. So in order to use this software please install python3.6
-into your environment beforehand. We are doing a huge effort to make Kytos and its components available on all
-common distros.
-
 Installing required dependencies
 ================================
 
-In order to start using and coding with Kytos, you need a few required
-dependencies. One of them is Python 3.6. Note that an additional step is
+We use Python 3.6, so in order to use this software please install it
+into your environment beforehand. Note that an additional step is
 needed for Ubuntu releases older than 16.10.
 
 
-Python3.6 in old Ubuntu releases
-================================
+Python 3.6 in old Ubuntu releases
+=================================
 
 If are you using Ubuntu 16.04 or older, you must add a PPA to be able to
 install Python 3.6 packages. To add this PPA, use the commands:
@@ -37,8 +33,8 @@ The required Ubuntu packages can be installed by:
 Installing with pip
 ===================
 
-To install the latest Kytos from PyPI, just make sure that you done all
-previous steps:
+To install the latest Kytos from PyPI, make sure that you done all
+previous steps, then:
 
 .. code-block:: bash
 
@@ -51,9 +47,8 @@ python-openflow.
 Production Environment
 ======================
 
-If you want to download the kytos from your distro repository no problem:
-Download now, the latest release (it still a beta software), from our
-repository. First you need to clone *kytos* repository. So, install the git
+To download now the latest release (it still a beta software) from our
+repository, first you need to clone *kytos* repository. So, install git
 before clone:
 
 .. code-block:: shell

@@ -93,6 +93,7 @@ aside {
     	background-size: contain;
 }
 
+.sidebar-home,
 .sidebar-index {
 	background: url('./images/Robot.svg');
 	background-size: contain;

@@ -119,34 +119,20 @@ License
 This software is under *MIT-License*. For more information please read
 ``LICENSE`` file.
 
-More documentation
-******************
-
-Kytos Project
-=============
-Start here to learn about your next SDN Controller.
-Check out the admin section.
-
-Kytos Controller
-================
-Kytos Core component.
-It also has documentation for development and collaboration.
-
-In addition to a tutorials section and extra documentation.
-
-Kytos Tutorials
-===============
-
-Kytos OpenFlow Library
-======================
-python3-openflow is a low-level OpenFlow library.
+What's Next
+***********
 
 Kytos NApps
 ===========
-Kytos project official set of Network Applications.
+You are now ready to browse our guide for :doc:`administrators </admin/intro>` or :doc:`developers </developer/intro>`. Check out!
 
 
 .. raw:: html
+
+    <div id="outer-clipart">
+        <a href="/admin" id="clipart-admin" class="col-md-6"></a>
+        <a href="/developer" id="clipart-devel" class="col-md-6"></a>
+    </div>
 
     <style> .prev-next-nav li:last-child { display: none; } </style>
 

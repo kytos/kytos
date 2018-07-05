@@ -122,8 +122,6 @@ This software is under *MIT-License*. For more information please read
 What's Next
 ***********
 
-Kytos NApps
-===========
 You are now ready to browse our guide for :doc:`administrators </admin/intro>` or :doc:`developers </developer/intro>`. Check out!
 
 

@@ -119,6 +119,22 @@ License
 This software is under *MIT-License*. For more information please read
 ``LICENSE`` file.
 
+What's Next
+***********
+
+You are now ready to browse our guide for :doc:`administrators </admin/intro>` or :doc:`developers </developer/intro>`. Check out!
+
+
+.. raw:: html
+
+    <div id="outer-clipart">
+        <a href="/admin" id="clipart-admin" class="col-md-6"></a>
+        <a href="/developer" id="clipart-devel" class="col-md-6"></a>
+    </div>
+
+    <style> .prev-next-nav li:last-child { display: none; } </style>
+
+
 .. TAGs
 
 .. |Experimental| image:: https://img.shields.io/badge/stability-experimental-orange.svg

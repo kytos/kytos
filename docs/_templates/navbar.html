@@ -13,18 +13,13 @@
     <div class="row sidebar-header">
 
      <div class="navbar-header">
-       <a class="navbar-brand" href="http://docs.kytos.io/">
+       <a class="navbar-brand" href="/">
         <img src="../../_static/kytos.svg" width="100px" alt="Kytos" title="Kytos">
        </a>
      </div><!-- navbar-brand -->
       <div class="navbar-options collapse navbar-collapse nav-collapse">
 
         <ul class="nav navbar-nav">
-          <li {% if active == "index" or active == "home" %} class='active' {% endif %}>
-            <a href="/index.html" title="Home">
-             <span>Home</span>
-           </a>
-          </li>
           <li {% if active == "admin" %} class='active' {% endif %}>
            <a href="/admin/index.html" title="I'm Admin">
             <span>I'm an admin</span>
@@ -36,6 +31,19 @@
            </a>
           </li>
         </ul>
+
+        {%- if pagename != "search" %}
+        <form id="search-navbar" class="search-form navbar-right" action="{{ pathto('search') }}" method="get">
+         <div class="form-group has-feedback">
+          <label for="search" class="sr-only">Search</label>
+          <input type="text" name="q" id="search" class="form-control" placeholder="Search" />
+          <span class="glyphicon fa fa-search form-control-feedback"></span>
+         </div>
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        {%- endif %}
+
        </div>
 
     </div>

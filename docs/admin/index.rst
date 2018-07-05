@@ -18,7 +18,7 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
 
 .. raw:: html
 
-   <a href="/admin/intro.html" class="button-content" title="Read admin guide">
+   <a href="/admin/intro" class="button-content" title="Read admin guide">
      <span class="glyphicon glyphicon-chevron-right"></span>
      <span>Read admin guide</span>
    </a>

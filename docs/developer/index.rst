@@ -23,7 +23,7 @@ Kytos Summit provides an opportunity for developers, contributors and other inte
 
 .. raw:: html
 
-       <a href="/developer/intro.html" class="button-content" title="Read devel guide">
+       <a href="/developer/intro" class="button-content" title="Read devel guide">
          <span class="glyphicon glyphicon-chevron-right"></span>
          <span>Read devel guide</span>
        </a>

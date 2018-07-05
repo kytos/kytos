@@ -93,8 +93,57 @@ After created your NApp we have the basic NApp structure.
 - **ui**: Folder with components to be displayed in the Kytos UI
 - **ui/README.rst**: A file with a brief description of your NApp components.
 
+
+How to create a rest endpoint for your napp
+===========================================
+
+In the Kytos Project we have a decorator to create new API endpoints.
+If you want to create a new endpoint you should follow the steps below.
+
+- You need import the rest decorator method.
+- You need  declare a function using the rest decorator
+- In the end of function you need return a string and the status code of your
+method.
+
+
+.. code-block:: python
+
+  from flask import jsonify # import jsonify method to convert json to string
+
+  from kytos.core.napps import rest #import rest decorator method
+
+  class Main(KytosNapps): # KytosNapps class
+
+    # all KytosNapps methods
+
+    @rest('sample_endpoint/<name>', methods=['GET'])# call the decorator
+    def my_endpoint(self, name):
+      result = {"name": name}
+      return jsonify(result), 200 # return a string and status http status code
+
+
+When the kytos starts this napp will register an endpoint called
+`/api/<username>/<napp_name>/sample_endpoint/<name>` handling only **GET**
+methods.
+
+If you try open your browser using this endpoint, you will always get in the
+browser the result below, where `name` was given in the browser.
+
+.. code-block:: json
+
+  {
+    "name": "<name>"
+  }
+
+
 How to document your API Rest
 =============================
+
+If your NApp have to use the decorator rest to create some API endpoint you
+need to document this endpoint.
+
+
+
 
 
 

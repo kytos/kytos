@@ -70,7 +70,7 @@ behaviour. You can view and modify the main config file at
 ``/etc/kytos/logging.ini``.
 
 For more information about the config options please visit the `Kytos's
-Administrator Guide <https://docs.kytos.io/kytos-core/administrator/#configuration>`__.
+Administrator Guide <https://docs.kytos.io/admin/configuring/>`__.
 
 How to use
 **********

@@ -167,10 +167,10 @@ Prints a list of all installed NApps along with their respective description and
   Reload
   ======
 
-  Reloads one or more previously installed NApps. <napps> is the ID of the
-  NApp(s), in the format ``user/napp_name``. This command allows to change a
-  code of an installed NApp and reload the code without having to restart the
-  kytos to persist the changes.
+  Reloads one or more previously installed NApps. <napps> are the IDs of the
+  NApps in the format ``user/napp_name``, separated by spaces.
+  This command allows you to change the code of an installed NApp and load
+  the new version without restarting Kytos.
 
   .. code-block:: shell
 

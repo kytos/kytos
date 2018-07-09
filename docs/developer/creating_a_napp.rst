@@ -170,6 +170,25 @@ After that you can upload yours NApps.
 How to upload your NApp in the NApps repository
 ===============================================
 
+First of all, to upload your napp you should have an active account in the
+napps server. With an registered account you should execute the command below
+inside the napp structure.
+
+The command below will to compact your NApp and upload to the napps server.
+
+.. code-block:: shell
+
+  (kytos-environment)$ kytos napps upload
+  Enter the username: <username>
+  Enter the password for <username>: <password>
+  SUCCESS: NApp <username>/my_first_napp uploaded.
+
+
+If your NApp do not have a openapi.yml, the command executed will display the message:
+`Do you have REST endpoints and wish to create an API skeleton in openapi.yml? (Y/n)`.
+In this case if you input `y`, `Y` or `Enter` the file will be created,
+otherwise the compacted NApp will be uploaded without this file.  Do not
+worrying if your NApp do not have this file.
 
 How the events works
 ====================

@@ -162,10 +162,8 @@ Prints a list of all installed NApps along with their respective description and
 
    Status: (i)nstalled, (e)nabled
 
-..
-
-  Reload
-  ======
+Reload
+======
 
   Reloads one or more previously installed NApps. <napps> are the IDs of the
   NApps in the format ``user/napp_name``, separated by spaces.

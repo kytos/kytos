@@ -93,14 +93,108 @@ After created your NApp we have the basic NApp structure.
 - **ui**: Folder with components to be displayed in the Kytos UI
 - **ui/README.rst**: A file with a brief description of your NApp components.
 
+
+How to create a rest endpoint for your napp
+===========================================
+
+In the Kytos Project we have a decorator to create new API endpoints.
+If you want to create a new endpoint you should follow the steps below.
+
+- You need import the rest decorator method.
+- You need  declare a function using the rest decorator
+- In the end of function you need return a string and the status code of your method.
+
+.. code-block:: python
+
+  from flask import jsonify # import jsonify method to convert json to string
+
+  from kytos.core.napps import rest #import rest decorator method
+
+  class Main(KytosNapps): # KytosNapps class
+
+    # all KytosNapps methods
+
+    # call the rest decorator to register your endpoint
+    @rest('sample_endpoint/<name>', methods=['GET'])
+    def my_endpoint(self, name):
+     """Sample of documentation.
+
+     Description for your method.
+     """
+     result = {"name": name}
+     return jsonify(result), 200 # return a string and http status code
+
+When the kytos starts this napp will register an endpoint called
+`/api/<username>/<napp_name>/sample_endpoint/<name>` handling only **GET**
+methods.
+
+If you try open your browser using this endpoint, you will always get in the
+browser the result below, where `name` was given in the browser.
+
+.. code-block:: json
+
+  {
+    "name": "<name>"
+  }
+
+
 How to document your API Rest
 =============================
 
+If your NApp have to use the decorator `rest` to create some API endpoint you
+need to document this endpoint. In the `kytos-utils` package there is a
+command to create a basic **openapi.yml** structure to document your API.
+
+To create the openapi file just run the follow command.
+
+.. code-block:: shell
+
+  (kytos-environment)$ kytos napps prepare
+  Do you have REST endpoints and wish to create an API skeleton in openapi.yml? (Y/n)
+  Please, update your openapi.yml file.
 
 
+After that a new file called openapi.yml will be created and you can update
+that to display your API documentation. To learn more how to  fill the
+documentation you can see the `OpenAPI Specification <https://swagger.io/specification/>`__
 
 
+An example of openapi.yml using the main.py edited in the previous section is
+displayed below.
 
+.. code-block:: yaml
+
+    openapi: 3.0.0
+    info:
+      title: macartur/tutorial
+      version: latest
+      description: # TODO: <<<< Insert your NApp description here >>>>
+    paths:
+      /api/macartur/tutorial/sample_endpoint/{name}:
+        get:
+          summary: Sample of documentation
+          description: Description of your method
+          parameters:  # If you have parameters in the URL
+            - name: Parameter's name as in path.
+              required: true
+              description: Describe parameter here
+              in: path
+          responses:
+            200:  # You can add more responses
+              description: Describe a successful call.
+              content:
+                application/json:  # You can also use text/plain, for example
+                  schema:
+                    type: object  # Adapt to your response
+                    properties:
+                      prop_one:
+                        type: string
+                        description: Meaning of prop_one
+                        example: an example of prop_one
+                      second_prop:
+                        type: integer
+                        description: Meaning of second_prop
+                        example: 42
 
 How to register yourself in the NApps respository
 =================================================

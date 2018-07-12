@@ -22,7 +22,7 @@ all NApps matching the pattern along with their respective description and statu
 
 For example, if you want to search for ``kytos`` you can run:
 
-.. code-block:: shell
+.. code-block:: text
 
   $ kytos napps search kytos
 

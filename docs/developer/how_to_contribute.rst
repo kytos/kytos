@@ -8,7 +8,7 @@ make it easier to create and share Network Applications.
 
 To give us your feedback, check the most appropriate instructions in the next
 section. You can also contact us directly and subscribe to mailing lists as
-described in the :ref:`kytos-get-help` section.
+described in the :doc:`/home/get_help` section.
 
 Contributing Guidelines
 -----------------------
@@ -28,7 +28,7 @@ Got a Question or Problem?
 
 If you have questions about how to use any component of the Kytos project,
 direct them to our dev mailing list. We are also available on IRC. Check the
-details in the :ref:`kytos-get-help` section.
+details in the :doc:`/home/get_help` section.
 
 .. _contributing-issue:
 
@@ -50,7 +50,7 @@ If you would like to implement a new feature, then consider what kind of change
 it is:
 
 - **Major Changes** that you wish to contribute to the project should be
-  discussed first in our dev mailing list or IRC (see: :ref:`kytos-get-help`
+  discussed first in our dev mailing list or IRC (see: :doc:`/home/get_help`
   section), so that we can better coordinate our efforts, prevent work
   duplication, and help you to craft the changes so they are successfully
   integrated into the project.

@@ -2,12 +2,8 @@
 Web Interface
 *************
 
-Overview
-########
-
 kytos has a friendly and flexible interface.  We tried to make the UI in such a
 way that it could be coupled new components in an easy and intuitive way.
-
 The developer of an NApp (`Dev Guide
 <https://docs.kytos.io/kytos/developer/>`_) no longer needs to change the
 Kytos core source code to add its components in the interface.
@@ -15,7 +11,7 @@ Kytos core source code to add its components in the interface.
 This document shows how you, the developer of an NApp, can build your graphical
 screens using the Kytos platform.
 
-.. figure:: _static/imgs/kytos-ui.png
+.. figure:: kytos-ui.png
    :alt: Kytos Graphical User Interface
    :align: center
 
@@ -30,7 +26,7 @@ comfortable to evolve from it.
 
 The following images you can see the Kytos UI sections.
 
-.. figure:: _static/imgs/kytos-ui-parts.png
+.. figure:: kytos-ui-parts.png
    :alt: Kytos Graphical User Interface
    :align: center
 
@@ -119,5 +115,4 @@ UI component: `menu-actions`
 If you try to press `ctrl + space` a list of actions will appear at the center
 of Kytos UI. This is another way to trigger actions that you think that is not
 suitable for the toolbar, for instance.
-
 

@@ -45,7 +45,7 @@ python-openflow.
 
 For more information about the install options please visit the `Kytos's
 Developer Guide / Preparing the Development Environment
-<https://docs.kytos.io/developer/setup_develop_environment/>`__.
+<../../developer/setup_develop_environment/>`__.
 
 Configuring
 ===========
@@ -59,4 +59,4 @@ behaviour. You can view and modify the main config file at
 
 For more information about the config options please visit the `Kytos's
 Administrator Guide / Configuring
-<https://docs.kytos.io/kytos/admin/configuring/>`__.
+<../configuring/>`__.

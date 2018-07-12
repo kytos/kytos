@@ -1,6 +1,5 @@
-#######
 Authors
-#######
+*******
 
 - Beraldo Leal <beraldo DOT leal AT cern DOT ch>
 - Arthur Baruchi <abaruchi AT ncc DOT unesp DOT br>
@@ -10,7 +9,7 @@ Authors
 - Renan Rodrigo <renanrb AT ime DOT usp DOT br>
 
 Contributors
-------------
+============
 
 - Raphael Cóbe <rmcobe AT ncc DOT unesp DOT br>
 - Antonio Francisco <ajoaoff AT gmail.com>

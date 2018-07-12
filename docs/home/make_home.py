@@ -42,7 +42,6 @@ def write_new_rst(directory, readme_path):
     # FOR EACH SECTION CREATE A NEW FILE INTO THE INDEX FOLDER
     for index, section in enumerate(sections):
         path = f'{directory}/{files[index]}.rst'
-
         with open(path,'w') as fp:
             if index == len(sections)-1:
                 start = section
@@ -51,6 +50,12 @@ def write_new_rst(directory, readme_path):
                 start = section
                 end = sections[index+1]
 
+            if "license" in files[index]:
+                replace_file(fp, "../LICENSE", files[index])
+                continue
+            if "authors" in files[index]:
+                replace_file(fp, "../AUTHORS.rst")
+                continue
             fp.write(''.join(readme[start:end]))
 
             if index == 0:
@@ -60,6 +65,14 @@ def write_new_rst(directory, readme_path):
     with open('index.rst', 'w') as fp:
         fp.write(f'.. include:: {directory}/index.rst\n\n')
         fp.write(''.join(toc_tree_text))
+
+def replace_file(file_pointer, destination, title=None):
+    with open(destination,'r') as fp:
+        text = fp.readlines()
+
+    if title:
+        file_pointer.write(f"{title.title()}\n{'*'*len(title)}\n\n")
+    file_pointer.write("".join(text))
 
 if __name__ == '__main__':
     delete_old_rst('./home')

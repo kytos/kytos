@@ -43,26 +43,9 @@ previous steps, then:
 This will install Kytos with all the dependencies, like kytos-utils and
 python-openflow.
 
-
-Production Environment
-======================
-
-To download now the latest release (it still a beta software) from our
-repository, first you need to clone *kytos* repository. So, install git
-before clone:
-
-.. code-block:: shell
-
-  $ sudo apt install git
-  $ git clone https://github.com/kytos/kytos.git
-
-After cloning, the installation process is done by standard `setuptools`
-install procedure:
-
-.. code-block:: shell
-
-  $ cd kytos
-  $ sudo python3.6 setup.py install
+For more information about the install options please visit the `Kytos's
+Developer Guide / Preparing the Development Environment
+<https://docs.kytos.io/developer/setup_develop_environment/>`__.
 
 Configuring
 ===========

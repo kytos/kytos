@@ -5,8 +5,8 @@ Introduction
 This guide is intended to guide you in how to setup and
 develop new features inside the Kytos Project. Please, before proceeding
 make sure that you have read the
-`Kytos introduction <https://docs.kytos.io/>` and
-`Admin Guide <http://docs.kytos.io/https://docs.kytos.io/admin/index.html>`.
+`Kytos introduction <https://docs.kytos.io/>`__ and
+`Admin Guide <http://docs.kytos.io/https://docs.kytos.io/admin/index.html>`__.
 
 In this section you will learn about:
 

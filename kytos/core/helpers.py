@@ -26,7 +26,7 @@ def listen_to(event, *events):
 
     The event that will be listened to is always a string, but it can represent
     a regular expression to match against multiple Event Types. All listened
-    events are documented in :doc:`developer/listened_events` section.
+    events are documented in :doc:`/developer/listened_events` section.
 
     Example of usage:
 

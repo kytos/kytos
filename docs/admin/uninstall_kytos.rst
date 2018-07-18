@@ -11,4 +11,4 @@ terminal:
 
 .. note:: If you want to ensure that all files and settings have been deleted,
           you must do this manually. Please check the `/var/lib/kytos` and
-          `/var/kytos` directories.
+          `/etc/kytos` directories.

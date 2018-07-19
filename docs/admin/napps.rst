@@ -22,7 +22,7 @@ all NApps matching the pattern along with their respective description and statu
 
 For example, if you want to search for ``kytos`` you can run:
 
-.. code-block:: shell
+.. code-block:: text
 
   $ kytos napps search kytos
 
@@ -162,31 +162,35 @@ Prints a list of all installed NApps along with their respective description and
 
    Status: (i)nstalled, (e)nabled
 
-..
+Reload
+======
 
-  Reload
-  ======
+Reloads one or more previously installed NApps. <napps> are the IDs of the
+NApps in the format ``user/napp_name``, separated by spaces.
+This command allows you to change the code of an installed NApp and load
+the new version without restarting Kytos.
 
-  Reloads one or more previously installed NApps. <napps> is the ID of the
-  NApp(s), in the format ``user/napp_name``. This command allows to change a
-  code of an installed NApp and reload the code without having to restart the
-  kytos to persist the changes.
+.. code-block:: shell
 
-  .. code-block:: shell
-
-       $ kytos napps reload <napps>
+   $ kytos napps reload <napps>
 
 
-  For example, you can reload ``kytos/of_core`` and ``kytos/of_l2ls`` using the
-  command:
+For example, you can reload ``kytos/of_core`` and ``kytos/of_l2ls`` using the
+command:
 
-  .. code-block:: shell
+.. code-block:: shell
 
-       $ kytos napps reload kytos/of_core kytos/of_l2ls
+   $ kytos napps reload kytos/of_core kytos/of_l2ls
 
 
-  If you want to reload all NApps at once, you can run:
+If you want to reload all NApps at once, you can run:
 
-  .. code-block:: shell
+.. code-block:: shell
 
-       $ kytos napps reload all
+   $ kytos napps reload all
+
+
+
+For details about how to develop your NApp visit the `Kytos's
+Developer Guide / How to develop your NApp
+<https://docs.kytos.io/developer/creating_a_napp/>`__.

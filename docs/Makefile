@@ -2,7 +2,7 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    =
+SPHINXOPTS    = -W
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
@@ -75,13 +75,13 @@ versions:
 
 .PHONY: clean
 clean:
-	rm -rf kytos.*
+	rm -rf ./developer/kytos_api/*
 	rm -rf $(BUILDDIR)/*
 
 .PHONY: html
 html:
 	$(PYTHON) home/make_home.py
-	sphinx-apidoc -o . ../kytos/ -d10 -M -T
+	sphinx-apidoc -o ./developer/kytos_api ../kytos/ -d10 -M -T
 	sed -i "/Submodules/,+1d" *.rst
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
@@ -90,7 +90,7 @@ html:
 .PHONY: dirhtml
 dirhtml:
 	$(PYTHON) home/make_home.py
-	sphinx-apidoc -o . ../kytos/ -d10 -M -T
+	sphinx-apidoc -o ./developer/kytos_api ../kytos/ -d10 -M -T
 	sed -i "/Submodules/,+1d" *.rst
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo
@@ -284,9 +284,10 @@ dummy:
 	@echo
 	@echo "Build finished. Dummy builder generates no files."
 
+.PHONY: livehtml
 livehtml:
 	$(PYTHON) home/make_home.py
-	sphinx-apidoc -o . ../kytos/ -d10 -M -T
+	sphinx-apidoc -o ./developer/kytos_api ../kytos/ -d10 -M -T
 	sed -i "/Submodules/,+1d" *.rst
 	sphinx-autobuild --re-ignore "\.[^.]+" -r ".+~" -b dirhtml \
 	    $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml -z ../kytos

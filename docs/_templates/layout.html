@@ -6,6 +6,7 @@
   {% set static_page = False %}
 {%else %}
   {% set static_page = True %}
+  {% set theme_navbar_title =  active.title() + " Guide" %}
 {% endif %}
 
 {% if  active == "index" or active == "home" %}

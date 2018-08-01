@@ -186,6 +186,38 @@ Information necessary to create the EVC:
         201: Circuit created but not active (link down)
         401: Permission denied
 
+To edit an EVC, a PATCH request must be used:
+
+.. code:: bash
+
+  PATCH /kytos/mef_eline/v2.0/evc/<id>
+
+Information necessary to modify the EVC:
+
+.. code:: bash
+
+  {str bandwidth, datetime start_date, datetime end_date, 
+  [str primary_links], [str backup_links], bool dynamic_backup_path,
+  tenant, service_level}
+
+If ``start_date`` or ``end_date`` are modified then it is necessary
+to verify if the EVC should be deployed or stopped immediately.
+For example, suppose you have an EVC with ``start_date`` at 4pm and 
+``end_date`` at 6pm. At 3pm it is edited and ``start_date`` is changed
+to 2pm. In this case, the EVC should be imediately deployed.
+If ``primary_links`` or ``backup_links`` are modified then new paths
+must be found and redeployed if necessary.
+
+To remove an EVC, the user will use a DELETE request:
+
+.. code:: bash
+
+  DELETE /kytos/mef_eline/v2.0/evc/<id>
+
+No extra information should be passed. The EVC must be marked as disabled
+but not removed from the database.
+
+
 Interface tags pool mechanism
 -----------------------------
 

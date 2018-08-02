@@ -10,5 +10,5 @@ terminal:
   $ pip uninstall kytos
 
 .. note:: If you want to ensure that all files and settings have been deleted,
-          you must do this manually. Please check the `/etc/kytos` and
-          `/var/kytos` directories.
+          you must do this manually. Please check the `/var/lib/kytos` and
+          `/etc/kytos` directories.

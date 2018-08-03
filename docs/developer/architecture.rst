@@ -30,8 +30,8 @@ behind the separation of such components is to clearly define the main
 responsibilities needed to take care of in order to build an OpenFlow based
 network.
 
-Kytos OpenFlow Library - python3-openflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Kytos OpenFlow Library - python-openflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The main responsibility of this component is to read binary OpenFlow messages
 and build primary data structures from them. We've developed a set of basic

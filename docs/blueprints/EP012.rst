@@ -202,14 +202,18 @@ Information necessary to modify the EVC:
 
 If ``start_date`` or ``end_date`` are modified then it is necessary
 to verify if the EVC should be deployed or stopped immediately.
-For example, suppose you have an EVC with ``start_date`` at 4pm and
+For example, suppose you have an EVC with ``start_date`` at 2pm and
 ``end_date`` at 6pm. At 3pm it is edited and ``start_date`` is changed
-to 2pm. In this case, the EVC should be imediately deployed.
+to 4pm. In this case, the flows from the EVC should be imediately
+removed from the nodes.
 If ``UNI_A``, ``UNI_Z``, ``primary_links`` or ``backup_links`` are
 modified then new paths must be found and redeployed if necessary.
+To redeploy an EVC the old flows must be removed from the nodes and
+the news ones (from the new path) must be installed in the nodes.
 
 Whenever an EVC is modified, that change must be stored for history.
-The user must be able to track who modified what and when.
+The user must be able to track who modified what and when. A suggestion
+for a history table is given below.
 
 .. code:: python
 

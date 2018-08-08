@@ -191,6 +191,10 @@ class KytosNApp(Thread, metaclass=ABCMeta):
                     self._listeners[event_name] = []
                 self._listeners[event_name].append(method)
 
+    def listeners(self):
+        """Return all listeners registered."""
+        return list(self._listeners.keys())
+
     def _load_json(self):
         """Update object attributes based on kytos.json."""
         current_file = sys.modules[self.__class__.__module__].__file__

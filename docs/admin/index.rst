@@ -71,4 +71,3 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
   web-ui
   upgrade_kytos
   uninstall_kytos
-  monitoring_kytos

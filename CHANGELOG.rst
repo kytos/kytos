@@ -21,6 +21,12 @@ Fixed
 Security
 ========
 
+[2018.1] - "dalva" - 2018-07-19
+*******************************
+Fixed
+=====
+- Fixed napps pre-installed with default value.
+
 [2018.1b3] - "dalva" beta3 - 2018-06-15
 **************************************
 Added

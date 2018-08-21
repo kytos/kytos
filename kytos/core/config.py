@@ -154,6 +154,9 @@ class KytosConfig():
 
         result = options.enable_entities_by_default in ['True', True]
         options.enable_entities_by_default = result
-        options.napps_pre_installed = json.loads(options.napps_pre_installed)
+
+        if isinstance(options.napps_pre_installed, str):
+            napps = options.napps_pre_installed
+            options.napps_pre_installed = json.loads(napps)
 
         return options

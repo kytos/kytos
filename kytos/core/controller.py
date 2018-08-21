@@ -40,6 +40,7 @@ from kytos.core.napps.base import NApp
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.napps.napp_dir_listener import NAppDirListener
 from kytos.core.switch import Switch
+from kytos.core import abclient
 
 __all__ = ('Controller',)
 
@@ -198,6 +199,9 @@ class Controller:
                                   self,
                                   self.options.protocol_name)
 
+        event = KytosEvent(name='kytos/core.start')
+        self.buffers.app.put(event)
+
         self.log.info("Starting TCP server: %s", self.server)
         self.server.serve_forever()
 
@@ -241,6 +245,10 @@ class Controller:
         self.napp_dir_listener.start()
         self.pre_install_napps(self.options.napps_pre_installed)
         self.load_napps()
+
+        self.autobahn = abclient.component
+        self.autobahn.ui_buffer = self.buffers.ui
+        self.autobahn.start(loop=self._loop)
 
         self.started_at = now()
 
@@ -469,9 +477,12 @@ class Controller:
         self.log.info("App Event Handler started")
         while True:
             event = await self.buffers.app.aget()
+
+            # Forward all app events to UI buffer
+            await self.buffers.ui.aput(event)
+
             self.notify_listeners(event)
             self.log.debug("App Event handler called")
-
             if event.name == "kytos/core.shutdown":
                 self.log.debug("App Event handler stopped")
                 break

@@ -149,6 +149,7 @@ class KytosBuffers:
         self.msg_in = KytosEventBuffer('msg_in_event')
         self.msg_out = KytosEventBuffer('msg_out_event')
         self.app = KytosEventBuffer('app_event')
+        self.ui = KytosEventBuffer('ui_event')
 
     def send_stop_signal(self):
         """Send a ``kytos/core.shutdown`` event to each buffer."""

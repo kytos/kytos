@@ -53,16 +53,21 @@ class NApp:
     def uri(self):
         """Return a unique identifier of this NApp."""
         version = self.version if self.version else 'latest'
-        if self._has_valid_repository():
-            return "{}/{}-{}".format(self.repository, self.id, version)
-            # Use the next line after Diraol fix redirect using ":" for version
-            # return "{}/{}:{}".format(self.repository, self.id, version)
+
+        if not self._has_valid_repository():
+            return ""
+
+        # Use the next line after Diraol fix redirect using ":" for version
+        # return "{}/{}:{}".format(self.repository, self.id, version)
+
+        return "{}/{}-{}".format(self.repository, self.id, version)
 
     @property
     def package_url(self):
         """Return a fully qualified URL for a NApp package."""
-        if self.uri:
-            return "{}.napp".format(self.uri)
+        if not self.uri:
+            return ""
+        return "{}.napp".format(self.uri)
 
     @classmethod
     def create_from_json(cls, filename):
@@ -88,11 +93,13 @@ class NApp:
         regex = r'^(((https?://|file://)(.+))/)?(.+?)/(.+?)/?(:(.+))?$'
         match = re.match(regex, uri)
 
-        if match:
-            return NApp(username=match.groups()[4],
-                        name=match.groups()[5],
-                        version=match.groups()[7],
-                        repository=match.groups()[1])
+        if not match:
+            return None
+
+        return NApp(username=match.groups()[4],
+                    name=match.groups()[5],
+                    version=match.groups()[7],
+                    repository=match.groups()[1])
 
     def match(self, pattern):
         """Whether a pattern is present on NApp id, description and tags."""
@@ -114,12 +121,14 @@ class NApp:
             str: Downloaded temp filename.
 
         """
-        if self.package_url:
-            package_filename = urllib.request.urlretrieve(self.package_url)[0]
-            extracted = self._extract(package_filename)
-            Path(package_filename).unlink()
-            self._update_repo_file(extracted)
-            return extracted
+        if not self.package_url:
+            return None
+
+        package_filename = urllib.request.urlretrieve(self.package_url)[0]
+        extracted = self._extract(package_filename)
+        Path(package_filename).unlink()
+        self._update_repo_file(extracted)
+        return extracted
 
     def as_json(self):
         """Dump all NApp attributes on a json format."""

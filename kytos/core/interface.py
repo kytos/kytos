@@ -96,7 +96,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         """Compare Interface class with another instance."""
         if isinstance(other, str):
             return self.address == other
-        elif isinstance(other, Interface):
+        if isinstance(other, Interface):
             return self.port_number == other.port_number and \
                 self.name == other.name and \
                 self.address == other.address and \
@@ -149,8 +149,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         """Add a specific tag in available_tags."""
         if not self.is_tag_available(tag):
             self.available_tags.append(tag)
-        else:
-            return False
+            return True
+        return False
 
     def get_endpoint(self, endpoint):
         """Return a tuple with existent endpoint, None otherwise.
@@ -207,8 +207,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         Warning: This method can potentially change information of other
         Interface instances. Use it with caution.
         """
-        if (link.endpoint_a != self and
-                link.endpoint_b != self):
+        if self not in (link.endpoint_a, link.endpoint_b):
             return False
 
         if self.link is None or self.link != link:
@@ -221,6 +220,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
         if endpoint.link is None or endpoint.link != link:
             endpoint.link = link
+
+        return True
 
     @property
     def speed(self):
@@ -277,6 +278,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             switch_id = self.switch.id
         LOG.warning("Couldn't get port %s speed, sw %s, feats %s",
                     self.port_number, switch_id, self.features)
+        return None
 
     def _is_v0x04(self):
         """Whether the switch is connected using OpenFlow 1.3."""
@@ -289,12 +291,13 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         pfts = PortFeatures01
         if fts and fts & pfts.OFPPF_10GB_FD:
             return 10 * 10**9 / 8
-        elif fts and fts & (pfts.OFPPF_1GB_HD | pfts.OFPPF_1GB_FD):
+        if fts and fts & (pfts.OFPPF_1GB_HD | pfts.OFPPF_1GB_FD):
             return 10**9 / 8
-        elif fts and fts & (pfts.OFPPF_100MB_HD | pfts.OFPPF_100MB_FD):
+        if fts and fts & (pfts.OFPPF_100MB_HD | pfts.OFPPF_100MB_FD):
             return 100 * 10**6 / 8
-        elif fts and fts & (pfts.OFPPF_10MB_HD | pfts.OFPPF_10MB_FD):
+        if fts and fts & (pfts.OFPPF_10MB_HD | pfts.OFPPF_10MB_FD):
             return 10 * 10**6 / 8
+        return None
 
     def _get_v0x04_speed(self):
         """Check against higher enums of v0x04.
@@ -305,10 +308,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         pfts = PortFeatures04
         if fts and fts & pfts.OFPPF_1TB_FD:
             return 10**12 / 8
-        elif fts and fts & pfts.OFPPF_100GB_FD:
+        if fts and fts & pfts.OFPPF_100GB_FD:
             return 100 * 10**9 / 8
-        elif fts and fts & pfts.OFPPF_40GB_FD:
+        if fts and fts & pfts.OFPPF_40GB_FD:
             return 40 * 10**9 / 8
+        return None
 
     def get_hr_speed(self):
         """Return Human-Readable string for link speed.

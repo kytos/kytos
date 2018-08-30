@@ -11,7 +11,7 @@ __all__ = ('KytosBuffers', )
 LOG = logging.getLogger(__name__)
 
 
-class KytosEventBuffer(object):
+class KytosEventBuffer:
     """KytosEventBuffer represents a queue to store a set of KytosEvents."""
 
     def __init__(self, name, event_base_class=None):
@@ -127,7 +127,7 @@ class KytosEventBuffer(object):
         return self._queue.sync_q.full()
 
 
-class KytosBuffers(object):
+class KytosBuffers:
     """Set of KytosEventBuffer used in Kytos."""
 
     def __init__(self):

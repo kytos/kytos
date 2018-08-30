@@ -274,7 +274,7 @@ setup(name='kytos',
       extras_require={
           'dev': [
               'coverage',
-              'pip-tools',
+              'pip-tools >= 2.0',
               'yala',
               'tox',
           ],

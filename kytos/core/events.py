@@ -3,7 +3,7 @@
 from kytos.core.helpers import now
 
 
-class KytosEvent(object):
+class KytosEvent:
     """Base Event class.
 
     The event data will be passed in the `content` attribute, which should be a

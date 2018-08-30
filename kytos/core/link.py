@@ -96,8 +96,8 @@ class Link(GenericEntity):
         if not self.is_tag_available(tag):
             self.endpoint_a.make_tag_available(tag)
             self.endpoint_b.make_tag_available(tag)
-        else:
-            return False
+            return True
+        return False
 
     def available_vlans(self):
         """Get all available vlans from each interface in the link."""

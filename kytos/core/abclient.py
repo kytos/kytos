@@ -49,6 +49,10 @@ import txaio
 
 LOG = txaio.make_logger()
 
+# txaio logger has a bug when the string contains dict representations {}
+# so we're using print() instead in some places
+#LOG.info(msg)
+
 component = Component(
     transports=u"ws://localhost:8080/ws",
     realm=u"kytos",
@@ -56,9 +60,11 @@ component = Component(
 
 def on_event(name, content, source):
     msg = f"'{name}' event, content: {content}, source: {source}"
-    # txaio logger has a bug when the string contains dict representations {}
-    #LOG.info(msg)
     print(msg)
+
+def on_ping(counter, content, source):
+    msg = f"ui.ping event #{counter}, content: {content}, source: {source}"
+    LOG.info(msg)
 
 @component.on_join
 async def joined(session, details):
@@ -71,7 +77,7 @@ async def joined(session, details):
     match_prefix = SubscribeOptions(match='prefix')
 
     # Keep-alive test
-    #await session.subscribe(on_counter, 'ui.counter')
+    await session.subscribe(on_ping, 'kytos/ui.ping')
 
     # Watch for all Kytos Events:
     #await session.subscribe(on_event, 'kytos/', match_prefix)
@@ -114,7 +120,7 @@ async def ui_event_handler():
                                   source='kytos.core.abclient',
                                   options=PublishOptions(exclude_me=False))
         if event.name == "kytos/core.shutdown":
-            self.log.debug("App Event handler stopped")
+            LOG.debug("App Event handler stopped")
             break
 
 #

@@ -199,9 +199,6 @@ class Controller:
                                   self,
                                   self.options.protocol_name)
 
-        event = KytosEvent(name='kytos/core.start')
-        self.buffers.app.put(event)
-
         self.log.info("Starting TCP server: %s", self.server)
         self.server.serve_forever()
 
@@ -251,6 +248,11 @@ class Controller:
         self.autobahn.start(loop=self._loop)
 
         self.started_at = now()
+
+        event = KytosEvent(name='kytos/core.start')
+        event.content = {"started_at": self.started_at}
+        self.buffers.app.put(event)
+
 
     def _register_endpoints(self):
         """Register all rest endpoint served by kytos.

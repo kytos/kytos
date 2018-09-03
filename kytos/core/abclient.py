@@ -123,9 +123,8 @@ async def ui_event_handler():
             LOG.debug("App Event handler stopped")
             break
 
-#
-# HELPER FUNCTIONS
-#
+
+# TODO: move helper function to appropriate module
 def serialize_dict(data: dict):
     """Force conversion of value objects to JSON.
 
@@ -141,6 +140,11 @@ def serialize_dict(data: dict):
         if not isinstance(obj, str):
             if getattr(obj, 'as_json', None):
                 obj = obj.as_json()
+            elif callable(obj):
+                # do not forward functions/methods as event content
+                continue
+            elif isinstance(obj, dict):
+                obj = serialize_dict(obj)
             else:
                 print("XXX key '%s' doesn't have .as_json(), value: %s, class %s" % (key, obj, type(obj)))
                 obj = str(obj)

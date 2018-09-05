@@ -11,7 +11,7 @@
 # log = logging.getLogger(__name__)
 #
 #
-# class NoDaemonContext(object):
+# class NoDaemonContext:
 #     """A mock DaemonContext for running kytos without being a daemon."""
 #
 #     def __init__(self, **kwargs):
@@ -47,7 +47,7 @@
 #         sys.exit(0)
 #
 #
-# class KytosDaemon(object):
+# class KytosDaemon:
 #     """Daemonize and run the kytos daemon."""
 #
 #     def __init__(self, options):

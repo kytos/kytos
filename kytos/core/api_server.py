@@ -331,4 +331,4 @@ class APIServer:
             self.app.url_map._rules.pop(index)
             # pylint: enable=protected-access
 
-        self.log.info(f'The Rest endpoints from %s were disabled.', prefix)
+        self.log.info('The Rest endpoints from %s were disabled.', prefix)

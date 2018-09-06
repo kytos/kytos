@@ -12,7 +12,32 @@ Run the following command to backup the files:
 
 .. code-block:: bash
 
-  $ tar cvfz ~/kytos-backup.tar.gz /etc/kytos /var/lib/kytos
+  $ tar cvfz kytos-backup.tar.gz /etc/kytos /var/lib/kytos
+
+Or, if you want to create multiple backup files, use a more verbose file name:
+
+.. code-block:: bash
+
+  $ tar cvfz "backup-$(kytosd --version)-$(date --iso-8601=seconds).tar.gz" \
+     /etc/kytos /var/lib/kytos
+
+This will create a file with the following pattern for the file name:
+
+.. code-block:: bash
+
+  backup-kytosd 2018.1b2-2018-09-03T18:39:19-0700.tar.gz
+
+It's a good idea to also save the version numbers for all napps:
+
+.. code-block:: bash
+
+  $ kytos napps list > "kytos-napps-list-$(kytosd --version).txt"
+
+If you're using the **storehouse** NApp, backup its files too:
+
+.. code-block:: bash
+
+  $ tar cvfz kytos-storehouse-data.tar.gz /var/tmp/kytos/storehouse
 
 
 Upgrading Kytos

@@ -21,6 +21,21 @@ Fixed
 Security
 ========
 
+[2018.2b1] - "ernesto" - 2018-09-06
+**********************************
+Added
+=====
+- Added methods to list all NApp listeners.
+
+Changed
+=======
+- Blueprint EP12.rst updated in order to describe patch and delete operations.
+
+Fixed
+=====
+- Fixed compatibility of Python 3.7
+- Fixed some linter issues.
+
 [2018.1] - "dalva" - 2018-07-19
 *******************************
 Fixed

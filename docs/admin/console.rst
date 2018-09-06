@@ -26,7 +26,7 @@ the Kytos console:
       Documentation.: https://docs.kytos.io/
       OF Address....: tcp://0.0.0.0:6633
       WEB UI........: http://0.0.0.0:8181/
-      Kytos Version.: 2018.1
+      Kytos Version.: 2018.2b1
 
   kytos $>
 

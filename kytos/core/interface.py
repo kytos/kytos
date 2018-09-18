@@ -3,8 +3,10 @@ import json
 import logging
 from enum import IntEnum
 
+from pyof.v0x01.common.phy_port import Port as PortNo01
 from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
 from pyof.v0x04.common.port import PortFeatures as PortFeatures04
+from pyof.v0x04.common.port import PortNo as PortNo04
 
 from kytos.core.common import GenericEntity
 from kytos.core.helpers import now
@@ -238,6 +240,13 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         """
         if self._custom_speed is not None:
             return self._custom_speed
+
+        if self._is_v0x04() and self.port_number == PortNo04.OFPP_LOCAL:
+            return 0
+
+        if not self._is_v0x04() and self.port_number == PortNo01.OFPP_LOCAL:
+            return 0
+
         return self.get_of_features_speed()
 
     def set_custom_speed(self, bytes_per_second):

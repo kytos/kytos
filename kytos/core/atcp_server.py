@@ -125,9 +125,10 @@ class KytosServerProtocol(asyncio.Protocol):
 
         self.connection = Connection(addr, port, socket)
 
-        # ASYNC TODO:
-        # if self.server.protocol_name:
-        #     self.known_ports[server_port] = self.server.protocol_name
+        # This allows someone to inherit from KytosServer and start a server
+        # on another port to handle a different protocol.
+        if self.server.protocol_name:
+            self.known_ports[server_port] = self.server.protocol_name
 
         if server_port in self.known_ports:
             protocol_name = self.known_ports[server_port]
@@ -135,11 +136,7 @@ class KytosServerProtocol(asyncio.Protocol):
             protocol_name = f'{server_port:04d}'
         self.connection.protocol.name = protocol_name
 
-        # ASYNC TODO:
-        # self.request.settimeout(70)
-
-        event_name = 'kytos/core.connection.new'
-        # f'kytos/core.{self.connection.protocol.name}.connection.new'
+        event_name = f'kytos/core.{protocol_name}.connection.new'
         event = KytosEvent(name=event_name,
                            content={'source': self.connection})
 
@@ -151,6 +148,9 @@ class KytosServerProtocol(asyncio.Protocol):
         Sends the received binary data in a ``kytos/core.{protocol}.raw.in``
         event on the raw buffer.
         """
+        # max_size = 2**16
+        # new_data = self.request.recv(max_size)
+
         data = self._rest + data
 
         LOG.debug("New data from %s:%s (%s bytes)",
@@ -168,10 +168,12 @@ class KytosServerProtocol(asyncio.Protocol):
     def connection_lost(self, exc):
         """Close the connection socket and generate connection lost event.
 
-        Emits a ``kytos/core.connection.lost`` event through the App buffer.
+        Emits a ``kytos/core.{protocol}.connection.lost`` event through the
+        App buffer.
         """
+        reason = exc or "Request closed by client"
         LOG.info("Connection lost with client %s:%s. Reason: %s",
-                 self.connection.address, self.connection.port, exc)
+                 self.connection.address, self.connection.port, reason)
 
         self.connection.close()
 

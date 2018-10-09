@@ -19,7 +19,7 @@ from kytos.core.metadata import __version__
 class KytosPrompt(Prompts):
     """Configure Kytos prompt for interactive shell."""
 
-    def in_prompt_tokens(self, cli=None):
+    def in_prompt_tokens(self):
         """Kytos IPython prompt."""
         return [(Token.Prompt, 'kytos $> ')]
 

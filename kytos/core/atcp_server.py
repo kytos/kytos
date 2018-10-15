@@ -26,14 +26,15 @@ class KytosServer:
     It creates a new thread for each Handler.
     """
 
-    def __init__(self, server_address, server_protocol, controller,
-                 protocol_name):
+    def __init__(self,  # pylint: disable=too-many-arguments
+                 server_address, server_protocol, controller,
+                 protocol_name, loop=None):
         """Create the object without starting the server.
 
         Args:
             server_address (tuple): Address where the server is listening.
                 example: ('127.0.0.1', 80)
-            server_protocol(asyncio.Protocol):
+            server_protocol (asyncio.Protocol):
                 Class that will be instantiated to handle each request.
             controller (:class:`~kytos.core.controller.Controller`):
                 An instance of Kytos Controller class.
@@ -52,7 +53,7 @@ class KytosServer:
         # object pointing to this instance
         self.server_protocol.server = self
 
-        self.loop = asyncio.get_event_loop()
+        self.loop = loop or asyncio.get_event_loop()
         self.loop.set_exception_handler(exception_handler)
 
     def serve_forever(self):

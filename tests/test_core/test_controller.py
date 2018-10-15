@@ -1,4 +1,5 @@
 """Test kytos.core.controller module."""
+import asyncio
 import json
 import logging
 import warnings
@@ -15,8 +16,12 @@ class TestController(TestCase):
 
     def setUp(self):
         """Instantiate a controller."""
+
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(None)
+
         self.options = KytosConfig().options['daemon']
-        self.controller = Controller(self.options)
+        self.controller = Controller(self.options, loop=self.loop)
         self.controller.log = Mock()
 
     def test_configuration_endpoint(self):
@@ -31,13 +36,16 @@ class TestController(TestCase):
     @patch('kytos.core.logs.Path')
     def test_websocket_log_usage(path, log_manager):
         """Assert that the web socket log is used."""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(None)
+
         # Save original state
         handlers_bak = copy(logging.root.handlers)
 
         # Minimum to instantiate Controller
         options = Mock(napps='')
         path.return_value.exists.return_value = False
-        controller = Controller(options)
+        controller = Controller(options, loop=loop)
 
         # The test
         controller.enable_logs()

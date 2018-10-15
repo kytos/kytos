@@ -57,7 +57,7 @@ class Controller:
 
     # Created issue #568 for the disabled checks.
     # pylint: disable=too-many-instance-attributes,too-many-public-methods
-    def __init__(self, options=None):
+    def __init__(self, options=None, loop=None):
         """Init method of Controller class takes the parameters below.
 
         Args:
@@ -66,10 +66,14 @@ class Controller:
         """
         if options is None:
             options = KytosConfig().options['daemon']
+
+        self._loop = loop or asyncio.get_event_loop()
+        self._pool = ThreadPoolExecutor(max_workers=1)
+
         #: dict: keep the main threads of the controller (buffers and handler)
         self._threads = {}
         #: KytosBuffers: KytosBuffer object with Controller buffers
-        self.buffers = KytosBuffers()
+        self.buffers = KytosBuffers(loop=self._loop)
         #: dict: keep track of the socket connections labeled by ``(ip, port)``
         #:
         #: This dict stores all connections between the controller and the
@@ -114,9 +118,6 @@ class Controller:
 
         #: Observer that handle NApps when they are enabled or disabled.
         self.napp_dir_listener = NAppDirListener(self)
-
-        self._loop = asyncio.get_event_loop()
-        self._pool = ThreadPoolExecutor(max_workers=1)
 
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:

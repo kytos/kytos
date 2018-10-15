@@ -21,6 +21,19 @@ Fixed
 Security
 ========
 
+[2018.2b2] - "ernesto" - 2018-10-15
+**********************************
+
+Changed
+=======
+ - Improved test coverage
+
+Fixed
+=====
+ - Removed warnings for invalid port speed (fix #754)
+ - Fixed port speed on web user interface
+ - Update console to support IPython 7
+
 [2018.2b1] - "ernesto" - 2018-09-06
 **********************************
 Added

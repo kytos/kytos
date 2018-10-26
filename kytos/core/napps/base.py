@@ -263,7 +263,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
     @abstractmethod
     def execute(self):
-        """Execute in a loop until the signal 'kytos/core.shutdown' is received.
+        """Execute in a loop until 'kytos/core.shutdown' is received.
 
         The execute method is called by KytosNApp class.
         Users shouldn't call this method directly.

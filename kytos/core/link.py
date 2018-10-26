@@ -15,7 +15,14 @@ class Link(GenericEntity):
     """Define a link between two Endpoints."""
 
     def __init__(self, endpoint_a, endpoint_b):
-        """Create a Link instance and set its attributes."""
+        """Create a Link instance and set its attributes.
+
+        Two ``kytos.core.interface.Interface``s are required as parameters.
+        """
+        if endpoint_a is None:
+            raise ValueError("endpoint_a cannot be None")
+        if endpoint_b is None:
+            raise ValueError("endpoint_b cannot be None")
         self.endpoint_a = endpoint_a
         self.endpoint_b = endpoint_b
         self._uuid = uuid4()

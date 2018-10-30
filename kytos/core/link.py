@@ -15,7 +15,14 @@ class Link(GenericEntity):
     """Define a link between two Endpoints."""
 
     def __init__(self, endpoint_a, endpoint_b):
-        """Create a Link instance and set its attributes."""
+        """Create a Link instance and set its attributes.
+
+        Two kytos.core.interface.Interface are required as parameters.
+        """
+        if endpoint_a is None:
+            raise ValueError("endpoint_a cannot be None")
+        if endpoint_b is None:
+            raise ValueError("endpoint_b cannot be None")
         self.endpoint_a = endpoint_a
         self.endpoint_b = endpoint_b
         self._uuid = uuid4()
@@ -24,10 +31,10 @@ class Link(GenericEntity):
     def is_enabled(self):
         """Override the is_enabled method.
 
-        We consider a link enabled whether all the interfaces are enabled.
+        We consider a link enabled when all the interfaces are enabled.
 
         Returns:
-            boolean: True if the interfaces are enabled, othewrise False.
+            boolean: True if both interfaces are enabled, False otherwise.
 
         """
         return (self._enabled and self.endpoint_a.is_enabled() and

@@ -38,6 +38,10 @@ class NAppsManager:
         enabled = self._enabled / napp.username / napp.name
         installed = self._installed / napp.username / napp.name
 
+        # First, enable all the dependencies
+        for dep in napp.napp_dependencies:
+            self.enable(dep)
+
         if not installed.is_dir():
             LOG.error("Failed to enable NApp %s. NApp not installed.",
                       napp.id)

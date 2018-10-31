@@ -669,6 +669,10 @@ class Controller:
             self.log.error("Error loading NApp '%s/%s': %s",
                            username, napp_name, err)
             return
+        except FileNotFoundError as err:
+            msg = "NApp module not found, assuming it's a meta napp: %s"
+            self.log.warning(msg, err.filename)
+            return
 
         napp = napp_module.Main(controller=self)
 

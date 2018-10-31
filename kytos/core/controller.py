@@ -22,8 +22,8 @@ import re
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from importlib import reload as reload_module
 from importlib import import_module
+from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
@@ -44,7 +44,7 @@ from kytos.core.switch import Switch
 __all__ = ('Controller',)
 
 
-class Controller(object):
+class Controller:
     """Main class of Kytos.
 
     The main responsibilities of this class are:
@@ -57,7 +57,7 @@ class Controller(object):
 
     # Created issue #568 for the disabled checks.
     # pylint: disable=too-many-instance-attributes,too-many-public-methods
-    def __init__(self, options=None):
+    def __init__(self, options=None, loop=None):
         """Init method of Controller class takes the parameters below.
 
         Args:
@@ -66,10 +66,14 @@ class Controller(object):
         """
         if options is None:
             options = KytosConfig().options['daemon']
+
+        self._loop = loop or asyncio.get_event_loop()
+        self._pool = ThreadPoolExecutor(max_workers=1)
+
         #: dict: keep the main threads of the controller (buffers and handler)
         self._threads = {}
         #: KytosBuffers: KytosBuffer object with Controller buffers
-        self.buffers = KytosBuffers()
+        self.buffers = KytosBuffers(loop=self._loop)
         #: dict: keep track of the socket connections labeled by ``(ip, port)``
         #:
         #: This dict stores all connections between the controller and the
@@ -84,7 +88,7 @@ class Controller(object):
         self.events_listeners = {'kytos/core.connection.new':
                                  [self.new_connection]}
 
-        #: dict: Current loaded apps - 'napp_name': napp (instance)
+        #: dict: Current loaded apps - ``'napp_name': napp`` (instance)
         #:
         #: The key is the napp name (string), while the value is the napp
         #: instance itself.
@@ -114,9 +118,6 @@ class Controller(object):
 
         #: Observer that handle NApps when they are enabled or disabled.
         self.napp_dir_listener = NAppDirListener(self)
-
-        self._loop = asyncio.get_event_loop()
-        self._pool = ThreadPoolExecutor(max_workers=1)
 
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
@@ -221,7 +222,8 @@ class Controller(object):
             completed, pending = await asyncio.wait(blocking_tasks)
             # results = [t.result() for t in completed]
             # log.debug('results: {!r}'.format(results))
-            log.debug(f'completed: {len(completed)}, pending: {len(pending)}')
+            log.debug('completed: %d, pending: %d',
+                      len(completed), len(pending))
 
         task = self._loop.create_task(self.raw_event_handler())
         task = self._loop.create_task(self.msg_in_event_handler())
@@ -447,7 +449,7 @@ class Controller(object):
                     not destination.state == ConnectionState.FINISHED):
                 packet = message.pack()
                 destination.send(packet)
-                self.log.debug('Connection %s: OUT OFP, ' +
+                self.log.debug('Connection %s: OUT OFP, '
                                'version: %s, type: %s, xid: %s - %s',
                                destination.id,
                                message.header.version,
@@ -612,10 +614,10 @@ class Controller(object):
                 The received event (``kytos/core.connection.new``) with the
                 needed info.
         """
-        self.log.info(f"Handling {event}...")
+        self.log.info("Handling %s...", event)
 
         connection = event.source
-        self.log.debug(f'Event source: {event.source}')
+        self.log.debug("Event source: %s", event.source)
 
         # Remove old connection (aka cleanup) if it exists
         if self.get_connection_by_id(connection.id):

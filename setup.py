@@ -1,6 +1,6 @@
 """Setup script.
 
-Run "python3 setup --help-commands" to list all available commands and their
+Run "python3 setup.py --help-commands" to list all available commands and their
 descriptions.
 """
 import os
@@ -14,7 +14,7 @@ from pathlib import Path
 from subprocess import CalledProcessError, call, check_call
 
 try:
-    # Used to check whether pip is installed
+    # Check if pip is installed
     import pip  # pylint: disable=unused-import
     from setuptools import Command, find_packages, setup
     from setuptools.command.develop import develop
@@ -51,7 +51,7 @@ class SimpleCommand(Command):
         pass
 
     def initialize_options(self):
-        """Set defa ult values for options."""
+        """Set default values for options."""
         pass
 
     def finalize_options(self):
@@ -138,7 +138,7 @@ class CITest(SimpleCommand):
 
 
 class CommonInstall:
-    """Class with common method used by children classes."""
+    """Class with common methods used by children classes."""
 
     @classmethod
     def generate_file_from_template(cls, templates,
@@ -274,7 +274,7 @@ setup(name='kytos',
       extras_require={
           'dev': [
               'coverage',
-              'pip-tools',
+              'pip-tools >= 2.0',
               'yala',
               'tox',
           ],

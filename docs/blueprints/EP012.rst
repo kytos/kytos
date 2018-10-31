@@ -129,6 +129,23 @@ Information necessary to create the EVC:
   end_date, [str primary_links], [str backup_links], bool dynamic_backup_path,
   tenant, service_level}
 
+To edit an EVC, a PATCH request must be used:
+
+.. code:: bash
+
+  PATCH /kytos/mef_eline/v2.0/evc/<id>
+
+All information that is going to be modified should be passed as in the POST
+endpoint. Note that ``UNI_A``, ``UNI_Z`` and ``name`` cannot be edited.
+
+To remove an EVC, the user will use a DELETE request:
+
+.. code:: bash
+
+  DELETE /kytos/mef_eline/v2.0/evc/<id>
+
+No extra information should be passed.
+
 **\*Required fields**
 
 .. code:: python
@@ -231,6 +248,7 @@ To remove an EVC, the user will use a DELETE request:
 
 No extra information should be passed. The EVC must be marked as disabled
 but not removed from the database.
+
 
 Interface tags pool mechanism
 -----------------------------

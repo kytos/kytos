@@ -57,7 +57,7 @@ class GenericEntity:
         """Return the current status of the Entity."""
         if self.is_enabled() and self.is_active():
             return EntityStatus.UP
-        elif self.is_administrative_down():
+        if self.is_administrative_down():
             return EntityStatus.DISABLED
         return EntityStatus.DOWN
 
@@ -124,7 +124,8 @@ class GenericEntity:
         If force is True any existing value is overwritten.
         """
         if force:
-            return self.metadata.update(metadatas)
+            self.metadata.update(metadatas)
+            return
 
         for key, value in metadatas.items():
             self.add_metadata(key, value)

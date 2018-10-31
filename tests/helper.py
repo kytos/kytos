@@ -14,24 +14,24 @@ __all__ = ('do_handshake', 'new_controller', 'new_client',
            'new_handshaked_client')
 
 
-def do_handshake(client):
-    """Get a client (socket) and do the handshake of it.
+def do_handshake(client: socket):
+    """Get a client socket and do the handshake of it.
 
-    This method receives a client (socket) that simulates a switch on the
-    network and do the OpenFlow handshake process with a running controller
+    This method receives a client socket that simulates a switch on the
+    network and does the OpenFlow handshake process with a running controller
     on the network.
 
     Args:
-        client (socket): a socket object connected on the controller.
+        client (socket): a socket object connected to the controller.
 
     Returns:
         The client with the handshake process done.
 
     """
-    # -- STEP 1: Sending Hello message
+    # -- STEP 1: Send Hello message
     client.send(Hello(xid=3).pack())
 
-    # -- STEP 2: Whait for Hello response
+    # -- STEP 2: Wait for Hello response
     binary_packet = b''
     while len(binary_packet) < 8:
         binary_packet = client.recv(8)

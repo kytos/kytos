@@ -11,10 +11,10 @@ __all__ = ('KytosBuffers', )
 LOG = logging.getLogger(__name__)
 
 
-class KytosEventBuffer(object):
+class KytosEventBuffer:
     """KytosEventBuffer represents a queue to store a set of KytosEvents."""
 
-    def __init__(self, name, event_base_class=None):
+    def __init__(self, name, event_base_class=None, loop=None):
         """Contructor of KytosEventBuffer receive the parameters below.
 
         Args:
@@ -22,8 +22,9 @@ class KytosEventBuffer(object):
             event_base_class (class): Class of KytosEvent.
         """
         self.name = name
-        self._queue = Queue()
         self._event_base_class = event_base_class
+        self._loop = loop
+        self._queue = Queue(loop=self._loop)
         self._reject_new_events = False
 
     def put(self, event):
@@ -127,10 +128,10 @@ class KytosEventBuffer(object):
         return self._queue.sync_q.full()
 
 
-class KytosBuffers(object):
+class KytosBuffers:
     """Set of KytosEventBuffer used in Kytos."""
 
-    def __init__(self):
+    def __init__(self, loop=None):
         """Build four KytosEventBuffers.
 
         :attr:`raw`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
@@ -145,10 +146,11 @@ class KytosBuffers(object):
         :attr:`app`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
         sent to NApps.
         """
-        self.raw = KytosEventBuffer('raw_event')
-        self.msg_in = KytosEventBuffer('msg_in_event')
-        self.msg_out = KytosEventBuffer('msg_out_event')
-        self.app = KytosEventBuffer('app_event')
+        self._loop = loop
+        self.raw = KytosEventBuffer('raw_event', loop=self._loop)
+        self.msg_in = KytosEventBuffer('msg_in_event', loop=self._loop)
+        self.msg_out = KytosEventBuffer('msg_out_event', loop=self._loop)
+        self.app = KytosEventBuffer('app_event', loop=self._loop)
 
     def send_stop_signal(self):
         """Send a ``kytos/core.shutdown`` event to each buffer."""

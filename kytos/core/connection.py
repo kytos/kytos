@@ -2,8 +2,8 @@
 import logging
 from enum import Enum
 from errno import EBADF, ENOTCONN
-from socket import error as SocketError
 from socket import SHUT_RDWR
+from socket import error as SocketError
 
 __all__ = ('Connection', 'ConnectionProtocol', 'ConnectionState')
 
@@ -30,7 +30,7 @@ class ConnectionProtocol:
         self.state = state
 
 
-class Connection(object):
+class Connection:
     """Connection class to abstract a network connections."""
 
     def __init__(self, address, port, socket, switch=None):

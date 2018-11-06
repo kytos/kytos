@@ -87,8 +87,8 @@ class NApp:
 
         return napp
 
-    @staticmethod
-    def create_from_uri(uri):
+    @classmethod
+    def create_from_uri(cls, uri):
         """Return a new NApp instance from an unique identifier."""
         regex = r'^(((https?://|file://)(.+))/)?(.+?)/(.+?)/?(:(.+))?$'
         match = re.match(regex, uri)
@@ -96,10 +96,10 @@ class NApp:
         if not match:
             return None
 
-        return NApp(username=match.groups()[4],
-                    name=match.groups()[5],
-                    version=match.groups()[7],
-                    repository=match.groups()[1])
+        return cls(username=match.groups()[4],
+                   name=match.groups()[5],
+                   version=match.groups()[7],
+                   repository=match.groups()[1])
 
     def match(self, pattern):
         """Whether a pattern is present on NApp id, description and tags."""
@@ -176,11 +176,12 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         self.username = None  # loaded from json
         self.name = None      # loaded from json
         self._load_json()
+
         # Force a listener with a private method.
-        napp_id = NApp(self.username, self.name).id
         self._listeners = {
             'kytos/core.shutdown': [self._shutdown_handler],
-            'kytos/core.shutdown.' + napp_id: [self._shutdown_handler]}
+            'kytos/core.shutdown.' + self.napp_id: [self._shutdown_handler]}
+
         self.__event = Event()
         #: int: Seconds to sleep before next call to :meth:`execute`. If
         #: negative, run :meth:`execute` only once.
@@ -199,6 +200,11 @@ class KytosNApp(Thread, metaclass=ABCMeta):
                 if event_name not in self._listeners:
                     self._listeners[event_name] = []
                 self._listeners[event_name].append(method)
+
+    @property
+    def napp_id(self):
+        """username/name string."""
+        return "{}/{}".format(self.username, self.name)
 
     def listeners(self):
         """Return all listeners registered."""

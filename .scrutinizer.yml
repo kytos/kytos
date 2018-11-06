@@ -22,3 +22,8 @@ build:
                     file: '.coverage'
                     config_file: '.coveragerc'
                     format: 'py-cc'
+    nodes:
+        analysis:
+            tests:
+                override:
+                    - py-scrutinizer-run

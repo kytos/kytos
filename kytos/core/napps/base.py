@@ -71,26 +71,9 @@ class NApp:
         return "{}.napp".format(self.uri)
 
     @classmethod
-    def create_from_json(cls, filename):
-        """Return a new NApp instance from a metadata (json) file."""
-        with open(filename, encoding='utf-8') as data_file:
-            data = json.loads(data_file.read())
-
-        return cls.create_from_dict(data)
-
-    @staticmethod
-    def create_from_dict(data):
-        """Return a new NApp instance from metadata."""
-        napp = NApp()
-
-        for attribute, value in data.items():
-            setattr(napp, attribute, value)
-
-        return napp
-
-    @classmethod
     def create_from_uri(cls, uri):
         """Return a new NApp instance from an unique identifier."""
+        # TODO: create a staticmethod just to match properties from URI?
         regex = r'^(((https?://|file://)(.+))/)?(.+?)/(.+?)/?(:(.+))?$'
         match = re.match(regex, uri)
 
@@ -101,6 +84,29 @@ class NApp:
                    name=match.groups()[5],
                    version=match.groups()[7],
                    repository=match.groups()[1])
+
+    @classmethod
+    def create_from_json(cls, filename):
+        """Return a new NApp instance from a metadata file."""
+        with open(filename, encoding='utf-8') as data_file:
+            data = json.loads(data_file.read())
+
+        return cls.create_from_dict(data)
+
+    @classmethod
+    def create_from_dict(cls, data):
+        """Return a new NApp instance from metadata."""
+        napp = cls()
+
+        for attribute, value in data.items():
+            setattr(napp, attribute, value)
+
+        return napp
+
+    def as_json(self):
+        """Dump all NApp attributes on a json format."""
+        return json.dumps(self.__dict__)
+
 
     def match(self, pattern):
         """Whether a pattern is present on NApp id, description and tags."""
@@ -130,10 +136,6 @@ class NApp:
         Path(package_filename).unlink()
         self._update_repo_file(extracted)
         return extracted
-
-    def as_json(self):
-        """Dump all NApp attributes on a json format."""
-        return json.dumps(self.__dict__)
 
     @staticmethod
     def _extract(filename):

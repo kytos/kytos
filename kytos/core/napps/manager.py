@@ -1,6 +1,7 @@
 """Manage Network Application files."""
 import json
 import logging
+import re
 import shutil
 from pathlib import Path
 
@@ -92,8 +93,12 @@ class NAppsManager:
         enabled = self._enabled_path / napp_id
         installed = self._installed_path / napp_id
 
-        # TODO: where is the dependencies?
-        # TODO: where is the meta napp?
+        new_manager = NewNAppManager(self._installed_path)
+        napp = new_manager.napps[napp_id]
+
+        for uri in napp.napp_dependencies:
+            username, napp_name = self.get_napp_fullname_from_uri(uri)
+            self.enable(username, napp_name)
 
         if not installed.is_dir():
             LOG.error("Failed to enable NApp %s. NApp not installed.", napp_id)
@@ -227,3 +232,13 @@ class NAppsManager:
                             meta['name'] == napp.name:
                         return kytos_json.parent
         raise FileNotFoundError('kytos.json not found.')
+
+
+class NewNAppManager:
+    def __init__(self, base_path: Path):
+        self.base_path = base_path
+        self.napps = {napp.id: napp for napp in self._find_napps()}
+
+    def _find_napps(self):
+        return NAppsManager.get_napps_from_path(self.base_path)
+

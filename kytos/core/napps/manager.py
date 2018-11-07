@@ -13,21 +13,28 @@ LOG = logging.getLogger(__name__)
 class NAppsManager:
     """Deal with NApps at filesystem level and ask Kytos to (un)load NApps."""
 
-    def __init__(self, controller):
+    def __init__(self, controller=None, base_path=None):
         """Need the controller for configuration paths and (un)loading NApps.
 
         Args:
             controller (kytos.Controller): Controller to (un)load NApps.
+            base_path (pathlib.Path): base path for enabled NApps.
+                This will be supported while kytos-utils still imports
+                kytos.core directly, and may be removed when it calls Kytos'
+                Web API.
         """
-        self._config = controller.options
-
         self._controller = controller
 
-        self._enabled_path = Path(self._config.napps)
+        if base_path:
+            self._enabled_path = base_path
+        else:
+            self._config = controller.options
+            self._enabled_path = Path(self._config.napps)
+
         self._installed_path = self._enabled_path / '.installed'
 
     def install(self, napp_uri, enable=True):
-        """Install and enable a NApp from his repository.
+        """Install and enable a NApp from its repository.
 
         By default, install procedure will also enable the NApp. If you only
         want to install and keep NApp disabled, please use enable=False.

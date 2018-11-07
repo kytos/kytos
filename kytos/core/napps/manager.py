@@ -64,7 +64,6 @@ class NAppsManager:
 
     def uninstall(self, username, napp_name):
         """Remove a NApp from filesystem, if existent."""
-
         napp_id = "{}/{}".format(username, napp_name)
 
         if self.is_enabled(username, napp_name):
@@ -89,7 +88,7 @@ class NAppsManager:
     def enable(self, username, napp_name):
         """Enable a NApp if not already enabled."""
         napp_id = "{}/{}".format(username, napp_name)
-        
+
         enabled = self._enabled_path / napp_id
         installed = self._installed_path / napp_id
 
@@ -140,7 +139,7 @@ class NAppsManager:
     def is_enabled(self, username, napp_name):
         """Whether a NApp is enabled or not on this controller FS."""
         napp_id = "{}/{}".format(username, napp_name)
-        
+
         napp = NApp.create_from_uri(napp_id)
         return napp in self.get_enabled_napps()
 
@@ -179,9 +178,9 @@ class NAppsManager:
     def get_installed_napps(self):
         """Return all NApps installed on this controller FS."""
         return self.get_napps_from_path(self._installed_path)
-   
+
     @staticmethod
-    def get_napps_from_path(path):
+    def get_napps_from_path(path: Path):
         """List all NApps found in ``napps_dir``."""
         if not path.exists():
             LOG.warning("NApps dir (%s) doesn't exist.", path)
@@ -191,30 +190,30 @@ class NAppsManager:
         return [NApp.create_from_json(j) for j in jsons]
 
     @staticmethod
-    def _create_module(path):
-        """Create module path with empty __init__.py if it doesn't exist.
+    def _create_module(path: Path):
+        """Create module with empty __init__.py in `path` if it doesn't exist.
 
         Args:
-            path (pathlib.Path): Module path.
+            path: Module path.
         """
         if not path.exists():
             path.mkdir(parents=True, exist_ok=True, mode=0o755)
-            (path / '__init__.py').touch()
+        (path / '__init__.py').touch()
 
     @staticmethod
-    def _find_napp(napp, root=None):
+    def _find_napp(napp, root: Path=None) -> Path:
         """Return local NApp root folder.
 
         Search for kytos.json in _./_ folder and _./user/napp_.
 
         Args:
-            root (pathlib.Path): Where to begin searching.
+            root: Where to begin searching.
 
         Raises:
             FileNotFoundError: If there is no such local NApp.
 
         Returns:
-            pathlib.Path: NApp root folder.
+            NApp root folder.
 
         """
         if root is None:

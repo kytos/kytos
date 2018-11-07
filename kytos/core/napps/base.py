@@ -21,11 +21,12 @@ class NApp:
     """Class to represent a NApp."""
 
     def __init__(self, username=None, name=None, version=None,
-                 repository=None):
+                 repository=None, meta=False):
         self.username = username
         self.name = name
         self.version = version if version else 'latest'
         self.repository = repository
+        self.meta = meta
         self.description = None
         self.tags = []
         self.enabled = False
@@ -175,6 +176,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         self.controller = controller
         self.username = None  # loaded from json
         self.name = None      # loaded from json
+        self.meta = False     # loaded from json
         self._load_json()
 
         # Force a listener with a private method.

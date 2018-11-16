@@ -7,7 +7,7 @@ System tests for NApps validation.
 
 Authors
 -------
-Vinicius Arcanjo (RNP/Kytos), Beraldo Leal (Kytos), Macatur Souza (Kytos), Humberto Diogenes (Kytos)
+Vinicius Arcanjo (RNP/Kytos), Jeronimo Bezerra (FIU/Kytos), Antonio Francisco (AmLight/Kytos), Beraldo Leal (Kytos), Macatur Souza (Kytos), Humberto Diogenes (Kytos)
 
 Blueprint Status
 ----------------
@@ -19,7 +19,7 @@ high
 
 Tags
 ----
-tests, system tests, sdn
+tests, system tests, end-to-end tests, sdn
 
 Milestone Target
 ----------------
@@ -31,11 +31,11 @@ Prototype in-progress
 
 Assignees
 ---------
-Vinicius Arcanjo.
+Jeronimo Bezerra and Vinicius Arcanjo.
 
 Approvers (PTL)
 ---------------
-Vinicius Arcanjo, Beraldo Leal, Macatur Souza, Humberto Diogenes.
+Vinicius Arcanjo, Beraldo Leal, Macatur Souza, Humberto Diogenes and Jeronimo Bezerra.
 
 Version
 -------
@@ -46,40 +46,58 @@ Description
 ===========
 This blueprint specifies both requirements for how a NApp should be validated,
 and which testing framework should be used. System (end-to-end) tests are supposed to
-help us to develop faster, and gain more confidence in significant changes. The definition of end-to-end system testing is not strict, but the goal is to test an environment as close to production as possible, including with actual (virtual) networking devices.
+help us to develop faster, and gain more confidence in significant changes. The definition of end-to-end system testing varies in the literature, but the goal is to test an environment as close to production as possible, including with actual (virtual) networking devices.
 
 System tests requeriments
 ==============================
 
-#. A NApp should be able to be validated either individually or with other NApps.
+#. A NApp should be able to be validated either individually or with other NApps, including specifying the version of the NApps.
 #. System tests, are meant to be run with actual or virtual switches, e.g.,
    OpenvSwitch.
 #. Tests should be coded to test a functionally individually, don't try to validate multiple
-   things at once. As a rule of thumb, it's better to have more atomic tests.
-#. System tests should be shipped with the NApp. The user should be free, to manipulate
-   the topology and point to his environment and run the tests.
-#. Tests should be written in a way where the control plane and data plane can be
-   tested either together or individually. It's easier and more practical, to
-   start only with the control plane, but in the CI/CD pipeline, the goal is to have
+   things at once. As a rule of thumb, it's better to have more atomic tests. Eventually, if the
+   tests start to take too long (a couple of hours) we might start grouping multiple tests together.
+#. System tests should be shipped with the NApp.
+#. System tests should be run in a CI/CD pipeline. The results should be publicly
+   available. Including the log results of the stdout.
+#. Tests of NApps supported by Kytos team should run at least nightly, and ideally on
+   every pull request of each NApp whenever a Python file changes (ignore any other kind of file type).
+#. Tests should be written in a way where the data plane can be tested on its own or with network hosts to verify end-to-end reachability. It's easier and more practical, to
+   start only with the data plane on its own (by verifying it the rules were pushed correctly, for example), but in the CI/CD pipeline, the goal is to have
    a real end-to-end validation which will also validate the data plane with some
-   traffic, e.g., ping or something similar.
+   traffic, e.g., ping or something similar. Whether there are network traffic involved or not should be up to the user running the test suite.
+#. In addition to ICMP ping, other more reliable SDN tools should be used in the future, such as the NApp amlight/sdntrace to properly track where the packets are being forwarded in the data plane.
 #. In the test results, it should be explicit which version of the NApp is running,
    and which switch platform and firmware release is under test. This is necessary for
    users to make informed decisions if a NApp has been tested in a specific protocol (
    currently, OF1.3/OF1.0) or a specific switch platform (OpenvSwitch v2.9, for example).
-#. System tests should be run in a CI/CD pipeline. The results should be publicly
-   available.
-#. Tests of NApps supported by Kytos team should run at least nightly, and ideally on
-   every pull request of each NApp.
+
+The following requirements, although desirable, have lower priorities for now:
+
 #. Developers should be able to run local system tests with Docker.
+#. The user should be free, to manipulate the topology and point to his environment and run the tests. This that tests are not just for developers, but the end user might want to run from Kytos CLI the test suite.
+#. Figure out how to improve the continuous delivery part of the NApps, since the system tests will be implemented shortly, for example, by shipping NApps as part of the CD pipeline.
 
 System test framework
 ==========================
 
 #. pytest is one of the most complete and modular testing frameworks in Python. A
    Prototype will be started with pytest.
+#. For data plane tests, it is necessary to have at two network interfaces on hosts,
+   preferably on different hosts, or different networking namespace. The simplest way
+   to use these hosts to validate the data plane is to dispatch a few ICMP request and
+   verifying the replies via SSH. In order to to so, a prototype will be started with
+   the library fabric. If you need ICMP packets tagged with a VLAN, just make sure
+   you have another interface available with such a tag on the host. The framework will
+   just dispatch and check ICMP packets, anything else related ot the provisioning of the
+   hosts should be done in advance before spinning up the environment.
+#. Instead of relying on SSH and connection management, an lightweight HTTP REST web server will be deployed on hosts as an agent. This agent will receive request to dispatch ICMP requests.
+#. To run tests locally with Docker and OpenvSwitch, the most reasonable approach is to
+   use containernet to have the entire environment containerized easily. This will also
+   be tested in the initial prototype.
 
 Future
 ======
   * Matrix result of tests for multiple versions.
-  * Stress tests
+  * Stress tests (this topic will be addressed in another blueprint)
+  * Bechmarking and scalability to understand Kytos and the NApps upper limits.

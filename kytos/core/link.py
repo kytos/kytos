@@ -28,6 +28,9 @@ class Link(GenericEntity):
         self._uuid = uuid4()
         super().__init__()
 
+    def __hash__(self):
+        return hash(self._uuid)
+
     def is_enabled(self):
         """Override the is_enabled method.
 

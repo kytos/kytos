@@ -46,9 +46,9 @@ Description
 ===========
 This blueprint specifies both requirements for how a NApp should be validated,
 and which testing framework should be used. System (end-to-end) tests are supposed to
-help us to develop faster, and gain more confidence in significant changes. The definition of end-to-end system testing varies in the literature, but the goal is to test an environment as close to production as possible, including with actual (virtual) networking devices.
+help us to develop faster, and gain more confidence in significant changes.The definition of end-to-end system testing varies in the literature, but the goal is to test an environment as close to production as possible, including with actual (virtual) networking devices.
 
-System tests requeriments
+System tests requirements
 ==============================
 
 #. A NApp should be able to be validated either individually or with other NApps, including specifying the version of the NApps.
@@ -89,7 +89,7 @@ System test framework
    verifying the replies via SSH. In order to to so, a prototype will be started with
    the library fabric. If you need ICMP packets tagged with a VLAN, just make sure
    you have another interface available with such a tag on the host. The framework will
-   just dispatch and check ICMP packets, anything else related ot the provisioning of the
+   just dispatch and check ICMP packets, anything else related to the provisioning of the
    hosts should be done in advance before spinning up the environment.
 #. Instead of relying on SSH and connection management, an lightweight HTTP REST web server will be deployed on hosts as an agent. This agent will receive request to dispatch ICMP requests.
 #. To run tests locally with Docker and OpenvSwitch, the most reasonable approach is to
@@ -100,4 +100,4 @@ Future
 ======
   * Matrix result of tests for multiple versions.
   * Stress tests (this topic will be addressed in another blueprint)
-  * Bechmarking and scalability to understand Kytos and the NApps upper limits.
+  * Benchmarking and scalability to understand Kytos and the NApps upper limits.

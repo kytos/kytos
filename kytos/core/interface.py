@@ -85,12 +85,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self.stats = None
         self.link = None
         self._custom_speed = speed
-        self.available_tags = []
-
-        for i in range(1, 4096):
-            vlan = TAGType.VLAN
-            tag = TAG(vlan, i)
-            self.available_tags.append(tag)
+        self.set_available_tags(range(1, 4096))
 
         super().__init__()
 
@@ -119,6 +114,19 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     def uni(self):
         """Return if an interface is a user-to-network Interface."""
         return not self.nni
+
+    def set_available_tags(self, iterable):
+        """Set a range of VLAN tags to be used by this Interface.
+
+        Args:
+            iterable ([int]): range of VLANs.
+        """
+        self.available_tags = []
+
+        for i in iterable:
+            vlan = TAGType.VLAN
+            tag = TAG(vlan, i)
+            self.available_tags.append(tag)
 
     def enable(self):
         """Enable this interface instance.

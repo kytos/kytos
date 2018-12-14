@@ -21,8 +21,22 @@ Fixed
 Security
 ========
 
+[2018.2b3] - "ernesto" beta3 - 2018-11-14
+*****************************************
+
+Added
+=====
+ - Added support to reuse VLAN pool configurations on Interface
+ - Added support for serialization of Link instances
+
+Changed
+=======
+ - Improved test coverage
+ - Blueprint EP015 (system tests) improved
+
+
 [2018.2b2] - "ernesto" - 2018-10-15
-**********************************
+***********************************
 
 Changed
 =======

@@ -119,6 +119,8 @@ class Controller:
         #: Observer that handle NApps when they are enabled or disabled.
         self.napp_dir_listener = NAppDirListener(self)
 
+        self.napps_manager = NAppsManager(self)
+
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
         #: from napps.<username>.<napp_name> import ?....
@@ -669,6 +671,10 @@ class Controller:
             self.log.error("Error loading NApp '%s/%s': %s",
                            username, napp_name, err)
             return
+        except FileNotFoundError as err:
+            msg = "NApp module not found, assuming it's a meta napp: %s"
+            self.log.warning(msg, err.filename)
+            return
 
         napp = napp_module.Main(controller=self)
 
@@ -690,16 +696,15 @@ class Controller:
         Args:
             napps ([str]): List of NApps to be pre-installed and enabled.
         """
-        napps_mngr = NAppsManager(self)
-        installed = [str(napp) for napp in napps_mngr.list()]
+        all_napps = self.napps_manager.get_installed_napps()
+        installed = [str(napp) for napp in all_napps]
         napps_diff = [napp for napp in napps if napp not in installed]
         for napp in napps_diff:
-            napps_mngr.install(napp, enable=enable)
+            self.napps_manager.install(napp, enable=enable)
 
     def load_napps(self):
         """Load all NApps enabled on the NApps dir."""
-        napps = NAppsManager(self)
-        for napp in napps.list_enabled():
+        for napp in self.napps_manager.get_enabled_napps():
             try:
                 self.log.info("Loading NApp %s", napp.id)
                 self.load_napp(napp.username, napp.name)

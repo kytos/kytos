@@ -20,7 +20,7 @@ class NAppDirListener(RegexMatchingEventHandler):
         """Require controller to get NApps dir, load and unload NApps.
 
         In order to watch the NApps dir for modifications, it must be created
-        if it doesn't exist (in this case, kytos-utils had not been run before
+        if it doesn't exist (in this case, kytos-utils has not been run before
         kytosd). We use the same dir permissions as in kytos-utils.
 
         Args:

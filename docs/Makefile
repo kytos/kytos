@@ -82,7 +82,6 @@ clean:
 html:
 	$(PYTHON) home/make_home.py
 	sphinx-apidoc -o ./developer/kytos_api ../kytos/ -d10 -M -T
-	sed -i "/Submodules/,+1d" *.rst
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
@@ -91,7 +90,6 @@ html:
 dirhtml:
 	$(PYTHON) home/make_home.py
 	sphinx-apidoc -o ./developer/kytos_api ../kytos/ -d10 -M -T
-	sed -i "/Submodules/,+1d" *.rst
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."
@@ -288,7 +286,6 @@ dummy:
 livehtml:
 	$(PYTHON) home/make_home.py
 	sphinx-apidoc -o ./developer/kytos_api ../kytos/ -d10 -M -T
-	sed -i "/Submodules/,+1d" *.rst
 	sphinx-autobuild --re-ignore "\.[^.]+" -r ".+~" -b dirhtml \
 	    $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml -z ../kytos
 	@echo

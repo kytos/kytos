@@ -79,7 +79,15 @@ class NAppsManager:
                         napp_id)
             return False
 
-        # TODO: Where is meta ?
+        new_manager = NewNAppManager(self._installed_path)
+        napp = new_manager.napps[napp_id]
+        deps = napp.napp_dependencies
+
+        if deps and napp.meta:
+            LOG.info('Uninstalling Meta-NApp %s dependencies: %s', napp, deps)
+            for uri in deps:
+                username, napp_name = self.get_napp_fullname_from_uri(uri)
+                self.uninstall(username, napp_name)
 
         if self.is_installed(username, napp_name):
             installed = self._installed_path / napp_id
@@ -102,10 +110,13 @@ class NAppsManager:
 
         new_manager = NewNAppManager(self._installed_path)
         napp = new_manager.napps[napp_id]
+        deps = napp.napp_dependencies
 
-        for uri in napp.napp_dependencies:
-            username, napp_name = self.get_napp_fullname_from_uri(uri)
-            self.enable(username, napp_name)
+        if deps and napp.meta:
+            LOG.info('Enabling Meta-NApp %s dependencies: %s', napp, deps)
+            for uri in deps:
+                username, napp_name = self.get_napp_fullname_from_uri(uri)
+                self.enable(username, napp_name)
 
         if not installed.is_dir():
             LOG.error("Failed to enable NApp %s. NApp not installed.", napp_id)
@@ -128,7 +139,15 @@ class NAppsManager:
         napp_id = "{}/{}".format(username, napp_name)
         enabled = self._enabled_path / napp_id
 
-        # TODO: Where is meta dependencies?
+        new_manager = NewNAppManager(self._installed_path)
+        napp = new_manager.napps[napp_id]
+        deps = napp.napp_dependencies
+
+        if deps and napp.meta:
+            LOG.info('Disabling Meta-NApp %s dependencies: %s', napp, deps)
+            for uri in deps:
+                username, napp_name = self.get_napp_fullname_from_uri(uri)
+                self.disable(username, napp_name)
 
         try:
             enabled.unlink()
@@ -163,6 +182,7 @@ class NAppsManager:
 
     @staticmethod
     def get_napp_fullname_from_uri(uri):
+        """Parse URI and get (username, napp_name) tuple."""
         regex = r'^(((https?://|file://)(.+))/)?(.+?)/(.+?)/?(:(.+))?$'
         match = re.match(regex, uri)
         username = match.groups()[4]
@@ -177,7 +197,7 @@ class NAppsManager:
         """Return all enabled NApps on this controller FS."""
         enabled = self.get_napps_from_path(self._enabled_path)
         for napp in enabled:
-            # TODO: We need to check if the NApp is enabled on controller
+            # We should also check if the NApp is enabled on controller
             napp.enabled = True
         return enabled
 
@@ -242,10 +262,12 @@ class NAppsManager:
 
 
 class NewNAppManager:
+    """A more simple NApp Manager, for just one NApp at a time."""
+
     def __init__(self, base_path: Path):
+        """Create a manager from a NApp base path."""
         self.base_path = base_path
         self.napps = {napp.id: napp for napp in self._find_napps()}
 
     def _find_napps(self):
         return NAppsManager.get_napps_from_path(self.base_path)
-

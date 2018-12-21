@@ -20,6 +20,7 @@ LOG = NAppLog()
 class NApp:
     """Class to represent a NApp."""
 
+    # pylint: disable=too-many-arguments
     def __init__(self, username=None, name=None, version=None,
                  repository=None, meta=False):
         self.username = username
@@ -73,7 +74,6 @@ class NApp:
     @classmethod
     def create_from_uri(cls, uri):
         """Return a new NApp instance from an unique identifier."""
-        # TODO: create a staticmethod just to match properties from URI?
         regex = r'^(((https?://|file://)(.+))/)?(.+?)/(.+?)/?(:(.+))?$'
         match = re.match(regex, uri)
 
@@ -106,7 +106,6 @@ class NApp:
     def as_json(self):
         """Dump all NApp attributes on a json format."""
         return json.dumps(self.__dict__)
-
 
     def match(self, pattern):
         """Whether a pattern is present on NApp id, description and tags."""

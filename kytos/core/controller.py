@@ -36,6 +36,7 @@ from kytos.core.connection import ConnectionState
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
+from kytos.core.interface import Interface
 from kytos.core.napps.base import NApp
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.napps.napp_dir_listener import NAppDirListener
@@ -538,6 +539,7 @@ class Controller:
         else:
             event_name += 'reconnected'
 
+        self.set_switch_options(dpid=dpid)
         event = KytosEvent(name=event_name, content={'switch': switch})
 
         old_connection = switch.connection
@@ -549,6 +551,41 @@ class Controller:
         self.buffers.app.put(event)
 
         return switch
+
+    def set_switch_options(self, dpid):
+        """Update the switch settings based on kytos.conf options.
+
+        Args:
+            dpid (|str|): dpid str used to identify a switch.
+
+        """
+
+        switch = self.switches.get(dpid)
+        if not switch:
+            return
+
+        vlan_pool = {}
+        try:
+            vlan_pool = json.loads(self.options.vlan_pool)
+            if not vlan_pool:
+                return
+        except json.JSONDecodeError as e:
+            self.log.error(f"Invalid vlan_pool settings: {str(e)}")
+
+        if vlan_pool.get(dpid):
+            self.log.info(f"Loading vlan_pool configuration for dpid {dpid}")
+            for intf_num, port_list in vlan_pool[dpid].items():
+                if not switch.interfaces.get((intf_num)):
+                    vlan_ids = set()
+                    for vlan_range in port_list:
+                        (vlan_begin, vlan_end) = (vlan_range[0:2])
+                        for vlan_id in range(vlan_begin, vlan_end):
+                            vlan_ids.add(vlan_id)
+                    intf_num = int(intf_num)
+                    intf = Interface(name=intf_num, port_number=intf_num,
+                                     switch=switch)
+                    intf.set_available_tags(vlan_ids)
+                    switch.update_interface(intf, ["available_tags"])
 
     def create_or_update_connection(self, connection):
         """Update a connection.

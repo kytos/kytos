@@ -95,8 +95,6 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             return self.address == other
         if isinstance(other, Interface):
             return self.port_number == other.port_number and \
-                self.name == other.name and \
-                self.address == other.address and \
                 self.switch.dpid == other.switch.dpid
         return False
 

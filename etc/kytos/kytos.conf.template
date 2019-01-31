@@ -55,3 +55,14 @@ napps_repositories = [
 # Pre installed napps. List of Napps to be pre-installed and enabled.
 # Use double quotes in each NApp in the list, e.g., ["username/napp"].
 napps_pre_installed = []
+
+# VLAN pool settings
+#
+# The VLAN pool settings is a dictionary of datapath id, which contains
+# a dictionary of of_port numbers with the respective vlan pool range
+# for each port number. See the example below, which sets the vlan range
+# [1, 5, 6, 7, 8, 9] on port 1 and vlan range [3] on port 4 of a switch
+# that has a dpid '00:00:00:00:00:00:00:01'
+
+vlan_pool = {}
+# vlan_pool = {"00:00:00:00:00:00:00:01": {"1": [[1, 2], [5, 10]], "4": [[3, 4]]}}

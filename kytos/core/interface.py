@@ -52,6 +52,9 @@ class TAG:
         """Return a json representating a tag object."""
         return json.dumps(self.as_dict())
 
+    def __repr__(self):
+        return f"TAG({self.tag_type!r}, {self.value!r})"
+
 
 class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     """Interface Class used to abstract the network interfaces."""
@@ -95,8 +98,6 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             return self.address == other
         if isinstance(other, Interface):
             return self.port_number == other.port_number and \
-                self.name == other.name and \
-                self.address == other.address and \
                 self.switch.dpid == other.switch.dpid
         return False
 

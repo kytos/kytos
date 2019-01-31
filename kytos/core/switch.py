@@ -187,21 +187,14 @@ class Switch(GenericEntity):
         """Update the lastseen attribute."""
         self.lastseen = now()
 
-    def update_interface(self, interface, attrs_filter=None):
+    def update_interface(self, interface):
         """Update or associate a interface from switch instance.
 
         Args:
             interface (:class:`~kytos.core.switch.Interface`):
                 Interface object to be storeged.
-            attrs_filter ([str]): attributes to be updated.
-
         """
-        if not attrs_filter or not self.interfaces.get(interface.port_number):
-            self.interfaces[interface.port_number] = interface
-        else:
-            intf_ref = self.interfaces[interface.port_number]
-            for attr in attrs_filter:
-                setattr(intf_ref, attr, getattr(interface, attr))
+        self.interfaces[interface.port_number] = interface
 
     def remove_interface(self, interface):
         """Remove a interface from switch instance.

@@ -585,7 +585,7 @@ class Controller:
                     intf = Interface(name=intf_num, port_number=intf_num,
                                      switch=switch)
                     intf.set_available_tags(vlan_ids)
-                    switch.update_interface(intf, ["available_tags"])
+                    switch.update_interface(intf)
 
     def create_or_update_connection(self, connection):
         """Update a connection.

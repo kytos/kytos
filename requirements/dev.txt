@@ -5,7 +5,6 @@
 #    pip-compile --output-file requirements/dev.txt requirements/dev.in
 #
 -e git+git://github.com/kytos/sphinx-theme.git#egg=kytos-sphinx-theme
--e git+git://github.com/kytos/kytos-utils.git#egg=kytos-utils
 -e .
 -e git+git://github.com/kytos/python-openflow.git#egg=python-openflow
 alabaster==0.7.11         # via sphinx

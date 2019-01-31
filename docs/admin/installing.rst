@@ -38,10 +38,10 @@ previous steps, then:
 
 .. code-block:: bash
 
-  $ pip install kytos
+  $ pip install kytos kytos-utils
 
-This will install Kytos with all the dependencies, like kytos-utils and
-python-openflow.
+This will install the Kytos server and client, and also their dependencies,
+like the python-openflow library.
 
 For more information about the install options please visit the `Kytos's
 Developer Guide / Preparing the Development Environment

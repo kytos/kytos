@@ -124,7 +124,7 @@ First, you need to run the commands below to clone the python-openflow, kytos-ut
 .. code-block:: shell
 
   for repo in python-openflow kytos-utils kytos; do
-    (kytos-environment) $ git clone git@github.com/kytos/${repo}
+    (kytos-environment) $ git clone https://github.com/kytos/${repo}
   done
 
 After cloning, the kytos installation process is done running setuptools installation procedure for each cloned repository, in order. Below we execute its commands.

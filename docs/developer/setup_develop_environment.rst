@@ -16,7 +16,7 @@ Ubuntu Old releases
 -------------------
 
 If are you using an Ubuntu version less than 17.10 you need to add a PPA to
-able to install Python 3.6 packages.This step is made running the command
+able to install Python 3.6 packages. This step is made running the command
 below.
 
 .. code-block:: shell
@@ -119,17 +119,20 @@ is already installed in the virtualenv, with setuptools and wheel.
 Download the kytos project from github
 --------------------------------------
 
-To download the kytos from github you need run the command below to clone the
-project locally.
+First, you need to run the commands below to clone the python-openflow, kytos-utils and kytos projects locally. 
 
 .. code-block:: shell
 
-   (kytos-environment) $ git clone https://github.com/kytos/kytos.git
+  for repo in python-openflow kytos-utils kytos; do
+    (kytos-environment) $ git clone git@github.com/kytos/${repo}
+  done
 
-After that change the directory to kytos project and install all development
-dependencies. Below we execute its commands.
+After cloning, the kytos installation process is done running setuptools installation procedure for each cloned repository, in order. Below we execute its commands.
 
 .. code-block:: shell
 
-   (kytos-environment) $ cd kytos
-   (kytos-environment) $ pip install -r requirements/dev.txt
+    for repo in python-openflow kytos-utils kytos; do
+      (kytos-environment) $ cd ${repo}
+      (kytos-environment) $ python3 setup.py develop
+      (kytos-environment) $ cd ..
+    done

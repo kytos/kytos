@@ -11,7 +11,7 @@ command below.
 
 .. code-block:: sh
 
-  pip install -r requirements.txt
+  pip3 install -r requirements.txt
 
 Building documentation
 ======================

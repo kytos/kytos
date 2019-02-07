@@ -36,6 +36,7 @@ from kytos.core.connection import ConnectionState
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
 from kytos.core.logs import LogManager
+from kytos.core.interface import Interface
 from kytos.core.napps.base import NApp
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.napps.napp_dir_listener import NAppDirListener
@@ -118,6 +119,8 @@ class Controller:
 
         #: Observer that handle NApps when they are enabled or disabled.
         self.napp_dir_listener = NAppDirListener(self)
+
+        self.napps_manager = NAppsManager(self)
 
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
@@ -536,6 +539,7 @@ class Controller:
         else:
             event_name += 'reconnected'
 
+        self.set_switch_options(dpid=dpid)
         event = KytosEvent(name=event_name, content={'switch': switch})
 
         old_connection = switch.connection
@@ -547,6 +551,41 @@ class Controller:
         self.buffers.app.put(event)
 
         return switch
+
+    def set_switch_options(self, dpid):
+        """Update the switch settings based on kytos.conf options.
+
+        Args:
+            dpid (|str|): dpid str used to identify a switch.
+
+        """
+
+        switch = self.switches.get(dpid)
+        if not switch:
+            return
+
+        vlan_pool = {}
+        try:
+            vlan_pool = json.loads(self.options.vlan_pool)
+            if not vlan_pool:
+                return
+        except json.JSONDecodeError as e:
+            self.log.error(f"Invalid vlan_pool settings: {str(e)}")
+
+        if vlan_pool.get(dpid):
+            self.log.info(f"Loading vlan_pool configuration for dpid {dpid}")
+            for intf_num, port_list in vlan_pool[dpid].items():
+                if not switch.interfaces.get((intf_num)):
+                    vlan_ids = set()
+                    for vlan_range in port_list:
+                        (vlan_begin, vlan_end) = (vlan_range[0:2])
+                        for vlan_id in range(vlan_begin, vlan_end):
+                            vlan_ids.add(vlan_id)
+                    intf_num = int(intf_num)
+                    intf = Interface(name=intf_num, port_number=intf_num,
+                                     switch=switch)
+                    intf.set_available_tags(vlan_ids)
+                    switch.update_interface(intf)
 
     def create_or_update_connection(self, connection):
         """Update a connection.
@@ -669,6 +708,10 @@ class Controller:
             self.log.error("Error loading NApp '%s/%s': %s",
                            username, napp_name, err)
             return
+        except FileNotFoundError as err:
+            msg = "NApp module not found, assuming it's a meta napp: %s"
+            self.log.warning(msg, err.filename)
+            return
 
         napp = napp_module.Main(controller=self)
 
@@ -690,16 +733,15 @@ class Controller:
         Args:
             napps ([str]): List of NApps to be pre-installed and enabled.
         """
-        napps_mngr = NAppsManager(self)
-        installed = [str(napp) for napp in napps_mngr.list()]
+        all_napps = self.napps_manager.get_installed_napps()
+        installed = [str(napp) for napp in all_napps]
         napps_diff = [napp for napp in napps if napp not in installed]
         for napp in napps_diff:
-            napps_mngr.install(napp, enable=enable)
+            self.napps_manager.install(napp, enable=enable)
 
     def load_napps(self):
         """Load all NApps enabled on the NApps dir."""
-        napps = NAppsManager(self)
-        for napp in napps.list_enabled():
+        for napp in self.napps_manager.get_enabled_napps():
             try:
                 self.log.info("Loading NApp %s", napp.id)
                 self.load_napp(napp.username, napp.name)

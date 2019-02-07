@@ -6,6 +6,10 @@ All notable changes to the kytos project will be documented in this file.
 UNRELEASED - Under development
 ******************************
 
+Added
+=====
+ - Added vlan_pool configuration on kytos.conf to support mef_eline
+
 Changed
 =======
 
@@ -20,6 +24,16 @@ Fixed
 
 Security
 ========
+
+
+[2018.2rc1] - "ernesto" rc1 - 2018-12-21
+*****************************************
+
+Added
+=====
+
+ - Support for meta-napps (EXPERIMENTAL)
+
 
 [2018.2b3] - "ernesto" beta3 - 2018-12-14
 *****************************************

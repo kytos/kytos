@@ -188,7 +188,7 @@ class Switch(GenericEntity):
         self.lastseen = now()
 
     def update_interface(self, interface):
-        """Update a interface from switch instance.
+        """Update or associate a interface from switch instance.
 
         Args:
             interface (:class:`~kytos.core.switch.Interface`):

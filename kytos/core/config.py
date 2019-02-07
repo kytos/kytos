@@ -114,6 +114,7 @@ class KytosConfig():
                     'protocol_name': '',
                     'enable_entities_by_default': False,
                     'napps_pre_installed': [],
+                    'vlan_pool': {},
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()

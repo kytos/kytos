@@ -20,12 +20,14 @@ LOG = NAppLog()
 class NApp:
     """Class to represent a NApp."""
 
+    # pylint: disable=too-many-arguments
     def __init__(self, username=None, name=None, version=None,
-                 repository=None):
+                 repository=None, meta=False):
         self.username = username
         self.name = name
         self.version = version if version else 'latest'
         self.repository = repository
+        self.meta = meta
         self.description = None
         self.tags = []
         self.enabled = False
@@ -70,25 +72,7 @@ class NApp:
         return "{}.napp".format(self.uri)
 
     @classmethod
-    def create_from_json(cls, filename):
-        """Return a new NApp instance from a metadata (json) file."""
-        with open(filename, encoding='utf-8') as data_file:
-            data = json.loads(data_file.read())
-
-        return cls.create_from_dict(data)
-
-    @staticmethod
-    def create_from_dict(data):
-        """Return a new NApp instance from metadata."""
-        napp = NApp()
-
-        for attribute, value in data.items():
-            setattr(napp, attribute, value)
-
-        return napp
-
-    @staticmethod
-    def create_from_uri(uri):
+    def create_from_uri(cls, uri):
         """Return a new NApp instance from an unique identifier."""
         regex = r'^(((https?://|file://)(.+))/)?(.+?)/(.+?)/?(:(.+))?$'
         match = re.match(regex, uri)
@@ -96,10 +80,32 @@ class NApp:
         if not match:
             return None
 
-        return NApp(username=match.groups()[4],
-                    name=match.groups()[5],
-                    version=match.groups()[7],
-                    repository=match.groups()[1])
+        return cls(username=match.groups()[4],
+                   name=match.groups()[5],
+                   version=match.groups()[7],
+                   repository=match.groups()[1])
+
+    @classmethod
+    def create_from_json(cls, filename):
+        """Return a new NApp instance from a metadata file."""
+        with open(filename, encoding='utf-8') as data_file:
+            data = json.loads(data_file.read())
+
+        return cls.create_from_dict(data)
+
+    @classmethod
+    def create_from_dict(cls, data):
+        """Return a new NApp instance from metadata."""
+        napp = cls()
+
+        for attribute, value in data.items():
+            setattr(napp, attribute, value)
+
+        return napp
+
+    def as_json(self):
+        """Dump all NApp attributes on a json format."""
+        return json.dumps(self.__dict__)
 
     def match(self, pattern):
         """Whether a pattern is present on NApp id, description and tags."""
@@ -129,10 +135,6 @@ class NApp:
         Path(package_filename).unlink()
         self._update_repo_file(extracted)
         return extracted
-
-    def as_json(self):
-        """Dump all NApp attributes on a json format."""
-        return json.dumps(self.__dict__)
 
     @staticmethod
     def _extract(filename):
@@ -175,12 +177,14 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         self.controller = controller
         self.username = None  # loaded from json
         self.name = None      # loaded from json
+        self.meta = False     # loaded from json
         self._load_json()
+
         # Force a listener with a private method.
-        napp_id = NApp(self.username, self.name).id
         self._listeners = {
             'kytos/core.shutdown': [self._shutdown_handler],
-            'kytos/core.shutdown.' + napp_id: [self._shutdown_handler]}
+            'kytos/core.shutdown.' + self.napp_id: [self._shutdown_handler]}
+
         self.__event = Event()
         #: int: Seconds to sleep before next call to :meth:`execute`. If
         #: negative, run :meth:`execute` only once.
@@ -199,6 +203,11 @@ class KytosNApp(Thread, metaclass=ABCMeta):
                 if event_name not in self._listeners:
                     self._listeners[event_name] = []
                 self._listeners[event_name].append(method)
+
+    @property
+    def napp_id(self):
+        """username/name string."""
+        return "{}/{}".format(self.username, self.name)
 
     def listeners(self):
         """Return all listeners registered."""

@@ -33,7 +33,7 @@ Added
 
  - Support for meta-napps (EXPERIMENTAL)
 
-[2018.2b3] - "ernesto" beta3 - 2018-11-14
+[2018.2b3] - "ernesto" beta3 - 2018-12-14
 *****************************************
 
 Added

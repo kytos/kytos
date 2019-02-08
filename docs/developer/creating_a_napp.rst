@@ -287,8 +287,8 @@ worrying if your NApp do not have this file.
 How the events works
 ====================
 
-With the purpose of performing the communication between NApps in the `Kytos
-Project` any Napp can send or receive events.
+With the purpose of performing the communication between NApps in the `Kytos Project` 
+any Napp can send or receive events.
 
 Create Kytos Event
 ------------------
@@ -365,3 +365,92 @@ categories is displayed.
    :maxdepth: 3
 
    listened_events
+
+Create your Meta-NApp
+=====================
+
+A Meta-Napp is a NApp that doesn't contain executable code, is used to specify dependencies of a given package 
+and just installs and enables/disables a specific set of napps. 
+
+To create your Meta-NApp, just like a common NApp, you need to use your napp-server name and insert some NApp
+information. The difference is just the `meta` flag in the create command.
+
+.. code-block:: shell
+
+  (kytos-environment)$ kytos napps create --meta
+  --------------------------------------------------------------
+  Welcome to the bootstrap process of your NApp.
+  --------------------------------------------------------------
+  In order to answer both the username and the napp name,
+  You must follow this naming rules:
+  - name starts with a letter
+  - name contains only letters, numbers or underscores
+  - at least three characters
+  --------------------------------------------------------------
+
+  Please, insert your NApps Server username: <username>
+  Please, insert your NApp name: <meta napp name>
+  Please, insert a brief description for your NApp [optional]: <brief description>
+
+  Congratulations! Your NApp have been bootstrapped!
+  Now you can go to the directory {username}/{meta_napp_name} and begin to code your NApp.
+  Have fun!
+
+After that, a folder with `username` will be created and inside that we have
+your Meta-NApp folder.
+
+Understanding the Meta-NApp structure
+-------------------------------------
+
+The basic Meta-NApp structure is described below.
+
+.. code-block:: shell
+
+   <username>/
+   ├── __init__.py
+   └── <meta_napp_name>/
+       ├── __init__.py
+       ├── kytos.json
+       ├── README.rst
+
+- **kytos.json**: This is your Meta-NApp's main file, where the dependencies are defined.
+- **README.rst**: Main description and information about your Meta-NApp, ensure that it includes a brief description of the dependencies
+
+How to create a basic NApp dependency 
+=====================================
+
+First, you have to edit the `kytos.json` and set the napp_dependencies field with some napps. An example is displayed bellow.
+
+.. code-block:: shell
+
+  {
+    ...
+    "napp_dependencies": ["kytos/of_core"],
+    ...
+  }
+
+Now, you have to install this Meta-NApp with the same command that was used to install a common NApp.
+
+.. code-block:: shell
+
+  $ kytos napps install username/meta_napp_name
+  INFO    NApp username/meta_napp_name:
+  INFO      Searching local NApp...
+  INFO      Found and installed.
+  INFO      Enabling...
+  INFO  NApp enabled: username/meta_napp_name
+  INFO      Enabled.
+  INFO  Installing Dependencies:
+  INFO    NApp kytos/of_core:
+  INFO      Searching local NApp...
+  INFO      Not found. Downloading from NApps Server...
+  INFO      Downloaded and installed.
+  INFO      Enabling...
+  INFO  NApp enabled: kytos/of_core
+  INFO      Enabled.
+
+Finally, the Meta-Napp and its dependencies were installed. The Meta-Napp supports the same commands as a common Napp.
+
+.. code-block:: shell
+
+  $ kytos napps install/uninstall/enable/disable meta_napp_name

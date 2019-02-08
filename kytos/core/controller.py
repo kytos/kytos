@@ -556,7 +556,7 @@ class Controller:
         """Update the switch settings based on kytos.conf options.
 
         Args:
-            dpid (|str|): dpid str used to identify a switch.
+            dpid (str): dpid used to identify a switch.
 
         """
 

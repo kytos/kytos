@@ -43,10 +43,9 @@ pygments==2.2.0           # via sphinx
 pylint==2.1.1             # via yala
 pyparsing==2.2.0          # via packaging
 pytz==2018.5              # via babel
-pyyaml==3.13              # via sphinx-autobuild, watchdog
+pyyaml==4.2b4             # via sphinx-autobuild, watchdog
 radon==2.2.0              # via yala
-requests==2.19.1          # via sphinx
-ruamel.yaml==0.15.60
+requests==2.21.0          # via sphinx
 six==1.11.0               # via astroid, livereload, mando, packaging, pip-tools, pydocstyle, sphinx, tox
 snowballstemmer==1.2.1    # via pydocstyle, sphinx
 sphinx-autobuild==0.7.1

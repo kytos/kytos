@@ -569,7 +569,7 @@ class Controller:
             vlan_pool = json.loads(self.options.vlan_pool)
             if not vlan_pool:
                 return
-        except json.JSONDecodeError as e:
+        except (TypeError, json.JSONDecodeError) as e:
             self.log.error(f"Invalid vlan_pool settings: {str(e)}")
 
         if vlan_pool.get(dpid):

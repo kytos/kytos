@@ -43,3 +43,8 @@ class TestLink(unittest.TestCase):
         """Test initialization with None as endpoints."""
         with self.assertRaises(ValueError):
             Link(None, None)
+
+    def test_link_id(self):
+        link1 = Link(self.iface1, self.iface2)
+        link2 = Link(self.iface2, self.iface1)
+        self.assertEqual(link1.id, link2.id)

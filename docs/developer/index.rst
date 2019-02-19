@@ -86,8 +86,9 @@ Kytos Summit provides an opportunity for developers, contributors and other inte
    setup_develop_environment
    Kytos API <./kytos_api/kytos>
    creating_a_napp
-   how_to_create_tests
    how_to_contribute
    hacking
    security
+   testing_with_mininet
+   unit_tests
    pyof

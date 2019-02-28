@@ -2,8 +2,8 @@
 import logging
 from enum import Enum
 from errno import EBADF, ENOTCONN
-from socket import SHUT_RDWR
 from socket import error as SocketError
+from socket import SHUT_RDWR
 
 __all__ = ('Connection', 'ConnectionProtocol', 'ConnectionState')
 

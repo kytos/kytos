@@ -22,8 +22,8 @@ import re
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from importlib import import_module
 from importlib import reload as reload_module
+from importlib import import_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
@@ -35,8 +35,8 @@ from kytos.core.config import KytosConfig
 from kytos.core.connection import ConnectionState
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
-from kytos.core.logs import LogManager
 from kytos.core.interface import Interface
+from kytos.core.logs import LogManager
 from kytos.core.napps.base import NApp
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.napps.napp_dir_listener import NAppDirListener
@@ -559,7 +559,6 @@ class Controller:
             dpid (str): dpid used to identify a switch.
 
         """
-
         switch = self.switches.get(dpid)
         if not switch:
             return
@@ -569,8 +568,8 @@ class Controller:
             vlan_pool = json.loads(self.options.vlan_pool)
             if not vlan_pool:
                 return
-        except (TypeError, json.JSONDecodeError) as e:
-            self.log.error(f"Invalid vlan_pool settings: {str(e)}")
+        except (TypeError, json.JSONDecodeError) as err:
+            self.log.error("Invalid vlan_pool settings: %s", err)
 
         if vlan_pool.get(dpid):
             self.log.info(f"Loading vlan_pool configuration for dpid {dpid}")

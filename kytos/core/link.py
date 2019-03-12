@@ -4,8 +4,8 @@ Links are low level abstractions representing connections between two
 interfaces.
 """
 
-import json
 import hashlib
+import json
 
 from kytos.core.common import GenericEntity
 from kytos.core.interface import TAGType
@@ -78,7 +78,7 @@ class Link(GenericEntity):
             elements = (dpid_a, port_a, dpid_b, port_b)
         else:
             elements = (dpid_b, port_b, dpid_a, port_a)
-        
+
         str_id = "%s:%s:%s:%s" % elements
         return hashlib.sha256(str_id.encode('utf-8')).hexdigest()
 

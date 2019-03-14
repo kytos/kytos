@@ -796,26 +796,27 @@ class Controller:
             napp_module = import_module(mod_name)
         except ModuleNotFoundError as err:
             self.log.error("Module '%s' not found", mod_name)
-            return False
+            return err
         try:
             napp_module = reload_module(napp_module)
         except ImportError as err:
             self.log.error("Error reloading NApp '%s/%s': %s",
                            username, napp_name, err)
-            return False
-        return True
+            return err
+        return None
 
     def reload_napp(self, username, napp_name):
         """Reload a NApp."""
         self.unload_napp(username, napp_name)
+        res_settings = self.reload_napp_module(username, napp_name, 'settings')
+        res_main = self.reload_napp_module(username, napp_name, 'main')
         if (
-            self.reload_napp_module(username, napp_name, 'settings') and
-            self.reload_napp_module(username, napp_name, 'main')
+            isinstance(res_settings, (ModuleNotFoundError, ImportError)) or
+            isinstance(res_main, (ModuleNotFoundError, ImportError))
         ):
-            self.log.info("NApp '%s/%s' successfully reloaded",
-                          username, napp_name)
-        else:
             return 400
+        self.log.info("NApp '%s/%s' successfully reloaded",
+                      username, napp_name)
         self.load_napp(username, napp_name)
         return 200
 

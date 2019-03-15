@@ -789,26 +789,31 @@ class Controller:
         for (username, napp_name) in list(self.napps.keys()):  # noqa
             self.unload_napp(username, napp_name)
 
-    def reload_napp(self, username, napp_name):
-        """Reload a NApp."""
-        self.unload_napp(username, napp_name)
-
-        mod_name = '.'.join(['napps', username, napp_name, 'main'])
+    def reload_napp_module(self, username, napp_name, napp_file):
+        """Reload a NApp Module."""
+        mod_name = '.'.join(['napps', username, napp_name, napp_file])
         try:
             napp_module = import_module(mod_name)
         except ModuleNotFoundError as err:
             self.log.error("Module '%s' not found", mod_name)
-            return 400
-
+            raise
         try:
             napp_module = reload_module(napp_module)
-            self.log.info("NApp '%s/%s' successfully reloaded",
-                          username, napp_name)
         except ImportError as err:
             self.log.error("Error reloading NApp '%s/%s': %s",
                            username, napp_name, err)
-            return 400
+            raise
 
+    def reload_napp(self, username, napp_name):
+        """Reload a NApp."""
+        self.unload_napp(username, napp_name)
+        try:
+            self.reload_napp_module(username, napp_name, 'settings')
+            self.reload_napp_module(username, napp_name, 'main')
+        except (ModuleNotFoundError, ImportError):
+            return 400
+        self.log.info("NApp '%s/%s' successfully reloaded",
+                      username, napp_name)
         self.load_napp(username, napp_name)
         return 200
 

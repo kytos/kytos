@@ -9,18 +9,31 @@ UNRELEASED - Under development
 Added
 =====
  - Added vlan_pool configuration on kytos.conf to support mef_eline
+ - Added pyyaml and requests to requirements
+ - Added TyperError Handler to catch the exception when the vlan_pool option is missing in of_core's main file
+ - Added documentation to describe how to create a Meta-Napp
+ - Added documentation about Unit Tests
 
 Changed
 =======
+ - update_interface on switch goes back to what it was, without attrs_filter
+ - set_switch_options changed to use update_interface
+ - Updated documentation to install python-openflow, kytos-utils and kytos in order
+ - Updated documentation to use pip3 instead pip in requirements installation
+ - link id based on endpoints is now used instead of an uuid
 
 Deprecated
 ==========
 
 Removed
 =======
+ - Removed circular dependency of kytos-utils
+ - Removed unnecessary comparison on interfaces if they are on the same switch
 
 Fixed
 =====
+ - Fixed type declaration that broke sphinx-build
+ - Fixed some linter issues.
 
 Security
 ========

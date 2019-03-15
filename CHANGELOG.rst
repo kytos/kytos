@@ -5,22 +5,41 @@ All notable changes to the kytos project will be documented in this file.
 
 UNRELEASED - Under development
 ******************************
+Added
+=====
+
+Changed
+=======
+
+Deprecated
+==========
+
+Removed
+=======
+
+Fixed
+=====
+
+Security
+========
+
+[2019.1b1] - "fafa" beta1 - 2019-03-15
+**************************************
 
 Added
 =====
- - Added vlan_pool configuration on kytos.conf to support mef_eline
- - Added pyyaml and requests to requirements
- - Added TyperError Handler to catch the exception when the vlan_pool option is missing in of_core's main file
- - Added documentation to describe how to create a Meta-Napp
+ - Added vlan_pool configuration on kytos.conf to support mef_eline. Now you
+   can configure available vlans per interface.
+ - Added documentation to describe how to create a Meta Napp
  - Added documentation about Unit Tests
 
 Changed
 =======
- - update_interface on switch goes back to what it was, without attrs_filter
- - set_switch_options changed to use update_interface
- - Updated documentation to install python-openflow, kytos-utils and kytos in order
- - Updated documentation to use pip3 instead pip in requirements installation
- - link id based on endpoints is now used instead of an uuid
+ - Updated documentation to install python-openflow, kytos-utils and kytos in
+   that order
+ - Updated documentation to use pip3 instead pip
+ - Link id is now based on endpoints hashes, instead of a random uuid. This
+   fixes #875
 
 Deprecated
 ==========
@@ -33,13 +52,23 @@ Removed
 Fixed
 =====
  - Fixed type declaration that broke sphinx-build
- - Fixed some linter issues.
+ - Fixed some linter issues
+ - Fixed NApps settings reload. Now when you change a NApp settings the reload
+   it will work
 
 Security
 ========
+ - Updated pyyaml and requests requirements versions, in order to fix
+   vulnerabilities
+
+[2018.2] - "ernesto" stable - 2018-12-30
+****************************************
+
+ - This is the stable "ernesto" version, based on the last beta pre-releases.
+   No changes since the last rc1.
 
 [2018.2rc1] - "ernesto" rc1 - 2018-12-21
-*****************************************
+****************************************
 
 Added
 =====

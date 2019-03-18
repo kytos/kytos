@@ -89,7 +89,7 @@ class Controller:
         self.events_listeners = {'kytos/core.connection.new':
                                  [self.new_connection]}
 
-        #: dict: Current loaded apps - ``'napp_name': napp`` (instance)
+        #: dict: Current loaded apps - ``'napp_name'``: ``napp`` (instance)
         #:
         #: The key is the napp name (string), while the value is the napp
         #: instance itself.

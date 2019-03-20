@@ -1,6 +1,7 @@
 """Module with some helpers for tests."""
 import os
 import sys
+import threading
 import time
 from socket import socket
 
@@ -122,3 +123,50 @@ def new_handshaked_client(options=None):
         options = get_config().options['daemon']
     client = new_client(options)
     return do_handshake(client)
+
+
+def test_concurrently(times):
+    """
+    Decorator to test concurrently many times.
+
+    Add this decorator to small pieces of code that you want to test
+    concurrently to make sure they don't raise exceptions when run at the
+    same time.
+
+    E.g., some views that do a SELECT and then a subsequent
+    INSERT might fail when the INSERT assumes that the data has not changed
+    since the SELECT.
+    E.g.:
+        def test_method(self):
+        from tests.helpers import test_concurrently
+        @test_concurrently(10)
+        def toggle_call_your_method_here():
+            print('This is a test')
+
+        toggle_call_your_method_here()
+    """
+    def test_concurrently_decorator(test_func):
+        """Decorator thread execution."""
+        def wrapper(*args, **kwargs):
+            """Thread wrapper."""
+            exceptions = []
+
+            def call_test_func():
+                """Call the test method."""
+                try:
+                    test_func(*args, **kwargs)
+                except Exception:
+                    raise
+            threads = []
+            for _ in range(times):
+                threads.append(threading.Thread(target=call_test_func))
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
+            if exceptions:
+                raise Exception('test_concurrently intercepted '
+                                '%s exceptions: %s' %
+                                (len(exceptions), exceptions))
+        return wrapper
+    return test_concurrently_decorator

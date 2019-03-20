@@ -92,7 +92,10 @@ class Link(GenericEntity):
                 self.endpoint_b.available_tags]
 
     def use_tag(self, tag):
-        """Remove a specific tag from available_tags if it is there."""
+        """Remove a specific tag from available_tags if it is there.
+
+        Deprecated: use only the get_next_available_tag method.
+        """
         if self.is_tag_available(tag):
             self.endpoint_a.use_tag(tag)
             self.endpoint_b.use_tag(tag)
@@ -106,9 +109,28 @@ class Link(GenericEntity):
 
     def get_next_available_tag(self):
         """Return the next available tag if exists."""
-        for tag in self.endpoint_a.available_tags:
-            if tag in self.endpoint_b.available_tags:
+        # Copy the available tags because in case of error
+        # we will remove and add elements to the available_tags
+        available_tags_a = self.endpoint_a.available_tags.copy()
+        available_tags_b = self.endpoint_b.available_tags.copy()
+
+        for tag in available_tags_a:
+            if tag in available_tags_b:
+                is_success = self.endpoint_a.use_tag(tag)
+                if not is_success:
+                    # Tag already in use. Try another tag.
+                    continue
+
+                is_success = self.endpoint_b.use_tag(tag)
+                if not is_success:
+                    # Tag already in use.
+                    # Return endpoint_a tag and try another tag.
+                    self.endpoint_a.make_tag_available(tag)
+                    continue
+
+                # Tag used successfully by both endpoints. Returning.
                 return tag
+
         return False
 
     def make_tag_available(self, tag):

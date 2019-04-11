@@ -155,7 +155,8 @@ def test_concurrently(times):
                 """Call the test method."""
                 try:
                     test_func(*args, **kwargs)
-                except Exception:
+                except Exception as _e:
+                    exceptions.append(_e)
                     raise
             threads = []
             for _ in range(times):

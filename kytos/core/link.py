@@ -115,21 +115,21 @@ class Link(GenericEntity):
         available_tags_b = self.endpoint_b.available_tags.copy()
 
         for tag in available_tags_a:
-            if tag in available_tags_b:
-                is_success = self.endpoint_a.use_tag(tag)
-                if not is_success:
-                    # Tag already in use. Try another tag.
-                    continue
+            # Tag does not exist in endpoint B. Try another tag.
+            if tag not in available_tags_b:
+                continue
 
-                is_success = self.endpoint_b.use_tag(tag)
-                if not is_success:
-                    # Tag already in use.
-                    # Return endpoint_a tag and try another tag.
-                    self.endpoint_a.make_tag_available(tag)
-                    continue
+            # Tag already in use. Try another tag.
+            if not self.endpoint_a.use_tag(tag):
+                continue
 
-                # Tag used successfully by both endpoints. Returning.
-                return tag
+            # Tag already in use in B. Mark the tag as available again.
+            if not self.endpoint_b.use_tag(tag):
+                self.endpoint_a.make_tag_available(tag)
+                continue
+
+            # Tag used successfully by both endpoints. Returning.
+            return tag
 
         return False
 

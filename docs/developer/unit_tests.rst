@@ -33,6 +33,15 @@ Additionally, every new Pull Request created on GitHub triggers a
 build+install+test process in |scrutinizer|_, which creates a result
 report and links to it in the Pull Request.
 
+To run tests the same way that |scrutinizer| does, just run ``tox``. It will
+setup a new temporary virtualenv, install package requirements and run all tests
+listed in ``tox.ini``:
+
+.. code-block:: shell
+
+    $ tox
+
+
 .. |scrutinizer| replace:: *Scrutinizer*
 .. _scrutinizer:  https://scrutinizer-ci.com/
 

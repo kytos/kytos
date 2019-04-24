@@ -23,6 +23,18 @@ Fixed
 Security
 ========
 
+[2019.1b2] - "fafa" beta2 - 2019-04-26
+**************************************
+
+Added
+=====
+- Blueprint describing when link with MEF E-line.
+- Documentation test description.
+
+Fixed
+=====
+- Warning when compiling documentation.
+
 [2019.1b1] - "fafa" beta1 - 2019-03-15
 **************************************
 

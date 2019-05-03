@@ -5,7 +5,7 @@ from unittest.mock import Mock
 
 from pyof.v0x04.common.port import PortFeatures
 
-from kytos.core.interface import Interface
+from kytos.core.interface import Interface, TAG, TAGType
 from kytos.core.switch import Switch
 
 logging.basicConfig(level=logging.CRITICAL)
@@ -116,3 +116,48 @@ class TestInterface(unittest.TestCase):
         self.iface.set_available_tags(custom_range)
         intf_values = [tag.value for tag in self.iface.available_tags]
         self.assertListEqual(intf_values, custom_range)
+
+    def test_all_available_tags(self):
+        """Test all available_tags on Interface class."""
+        max_range = 4096
+
+        for i in range(1, max_range):
+            next_tag = self.iface.get_next_available_tag()
+            self.assertIs(type(next_tag), TAG)
+            self.assertEqual(next_tag.value, max_range - i)
+
+        next_tag = self.iface.get_next_available_tag()
+        self.assertEqual(next_tag, False)
+
+    def test_interface_is_tag_available(self):
+        """Test is_tag_available on Interface class."""
+        max_range = 4096
+        for i in range(1, max_range):
+            tag = TAG(TAGType.VLAN, i)
+
+            next_tag = self.iface.is_tag_available(tag)
+            self.assertTrue(next_tag)
+
+        # test lower limit
+        tag = TAG(TAGType.VLAN, 0)
+        self.assertFalse(self.iface.is_tag_available(tag))
+        # test upper limit
+        tag = TAG(TAGType.VLAN, max_range)
+        self.assertFalse(self.iface.is_tag_available(tag))
+
+    def test_interface_use_tags(self):
+        """Test all use_tag on Interface class."""
+
+        tag = TAG(TAGType.VLAN, 100)
+        # check use tag for the first time
+        is_success = self.iface.use_tag(tag)
+        self.assertTrue(is_success)
+
+        # check use tag for the second time
+        is_success = self.iface.use_tag(tag)
+        self.assertFalse(is_success)
+
+        # check use tag after returning the tag to the pool
+        self.iface.make_tag_available(tag)
+        is_success = self.iface.use_tag(tag)
+        self.assertTrue(is_success)

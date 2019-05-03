@@ -19,4 +19,5 @@ Contributors
 - Valessio Soares de Brito <contato AT valessiobrito DOT com DOT br>
 - Vinicius Arcanjo <viniciusarcanjov AT gmail DOT com>
 - Erick Vermot <erick.vermot AT gmail DOT com>
-- Gleyberson Andrade <gleybersonandrade@gmail.com>
+- Gleyberson Andrade <gleybersonandrade AT gmail DOT com>
+- Lucas Felix <lucasgsfelix AT gmail DOT com>

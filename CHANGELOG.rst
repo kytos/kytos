@@ -23,17 +23,18 @@ Fixed
 Security
 ========
 
-[2019.1b2] - "fafa" beta2 - 2019-04-26
+[2019.1b2] - "fafa" beta2 - 2019-05-03
 **************************************
 
 Added
 =====
-- Blueprint describing when link with MEF E-line.
-- Documentation test description.
+- Added MEF E-Line Link Up/Down definition blueprint.
+- Added documentation about using tox for unit tests.
 
 Fixed
 =====
-- Warning when compiling documentation.
+- Fixed method get_next_available_tag under concurrent scenarios.
+- Fixed warning when compiling documentation.
 
 [2019.1b1] - "fafa" beta1 - 2019-03-15
 **************************************

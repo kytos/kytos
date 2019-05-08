@@ -268,7 +268,7 @@ First of all, to upload your NApp you should have an active account in the
 NApps server. With an registered account you should execute the command below
 inside the napp structure.
 
-The command below will to compact your NApp and upload to the napps server.
+The command below will compact your NApp and upload to the napps server.
 
 .. code-block:: shell
 
@@ -278,7 +278,7 @@ The command below will to compact your NApp and upload to the napps server.
   SUCCESS: NApp <username>/my_first_napp uploaded.
 
 
-If your NApp do not have a openapi.yml, the command executed will display the message:
+If your NApp does not have a openapi.yml, the command executed will display the message:
 `Do you have REST endpoints and wish to create an API skeleton in openapi.yml? (Y/n)`.
 In this case if you input `y`, `Y` or `Enter` the file will be created,
 otherwise the compacted NApp will be uploaded without this file.  Do not
@@ -319,19 +319,19 @@ controller buffer. Below we have a python code to send a KytosEvent named
         # display that the event was sent.
         log.info('%s sent.', event.content['message'])
 
-After created, a method to send new events to Kytos you need to know how to
+After creating a method to send new events to Kytos you need to know how to
 receive that event in your NApp.
 
 Listen Kytos Event
 ------------------
 
 In the Kytos core we have a decorator named **listen_to()** to call a function
-when the kytos receive some specific event.  The parameter to **listen_to** is
+when the Kytos receives some specific event.  The parameter to **listen_to** is
 a regex to filter the event by name.  For instance with you can receive all
 events send by **<username>/napp_name** you can pass the string
 **<username>/napp_name.***.
 
-Below there is a function called when receive some event with the pattern
+Below is a function called when receiving some event with the pattern
 **<username>/napp_name.***.
 
 .. code-block:: python

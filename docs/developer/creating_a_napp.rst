@@ -61,13 +61,13 @@ information. Using the following command you will create a basic structure.
   Now you can go to the directory tutorial/helloworld and begin to code your NApp.
   Have fun!
 
-After that a folder with `username` will be created and inside that we have
+After that a folder with `username` will be created and inside that we will have
 your NApp folder.
 
 Understanding the NApp structure
 --------------------------------
 
-After created your NApp we have the basic NApp structure.
+After created, your NApp will have the basic NApp structure.
 
 .. code-block:: shell
 
@@ -90,7 +90,7 @@ After created your NApp we have the basic NApp structure.
 - **settings.py**: Main settings parameters of your NApp.
 - **main.py**: Main source code of your NApp.
 - **README.rst**: Main description and information about your NApp.
-- **ui**: Folder with components to be displayed in the Kytos UI
+- **ui**: Folder with components to be displayed in the Kytos UI.
 - **ui/README.rst**: A file with a brief description of your NApp components.
 
 
@@ -101,7 +101,7 @@ In the Kytos Project we have a decorator to create new API endpoints.
 If you want to create a new endpoint you should follow the steps below.
 
 - You need import the rest decorator method.
-- You need  declare a function using the rest decorator
+- You need  declare a function using the rest decorator.
 - In the end of function you need return a string and the status code of your method.
 
 .. code-block:: python
@@ -145,7 +145,7 @@ If your NApp have to use the decorator `rest` to create some API endpoint you
 need to document this endpoint. In the `kytos-utils` package there is a
 command to create a basic **openapi.yml** structure to document your API.
 
-To create the openapi file just run the follow command.
+To create the openapi file just run the following command.
 
 .. code-block:: shell
 
@@ -155,7 +155,7 @@ To create the openapi file just run the follow command.
 
 
 After that a new file called openapi.yml will be created and you can update
-that to display your API documentation. To learn more how to  fill the
+that to display your API documentation. To learn more how to fill the
 documentation you can see the `OpenAPI Specification <https://swagger.io/specification/>`__
 
 
@@ -200,7 +200,7 @@ How to register yourself in the NApps respository
 =================================================
 
 To publish your NApp in the `Napps server <https://napps.kytos.io/>`_ you need
-to self register.Tto do that the tool `kytos` has a command
+to self register. To do that the tool `kytos` has a command
 line to make the registration. Below we have the steps to make the
 registration.
 
@@ -249,7 +249,7 @@ First of all use the command below and pass the your user information.
 - **username**: Username is the identifier in the server.
 - **first name**: The first name information.
 - **last name**: The last name information.
-- **password**: The password used to make changes in the server
+- **password**: The password used to make changes in the server.
 - **password confirmation**: The password confirmation.
 - **email**: Email to confirm the registration in the server.
 - **phone**: Phone number information.This field is optional.
@@ -257,18 +257,18 @@ First of all use the command below and pass the your user information.
 - **state**: State information.This field is optional.
 - **country**: Country information. This field is optional.
 
-After created you can't use your user yet.You need to confirm your
+After created you can't use your user yet. You need to confirm your
 registration process in the email box passed.
-After that you can upload yours NApps.
+After that you can upload your NApps.
 
 How to upload your NApp in the NApps repository
 ===============================================
 
-First of all, to upload your napp you should have an active account in the
-napps server. With an registered account you should execute the command below
+First of all, to upload your NApp you should have an active account in the
+NApps server. With an registered account you should execute the command below
 inside the napp structure.
 
-The command below will to compact your NApp and upload to the napps server.
+The command below will compact your NApp and upload to the napps server.
 
 .. code-block:: shell
 
@@ -278,11 +278,11 @@ The command below will to compact your NApp and upload to the napps server.
   SUCCESS: NApp <username>/my_first_napp uploaded.
 
 
-If your NApp do not have a openapi.yml, the command executed will display the message:
+If your NApp does not have a openapi.yml, the command executed will display the message:
 `Do you have REST endpoints and wish to create an API skeleton in openapi.yml? (Y/n)`.
 In this case if you input `y`, `Y` or `Enter` the file will be created,
 otherwise the compacted NApp will be uploaded without this file.  Do not
-worrying if your NApp do not have this file.
+worry if your NApp does not have this file.
 
 How the events works
 ====================
@@ -319,19 +319,19 @@ controller buffer. Below we have a python code to send a KytosEvent named
         # display that the event was sent.
         log.info('%s sent.', event.content['message'])
 
-After created a method to send new events to Kytos you need to know how to
+After creating a method to send new events to Kytos you need to know how to
 receive that event in your NApp.
 
 Listen Kytos Event
 ------------------
 
 In the Kytos core we have a decorator named **listen_to()** to call a function
-when the kytos receive some specific event.  The parameter to **listen_to** is
+when the Kytos receives some specific event.  The parameter to **listen_to** is
 a regex to filter the event by name.  For instance with you can receive all
 events send by **<username>/napp_name** you can pass the string
 **<username>/napp_name.***.
 
-Below there is a function called when receive some event with the pattern
+Below is a function called when receiving some event with the pattern
 **<username>/napp_name.***.
 
 .. code-block:: python
@@ -354,11 +354,11 @@ Below there is a function called when receive some event with the pattern
 Events that are generated by Kytos
 ==================================
 
-In the Kytos project we have a list of events generated by kytos. You can read
+In the Kytos project we have a list of events generated by Kytos. You can read
 the section :doc:`./listened_events` to know more about events generated by
-kytos.
+Kytos.
 
-The kytos events are divided in some categories, below a list of all
+The Kytos events are divided in some categories, below a list of all
 categories is displayed.
 
 .. toctree::
@@ -396,7 +396,7 @@ information. The difference is just the `meta` flag in the create command.
   Now you can go to the directory {username}/{meta_napp_name} and begin to code your NApp.
   Have fun!
 
-After that, a folder with `username` will be created and inside that we have
+After that, a folder with `username` will be created and inside that we will have
 your Meta-NApp folder.
 
 Understanding the Meta-NApp structure

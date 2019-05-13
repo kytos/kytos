@@ -360,6 +360,9 @@ class APIServer:
                                     self._list_enabled_napps)
         self.register_core_endpoint("napps_installed",
                                     self._list_installed_napps)
+        self.register_core_endpoint(
+            "napps/<username>/<napp_name>/metadata/<key>",
+            self._get_napp_metadata)
 
     def _enable_napp(self, username, napp_name):
         """
@@ -454,3 +457,22 @@ class APIServer:
 
         return '{"napps": %s}' % serialized_dict, HTTPStatus.OK.value
 
+    def _get_napp_metadata(self, username, napp_name, key):
+        """Get NApp metadata value.
+
+        For safety reasons, only some keys can be retrieved:
+        napp_dependencies, description, version.
+
+        """
+        _VALID_KEYS = ['napp_dependencies', 'description', 'version']
+
+        if not self.nappsManager.is_installed(username, napp_name):
+            return "Napp is not installed.", HTTPStatus.BAD_REQUEST.value
+
+        if key not in _VALID_KEYS:
+            return "Invalid key.", HTTPStatus.BAD_REQUEST.value
+
+        data = self.nappsManager.get_napp_metadata(username, napp_name, key)
+        serialized_dict = json.dumps({key: data})
+
+        return '%s' % serialized_dict, HTTPStatus.OK.value

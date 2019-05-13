@@ -26,7 +26,7 @@ class APIServer:
     _CORE_PREFIX = "/api/kytos/core/"
 
     def __init__(self, app_name, listen='0.0.0.0', port=8181,
-                 controller=None):
+                 napps_manager=None, napps_dir=None):
         """Start a Flask+SocketIO server.
 
         Require controller to get NApps dir and NAppsManager
@@ -38,8 +38,8 @@ class APIServer:
             controller(kytos.core.controller): A controller instance.
         """
         dirname = os.path.dirname(os.path.abspath(__file__))
-        self.nappsManager = controller.napps_manager
-        self.napps_dir = controller.options.napps
+        self.nappsManager = napps_manager
+        self.napps_dir = napps_dir
 
         self.flask_dir = os.path.join(dirname, '../web-ui')
         self.log = logging.getLogger('api_server')
@@ -350,14 +350,16 @@ class APIServer:
         """
         self.register_core_endpoint("napps/<username>/<napp_name>/enable",
                                     self._enable_napp)
-
         self.register_core_endpoint("napps/<username>/<napp_name>/disable",
                                     self._disable_napp)
-
         self.register_core_endpoint("napps/<username>/<napp_name>/install",
                                     self._install_napp)
         self.register_core_endpoint("napps/<username>/<napp_name>/uninstall",
                                     self._uninstall_napp)
+        self.register_core_endpoint("napps_enabled",
+                                    self._list_enabled_napps)
+        self.register_core_endpoint("napps_installed",
+                                    self._list_installed_napps)
 
     def _enable_napp(self, username, napp_name):
         """
@@ -377,12 +379,12 @@ class APIServer:
             self.nappsManager.enable(username, napp_name)
 
         # Check if NApp is enabled
-        if self.nappsManager.is_enabled(username, napp_name):
-            return '{"response": "enabled"}', HTTPStatus.OK.value
+        if not self.nappsManager.is_enabled(username, napp_name):
+            # If it is not enabled an admin user must check the log file
+            return '{"response": "error"}', \
+                   HTTPStatus.INTERNAL_SERVER_ERROR.value
 
-        # If it is not enabled an admin user must check the log file
-        return '{"response": "error"}', \
-               HTTPStatus.INTERNAL_SERVER_ERROR.value
+        return '{"response": "enabled"}', HTTPStatus.OK.value
 
     def _disable_napp(self, username, napp_name):
         """
@@ -418,7 +420,7 @@ class APIServer:
         napp = "{}/{}".format(username, napp_name)
 
         # Try to install the napp
-        if not self.nappsManager.install(napp, False):
+        if not self.nappsManager.install(napp, enable=False):
             # If it is not installed an admin user must check the log file
             return '{"response": "error"}', \
                    HTTPStatus.INTERNAL_SERVER_ERROR.value
@@ -427,13 +429,28 @@ class APIServer:
 
     def _uninstall_napp(self, username, napp_name):
         # Check if the NApp is installed
-        if not self.nappsManager.is_installed(username, napp_name):
-            return '{"response": "uninstalled"}', HTTPStatus.OK.value
-
-        # Try to unload/uninstall the napp
-        if not self.nappsManager.uninstall(username, napp_name):
-            # If it is not uninstalled admin user must check the log file
-            return '{"response": "error"}', \
-                   HTTPStatus.INTERNAL_SERVER_ERROR.value
+        if self.nappsManager.is_installed(username, napp_name):
+            # Try to unload/uninstall the napp
+            if not self.nappsManager.uninstall(username, napp_name):
+                # If it is not uninstalled admin user must check the log file
+                return '{"response": "error"}', \
+                       HTTPStatus.INTERNAL_SERVER_ERROR.value
 
         return '{"response": "uninstalled"}', HTTPStatus.OK.value
+
+    def _list_enabled_napps(self):
+        """Sorted list of (username, napp_name) of enabled napps."""
+        serialized_dict = json.dumps(
+                            self.nappsManager.get_enabled_napps(),
+                            default=lambda a: [a.username, a.name])
+
+        return '{"napps": %s}' % serialized_dict, HTTPStatus.OK.value
+
+    def _list_installed_napps(self):
+        """Sorted list of (username, napp_name) of installed napps."""
+        serialized_dict = json.dumps(
+                            self.nappsManager.get_installed_napps(),
+                            default=lambda a: [a.username, a.name])
+
+        return '{"napps": %s}' % serialized_dict, HTTPStatus.OK.value
+

@@ -29,8 +29,8 @@ logging = {{ prefix }}/etc/kytos/logging.ini
 listen = 0.0.0.0
 
 # The port parameter tells kytos controller to accept and to send
-# openflow packets using TCP protocol. Default is 6633.
-port = 6633
+# openflow packets using TCP protocol. Default is 6653.
+port = 6653
 
 # Southbound protocol name of the TCP server. Don't use quotes in the string.
 protocol_name =

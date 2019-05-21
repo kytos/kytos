@@ -110,7 +110,6 @@ class Controller:
         #: logging.Logger: Logger instance used by Kytos.
         self.log = None
 
-
         #: Observer that handle NApps when they are enabled or disabled.
         self.napp_dir_listener = NAppDirListener(self)
 
@@ -119,7 +118,7 @@ class Controller:
         #: API Server used to expose rest endpoints.
         self.api_server = APIServer(__name__, self.options.listen,
                                     self.options.api_port,
-                                    controller=self)
+                                    self.napps_manager, self.options.napps)
 
         self._register_endpoints()
         #: Adding the napps 'enabled' directory into the PATH

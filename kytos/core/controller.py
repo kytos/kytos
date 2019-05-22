@@ -22,8 +22,8 @@ import re
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from importlib import reload as reload_module
 from importlib import import_module
+from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
@@ -571,7 +571,7 @@ class Controller:
             self.log.error("Invalid vlan_pool settings: %s", err)
 
         if vlan_pool.get(dpid):
-            self.log.info(f"Loading vlan_pool configuration for dpid {dpid}")
+            self.log.info("Loading vlan_pool configuration for dpid %s", dpid)
             for intf_num, port_list in vlan_pool[dpid].items():
                 if not switch.interfaces.get((intf_num)):
                     vlan_ids = set()

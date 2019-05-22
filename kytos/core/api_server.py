@@ -25,6 +25,7 @@ class APIServer:
     _NAPP_PREFIX = "/api/{napp.username}/{napp.name}/"
     _CORE_PREFIX = "/api/kytos/core/"
 
+    # pylint: disable=too-many-arguments
     def __init__(self, app_name, listen='0.0.0.0', port=8181,
                  napps_manager=None, napps_dir=None):
         """Start a Flask+SocketIO server.
@@ -464,12 +465,12 @@ class APIServer:
         napp_dependencies, description, version.
 
         """
-        _VALID_KEYS = ['napp_dependencies', 'description', 'version']
+        valid_keys = ['napp_dependencies', 'description', 'version']
 
         if not self.napps_manager.is_installed(username, napp_name):
             return "NApp is not installed.", HTTPStatus.BAD_REQUEST.value
 
-        if key not in _VALID_KEYS:
+        if key not in valid_keys:
             return "Invalid key.", HTTPStatus.BAD_REQUEST.value
 
         data = self.napps_manager.get_napp_metadata(username, napp_name, key)

@@ -38,7 +38,7 @@ class APIServer:
             controller(kytos.core.controller): A controller instance.
         """
         dirname = os.path.dirname(os.path.abspath(__file__))
-        self.nappsManager = napps_manager
+        self.napps_manager = napps_manager
         self.napps_dir = napps_dir
 
         self.flask_dir = os.path.join(dirname, '../web-ui')
@@ -373,16 +373,16 @@ class APIServer:
         :return: JSON content and return code
         """
         # Check if the NApp is installed
-        if not self.nappsManager.is_installed(username, napp_name):
+        if not self.napps_manager.is_installed(username, napp_name):
             return '{"response": "not installed"}', \
                    HTTPStatus.BAD_REQUEST.value
 
         # Check if the NApp is already been enabled
-        if not self.nappsManager.is_enabled(username, napp_name):
-            self.nappsManager.enable(username, napp_name)
+        if not self.napps_manager.is_enabled(username, napp_name):
+            self.napps_manager.enable(username, napp_name)
 
         # Check if NApp is enabled
-        if not self.nappsManager.is_enabled(username, napp_name):
+        if not self.napps_manager.is_enabled(username, napp_name):
             # If it is not enabled an admin user must check the log file
             return '{"response": "error"}', \
                    HTTPStatus.INTERNAL_SERVER_ERROR.value
@@ -398,16 +398,16 @@ class APIServer:
         :return: JSON content and return code
         """
         # Check if the NApp is installed
-        if not self.nappsManager.is_installed(username, napp_name):
+        if not self.napps_manager.is_installed(username, napp_name):
             return '{"response": "not installed"}', \
                    HTTPStatus.BAD_REQUEST.value
 
         # Check if the NApp is enabled
-        if self.nappsManager.is_enabled(username, napp_name):
-            self.nappsManager.disable(username, napp_name)
+        if self.napps_manager.is_enabled(username, napp_name):
+            self.napps_manager.disable(username, napp_name)
 
         # Check if NApp is still enabled
-        if self.nappsManager.is_enabled(username, napp_name):
+        if self.napps_manager.is_enabled(username, napp_name):
             # If it is still enabled an admin user must check the log file
             return '{"response": "error"}', \
                    HTTPStatus.INTERNAL_SERVER_ERROR.value
@@ -417,13 +417,13 @@ class APIServer:
 
     def _install_napp(self, username, napp_name):
         # Check if the NApp is installed
-        if self.nappsManager.is_installed(username, napp_name):
+        if self.napps_manager.is_installed(username, napp_name):
             return '{"response": "installed"}', HTTPStatus.OK.value
 
         napp = "{}/{}".format(username, napp_name)
 
         # Try to install the napp
-        if not self.nappsManager.install(napp, enable=False):
+        if not self.napps_manager.install(napp, enable=False):
             # If it is not installed an admin user must check the log file
             return '{"response": "error"}', \
                    HTTPStatus.INTERNAL_SERVER_ERROR.value
@@ -432,9 +432,9 @@ class APIServer:
 
     def _uninstall_napp(self, username, napp_name):
         # Check if the NApp is installed
-        if self.nappsManager.is_installed(username, napp_name):
+        if self.napps_manager.is_installed(username, napp_name):
             # Try to unload/uninstall the napp
-            if not self.nappsManager.uninstall(username, napp_name):
+            if not self.napps_manager.uninstall(username, napp_name):
                 # If it is not uninstalled admin user must check the log file
                 return '{"response": "error"}', \
                        HTTPStatus.INTERNAL_SERVER_ERROR.value
@@ -444,7 +444,7 @@ class APIServer:
     def _list_enabled_napps(self):
         """Sorted list of (username, napp_name) of enabled napps."""
         serialized_dict = json.dumps(
-                            self.nappsManager.get_enabled_napps(),
+                            self.napps_manager.get_enabled_napps(),
                             default=lambda a: [a.username, a.name])
 
         return '{"napps": %s}' % serialized_dict, HTTPStatus.OK.value
@@ -452,7 +452,7 @@ class APIServer:
     def _list_installed_napps(self):
         """Sorted list of (username, napp_name) of installed napps."""
         serialized_dict = json.dumps(
-                            self.nappsManager.get_installed_napps(),
+                            self.napps_manager.get_installed_napps(),
                             default=lambda a: [a.username, a.name])
 
         return '{"napps": %s}' % serialized_dict, HTTPStatus.OK.value
@@ -466,13 +466,13 @@ class APIServer:
         """
         _VALID_KEYS = ['napp_dependencies', 'description', 'version']
 
-        if not self.nappsManager.is_installed(username, napp_name):
-            return "Napp is not installed.", HTTPStatus.BAD_REQUEST.value
+        if not self.napps_manager.is_installed(username, napp_name):
+            return "NApp is not installed.", HTTPStatus.BAD_REQUEST.value
 
         if key not in _VALID_KEYS:
             return "Invalid key.", HTTPStatus.BAD_REQUEST.value
 
-        data = self.nappsManager.get_napp_metadata(username, napp_name, key)
+        data = self.napps_manager.get_napp_metadata(username, napp_name, key)
         serialized_dict = json.dumps({key: data})
 
         return '%s' % serialized_dict, HTTPStatus.OK.value

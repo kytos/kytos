@@ -230,7 +230,7 @@ class NAppsManager:
                 meta = json.load(file_descriptor)
                 return meta[key]
         except (FileNotFoundError, json.JSONDecodeError, KeyError):
-            LOG.warning("Load napp metada failed: %s/kytos.json", napp_id)
+            LOG.warning("NApp metadata load failed: %s/kytos.json", napp_id)
             return ''
 
     @staticmethod

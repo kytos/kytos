@@ -12,7 +12,7 @@ from kytos.core.atcp_server import KytosServer, KytosServerProtocol
 logging.basicConfig(level=logging.CRITICAL)
 
 # Using "nettest" TCP port as a way to avoid conflict with a running
-# Kytos server on 6633.
+# Kytos server on 6653.
 TEST_ADDRESS = ('127.0.0.1', 4138)
 
 

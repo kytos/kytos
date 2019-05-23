@@ -107,6 +107,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
         Returns:
             string: Interface id.
+
         """
         return "{}:{}".format(self.switch.dpid, self.port_number)
 

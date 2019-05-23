@@ -22,8 +22,8 @@ import re
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from importlib import reload as reload_module
 from importlib import import_module
+from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
@@ -110,18 +110,17 @@ class Controller:
         #: logging.Logger: Logger instance used by Kytos.
         self.log = None
 
-        #: API Server used to expose rest endpoints.
-        self.api_server = APIServer(__name__, self.options.listen,
-                                    self.options.api_port,
-                                    napps_dir=self.options.napps)
-
-        self._register_endpoints()
-
         #: Observer that handle NApps when they are enabled or disabled.
         self.napp_dir_listener = NAppDirListener(self)
 
         self.napps_manager = NAppsManager(self)
 
+        #: API Server used to expose rest endpoints.
+        self.api_server = APIServer(__name__, self.options.listen,
+                                    self.options.api_port,
+                                    self.napps_manager, self.options.napps)
+
+        self._register_endpoints()
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
         #: from napps.<username>.<napp_name> import ?....
@@ -572,7 +571,7 @@ class Controller:
             self.log.error("Invalid vlan_pool settings: %s", err)
 
         if vlan_pool.get(dpid):
-            self.log.info(f"Loading vlan_pool configuration for dpid {dpid}")
+            self.log.info("Loading vlan_pool configuration for dpid %s", dpid)
             for intf_num, port_list in vlan_pool[dpid].items():
                 if not switch.interfaces.get((intf_num)):
                     vlan_ids = set()

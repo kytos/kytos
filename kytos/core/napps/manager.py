@@ -211,6 +211,28 @@ class NAppsManager:
         """Return all NApps installed on this controller FS."""
         return self.get_napps_from_path(self._installed_path)
 
+    def get_napp_metadata(self, username, napp_name, key):
+        """Return a value from kytos.json.
+
+        Args:
+            username (string): A Username.
+            napp_name (string): A NApp name
+            key (string): Key used to get the value within kytos.json.
+
+        Returns:
+            meta (object): Value stored in kytos.json.
+
+        """
+        napp_id = "{}/{}".format(username, napp_name)
+        kytos_json = self._installed_path / napp_id / 'kytos.json'
+        try:
+            with kytos_json.open() as file_descriptor:
+                meta = json.load(file_descriptor)
+                return meta[key]
+        except (FileNotFoundError, json.JSONDecodeError, KeyError):
+            LOG.warning("NApp metadata load failed: %s/kytos.json", napp_id)
+            return ''
+
     @staticmethod
     def get_napps_from_path(path: Path):
         """List all NApps found in ``napps_dir``."""
@@ -233,7 +255,7 @@ class NAppsManager:
         (path / '__init__.py').touch()
 
     @staticmethod
-    def _find_napp(napp, root: Path=None) -> Path:
+    def _find_napp(napp, root: Path = None) -> Path:
         """Return local NApp root folder.
 
         Search for kytos.json in _./_ folder and _./user/napp_.

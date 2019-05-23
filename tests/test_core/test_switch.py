@@ -28,7 +28,7 @@ class TestSwitch(TestCase):
 
     def test_switch_vlan_pool_default(self):
         """Test default vlan_pool value."""
-        self.assertEqual(self.options.vlan_pool, {})
+        self.assertEqual(self.options.vlan_pool, '{}')
 
     def test_switch_vlan_pool_options(self):
         """Test switch with the example from kytos.conf."""

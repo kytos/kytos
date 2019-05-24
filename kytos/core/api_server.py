@@ -423,8 +423,8 @@ class APIServer:
 
         napp = "{}/{}".format(username, napp_name)
 
-        # Try to install the napp
-        if not self.napps_manager.install(napp, enable=False):
+        # Try to install and enable the napp
+        if not self.napps_manager.install(napp, enable=True):
             # If it is not installed an admin user must check the log file
             return '{"response": "error"}', \
                    HTTPStatus.INTERNAL_SERVER_ERROR.value

@@ -134,6 +134,8 @@ class NAppsManager:
                 LOG.error("Failed to enable NApp %s. Permission denied.",
                           napp_id)
 
+        return True
+
     def disable(self, username, napp_name):
         """Disable a NApp if it is enabled."""
         napp_id = "{}/{}".format(username, napp_name)
@@ -156,6 +158,8 @@ class NAppsManager:
                 self._controller.unload_napp(username, napp_name)
         except FileNotFoundError:
             pass  # OK, it was already disabled
+
+        return True
 
     def enable_all(self):
         """Enable all napps already installed and disabled."""

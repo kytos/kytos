@@ -4,8 +4,8 @@ Links are low level abstractions representing connections between two
 interfaces.
 """
 
+import hashlib
 import json
-from uuid import uuid4
 
 from kytos.core.common import GenericEntity
 from kytos.core.interface import TAGType
@@ -25,11 +25,10 @@ class Link(GenericEntity):
             raise ValueError("endpoint_b cannot be None")
         self.endpoint_a = endpoint_a
         self.endpoint_b = endpoint_b
-        self._uuid = uuid4()
         super().__init__()
 
     def __hash__(self):
-        return hash(self._uuid)
+        return hash(self.id)
 
     def is_enabled(self):
         """Override the is_enabled method.
@@ -57,10 +56,7 @@ class Link(GenericEntity):
 
     def __eq__(self, other):
         """Check if two instances of Link are equal."""
-        return ((self.endpoint_a == other.endpoint_a and
-                 self.endpoint_b == other.endpoint_b) or
-                (self.endpoint_a == other.endpoint_b and
-                 self.endpoint_b == other.endpoint_a))
+        return self.id == other.id
 
     @property
     def id(self):  # pylint: disable=invalid-name
@@ -70,7 +66,21 @@ class Link(GenericEntity):
             string: link id.
 
         """
-        return "{}".format(self._uuid)
+        dpid_a = self.endpoint_a.switch.dpid
+        port_a = self.endpoint_a.port_number
+        dpid_b = self.endpoint_b.switch.dpid
+        port_b = self.endpoint_b.port_number
+        if dpid_a < dpid_b:
+            elements = (dpid_a, port_a, dpid_b, port_b)
+        elif dpid_a > dpid_b:
+            elements = (dpid_b, port_b, dpid_a, port_a)
+        elif port_a < port_b:
+            elements = (dpid_a, port_a, dpid_b, port_b)
+        else:
+            elements = (dpid_b, port_b, dpid_a, port_a)
+
+        str_id = "%s:%s:%s:%s" % elements
+        return hashlib.sha256(str_id.encode('utf-8')).hexdigest()
 
     @property
     def available_tags(self):
@@ -82,7 +92,10 @@ class Link(GenericEntity):
                 self.endpoint_b.available_tags]
 
     def use_tag(self, tag):
-        """Remove a specific tag from available_tags if it is there."""
+        """Remove a specific tag from available_tags if it is there.
+
+        Deprecated: use only the get_next_available_tag method.
+        """
         if self.is_tag_available(tag):
             self.endpoint_a.use_tag(tag)
             self.endpoint_b.use_tag(tag)
@@ -96,9 +109,28 @@ class Link(GenericEntity):
 
     def get_next_available_tag(self):
         """Return the next available tag if exists."""
-        for tag in self.endpoint_a.available_tags:
-            if tag in self.endpoint_b.available_tags:
-                return tag
+        # Copy the available tags because in case of error
+        # we will remove and add elements to the available_tags
+        available_tags_a = self.endpoint_a.available_tags.copy()
+        available_tags_b = self.endpoint_b.available_tags.copy()
+
+        for tag in available_tags_a:
+            # Tag does not exist in endpoint B. Try another tag.
+            if tag not in available_tags_b:
+                continue
+
+            # Tag already in use. Try another tag.
+            if not self.endpoint_a.use_tag(tag):
+                continue
+
+            # Tag already in use in B. Mark the tag as available again.
+            if not self.endpoint_b.use_tag(tag):
+                self.endpoint_a.make_tag_available(tag)
+                continue
+
+            # Tag used successfully by both endpoints. Returning.
+            return tag
+
         return False
 
     def make_tag_available(self, tag):

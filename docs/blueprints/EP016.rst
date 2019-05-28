@@ -1,0 +1,88 @@
+Summary
+=======
+
+Title
+-----
+Kytos E-Line Link Up Definition
+
+Author(s)
+---------
+Jeronimo Bezerra (FIU)
+
+Blueprint Status
+----------------
+under_revision
+
+Priority
+--------
+high
+
+Tags
+----
+eline, mef, circuit, provisioning, sdn, resilience
+
+Milestone Target
+----------------
+
+
+Implementation
+--------------
+
+
+Assignees
+---------
+
+
+Approvers (PTL)
+---------------
+
+
+Version
+-------
+
+
+Specifications
+--------------
+
+
+Description
+===========
+This blueprint describes what should be the concept of ``link up`` or link operational.
+
+There will be situations that, due external reasons such as a fiber cut, a `link` will turn `down`. A link is considered
+`down` when OpenFlow Port Status messages are sent by one or two switches with `port.state` and `port.config` set to
+`1`. More details about the definition of `link down` is provided in blueprint EP015.
+
+Once the root cause is fixed and the connectivity is, in theory, restored, new OpenFlow Port Status messages will be
+sent by OpenFlow switches reporting the new status as `up` (`port.state` and `port.config` set to `0`).
+
+However, the Kytos Topology Napp should NOT generate an `link up` event to the Napps before the following conditions are
+fulfilled:
+
+ 1. BOTH remote NNIs that define the `link` should be in the `up` state
+ 2. Timer: BOTH remote NNIS should be in the `up` state for more than TIMER seconds, where TIMER is defined by the
+    network operator in a per-link basis
+ 3. Error-free: BOTH remote NNIS's error counters should not be increasing
+ 4. Continuity Tests: the link has to be functional end-to-end
+ 5. User-defined tests: Network operators should be allowed to create customized evaluation procedures if needed.
+
+Condition #4 is important because a `link` could be assumed as `up` even though it is not operational. Some
+examples of situations where both NNIs are `up` but the link is not operational:
+
+  * There are loops in the circuit, where traffic coming from a NNI is being sent back to the same NNI (the optical
+    carrier is testing the circuit after a fiber repair)
+  * The link is offered as an Ethernet service provided by another service provider and this service provider has a
+    network outage that does not affect Provider Edge devices. Example:
+    ::
+
+     E-Line_NNI_A <--> ISP_A_PE_1 <--> ISP_A_P1 <--> ISP_A_P2 <--> ISP_A_PE_2 <--> E-Line_NNI_B
+
+                      | --------------------- ISP A Domain ----------------- |
+
+    In case the link between E-Line_NNI_A and E-Line_NNI_B is provided by ISP A using Ethernet and there is a problem
+    between ISP_A_P1 and ISP_A_P2, E-Line_NNI_A and E-Line_NNI_B will remain `up` but the link is not operational
+    end-to-end.
+
+One way of detecting if the `link` is operational is using the LLDP messages sent by the topology discovery process.
+If a packet_in is received from the same switch + port that is in the LLDP message (`LLDP.c_id` and `LLDP.p_id`),
+then there is a loop. If no packet_in is received at all, that means the `link` is not operational.

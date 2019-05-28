@@ -103,7 +103,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
     @property
     def id(self):  # pylint: disable=invalid-name
-        """Return id from Interface intance.
+        """Return id from Interface instance.
 
         Returns:
             string: Interface id.
@@ -138,11 +138,13 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self._enabled = True
 
     def use_tag(self, tag):
-        """Remove a specific tag from available_tags if it is there."""
-        for available_tag in self.available_tags:
-            if tag == available_tag:
-                self.available_tags.remove(available_tag)
-                return True
+        """Remove a specific tag from available_tags if it is there.
+
+        Return False in case the tag is already removed.
+        """
+        if tag in self.available_tags:
+            self.available_tags.remove(tag)
+            return True
         return False
 
     def is_tag_available(self, tag):
@@ -150,7 +152,12 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         return tag in self.available_tags
 
     def get_next_available_tag(self):
-        """Return the next available tag if exists."""
+        """Get the next available tag from the interface.
+
+        Return the next available tag if exists and remove from the
+        available tags.
+        If no tag is available return False.
+        """
         try:
             return self.available_tags.pop()
         except IndexError:

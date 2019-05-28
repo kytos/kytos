@@ -8,6 +8,7 @@ import warnings
 import zipfile
 from datetime import datetime
 from glob import glob
+from http import HTTPStatus
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen, urlretrieve
 
@@ -24,17 +25,23 @@ class APIServer:
     _NAPP_PREFIX = "/api/{napp.username}/{napp.name}/"
     _CORE_PREFIX = "/api/kytos/core/"
 
+    # pylint: disable=too-many-arguments
     def __init__(self, app_name, listen='0.0.0.0', port=8181,
-                 napps_dir=None):
+                 napps_manager=None, napps_dir=None):
         """Start a Flask+SocketIO server.
+
+        Require controller to get NApps dir and NAppsManager
 
         Args:
             app_name(string): String representing a App Name
             listen (string): host name used by api server instance
             port (int): Port number used by api server instance
-            napps_dir(string): napps path directory
+            controller(kytos.core.controller): A controller instance.
         """
         dirname = os.path.dirname(os.path.abspath(__file__))
+        self.napps_manager = napps_manager
+        self.napps_dir = napps_dir
+
         self.flask_dir = os.path.join(dirname, '../web-ui')
         self.log = logging.getLogger('api_server')
 
@@ -53,7 +60,6 @@ class APIServer:
 
         # Update web-ui if necessary
         self.update_web_ui(force=False)
-        self.napps_dir = napps_dir
 
     def _enable_websocket_rooms(self):
         socket = self.server
@@ -90,6 +96,9 @@ class APIServer:
         self.register_core_endpoint('web/update/',
                                     self.update_web_ui,
                                     methods=['POST'])
+
+        self.register_core_napp_services()
+
         self._register_web_ui()
 
     def register_core_endpoint(self, rule, function, **options):
@@ -112,7 +121,7 @@ class APIServer:
     @staticmethod
     def status_api():
         """Display kytos status using the route ``/kytos/status/``."""
-        return '{"response": "running"}', 201
+        return '{"response": "running"}', HTTPStatus.CREATED.value
 
     def stop_api_server(self):
         """Send a shutdown request to stop Api Server."""
@@ -131,18 +140,18 @@ class APIServer:
         allowed_host = ['127.0.0.1:'+str(self.port),
                         'localhost:'+str(self.port)]
         if request.host not in allowed_host:
-            return "", 403
+            return "", HTTPStatus.FORBIDDEN.value
 
         self.server.stop()
 
-        return 'Server shutting down...', 200
+        return 'Server shutting down...', HTTPStatus.OK.value
 
     def static_web_ui(self, username, napp_name, filename):
         """Serve static files from installed napps."""
         path = f"{self.napps_dir}/{username}/{napp_name}/ui/{filename}"
         if os.path.exists(path):
             return send_file(path)
-        return "", 404
+        return "", HTTPStatus.NOT_FOUND.value
 
     def get_ui_components(self, section_name):
         """Return all napps ui components from an specific section.
@@ -332,3 +341,139 @@ class APIServer:
             # pylint: enable=protected-access
 
         self.log.info('The Rest endpoints from %s were disabled.', prefix)
+
+    def register_core_napp_services(self):
+        """
+        Register /kytos/core/ services over NApps.
+
+        It registers enable, disable, install, uninstall NApps that will
+        be used by kytos-utils.
+        """
+        self.register_core_endpoint("napps/<username>/<napp_name>/enable",
+                                    self._enable_napp)
+        self.register_core_endpoint("napps/<username>/<napp_name>/disable",
+                                    self._disable_napp)
+        self.register_core_endpoint("napps/<username>/<napp_name>/install",
+                                    self._install_napp)
+        self.register_core_endpoint("napps/<username>/<napp_name>/uninstall",
+                                    self._uninstall_napp)
+        self.register_core_endpoint("napps_enabled",
+                                    self._list_enabled_napps)
+        self.register_core_endpoint("napps_installed",
+                                    self._list_installed_napps)
+        self.register_core_endpoint(
+            "napps/<username>/<napp_name>/metadata/<key>",
+            self._get_napp_metadata)
+
+    def _enable_napp(self, username, napp_name):
+        """
+        Enable an installed NApp.
+
+        :param username: NApps user name
+        :param napp_name: NApp name
+        :return: JSON content and return code
+        """
+        # Check if the NApp is installed
+        if not self.napps_manager.is_installed(username, napp_name):
+            return '{"response": "not installed"}', \
+                   HTTPStatus.BAD_REQUEST.value
+
+        # Check if the NApp is already been enabled
+        if not self.napps_manager.is_enabled(username, napp_name):
+            self.napps_manager.enable(username, napp_name)
+
+        # Check if NApp is enabled
+        if not self.napps_manager.is_enabled(username, napp_name):
+            # If it is not enabled an admin user must check the log file
+            return '{"response": "error"}', \
+                   HTTPStatus.INTERNAL_SERVER_ERROR.value
+
+        return '{"response": "enabled"}', HTTPStatus.OK.value
+
+    def _disable_napp(self, username, napp_name):
+        """
+        Disable an installed NApp.
+
+        :param username: NApps user name
+        :param napp_name: NApp name
+        :return: JSON content and return code
+        """
+        # Check if the NApp is installed
+        if not self.napps_manager.is_installed(username, napp_name):
+            return '{"response": "not installed"}', \
+                   HTTPStatus.BAD_REQUEST.value
+
+        # Check if the NApp is enabled
+        if self.napps_manager.is_enabled(username, napp_name):
+            self.napps_manager.disable(username, napp_name)
+
+        # Check if NApp is still enabled
+        if self.napps_manager.is_enabled(username, napp_name):
+            # If it is still enabled an admin user must check the log file
+            return '{"response": "error"}', \
+                   HTTPStatus.INTERNAL_SERVER_ERROR.value
+
+        return '{"response": "disabled"}', \
+               HTTPStatus.OK.value
+
+    def _install_napp(self, username, napp_name):
+        # Check if the NApp is installed
+        if self.napps_manager.is_installed(username, napp_name):
+            return '{"response": "installed"}', HTTPStatus.OK.value
+
+        napp = "{}/{}".format(username, napp_name)
+
+        # Try to install and enable the napp
+        if not self.napps_manager.install(napp, enable=True):
+            # If it is not installed an admin user must check the log file
+            return '{"response": "error"}', \
+                   HTTPStatus.INTERNAL_SERVER_ERROR.value
+
+        return '{"response": "installed"}', HTTPStatus.OK.value
+
+    def _uninstall_napp(self, username, napp_name):
+        # Check if the NApp is installed
+        if self.napps_manager.is_installed(username, napp_name):
+            # Try to unload/uninstall the napp
+            if not self.napps_manager.uninstall(username, napp_name):
+                # If it is not uninstalled admin user must check the log file
+                return '{"response": "error"}', \
+                       HTTPStatus.INTERNAL_SERVER_ERROR.value
+
+        return '{"response": "uninstalled"}', HTTPStatus.OK.value
+
+    def _list_enabled_napps(self):
+        """Sorted list of (username, napp_name) of enabled napps."""
+        serialized_dict = json.dumps(
+                            self.napps_manager.get_enabled_napps(),
+                            default=lambda a: [a.username, a.name])
+
+        return '{"napps": %s}' % serialized_dict, HTTPStatus.OK.value
+
+    def _list_installed_napps(self):
+        """Sorted list of (username, napp_name) of installed napps."""
+        serialized_dict = json.dumps(
+                            self.napps_manager.get_installed_napps(),
+                            default=lambda a: [a.username, a.name])
+
+        return '{"napps": %s}' % serialized_dict, HTTPStatus.OK.value
+
+    def _get_napp_metadata(self, username, napp_name, key):
+        """Get NApp metadata value.
+
+        For safety reasons, only some keys can be retrieved:
+        napp_dependencies, description, version.
+
+        """
+        valid_keys = ['napp_dependencies', 'description', 'version']
+
+        if not self.napps_manager.is_installed(username, napp_name):
+            return "NApp is not installed.", HTTPStatus.BAD_REQUEST.value
+
+        if key not in valid_keys:
+            return "Invalid key.", HTTPStatus.BAD_REQUEST.value
+
+        data = self.napps_manager.get_napp_metadata(username, napp_name, key)
+        serialized_dict = json.dumps({key: data})
+
+        return '%s' % serialized_dict, HTTPStatus.OK.value

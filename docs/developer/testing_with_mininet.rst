@@ -1,8 +1,6 @@
-*******************
-How to create tests
-*******************
-
-.. note:: This section will be updated soon.
+******************************
+How to test Kytos with Mininet
+******************************
 
 Simulate production environment locally with Mininet
 ====================================================

@@ -93,7 +93,7 @@ command line.
 
 With the above commands your controller will be running and ready to be used.
 Please note that you have to run it as an user with permission to
-open sockets at ports 6633 and 8181.
+open sockets at ports 6653 and 8181.
 
 The Web Admin User Interface
 ============================

@@ -35,8 +35,8 @@ from kytos.core.config import KytosConfig
 from kytos.core.connection import ConnectionState
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import now
-from kytos.core.logs import LogManager
 from kytos.core.interface import Interface
+from kytos.core.logs import LogManager
 from kytos.core.napps.base import NApp
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.napps.napp_dir_listener import NAppDirListener
@@ -89,7 +89,7 @@ class Controller:
         self.events_listeners = {'kytos/core.connection.new':
                                  [self.new_connection]}
 
-        #: dict: Current loaded apps - ``'napp_name': napp`` (instance)
+        #: dict: Current loaded apps - ``'napp_name'``: ``napp`` (instance)
         #:
         #: The key is the napp name (string), while the value is the napp
         #: instance itself.
@@ -110,18 +110,17 @@ class Controller:
         #: logging.Logger: Logger instance used by Kytos.
         self.log = None
 
-        #: API Server used to expose rest endpoints.
-        self.api_server = APIServer(__name__, self.options.listen,
-                                    self.options.api_port,
-                                    napps_dir=self.options.napps)
-
-        self._register_endpoints()
-
         #: Observer that handle NApps when they are enabled or disabled.
         self.napp_dir_listener = NAppDirListener(self)
 
         self.napps_manager = NAppsManager(self)
 
+        #: API Server used to expose rest endpoints.
+        self.api_server = APIServer(__name__, self.options.listen,
+                                    self.options.api_port,
+                                    self.napps_manager, self.options.napps)
+
+        self._register_endpoints()
         #: Adding the napps 'enabled' directory into the PATH
         #: Now you can access the enabled napps with:
         #: from napps.<username>.<napp_name> import ?....
@@ -559,7 +558,6 @@ class Controller:
             dpid (str): dpid used to identify a switch.
 
         """
-
         switch = self.switches.get(dpid)
         if not switch:
             return
@@ -569,11 +567,11 @@ class Controller:
             vlan_pool = json.loads(self.options.vlan_pool)
             if not vlan_pool:
                 return
-        except json.JSONDecodeError as e:
-            self.log.error(f"Invalid vlan_pool settings: {str(e)}")
+        except (TypeError, json.JSONDecodeError) as err:
+            self.log.error("Invalid vlan_pool settings: %s", err)
 
         if vlan_pool.get(dpid):
-            self.log.info(f"Loading vlan_pool configuration for dpid {dpid}")
+            self.log.info("Loading vlan_pool configuration for dpid %s", dpid)
             for intf_num, port_list in vlan_pool[dpid].items():
                 if not switch.interfaces.get((intf_num)):
                     vlan_ids = set()
@@ -790,26 +788,31 @@ class Controller:
         for (username, napp_name) in list(self.napps.keys()):  # noqa
             self.unload_napp(username, napp_name)
 
-    def reload_napp(self, username, napp_name):
-        """Reload a NApp."""
-        self.unload_napp(username, napp_name)
-
-        mod_name = '.'.join(['napps', username, napp_name, 'main'])
+    def reload_napp_module(self, username, napp_name, napp_file):
+        """Reload a NApp Module."""
+        mod_name = '.'.join(['napps', username, napp_name, napp_file])
         try:
             napp_module = import_module(mod_name)
         except ModuleNotFoundError as err:
             self.log.error("Module '%s' not found", mod_name)
-            return 400
-
+            raise
         try:
             napp_module = reload_module(napp_module)
-            self.log.info("NApp '%s/%s' successfully reloaded",
-                          username, napp_name)
         except ImportError as err:
             self.log.error("Error reloading NApp '%s/%s': %s",
                            username, napp_name, err)
-            return 400
+            raise
 
+    def reload_napp(self, username, napp_name):
+        """Reload a NApp."""
+        self.unload_napp(username, napp_name)
+        try:
+            self.reload_napp_module(username, napp_name, 'settings')
+            self.reload_napp_module(username, napp_name, 'main')
+        except (ModuleNotFoundError, ImportError):
+            return 400
+        self.log.info("NApp '%s/%s' successfully reloaded",
+                      username, napp_name)
         self.load_napp(username, napp_name)
         return 200
 

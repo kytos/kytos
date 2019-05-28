@@ -24,7 +24,7 @@ the Kytos console:
 
       Kytos website.: https://kytos.io/
       Documentation.: https://docs.kytos.io/
-      OF Address....: tcp://0.0.0.0:6633
+      OF Address....: tcp://0.0.0.0:6653
       WEB UI........: http://0.0.0.0:8181/
       Kytos Version.: 2018.2b3
 

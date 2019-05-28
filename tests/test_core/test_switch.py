@@ -28,9 +28,9 @@ class TestSwitch(TestCase):
 
     def test_switch_vlan_pool_default(self):
         """Test default vlan_pool value."""
-        self.assertEqual(self.options.vlan_pool, {})
+        self.assertEqual(self.options.vlan_pool, '{}')
 
-    def test_switch_set_options_vlan_pool(self):
+    def test_switch_vlan_pool_options(self):
         """Test switch with the example from kytos.conf."""
         dpid = "00:00:00:00:00:00:00:01"
         vlan_pool_json = '{"00:00:00:00:00:00:00:01": {"1": [[1, 2], [5, 10]], \

@@ -5,10 +5,8 @@ All notable changes to the kytos project will be documented in this file.
 
 UNRELEASED - Under development
 ******************************
-
 Added
 =====
- - Added vlan_pool configuration on kytos.conf to support mef_eline
 
 Changed
 =======
@@ -25,8 +23,65 @@ Fixed
 Security
 ========
 
+[2019.1b2] - "fafa" beta2 - 2019-05-03
+**************************************
+
+Added
+=====
+- Added MEF E-Line Link Up/Down definition blueprint.
+- Added documentation about using tox for unit tests.
+
+Fixed
+=====
+- Fixed method get_next_available_tag under concurrent scenarios.
+- Fixed warning when compiling documentation.
+
+[2019.1b1] - "fafa" beta1 - 2019-03-15
+**************************************
+
+Added
+=====
+ - Added vlan_pool configuration on kytos.conf to support mef_eline. Now you
+   can configure available vlans per interface.
+ - Added documentation to describe how to create a Meta Napp
+ - Added documentation about Unit Tests
+
+Changed
+=======
+ - Updated documentation to install python-openflow, kytos-utils and kytos in
+   that order
+ - Updated documentation to use pip3 instead pip
+ - Link id is now based on endpoints hashes, instead of a random uuid. This
+   fixes #875
+
+Deprecated
+==========
+
+Removed
+=======
+ - Removed circular dependency of kytos-utils
+ - Removed unnecessary comparison on interfaces if they are on the same switch
+
+Fixed
+=====
+ - Fixed type declaration that broke sphinx-build
+ - Fixed some linter issues
+ - Fixed NApps settings reload. Now when you change a NApp settings the reload
+   it will work
+
+Security
+========
+ - Updated pyyaml and requests requirements versions, in order to fix
+   vulnerabilities
+
+[2018.2] - "ernesto" stable - 2018-12-30
+****************************************
+
+ - This is the stable "ernesto" version, based on the last beta pre-releases.
+   No changes since the last rc1.
+
 [2018.2rc1] - "ernesto" rc1 - 2018-12-21
-*****************************************
+****************************************
 
 Added
 =====

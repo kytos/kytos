@@ -270,9 +270,9 @@ setup(name='kytos',
       dependency_links=[
           'https://github.com/diraol/watchdog/archive/master.zip#egg=watchdog'
       ],
-      install_requires=[
-                        i.strip() for i in open("requirements.txt").readlines()
-                       ],
+      install_requires=[i.strip()
+                        for i in open("requirements/run.in").readlines()
+                        if not i.startswith('#') ],
       extras_require={
           'dev': [
               'coverage',

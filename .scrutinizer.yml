@@ -11,10 +11,7 @@ build:
         python: 3.6.0
         postgresql: false
         redis: false
-    dependencies:
-        before:
-            - pip install coverage git+git://github.com/diraol/watchdog.git#egg=watchdog
-    tests:
+   tests:
         override:
             -
                 command: 'tox'

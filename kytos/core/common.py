@@ -15,33 +15,22 @@ class EntityStatus(Enum):
 
 
 class GenericEntity:
-    """Generic Class that represents any Entity."""
+    """Generic class that represents any Entity."""
 
     def __init__(self):
         """Create the GenericEntity object with empty metadata dictionary."""
         options = KytosConfig().options['daemon']
         self.metadata = {}
-        # operational status with True or False
-        self._active = True
-        # administrative status with True or False
-        self._enabled = options.enable_entities_by_default
 
-    def is_enabled(self):
-        """Return whether the entity is enabled.
+        self._active: bool = True
+        self._enabled: bool = options.enable_entities_by_default
 
-        Returns:
-            boolean: True whether the entity is enabled, otherwise False.
-
-        """
+    def is_enabled(self) -> bool:
+        """Return the *administrative* status of the entity."""
         return self._enabled
 
-    def is_active(self):
-        """Return whether the entity is enabled.
-
-        Returns:
-            boolean: True whether the entity is active, otherwise False.
-
-        """
+    def is_active(self) -> bool:
+        """Return the *operational* status of the entity."""
         return self._active
 
     def activate(self):
@@ -70,7 +59,7 @@ class GenericEntity:
 
         Although this method only sets an 'enabled' flag, always prefer to use
         it instead of setting it manually. This allows us to change the
-        behavior on the future.
+        behavior in the future.
         """
         self._enabled = True
 

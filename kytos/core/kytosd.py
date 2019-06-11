@@ -3,7 +3,6 @@
 import asyncio
 import functools
 import signal
-import sys
 from concurrent.futures import ThreadPoolExecutor
 
 import daemon
@@ -83,8 +82,17 @@ def start_shell(controller=None):
 #     from concurrent.futures import thread, ThreadPoolExecutor
 #     atexit.unregister(thread._python_exit)
 
+def main():
+    config = KytosConfig().options['daemon']
 
-def async_main():
+    if config.foreground:
+        async_main(config)
+    else:
+        with daemon.DaemonContext():
+            async_main(config)
+
+
+def async_main(config):
     """Start main Kytos Daemon with asyncio loop."""
     def stop_controller(controller):
         """Stop the controller before quitting."""
@@ -107,10 +115,10 @@ def async_main():
         stop_controller(controller)
         return data
 
-    config = KytosConfig()
-    controller = Controller(config.options['daemon'])
-
     loop = asyncio.get_event_loop()
+
+    controller = Controller(config)
+
     kill_handler = functools.partial(stop_controller, controller)
     loop.add_signal_handler(signal.SIGINT, kill_handler)
     loop.add_signal_handler(signal.SIGTERM, kill_handler)
@@ -118,62 +126,17 @@ def async_main():
     if controller.options.debug:
         loop.set_debug(True)
 
-    if controller.options.foreground:
-        try:
-            controller.start()
-        except SystemExit as exc:
-            controller.log.error(exc)
-            controller.log.info("Kytos start aborted.")
-            sys.exit()
+    loop.call_soon(controller.start)
 
+    if controller.options.foreground:
         executor = ThreadPoolExecutor(max_workers=1)
         loop.create_task(start_shell_async())
-    else:
-        with daemon.DaemonContext():
-            try:
-                controller.start()
-            except SystemExit as exc:
-                controller.log.error(exc)
-                controller.log.info("Kytos daemon start aborted.")
-                sys.exit()
 
+    try:
+        loop.run_forever()
+    except SystemExit as exc:
+        controller.log.error(exc)
+        controller.log.info("Shutting down Kytos...")
+    finally:
+        loop.close()
 
-def main():
-    """Start main Kytos Daemon."""
-    def stop_controller(signum, frame):     # pylint: disable=unused-argument
-        """Stop the controller before quitting."""
-        if controller:
-            print('Stopping controller...')
-
-            # If stop() hangs, old ctrl+c behaviour will be restored
-            signal.signal(signal.SIGINT, sigint_handler)
-            signal.signal(signal.SIGTERM, sigkill_handler)
-
-            controller.stop()
-
-    sigint_handler = signal.signal(signal.SIGINT, stop_controller)
-    sigkill_handler = signal.signal(signal.SIGTERM, stop_controller)
-
-    config = KytosConfig()
-    controller = Controller(config.options['daemon'])
-
-    if controller.options.foreground:
-        try:
-            controller.start()
-        except SystemExit as exc:
-            controller.log.error(exc)
-            controller.log.info("Kytos start aborted.")
-            sys.exit()
-
-        start_shell(controller)
-
-        # Stop Kytos controller after user exits shell
-        controller.stop()
-    else:
-        with daemon.DaemonContext():
-            try:
-                controller.start()
-            except SystemExit as exc:
-                controller.log.error(exc)
-                controller.log.info("Kytos daemon start aborted.")
-                sys.exit()

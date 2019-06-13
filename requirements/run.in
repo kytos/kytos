@@ -6,7 +6,7 @@ python-openflow>=2019.1b2
 flask-socketio
 flask_cors
 flask
-python-daemon==2.1.2
+python-daemon
 # For some reason setuptools
 # Maybe we need to remove this on the future
 setuptools>=34.0.0

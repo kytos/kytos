@@ -23,6 +23,32 @@ Fixed
 Security
 ========
 
+[2019.1b3] - "fafa" beta3 - 2019-06-13
+**************************************
+
+Added
+=====
+- Added API REST services to install/uninstall/enable/disable and get NApps
+  information.
+- Added install_requires field in setup.py to read dependencies.
+
+Changed
+=======
+- Kytos-utils is now decoupled from Kytos source code and filesystem.
+- Changed Python-Openflow port to 6653.
+- Changed some dependencies versions.
+- Dependencies list is now fetched from requirements/run.in, ignoring comments.
+- Some explanations of code comments are moved to docstring.
+
+Removed
+=======
+- Removed watchdog dependency from scrutinizer and setup.py.
+
+Fixed
+=====
+- Fixed some grammar errors in documentation.
+- Fixed some linter issues.
+
 [2019.1b2] - "fafa" beta2 - 2019-05-03
 **************************************
 

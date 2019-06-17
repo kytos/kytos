@@ -23,44 +23,48 @@ Fixed
 Security
 ========
 
-[2019.1b3] - "fafa" beta3 - 2019-06-13
+[2019.1b3] - "fafa" beta3 - 2019-06-17
 **************************************
 
 Added
 =====
-- Added API REST services to install/uninstall/enable/disable and get NApps
-  information.
-- Added install_requires field in setup.py to read dependencies.
+- Added REST API endpoints to manage NApps from remote applications
+- New kytos/kronos NApp was released. This NApp will be responsible for
+  handling time series data, with initial support for InfluxDB (EXPERIMENTAL).
+  For now on, visit kytos/kronos changelog for updates.
 
 Changed
 =======
-- Kytos-utils is now decoupled from Kytos source code and filesystem.
-- Changed Python-Openflow port to 6653.
-- Changed some dependencies versions.
-- Dependencies list is now fetched from requirements/run.in, ignoring comments.
-- Some explanations of code comments are moved to docstring.
+- kytos-utils is now decoupled from kytos core
+- Changed default Openflow TCP port to 6653
 
 Removed
 =======
-- Removed watchdog dependency from scrutinizer and setup.py.
+- Removed diraol's watchdog fork dependency
 
 Fixed
 =====
-- Fixed some grammar errors in documentation.
-- Fixed some linter issues.
+- Fixed kytos install from PyPI. Now dependencies are properly installed
+- Fixed some grammar errors in documentation
+- Fixed some linter issues
+
+Security
+========
+- Changed some dependencies versions in order to fix security bugs
 
 [2019.1b2] - "fafa" beta2 - 2019-05-03
 **************************************
 
 Added
 =====
-- Added MEF E-Line Link Up/Down definition blueprint.
-- Added documentation about using tox for unit tests.
+- Added MEF E-Line Link Up/Down definition blueprint
+- Added documentation about using tox for unit tests
 
 Fixed
 =====
-- Fixed method get_next_available_tag under concurrent scenarios.
-- Fixed warning when compiling documentation.
+- Fixed bug when starting kytosd in background (#893)
+- Fixed method get_next_available_tag under concurrent scenarios
+- Fixed warning when compiling documentation
 
 [2019.1b1] - "fafa" beta1 - 2019-03-15
 **************************************
@@ -68,7 +72,7 @@ Fixed
 Added
 =====
  - Added vlan_pool configuration on kytos.conf to support mef_eline. Now you
-   can configure available vlans per interface.
+   can configure available vlans per interface
  - Added documentation to describe how to create a Meta Napp
  - Added documentation about Unit Tests
 

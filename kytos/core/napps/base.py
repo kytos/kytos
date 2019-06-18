@@ -241,6 +241,12 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
         It should not be overriden.
         """
+        # Inform this NApp has been loaded
+        from kytos.core import KytosEvent
+        name = f'{self.username}/{self.name}.loaded'
+        event = KytosEvent(name=name, content={})
+        self.controller.buffers.app.put(event)
+
         LOG.info("Running NApp: %s", self)
         self.execute()
         while self.__interval > 0 and not self.__event.is_set():

@@ -3,7 +3,7 @@ prepare:
 clean:
 	rm -rf build/ dist/ *.egg-info/
 build: clean
-	python3.6 setup.py sdist bdist_wheel
+	python3.6 setup.py sdist
 testupload: build
 	twine upload -r pypitest dist/*
 upload: build

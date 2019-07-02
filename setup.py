@@ -247,7 +247,7 @@ class DevelopMode(develop, CommonInstall):
 
 # We are parsing the metadata file as if it was a text file because if we
 # import it as a python module, necessarily the kytos.core module would be
-# initialized, which means that kyots/core/__init__.py would be run and, then,
+# initialized, which means that kytos/core/__init__.py would be run and, then,
 # kytos.core.controller.Controller would be called and it will try to import
 # some modules that are dependencies from this project and that were not yet
 # installed, since the requirements installation from this project hasn't yet
@@ -271,7 +271,7 @@ setup(name='kytos',
                         for line in open("requirements/run.in").readlines()
                         if not line.startswith('#')],
       setup_requires=['pytest-runner'],
-      tests_require=['coverage', 'pytest', 'yala', 'tox'],
+      tests_require=['coverage', 'pgrep', 'pytest', 'yala', 'tox'],
       extras_require={'dev': ['pip-tools >= 2.0']},
       cmdclass={
           'clean': Cleaner,

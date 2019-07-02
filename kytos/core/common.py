@@ -19,6 +19,9 @@ class GenericEntity:
 
     def __init__(self):
         """Create the GenericEntity object with empty metadata dictionary."""
+        # FIXME: this reads kytosd arguments every time a GenericEntity is
+        #        instantiated. We should find another way to get this config
+        #        to work.
         options = KytosConfig().options['daemon']
         self.metadata = {}
 

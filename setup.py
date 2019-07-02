@@ -270,6 +270,8 @@ setup(name='kytos',
       install_requires=[line.strip()
                         for line in open("requirements/run.in").readlines()
                         if not line.startswith('#')],
+      setup_requires=['pytest-runner'],
+      tests_require=['pytest'],
       extras_require={
           'dev': [
               'coverage',

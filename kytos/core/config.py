@@ -145,7 +145,7 @@ class KytosConfig():
             options(Namespace): Namespace with the args given
 
         """
-        options = self.parser.parse_args(argv)
+        options, _ = self.parser.parse_known_args(argv)
         options.napps_repositories = json.loads(options.napps_repositories)
         options.debug = True if options.debug in ['True', True] else False
         options.daemon = True if options.daemon in ['True', True] else False

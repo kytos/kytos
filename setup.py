@@ -271,15 +271,8 @@ setup(name='kytos',
                         for line in open("requirements/run.in").readlines()
                         if not line.startswith('#')],
       setup_requires=['pytest-runner'],
-      tests_require=['pytest'],
-      extras_require={
-          'dev': [
-              'coverage',
-              'pip-tools >= 2.0',
-              'yala',
-              'tox',
-          ],
-      },
+      tests_require=['coverage', 'pytest', 'yala', 'tox'],
+      extras_require={'dev': ['pip-tools >= 2.0']},
       cmdclass={
           'clean': Cleaner,
           'ci': CITest,

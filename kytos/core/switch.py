@@ -84,6 +84,9 @@ class Switch(GenericEntity):
 
         super().__init__()
 
+    def __repr__(self):
+        return f"Switch('{self.dpid}')"
+
     def update_description(self, desc):
         """Update switch'descriptions from Switch instance.
 

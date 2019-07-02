@@ -18,6 +18,11 @@ class TestInterface(unittest.TestCase):
         """Create interface object."""
         self.iface = self._get_v0x04_iface()
 
+    def test_repr(self):
+        """Test repr() output."""
+        expected = "Interface('name', 42, Switch('dpid'))"
+        self.assertEqual(repr(self.iface), expected)
+
     @staticmethod
     def _get_v0x04_iface(*args, **kwargs):
         """Create a v0x04 interface object with optional extra arguments."""

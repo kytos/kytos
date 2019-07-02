@@ -92,6 +92,9 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
         super().__init__()
 
+    def __repr__(self):
+        return f"Interface('{self.name}', {self.port_number}, {self.switch!r})"
+
     def __eq__(self, other):
         """Compare Interface class with another instance."""
         if isinstance(other, str):

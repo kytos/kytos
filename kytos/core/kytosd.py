@@ -83,6 +83,7 @@ def start_shell(controller=None):
 #     atexit.unregister(thread._python_exit)
 
 def main():
+    """Read config and start Kytos in foreground or daemon mode."""
     config = KytosConfig().options['daemon']
 
     if config.foreground:
@@ -139,4 +140,3 @@ def async_main(config):
         controller.log.info("Shutting down Kytos...")
     finally:
         loop.close()
-

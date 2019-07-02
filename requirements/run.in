@@ -7,9 +7,6 @@ flask-socketio
 flask_cors
 flask
 python-daemon
-# For some reason setuptools
-# Maybe we need to remove this on the future
-setuptools>=34.0.0
 janus
 jinja2
 watchdog

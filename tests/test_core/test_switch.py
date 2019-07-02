@@ -22,6 +22,11 @@ class TestSwitch(TestCase):
         self.controller = Controller(self.options, loop=self.loop)
         self.controller.log = Mock()
 
+    def test_repr(self):
+        """Test repr() output."""
+        switch = Switch('some-dpid')
+        self.assertEqual(repr(switch), "Switch('some-dpid')")
+
     def tearDown(self):
         """TearDown."""
         self.loop.close()

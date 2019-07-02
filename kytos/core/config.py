@@ -131,7 +131,7 @@ class KytosConfig():
         self.parser.set_defaults(**defaults)
 
         if 'test' in argv:
-            argv.pop(argv.index('test'))
+            argv.remove('test')
 
         self.options['daemon'] = self._parse_options(argv)
 

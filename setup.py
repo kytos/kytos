@@ -269,7 +269,7 @@ setup(name='kytos',
       packages=find_packages(exclude=['tests']),
       install_requires=[line.strip()
                         for line in open("requirements/run.in").readlines()
-                        if not line.startswith('#') ],
+                        if not line.startswith('#')],
       extras_require={
           'dev': [
               'coverage',

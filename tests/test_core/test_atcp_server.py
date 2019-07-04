@@ -1,25 +1,23 @@
 """Async TCP Server tests."""
 
 import asyncio
+import errno
 import logging
-import unittest
 
-from kytos.core.atcp_server import KytosServer, KytosServerProtocol
-
-# from unittest.mock import Mock
-
-
-logging.basicConfig(level=logging.CRITICAL)
+from kytos.core.atcp_server import (KytosServer, KytosServerProtocol,
+                                    exception_handler)
 
 # Using "nettest" TCP port as a way to avoid conflict with a running
 # Kytos server on 6653.
 TEST_ADDRESS = ('127.0.0.1', 4138)
 
 
-class TestKytosServer(unittest.TestCase):
-    """"Test if a Kytos Server will go up and receive connections."""
-    def setUp(self):
+class TestKytosServer:
+    """Test if a Kytos Server will go up and receive connections."""
+
+    def setup(self):
         """Start new asyncio loop and a test TCP server."""
+        # pylint: disable=attribute-defined-outside-init
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(None)
         self.server = KytosServer(TEST_ADDRESS, KytosServerProtocol,
@@ -37,3 +35,27 @@ class TestKytosServer(unittest.TestCase):
                 *TEST_ADDRESS, loop=self.loop)
 
         self.loop.run_until_complete(wait_and_go())
+
+    def test_exception_handler_oserror(self, caplog):
+        """Test the TCP Server Exception Handler.
+
+        1. create mock OSError/TimeoutError instances
+        2. call exception_handler with them
+        3. ensure log is OK
+        """
+        caplog.set_level(logging.INFO)
+
+        exception = TimeoutError()
+        context = {"exception": exception,
+                   "transport": "unit_tests"}
+        exception_handler(self.loop, context)
+
+        exception2 = OSError(errno.EBADF, "Bad file descriptor")
+        context2 = {"exception": exception2,
+                    "transport": "unit_tests"}
+        exception_handler(self.loop, context2)
+
+        assert caplog.record_tuples == [
+            ("atcp_server", logging.INFO, "Socket timeout: 'unit_tests'"),
+            ("atcp_server", logging.INFO, "Socket closed: 'unit_tests'"),
+        ]

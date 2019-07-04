@@ -38,8 +38,8 @@ class TestSwitch(TestCase):
     def test_switch_vlan_pool_options(self):
         """Test switch with the example from kytos.conf."""
         dpid = "00:00:00:00:00:00:00:01"
-        vlan_pool_json = '{"00:00:00:00:00:00:00:01": {"1": [[1, 2], [5, 10]], \
-            "4": [[3, 4]]}}'
+        vlan_pool_json = '{"00:00:00:00:00:00:00:01": ' \
+                         + '{"1": [[1, 2], [5, 10]], "4": [[3, 4]]}}'
         switch = Switch(dpid)
         self.controller.switches[dpid] = switch
         self.options.vlan_pool = vlan_pool_json

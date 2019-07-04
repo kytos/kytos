@@ -1,6 +1,7 @@
 """AsyncIO TCP Server for Kytos."""
 
 import asyncio
+import errno
 import logging
 
 from kytos.core.connection import Connection
@@ -11,8 +12,13 @@ LOG = logging.getLogger("atcp_server")
 
 def exception_handler(loop, context):
     """Exception handler to avoid tracebacks because of network timeouts."""
-    if isinstance(context.get('exception'), TimeoutError):
-        LOG.info('Lost connection on socket %r', context['transport'])
+    exc = context.get('exception')
+    transport = context.get('transport')
+
+    if isinstance(exc, TimeoutError):
+        LOG.info('Socket timeout: %r', transport)
+    elif isinstance(exc, OSError) and exc.errno == errno.EBADF:
+        LOG.info('Socket closed: %r', transport)
     else:
         loop.default_exception_handler(context)
 

@@ -31,7 +31,7 @@ Added
 =====
 - Added Makefile for packaging and uploading to PyPI
 - Added string representations to `Switch` and `Interface`
-- New unit tests for daemon mode and TCP server exceptions
+- New unit test for TCP server exceptions
 
 Changed
 =======

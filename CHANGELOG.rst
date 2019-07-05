@@ -23,6 +23,21 @@ Fixed
 Security
 ========
 
+[2019.1rc1] - "fafa" rc - 2019-07-05
+**************************************
+Added
+=====
+- Add Makefile for PyPI
+- Add repr's to Switch and Interface
+
+Removed
+=======
+- Disable wheel packaging to fix PyPI installation
+
+Fixed
+=====
+- Fixed few linter issues
+
 [2019.1b3] - "fafa" beta3 - 2019-06-17
 **************************************
 

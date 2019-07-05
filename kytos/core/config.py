@@ -7,6 +7,7 @@ will be overridden by the option on command line.
 
 import json
 import os
+import warnings
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from configparser import ConfigParser
 
@@ -130,9 +131,6 @@ class KytosConfig():
 
         self.parser.set_defaults(**defaults)
 
-        if 'test' in argv:
-            argv.remove('test')
-
         self.options['daemon'] = self._parse_options(argv)
 
     def _parse_options(self, argv):
@@ -145,7 +143,9 @@ class KytosConfig():
             options(Namespace): Namespace with the args given
 
         """
-        options, _ = self.parser.parse_known_args(argv)
+        options, unknown = self.parser.parse_known_args(argv)
+        if unknown:
+            warnings.warn(f"Unknown arguments: {unknown}")
         options.napps_repositories = json.loads(options.napps_repositories)
         options.debug = True if options.debug in ['True', True] else False
         options.daemon = True if options.daemon in ['True', True] else False

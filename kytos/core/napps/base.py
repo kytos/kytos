@@ -241,17 +241,19 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
         It should not be overriden.
         """
-        # Inform this NApp has been loaded
-        from kytos.core import KytosEvent
-        name = f'{self.username}/{self.name}.loaded'
-        event = KytosEvent(name=name, content={})
-        self.controller.buffers.app.put(event)
-
+        self.notify_loaded()
         LOG.info("Running NApp: %s", self)
         self.execute()
         while self.__interval > 0 and not self.__event.is_set():
             self.__event.wait(self.__interval)
             self.execute()
+
+    def notify_loaded(self):
+        """Inform this NApp has been loaded."""
+        from kytos.core import KytosEvent
+        name = f'{self.username}/{self.name}.loaded'
+        event = KytosEvent(name=name, content={})
+        self.controller.buffers.app.put(event)
 
     # all listeners receive event
     def _shutdown_handler(self, event):  # pylint: disable=unused-argument

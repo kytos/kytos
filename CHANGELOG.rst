@@ -23,20 +23,25 @@ Fixed
 Security
 ========
 
-[2019.1rc1] - "fafa" rc - 2019-07-05
+
+[2019.1rc1] - "fafa" rc1 - 2019-07-05
 **************************************
+
 Added
 =====
-- Add Makefile for PyPI
-- Add repr's to Switch and Interface
+- Added Makefile for packaging and uploading to PyPI
+- Added string representations to `Switch` and `Interface`
+- New unit tests for daemon mode and TCP server exceptions
 
-Removed
+Changed
 =======
-- Disable wheel packaging to fix PyPI installation
+- `pytest` is now the default tool for Kytos' unit tests
+- Invalid command-line parameters emit warnings instead of halting kytosd start
 
 Fixed
 =====
-- Fixed few linter issues
+- Fixed traceback when a switch loses connectivity
+
 
 [2019.1b3] - "fafa" beta3 - 2019-06-17
 **************************************

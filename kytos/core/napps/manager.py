@@ -55,6 +55,7 @@ class NAppsManager:
             dst = self._installed_path / napp.username / napp.name
             self._create_module(dst.parent)
             shutil.move(str(napp_folder), str(dst))
+            NApp.install_requirements(dst)
         finally:
             if pkg_folder and pkg_folder.exists():
                 shutil.rmtree(str(pkg_folder))

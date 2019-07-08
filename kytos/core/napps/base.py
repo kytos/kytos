@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import subprocess
 import sys
 import tarfile
 import urllib
@@ -135,6 +136,16 @@ class NApp:
         Path(package_filename).unlink()
         self._update_repo_file(extracted)
         return extracted
+
+    @staticmethod
+    def install_requirements(path):
+        """Install NApp requirements."""
+        os.chdir(path)
+        requirements_file = "requirements/run.txt"
+        if os.path.exists(requirements_file):
+            LOG.info('Installing dependencies:')
+            subprocess.call([sys.executable, "-m", "pip", "install", "-r",
+                             requirements_file])
 
     @staticmethod
     def _extract(filename):

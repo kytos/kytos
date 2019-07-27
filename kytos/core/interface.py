@@ -87,6 +87,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self.endpoints = []
         self.stats = None
         self.link = None
+        self.receive_lldp = True
         self._custom_speed = speed
         self.set_available_tags(range(1, 4096))
 
@@ -376,6 +377,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
              'uni': True,
              'speed': 12500000000,
              'metadata': {},
+             'receive_lldp': True,
              'active': True,
              'enabled': False,
              'link': ""
@@ -395,6 +397,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                       'uni': self.uni,
                       'speed': self.speed,
                       'metadata': self.metadata,
+                      'receive_lldp': self.receive_lldp,
                       'active': self.is_active(),
                       'enabled': self.is_enabled(),
                       'link': self.link.id if self.link else ""}

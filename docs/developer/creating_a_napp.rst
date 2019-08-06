@@ -54,11 +54,11 @@ information. Using the following command you will create a basic structure.
   --------------------------------------------------------------
 
   Please, insert your NApps Server username: <username>
-  Please, insert your NApp name: <napp name>
+  Please, insert your NApp name: <napp_name>
   Please, insert a brief description for your NApp [optional]: <brief description>
 
   Congratulations! Your NApp have been bootstrapped!
-  Now you can go to the directory tutorial/helloworld and begin to code your NApp.
+  Now you can go to the directory <username>/<napp_name> and begin to code your NApp.
   Have fun!
 
 After that a folder with `username` will be created and inside that we will have
@@ -275,7 +275,7 @@ The command below will compact your NApp and upload to the napps server.
   (kytos-environment)$ kytos napps upload
   Enter the username: <username>
   Enter the password for <username>: <password>
-  SUCCESS: NApp <username>/my_first_napp uploaded.
+  SUCCESS: NApp <username>/<napp_name> uploaded.
 
 
 If your NApp does not have a openapi.yml, the command executed will display the message:
@@ -369,11 +369,13 @@ categories is displayed.
 Create your Meta-NApp
 =====================
 
-A Meta-Napp is a NApp that doesn't contain executable code, is used to specify dependencies of a given package 
-and just installs and enables/disables a specific set of napps. 
+A Meta-Napp is a NApp that doesn't contain executable code, is used to specify
+dependencies of a given package and just installs and enables/disables a
+specific set of napps. 
 
-To create your Meta-NApp, just like a common NApp, you need to use your napp-server name and insert some NApp
-information. The difference is just the `meta` flag in the create command.
+To create your Meta-NApp, just like a common NApp, you need to use your
+napp-server name and insert some NApp information. The difference is just the
+`meta` flag in the create command.
 
 .. code-block:: shell
 
@@ -419,7 +421,8 @@ The basic Meta-NApp structure is described below.
 How to create a basic NApp dependency 
 =====================================
 
-First, you have to edit the `kytos.json` and set the napp_dependencies field with some napps. An example is displayed bellow.
+First, you have to edit the `kytos.json` and set the napp_dependencies field with
+some napps. An example is displayed bellow.
 
 .. code-block:: shell
 
@@ -429,27 +432,30 @@ First, you have to edit the `kytos.json` and set the napp_dependencies field wit
     ...
   }
 
-Now, you have to install this Meta-NApp with the same command that was used to install a common NApp.
+Now, you have to install this Meta-NApp with the same command that was used to
+install a common NApp. Remember you have to publish it before installing, following
+the `How to upload your NApp in the NApps repository` section above. Then, you can
+install it using the ``kytos`` command line from the ``kytos-utils`` package:
 
 .. code-block:: shell
 
-  $ kytos napps install username/meta_napp_name
-  INFO    NApp username/meta_napp_name:
-  INFO      Searching local NApp...
-  INFO      Found and installed.
+  $ kytos napps install <username>/<meta_napp_name>
+  INFO    NApp <username>/<meta_napp_name>:
+  INFO      Downloading from NApps Server...
+  INFO      Downloaded and installed.
   INFO      Enabling...
-  INFO  NApp enabled: username/meta_napp_name
+  INFO  NApp enabled: <username>/<meta_napp_name>
   INFO      Enabled.
   INFO  Installing Dependencies:
   INFO    NApp kytos/of_core:
-  INFO      Searching local NApp...
-  INFO      Not found. Downloading from NApps Server...
+  INFO      Downloading from NApps Server...
   INFO      Downloaded and installed.
   INFO      Enabling...
   INFO  NApp enabled: kytos/of_core
   INFO      Enabled.
 
-Finally, the Meta-Napp and its dependencies were installed. The Meta-Napp supports the same commands as a common Napp.
+Finally, the Meta-Napp and its dependencies were installed. The Meta-Napp supports
+the same commands as a common Napp.
 
 .. code-block:: shell
 

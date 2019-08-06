@@ -73,9 +73,19 @@ command:
 
      $ kytos napps install kytos/of_core kytos/of_l2ls
 
-Kytos will look for the NApp in the current directory. If not found, it will
-search for the NApp in the NApps Servers defined in the configuration. The NApp
-will be downloaded and installed.
+Kytos will search for the NApp in the NApps Servers defined in the configuration.
+If the NApp is only in local environment, it has to be published in order to be
+downloaded and installed.
+
+To upload your NApp you should have an active account in the NApps server. With
+an registered account you should execute the command below inside the NApp structure:
+
+.. code-block:: shell
+
+  $ kytos napps upload
+  Enter the username: <username>
+  Enter the password for <username>: <password>
+  SUCCESS: NApp <username>/<napp_name> uploaded.
 
 Uninstall
 =========

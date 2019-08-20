@@ -72,7 +72,7 @@ class EggInfo(egg_info):
         """Python wheels are much faster (no compiling)."""
         print('Installing dependencies...')
         check_call([sys.executable, '-m', 'pip', 'install', '-r',
-                    'requirements/run.in'])
+                    'requirements/run.txt'])
 
 
 class Cleaner(clean):
@@ -268,11 +268,10 @@ setup(name='kytos',
       data_files=[(os.path.join(BASE_ENV, 'etc/kytos'), ETC_FILES)],
       packages=find_packages(exclude=['tests']),
       install_requires=[line.strip()
-                        for line in open("requirements/run.in").readlines()
+                        for line in open("requirements/run.txt").readlines()
                         if not line.startswith('#')],
       setup_requires=['pytest-runner'],
-      tests_require=['coverage', 'pytest', 'yala', 'tox'],
-      extras_require={'dev': ['pip-tools >= 2.0']},
+      tests_require=['pytest'],
       cmdclass={
           'clean': Cleaner,
           'ci': CITest,

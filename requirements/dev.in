@@ -1,3 +1,7 @@
 -e git+git://github.com/kytos/python-openflow.git#egg=python-openflow
 -e git+git://github.com/kytos/sphinx-theme.git#egg=kytos-sphinx-theme
--e .[dev]
+pip-tools >= 2.0
+coverage
+pytest
+yala
+tox

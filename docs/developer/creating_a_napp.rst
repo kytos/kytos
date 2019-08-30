@@ -199,7 +199,7 @@ displayed below.
 How to register yourself in the NApps respository
 =================================================
 
-To publish your NApp in the `Napps server <https://napps.kytos.io/>`_ you need
+To publish your NApp in the `NApps server <https://napps.kytos.io/>`_ you need
 to self register. To do that the tool `kytos` has a command
 line to make the registration. Below we have the steps to make the
 registration.
@@ -288,7 +288,7 @@ How the events works
 ====================
 
 With the purpose of performing the communication between NApps in the `Kytos Project` 
-any Napp can send or receive events.
+any NApp can send or receive events.
 
 Create Kytos Event
 ------------------
@@ -369,7 +369,7 @@ categories is displayed.
 Create your Meta-NApp
 =====================
 
-A Meta-Napp is a NApp that doesn't contain executable code, is used to specify
+A Meta-NApp is a NApp that doesn't contain executable code, is used to specify
 dependencies of a given package and just installs and enables/disables a
 specific set of napps. 
 
@@ -454,8 +454,8 @@ install it using the ``kytos`` command line from the ``kytos-utils`` package:
   INFO  NApp enabled: kytos/of_core
   INFO      Enabled.
 
-Finally, the Meta-Napp and its dependencies were installed. The Meta-Napp supports
-the same commands as a common Napp.
+Finally, the Meta-NApp and its dependencies were installed. The Meta-NApp supports
+the same commands as a common NApp.
 
 .. code-block:: shell
 

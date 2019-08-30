@@ -23,13 +23,20 @@ Fixed
 Security
 ========
 
-[2019.2b1] - "" beta1 - 2019-08-30
+
+[2019.2b1] - "gil" beta1 - 2019-08-30
 **************************************
 
 Added
 =====
-- Now, user can choose to enable or disable an interfaces in switch to receive
-  a package LLDP
+ - `Interface` objects have a new boolean `lldp` attribute (default `True`).
+   Other applications can look at this attribute to determine the LLDP behavior.
+
+Changed
+=======
+ - Improved installation of dependencies - pinned versions for dependencies
+   in the production and developer install modes.
+
 
 [2019.1] - "fafa" stable - 2019-07-12
 *************************************

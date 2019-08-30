@@ -1,0 +1,80 @@
+Summary
+=======
+
+Title
+-----
+Improvement of `kytos/flow_manager` logic.
+
+Authors
+-------
+Antonio Francisco (AmLight/Kytos), Beraldo Leal (Kytos)
+
+Blueprint Status
+----------------
+work-in-progress
+
+Priority
+--------
+high
+
+Tags
+----
+flows, error, sdn
+
+Milestone Target
+----------------
+TBD
+
+Implementation
+--------------
+Prototype in-progress
+
+Assignees
+---------
+Antonio Francisco
+
+Approvers (PTL)
+---------------
+Beraldo Leal and Jeronimo Bezerra.
+
+Version
+-------
+0.0.1
+
+
+Description
+===========
+This blueprint specifies changes in `flow_manager` to better track the
+FLOW MOD messages sent to the switches.
+
+
+OFPT_ERROR
+----------
+Errors in the FLOW MOD sent back by the switch are not treated by the
+`flow_manager` NApp. The NApp must listen
+to incoming errors in order to identify errors related to FLOW MODs it sent.
+To do that, when a FLOW MOD is sent, its XID (transaction id) must be recorded
+to be compared to the XID of the error message. If such an error happens, the
+NApp should generate an event with the FLOW MOD that caused the error, so the
+calling application knows an error occurred and then it can handle the error
+accordingly.
+
+
+Request errors
+--------------
+Proper error codes are returned when the JSON sent in the request is malformed,
+or if the switch does not exist or is disabled.
+But if an non-existent flow attribute is sent, the request is accepted
+(although this really causes no problem, as the non-existent attributes are
+simple ignored) or if invalid values are sent, errors are not handled.
+When an application tries to send a message with a wrong type value (a string
+instead of an integer, for example), the controller crashes. In that
+scenario, the caller is receiving a `200 Ok` reply.
+The application should check if the received parameters have the correct
+values to avoid errors in the controller and to let the caller know it sent
+an incorrect request.
+
+Delete method
+-------------
+The endpoint to remove a flow is a `POST` to `/v2/delete`. It must be changed
+to a `DELETE` to `/v2/flows`, and the `POST` must be marked as deprecated.

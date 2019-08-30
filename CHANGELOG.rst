@@ -23,6 +23,14 @@ Fixed
 Security
 ========
 
+[2019.2b1] - "" beta1 - 2019-08-30
+**************************************
+
+Added
+=====
+- Now, user can choose to enable or disable an interfaces in switch to receive
+  a package LLDP
+
 [2019.1] - "fafa" stable - 2019-07-12
 *************************************
 

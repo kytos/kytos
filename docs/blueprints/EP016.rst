@@ -83,6 +83,19 @@ examples of situations where both NNIs are `up` but the link is not operational:
     between ISP_A_P1 and ISP_A_P2, E-Line_NNI_A and E-Line_NNI_B will remain `up` but the link is not operational
     end-to-end.
 
-One way of detecting if the `link` is operational is using the LLDP messages sent by the topology discovery process.
-If a packet_in is received from the same switch + port that is in the LLDP message (`LLDP.c_id` and `LLDP.p_id`),
-then there is a loop. If no packet_in is received at all, that means the `link` is not operational.
+Implementation
+==============
+Condition #1 is already implemented.
+
+To implement condition #2, the interface must have a `timer` attribute, that must be set to `0` when the interface comes
+`down` and to the current timestamp when it comes `up`. When the interfaces comes `up`, the method dealing with the
+event must, after setting the timer attribute, wait for TIMER seconds, and then check if the `timer` attribute has not
+changed. If, for both NNIs, the `timer` attribute has not changed after TIMER seconds, then the condition is satisfied.
+
+Condition #3 requires that port stats are retrieved from the switch and stored. The NApp `kytos/of_stats` does that,
+but it does not record the time when the data was received. One way to solve the problem is to store not just
+the error value received, but also the delta since the last time it was received.
+
+Condition #4: one way of detecting if the `link` is operational is using the LLDP messages sent by the topology
+discovery process. If a packet_in is received from the same switch + port that is in the LLDP message (`LLDP.c_id`
+and `LLDP.p_id`), then there is a loop. If no packet_in is received at all, that means the `link` is not operational.

@@ -11,7 +11,7 @@ Antonio Francisco (AmLight/Kytos), Beraldo Leal (Kytos)
 
 Blueprint Status
 ----------------
-work-in-progress
+draft
 
 Priority
 --------
@@ -48,16 +48,17 @@ This blueprint specifies changes in `flow_manager` to better track the
 FLOW MOD messages sent to the switches.
 
 
-OFPT_ERROR
-----------
-Errors in the FLOW MOD sent back by the switch are not treated by the
-`flow_manager` NApp. The NApp must listen
-to incoming errors in order to identify errors related to FLOW MODs it sent.
-To do that, when a FLOW MOD is sent, its XID (transaction id) must be recorded
-to be compared to the XID of the error message. If such an error happens, the
-NApp should generate an event with the FLOW MOD that caused the error, so the
-calling application knows an error occurred and then it can handle the error
-accordingly.
+OpenFlow errors
+---------------
+Errors in the FLOW MOD sent back by the switch are currently not handled by the
+`flow_manager` NApp.
+To handle those errors, the NApp must listen to incoming errors in order to
+identify errors related to FLOW MODs it sent.
+To do that, when a FLOW MOD is sent to the switch, its XID (transaction id)
+must be recorded with the corresponding FLOW MOD, to be compared to the XID of
+the error message. If such an error happens, the NApp should generate an event
+with the FLOW MOD that caused the error, so the calling application knows an
+error occurred and then it can handle the error accordingly.
 
 
 Request errors

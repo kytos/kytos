@@ -51,7 +51,7 @@ This blueprint describes what should be the concept of ``link up`` or link opera
 
 There will be situations that, due external reasons such as a fiber cut, a `link` will turn `down`. A link is considered
 `down` when OpenFlow Port Status messages are sent by one or two switches with `port.state` and `port.config` set to
-`1`. More details about the definition of `link down` is provided in blueprint EP015.
+`1`. More details about the definition of `link down` is provided in blueprint EP012.
 
 Once the root cause is fixed and the connectivity is, in theory, restored, new OpenFlow Port Status messages will be
 sent by OpenFlow switches reporting the new status as `up` (`port.state` and `port.config` set to `0`).
@@ -85,12 +85,16 @@ examples of situations where both NNIs are `up` but the link is not operational:
 
 Implementation
 ==============
-Condition #1 is already implemented.
+Condition #1 is almost completely implemented, but it is considering the link `up` when one side goes `up`, not
+checking if the other side is, and that need to be done.
 
-To implement condition #2, the interface must have a `timer` attribute, that must be set to `0` when the interface comes
-`down` and to the current timestamp when it comes `up`. When the interfaces comes `up`, the method dealing with the
-event must, after setting the timer attribute, wait for TIMER seconds, and then check if the `timer` attribute has not
-changed. If, for both NNIs, the `timer` attribute has not changed after TIMER seconds, then the condition is satisfied.
+To implement condition #2, the interface must have a `last_changed_status` attribute, that must be set to the
+current timestamp when the interface state changes. When the interfaces comes `up`, the method dealing with the
+event must, after setting the `last_changed_status` attribute, wait for TIMER seconds, and then check if the
+`last_changed_status` attribute has not changed. If, for both NNIs, the it has not changed after TIMER seconds,
+then the condition is satisfied. The TIMER setting can be stored in the link metadata, having a default
+value for any link, that can be customized in the settings file per link, and can also be changed in runtime
+using the APIs to modify metadata.
 
 Condition #3 requires that port stats are retrieved from the switch and stored. The NApp `kytos/of_stats` does that,
 but it does not record the time when the data was received. One way to solve the problem is to store not just

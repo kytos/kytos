@@ -56,6 +56,10 @@ class TestKytosServer:
         exception_handler(self.loop, context2)
 
         assert caplog.record_tuples == [
-            ("atcp_server", logging.INFO, "Socket timeout: 'unit_tests'"),
-            ("atcp_server", logging.INFO, "Socket closed: 'unit_tests'"),
+            ("kytos.core.atcp_server",
+             logging.INFO,
+             "Socket timeout: 'unit_tests'"),
+            ("kytos.core.atcp_server",
+             logging.INFO,
+             "Socket closed: 'unit_tests'"),
         ]

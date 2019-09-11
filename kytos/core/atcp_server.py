@@ -7,7 +7,7 @@ import logging
 from kytos.core.connection import Connection
 from kytos.core.events import KytosEvent
 
-LOG = logging.getLogger("atcp_server")
+LOG = logging.getLogger(__name__)
 
 
 def exception_handler(loop, context):

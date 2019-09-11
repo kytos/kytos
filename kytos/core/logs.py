@@ -45,6 +45,7 @@ class LogManager:
     def _set_debug_mode(cls, debug=False):
         if debug is True:
             cls._PARSER.set('logger_root', 'level', 'DEBUG')
+            cls._PARSER.set('logger_kytos', 'level', 'DEBUG')
             cls._PARSER.set('logger_api_server', 'level', 'DEBUG')
             LOG.info('Setting log configuration with debug mode.')
 
@@ -141,7 +142,12 @@ class NAppLog:
     def __getattribute__(self, name):
         """Detect NApp ID and use its logger."""
         napp_id = _detect_napp_id()
-        logger = getLogger(napp_id)
+        logger = getLogger(f"kytos.napps")
+
+        # if napp_id is detected, get the napp logger.
+        if napp_id:
+            logger = logger.getChild(napp_id)
+
         return logger.__getattribute__(name)
 
 

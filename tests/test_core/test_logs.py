@@ -223,13 +223,13 @@ class TestNAppLog(LogTester):
     def test_napp_id_detection(self):
         """Test NApp ID detection based on filename."""
         self._set_filename('/napps/username/name/main.py')
-        expected_logger_name = 'username/name'
+        expected_logger_name = 'kytos.napps.username/name'
         napp_logger = NAppLog()
         self.assertEqual(expected_logger_name, napp_logger.name)
 
     def test_napp_id_not_found(self):
         """If NApp ID is not found, should use root logger."""
         self._set_filename('not/an/expected/NApp/path.py')
-        root_logger = logging.getLogger()
+        root_logger = logging.getLogger("kytos.napps")
         napp_logger = NAppLog()
         self.assertEqual(root_logger.name, napp_logger.name)

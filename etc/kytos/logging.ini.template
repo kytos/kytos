@@ -5,7 +5,7 @@ keys: console,syslog
 keys: console,syslog
 
 [loggers]
-keys: root,api_server,socket
+keys: root,kytos,api_server,socket
 
 [formatter_syslog]
 format: %(name)s:%(levelname)s %(module)s:%(lineno)d:  %(message)s
@@ -24,6 +24,10 @@ args: {{syslog_args}}
 formatter: syslog
 
 [logger_root]
+level: INFO
+handlers: syslog,console
+
+[logger_kytos]
 level: INFO
 handlers: syslog,console
 

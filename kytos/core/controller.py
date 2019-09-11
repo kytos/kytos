@@ -130,7 +130,7 @@ class Controller:
         """Register kytos log and enable the logs."""
         LogManager.load_config_file(self.options.logging, self.options.debug)
         LogManager.enable_websocket(self.api_server.server)
-        self.log = logging.getLogger("controller")
+        self.log = logging.getLogger(__name__)
 
     def start(self, restart=False):
         """Create pidfile and call start_controller method."""
@@ -213,7 +213,7 @@ class Controller:
             loop.stop()
 
         async def _run_api_server_thread(executor):
-            log = logging.getLogger('controller.api_server_thread')
+            log = logging.getLogger('kytos.core.controller.api_server_thread')
             log.debug('starting')
             # log.debug('creating tasks')
             loop = asyncio.get_event_loop()

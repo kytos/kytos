@@ -43,7 +43,7 @@ class APIServer:
         self.napps_dir = napps_dir
 
         self.flask_dir = os.path.join(dirname, '../web-ui')
-        self.log = logging.getLogger('api_server')
+        self.log = logging.getLogger(__name__)
 
         self.listen = listen
         self.port = port

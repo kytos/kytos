@@ -91,3 +91,43 @@ class TestController(TestCase):
             warning = wrngs[0]
             self.assertEqual(warning.category, DeprecationWarning)
             self.assertIn('@rest', str(warning.message))
+
+    def test_loggers(self):
+        """Test that all controller loggers are under kytos
+        hierachy logger"""
+        loggers = self.controller.loggers()
+        for logger in loggers:
+            self.assertTrue(logger.name.startswith("kytos"))
+
+    def test_debug_on(self):
+        """Test the enable debug feature."""
+        # Enable debug for kytos.core
+        self.controller.debug("kytos.core", 1)
+        self._test_debug_result()
+
+    def test_debug_on_defaults(self):
+        """Test the enable debug feature. Test the default parameter"""
+        # Enable debug for kytos.core
+        self.controller.debug("kytos.core")
+        self._test_debug_result()
+
+    def _test_debug_result(self):
+        """Verify if the loggers have level debug."""
+        loggers = self.controller.loggers()
+        for logger in loggers:
+            # Check if all kytos.core loggers are in DEBUG mode.
+            # All the rest must remain the same.
+            if logger.name.startswith("kytos.core"):
+                self.assertTrue(logger.getEffectiveLevel(), logging.DEBUG)
+            else:
+                self.assertTrue(logger.getEffectiveLevel(), logging.CRITICAL)
+
+    def test_debug_off(self):
+        """Test the disable debug feature"""
+        # Fist we enable the debug
+        self.controller.debug("kytos.core", 1)
+        # ... then we disable the debug for the test
+        self.controller.debug("kytos.core", 0)
+        loggers = self.controller.loggers()
+        for logger in loggers:
+            self.assertTrue(logger.getEffectiveLevel(), logging.CRITICAL)

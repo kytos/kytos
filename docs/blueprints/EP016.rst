@@ -7,11 +7,11 @@ Kytos E-Line Link Up Definition
 
 Author(s)
 ---------
-Jeronimo Bezerra (FIU)
+Jeronimo Bezerra (FIU), Antonio Francisco (ANSP)
 
 Blueprint Status
 ----------------
-under_revision
+implementing
 
 Priority
 --------

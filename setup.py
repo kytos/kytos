@@ -24,7 +24,7 @@ except ModuleNotFoundError:
     print('Please install python3-pip and run setup.py again.')
     exit(-1)
 
-BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
+BASE_ENV = Path(os.environ.get('VIRTUAL_ENV', None)) or Path('/')
 ETC_FILES = []
 TEMPLATE_FILES = ['etc/kytos/kytos.conf.template',
                   'etc/kytos/logging.ini.template']
@@ -156,7 +156,7 @@ class CommonInstall:
         """
         from jinja2 import Template
 
-        if kwargs.get('prefix').endswith('/'):
+        if str(kwargs.get('prefix')).endswith('/'):
             kwargs['prefix'] = kwargs['prefix'][:-1]
 
         cls.create_paths()
@@ -238,11 +238,25 @@ class DevelopMode(develop, CommonInstall):
     def generate_file_link(file_name):
         """Create a symbolic link from a file name."""
         current_directory = os.path.dirname(__file__)
-        src = os.path.join(os.path.abspath(current_directory), file_name)
-        dst = os.path.join(BASE_ENV, file_name)
+        src = Path(os.path.join(os.path.abspath(current_directory), file_name))
+        dst = Path(os.path.join(BASE_ENV, file_name))
 
-        if not os.path.exists(dst):
-            os.symlink(src, dst)
+        print(f"\nCreating symbolic link {dst}.")
+
+        symlink_if_different(src, dst)
+
+
+def symlink_if_different(path, target):
+    """Force symlink creation if it points anywhere else."""
+    # print(f"symlinking {path} to target: {target}...", end=" ")
+    if not path.exists():
+        # print(f"path doesn't exist. linking...")
+        path.symlink_to(target)
+    elif not path.samefile(target):
+        # print(f"path exists, but is different. removing and linking...")
+        # Exists but points to a different file, so let's replace it
+        path.unlink()
+        path.symlink_to(target)
 
 
 # We are parsing the metadata file as if it was a text file because if we

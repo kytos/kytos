@@ -1,0 +1,175 @@
+:EP: 17
+:Title: Improvements on Statistics Metrics Collections
+:Author:
+        José Mauro Ribeiro <zemauror@gmail.com>, Antonio Francisco <ajoaoff@gmail.com>, Humberto Diógenes <hdiogenes@gmail.com>
+:Created: 2019-09-18
+:Kytos-Version: 2019.2
+:Status: Draft
+:Type: Standards Track
+
+
+########
+Abstract
+########
+
+This blueprint proposes a standardization/convention in the namespaces for metrics collection. Thus any application that resolves to save metrics should follow this specification to save data metrics using kytos/kronos. The kronos/kytos is responsible for data persistence, saving and retrieving information from time series database.
+
+##########
+Motivation
+##########
+
+Currently all metrics management are implemented by kytos/of_stats, which is specific to OpenFlow protocol. Basic counters data provided by OpenFlow are persisted in RRDtool database by kytos/of_stats. In this architecture we have a Kytos statistics management tied up with OpenFlow protocol. Since Kytos intends to be "protocol-independent", it is necessary to review and improve this architecture.
+
+If, in the future, we need to implement another protocol besides OpenFlow, we should decouple the statistics gathering from the storage of time series data. This has already been started with the development of the kytos/kronos NApp, which is responsible for saving time series data.
+
+Now need to find a way to ensure that the of_stats (or other NApp) generates metrics data/events in a standard way so that:
+
+1. The kytos/kronos NApp saves them in the backend;
+2. The Kytos Interface can receive (in the case of events) and retrieve  (in the case of past data, if we want to show that) and display them to the end-user.
+
+
+
+#########
+Rationale
+#########
+
+Kronos is designed to persist metrics and be agnostic of both the network protocol and persistence back-end solutions. Thus a simple and flexible namespace scheme is proposed here. Flexibility is necessary for other back-ends solutions that may be implemented in the future use the namespace to get the best from their schemes databases.
+
+#############
+Specification
+#############
+
+The proposed namespace scheme consists of three fields:
+
+Origin NApp: NApp that requested data to be persisted/retrieved. Since only NApps use kytos/kronos services, this field allows any persisted information to always be associated with a specific NApp and can be traced back to its origin.
+
+Source Entity: Entity that is associated with the persisted data. In this case we are talking specifically about switches, ports, interfaces and flow. This is the most complex field because it can consist of multiple subparts. Thus the standard for this field assumes that each subpart must separate by '.' character and each pair of subparts (starting from the first subpart) determines one pair of field and value.
+
+Data Name: The user who wants to retrieve or persist in a database. Bytes per second, packets per second, and others.
+
+This is how the specification works to listened events.
+
+kytos.*.kronos.save
+===================
+
+Content
+-------
+
+.. code-block:: python3
+
+   {
+     'namespace': <'namespace name'>,
+     'value': <'any value to be saved'>,
+     'timestamp': <'timestamp associated with the value'>
+   }
+
+Example
+-------
+
+
+.. code-block:: python3
+
+    {
+     'namespace': 'kytos.telemetry.switches.1.interfaces.232.bytes_in',
+     'value': 1234,
+     'timestamp': '2019-10-08T13:45:20+0000'
+    }
+
+Following the previous specification:
+
+    *Origin NApp*: 'telemetry'
+
+    *Source Entity*: 'switches.1.interfaces.232'
+
+    *Data name*: 'bytes_in'
+   
+
+Where the Source Entity has the following pairs of fields and values:
+
+    *switches*: 1
+
+    *interfaces*: 232
+
+
+kytos.*.kronos.get
+==================
+
+Content
+-------
+
+.. code-block:: python3
+
+    {
+     'namespace': <namespace name>,
+     'timestamp': <'timestamp tuple with the range to query'>
+    }
+
+Example
+-------
+
+.. code-block:: python3
+
+    {
+     'namespace': 'kytos.telemetry.switches.1.interfaces.232.bytes_in',
+     'timestamp': ('2019-10-08T13:45:20+0000', '2019-10-08T14:45:20+0000')
+    }
+
+
+kytos.*.kronos.delete
+=====================    
+
+Content
+-------
+
+
+.. code-block:: python3
+
+    {
+     'namespace': <'namespace name'>,
+     'timestamp': <'timestamp tuple with the range to delete'>
+    }
+
+Example
+-------
+
+
+.. code-block:: python3
+
+    {
+     'namespace': 'kytos.telemetry.switches.1.interfaces.232.bytes_in',
+     'timestamp': ('2019-10-08T13:45:20+0000', '2019-10-08T14:45:20+0000')
+    }
+
+
+##############
+Rejected Ideas
+##############
+
+[Why certain ideas that were brought while discussing this PEP were not ultimately pursued.]
+
+
+###########
+Open Issues
+###########
+
+[Any points that are still being decided/discussed.]
+
+##########
+References
+##########
+
+[A collection of URLs used as references through the PEP.]
+
+
+#########
+Copyright
+#########
+
+This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.
+
+
+
+
+
+

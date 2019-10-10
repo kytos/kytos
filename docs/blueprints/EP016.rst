@@ -1,105 +1,84 @@
-Summary
-=======
-
-Title
------
-Kytos E-Line Link Up Definition
-
-Author(s)
----------
-Jeronimo Bezerra (FIU), Antonio Francisco (ANSP)
-
-Blueprint Status
-----------------
-implementing
-
-Priority
---------
-high
-
-Tags
-----
-eline, mef, circuit, provisioning, sdn, resilience
-
-Milestone Target
-----------------
-
-
-Implementation
---------------
-
-
-Assignees
----------
-
-
-Approvers (PTL)
----------------
-
-
-Version
--------
-
-
-Specifications
---------------
+:EP: 16
+:Title: Kytos E-Line Link Up Definition
+:Author(s): Jeronimo Bezerra (FIU), Antonio Francisco (ANSP)
+:Created: 2019-04-18
+:Kytos-Version: 2019.2
+:Status: Implementing
+:Type: Development
+:Priority: High
+:Tags: eline, mef, circuit, provisioning, sdn, resilience
 
 
 Description
 ===========
-This blueprint describes what should be the concept of ``link up`` or link operational.
+This blueprint describes what should be the concept of ``link up`` or link
+operational.
 
-There will be situations that, due external reasons such as a fiber cut, a `link` will turn `down`. A link is considered
-`down` when OpenFlow Port Status messages are sent by one or two switches with `port.state` and `port.config` set to
-`1`. More details about the definition of `link down` is provided in blueprint EP012.
+There will be situations that, due external reasons such as a fiber cut, a
+`link` will turn `down`. A link is considered `down` when OpenFlow Port Status
+messages are sent by one or two switches with `port.state` and `port.config`
+set to `1`. More details about the definition of `link down` is provided in
+blueprint EP012.
 
-Once the root cause is fixed and the connectivity is, in theory, restored, new OpenFlow Port Status messages will be
-sent by OpenFlow switches reporting the new status as `up` (`port.state` and `port.config` set to `0`).
+Once the root cause is fixed and the connectivity is, in theory, restored, new
+OpenFlow Port Status messages will be sent by OpenFlow switches reporting the
+new status as `up` (`port.state` and `port.config` set to `0`).
 
-However, the Kytos Topology Napp should NOT generate an `link up` event to the Napps before the following conditions are
-fulfilled:
+However, the Kytos Topology Napp should NOT generate an `link up` event to the
+Napps before the following conditions are fulfilled:
 
  1. BOTH remote NNIs that define the `link` should be in the `up` state
- 2. Timer: BOTH remote NNIS should be in the `up` state for more than TIMER seconds, where TIMER is defined by the
-    network operator in a per-link basis
+ 2. Timer: BOTH remote NNIS should be in the `up` state for more than TIMER
+    seconds, where TIMER is defined by the network operator in a per-link basis
  3. Error-free: BOTH remote NNIS's error counters should not be increasing
  4. Continuity Tests: the link has to be functional end-to-end
- 5. User-defined tests: Network operators should be allowed to create customized evaluation procedures if needed.
+ 5. User-defined tests: Network operators should be allowed to create
+    customized evaluation procedures if needed.
 
-Condition #4 is important because a `link` could be assumed as `up` even though it is not operational. Some
-examples of situations where both NNIs are `up` but the link is not operational:
+Condition #4 is important because a `link` could be assumed as `up` even though
+it is not operational. Some examples of situations where both NNIs are `up` but
+the link is not operational:
 
-  * There are loops in the circuit, where traffic coming from a NNI is being sent back to the same NNI (the optical
-    carrier is testing the circuit after a fiber repair)
-  * The link is offered as an Ethernet service provided by another service provider and this service provider has a
-    network outage that does not affect Provider Edge devices. Example:
+  * There are loops in the circuit, where traffic coming from a NNI is being
+    sent back to the same NNI (the optical carrier is testing the circuit after
+    a fiber repair)
+  * The link is offered as an Ethernet service provided by another service
+    provider and this service provider has a network outage that does not
+    affect Provider Edge devices. Example:
     ::
 
-     E-Line_NNI_A <--> ISP_A_PE_1 <--> ISP_A_P1 <--> ISP_A_P2 <--> ISP_A_PE_2 <--> E-Line_NNI_B
+     E-L_A <-> ISP_A_PE_1 <-> ISP_A_P1 <-> ISP_A_P2 <-> ISP_A_PE_2 <-> E-L_B
 
-                      | --------------------- ISP A Domain ----------------- |
+              | ------------------ ISP A Domain ----------------- |
 
-    In case the link between E-Line_NNI_A and E-Line_NNI_B is provided by ISP A using Ethernet and there is a problem
-    between ISP_A_P1 and ISP_A_P2, E-Line_NNI_A and E-Line_NNI_B will remain `up` but the link is not operational
-    end-to-end.
+    In case the link between E-L_A and E-L_B is provided by ISP A using 
+    Ethernet and there is a problem between ISP_A_P1 and ISP_A_P2, E-L_A and 
+    E-L_B will remain `up` but the link is not operational end-to-end.
 
 Implementation
 ==============
-Condition #1 is almost completely implemented, but it is considering the link `up` when one side goes `up`, not
-checking if the other side is, and that need to be done.
+Condition #1 is almost completely implemented, but it is considering the link
+`up` when one side goes `up`, not checking if the other side is, and that need
+to be done.
 
-To implement condition #2, the interface must have a `last_changed_status` attribute, that must be set to the
-current timestamp when the interface state changes. When the interfaces comes `up`, the method dealing with the
-event must, after setting the `last_changed_status` attribute, wait for TIMER seconds, and then check if the
-`last_changed_status` attribute has not changed. If, for both NNIs, the it has not changed after TIMER seconds,
-then the condition is satisfied. The TIMER setting can be stored in the link metadata, having a default
-value for any link, that can be customized in the settings file per link, and can also be changed in runtime
-using the APIs to modify metadata.
+To implement condition #2, the interface must have a `last_changed_status`
+attribute, that must be set to the current timestamp when the interface state
+changes. When the interfaces comes `up`, the method dealing with the event
+must, after setting the `last_changed_status` attribute, wait for TIMER
+seconds, and then check if the `last_changed_status` attribute has not changed.
+If, for both NNIs, the it has not changed after TIMER seconds,
+then the condition is satisfied. The TIMER setting can be stored in the link
+metadata, having a default value for any link, that can be customized in the
+settings file per link, and can also be changed in runtime using the APIs to
+modify metadata.
 
-Condition #3 requires that port stats are retrieved from the switch and stored. The NApp `kytos/of_stats` does that,
-but it does not record the time when the data was received. One way to solve the problem is to store not just
-the error value received, but also the delta since the last time it was received.
+Condition #3 requires that port stats are retrieved from the switch and stored.
+The NApp `kytos/of_stats` does that, but it does not record the time when the
+data was received. One way to solve the problem is to store not just the error
+value received, but also the delta since the last time it was received.
 
-Condition #4: one way of detecting if the `link` is operational is using the LLDP messages sent by the topology
-discovery process. If a packet_in is received from the same switch + port that is in the LLDP message (`LLDP.c_id`
-and `LLDP.p_id`), then there is a loop. If no packet_in is received at all, that means the `link` is not operational.
+Condition #4: one way of detecting if the `link` is operational is using the
+LLDP messages sent by the topology discovery process. If a packet_in is
+received from the same switch + port that is in the LLDP message (`LLDP.c_id`
+and `LLDP.p_id`), then there is a loop. If no packet_in is received at all,
+that means the `link` is not operational.

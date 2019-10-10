@@ -30,6 +30,7 @@ from pathlib import Path
 from kytos.core.api_server import APIServer
 # from kytos.core.tcp_server import KytosRequestHandler, KytosServer
 from kytos.core.atcp_server import KytosServer, KytosServerProtocol
+from kytos.core.auth import Auth
 from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 from kytos.core.connection import ConnectionState
@@ -119,6 +120,8 @@ class Controller:
         self.api_server = APIServer(__name__, self.options.listen,
                                     self.options.api_port,
                                     self.napps_manager, self.options.napps)
+
+        self.auth = Auth(self)
 
         self._register_endpoints()
         #: Adding the napps 'enabled' directory into the PATH
@@ -265,6 +268,7 @@ class Controller:
             self.rest_reload_napp)
         self.api_server.register_core_endpoint('reload/all',
                                                self.rest_reload_all_napps)
+        self.auth.register_core_auth_services()
 
     def register_rest_endpoint(self, url, function, methods):
         """Deprecate in favor of @rest decorator."""

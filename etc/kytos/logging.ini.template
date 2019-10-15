@@ -29,6 +29,7 @@ handlers: syslog,console
 
 [logger_kytos]
 level: INFO
+qualname: kytos
 handlers: syslog,console
 
 [logger_api_server]

@@ -4,6 +4,7 @@ import logging
 import time
 from functools import wraps
 from http import HTTPStatus
+import datetime
 
 import jwt
 from flask import jsonify, request
@@ -93,7 +94,19 @@ class Auth:
         return response['answer'], response['code']
 
     def _authenticate_user(self):
-        return {"user": "authenticate"}, HTTPStatus.OK.value
+        
+        username = request.authorization["username"]
+        password = request.authorization["password"].encode()
+        time_exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
+        try:
+            user = self._list_user(username)[0].get("data")
+            if user.get("password") == hashlib.sha512(password).hexdigest():
+                token = self._generate_token(username, time_exp)
+                return {"token": token.decode()}, HTTPStatus.OK.value
+            raise Exception()
+        except Exception:
+            result = "Username or password wrong!"
+        return result, HTTPStatus.UNAUTHORIZED.value
 
     def _list_users(self):
         """List all users using Storehouse."""
@@ -222,6 +235,15 @@ class Auth:
             if response:
                 break
         return response['answer'], response['code']
+    
+    def _generate_token(self, username, time):
+        """Generate a jwt token."""
+        return jwt.encode(
+            {'username': username, 'iss': "Kytos NApps Server", 'exp': time},
+            JWT_SECRET,
+            algorithm='HS256',
+        )
+
 
 
 def Authenticated(func):

@@ -23,6 +23,16 @@ Fixed
 Security
 ========
 
+[2019.2b2] - "gil" beta2 - 2019-10-18
+**************************************
+Added
+=====
+  - Added API Authentication blueprint EP018.
+
+Changed
+=======
+  - Changed loggers to begin the hierarchy with "kytos.
+  - Changed layout and improvement ideas in blueprint EP016.
 
 [2019.2b1] - "gil" beta1 - 2019-08-30
 **************************************

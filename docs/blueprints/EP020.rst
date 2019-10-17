@@ -1,5 +1,5 @@
-:EP: 18
-:Title: Data and Settings Persistence
+:EP: 20
+:Title: Settings and Data Persistence
 :Author: Humberto Diógenes <hdiogenes@gmail.com>
 :Created: 2019-09-18
 :Kytos-Version: 2019.2
@@ -12,7 +12,6 @@ Abstract
 
 Here we propose the use of the distributed key-value store etcd_ as a central backend for storing all Kytos Core and NApps settings, which today are scattered in many files and formats, in different directories on the file system.
 
-__
 .. _etcd: https://etcd.io/
 
 
@@ -33,8 +32,7 @@ Kytos's current approach to configuration files has a few shortcomings, which we
 - Replication and High Availability
     The lack of a central standard place to store configuration also makes it difficult to run Kytos in a High Availability scenario. For this to be truly possible, we'd also need to store NApp data (like mef-eline_'s circuit data) also centralized and remotely accessible, which we'll address in the `High Availability`_ section of this document.
 
-__
-.. mef-eline: https://napps.kytos.io/kytos/mef_eline
+.. _mef-eline: https://napps.kytos.io/kytos/mef_eline
 
 
 Rationale
@@ -50,13 +48,13 @@ This EP proposes the use of the etcd_ distributed key-value store as a backend t
 Specification
 =============
 
-We'll have to decide how we're going to make this feature available to other developers. Will we have a new NApp, use the storehouse NApp or will it be a core feature?
+We'll have to decide how we're going to make this feature available to other developers. Will it be a core feature, or are we going to implement it as a NApp? If using a NApp, will it be a new one, or the existing storehouse_ NApp?
 
-With a NApp, we'd probably have to implement all the settings CRUD operations through Kytos Events, which may prove to be cumbersome.
+Providing this feature as a core feature, we'd have to decide if etcd would be an optional backend or a new dependency for Kytos. We'd have to create a new ``Config`` API, to abstract the etcd implementation details from Kytos Core and NApp developers.
 
-Providing this feature as a core feature, we'd have to decide if etcd would be an optional backend or a new dependency for Kytos.
+With the NApp approach, we'd probably use the existing storehouse_ infrastructure, so that we don't have to reimplement all the CRUD operations on settings through Kytos Events, which are already in place at storehouse_.
 
-Either way, we'd have to create a new ``Config`` API, to abstract the etcd implementation details from Kytos Core and NApp developers.
+.. _storehouse: https://napps.kytos.io/kytos/storehouse
 
 
 Backwards Compatibility
@@ -69,8 +67,16 @@ Again, this would depend on the NApp vs. core feature decision.
 As a core (and also mandatory) dependency, it'd would be easier to just say "from Kytos 2019.2 on, settings files will be migrated to etcd." It's very probable that we'd have to maintain one very minimal ``.ini`` file to keep the basics needed by the ``kytosd`` bootstrap.
 
 If we decide to implement this as a new "Settings NApp", we'd have a few questions:
-- Will we have some kind of flag to know where to pull settings from? Or once the settings NApp is loaded everything comes from etcd transparently?
-- If the Settings NApp is enabled, will we force it to be loaded before all others NApps? How?
+- Will we have some kind of flag to know where to pull settings from? Or, once the settings NApp is loaded, everything comes from etcd transparently?
+- If the Settings NApp is enabled, will we force it to be loaded before all other NApps? How?
+
+
+High Availability
+=================
+
+A key problem in High Availability (eg.: one main server with one or more stand-by servers) scenarios is how to keep the stand-by servers configuration up-to-date in relation to the main server. Using a centralized configuration system like etcd_ solves that problem with the added benefit of etcd_ already being capable of running with many stand-by replicated instances itself.
+
+This EP can also be enhanced (or a new, more specific, EP could be created) to propose the use of etcd_ for all NApp-specific in-memory data (like circuit data for mef-eline_, for example).
 
 
 Security Implications
@@ -82,7 +88,7 @@ A malicious user could possibly gain direct access to etcd and use this to their
 How to Teach This
 =================
 
-We will have to create two new documentations:
+We will have to create two new documentation articles:
 
 - On the Admin Guide: How to install, setup and secure etcd for use with kytos
 - On the Developer Guide: How to use the new configuration API
@@ -105,7 +111,8 @@ Open Issues
 
 * Will etcd be mandatory or optional?
 * Related to the question above: will it be a new core feature, or is it going to be implemented as a new NApp?
-* Are we going to use etcd for NApp data? Is etcd suitable for that?
+* If it's implemented as a storehouse_ backend, where will we store the configuration that will tell storehouse which backend to use? ``kytos.ini``?
+* Are we going to use etcd for NApp data? Is it suitable for that?
   * The fact that etcd is used to store runtime data and settings in the Kubernetes project tells us that yes, this is (very) viable.
 
 References
@@ -113,13 +120,12 @@ References
 
 [A collection of URLs used as references through the PEP.]
 
+_storehouse: https://napps.kytos.io/kytos/storehouse
+
 
 Copyright
 =========
 
 This document is placed in the public domain or under the
 CC0-1.0-Universal license, whichever is more permissive.
-
-
-
 

@@ -1,7 +1,9 @@
-:EP: 17
+:EP: 19
 :Title: Improvements on Statistics Metrics Collections
-:Author:
-        José Mauro Ribeiro <zemauror@gmail.com>, Antonio Francisco <ajoaoff@gmail.com>, Humberto Diógenes <hdiogenes@gmail.com>
+:Authors: - José Mauro Ribeiro zemauror@gmail.com;
+          - Antonio Francisco ajoaoff@gmail.com ;
+          - Humberto Diógenes hdiogenes@gmail.com
+         
 :Created: 2019-09-18
 :Kytos-Version: 2019.2
 :Status: Draft

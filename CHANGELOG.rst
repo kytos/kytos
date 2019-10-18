@@ -23,16 +23,22 @@ Fixed
 Security
 ========
 
+
 [2019.2b2] - "gil" beta2 - 2019-10-18
 **************************************
 Added
 =====
-  - Added API Authentication blueprint EP018.
-
+- New blueprint: EP018 - API Authentication.
+- New blueprint: EP019 - Improvements on Statistics Metrics Collections.
+- New blueprint: EP020 - Data and Settings Persistence.
+  
 Changed
 =======
-  - Changed loggers to begin the hierarchy with "kytos.
-  - Changed layout and improvement ideas in blueprint EP016.
+- Changed loggers to begin the hierarchy with "kytos."
+- Modify the kytos developer mode to check the installation of configuration files.
+- Blueprint EP016: Changed layout and improvement ideas.
+- Blueprint EP017: More details on OpenFlow errors.
+
 
 [2019.2b1] - "gil" beta1 - 2019-08-30
 **************************************

@@ -3,12 +3,19 @@ from kytos.core.controller import Controller
 from kytos.core.events import KytosEvent
 from kytos.core.logs import NAppLog
 from kytos.core.napps import KytosNApp, rest
-from kytos.core.auth import Authenticated
+from kytos.core.auth import authenticated
 
 from .metadata import __version__
 
-__all__ = ('Authenticated', 'Controller', 'KytosEvent', 'KytosNApp', 'log',
-            'rest','__version__')
+__all__ = (
+    "authenticated",
+    "Controller",
+    "KytosEvent",
+    "KytosNApp",
+    "log",
+    "rest",
+    "__version__",
+)
 
 # Kept lowercase to be more user friendly.
 log = NAppLog()  # pylint: disable=invalid-name

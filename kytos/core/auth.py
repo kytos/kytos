@@ -1,17 +1,17 @@
 """Module with main classes related to Authentication."""
+import datetime
 import hashlib
 import logging
 import time
 from functools import wraps
 from http import HTTPStatus
-import datetime
 
 import jwt
 from flask import jsonify, request
 
 from kytos.core.events import KytosEvent
 
-__all__ = ['Authenticated']
+__all__ = ['authenticated']
 
 LOG = logging.getLogger(__name__)
 JWT_SECRET = "secret"
@@ -25,6 +25,7 @@ class Auth:
 
         Args:
             controller(kytos.core.controller): A Controller instance.
+
         """
         self.controller = controller
         self.namespace = 'kytos.core.auth.users'
@@ -57,11 +58,11 @@ class Auth:
 
     def _create_user(self):
         """Save a user using Storehouse."""
-        response = None
+        response = {}
 
         def _create_user_calback(_event, box, error):
             nonlocal response
-            if error:
+            if error or not box:
                 response = {
                     'answer': "User cannot be created",
                     'code': HTTPStatus.CONFLICT.value,
@@ -94,7 +95,7 @@ class Auth:
         return response['answer'], response['code']
 
     def _authenticate_user(self):
-        
+
         username = request.authorization["username"]
         password = request.authorization["password"].encode()
         time_exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
@@ -104,13 +105,14 @@ class Auth:
                 token = self._generate_token(username, time_exp)
                 return {"token": token.decode()}, HTTPStatus.OK.value
             raise Exception()
+        # pylint: disable=W0703
         except Exception:
             result = "Username or password wrong!"
         return result, HTTPStatus.UNAUTHORIZED.value
 
     def _list_users(self):
         """List all users using Storehouse."""
-        response = None
+        response = {}
 
         def _list_users_callback(_event, boxes, error):
             nonlocal response
@@ -139,7 +141,7 @@ class Auth:
 
     def _list_user(self, uid):
         """List a specific user using Storehouse."""
-        response = None
+        response = {}
 
         def _list_user_callback(_event, box, error):
             nonlocal response
@@ -169,7 +171,7 @@ class Auth:
 
     def _delete_user(self, uid):
         """Delete a user using Storehouse."""
-        response = None
+        response = {}
 
         def _delete_user_callback(_event, box, error):
             nonlocal response
@@ -199,7 +201,7 @@ class Auth:
 
     def _update_user(self, uid):
         """Update user data using Storehouse."""
-        response = None
+        response = {}
 
         def _update_user_callback(_event, box, error):
             nonlocal response
@@ -235,18 +237,22 @@ class Auth:
             if response:
                 break
         return response['answer'], response['code']
-    
-    def _generate_token(self, username, time):
+
+    @classmethod
+    def _generate_token(cls, username, time_exp):
         """Generate a jwt token."""
         return jwt.encode(
-            {'username': username, 'iss': "Kytos NApps Server", 'exp': time},
+            {
+                'username': username,
+                'iss': "Kytos NApps Server",
+                'exp': time_exp,
+            },
             JWT_SECRET,
             algorithm='HS256',
         )
 
 
-
-def Authenticated(func):
+def authenticated(func):
     """Handle tokens from requests."""
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -256,9 +262,12 @@ def Authenticated(func):
             if content is None:
                 raise AttributeError
             token = content.split("Bearer ")[1]
-            token_data = jwt.decode(token, key=JWT_SECRET)
-        except (AttributeError, jwt.ExpiredSignature,
-                jwt.exceptions.DecodeError):
+            jwt.decode(token, key=JWT_SECRET)
+        except (
+            AttributeError,
+            jwt.ExpiredSignature,
+            jwt.exceptions.DecodeError,
+        ):
             msg = 'Token not sent or expired.'
             return jsonify({'error': msg}), 401
         return func(*args, **kwargs)

@@ -238,12 +238,13 @@ class DevelopMode(develop, CommonInstall):
     def generate_file_link(file_name):
         """Create a symbolic link from a file name."""
         current_directory = os.path.dirname(__file__)
-        src = Path(os.path.join(os.path.abspath(current_directory), file_name))
-        dst = Path(os.path.join(BASE_ENV, file_name))
+        target = Path(os.path.join(os.path.abspath(current_directory),
+                                   file_name))
+        path = Path(os.path.join(BASE_ENV, file_name))
 
-        print(f"\nCreating symbolic link {dst}.")
+        print(f"\nCreating symbolic link {path}.")
 
-        symlink_if_different(src, dst)
+        symlink_if_different(path, target)
 
 
 def symlink_if_different(path, target):

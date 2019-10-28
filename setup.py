@@ -24,7 +24,7 @@ except ModuleNotFoundError:
     print('Please install python3-pip and run setup.py again.')
     exit(-1)
 
-BASE_ENV = Path(os.environ.get('VIRTUAL_ENV', None)) or Path('/')
+BASE_ENV = Path(os.environ.get('VIRTUAL_ENV', '/'))
 ETC_FILES = []
 TEMPLATE_FILES = ['etc/kytos/kytos.conf.template',
                   'etc/kytos/logging.ini.template']
@@ -156,8 +156,7 @@ class CommonInstall:
         """
         from jinja2 import Template
 
-        if str(kwargs.get('prefix')).endswith('/'):
-            kwargs['prefix'] = kwargs['prefix'][:-1]
+        kwargs['prefix'] = Path(str(kwargs['prefix']).rstrip('/'))
 
         cls.create_paths()
         for path in templates:

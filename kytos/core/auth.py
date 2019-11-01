@@ -9,12 +9,12 @@ from http import HTTPStatus
 import jwt
 from flask import jsonify, request
 
+from kytos.core.config import KytosConfig
 from kytos.core.events import KytosEvent
 
 __all__ = ['authenticated']
 
 LOG = logging.getLogger(__name__)
-JWT_SECRET = "secret"
 DEFAULT_USERNAME = "admin"
 DEFAULT_PASSWORD = "youshallnotpass"
 DEFAULT_EMAIL = "admin@kytos.io"
@@ -30,7 +30,7 @@ def authenticated(func):
             if content is None:
                 raise AttributeError
             token = content.split("Bearer ")[1]
-            jwt.decode(token, key=JWT_SECRET)
+            jwt.decode(token, key=Auth.get_jwt_secret())
         except (
             AttributeError,
             jwt.ExpiredSignature,
@@ -58,6 +58,13 @@ class Auth:
         self._create_default_user()
 
     @classmethod
+    def get_jwt_secret(cls):
+        """Return JWT secret defined in kytos conf."""
+        options = KytosConfig().options['daemon']
+        serializable_options = vars(options)
+        return serializable_options['jwt_secret']
+
+    @classmethod
     def _generate_token(cls, username, time_exp):
         """Generate a jwt token."""
         return jwt.encode(
@@ -66,7 +73,7 @@ class Auth:
                 'iss': "Kytos NApps Server",
                 'exp': time_exp,
             },
-            JWT_SECRET,
+            Auth.get_jwt_secret(),
             algorithm='HS256',
         )
 
@@ -123,7 +130,7 @@ class Auth:
         try:
             user = self._list_user(username)[0].get("data")
             if user.get("password") != hashlib.sha512(password).hexdigest():
-                raise
+                raise KeyError
             time_exp = datetime.datetime.utcnow() + datetime.timedelta(
                 minutes=10
             )

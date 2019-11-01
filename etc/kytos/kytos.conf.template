@@ -66,3 +66,6 @@ napps_pre_installed = []
 
 vlan_pool = {}
 # vlan_pool = {"00:00:00:00:00:00:00:01": {"1": [[1, 2], [5, 10]], "4": [[3, 4]]}}
+
+# The jwt_secret parameter is responsible for signing JSON Web Tokens.
+jwt_secret = {{ jwt_secret }}

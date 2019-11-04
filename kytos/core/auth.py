@@ -15,9 +15,9 @@ from kytos.core.events import KytosEvent
 __all__ = ['authenticated']
 
 LOG = logging.getLogger(__name__)
-DEFAULT_USERNAME = "admin"
+DEFAULT_USERNAME = "suser"
 DEFAULT_PASSWORD = "youshallnotpass"
-DEFAULT_EMAIL = "admin@kytos.io"
+DEFAULT_EMAIL = "suser@kytos.io"
 
 
 def authenticated(func):
@@ -55,7 +55,8 @@ class Auth:
         """
         self.controller = controller
         self.namespace = "kytos.core.auth.users"
-        self._create_default_user()
+        if self.controller.options.create_superuser:
+            self._create_superuser()
 
     @classmethod
     def get_jwt_secret(cls):
@@ -77,11 +78,11 @@ class Auth:
             algorithm='HS256',
         )
 
-    def _create_default_user(self):
-        """Create a default user using Storehouse."""
-        def _create_default_user_callback(_event, box, error):
+    def _create_superuser(self):
+        """Create a superuser using Storehouse."""
+        def _create_superuser_callback(_event, box, error):
             if box and not error:
-                LOG.info("Default user successfully created")
+                LOG.info("Superuser successfully created")
 
         user = {
             "username": DEFAULT_USERNAME,
@@ -92,7 +93,7 @@ class Auth:
             "namespace": self.namespace,
             "box_id": user["username"],
             "data": user,
-            "callback": _create_default_user_callback,
+            "callback": _create_superuser_callback,
         }
         event = KytosEvent(name="kytos.storehouse.create", content=content)
         self.controller.buffers.app.put(event)

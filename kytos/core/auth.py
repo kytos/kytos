@@ -129,7 +129,7 @@ class Auth:
         username = request.authorization["username"]
         password = request.authorization["password"].encode()
         try:
-            user = self._list_user(username)[0].get("data")
+            user = self._find_user(username)[0].get("data")
             if user.get("password") != hashlib.sha512(password).hexdigest():
                 raise KeyError
             time_exp = datetime.datetime.utcnow() + datetime.timedelta(
@@ -141,6 +141,45 @@ class Auth:
             result = "Incorrect username or password"
             return result, HTTPStatus.UNAUTHORIZED.value
 
+    def _find_user(self, uid):
+        """Find a specific user using Storehouse."""
+        response = {}
+
+        def _find_user_callback(_event, box, error):
+            nonlocal response
+            if error or not box:
+                response = {
+                    "answer": "User data cannot be shown",
+                    "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,
+                }
+            else:
+                response = {
+                    "answer": {"data": box.data},
+                    "code": HTTPStatus.OK.value,
+                }
+
+        content = {
+            "box_id": uid,
+            "namespace": self.namespace,
+            "callback": _find_user_callback,
+        }
+        event = KytosEvent(name="kytos.storehouse.retrieve", content=content)
+        self.controller.buffers.app.put(event)
+        while True:
+            time.sleep(0.1)
+            if response:
+                break
+        return response["answer"], response["code"]
+
+    @authenticated
+    def _list_user(self, uid):
+        """List a specific user using Storehouse."""
+        answer, code = self._find_user(uid)
+        if code == HTTPStatus.OK.value:
+            del answer['data']['password']
+        return answer, code
+
+    @authenticated
     def _list_users(self):
         """List all users using Storehouse."""
         response = {}
@@ -163,37 +202,6 @@ class Auth:
             "callback": _list_users_callback,
         }
         event = KytosEvent(name="kytos.storehouse.list", content=content)
-        self.controller.buffers.app.put(event)
-        while True:
-            time.sleep(0.1)
-            if response:
-                break
-        return response["answer"], response["code"]
-
-    def _list_user(self, uid):
-        """List a specific user using Storehouse."""
-        response = {}
-
-        def _list_user_callback(_event, box, error):
-            nonlocal response
-            if error or not box:
-                response = {
-                    "answer": "User data cannot be shown",
-                    "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                }
-            else:
-                # del box.data['password']
-                response = {
-                    "answer": {"data": box.data},
-                    "code": HTTPStatus.OK.value,
-                }
-
-        content = {
-            "box_id": uid,
-            "namespace": self.namespace,
-            "callback": _list_user_callback,
-        }
-        event = KytosEvent(name="kytos.storehouse.retrieve", content=content)
         self.controller.buffers.app.put(event)
         while True:
             time.sleep(0.1)

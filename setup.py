@@ -156,7 +156,8 @@ class CommonInstall:
         """
         from jinja2 import Template
 
-        kwargs['prefix'] = Path(str(kwargs['prefix']).rstrip('/'))
+        if str(kwargs['prefix']) != '/':
+            kwargs['prefix'] = Path(str(kwargs['prefix']).rstrip('/'))
 
         cls.create_paths()
         for path in templates:

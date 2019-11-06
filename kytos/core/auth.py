@@ -1,5 +1,6 @@
 """Module with main classes related to Authentication."""
 import datetime
+import getpass
 import hashlib
 import logging
 import time
@@ -15,9 +16,6 @@ from kytos.core.events import KytosEvent
 __all__ = ['authenticated']
 
 LOG = logging.getLogger(__name__)
-DEFAULT_USERNAME = "suser"
-DEFAULT_PASSWORD = "youshallnotpass"
-DEFAULT_EMAIL = "suser@kytos.io"
 
 
 def authenticated(func):
@@ -55,15 +53,14 @@ class Auth:
         """
         self.controller = controller
         self.namespace = "kytos.core.auth.users"
-        if self.controller.options.create_superuser:
+        if self.controller.options.create_superuser is True:
             self._create_superuser()
 
     @classmethod
     def get_jwt_secret(cls):
         """Return JWT secret defined in kytos conf."""
         options = KytosConfig().options['daemon']
-        serializable_options = vars(options)
-        return serializable_options['jwt_secret']
+        return options.jwt_secret
 
     @classmethod
     def _generate_token(cls, username, time_exp):
@@ -84,10 +81,20 @@ class Auth:
             if box and not error:
                 LOG.info("Superuser successfully created")
 
+        username = input("Username: ")
+        email = input("Email: ")
+
+        while True:
+            password = getpass.getpass()
+            re_password = getpass.getpass('Retype password: ')
+            if password == re_password:
+                break
+            print('Passwords do not match. Try again')
+
         user = {
-            "username": DEFAULT_USERNAME,
-            "email": DEFAULT_EMAIL,
-            "password": hashlib.sha512(DEFAULT_PASSWORD.encode()).hexdigest(),
+            "username": username,
+            "email": email,
+            "password": hashlib.sha512(password.encode()).hexdigest(),
         }
         content = {
             "namespace": self.namespace,

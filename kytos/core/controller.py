@@ -136,71 +136,78 @@ class Controller:
     def loggers():
         """List all logging Loggers.
 
-        Displays the Logger object, with name and logging level.
+        Return a list of Logger objects, with name and logging level.
         """
-        loggers = []
-        for name in logging.root.manager.loggerDict:
-            if "kytos" in name:
-                loggers.append(logging.getLogger(name))
+        loggers = [
+            logging.getLogger(name)
+            for name in logging.root.manager.loggerDict
+            if "kytos" in name
+        ]
         return loggers
 
-    def debug(self, name=None, enable=True):
+    def toggle_debug(self, name=None):
         """Enable/disable logging debug messages to given logger name.
 
         If the name parameter is not specified the debug is activated to all
         loggers, including the root Logger.
-        The debug is enable by default. It is the last parameter to be easier
-        to the user to disable it using the console. Disabling the debug
-        will reload the logging configuration file defaults.
+        To disable the debug the logging will be set to NOTSET
 
         Args:
-            name(text): Full hierarch Logger name. Ex: "kytos.core.controller"
-            enable: True to enable the debug.
+            name(text): Full hierarchy Logger name. Ex: "kytos.core.controller"
         """
-        if enable:
-            self._debug_on(name)
-        else:
-            self._debug_off(name)
+        if not name:
+            level = logging.getLogger('kytos').getEffectiveLevel()
+            activate_debug = level != logging.DEBUG
 
-    def _debug_on(self, name=None):
+            # Activating all default Loggers
+            LogManager.load_config_file(self.options.logging, activate_debug)
+            return
+
+        if name not in logging.root.manager.loggerDict:
+            # Logger name not specified.
+            # It will raise an error otherwise logging would create a new
+            # Logger with the specified name.
+            raise ValueError("Invalid logger name.")
+
+        # Change effective logger level
+        level = logging.getLogger(name).getEffectiveLevel()
+
+        if level == logging.DEBUG:
+            self._debug_off(name)
+        else:
+            self._debug_on(name)
+
+    @classmethod
+    def _debug_on(cls, name):
         """Turn on the debug.
 
         Turn on the logging debug to a specific Logger name, or to all
         Loggers, including the root Logger.
 
         Args:
-            name(text): Full hierarch Logger name. Ex: "kytos.core.controller"
+            name(text): Full hierarchy Logger name. Ex: "kytos.core.controller"
         """
         if name:
             # If logger name do not exist, raise an error.
             # otherwise the getLogger will create another Logger
-            if name not in logging.root.manager.loggerDict:
-                raise ValueError("Invalid logger name.")
-
             logger = logging.getLogger(name)
             logger.setLevel(logging.DEBUG)
-        else:
-            LogManager.load_config_file(self.options.logging, True)
 
-    def _debug_off(self, name=None):
+    @classmethod
+    def _debug_off(cls, name):
         """Turn on the debug.
 
         Turn off the logging debug to a specific Logger name, or to all
         Loggers, reloading the logging configuration file defaults.
 
         Args:
-            name(text): Full hierarch Logger name. Ex: "kytos.core.controller"
+            name(text): Full hierarchy Logger name. Ex: "kytos.core.controller"
         """
         if name:
             # If logger name do not exist, raise an error.
             # otherwise the getLogger will create another Logger
-            if name not in logging.root.manager.loggerDict:
-                raise ValueError("Invalid logger name.")
-
             logger = logging.getLogger(name)
             logger.setLevel(logging.NOTSET)
-        else:
-            LogManager.load_config_file(self.options.logging, False)
 
     def start(self, restart=False):
         """Create pidfile and call start_controller method."""

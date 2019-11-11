@@ -9,6 +9,7 @@ from unittest.mock import Mock, patch
 
 from kytos.core import Controller
 from kytos.core.config import KytosConfig
+from kytos.core.logs import LogManager
 
 
 class TestController(TestCase):
@@ -94,7 +95,8 @@ class TestController(TestCase):
 
     def test_loggers(self):
         """Test that all controller loggers are under kytos
-        hierachy logger"""
+        hierarchy logger.
+        """
         loggers = self.controller.loggers()
         for logger in loggers:
             self.assertTrue(logger.name.startswith("kytos"))
@@ -102,13 +104,13 @@ class TestController(TestCase):
     def test_debug_on(self):
         """Test the enable debug feature."""
         # Enable debug for kytos.core
-        self.controller.debug("kytos.core", 1)
+        self.controller.toggle_debug("kytos.core")
         self._test_debug_result()
 
     def test_debug_on_defaults(self):
         """Test the enable debug feature. Test the default parameter"""
         # Enable debug for kytos.core
-        self.controller.debug("kytos.core")
+        self.controller.toggle_debug("kytos.core")
         self._test_debug_result()
 
     def _test_debug_result(self):
@@ -125,9 +127,23 @@ class TestController(TestCase):
     def test_debug_off(self):
         """Test the disable debug feature"""
         # Fist we enable the debug
-        self.controller.debug("kytos.core", 1)
+        self.controller.toggle_debug("kytos.core")
         # ... then we disable the debug for the test
-        self.controller.debug("kytos.core", 0)
+        self.controller.toggle_debug("kytos.core")
         loggers = self.controller.loggers()
         for logger in loggers:
             self.assertTrue(logger.getEffectiveLevel(), logging.CRITICAL)
+
+    @patch.object(LogManager, 'load_config_file')
+    def test_debug_no_name(self, mock_load_config_file):
+        """Test the enable debug logger with default levels."""
+        # Mock the LogManager that loads the default Loggers
+        self.controller.toggle_debug(name="")
+        self._test_debug_result()
+
+        mock_load_config_file.assert_called_once()
+
+    def test_debug_wrong_name(self):
+        """Test the enable debug logger with wrong name."""
+        self.assertRaises(ValueError,
+                          self.controller.toggle_debug, name="foobar")

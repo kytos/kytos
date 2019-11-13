@@ -138,76 +138,46 @@ class Controller:
 
         Return a list of Logger objects, with name and logging level.
         """
-        loggers = [
-            logging.getLogger(name)
-            for name in logging.root.manager.loggerDict
-            if "kytos" in name
-        ]
-        return loggers
+        return [logging.getLogger(name)
+                for name in logging.root.manager.loggerDict
+                if "kytos" in name]
 
     def toggle_debug(self, name=None):
-        """Enable/disable logging debug messages to given logger name.
+        """Enable/disable logging debug messages to a given logger name.
 
-        If the name parameter is not specified the debug is activated to all
-        loggers, including the root Logger.
-        To disable the debug the logging will be set to NOTSET
+        If the name parameter is not specified the debug will be
+        enabled/disabled following the initial config file. It will decide
+        to enable/disable using the 'kytos' name to find the current
+        logger level.
+        Obs: To disable the debug the logging will be set to NOTSET
 
         Args:
             name(text): Full hierarchy Logger name. Ex: "kytos.core.controller"
         """
-        if not name:
-            level = logging.getLogger('kytos').getEffectiveLevel()
-            activate_debug = level != logging.DEBUG
-
-            # Activating all default Loggers
-            LogManager.load_config_file(self.options.logging, activate_debug)
-            return
-
-        if name not in logging.root.manager.loggerDict:
-            # Logger name not specified.
-            # It will raise an error otherwise logging would create a new
-            # Logger with the specified name.
+        if name and name not in logging.root.manager.loggerDict:
+            # A Logger name that is not declared in logging will raise an error
+            # otherwise logging would create a new Logger.
             raise ValueError("Invalid logger name.")
 
-        # Change effective logger level
+        if not name:
+            # Logger name not specified.
+            level = logging.getLogger('kytos').getEffectiveLevel()
+            enable_debug = level != logging.DEBUG
+
+            # Enable/disable default Loggers
+            LogManager.load_config_file(self.options.logging, enable_debug)
+            return
+
+        # Get effective logger level for the name
         level = logging.getLogger(name).getEffectiveLevel()
+        logger = logging.getLogger(name)
 
         if level == logging.DEBUG:
-            self._debug_off(name)
-        else:
-            self._debug_on(name)
-
-    @classmethod
-    def _debug_on(cls, name):
-        """Turn on the debug.
-
-        Turn on the logging debug to a specific Logger name, or to all
-        Loggers, including the root Logger.
-
-        Args:
-            name(text): Full hierarchy Logger name. Ex: "kytos.core.controller"
-        """
-        if name:
-            # If logger name do not exist, raise an error.
-            # otherwise the getLogger will create another Logger
-            logger = logging.getLogger(name)
-            logger.setLevel(logging.DEBUG)
-
-    @classmethod
-    def _debug_off(cls, name):
-        """Turn on the debug.
-
-        Turn off the logging debug to a specific Logger name, or to all
-        Loggers, reloading the logging configuration file defaults.
-
-        Args:
-            name(text): Full hierarchy Logger name. Ex: "kytos.core.controller"
-        """
-        if name:
-            # If logger name do not exist, raise an error.
-            # otherwise the getLogger will create another Logger
-            logger = logging.getLogger(name)
+            # disable debug
             logger.setLevel(logging.NOTSET)
+        else:
+            # enable debug
+            logger.setLevel(logging.DEBUG)
 
     def start(self, restart=False):
         """Create pidfile and call start_controller method."""

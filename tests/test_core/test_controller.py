@@ -138,7 +138,16 @@ class TestController(TestCase):
     def test_debug_no_name(self, mock_load_config_file):
         """Test the enable debug logger with default levels."""
         # Mock the LogManager that loads the default Loggers
-        self.controller.toggle_debug(name="")
+        self.controller.toggle_debug()
+        self._test_debug_result()
+
+        mock_load_config_file.assert_called_once()
+
+    @patch.object(LogManager, 'load_config_file')
+    def test_debug_empty_name(self, mock_load_config_file):
+        """Test the enable debug logger with default levels."""
+        # Mock the LogManager that loads the default Loggers
+        self.controller.toggle_debug('')
         self._test_debug_result()
 
         mock_load_config_file.assert_called_once()

@@ -258,7 +258,8 @@ class Controller:
         # Register controller endpoints as /api/kytos/core/...
         self.api_server.register_core_endpoint('config/',
                                                self.configuration_endpoint)
-
+        self.api_server.register_core_endpoint('metadata/',
+                                               Controller.metadata_endpoint)
         self.api_server.register_core_endpoint(
             'reload/<username>/<napp_name>/',
             self.rest_reload_napp)
@@ -268,6 +269,19 @@ class Controller:
     def register_rest_endpoint(self, url, function, methods):
         """Deprecate in favor of @rest decorator."""
         self.api_server.register_rest_endpoint(url, function, methods)
+
+    @classmethod
+    def metadata_endpoint(cls):
+        """Return the Kytos metadata.
+
+        Returns:
+            string: Json with current kytos metadata.
+
+        """
+        meta_path = "%s/metadata.py" % os.path.dirname(__file__)
+        meta_file = open(meta_path).read()
+        metadata = dict(re.findall(r"(__[a-z]+__)\s*=\s*'([^']+)'", meta_file))
+        return json.dumps(metadata)
 
     def configuration_endpoint(self):
         """Return the configuration options used by Kytos.

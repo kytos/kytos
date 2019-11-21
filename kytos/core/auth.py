@@ -36,7 +36,7 @@ def authenticated(func):
             jwt.exceptions.DecodeError,
         ) as exc:
             msg = f"Token not sent or expired: {exc}"
-            return jsonify({"error": msg}), 401
+            return jsonify({"error": msg}), HTTPStatus.UNAUTHORIZED.value
         return func(*args, **kwargs)
 
     return wrapper
@@ -82,8 +82,14 @@ class Auth:
             if box and not error:
                 LOG.info("Superuser successfully created")
 
-        username = input("Username: ")
-        email = input("Email: ")
+        def get_username():
+            return input("Username: ")
+
+        def get_email():
+            return input("Email: ")
+
+        username = get_username()
+        email = get_email()
 
         while True:
             password = getpass.getpass()

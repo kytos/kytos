@@ -144,8 +144,8 @@ class Auth:
             )
             token = self._generate_token(username, time_exp)
             return {"token": token.decode()}, HTTPStatus.OK.value
-        except KeyError:
-            result = "Incorrect username or password"
+        except (AttributeError, KeyError) as exc:
+            result = f"Incorrect username or password: {exc}"
             return result, HTTPStatus.UNAUTHORIZED.value
 
     def _find_user(self, uid):

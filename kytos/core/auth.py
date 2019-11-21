@@ -31,10 +31,11 @@ def authenticated(func):
             jwt.decode(token, key=Auth.get_jwt_secret())
         except (
             AttributeError,
+            IndexError,
             jwt.ExpiredSignature,
             jwt.exceptions.DecodeError,
-        ):
-            msg = "Token not sent or expired."
+        ) as exc:
+            msg = f"Token not sent or expired: {exc}"
             return jsonify({"error": msg}), 401
         return func(*args, **kwargs)
 

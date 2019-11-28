@@ -212,7 +212,7 @@ class TestAuth(TestCase):
         url = "%s/auth/users/%s" % (API_URI, 'user3')
         error_response = api.open(url, method='GET', headers=valid_header)
 
-        self.assertEqual(error_response.status_code, 500)
+        self.assertEqual(error_response.status_code, 404)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_05_update_user_request(self, mock_jwt_secret):
@@ -222,14 +222,22 @@ class TestAuth(TestCase):
         self.patched_events.append({'_update_user_callback': data})
         api = self.get_auth_test_client(self.auth)
         url = "%s/auth/users/%s" % (API_URI, self.user_data.get("username"))
-        error_url = "%s/auth/users/%s" % (API_URI, 'user5')
         success_response = api.open(url, method='PATCH', json=data,
                                     headers=valid_header)
-        error_response = api.open(error_url, method='PATCH', json=None,
-                                  headers=valid_header)
 
         self.assertEqual(success_response.status_code, 200)
-        self.assertEqual(error_response.status_code, 500)
+
+    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
+    def test_05_update_user_request_error(self, mock_jwt_secret):
+        """Test auth update user endpoint."""
+        valid_header = {"Authorization": "Bearer %s" % self.token}
+        self.patched_events.append({'_update_user_callback': None})
+        api = self.get_auth_test_client(self.auth)
+        url = "%s/auth/users/%s" % (API_URI, 'user5')
+        error_response = api.open(url, method='PATCH', json={},
+                                  headers=valid_header)
+
+        self.assertEqual(error_response.status_code, 404)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_06_delete_user_request(self, mock_jwt_secret):
@@ -253,4 +261,4 @@ class TestAuth(TestCase):
         url = "%s/auth/users/%s" % (API_URI, "nonexistent")
         success_response = api.open(url, method='DELETE', headers=header)
 
-        self.assertEqual(success_response.status_code, 500)
+        self.assertEqual(success_response.status_code, 404)

@@ -161,7 +161,12 @@ class Auth:
 
         def _find_user_callback(_event, box, error):
             nonlocal response
-            if error or not box:
+            if not box:
+                response = {
+                    "answer": f'User with uid {uid} not found',
+                    "code": HTTPStatus.NOT_FOUND.value
+                }
+            elif error:
                 response = {
                     "answer": "User data cannot be shown",
                     "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,
@@ -230,10 +235,15 @@ class Auth:
 
         def _create_user_callback(_event, box, error):
             nonlocal response
-            if error or not box:
+            if not box:
                 response = {
-                    "answer": "User cannot be created",
+                    "answer": f'User already exists',
                     "code": HTTPStatus.CONFLICT.value,
+                }
+            elif error:
+                response = {
+                    "answer": "User has not been created",
+                    "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,
                 }
             else:
                 response = {
@@ -269,7 +279,12 @@ class Auth:
 
         def _delete_user_callback(_event, box, error):
             nonlocal response
-            if error or not box:
+            if not box:
+                response = {
+                    "answer": f'User with uid {uid} not found',
+                    "code": HTTPStatus.NOT_FOUND.value
+                }
+            elif error:
                 response = {
                     "answer": "User has not been deleted",
                     "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,
@@ -300,7 +315,12 @@ class Auth:
 
         def _update_user_callback(_event, box, error):
             nonlocal response
-            if error or not box:
+            if not box:
+                response = {
+                    "answer": f'User with uid {uid} not found',
+                    "code": HTTPStatus.NOT_FOUND.value
+                }
+            elif error:
                 response = {
                     "answer": "User has not been updated",
                     "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,

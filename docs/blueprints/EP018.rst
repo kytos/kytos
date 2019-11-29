@@ -71,7 +71,7 @@ Endpoints REST:
 
 .. code:: http
     
-    POST /api/kytos/auth/v1/users/ - This endpoint creates new users.
+    POST /api/kytos/core/auth/users/ - This endpoint creates new users.
 
     $ curl -X POST \
         -H 'Content-Type: application/json' \
@@ -80,7 +80,7 @@ Endpoints REST:
 
 .. code:: http
 
-    GET /api/kytos/auth/v1/login/ - This endpoint verifies a user and returns a valid token if authentication is correct.
+    GET /api/kytos/core/auth/login/ - This endpoint verifies a user and returns a valid token if authentication is correct.
 
     $ curl -X GET \
         -H 'Accept:application/json' \
@@ -89,7 +89,7 @@ Endpoints REST:
 
 .. code:: http
 
-    GET /api/kytos/auth/v1/users/ - This endpoint lists the registered users.
+    GET /api/kytos/core/auth/users/ - This endpoint lists the registered users.
 
     $ curl -X GET \
         -H 'Accept:application/json' \
@@ -98,7 +98,7 @@ Endpoints REST:
 
 .. code:: http
 
-    GET /api/kytos/auth/v1/users/<user_id>/ - This endpoint gets details about a specific user.
+    GET /api/kytos/core/auth/users/<user_id>/ - This endpoint gets details about a specific user.
 
     $ curl -X GET \
         -H 'Content-type:application/json' \
@@ -109,7 +109,7 @@ Endpoints REST:
 
 .. code:: http
 
-    DELETE /api/kytos/auth/v1/users/<user_id>/ - This endpoint delete a specific user.	
+    DELETE /api/kytos/core/auth/users/<user_id>/ - This endpoint delete a specific user.	
 
     $ curl -X DELETE \
         -H 'Content-type:application/json' \
@@ -120,7 +120,7 @@ Endpoints REST:
 
 .. code:: http
 
-    PATCH /api/kytos/auth/v1/users/<user_id>/ - This endpoint update a specific user.
+    PATCH /api/kytos/core/auth/users/<user_id>/ - This endpoint update a specific user.
 
     $ curl -X PATCH \
         -H 'Content-Type: application/json' \
@@ -152,12 +152,12 @@ Documentation should be changed to include these new features:
 
     - To list, create, and delete users, instructions should be added teaching users how to use the public endpoints of the authentication module:
 
-        - POST /api/kytos/auth/v1/users/ - Create a user.
-        - GET /api/kytos/auth/v1/login/ -  Authenticate a user.
-        - GET /api/kytos/auth/v1/users/ - List all users.
-        - GET /api/kytos/auth/v1/users/<user_id>/ - List specific user.
-        - DELETE /api/kytos/auth/v1/users/<user_id>/ - Delete specific user.
-        - PATCH /api/kytos/auth/v1/users/<user_id>/ - Update specific user.
+        - POST /api/kytos/core/auth/users/ - Create a user.
+        - GET /api/kytos/core/auth/login/ -  Authenticate a user.
+        - GET /api/kytos/core/auth/users/ - List all users.
+        - GET /api/kytos/core/auth/users/<user_id>/ - List specific user.
+        - DELETE /api/kytos/core/auth/users/<user_id>/ - Delete specific user.
+        - PATCH /api/kytos/core/auth/users/<user_id>/ - Update specific user.
 
 Open Issues
 ===========

@@ -138,6 +138,122 @@ browser the result below, where `name` was given in the browser.
   }
 
 
+
+How to protect a NApp REST endpoint
+===================================
+
+
+By default, all the REST endpoints created with @rest decorator are public. 
+To protect these endpoints is necessary to use an @authenticated decorator. 
+This decorator is able to create an authentication and protection layer to endpoints, abstracting the complexity of using this functionality for developers.
+
+Initially, we recommend completing the tutorials: `Preparing the Development environment <https://docs.kytos.io/developer/setup_develop_environment/>`_ and  `How to create a rest endpoint for you napp <https://docs.kytos.io/developer/creating_a_napp/#how-to-create-a-rest-endpoint-for-your-napp>`_
+.
+
+To use this resource you must complete the following steps:
+
+- Install an environment with kytos, kytos-utils, python-openflow and storehouse NApp;
+- Create a user to access protected endpoints;
+- Import the authenticated decorator;
+- Secure the REST endpoints by using the @authenticated decorator.
+
+
+*Using this feature, endpoints marked as protected require the provision of a token to perform the requested operations*.
+
+Considering the environment is complete, the first step is create an authentication user. Run the following command in terminal to create it:
+
+.. code-block:: shell
+
+ (kytos-environment)$ kytosd -f -C
+
+ Username:<username>
+ Email:<email>
+ Password:<password>
+
+
+
+Now that the user has been created, import the authenticated decorator on NApp that you want to protect.
+
+
+.. code-block:: python
+
+ from flask import jsonify # import jsonify method to convert json to string
+ from kytos.core.napps import rest #import rest decorator method
+ from kytos.core import authenticated #import authenticated decorator method
+
+ class Main(KytosNapps): # KytosNapps class
+
+   # all KytosNapps methods
+
+   # call the rest decorator to register your endpoint
+   @rest('sample_endpoint/<name>', methods=['GET'])
+   @authenticated
+   def my_endpoint(self, name):
+    """Sample of documentation.
+
+    Description for your method.
+    """
+    result = {"name": name}
+    return jsonify(result), 200 # return a string and http status code
+
+
+
+Then, when this endpoint is accessed without sending a token, the following message will be seen:
+
+.. code-block:: json
+
+ {
+   "error": "Token not sent or expired"
+ }
+
+
+Now, to access this endpoint you must login with the created user credentials by submitting the username and password.
+
+.. code-block:: shell
+
+  GET api/kytos/core/auth/login/
+  GET http://0.0.0.0:8181/api/kytos/core/auth/login/
+
+  $ curl -X GET \
+    -H 'Accept:application/json' \
+    -H 'Authorization:Basic <username>:<password>' \
+    URL
+
+
+You will receive a token as response:
+
+.. code-block:: json
+
+ {
+   "token": "<token>"
+ }
+
+Finally, you can access the protected endpoint sending the token:
+
+.. code-block:: shell
+
+  GET http://0.0.0.0:8181/api/<username>/<napp_name>/sample_endpoint/<name>
+
+  $ curl -X GET \
+    -H 'Content-type:application/json' \
+    -H 'Accept:application/json' \
+    -H 'Authorization: Bearer ${TOKEN}' \
+    URL
+
+You will receive a token as response:
+
+.. code-block:: json
+
+ {
+  "name": "<name>"
+ }
+
+
+*REST requests can be made using a REST client.*
+
+
+
+
 How to document your API Rest
 =============================
 

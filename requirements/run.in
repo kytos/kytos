@@ -10,3 +10,4 @@ python-daemon
 janus
 jinja2
 watchdog
+pyjwt

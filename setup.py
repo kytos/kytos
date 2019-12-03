@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import sys
+import uuid
 from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
 from distutils.command.clean import clean  # pylint: disable=E0401,E0611
@@ -158,6 +159,7 @@ class CommonInstall:
 
         if str(kwargs['prefix']) != '/':
             kwargs['prefix'] = Path(str(kwargs['prefix']).rstrip('/'))
+        kwargs['jwt_secret'] = uuid.uuid4().hex
 
         cls.create_paths()
         for path in templates:

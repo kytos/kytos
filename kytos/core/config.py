@@ -76,6 +76,10 @@ class KytosConfig():
                             action='store_true',
                             help="Enable all new Entities by default.")
 
+        parser.add_argument('-C', '--create-superuser',
+                            action='store_true',
+                            help="Create a kytos superuser.")
+
         self.conf_parser, self.parser = conf_parser, parser
         self.parse_args()
 

@@ -102,27 +102,28 @@ If you want to create a new endpoint you should follow the steps below.
 
 - You need import the rest decorator method.
 - You need  declare a function using the rest decorator.
-- In the end of function you need return a string and the status code of your method.
+- In the end of function you need return a string and the status
+  code of your method.
 
 .. code-block:: python
 
   from flask import jsonify # import jsonify method to convert json to string
+  from kytos.core import KytosNapp, rest # import rest decorator method
+  from kytos.core import authenticated # import authenticated decorator method
 
-  from kytos.core.napps import rest #import rest decorator method
 
-  class Main(KytosNapps): # KytosNapps class
+  class Main(KytosNapp):
+      # KytosNapps class
+      # all KytosNapps methods
+      # call the rest decorator to register your endpoint
+      @rest('sample_endpoint/<name>', methods=['GET'])
+      def my_endpoint(self, name):
+          """Sample of documentation.
+          Description for your method.
+          """
+          result = {"name": name}
+          return jsonify(result), 200  # return a string and http status code.
 
-    # all KytosNapps methods
-
-    # call the rest decorator to register your endpoint
-    @rest('sample_endpoint/<name>', methods=['GET'])
-    def my_endpoint(self, name):
-     """Sample of documentation.
-
-     Description for your method.
-     """
-     result = {"name": name}
-     return jsonify(result), 200 # return a string and http status code
 
 When the kytos starts this napp will register an endpoint called
 `/api/<username>/<napp_name>/sample_endpoint/<name>` handling only **GET**
@@ -143,80 +144,89 @@ How to protect a NApp REST endpoint
 ===================================
 
 
-By default, all the REST endpoints created with @rest decorator are public. 
-To protect these endpoints is necessary to use an @authenticated decorator. 
-This decorator is able to create an authentication and protection layer to endpoints, abstracting the complexity of using this functionality for developers.
+By default, all the REST endpoints created with @rest decorator are public.
+To protect these endpoints is necessary to use an @authenticated decorator.
+This decorator is able to create an authentication and protection layer to
+endpoints, abstracting the complexity of using this functionality for developers.
 
-Initially, we recommend completing the tutorials: `Preparing the Development environment <https://docs.kytos.io/developer/setup_develop_environment/>`_ and  `How to create a rest endpoint for you napp <https://docs.kytos.io/developer/creating_a_napp/#how-to-create-a-rest-endpoint-for-your-napp>`_
+Initially, we recommend completing the tutorials:
+`Preparing the Development environment
+<https://docs.kytos.io/developer/setup_develop_environment/>`_ and
+`How to create a rest endpoint for you napp
+<https://docs.kytos.io/developer/creating_a_napp/#how-to-create-a-rest-endpoint-for-your-napp>`_
 .
 
 To use this resource you must complete the following steps:
 
-- Install an environment with kytos, kytos-utils, python-openflow and storehouse NApp;
+- Install an environment with kytos, kytos-utils,
+  python-openflow and storehouse NApp;
 - Create a user to access protected endpoints;
 - Import the authenticated decorator;
 - Secure the REST endpoints by using the @authenticated decorator.
 
 
-*Using this feature, endpoints marked as protected require the provision of a token to perform the requested operations*.
+*Using this feature, endpoints marked as protected require
+the provision of a token to perform the requested operations*.
 
-Considering the environment is complete, the first step is create an authentication user. Run the following command in terminal to create it:
+Considering the environment is complete,
+the first step is create an authentication user. Run the following
+command in terminal to create it:
 
 .. code-block:: shell
 
  (kytos-environment)$ kytosd -f -C
 
- Username:<username>
- Email:<email>
- Password:<password>
+ Username: <username>
+ Email: <email>
+ Password: <password>
 
 
 
-Now that the user has been created, import the authenticated decorator on NApp that you want to protect.
+Now that the user has been created, import the authenticated decorator on NApp
+that you want to protect.
 
 
 .. code-block:: python
 
- from flask import jsonify # import jsonify method to convert json to string
- from kytos.core.napps import rest #import rest decorator method
- from kytos.core import authenticated #import authenticated decorator method
-
- class Main(KytosNapps): # KytosNapps class
-
-   # all KytosNapps methods
-
-   # call the rest decorator to register your endpoint
-   @rest('sample_endpoint/<name>', methods=['GET'])
-   @authenticated
-   def my_endpoint(self, name):
-    """Sample of documentation.
-
-    Description for your method.
-    """
-    result = {"name": name}
-    return jsonify(result), 200 # return a string and http status code
+  from flask import jsonify # import jsonify method to convert json to string
+  from kytos.core import KytosNapp, rest # import rest decorator method
+  from kytos.core import authenticated # import authenticated decorator method
 
 
+  class Main(KytosNapp):
+      # KytosNapps class
+      # all KytosNapps methods
+      # call the rest decorator to register your endpoint
+      @rest('sample_endpoint/<name>', methods=['GET'])
+      @authenticated
+      def my_endpoint(self, name):
+          """Sample of documentation.
+          Description for your method.
+          """
+          result = {"name": name}
+          return jsonify(result), 200  # return a string and http status code.
 
-Then, when this endpoint is accessed without sending a token, the following message will be seen:
+
+Then, when this endpoint is accessed without sending a token,
+the following message will be seen:
 
 .. code-block:: json
 
- {
-   "error": "Token not sent or expired"
- }
+  {
+    "error": "Token not sent or expired"
+  }
 
 
-Now, to access this endpoint you must login with the created user credentials by submitting the username and password.
+Now, to access this endpoint you must login with the created user credentials
+by submitting the username and password.
 
 .. code-block:: shell
 
-  GET api/kytos/core/auth/login/
   GET http://0.0.0.0:8181/api/kytos/core/auth/login/
 
   $ curl -X GET \
-    -H 'Accept:application/json' \
-    -H 'Authorization:Basic <username>:<password>' \
+    -H 'Accept: application/json' \
+    -H 'Authorization: Basic <username>: <password>' \
     URL
 
 
@@ -224,9 +234,9 @@ You will receive a token as response:
 
 .. code-block:: json
 
- {
+  {
    "token": "<token>"
- }
+  }
 
 Finally, you can access the protected endpoint sending the token:
 
@@ -235,8 +245,8 @@ Finally, you can access the protected endpoint sending the token:
   GET http://0.0.0.0:8181/api/<username>/<napp_name>/sample_endpoint/<name>
 
   $ curl -X GET \
-    -H 'Content-type:application/json' \
-    -H 'Accept:application/json' \
+    -H 'Content-type: application/json' \
+    -H 'Accept: application/json' \
     -H 'Authorization: Bearer ${TOKEN}' \
     URL
 
@@ -244,9 +254,9 @@ You will receive a token as response:
 
 .. code-block:: json
 
- {
-  "name": "<name>"
- }
+  {
+    "name": "<name>"
+  }
 
 
 *REST requests can be made using a REST client.*
@@ -403,7 +413,7 @@ worry if your NApp does not have this file.
 How the events works
 ====================
 
-With the purpose of performing the communication between NApps in the `Kytos Project` 
+With the purpose of performing the communication between NApps in the `Kytos Project`
 any NApp can send or receive events.
 
 Create Kytos Event
@@ -487,7 +497,7 @@ Create your Meta-NApp
 
 A Meta-NApp is a NApp that doesn't contain executable code, is used to specify
 dependencies of a given package and just installs and enables/disables a
-specific set of napps. 
+specific set of napps.
 
 To create your Meta-NApp, just like a common NApp, you need to use your
 napp-server name and insert some NApp information. The difference is just the
@@ -531,10 +541,12 @@ The basic Meta-NApp structure is described below.
        ├── kytos.json
        ├── README.rst
 
-- **kytos.json**: This is your Meta-NApp's main file, where the dependencies are defined.
-- **README.rst**: Main description and information about your Meta-NApp, ensure that it includes a brief description of the dependencies
+- **kytos.json**: This is your Meta-NApp's main file,
+  where the dependencies are defined.
+- **README.rst**: Main description and information about your Meta-NApp,
+  ensure that it includes a brief description of the dependencies
 
-How to create a basic NApp dependency 
+How to create a basic NApp dependency
 =====================================
 
 First, you have to edit the `kytos.json` and set the napp_dependencies field with

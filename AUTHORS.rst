@@ -13,6 +13,7 @@ Contributors
 ============
 
 - Antonio Francisco <ajoaoff AT gmail.com>
+- Carlos Magno Barbosa <cmagnobarbosa AT gmail DOT com>
 - Erick Vermot <erick.vermot AT gmail DOT com>
 - Gleyberson Andrade <gleybersonandrade AT gmail DOT com>
 - Jose Mauro <zemauror AT gmail DOT com>

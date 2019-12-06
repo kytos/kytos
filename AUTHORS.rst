@@ -20,6 +20,7 @@ Contributors
 - Luan Gonçalves <luanlg.cco AT gmail DOT com>
 - Lucas Felix <lucasgsfelix AT gmail DOT com>
 - Raphael Cóbe <rmcobe AT ncc DOT unesp DOT br>
+- Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 - Thiago Lopes <thiagolopes AT ncc DOT unesp DOT br>
 - Valessio Soares de Brito <contato AT valessiobrito DOT com DOT br>
 - Vinicius Arcanjo <viniciusarcanjov AT gmail DOT com>

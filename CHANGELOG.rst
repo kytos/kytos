@@ -24,8 +24,29 @@ Security
 ========
 
 
+[2019.2b3] - "gil" beta3 - 2019-12-06
+**************************************
+
+Added
+=====
+- New Authentication module - REST endpoints can now be protected
+  using the `@authenticated` decorator.
+- New unitests to the Authentication module.
+- New `/metadata` REST endpoint to access package metadata.
+  `kytos-utils` now uses this to look for version mismatches.
+
+Changed
+=======
+- Blueprint EP018 - Updated endpoints to configure Authentication module.
+
+Fixed
+=====
+- Fix kytos installation without virtual env (eg.: `sudo`).
+
+
 [2019.2b2] - "gil" beta2 - 2019-10-18
 **************************************
+
 Added
 =====
 - New blueprint: EP018 - API Authentication.

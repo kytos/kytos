@@ -86,6 +86,7 @@ Kytos Summit provides an opportunity for developers, contributors and other inte
    setup_develop_environment
    Kytos API <./kytos_api/kytos>
    creating_a_napp
+   auth
    how_to_contribute
    hacking
    security

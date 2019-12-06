@@ -14,6 +14,7 @@ In this section you will learn about:
 - :doc:`Preparing your Development Environment </developer/setup_develop_environment/>`
 - :doc:`Kytos API </developer/kytos_api/kytos>`
 - :doc:`How to develop your NApp </developer/creating_a_napp/>`
+- :doc:`Authentication Module </developer/auth/>`
 - :doc:`How to Contribute </developer/how_to_contribute/>`
 - :doc:`Hacking </developer/hacking/>`
 - :doc:`Security </developer/security/>`

@@ -135,6 +135,53 @@ class Controller:
         LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
 
+    @staticmethod
+    def loggers():
+        """List all logging Loggers.
+
+        Return a list of Logger objects, with name and logging level.
+        """
+        return [logging.getLogger(name)
+                for name in logging.root.manager.loggerDict
+                if "kytos" in name]
+
+    def toggle_debug(self, name=None):
+        """Enable/disable logging debug messages to a given logger name.
+
+        If the name parameter is not specified the debug will be
+        enabled/disabled following the initial config file. It will decide
+        to enable/disable using the 'kytos' name to find the current
+        logger level.
+        Obs: To disable the debug the logging will be set to NOTSET
+
+        Args:
+            name(text): Full hierarchy Logger name. Ex: "kytos.core.controller"
+        """
+        if name and name not in logging.root.manager.loggerDict:
+            # A Logger name that is not declared in logging will raise an error
+            # otherwise logging would create a new Logger.
+            raise ValueError(f"Invalid logger name: {name}")
+
+        if not name:
+            # Logger name not specified.
+            level = logging.getLogger('kytos').getEffectiveLevel()
+            enable_debug = level != logging.DEBUG
+
+            # Enable/disable default Loggers
+            LogManager.load_config_file(self.options.logging, enable_debug)
+            return
+
+        # Get effective logger level for the name
+        level = logging.getLogger(name).getEffectiveLevel()
+        logger = logging.getLogger(name)
+
+        if level == logging.DEBUG:
+            # disable debug
+            logger.setLevel(logging.NOTSET)
+        else:
+            # enable debug
+            logger.setLevel(logging.DEBUG)
+
     def start(self, restart=False):
         """Create pidfile and call start_controller method."""
         self.enable_logs()

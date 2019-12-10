@@ -157,7 +157,7 @@ class Controller:
         if name and name not in logging.root.manager.loggerDict:
             # A Logger name that is not declared in logging will raise an error
             # otherwise logging would create a new Logger.
-            raise ValueError("Invalid logger name.")
+            raise ValueError(f"Invalid logger name: {name}")
 
         if not name:
             # Logger name not specified.

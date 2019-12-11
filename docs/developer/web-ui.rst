@@ -11,7 +11,7 @@ Kytos core source code to add its components in the interface.
 This document shows how you, the developer of an NApp, can build your graphical
 screens using the Kytos platform.
 
-.. figure:: kytos-ui.png
+.. figure:: img/kytos-ui.png
    :alt: Kytos Graphical User Interface
    :align: center
 
@@ -26,7 +26,7 @@ comfortable to evolve from it.
 
 The following images you can see the Kytos UI sections.
 
-.. figure:: kytos-ui-parts.png
+.. figure:: img/kytos-ui-parts.png
    :alt: Kytos Graphical User Interface
    :align: center
 

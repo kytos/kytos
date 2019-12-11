@@ -85,7 +85,7 @@ class Controller:
         #: dict: mapping of events and event listeners.
         #:
         #: The key of the dict is a KytosEvent (or a string that represent a
-        #: regex to match agains KytosEvents) and the value is a list of
+        #: regex to match against KytosEvents) and the value is a list of
         #: methods that will receive the referenced event
         self.events_listeners = {'kytos/core.connection.new':
                                  [self.new_connection]}
@@ -772,11 +772,16 @@ class Controller:
                            username, napp_name, err)
             return
         except FileNotFoundError as err:
-            msg = "NApp module not found, assuming it's a meta napp: %s"
+            msg = "NApp module not found, assuming it's a meta-napp: %s"
             self.log.warning(msg, err.filename)
             return
 
-        napp = napp_module.Main(controller=self)
+        try:
+            napp = napp_module.Main(controller=self)
+        except:  # noqa pylint: disable=bare-except
+            self.log.critical("NApp initialization failed: %s/%s",
+                              username, napp_name, exc_info=True)
+            return
 
         self.napps[(username, napp_name)] = napp
 

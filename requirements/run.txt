@@ -4,6 +4,7 @@
 #
 #    pip-compile --output-file=requirements/run.txt requirements/run.in
 #
+appnope==0.1.0            # via ipython
 argh==0.26.2              # via watchdog
 backcall==0.1.0           # via ipython
 click==7.0                # via flask
@@ -40,4 +41,4 @@ wcwidth==0.1.7            # via prompt-toolkit
 werkzeug==0.15.5          # via flask
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.4.0        # via ipython, python-daemon
+# setuptools

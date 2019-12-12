@@ -190,10 +190,41 @@ Your file tree should look like this::
         __init__.py
         mynewmessage.py
 
-Python-Openflow API
+Python-OpenFlow API
 ===================
 
 Python-OpenFlow is a library used to create NApps to work with the
 OpenFlow protocol. The documentation of the library is located at
 `python-openflow api <https://docs.kytos.io/python-openflow/pyof>`__.
 
+Coverage
+========
+
+Code coverage is a metric that can help you understand how much of your source
+is tested. It's a very useful metric that can help you assess the quality of
+your test suite.
+
+In the following sections you will see the chart and table for OpenFlow 1.0 and
+1.3 versions, if you would like to see the coverage of each file, 
+`click here <https://codecov.io/gh/gleybersonandrade/python-openflow>`__.
+
+.. image:: https://codecov.io/gh/gleybersonandrade/python-openflow/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/gleybersonandrade/python-openflow
+
+Python OpenFlow 1.0
+-------------------
+
+.. image:: img/v0x01_coverage_graph.png
+   :align: center
+
+.. image:: img/v0x01_coverage_table.png
+   :align: center
+
+Python OpenFlow 1.3
+-------------------
+
+.. image:: img/v0x04_coverage_graph.png
+   :align: center
+
+.. image:: img/v0x04_coverage_table.png
+   :align: center

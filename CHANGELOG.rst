@@ -24,6 +24,21 @@ Security
 ========
 
 
+[2019.2rc1] - "gil" release candidate 1 - 2019-12-13
+****************************************************
+
+Added
+=====
+- NApps Server now has e-mail verification and password reset for devs
+- Added `python-openflow` unit test coverage section to Kytos Dev guide
+
+Fixed
+=====
+- Fixed duplicated logs (#993)
+- Fixed exception handling during NApp setup which could cause
+  locks on kytosd shutdown (#1000)
+
+
 [2019.2b3] - "gil" beta3 - 2019-12-06
 **************************************
 

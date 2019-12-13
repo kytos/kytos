@@ -29,6 +29,7 @@ Security
 
 Added
 =====
+- New `etcd` backend for the Storehouse NApp (experimental)
 - NApps Server now has e-mail verification and password reset for devs
 - Added `python-openflow` unit test coverage section to Kytos Dev guide
 

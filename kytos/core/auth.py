@@ -16,7 +16,7 @@ from kytos.core.events import KytosEvent
 __all__ = ['authenticated']
 
 LOG = logging.getLogger(__name__)
-
+TIME_EXP = 180
 
 def authenticated(func):
     """Handle tokens from requests."""
@@ -147,7 +147,7 @@ class Auth:
             if user.get("password") != hashlib.sha512(password).hexdigest():
                 raise KeyError
             time_exp = datetime.datetime.utcnow() + datetime.timedelta(
-                minutes=10
+                minutes=TIME_EXP
             )
             token = self._generate_token(username, time_exp)
             return {"token": token.decode()}, HTTPStatus.OK.value

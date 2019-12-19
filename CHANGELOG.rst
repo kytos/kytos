@@ -24,6 +24,14 @@ Security
 ========
 
 
+[2019.2] - "gil" stable - 2019-12-20
+*************************************
+
+Changed
+=======
+- Increased token expiration time in auth module.
+
+
 [2019.2rc1] - "gil" release candidate 1 - 2019-12-13
 ****************************************************
 
@@ -68,7 +76,7 @@ Added
 - New blueprint: EP018 - API Authentication.
 - New blueprint: EP019 - Improvements on Statistics Metrics Collections.
 - New blueprint: EP020 - Data and Settings Persistence.
-  
+
 Changed
 =======
 - Changed loggers to begin the hierarchy with "kytos."

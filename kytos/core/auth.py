@@ -18,6 +18,7 @@ __all__ = ['authenticated']
 LOG = logging.getLogger(__name__)
 TOKEN_EXPIRATION_MINUTES = 180
 
+
 def authenticated(func):
     """Handle tokens from requests."""
     @wraps(func)

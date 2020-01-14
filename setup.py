@@ -275,6 +275,7 @@ METADATA = dict(re.findall(r"(__[a-z]+__)\s*=\s*'([^']+)'", META_FILE))
 setup(name='kytos',
       version=METADATA.get('__version__'),
       description=METADATA.get('__description__'),
+      long_description=open("README.rst", "r").read(),
       url=METADATA.get('__url__'),
       author=METADATA.get('__author__'),
       author_email=METADATA.get('__author_email__'),

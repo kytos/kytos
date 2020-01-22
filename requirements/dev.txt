@@ -15,7 +15,7 @@ babel==2.6.0              # via sphinx
 certifi==2018.8.13        # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via pip-tools
-coverage==4.5.1
+coverage==5.0.3
 docopt==0.6.2             # via yala
 docutils==0.15.2          # via sphinx
 idna==2.7                 # via requests

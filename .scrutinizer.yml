@@ -8,7 +8,7 @@ filter:
         - 'kytos/web-ui/*'
 build:
     environment:
-        python: 3.6.0
+        python: 3.6.3
         postgresql: false
         redis: false
     dependencies:

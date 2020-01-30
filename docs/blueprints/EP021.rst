@@ -1,0 +1,180 @@
+:EP: BP021
+:Title: Kytos testing pipeline and definitions
+:Authors:
+    - Rogério Motitsuki <rogerio@ansp.br>
+    - Humberto Diógenes <hdiogenes@gmail.com>
+    - Carlos Magno <cmagnobarbosa@gmail.com>
+    - Gleyberson Andrade <gleybersonandrade@gmail.com>
+:Created: 2020-01-30
+:Kytos-Version: 2020.1
+:Status: Draft
+:Type: Informational
+
+
+Abstract
+========
+
+This blueprint proposes the implementation of higher-level automated tests for Kytos, splitting Kytos tests into three major categories with different requisites of scope, total running time and frequency: Unit Tests, Integration Tests and End-to-End Tests. Each of those categories is described, as well as a new Continuous Integration Pipeline to accommodate them. It also proposes the creation of a "test panel" which will aggregate test and coverage results, for the purpose of increasing the visibility of Kytos code quality statistics for users and developers.
+
+
+Motivation
+==========
+
+Nowadays Kytos doesn't have a well-defined testing pipeline and only unit tests are widely implemented. Besides that, we don't have a clear separation on our test types and Kytos engineers are using different terminology to describe them. We also don't have any kind of test groups. For example: some tests may run for many minutes or even hours and there's no easy way to run only the tests that run fast. Shortly we'll need a separation for tests that will run with virtual switches and/or real hardware.
+
+Test results visibility is another area that can be improved. As Kytos is made of many different repositories – 4 main projects (kytos [core], kytos-utils, kytos-ui and python-openflow) and 11 NApps (Network Applications) – we need a better way to check the status of the tests and the unit test coverage on each project.
+
+
+Rationale
+=========
+
+Testing is required for an effective performance of software application or product. Some benefits of automating the tests include: to avoid repetitive work and to have a faster feedback.
+
+
+Specification
+=============
+
+Use three classes as test categories: Unit Test, Integration Test and E2E Test.
+
+- **Unit Test:** In unit testing, you look to cover the application’s functionality at its most basic level. Test each individual unit of code, typically a method, in isolation to see if given certain conditions it responds in the expected way. This test has to be executed very quickly, in fact, one tenth of a second is considered slow for unit tests;
+- **Integration Test:** An integration test takes a small group of units, often two units, and tests their behavior as a whole, verifying that they coherently work together;
+- **E2E Test:** An end-to-end test tests your entire system from one end to the other, treating everything in between as a black box. Unfortunately, end-to-end tests are slower, more flaky, and more expensive to maintain than unit or integration tests.
+
+  **Unit Tests - > Integration Tests -> End-to-End Tests**
+
+  "So how do we create that ideal feedback loop? By thinking smaller, not larger; as a good first guess, Google often suggests a 70/20/10 split: **70% unit tests, 20% integration tests, and 10% end-to-end tests.**"
+  [*Mike Wacker, Adam Bender (Google) - Just Say No to More End-to-End Tests, Testing on the Toilet: What Makes a Good End-to-End Test? [6,7]*]
+
+
+Unit Tests
+----------
+
+**Time limit (seconds):** 60
+
+**Definition:**
+
+For unit tests we will follow the "sociable" unit test definition.
+A "sociable" unit test can cover the behavior of a single unit, that can rely on other units to fulfill its behavior, although access to external services, or non-deterministic components, must be avoided, with the use of mock services whenever possible.
+The unit test must run really fast: a test suite must run hundreds/thousands of tests per minute.
+
+Some "anti-patterns" must be avoided:
+- Dependencies between test cases
+- Interdependent tests
+- Slow running tests
+
+The "test code coverage" metric will be used with the unit test runner.
+A target for a good coverage must be on the upper 80s.
+
+For the Kytos project, the default Python test framework is pytest and must it be used for any new test created.
+
+
+Integration Tests
+-----------------
+
+**Time limit (seconds):** 300
+
+**Definition:**
+
+For the integration test we use the concept of narrow integration tests.
+They test all the parts that live outside the application, such as other services, database, and filesystem. It means that the application  and component/service integrating with must run.
+External integrated services can run locally or be a fake service that mimics the behaviour of a real service
+The test can be done one integration at a time. All other services can be replaced by test doubles.
+
+Integration tests must be written to all pieces that serialize data, such as:
+        - calls to services´ REST API
+        - calls to other application´s API
+        - read/write to database
+        - read/write queues
+        - write to filesystem
+
+Integration tests must be written for each NApp module, in a different test folder with a proper setup environment.
+
+
+End-to-End Tests
+----------------
+
+**Type:** REST API & User Interface End-to-End Tests
+
+**Time limit (seconds):**  900+
+
+**Definition:** Test on a live version of all services, interconnected subsystems and dependent systems. Test the process flows along with front end & backend & middle-tier systems
+
+Test Tags
+---------
+
+In parallel with the three major categories described above, we may also start to use test tags that make it easier to separate tests that will run in virtual hardware (ovs / mininet) or real hardware (switches available for automated testing). System tests for NApps is better described on blueprint EP015
+
+Continuous Integration Pipeline
+-------------------------------
+
+Today
+`````
+
+   - Before commit: manual tox (pytest/unittest, pylint, coverage, documentation build)
+   - Before merge: tox / scrutinizer
+   - After merge: tox / scrutinizer, send email
+   - Every day/night: no tests, only the docker nightly build
+   - Every week: -
+   - Before release: [manual] packaging tests
+   - After release: manual acceptance tests by Kytos dev and Amlight teams
+
+Objectives
+``````````
+
+   - Before commit: optional/manual tests
+   - Before push: manual test; individual devs may locally automate unit tests w/ git hook
+   - Pull Request created/updated:  unit tests + linter + small/medium integration tests
+   - After merge: all tests on virtual environment
+   - Every day: all tests, including real hardware
+   - Every week: not needed (all tests run every day); future: chaos monkey [2]
+   - Before release: all tests (just for sake of sanity)
+   - [tagging of the release]
+   - After release: just python/distro packages
+
+
+
+Reference Implementation
+========================
+
+While writing this blueprint we've also developed a proof-of-concept aggregation for the test results, which may be used as a starting point for a test panel.
+
+https://git.ncc.unesp.br/kytos/misc/blob/master/scoreboard/scoreboard.py
+
+
+Rejected Ideas
+==============
+
+A separate System Tests category was discussed, but dropped for now.
+
+**Test:** System test
+
+**Frequency:** Every merge, nightly
+
+**Definition:**
+
+    - Test the whole integrated software and requires a live version of all services.
+    - It requires substantial test environment and network access
+    - It must check all features, fuctionalities, specifications and run functional and non-functional testing
+    - For the Kytos project the sytem test and end-to-end test would run in the same pipeline process since they need all the live services.
+
+
+Open Issues
+===========
+
+- Some NApps have unit test coverage 0% - do we write unit tests for them or jump straight into integration tests? -> minimal unit test coverage is needed
+- Development roadmap: will we start writing E2E tests in parallel, or just after we have integration tests running? -> integration first
+
+
+References
+==========
+
+- EP015 - System tests for NApps validation:
+    - https://github.com/kytos/kytos/blob/master/docs/blueprints/EP015.rst
+- pytest - Good Integration Practices:
+    - https://docs.pytest.org/en/latest/goodpractices.html
+- Getting Started With Testing in Python:
+    - https://realpython.com/python-testing/#writing-integration-tests
+- Test Sizes:
+    - https://testing.googleblog.com/2010/12/test-sizes.html
+- [6] https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html
+- [7] https://testing.googleblog.com/2016/09/testing-on-toilet-what-makes-good-end.html

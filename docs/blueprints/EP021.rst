@@ -81,11 +81,12 @@ External integrated services can run locally or be a fake service that mimics th
 The test can be done one integration at a time. All other services can be replaced by test doubles.
 
 Integration tests must be written to all pieces that serialize data, such as:
-        - calls to services´ REST API
-        - calls to other application´s API
-        - read/write to database
-        - read/write queues
-        - write to filesystem
+
+- calls to services´ REST API
+- calls to other application´s API
+- read/write to database
+- read/write queues
+- write to filesystem
 
 Integration tests must be written for each NApp module, in a different test folder with a proper setup environment.
 
@@ -107,29 +108,29 @@ In parallel with the three major categories described above, we may also start t
 Continuous Integration Pipeline
 -------------------------------
 
-Today
-`````
+Today:
+``````
 
-   - Before commit: manual tox (pytest/unittest, pylint, coverage, documentation build)
-   - Before merge: tox / scrutinizer
-   - After merge: tox / scrutinizer, send email
-   - Every day/night: no tests, only the docker nightly build
-   - Every week: -
-   - Before release: [manual] packaging tests
-   - After release: manual acceptance tests by Kytos dev and Amlight teams
+    - Before commit: manual tox (pytest/unittest, pylint, coverage, documentation build)
+    - Before merge: tox / scrutinizer
+    - After merge: tox / scrutinizer, send email
+    - Every day/night: no tests, only the docker nightly build
+    - Every week: -
+    - Before release: [manual] packaging tests
+    - After release: manual acceptance tests by Kytos dev and Amlight teams
 
-Objectives
-``````````
+Objectives:
+```````````
 
-   - Before commit: optional/manual tests
-   - Before push: manual test; individual devs may locally automate unit tests w/ git hook
-   - Pull Request created/updated:  unit tests + linter + small/medium integration tests
-   - After merge: all tests on virtual environment
-   - Every day: all tests, including real hardware
-   - Every week: not needed (all tests run every day); future: chaos monkey [2]
-   - Before release: all tests (just for sake of sanity)
-   - [tagging of the release]
-   - After release: just python/distro packages
+- Before commit: optional/manual tests
+- Before push: manual test; individual devs may locally automate unit tests w/ git hook
+- Pull Request created/updated:  unit tests + linter + small/medium integration tests
+- After merge: all tests on virtual environment
+- Every day: all tests, including real hardware
+- Every week: not needed (all tests run every day); future: chaos monkey [2]
+- Before release: all tests (just for sake of sanity)
+- [tagging of the release]
+- After release: just python/distro packages
 
 
 
@@ -152,10 +153,10 @@ A separate System Tests category was discussed, but dropped for now.
 
 **Definition:**
 
-    - Test the whole integrated software and requires a live version of all services.
-    - It requires substantial test environment and network access
-    - It must check all features, fuctionalities, specifications and run functional and non-functional testing
-    - For the Kytos project the sytem test and end-to-end test would run in the same pipeline process since they need all the live services.
+- Test the whole integrated software and requires a live version of all services.
+- It requires substantial test environment and network access
+- It must check all features, fuctionalities, specifications and run functional and non-functional testing
+- For the Kytos project the sytem test and end-to-end test would run in the same pipeline process since they need all the live services.
 
 
 Open Issues
@@ -176,5 +177,7 @@ References
     - https://realpython.com/python-testing/#writing-integration-tests
 - Test Sizes:
     - https://testing.googleblog.com/2010/12/test-sizes.html
-- [6] https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html
-- [7] https://testing.googleblog.com/2016/09/testing-on-toilet-what-makes-good-end.html
+- Just say no to more end-to-end tests
+    - https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html
+- Testing on the Toilet: What Makes a Good End-to-End Test? 
+    - https://testing.googleblog.com/2016/09/testing-on-toilet-what-makes-good-end.html

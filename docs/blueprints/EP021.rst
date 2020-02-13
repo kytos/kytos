@@ -21,7 +21,7 @@ This blueprint proposes the implementation of higher-level automated tests for K
 Motivation
 ==========
 
-Nowadays Kytos doesn't have a well-defined testing pipeline and only unit tests are widely implemented. Besides that, we don't have a clear separation on our test types and Kytos engineers are using different terminology to describe them. We also don't have any kind of test groups. For example: some tests may run for many minutes or even hours and there's no easy way to run only the tests that run fast. Shortly we'll need a separation for tests that will run with virtual switches and/or real hardware.
+Nowadays Kytos doesn't have a well-defined testing pipeline and only unit tests are widely implemented. Besides that, we don't have a clear separation on our test types and Kytos engineers are using different terminology to describe them. We also don't have any kind of test groups. For example: some tests may run for many minutes or even hours and there's no easy way to run only the tests that run fast. In a near future, we'll need a separation for tests that will run with virtual switches and/or real hardware.
 
 Test results visibility is another area that can be improved. As Kytos is made of many different repositories – 4 main projects (kytos [core], kytos-utils, kytos-ui and python-openflow) and 11 NApps (Network Applications) – we need a better way to check the status of the tests and the unit test coverage on each project.
 
@@ -65,7 +65,7 @@ Some "anti-patterns" must be avoided:
 The "test code coverage" metric will be used with the unit test runner.
 A target for a good coverage must be above 85%.
 
-For the Kytos project, the default Python test framework is pytest and must it be used for any new test created.
+For the Kytos project, the default Python test framework is pytest and it must be used for any new test created.
 
 
 Integration Tests

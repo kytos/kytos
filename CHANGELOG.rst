@@ -24,6 +24,19 @@ Security
 ========
 
 
+[2020.1b1] - "" beta1 - 2020-03-06
+**********************************
+
+Added
+=====
+- Added long description field for display in pypi.org.
+- New blueprint: EP018 - Kytos testing pipeline and definitions.
+
+Fixed
+=====
+- Fixed Scrutinizer coverage error.
+
+
 [2019.2] - "gil" stable - 2019-12-20
 *************************************
 

@@ -24,13 +24,17 @@ Security
 ========
 
 
-[2020.1b1] - "" beta1 - 2020-03-06
-**********************************
+[2020.1b1] - "helena" beta1 - 2020-03-09
+****************************************
 
 Added
 =====
-- Added long description field for display in pypi.org.
+- New unit tests for NApps:
+    - `kytos/kronos`, coverage increased from 0% to 31%
+    - `kytos/mef_eline`, coverage increased from 67% to 70%
+    - `kytos/of_core`, coverage increased from 28% to 47%
 - New blueprint: EP018 - Kytos testing pipeline and definitions.
+- Added long description field for display in pypi.org.
 
 Fixed
 =====

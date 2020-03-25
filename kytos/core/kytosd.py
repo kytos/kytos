@@ -2,8 +2,11 @@
 """Start Kytos SDN Platform core."""
 import asyncio
 import functools
+import os
+import shutil
 import signal
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 import daemon
 from IPython.terminal.embed import InteractiveShellEmbed
@@ -14,6 +17,9 @@ from kytos.core import Controller
 from kytos.core.config import KytosConfig
 from kytos.core.metadata import __version__
 
+BASE_ENV = Path(os.environ.get('VIRTUAL_ENV', '/'))
+ETC_FILES = []
+
 
 class KytosPrompt(Prompts):
     """Configure Kytos prompt for interactive shell."""
@@ -21,6 +27,18 @@ class KytosPrompt(Prompts):
     def in_prompt_tokens(self):
         """Kytos IPython prompt."""
         return [(Token.Prompt, 'kytos $> ')]
+
+
+class CommonInstall:
+    """Class with common methods used by children classes."""
+
+    @staticmethod
+    def create_pid_folder():
+        """Create the folder in /var/run to hold the pidfile."""
+        pid_folder = os.path.join(BASE_ENV, 'var/run/kytos')
+        os.makedirs(pid_folder, exist_ok=True)
+        if BASE_ENV == '/':  # system install
+            os.chmod(pid_folder, 0o1777)  # permissions like /tmp
 
 
 def start_shell(controller=None):
@@ -84,6 +102,12 @@ def start_shell(controller=None):
 
 def main():
     """Read config and start Kytos in foreground or daemon mode."""
+    # data_files is not enough when installing from PyPI
+    for file in ETC_FILES:
+        shutil.copy2(file, Path(BASE_ENV) / file)
+
+    CommonInstall.create_pid_folder()
+
     config = KytosConfig().options['daemon']
 
     if config.foreground:

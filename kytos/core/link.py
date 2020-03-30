@@ -170,3 +170,9 @@ class Link(GenericEntity):
     def as_json(self):
         """Return the Link as a JSON string."""
         return json.dumps(self.as_dict())
+
+    @classmethod
+    def from_dict(cls, link_dict):
+        """Return a Link instance from python dictionary."""
+        return cls(link_dict.get('endpoint_a'),
+                   link_dict.get('endpoint_b'))

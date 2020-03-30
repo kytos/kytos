@@ -353,3 +353,10 @@ class Switch(GenericEntity):
 
         """
         return json.dumps(self.as_dict())
+
+    @classmethod
+    def from_dict(cls, switch_dict):
+        """Return a Switch instance from python dictionary."""
+        return cls(switch_dict.get('dpid'),
+                   switch_dict.get('connection'),
+                   switch_dict.get('features'))

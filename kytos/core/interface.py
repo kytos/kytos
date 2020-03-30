@@ -418,6 +418,17 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             iface_dict['stats'] = self.stats.as_dict()
         return iface_dict
 
+    @classmethod
+    def from_dict(cls, interface_dict):
+        """Return a Interface instance from python dictionary."""
+        return cls(interface_dict.get('name'),
+                   interface_dict.get('port_number'),
+                   interface_dict.get('switch'),
+                   interface_dict.get('address'),
+                   interface_dict.get('state'),
+                   interface_dict.get('features'),
+                   interface_dict.get('speed'))
+
     def as_json(self):
         """Return a json with Interfaces attributes.
 
@@ -464,6 +475,12 @@ class UNI:
             'interface_id': self.interface.id,
             'tag': self.user_tag.as_dict() if self.user_tag else None
             }
+
+    @classmethod
+    def from_dict(cls, uni):
+        """Return a Uni instance from python dictionary."""
+        return cls(uni.get('interface'),
+                   uni.get('user_tag'))
 
     def as_json(self):
         """Return a json representating a UNI object."""

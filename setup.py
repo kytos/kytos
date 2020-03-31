@@ -6,7 +6,6 @@ descriptions.
 import os
 import re
 import sys
-import uuid
 from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
 from distutils.command.clean import clean  # pylint: disable=E0401,E0611
@@ -17,7 +16,6 @@ try:
     # Check if pip is installed
     import pip  # pylint: disable=unused-import
     from setuptools import Command, find_packages, setup
-    from setuptools.command.develop import develop
     from setuptools.command.egg_info import egg_info
     from setuptools.command.install import install
 except ModuleNotFoundError:
@@ -134,52 +132,52 @@ class CITest(SimpleCommand):
             command(*self._args, **self._kwargs).run()
 
 
-class CommonInstall:
-    """Class with common methods used by children classes."""
+# class CommonInstall:
+#     """Class with common methods used by children classes."""
 
-    @classmethod
-    def generate_file_from_template(cls, templates,
-                                    destination=Path(__file__).parent,
-                                    **kwargs):
-        """Create a config file based on a template file.
+#     @classmethod
+#     def generate_file_from_template(cls, templates,
+#                                     destination=Path(__file__).parent,
+#                                     **kwargs):
+#         """Create a config file based on a template file.
 
-        If no destination is passed, the new conf file will be created on the
-        directory of the template file.
+#         If no destination is passed, the new conf file will be created on the
+#         directory of the template file.
 
-        Args:
-            template (string):    Path of the template file
-            destination (string): Directory in which the config file will
-                                  be placed.
-        """
-        from jinja2 import Template
+#         Args:
+#             template (string):    Path of the template file
+#             destination (string): Directory in which the config file will
+#                                   be placed.
+#         """
+#         from jinja2 import Template
 
-        if str(kwargs['prefix']) != '/':
-            kwargs['prefix'] = Path(str(kwargs['prefix']).rstrip('/'))
-        kwargs['jwt_secret'] = uuid.uuid4().hex
+#         if str(kwargs['prefix']) != '/':
+#             kwargs['prefix'] = Path(str(kwargs['prefix']).rstrip('/'))
+#         kwargs['jwt_secret'] = uuid.uuid4().hex
 
-        cls.create_paths()
-        for path in templates:
-            with open(path, 'r', encoding='utf-8') as src_file:
-                content = Template(src_file.read()).render(**kwargs)
-                dst_path = Path(destination) / path.replace('.template', '')
-                with open(dst_path, 'w') as dst_file:
-                    dst_file.write(content)
+#         cls.create_paths()
+#         for path in templates:
+#             with open(path, 'r', encoding='utf-8') as src_file:
+#                 content = Template(src_file.read()).render(**kwargs)
+#                 dst_path = Path(destination) / path.replace('.template', '')
+#                 with open(dst_path, 'w') as dst_file:
+#                     dst_file.write(content)
 
-    @staticmethod
-    def create_pid_folder():
-        """Create the folder in /var/run to hold the pidfile."""
-        pid_folder = os.path.join(BASE_ENV, 'var/run/kytos')
-        os.makedirs(pid_folder, exist_ok=True)
-        if BASE_ENV == '/':  # system install
-            os.chmod(pid_folder, 0o1777)  # permissions like /tmp
+#     @staticmethod
+#     def create_pid_folder():
+#         """Create the folder in /var/run to hold the pidfile."""
+#         pid_folder = os.path.join(BASE_ENV, 'var/run/kytos')
+#         os.makedirs(pid_folder, exist_ok=True)
+#         if BASE_ENV == '/':  # system install
+#             os.chmod(pid_folder, 0o1777)  # permissions like /tmp
 
-    @staticmethod
-    def create_paths():
-        """Create the paths used by Kytos in develop mode."""
-        directories = [os.path.join(BASE_ENV, 'etc/kytos')]
-        for directory in directories:
-            if not os.path.exists(directory):
-                os.makedirs(directory)
+#     @staticmethod
+#     def create_paths():
+#         """Create the paths used by Kytos in develop mode."""
+#         directories = [os.path.join(BASE_ENV, 'etc/kytos')]
+#         for directory in directories:
+#             if not os.path.exists(directory):
+#                 os.makedirs(directory)
 
 
 class InstallMode(install):
@@ -245,7 +243,6 @@ setup(name='kytos',
           'clean': Cleaner,
           'ci': CITest,
           'coverage': TestCoverage,
-          'develop': develop,
           'doctest': DocTest,
           'egg_info': EggInfo,
           'install': InstallMode,

@@ -16,8 +16,9 @@ from pathlib import Path
 from kytos.core.metadata import __version__
 
 BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
-TEMPLATE_FILES = ['etc/kytos/kytos.conf.template',
-                  'etc/kytos/logging.ini.template']
+ETC_KYTOS = 'etc/kytos'
+TEMPLATE_FILES = ['templates/kytos.conf.template',
+                  'templates/logging.ini.template']
 SYSLOG_ARGS = ['/dev/log'] if Path('/dev/log').exists() else []
 
 
@@ -167,15 +168,20 @@ class KytosConfig():
         kwargs['jwt_secret'] = uuid.uuid4().hex
 
         # Create the paths used by Kytos.
-        directories = [os.path.join(BASE_ENV, 'etc/kytos')]
+        directories = [os.path.join(BASE_ENV, ETC_KYTOS)]
         for directory in directories:
             if not os.path.exists(directory):
                 os.makedirs(directory)
 
-        for path in templates:
+        tmpl_path = Path(os.path.abspath(os.path.dirname(__file__))).parent
+
+        for tmpl in templates:
+            path = os.path.join(tmpl_path, tmpl)
             with open(path, 'r', encoding='utf-8') as src_file:
                 content = Template(src_file.read()).render(**kwargs)
-                dst_path = Path(destination) / path.replace('.template', '')
+                tmpl = tmpl.replace('templates', ETC_KYTOS) \
+                           .replace('.template', '')
+                dst_path = Path(destination) / tmpl
                 with open(dst_path, 'w') as dst_file:
                     dst_file.write(content)
 

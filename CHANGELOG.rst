@@ -24,6 +24,30 @@ Security
 ========
 
 
+
+[2020.1b2] - "helena" beta2 - 2020-04-03
+****************************************
+
+Added
+=====
+- Add shorter README file to use on PyPI description.
+
+Changed
+=======
+
+Deprecated
+==========
+
+Removed
+=======
+
+Fixed
+=====
+
+Security
+========
+
+
 [2020.1b1] - "helena" beta1 - 2020-03-09
 ****************************************
 

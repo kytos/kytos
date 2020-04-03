@@ -44,12 +44,12 @@ A ``connections`` item is composed by:
 
 .. code:: python
 
-  connections = {
-      (ip, port): {
-          'socket': `connection_socket`,
-          'dpid': None
-      }
-  }
+    connections = {
+        (ip, port): {
+            'socket': connection_socket,
+            'dpid': None
+        }
+    }
 
 While we do not receive the ``FeaturesReply`` message with the switch ``dpid``, the value of the *dpid* attribute will be ``None``.
 

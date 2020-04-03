@@ -103,14 +103,14 @@ A ``connections`` item is composed by:
 
 .. code:: python
 
-  connections = {
-      (ip, port): {
-          'socket': `connection_socket`,
-          'dpid': None,
-          'pack': `protocol pack function`,
-          'unpack': `protocol unpack function`
-      }
-  }
+    connections = {
+        (ip, port): {
+            'socket': connection_socket,
+            'dpid': None,
+            'pack': protocol_pack_function,
+            'unpack': protocol_unpack_function
+        }
+    }
 
 
 While the handshake is not complete (``kytos/of_core.hello_complete``), ``pack``

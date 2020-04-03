@@ -69,7 +69,7 @@ can be implemented using the pyJWT library.
 Endpoints REST:
 ---------------
 
-.. code:: http
+.. code:: console
     
     POST /api/kytos/core/auth/users/ - This endpoint creates new users.
 
@@ -78,7 +78,7 @@ Endpoints REST:
         -d '{"username":"babel42", "password":"youshallnotpass", "email": "babel42@email.com"}' \
         URL
 
-.. code:: http
+.. code:: console
 
     GET /api/kytos/core/auth/login/ - This endpoint verifies a user and returns a valid token if authentication is correct.
 
@@ -87,7 +87,7 @@ Endpoints REST:
         -H 'Authorization:Basic username:password' \
         URL
 
-.. code:: http
+.. code:: console
 
     GET /api/kytos/core/auth/users/ - This endpoint lists the registered users.
 
@@ -96,7 +96,7 @@ Endpoints REST:
         -H 'Authorization: Bearer ${TOKEN}' \
         URL
 
-.. code:: http
+.. code:: console
 
     GET /api/kytos/core/auth/users/<user_id>/ - This endpoint gets details about a specific user.
 
@@ -107,7 +107,7 @@ Endpoints REST:
         -d '{"user_id":"001"}' \
         URL
 
-.. code:: http
+.. code:: console
 
     DELETE /api/kytos/core/auth/users/<user_id>/ - This endpoint delete a specific user.	
 
@@ -118,7 +118,7 @@ Endpoints REST:
         -d '{"user_id":"001"}' \
         URL
 
-.. code:: http
+.. code:: console
 
     PATCH /api/kytos/core/auth/users/<user_id>/ - This endpoint update a specific user.
 

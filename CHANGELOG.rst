@@ -27,11 +27,24 @@ Changed
 =======
 
 
-[2020.1b2] - "helena" beta2 - UNRELEASED
+[2020.1b2] - "helena" beta2 - 2020-04-08
 ****************************************
+
+Added
+=====
+- Added shorter README file to use on PyPI description.
+
 Changed
 =======
 - Upgraded versions for all dependencies
+- `kytosd` now create configuration only in post-install - #1042
+
+Fixed
+=====
+- Fixed `SandboxViolation` when installing Kytos as a dependency
+  from PyPI - #494
+- Fixed install from wheel package format- #922
+- Fixed "There is no config file." error when starting kytosd - #951
 
 
 [2020.1b1] - "helena" beta1 - 2020-03-09

@@ -5,9 +5,7 @@ descriptions.
 """
 import os
 import re
-import shutil
 import sys
-import uuid
 from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
 from distutils.command.clean import clean  # pylint: disable=E0401,E0611
@@ -18,7 +16,6 @@ try:
     # Check if pip is installed
     import pip  # pylint: disable=unused-import
     from setuptools import Command, find_packages, setup
-    from setuptools.command.develop import develop
     from setuptools.command.egg_info import egg_info
     from setuptools.command.install import install
 except ModuleNotFoundError:
@@ -27,9 +24,6 @@ except ModuleNotFoundError:
 
 BASE_ENV = Path(os.environ.get('VIRTUAL_ENV', '/'))
 ETC_FILES = []
-TEMPLATE_FILES = ['etc/kytos/kytos.conf.template',
-                  'etc/kytos/logging.ini.template']
-SYSLOG_ARGS = ['/dev/log'] if Path('/dev/log').exists() else []
 
 
 class SimpleCommand(Command):
@@ -138,60 +132,8 @@ class CITest(SimpleCommand):
             command(*self._args, **self._kwargs).run()
 
 
-class CommonInstall:
-    """Class with common methods used by children classes."""
-
-    @classmethod
-    def generate_file_from_template(cls, templates,
-                                    destination=Path(__file__).parent,
-                                    **kwargs):
-        """Create a config file based on a template file.
-
-        If no destination is passed, the new conf file will be created on the
-        directory of the template file.
-
-        Args:
-            template (string):    Path of the template file
-            destination (string): Directory in which the config file will
-                                  be placed.
-        """
-        from jinja2 import Template
-
-        if str(kwargs['prefix']) != '/':
-            kwargs['prefix'] = Path(str(kwargs['prefix']).rstrip('/'))
-        kwargs['jwt_secret'] = uuid.uuid4().hex
-
-        cls.create_paths()
-        for path in templates:
-            with open(path, 'r', encoding='utf-8') as src_file:
-                content = Template(src_file.read()).render(**kwargs)
-                dst_path = Path(destination) / path.replace('.template', '')
-                with open(dst_path, 'w') as dst_file:
-                    dst_file.write(content)
-
-    @staticmethod
-    def create_pid_folder():
-        """Create the folder in /var/run to hold the pidfile."""
-        pid_folder = os.path.join(BASE_ENV, 'var/run/kytos')
-        os.makedirs(pid_folder, exist_ok=True)
-        if BASE_ENV == '/':  # system install
-            os.chmod(pid_folder, 0o1777)  # permissions like /tmp
-
-    @staticmethod
-    def create_paths():
-        """Create the paths used by Kytos in develop mode."""
-        directories = [os.path.join(BASE_ENV, 'etc/kytos')]
-        for directory in directories:
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-
-
-class InstallMode(install, CommonInstall):
-    """Class used to overwrite the default installation using setuptools.
-
-    Besides doing the default install, the config files used by
-    Kytos SDN Platform will also be created, based on templates.
-    """
+class InstallMode(install):
+    """Class used to overwrite the default installation using setuptools."""
 
     def run(self):
         """Install the package in install mode.
@@ -205,61 +147,19 @@ class InstallMode(install, CommonInstall):
         else:
             # force install of deps' eggs during setup.py install
             self.do_egg_install()
-        self.generate_file_from_template(TEMPLATE_FILES, BASE_ENV,
-                                         prefix=BASE_ENV,
-                                         syslog_args=SYSLOG_ARGS)
-        # data_files is not enough when installing from PyPI
-        for file in ETC_FILES:
-            shutil.copy2(file, Path(BASE_ENV) / file)
-
-        self.create_pid_folder()
 
 
-class DevelopMode(develop, CommonInstall):
-    """Recommended setup for developers.
-
-    Instead of copying the files to the expected directories, a symlink is
-    created on the system aiming the current source code.
-    """
-
-    def run(self):
-        """Install the package in a developer mode."""
-        super().run()
-
-        self.generate_file_from_template(TEMPLATE_FILES, prefix=BASE_ENV,
-                                         syslog_args=SYSLOG_ARGS)
-
-        for file_name in ETC_FILES:
-            self.generate_file_link(file_name)
-
-        for file_name in TEMPLATE_FILES:
-            self.generate_file_link(file_name.replace('.template', ''))
-        self.create_pid_folder()
-
-    @staticmethod
-    def generate_file_link(file_name):
-        """Create a symbolic link from a file name."""
-        current_directory = os.path.dirname(__file__)
-        target = Path(os.path.join(os.path.abspath(current_directory),
-                                   file_name))
-        path = Path(os.path.join(BASE_ENV, file_name))
-
-        print(f"\nCreating symbolic link {path}.")
-
-        symlink_if_different(path, target)
-
-
-def symlink_if_different(path, target):
-    """Force symlink creation if it points anywhere else."""
-    # print(f"symlinking {path} to target: {target}...", end=" ")
-    if not path.exists():
-        # print(f"path doesn't exist. linking...")
-        path.symlink_to(target)
-    elif not path.samefile(target):
-        # print(f"path exists, but is different. removing and linking...")
-        # Exists but points to a different file, so let's replace it
-        path.unlink()
-        path.symlink_to(target)
+# class DevelopMode(develop):
+#    """Recommended setup for developers.
+#
+#    The following feature are temporarily remove from code:
+#    Instead of copying the files to the expected directories, a symlink is
+#    created on the system aiming the current source code.
+#    """
+#
+#    def run(self):
+#        """Install the package in a developer mode."""
+#        super().run()
 
 
 # We are parsing the metadata file as if it was a text file because if we
@@ -295,7 +195,6 @@ setup(name='kytos',
           'clean': Cleaner,
           'ci': CITest,
           'coverage': TestCoverage,
-          'develop': DevelopMode,
           'doctest': DocTest,
           'egg_info': EggInfo,
           'install': InstallMode,

@@ -7,13 +7,21 @@ will be overridden by the option on command line.
 
 import json
 import os
+import uuid
 import warnings
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from configparser import ConfigParser
+from pathlib import Path
+
+from jinja2 import Template
 
 from kytos.core.metadata import __version__
 
 BASE_ENV = os.environ.get('VIRTUAL_ENV', None) or '/'
+ETC_KYTOS = 'etc/kytos'
+TEMPLATE_FILES = ['templates/kytos.conf.template',
+                  'templates/logging.ini.template']
+SYSLOG_ARGS = ['/dev/log'] if Path('/dev/log').exists() else []
 
 
 class KytosConfig():
@@ -125,13 +133,17 @@ class KytosConfig():
         options, argv = self.conf_parser.parse_known_args()
 
         config = ConfigParser()
-        result = config.read([options.conf or defaults.get('conf')])
 
-        if result:
-            defaults.update(dict(config.items("daemon")))
-        else:
-            print('There is no config file.')
-            exit(-1)
+        config_file = options.conf or defaults.get('conf')
+
+        if not os.path.exists(config_file):
+            _render_config_templates(TEMPLATE_FILES, BASE_ENV,
+                                     prefix=BASE_ENV,
+                                     syslog_args=SYSLOG_ARGS)
+
+        config.read(config_file)
+
+        defaults.update(dict(config.items("daemon")))
 
         self.parser.set_defaults(**defaults)
 
@@ -165,3 +177,39 @@ class KytosConfig():
             options.napps_pre_installed = json.loads(napps)
 
         return options
+
+
+def _render_config_templates(templates,
+                             destination=Path(__file__).parent,
+                             **kwargs):
+    """Create a config file based on a template file.
+
+    If no destination is passed, the new conf file will be created on the
+    directory of the template file.
+
+    Args:
+        template (string):    Path of the template file
+        destination (string): Directory in which the config file will
+                              be placed.
+    """
+    if str(kwargs['prefix']) != '/':
+        kwargs['prefix'] = Path(str(kwargs['prefix']).rstrip('/'))
+    kwargs['jwt_secret'] = uuid.uuid4().hex
+
+    # Create the paths used by Kytos.
+    directories = [os.path.join(BASE_ENV, ETC_KYTOS)]
+    for directory in directories:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+    tmpl_path = Path(os.path.abspath(os.path.dirname(__file__))).parent
+
+    for tmpl in templates:
+        path = os.path.join(tmpl_path, tmpl)
+        with open(path, 'r', encoding='utf-8') as src_file:
+            content = Template(src_file.read()).render(**kwargs)
+            tmpl = tmpl.replace('templates', ETC_KYTOS) \
+                       .replace('.template', '')
+            dst_path = Path(destination) / tmpl
+            with open(dst_path, 'w') as dst_file:
+                dst_file.write(content)

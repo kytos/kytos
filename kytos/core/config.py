@@ -163,8 +163,8 @@ class KytosConfig():
         if unknown:
             warnings.warn(f"Unknown arguments: {unknown}")
         options.napps_repositories = json.loads(options.napps_repositories)
-        options.debug = True if options.debug in ['True', True] else False
-        options.daemon = True if options.daemon in ['True', True] else False
+        options.debug = options.debug in ['True', True]
+        options.daemon = options.daemon in ['True', True]
         options.port = int(options.port)
         options.api_port = int(options.api_port)
         options.protocol_name = str(options.protocol_name)

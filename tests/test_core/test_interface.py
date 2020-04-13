@@ -113,11 +113,11 @@ class TestInterface(unittest.TestCase):
 
     def test_interface_available_tags(self):
         """Test available_tags on Interface class."""
-        default_range = [vlan for vlan in range(1, 4096)]
+        default_range = list(range(1, 4096))
         intf_values = [tag.value for tag in self.iface.available_tags]
         self.assertListEqual(intf_values, default_range)
 
-        custom_range = [vlan for vlan in range(100, 199)]
+        custom_range = list(range(100, 199))
         self.iface.set_available_tags(custom_range)
         intf_values = [tag.value for tag in self.iface.available_tags]
         self.assertListEqual(intf_values, custom_range)

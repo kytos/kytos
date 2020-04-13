@@ -56,7 +56,6 @@ class TestAPIDecorator(unittest.TestCase):
             @rest(rule, **options)
             def my_endpoint(self):
                 """Do nothing."""
-                pass
 
         napp = MyNApp()
         server = cls._mock_api_server(napp)
@@ -103,7 +102,6 @@ class TestAPIDecorator(unittest.TestCase):
             @rest('/rule')
             def my_endpoint(self):
                 """Do nothing."""
-                pass
 
         cls._assert_rule_is_added(MyNApp)
 
@@ -117,7 +115,6 @@ class TestAPIDecorator(unittest.TestCase):
             @classmethod
             def my_endpoint(cls):
                 """Do nothing."""
-                pass
 
         cls._assert_rule_is_added(MyNApp)
 
@@ -131,7 +128,6 @@ class TestAPIDecorator(unittest.TestCase):
             @staticmethod
             def my_endpoint():
                 """Do nothing."""
-                pass
 
         cls._assert_rule_is_added(MyNApp)
 

@@ -93,6 +93,7 @@ class TestLink(unittest.TestCase):
 
     def test_concurrent_get_next_tag(self):
         """Test get next available tags in concurrent execution"""
+        # pylint: disable=import-outside-toplevel
         from tests.helper import test_concurrently
         _link = Link(self.iface1, self.iface2)
 

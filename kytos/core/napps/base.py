@@ -268,7 +268,6 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         The setup method is automatically called on the NApp __init__().
         Users aren't supposed to call this method directly.
         """
-        pass
 
     @abstractmethod
     def execute(self):
@@ -277,7 +276,6 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         The execute method is called by KytosNApp class.
         Users shouldn't call this method directly.
         """
-        pass
 
     @abstractmethod
     def shutdown(self):
@@ -291,4 +289,3 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         called by the _shutdown_handler method when a KytosShutdownEvent is
         sent.
         """
-        pass

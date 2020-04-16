@@ -147,18 +147,6 @@ testing), and tags to group tests by running time:
 Continuous Integration Pipeline
 -------------------------------
 
-Today
-`````
-
-- Before commit: manual tox (pytest/unittest, pylint, coverage, documentation
-  build)
-- Before merge: tox / scrutinizer
-- After merge: tox / scrutinizer, send email
-- Every day/night: no tests, only the docker nightly build
-- Every week: -
-- Before release: [manual] packaging tests
-- After release: manual acceptance tests by Kytos dev and Amlight teams
-
 Objectives
 ``````````
 

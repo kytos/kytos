@@ -18,11 +18,12 @@ import atexit
 import json
 import logging
 import os
+import pkgutil
 import re
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from importlib import import_module
+from importlib import import_module, invalidate_caches
 from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
@@ -858,28 +859,40 @@ class Controller:
         for (username, napp_name) in list(self.napps.keys()):  # noqa
             self.unload_napp(username, napp_name)
 
-    def reload_napp_module(self, username, napp_name, napp_file):
-        """Reload a NApp Module."""
-        mod_name = '.'.join(['napps', username, napp_name, napp_file])
-        try:
+    def reload_napp_submodules(self, prefix, module, loaded):
+        """Reload all NApps submodules."""
+        for iterator in pkgutil.iter_modules(module.__path__, prefix):
+            (mod_name, submodule) = iterator[1:3]
+            # ignore reload the setup and tests
+            if 'setup' in mod_name or 'test' in mod_name:
+                continue
+            if mod_name in loaded:
+                continue
+            invalidate_caches()
             napp_module = import_module(mod_name)
-        except ModuleNotFoundError as err:
-            self.log.error("Module '%s' not found", mod_name)
-            raise
-        try:
             napp_module = reload_module(napp_module)
-        except ImportError as err:
-            self.log.error("Error reloading NApp '%s/%s': %s",
-                           username, napp_name, err)
-            raise
+            loaded.add(mod_name)
+
+            # load a subdirectory
+            if submodule:
+                napp_module_name = napp_module.__name__ + "."
+                loaded = self.reload_napp_submodules(napp_module_name,
+                                                     napp_module, loaded)
+        return loaded
 
     def reload_napp(self, username, napp_name):
         """Reload a NApp."""
         self.unload_napp(username, napp_name)
+        mod_name = '.'.join(['napps', username, napp_name])
+        loaded = set()
         try:
-            self.reload_napp_module(username, napp_name, 'settings')
-            self.reload_napp_module(username, napp_name, 'main')
-        except (ModuleNotFoundError, ImportError):
+            napp_module = import_module(mod_name)
+            napp_module_name = napp_module.__name__ + "."
+            loaded = self.reload_napp_submodules(napp_module_name,
+                                                 napp_module, loaded)
+        except (ModuleNotFoundError, ImportError) as err:
+            self.log.error("Error reloading NApp '%s/%s': %s",
+                           username, napp_name, err)
             return 400
         self.log.info("NApp '%s/%s' successfully reloaded",
                       username, napp_name)

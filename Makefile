@@ -1,9 +1,9 @@
 build: clean prepare
-	python3.6 setup.py sdist
+	python3.6 setup.py sdist bdist_wheel
 	ls -l dist/
 
 clean:
-	rm -rf build/ dist/ *.egg-info/
+	rm -rf build/ dist/ *.egg-info/ kytos/web-ui-*
 
 prepare:
 	pip3.6 install --upgrade pip setuptools wheel twine

@@ -146,10 +146,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
         Return False in case the tag is already removed.
         """
-        if tag in self.available_tags:
+        try:
             self.available_tags.remove(tag)
-            return True
-        return False
+        except ValueError:
+            return False
+        return True
 
     def is_tag_available(self, tag):
         """Check if a tag is available."""

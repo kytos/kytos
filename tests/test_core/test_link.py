@@ -63,17 +63,13 @@ class TestLink(unittest.TestCase):
         """Test get next available tags returns different tags"""
         link = Link(self.iface1, self.iface2)
         tag = link.get_next_available_tag()
-        self.assertEqual(tag.value, 1)
-
         next_tag = link.get_next_available_tag()
-        self.assertEqual(next_tag.value, 2)
+        self.assertNotEqual(next_tag.value, tag.value)
 
-    def test_next_tag__with_use_tags(self):
+    def test_next_tag_with_use_tags(self):
         """Test get next availabe tags returns different tags"""
         link = Link(self.iface1, self.iface2)
         tag = link.get_next_available_tag()
-        self.assertEqual(tag.value, 1)
-
         is_available = link.is_tag_available(tag)
         self.assertFalse(is_available)
         link.use_tag(tag)
@@ -82,7 +78,6 @@ class TestLink(unittest.TestCase):
         """Test get next available tags returns different tags"""
         link = Link(self.iface1, self.iface2)
         tag = link.get_next_available_tag()
-        self.assertEqual(tag.value, 1)
 
         is_available = link.is_tag_available(tag)
         self.assertFalse(is_available)
@@ -97,6 +92,7 @@ class TestLink(unittest.TestCase):
         _link = Link(self.iface1, self.iface2)
 
         _i = []
+        _initial_size = len(_link.endpoint_a.available_tags)
 
         @test_concurrently(20)
         def test_get_next_available_tag():
@@ -115,6 +111,7 @@ class TestLink(unittest.TestCase):
             # Check if in the 20 iteration the tag value is 40
             # It happens because we get 2 tags for every iteration
             if _i_len == 20:
-                self.assertEqual(next_tag.value, 40)
+                self.assertEqual(_initial_size,
+                                 len(_link.endpoint_a.available_tags) + 40)
 
         test_get_next_available_tag()

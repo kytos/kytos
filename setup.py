@@ -20,7 +20,7 @@ try:
     from setuptools.command.install import install
 except ModuleNotFoundError:
     print('Please install python3-pip and run setup.py again.')
-    exit(-1)
+    sys.exit(-1)
 
 BASE_ENV = Path(os.environ.get('VIRTUAL_ENV', '/'))
 ETC_FILES = []
@@ -43,15 +43,12 @@ class SimpleCommand(Command):
 
         Use *call* instead of *check_call* to ignore failures.
         """
-        pass
 
     def initialize_options(self):
         """Set default values for options."""
-        pass
 
     def finalize_options(self):
         """Post-process options."""
-        pass
 
 
 class EggInfo(egg_info):
@@ -104,6 +101,7 @@ class DocTest(SimpleCommand):
         cmd = 'make -C docs/ default doctest'
         check_call(cmd, shell=True)
 
+
 class Linter(SimpleCommand):
     """Code linters."""
 
@@ -117,8 +115,7 @@ class Linter(SimpleCommand):
             print('No linter error found.')
         except CalledProcessError:
             print('Linter check failed. Fix the error(s) above and try again.')
-            # disable error exit: 24 new warnings after pylint upgrade
-            #exit(-1)
+            sys.exit(-1)
 
 
 class CITest(SimpleCommand):

@@ -57,8 +57,6 @@ class KytosWrongEventType(KytosEventException):
     that buffer.
     """
 
-    pass
-
 # Exceptions related  to NApps
 
 

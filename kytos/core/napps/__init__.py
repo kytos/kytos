@@ -1,8 +1,8 @@
 """Module responsible for running and managing NApps."""
+from kytos.core.api_server import APIServer
+
 from .base import KytosNApp, NApp
-from .manager import NAppsManager
-# pylint does not recognize the import below as local
-from kytos.core.api_server import APIServer  # pylint: disable=C0411
+from .manager import NAppsManager  # pylint: disable=cyclic-import
 
 __all__ = ('NApp', 'KytosNApp', 'NAppsManager', 'rest')
 

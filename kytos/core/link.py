@@ -6,7 +6,6 @@ interfaces.
 
 import hashlib
 import json
-
 import random
 
 from kytos.core.common import GenericEntity

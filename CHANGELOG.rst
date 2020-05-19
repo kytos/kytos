@@ -33,6 +33,9 @@ Changed
 Added
 =====
 - Added a new `kytos.lib.helpers` to be used by NApps as an utility for tests.
+- [kytos/topology] Added persistence for switches and interfaces
+  administrative status (enabled/disabled).
+- [kytos/of_core] Added tag decorators for small/medium/large tests.
 - Enabled Kytos core in Travis CI.
 
 Changed

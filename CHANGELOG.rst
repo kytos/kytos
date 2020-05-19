@@ -36,19 +36,19 @@ Added
   utility for tests.
 - [kytos/topology] Added persistence for switches and interfaces
   administrative status (enabled/disabled).
+- [kytos/topology] Added REST APIs to enable/disable all interfaces from a switch.
+- [kytos/topology] Added listeners for events from the Maintenance NApp.
 - [kytos/of_core] Added tag decorators for small/medium/large tests.
-- Enabled Kytos core in Travis CI.
 
 Changed
 =======
 - [packaging] Changed Makefile to clean old `web-ui` builds.
-- Updated blueprint: EP018 - Removed `Today` session in Continuous Integration
-  Pipeline.
 
 Fixed
 =====
 - [kytos/topology] Avoid using flapping links: now a link is considered up
   only after a specific amount of time (default: 10 seconds).
+- [kytos/topology] Fixed switches coordinates on the map.
 - Fixed 22 linter issues raised after the pylint upgrade.
 
 

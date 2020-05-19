@@ -7,6 +7,8 @@ interfaces.
 import hashlib
 import json
 
+import random
+
 from kytos.core.common import GenericEntity
 from kytos.core.interface import TAGType
 
@@ -113,6 +115,8 @@ class Link(GenericEntity):
         # we will remove and add elements to the available_tags
         available_tags_a = self.endpoint_a.available_tags.copy()
         available_tags_b = self.endpoint_b.available_tags.copy()
+        random.shuffle(available_tags_a)
+        random.shuffle(available_tags_b)
 
         for tag in available_tags_a:
             # Tag does not exist in endpoint B. Try another tag.

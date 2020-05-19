@@ -26,6 +26,25 @@ Security
 Changed
 =======
 
+[2020.1b3] - "helena" beta3 - 2020-05-19
+****************************************
+
+Added
+=====
+- Enabled python bdist_wheel generation to make the install process via 'pip'
+  easier and faster.
+- Enabled kytos core in Travis CI.
+- Added a lib on kytos with helpers.py to be used as a utility for tests.
+
+Changed
+=======
+- Changed Makefile to clean old `web-ui` builds.
+- Updated blueprint: EP018 - Removed `Today` session in Continuous Integration
+  Pipeline.
+
+Fixed
+=====
+- Fixed some linter issues.
 
 [2020.1b2] - "helena" beta2 - 2020-04-08
 ****************************************

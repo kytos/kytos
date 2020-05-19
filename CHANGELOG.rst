@@ -27,7 +27,7 @@ Changed
 =======
 
 
-[2020.1b`3] - "helena" beta3 - 2020-05-19
+[2020.1b3] - "helena" beta3 - 2020-05-19
 ****************************************
 
 Added
@@ -47,6 +47,8 @@ Changed
 
 Fixed
 =====
+- [kytos/topology] Avoid using flapping links: now a link is considered up
+  only after a specific amount of time (default: 10 seconds).
 - Fixed 22 linter issues raised after the pylint upgrade.
 
 

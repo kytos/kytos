@@ -1,5 +1,5 @@
 """Module with utilities to create tests."""
-from unittest.mock import MagicMock, Mock, create_autospec
+from unittest.mock import Mock, create_autospec
 
 from kytos.core import Controller
 from kytos.core.config import KytosConfig

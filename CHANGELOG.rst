@@ -27,12 +27,13 @@ Changed
 =======
 
 
-[2020.1b3] - "helena" beta3 - 2020-05-19
+[2020.1b`3] - "helena" beta3 - 2020-05-19
 ****************************************
 
 Added
 =====
-- Added a new `kytos.lib.helpers` to be used by NApps as an utility for tests.
+- Added a new ``kytos.lib.helpers`` module to be used by NApps as an
+  utility for tests.
 - [kytos/topology] Added persistence for switches and interfaces
   administrative status (enabled/disabled).
 - [kytos/of_core] Added tag decorators for small/medium/large tests.

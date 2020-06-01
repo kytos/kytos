@@ -97,7 +97,7 @@ class TestLink(unittest.TestCase):
 
         @test_concurrently(20)
         def test_get_next_available_tag():
-            """Test get next availabe tags returns different tags"""
+            """Assert that get_next_available_tag() returns different tags."""
             _i.append(1)
             _i_len = len(_i)
             tag = _link.get_next_available_tag()
@@ -109,10 +109,13 @@ class TestLink(unittest.TestCase):
 
             self.assertNotEqual(tag, next_tag)
 
-            # Check if in the 20 iteration the tag value is 40
-            # It happens because we get 2 tags for every iteration
-            if _i_len == 20:
-                self.assertEqual(_initial_size,
-                                 len(_link.endpoint_a.available_tags) + 40)
-
         test_get_next_available_tag()
+
+        # sleep not needed because test_concurrently waits for all threads
+        # to finish before returning.
+        # time.sleep(0.1)
+
+        # Check if after the 20th iteration we have 40 tags
+        # It happens because we get 2 tags for every iteration
+        self.assertEqual(_initial_size,
+                         len(_link.endpoint_a.available_tags) + 40)

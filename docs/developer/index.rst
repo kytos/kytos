@@ -94,3 +94,4 @@ Kytos Summit provides an opportunity for developers, contributors and other inte
    testing_with_mininet
    unit_tests
    pyof
+   rest_endpoints

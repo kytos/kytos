@@ -2,8 +2,8 @@
 List REST Endpoints
 ****************************
 
-See list of all REST endpoints the kytos/core and the NApps/core.
-Can you test these endpoints using ``curl`` or a rest client as ``postman``.
+See list of all REST endpoints the kytos/core and the NApps.
+You can test these endpoints using ``curl`` or a rest client like ``postman``.
 
 Example request with ``curl``:
 

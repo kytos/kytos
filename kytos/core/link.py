@@ -9,6 +9,7 @@ import json
 import random
 
 from kytos.core.common import GenericEntity
+from kytos.core.exceptions import KytosNoTagAvailableError
 from kytos.core.interface import TAGType
 
 
@@ -134,7 +135,7 @@ class Link(GenericEntity):
             # Tag used successfully by both endpoints. Returning.
             return tag
 
-        return False
+        raise KytosNoTagAvailableError(self)
 
     def make_tag_available(self, tag):
         """Add a specific tag in available_tags."""

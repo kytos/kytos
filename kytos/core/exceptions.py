@@ -57,6 +57,26 @@ class KytosWrongEventType(KytosEventException):
     that buffer.
     """
 
+
+class KytosNoTagAvailableError(Exception):
+    """Exception raised when a link has no vlan available."""
+
+    def __init__(self, link):
+        """Require a link.
+
+        Args:
+            link (:class:`~kytos.core.link.Link`): A link with no vlan
+            available.
+        """
+        super().__init__()
+        self.link = link
+
+    def __str__(self):
+        """Full message."""
+        msg = f'Link {self.link.id} has no vlan available.'
+        return msg
+
+
 # Exceptions related  to NApps
 
 

@@ -27,25 +27,18 @@ Changed
 =======
 
 
-[2020.1rc1] - "helena" release candidate 1 - 2020-06-15
+[2020.1rc1] - "helena" release candidate 1 - 2020-06-17
 *******************************************************
-
-Added
-=====
-- Created new unit tests to pathfinder NApp, increasing coverage to 90%.
-- Created new unit tests to of_core NApp, increasing coverage to 71%.
-- Created new unit tests to storehouse NApp, increasing coverage to 96%.
-- Created new unit tests to topology NApp, increasing coverage to 85%.
-- Created new unit tests to status NApp, increasing coverage to 100%.
-- Created new unit tests to flow_manager NApp, increasing coverage to 97%.
-- Created new unit tests to of_l2ls NApp, increasing coverage to 98%.
-- Created new unit tests to of_lldp NApp, increasing coverage to 94%.
-- Created new unit tests to kronos NApp, increasing coverage to 82%.
-- Created new unit tests to maintenance NApp, increasing coverage to 84%.
 
 Fixed
 =====
-- Fixed random error on concurrent test, waiting for threads to finish before testing.
+- Fixed random error on concurrent tests, waiting for threads to finish before testing.
+
+Changed
+=======
+- Return the original HTTP error code when a NApp is not found in the NApp server
+- ``Link.get_next_available_tag()`` now raises an exception (instead of 
+  returning ``False``) when there is no available tag
 
 
 [2020.1b3] - "helena" beta3 - 2020-05-19

@@ -30,6 +30,11 @@ Changed
 [2020.1rc1] - "helena" release candidate 1 - 2020-06-17
 *******************************************************
 
+Added
+=====
+- Added doc listing all the REST APIs available on Kytos Core + NApps
+
+
 Fixed
 =====
 - Fixed random error on concurrent tests, waiting for threads to finish before testing.

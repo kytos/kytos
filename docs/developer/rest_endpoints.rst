@@ -2,8 +2,8 @@
 List REST Endpoints
 ****************************
 
-See list of all REST endpoints the kytos/core and the NApps.
-You can test these endpoints using ``curl`` or a rest client like ``postman``.
+This is a list of all REST endpoints in kytos/core and all the NApps.
+You can test these endpoints using ``curl`` or a REST client like ``postman``.
 
 Example request with ``curl``:
 
@@ -32,7 +32,7 @@ Update Web UI, used with command ``kytos web update``.
 
     POST http://0.0.0.0:8181/api/kytos/core/web/update/<version>/
 
-Get a list the installed NApps.
+Get a list of the installed NApps.
 
 .. code:: console
 
@@ -57,7 +57,7 @@ Get kytos metadata:
     GET http://0.0.0.0:8181/api/kytos/core/metadata/
 
 
-Get Api Server status.
+Get API Server status.
 
 .. code:: console
 
@@ -110,7 +110,7 @@ Reload a NApp.
 
 See the Auth documentation to get more information about this REST Endpoints.
 
-Return a token if user and token is registered.
+Return a token if user and token are registered.
 
 .. code:: console
 
@@ -158,10 +158,10 @@ Run ``kytosd -f``, and run the code bellow on the kytos console:
     routes
 
 
-NApps REST Endpoints
-====================
+NApps' REST Endpoints
+=====================
 
-For more details and test the NApps REST endpoints check the `NApp server
+For more details on the NApps' REST endpoints, check the `NApp server
 <https://napps.kytos.io/>`_.
 
 **kytos/flow_manager**

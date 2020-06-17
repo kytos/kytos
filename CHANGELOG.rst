@@ -27,6 +27,20 @@ Changed
 =======
 
 
+[2020.1rc1] - "helena" release candidate 1 - 2020-06-17
+*******************************************************
+
+Fixed
+=====
+- Fixed random error on concurrent tests, waiting for threads to finish before testing.
+
+Changed
+=======
+- Return the original HTTP error code when a NApp is not found in the NApp server
+- ``Link.get_next_available_tag()`` now raises an exception (instead of 
+  returning ``False``) when there is no available tag
+
+
 [2020.1b3] - "helena" beta3 - 2020-05-19
 ****************************************
 

@@ -448,8 +448,10 @@ class UNI:
 
     def as_dict(self):
         """Return a dict representating a UNI object."""
-        return {'interface_id': self.interface.id,
-                'tag': self.user_tag.as_dict()}
+        uni_dict = {'interface_id': self.interface.id}
+        if self.user_tag:
+            uni_dict.update({'tag': self.user_tag.as_dict()})
+        return uni_dict
 
     def as_json(self):
         """Return a json representating a UNI object."""

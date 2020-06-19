@@ -32,6 +32,8 @@ class TAG:
         self.value = value
 
     def __eq__(self, other):
+        if not other:
+            return False
         return self.tag_type == other.tag_type and self.value == other.value
 
     def as_dict(self):

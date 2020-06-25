@@ -28,7 +28,7 @@ class TAG:
     """Class that represents a TAG."""
 
     def __init__(self, tag_type, value):
-        self.tag_type = tag_type
+        self.tag_type = TAGType(tag_type)
         self.value = value
 
     def __eq__(self, other):

@@ -4,6 +4,9 @@ import asyncio
 import functools
 import os
 import signal
+import logging
+import sys
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -102,12 +105,23 @@ def main():
 
     config = KytosConfig().options['daemon']
 
+    #Configure to log uncaught exceptions to errlog file
+    sys.excepthook = exhandler
+
     if config.foreground:
         async_main(config)
     else:
         with daemon.DaemonContext():
             async_main(config)
 
+def exhandler(exctype, value, tb):
+    #logs uncaught exceptions into the console and errlog.log 
+    traceback.print_exception(exctype, value, tb)
+    print(tb)
+    logging.basicConfig(filename = 'kytos/kytos/core/errlog.log', 
+                            format = '%(asctime)s:%(pathname)s:%(levelname)s:%(message)s')
+    logging.exception('Uncaught Exception: {0}'.format(str(value)))
+    print('Uncaught Exception: {0}'.format(str(value)))
 
 def async_main(config):
     """Start main Kytos Daemon with asyncio loop."""

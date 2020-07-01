@@ -19,7 +19,7 @@ from kytos.core import Controller
 from kytos.core.config import KytosConfig
 from kytos.core.metadata import __version__
 
-BASE_ENV = Path(os.environ.get('VIRTUAL_ENV', '/'))
+BASE_ENV = Path(os.environ.get("VIRTUAL_ENV", "/"))
 
 
 class KytosPrompt(Prompts):
@@ -27,14 +27,14 @@ class KytosPrompt(Prompts):
 
     def in_prompt_tokens(self):
         """Kytos IPython prompt."""
-        return [(Token.Prompt, 'kytos $> ')]
+        return [(Token.Prompt, "kytos $> ")]
 
 
 def _create_pid_dir():
     """Create the directory in /var/run to hold the pidfile."""
-    pid_dir = os.path.join(BASE_ENV, 'var/run/kytos')
+    pid_dir = os.path.join(BASE_ENV, "var/run/kytos")
     os.makedirs(pid_dir, exist_ok=True)
-    if BASE_ENV == '/':  # system install
+    if BASE_ENV == "/":  # system install
         os.chmod(pid_dir, 0o1777)  # permissions like /tmp
 
 
@@ -83,9 +83,7 @@ def start_shell(controller=None):
     # on Kytos shutdown
     cfg.HistoryAccessor.enabled = False
 
-    ipshell = InteractiveShellEmbed(config=cfg,
-                                    banner1=banner1,
-                                    exit_msg=exit_msg)
+    ipshell = InteractiveShellEmbed(config=cfg, banner1=banner1, exit_msg=exit_msg)
     ipshell.prompts = KytosPrompt(ipshell)
 
     ipshell()
@@ -97,15 +95,16 @@ def start_shell(controller=None):
 #     from concurrent.futures import thread, ThreadPoolExecutor
 #     atexit.unregister(thread._python_exit)
 
+
 def main():
     """Read config and start Kytos in foreground or daemon mode."""
     # data_files is not enough when installing from PyPI
 
     _create_pid_dir()
 
-    config = KytosConfig().options['daemon']
+    config = KytosConfig().options["daemon"]
 
-    #Configure to log uncaught exceptions to errlog file
+    # Configure to log uncaught exceptions to errlog file
     sys.excepthook = exhandler
 
     if config.foreground:
@@ -114,17 +113,22 @@ def main():
         with daemon.DaemonContext():
             async_main(config)
 
+
 def exhandler(exctype, value, tb):
-    #logs uncaught exceptions into the console and errlog.log 
+    # logs uncaught exceptions into the console and errlog.log
     traceback.print_exception(exctype, value, tb)
     print(tb)
-    logging.basicConfig(filename = 'kytos/kytos/core/errlog.log', 
-                            format = '%(asctime)s:%(pathname)s:%(levelname)s:%(message)s')
-    logging.exception('Uncaught Exception: {0}'.format(str(value)))
-    print('Uncaught Exception: {0}'.format(str(value)))
+    logging.basicConfig(
+        filename="kytos/kytos/core/errlog.log",
+        format="%(asctime)s:%(pathname)s:%(levelname)s:%(message)s",
+    )
+    logging.exception("Uncaught Exception: {0}".format(str(value)))
+    print("Uncaught Exception: {0}".format(str(value)))
+
 
 def async_main(config):
     """Start main Kytos Daemon with asyncio loop."""
+
     def stop_controller(controller):
         """Stop the controller before quitting."""
         loop = asyncio.get_event_loop()

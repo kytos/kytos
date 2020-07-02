@@ -27,7 +27,6 @@ from importlib import import_module
 from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
-
 from kytos.core.api_server import APIServer
 # from kytos.core.tcp_server import KytosRequestHandler, KytosServer
 from kytos.core.atcp_server import KytosServer, KytosServerProtocol
@@ -130,17 +129,25 @@ class Controller:
         #: from napps.<username>.<napp_name> import ?....
         sys.path.append(os.path.join(self.options.napps, os.pardir))
         # Configure to log uncaught exceptions to errlog file
+        # pylint: disable=logging-format-interpolation
         logging.basicConfig(filename='kytos/kytos/core/errlog.log',
                             format='%(asctime)s:%(pathname)'
                             's:%(levelname)s:%(message)s')
         sys.excepthook = self.exhandler
 
     def exhandler(self, exctype, value, tb):
+        """Define exception hook hanndler
+        
+        Args:
+            exctype: exception type
+            value: value of exception
+            tb: traceback
+        """
         # logs uncaught exceptions into the console and errlog.log
-        traceback.print_exception(exctype, value, tb)
-        print(tb)
+        traceback.print_exception(exctype, value, traceback)
+        print(traceback)
         print('Uncaught Exception: {0}'.format(str(value)))
-        logging.exception('Uncaught Exception: {0}'.format(str(value)))
+        self.logging.exception('Uncaught Exception: {0}'.format(str(value)))
 
     def enable_logs(self):
         """Register kytos log and enable the logs."""

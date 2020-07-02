@@ -113,10 +113,19 @@ def main():
             async_main(config)
 
 
-def exhandler(exctype, value, tb):
+def exhandler(exctype, value, traceback):
+    """Define exception hook hanndler
+        
+        Args:
+            exctype: exception type
+            value: value of exception
+            tb: traceback
+    """
+    #
     # logs uncaught exceptions into the console and errlog.log
-    traceback.print_exception(exctype, value, tb)
-    print(tb)
+    traceback.print_exception(exctype, value, traceback)
+    print(traceback)
+    # pylint: disable=logging-format-interpolation
     logging.basicConfig(filename='kytos/kytos/core/errlog.log',
                         format='%(asctime)s:%(pathname)s:'
                         '%(levelname)s:%(message)s')

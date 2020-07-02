@@ -135,7 +135,7 @@ class Controller:
                             's:%(levelname)s:%(message)s')
         sys.excepthook = self.exhandler
 
-    def exhandler(self, exctype, value, tb):
+    def exhandler(self, exctype, value, traceback):
         """Define exception hook hanndler
         
         Args:
@@ -147,7 +147,7 @@ class Controller:
         traceback.print_exception(exctype, value, traceback)
         print(traceback)
         print('Uncaught Exception: {0}'.format(str(value)))
-        self.logging.exception('Uncaught Exception: {0}'.format(str(value)))
+        logging.exception('Uncaught Exception: {0}'.format(str(value)))
 
     def enable_logs(self):
         """Register kytos log and enable the logs."""

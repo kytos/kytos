@@ -135,7 +135,7 @@ class Controller:
                             's:%(levelname)s:%(message)s')
         sys.excepthook = self.exhandler
 
-    def exhandler(self, exctype, value, traceback):
+    def exhandler(self, exctype, value, tb):
         """Define exception hook hanndler
         
         Args:
@@ -144,8 +144,8 @@ class Controller:
             tb: traceback
         """
         # logs uncaught exceptions into the console and errlog.log
-        traceback.print_exception(exctype, value, traceback)
-        print(traceback)
+        traceback.print_exception(exctype, value, tb)
+        print(tb)
         print('Uncaught Exception: {0}'.format(str(value)))
         logging.exception('Uncaught Exception: {0}'.format(str(value)))
 

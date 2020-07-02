@@ -115,7 +115,6 @@ def main():
 
 def exhandler(exctype, value, traceback):
     """Define exception hook hanndler
-        
         Args:
             exctype: exception type
             value: value of exception
@@ -123,8 +122,8 @@ def exhandler(exctype, value, traceback):
     """
     #
     # logs uncaught exceptions into the console and errlog.log
-    traceback.print_exception(exctype, value, traceback)
-    print(traceback)
+    traceback.print_exception(exctype, value, tb)
+    print(tb)
     # pylint: disable=logging-format-interpolation
     logging.basicConfig(filename='kytos/kytos/core/errlog.log',
                         format='%(asctime)s:%(pathname)s:'

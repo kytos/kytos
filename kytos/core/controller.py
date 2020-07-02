@@ -135,9 +135,9 @@ class Controller:
                             's:%(levelname)s:%(message)s')
         sys.excepthook = self.exhandler
 
+    # pylint: disable=invalid-name
     def exhandler(self, exctype, value, tb):
         """Define exception hook hanndler
-        
         Args:
             exctype: exception type
             value: value of exception

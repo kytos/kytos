@@ -113,7 +113,8 @@ def main():
             async_main(config)
 
 
-def exhandler(exctype, value, traceback):
+# pylint: disable=invalid-name
+def exhandler(exctype, value, tb):
     """Define exception hook hanndler
         Args:
             exctype: exception type

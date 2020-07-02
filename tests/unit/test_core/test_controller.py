@@ -2,6 +2,7 @@
 import asyncio
 import json
 import logging
+import tempfile
 import warnings
 from copy import copy
 from unittest import TestCase
@@ -12,7 +13,7 @@ from kytos.core.config import KytosConfig
 from kytos.core.logs import LogManager
 
 
-# pylint: disable=too-many-public-methods
+# pylint: disable=protected-access, too-many-public-methods
 class TestController(TestCase):
     """Controller tests."""
 
@@ -159,6 +160,157 @@ class TestController(TestCase):
         """Test the enable debug logger with wrong name."""
         self.assertRaises(ValueError,
                           self.controller.toggle_debug, name="foobar")
+
+    @patch('kytos.core.controller.Controller.start_controller')
+    @patch('kytos.core.controller.Controller.create_pidfile')
+    @patch('kytos.core.controller.Controller.enable_logs')
+    def test_start(self, *args):
+        """Test activate method."""
+        (mock_enable_logs, mock_create_pidfile, mock_start_controller) = args
+        self.controller.start()
+
+        mock_enable_logs.assert_called()
+        mock_create_pidfile.assert_called()
+        mock_start_controller.assert_called()
+
+    @patch('os.getpid')
+    @patch('kytos.core.controller.atexit')
+    def test_create_pidfile(self, *args):
+        """Test activate method."""
+        (_, mock_getpid) = args
+        mock_getpid.return_value = 2
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_file.write(b'1')
+            tmp_file.seek(0)
+            self.controller.options.pidfile = tmp_file.name
+
+            self.controller.create_pidfile()
+
+            pid = tmp_file.read()
+            self.assertEqual(pid, b'2')
+
+    @staticmethod
+    @patch('kytos.core.controller.KytosServer')
+    @patch('kytos.core.controller.Controller.app_event_handler')
+    @patch('kytos.core.controller.Controller.msg_out_event_handler')
+    @patch('kytos.core.controller.Controller.msg_in_event_handler')
+    @patch('kytos.core.controller.Controller.raw_event_handler')
+    @patch('kytos.core.controller.Controller.load_napps')
+    @patch('kytos.core.controller.Controller.pre_install_napps')
+    def test_start_controller(*args):
+        """Test activate method."""
+        (mock_pre_install_napps, mock_load_napps, mock_raw_event_handler,
+         mock_msg_in_event_handler, mock_msg_out_event_handler,
+         mock_app_event_handler, _) = args
+
+        napp = MagicMock()
+        loop = MagicMock()
+        options = KytosConfig().options['daemon']
+        options.napps_pre_installed = [napp]
+        controller = Controller(options, loop=loop)
+        controller.log = Mock()
+
+        controller.start_controller()
+
+        controller.server.serve_forever.assert_called()
+        calls = [call(mock_raw_event_handler.return_value),
+                 call(mock_msg_in_event_handler.return_value),
+                 call(mock_msg_out_event_handler.return_value),
+                 call(mock_app_event_handler.return_value)]
+        loop.create_task.assert_has_calls(calls)
+        mock_pre_install_napps.assert_called_with([napp])
+        mock_load_napps.assert_called()
+
+    @patch('kytos.core.controller.Controller.__init__')
+    @patch('kytos.core.controller.Controller.start')
+    @patch('kytos.core.controller.Controller.stop')
+    def test_restart(self, *args):
+        """Test restart method."""
+        (mock_stop, mock_start, mock_init) = args
+        self.controller.started_at = 1
+
+        graceful = True
+        self.controller.restart(graceful)
+
+        mock_stop.assert_called_with(graceful)
+        mock_init.assert_called_with(self.controller.options)
+        mock_start.assert_called_with(restart=True)
+
+    @patch('kytos.core.controller.Controller.stop_controller')
+    def test_stop(self, mock_stop_controller):
+        """Test stop method."""
+        self.controller.started_at = 1
+
+        graceful = True
+        self.controller.stop(graceful)
+
+        mock_stop_controller.assert_called_with(graceful)
+
+    @patch('kytos.core.controller.Controller.unload_napps')
+    @patch('kytos.core.controller.KytosBuffers')
+    def test_stop_controller(self, *args):
+        """Test stop_controller method."""
+        (_, mock_unload_napps) = args
+        server = MagicMock()
+        buffers = MagicMock()
+        api_server = MagicMock()
+        napp_dir_listener = MagicMock()
+        pool = MagicMock()
+        self.controller.server = server
+        self.controller.buffers = buffers
+        self.controller.api_server = api_server
+        self.controller.napp_dir_listener = napp_dir_listener
+        self.controller._pool = pool
+
+        self.controller.stop_controller()
+
+        buffers.send_stop_signal.assert_called()
+        api_server.stop_api_server.assert_called()
+        napp_dir_listener.stop.assert_called()
+        pool.shutdown.assert_called()
+        mock_unload_napps.assert_called()
+        server.shutdown.assert_called()
+
+    def test_status(self):
+        """Test status method."""
+        status_1 = self.controller.status()
+        self.controller.started_at = 1
+        status_2 = self.controller.status()
+
+        self.assertEqual(status_1, 'Stopped')
+        self.assertEqual(status_2, 'Running since 1')
+
+    @patch('kytos.core.controller.now')
+    def test_uptime(self, mock_now):
+        """Test uptime method."""
+        mock_now.return_value = 11
+
+        uptime_1 = self.controller.uptime()
+        self.controller.started_at = 1
+        uptime_2 = self.controller.uptime()
+
+        self.assertEqual(uptime_1, 0)
+        self.assertEqual(uptime_2, 10)
+
+    def test_metadata_endpoint(self):
+        """Test metadata_endpoint method."""
+        metadata = self.controller.metadata_endpoint()
+        json_metadata = json.loads(metadata)
+
+        expected_keys = ['__version__', '__author__', '__license__', '__url__',
+                         '__description__']
+        self.assertEqual(list(json_metadata.keys()), expected_keys)
+
+    def test_notify_listeners(self):
+        """Test notify_listeners method."""
+        method = MagicMock()
+        self.controller.events_listeners = {'kytos/any': [method]}
+
+        event = MagicMock()
+        event.name = 'kytos/any'
+        self.controller.notify_listeners(event)
+
+        method.assert_called_with(event)
 
     def test_get_interface_by_id__not_interface(self):
         """Test get_interface_by_id method when interface does not exist."""

@@ -27,6 +27,7 @@ from importlib import import_module
 from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+
 from kytos.core.api_server import APIServer
 # from kytos.core.tcp_server import KytosRequestHandler, KytosServer
 from kytos.core.atcp_server import KytosServer, KytosServerProtocol
@@ -135,7 +136,7 @@ class Controller:
                             's:%(levelname)s:%(message)s')
         sys.excepthook = self.exhandler
 
-    # pylint: disable=invalid-name
+    # pylint: disable=invalid-name,no-self-use
     def exhandler(self, exctype, value, tb):
         """Define exception hook hanndler
         Args:
@@ -147,6 +148,7 @@ class Controller:
         traceback.print_exception(exctype, value, tb)
         print(tb)
         print('Uncaught Exception: {0}'.format(str(value)))
+        # pylint: disable=logging-format-interpolation
         logging.exception('Uncaught Exception: {0}'.format(str(value)))
 
     def enable_logs(self):

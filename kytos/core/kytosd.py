@@ -2,20 +2,21 @@
 """Start Kytos SDN Platform core."""
 import asyncio
 import functools
+import logging
 import os
 import signal
-import logging
 import sys
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 import daemon
 from IPython.terminal.embed import InteractiveShellEmbed
 from IPython.terminal.prompts import Prompts, Token
-from traitlets.config.loader import Config
 from kytos.core import Controller
 from kytos.core.config import KytosConfig
 from kytos.core.metadata import __version__
+from traitlets.config.loader import Config
 
 BASE_ENV = Path(os.environ.get('VIRTUAL_ENV', '/'))
 

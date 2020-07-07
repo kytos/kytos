@@ -1,16 +1,53 @@
 """Interface tests."""
 import logging
 import unittest
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 from pyof.v0x04.common.port import PortFeatures
 
-from kytos.core.interface import TAG, Interface, TAGType
+from kytos.core.interface import TAG, UNI, Interface, TAGType
 from kytos.core.switch import Switch
 
 logging.basicConfig(level=logging.CRITICAL)
 
 
+class TestTAG(unittest.TestCase):
+    """TAG tests."""
+
+    def setUp(self):
+        """Create TAG object."""
+        self.tag = TAG(1, 123)
+
+    def test_from_dict(self):
+        """Test from_dict method."""
+        tag_dict = {'tag_type': 2, 'value': 456}
+        tag = self.tag.from_dict(tag_dict)
+
+        self.assertEqual(tag.tag_type, 2)
+        self.assertEqual(tag.value, 456)
+
+    def test_as_dict(self):
+        """Test as_dict method."""
+        self.assertEqual(self.tag.as_dict(), {'tag_type': 1, 'value': 123})
+
+    def test_from_json(self):
+        """Test from_json method."""
+        tag_json = '{"tag_type": 2, "value": 456}'
+        tag = self.tag.from_json(tag_json)
+
+        self.assertEqual(tag.tag_type, 2)
+        self.assertEqual(tag.value, 456)
+
+    def test_as_json(self):
+        """Test as_json method."""
+        self.assertEqual(self.tag.as_json(), '{"tag_type": 1, "value": 123}')
+
+    def test__repr__(self):
+        """Test __repr__ method."""
+        self.assertEqual(repr(self.tag), 'TAG(1, 123)')
+
+
+# pylint: disable=protected-access, too-many-public-methods
 class TestInterface(unittest.TestCase):
     """Test Interfaces."""
 
@@ -166,3 +203,124 @@ class TestInterface(unittest.TestCase):
         self.iface.make_tag_available(tag)
         is_success = self.iface.use_tag(tag)
         self.assertTrue(is_success)
+
+    def test_enable(self):
+        """Test enable method."""
+        self.iface.switch = MagicMock()
+
+        self.iface.enable()
+
+        self.iface.switch.enable.assert_called()
+        self.assertTrue(self.iface._enabled)
+
+    def test_get_endpoint(self):
+        """Test get_endpoint method."""
+        endpoint = ('endpoint', 'time')
+        self.iface.endpoints = [endpoint]
+
+        return_endpoint = self.iface.get_endpoint('endpoint')
+
+        self.assertEqual(return_endpoint, endpoint)
+
+    def test_add_endpoint(self):
+        """Test add_endpoint method."""
+        self.iface.add_endpoint('endpoint')
+
+        self.assertEqual(len(self.iface.endpoints), 1)
+
+    def test_delete_endpoint(self):
+        """Test delete_endpoint method."""
+        endpoint = ('endpoint', 'time')
+        self.iface.endpoints = [endpoint]
+
+        self.iface.delete_endpoint('endpoint')
+
+        self.assertEqual(len(self.iface.endpoints), 0)
+
+    def test_update_endpoint(self):
+        """Test update_endpoint method."""
+        endpoint = ('endpoint', 'time')
+        self.iface.endpoints = [endpoint]
+
+        self.iface.update_endpoint('endpoint')
+
+        self.assertEqual(len(self.iface.endpoints), 1)
+
+    def test_update_link__none(self):
+        """Test update_link method when this interface is not in link
+           endpoints."""
+        link = MagicMock()
+        link.endpoint_a = MagicMock()
+        link.endpoint_b = MagicMock()
+
+        result = self.iface.update_link(link)
+
+        self.assertFalse(result)
+
+    def test_update_link__endpoint_a(self):
+        """Test update_link method when this interface is the endpoint a."""
+        interface = MagicMock()
+        interface.link = None
+        link = MagicMock()
+        link.endpoint_a = self.iface
+        link.endpoint_b = interface
+
+        self.iface.update_link(link)
+
+        self.assertEqual(self.iface.link, link)
+        self.assertEqual(interface.link, link)
+
+    def test_update_link__endpoint_b(self):
+        """Test update_link method when this interface is the endpoint b."""
+        interface = MagicMock()
+        interface.link = None
+        link = MagicMock()
+        link.endpoint_a = interface
+        link.endpoint_b = self.iface
+
+        self.iface.update_link(link)
+
+        self.assertEqual(self.iface.link, link)
+        self.assertEqual(interface.link, link)
+
+
+class TestUNI(unittest.TestCase):
+    """UNI tests."""
+
+    def setUp(self):
+        """Create UNI object."""
+        switch = MagicMock()
+        switch.dpid = '00:00:00:00:00:00:00:01'
+        interface = Interface('name', 1, switch)
+        user_tag = TAG(1, 123)
+        self.uni = UNI(interface, user_tag)
+
+    def test__eq__(self):
+        """Test __eq__ method."""
+        user_tag = TAG(2, 456)
+        interface = Interface('name', 2, MagicMock())
+        other = UNI(interface, user_tag)
+
+        self.assertFalse(self.uni.__eq__(other))
+
+    def test_is_valid(self):
+        """Test is_valid method for a valid, invalid and none tag."""
+        self.assertTrue(self.uni.is_valid())
+
+        self.uni.user_tag = TAG(999999, 123)
+        self.assertFalse(self.uni.is_valid())
+
+        self.uni.user_tag = None
+        self.assertTrue(self.uni.is_valid())
+
+    def test_as_dict(self):
+        """Test as_dict method."""
+        expected_dict = {'interface_id': '00:00:00:00:00:00:00:01:1',
+                         'tag': {'tag_type': 1, 'value': 123}}
+        self.assertEqual(self.uni.as_dict(), expected_dict)
+
+    def test_as_json(self):
+        """Test as_json method."""
+        expected_json = '{"interface_id": "00:00:00:00:00:00:00:01:1", ' + \
+                        '"tag": {"tag_type": 1, "value": 123}}'
+        self.assertEqual(self.uni.as_json(), expected_json)

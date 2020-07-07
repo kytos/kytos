@@ -21,6 +21,7 @@ class TestAPIServer(unittest.TestCase):
         """Instantiate a APIServer."""
         self.api_server = APIServer('CustomName', False)
         self.napps_manager = MagicMock()
+        self.api_server.server = MagicMock()
         self.api_server.napps_manager = self.napps_manager
         self.api_server.napps_dir = 'napps_dir'
         self.api_server.flask_dir = 'flask_dir'
@@ -35,6 +36,40 @@ class TestAPIServer(unittest.TestCase):
             warning = wrngs[0]
             self.assertEqual(warning.category, DeprecationWarning)
             self.assertIn('@rest', str(warning.message))
+
+    def test_run(self):
+        """Test run method."""
+        self.api_server.run()
+
+        self.api_server.server.run.assert_called_with(self.api_server.app,
+                                                      self.api_server.listen,
+                                                      self.api_server.port)
+
+    @patch('sys.exit')
+    def test_run_error(self, mock_exit):
+        """Test run method to error case."""
+        self.api_server.server.run.side_effect = OSError
+        self.api_server.run()
+
+        mock_exit.assert_called()
+
+    @patch('kytos.core.api_server.request')
+    def test_shutdown_api(self, mock_request):
+        """Test shutdown_api method."""
+        mock_request.host = 'localhost:8181'
+
+        self.api_server.shutdown_api()
+
+        self.api_server.server.stop.assert_called()
+
+    @patch('kytos.core.api_server.request')
+    def test_shutdown_api__error(self, mock_request):
+        """Test shutdown_api method to error case."""
+        mock_request.host = 'any:port'
+
+        self.api_server.shutdown_api()
+
+        self.api_server.server.stop.assert_not_called()
 
     def test_status_api(self):
         """Test status_api method."""

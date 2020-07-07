@@ -11,6 +11,7 @@ from kytos.core.switch import Switch
 logging.basicConfig(level=logging.CRITICAL)
 
 
+# pylint: disable=protected-access
 class TestLink(unittest.TestCase):
     """Test Links."""
 
@@ -119,3 +120,10 @@ class TestLink(unittest.TestCase):
         # It happens because we get 2 tags for every iteration
         self.assertEqual(_initial_size,
                          len(_link.endpoint_a.available_tags) + 40)
+
+    def test_get_available_vlans(self):
+        """Test _get_available_vlans method."""
+        link = Link(self.iface1, self.iface2)
+
+        vlans = link._get_available_vlans(link.endpoint_a)
+        self.assertEqual(len(vlans), 4095)

@@ -2,6 +2,7 @@
 import asyncio
 import json
 import logging
+import sys
 import tempfile
 import warnings
 from copy import copy
@@ -437,6 +438,70 @@ class TestController(TestCase):
         expected_switches = {'00:00:00:00:00:00:00:01': switch}
         self.assertEqual(self.controller.switches, expected_switches)
 
+    @patch('kytos.core.controller.module_from_spec')
+    @patch('kytos.core.controller.spec_from_file_location')
+    def test_import_napp(self, *args):
+        """Test _import_napp method."""
+        (mock_spec_from_file, mock_module_from_spec) = args
+        napp_spec = MagicMock()
+        napp_spec.name = 'spec_name'
+        mock_spec_from_file.return_value = napp_spec
+        napp_module = MagicMock()
+        mock_module_from_spec.return_value = napp_module
+
+        self.controller.options.napps = 'napps'
+        self.controller._import_napp('kytos', 'napp')
+
+        self.assertEqual(sys.modules[napp_spec.name], napp_module)
+        mock_spec_from_file.assert_called_with('napps.kytos.napp.main',
+                                               'napps/kytos/napp/main.py')
+        napp_spec.loader.exec_module.assert_called_with(napp_module)
+
+    def test_load_napp__loaded(self):
+        """Test load_napp method when napp is already loaded."""
+        napp = MagicMock()
+        self.controller.napps = {('kytos', 'napp'): napp}
+
+        self.controller.load_napp('kytos', 'napp')
+
+        self.assertEqual(self.controller.napps, {('kytos', 'napp'): napp})
+
+    @patch('kytos.core.controller.Controller._import_napp')
+    def test_load_napp__module_not_found(self, mock_import_napp):
+        """Test load_napp method when module is not found."""
+        mock_import_napp.side_effect = ModuleNotFoundError
+        self.controller.napps = {}
+
+        self.controller.load_napp('kytos', 'napp')
+
+        self.assertEqual(self.controller.napps, {})
+
+    @patch('kytos.core.controller.Controller._import_napp')
+    def test_load_napp__file_not_found(self, mock_import_napp):
+        """Test load_napp method when file is not found."""
+        mock_import_napp.side_effect = FileNotFoundError
+        self.controller.napps = {}
+
+        self.controller.load_napp('kytos', 'napp')
+
+        self.assertEqual(self.controller.napps, {})
+
+    @patch('kytos.core.api_server.APIServer.register_napp_endpoints')
+    @patch('kytos.core.controller.Controller._import_napp')
+    def test_load_napp__error(self, *args):
+        """Test load_napp method when an error is raised on napp module
+           attribution."""
+        (mock_import_napp, _) = args
+        self.controller.napps = {}
+
+        module = MagicMock()
+        module.Main.side_effect = Exception
+        mock_import_napp.return_value = module
+
+        self.controller.load_napp('kytos', 'napp')
+
+        self.assertEqual(self.controller.napps, {})
+
     @patch('kytos.core.api_server.APIServer.register_napp_endpoints')
     @patch('kytos.core.controller.Controller._import_napp')
     def test_load_napp(self, *args):
@@ -479,6 +544,26 @@ class TestController(TestCase):
         self.controller.load_napps()
 
         mock_load.assert_called_with('kytos', 'name')
+
+    @patch('kytos.core.controller.import_module')
+    def test_reload_napp_module__module_not_found(self, mock_import_module):
+        """Test reload_napp_module method when module is not found."""
+        mock_import_module.side_effect = ModuleNotFoundError
+
+        with self.assertRaises(ModuleNotFoundError):
+            self.controller.reload_napp_module('kytos', 'napp', 'napp_file')
+
+    @patch('kytos.core.controller.reload_module')
+    @patch('kytos.core.controller.import_module')
+    def test_reload_napp_module__import_error(self, *args):
+        """Test reload_napp_module method when an import error occurs."""
+        (mock_import_module, mock_reload_module) = args
+        napp_module = MagicMock()
+        mock_import_module.return_value = napp_module
+        mock_reload_module.side_effect = ImportError
+
+        with self.assertRaises(ImportError):
+            self.controller.reload_napp_module('kytos', 'napp', 'napp_file')
 
     @patch('kytos.core.controller.reload_module')
     @patch('kytos.core.controller.import_module')

@@ -5,6 +5,7 @@ import warnings
 # Disable not-grouped imports that conflicts with isort
 from unittest.mock import (MagicMock, Mock, patch,  # pylint: disable=C0412
                            sentinel)
+from urllib.error import HTTPError
 
 from kytos.core.api_server import APIServer
 from kytos.core.napps import rest
@@ -144,7 +145,53 @@ class TestAPIServer(unittest.TestCase):
 
         url = 'https://github.com/kytos/ui/releases/download/1.0/latest.zip'
         mock_urlretrieve.assert_called_with(url)
-        self.assertEqual(response, "updated the web ui")
+        self.assertEqual(response, 'updated the web ui')
+
+    @patch('kytos.core.api_server.urlretrieve')
+    @patch('kytos.core.api_server.urlopen')
+    @patch('os.path.exists')
+    def test_update_web_ui__http_error(self, *args):
+        """Test update_web_ui method to http error case."""
+        (mock_exists, mock_urlopen, mock_urlretrieve) = args
+
+        data = json.dumps({'tag_name': 1.0})
+        url_response = MagicMock()
+        url_response.readlines.return_value = [data]
+        mock_urlopen.return_value = url_response
+        mock_urlretrieve.side_effect = HTTPError('url', 123, 'msg', 'hdrs',
+                                                 MagicMock())
+
+        mock_exists.return_value = False
+
+        response = self.api_server.update_web_ui()
+
+        expected_response = 'Uri not found https://github.com/kytos/ui/' + \
+                            'releases/download/1.0/latest.zip.'
+        self.assertEqual(response, expected_response)
+
+    @patch('kytos.core.api_server.urlretrieve')
+    @patch('kytos.core.api_server.urlopen')
+    @patch('zipfile.ZipFile')
+    @patch('os.path.exists')
+    def test_update_web_ui__zip_error(self, *args):
+        """Test update_web_ui method to error case in zip file."""
+        (mock_exists, mock_zipfile, mock_urlopen, _) = args
+        zipfile = MagicMock()
+        zipfile.testzip.return_value = 'any'
+        mock_zipfile.return_value = zipfile
+
+        data = json.dumps({'tag_name': 1.0})
+        url_response = MagicMock()
+        url_response.readlines.return_value = [data]
+        mock_urlopen.return_value = url_response
+
+        mock_exists.return_value = False
+
+        response = self.api_server.update_web_ui()
+
+        expected_response = 'Zip file from https://github.com/kytos/ui/' + \
+                            'releases/download/1.0/latest.zip is corrupted.'
+        self.assertEqual(response, expected_response)
 
     def test_enable_napp__error_not_installed(self):
         """Test _enable_napp method error case when napp is not installed."""
@@ -213,6 +260,17 @@ class TestAPIServer(unittest.TestCase):
 
         self.assertEqual(resp, '{"response": "error"}')
         self.assertEqual(code, 500)
+
+    def test_install_napp__http_error(self):
+        """Test _install_napp method to http error case."""
+        self.napps_manager.is_installed.return_value = False
+        self.napps_manager.install.side_effect = HTTPError('url', 123, 'msg',
+                                                           'hdrs', MagicMock())
+
+        resp, code = self.api_server._install_napp('kytos', 'napp')
+
+        self.assertEqual(resp, '{"response": "error"}')
+        self.assertEqual(code, 123)
 
     def test_install_napp__success_is_installed(self):
         """Test _install_napp method success case when napp is installed."""
@@ -290,6 +348,25 @@ class TestAPIServer(unittest.TestCase):
         self.assertEqual(enabled_napps, '{"napps": [["kytos", "name"]]}')
         self.assertEqual(code, 200)
 
+    def test_get_napp_metadata__not_installed(self):
+        """Test _get_napp_metadata method to error case when napp is not
+           installed."""
+        self.napps_manager.is_installed.return_value = False
+        resp, code = self.api_server._get_napp_metadata('kytos', 'napp',
+                                                        'version')
+
+        self.assertEqual(resp, 'NApp is not installed.')
+        self.assertEqual(code, 400)
+
+    def test_get_napp_metadata__invalid_key(self):
+        """Test _get_napp_metadata method to error case when key is invalid."""
+        self.napps_manager.is_installed.return_value = True
+        resp, code = self.api_server._get_napp_metadata('kytos', 'napp',
+                                                        'any')
+
+        self.assertEqual(resp, 'Invalid key.')
+        self.assertEqual(code, 400)
+
     def test_get_napp_metadata(self):
         """Test _get_napp_metadata method."""
         data = '{"username": "kytos", \
@@ -297,12 +374,12 @@ class TestAPIServer(unittest.TestCase):
                  "version": "1.0"}'
         self.napps_manager.is_installed.return_value = True
         self.napps_manager.get_napp_metadata.return_value = data
-        metadata, resp = self.api_server._get_napp_metadata('kytos', 'napp',
-                                                            'version')
+        resp, code = self.api_server._get_napp_metadata('kytos', 'napp',
+                                                        'version')
 
         expected_metadata = json.dumps({'version': data})
-        self.assertEqual(metadata, expected_metadata)
-        self.assertEqual(resp, 200)
+        self.assertEqual(resp, expected_metadata)
+        self.assertEqual(code, 200)
 
     @staticmethod
     def __custom_endpoint():

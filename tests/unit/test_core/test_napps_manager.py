@@ -74,17 +74,72 @@ class TestNAppsManager(unittest.TestCase):
         self.assertTrue(installed)
 
     @patch('shutil.rmtree')
+    @patch('shutil.move')
+    @patch('kytos.core.napps.NApp.create_from_json')
+    @patch('kytos.core.napps.NApp.create_from_uri')
+    @patch('kytos.core.napps.NAppsManager.enable')
+    @patch('kytos.core.napps.NAppsManager.get_all_napps')
+    @patch('kytos.core.napps.NAppsManager._find_napp')
+    def test_install_and_enable(self, *args):
+        """Test install method enabling the napp."""
+        (_, _, mock_enable, mock_create_from_uri, mock_create_from_json, _,
+         _) = args
+        napp = MagicMock()
+        napp.username = 'kytos'
+        napp.name = 'napp'
+        mock_create_from_uri.return_value = napp
+        mock_create_from_json.return_value = napp
+
+        uri = 'file://any/kytos/napp:1.0'
+        self.napps_manager._installed_path = self.get_path(['json'])
+        installed = self.napps_manager.install(uri, True)
+
+        self.assertTrue(installed)
+        mock_enable.assert_called_with('kytos', 'napp')
+
+    @patch('kytos.core.napps.NApp.create_from_uri')
+    @patch('kytos.core.napps.NAppsManager.get_all_napps')
+    def test_install__installed(self, *args):
+        """Test install method when napp is already installed."""
+        (mock_get_all_napps, mock_create_from_uri) = args
+        napp = MagicMock()
+        mock_create_from_uri.return_value = napp
+        mock_get_all_napps.return_value = [napp]
+
+        uri = 'file://any/kytos/napp:1.0'
+        installed = self.napps_manager.install(uri, False)
+
+        self.assertFalse(installed)
+
     @patch('kytos.core.napps.NAppsManager.is_installed', return_value=True)
     @patch('kytos.core.napps.manager.NewNAppManager')
     def test_uninstall(self, *args):
         """Test uninstall method."""
-        (mock_new_napp_manager, _, _) = args
+        (mock_new_napp_manager, _) = args
         mock_new_napp_manager.return_value = self.get_new_napps_manager()
 
         self.napps_manager._installed_path = self.get_path(['json'])
         uninstalled = self.napps_manager.uninstall('kytos', 'napp')
 
         self.assertTrue(uninstalled)
+
+    @patch('kytos.core.napps.NAppsManager.is_installed', return_value=False)
+    @patch('kytos.core.napps.manager.NewNAppManager')
+    def test_uninstall__not_installed(self, *args):
+        """Test uninstall method when napp is not installed."""
+        (mock_new_napp_manager, _) = args
+        mock_new_napp_manager.return_value = self.get_new_napps_manager()
+
+        uninstalled = self.napps_manager.uninstall('kytos', 'napp')
+
+        self.assertTrue(uninstalled)
+
+    @patch('kytos.core.napps.NAppsManager.is_enabled', return_value=True)
+    def test_uninstall__enabled(self, _):
+        """Test uninstall method when napp is enabled."""
+        uninstalled = self.napps_manager.uninstall('kytos', 'napp')
+
+        self.assertFalse(uninstalled)
 
     @patch('kytos.core.napps.manager.NewNAppManager')
     def test_enable(self, mock_new_napp_manager):

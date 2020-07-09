@@ -34,6 +34,37 @@ class TestLink(unittest.TestCase):
 
         return iface1, iface2
 
+    def test__eq__(self):
+        """Test __eq__ method."""
+        link_1 = Link(self.iface1, self.iface2)
+        link_2 = Link(self.iface2, self.iface1)
+
+        iface1, iface2 = self._get_v0x04_ifaces()
+        iface1.port_number = 1
+        iface2.port_number = 2
+        link_3 = Link(iface1, iface2)
+
+        self.assertTrue(link_1.__eq__(link_2))
+        self.assertFalse(link_1.__eq__(link_3))
+
+    def test_id(self):
+        """Test id property."""
+        link = Link(self.iface1, self.iface2)
+        ids = []
+
+        for value in [('A', 1, 'B', 2), ('B', 2, 'A', 1), ('A', 1, 'A', 2),
+                      ('A', 2, 'A', 1)]:
+            link.endpoint_a.switch.dpid = value[0]
+            link.endpoint_a.port_number = value[1]
+            link.endpoint_b.switch.dpid = value[2]
+            link.endpoint_b.port_number = value[3]
+
+            ids.append(link.id)
+
+        self.assertEqual(ids[0], ids[1])
+        self.assertEqual(ids[2], ids[3])
+        self.assertNotEqual(ids[0], ids[2])
+
     def test_init(self):
         """Test normal Link initialization."""
         link = Link(self.iface1, self.iface2)

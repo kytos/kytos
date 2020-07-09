@@ -22,7 +22,7 @@ class TestController(TestCase):
         """Instantiate a controller."""
 
         self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
+        asyncio.set_event_loop(self.loop)
 
         self.options = KytosConfig().options['daemon']
         self.napps_manager = Mock()
@@ -415,6 +415,18 @@ class TestController(TestCase):
 
         self.assertEqual(self.controller.switches, {})
 
+    def test_remove_switch__error(self):
+        """Test remove_switch method to error case."""
+        switch_1 = MagicMock()
+        switch_2 = MagicMock()
+        switch_1.dpid = '00:00:00:00:00:00:00:01'
+        switch_2.dpid = '00:00:00:00:00:00:00:02'
+        self.controller.switches = {switch_1.dpid: switch_1}
+
+        self.controller.remove_switch(switch_2)
+
+        self.assertEqual(self.controller.switches, {switch_1.dpid: switch_1})
+
     def test_new_connection(self):
         """Test new_connection method."""
         self.controller.connections = {}
@@ -585,13 +597,25 @@ class TestController(TestCase):
         """Test reload_napp method."""
         (mock_reload_napp_module, mock_unload, mock_load) = args
 
-        self.controller.reload_napp('kytos', 'napp')
+        code = self.controller.reload_napp('kytos', 'napp')
 
         mock_unload.assert_called_with('kytos', 'napp')
         calls = [call('kytos', 'napp', 'settings'),
                  call('kytos', 'napp', 'main')]
         mock_reload_napp_module.assert_has_calls(calls)
         mock_load.assert_called_with('kytos', 'napp')
+        self.assertEqual(code, 200)
+
+    @patch('kytos.core.controller.Controller.unload_napp')
+    @patch('kytos.core.controller.Controller.reload_napp_module')
+    def test_reload_napp__error(self, *args):
+        """Test reload_napp method to error case."""
+        (mock_reload_napp_module, _) = args
+        mock_reload_napp_module.side_effect = ModuleNotFoundError
+
+        code = self.controller.reload_napp('kytos', 'napp')
+
+        self.assertEqual(code, 400)
 
     @patch('kytos.core.controller.Controller.reload_napp', return_value=200)
     def test_rest_reload_napp(self, mock_reload_napp):
@@ -611,3 +635,63 @@ class TestController(TestCase):
         mock_reload_napp.assert_called_with('kytos', 'napp')
         self.assertEqual(resp, 'reloaded')
         self.assertEqual(code, 200)
+
+    @patch('kytos.core.controller.Controller.notify_listeners')
+    def test_raw_event_handler(self, mock_notify_listeners):
+        """Test raw_event_handler async method by handling a shutdown event."""
+        event = MagicMock()
+        event.name = 'kytos/core.shutdown'
+        self.controller.buffers.raw._queue.sync_q.put(event)
+
+        self.loop.run_until_complete(self.controller.raw_event_handler())
+
+        mock_notify_listeners.assert_called_with(event)
+
+    @patch('kytos.core.controller.Controller.notify_listeners')
+    def test_msg_in_event_handler(self, mock_notify_listeners):
+        """Test msg_in_event_handler async method by handling a shutdown
+           event."""
+        event = MagicMock()
+        event.name = 'kytos/core.shutdown'
+        self.controller.buffers.msg_in._queue.sync_q.put(event)
+
+        self.loop.run_until_complete(self.controller.msg_in_event_handler())
+
+        mock_notify_listeners.assert_called_with(event)
+
+    @patch('kytos.core.controller.Controller.notify_listeners')
+    def test_msg_out_event_handler(self, mock_notify_listeners):
+        """Test msg_out_event_handler async method by handling a common and a
+           shutdown event."""
+        dst = MagicMock()
+        dst.state = 0
+        packet = MagicMock()
+        msg = MagicMock()
+        msg.pack.return_value = packet
+
+        event_1 = MagicMock()
+        event_1.name = 'kytos/core.any'
+        event_1.destination = dst
+        event_1.content = {"message": msg}
+
+        event_2 = MagicMock()
+        event_2.name = 'kytos/core.shutdown'
+
+        self.controller.buffers.msg_out._queue.sync_q.put(event_1)
+        self.controller.buffers.msg_out._queue.sync_q.put(event_2)
+
+        self.loop.run_until_complete(self.controller.msg_out_event_handler())
+
+        dst.send.assert_called_with(packet)
+        mock_notify_listeners.assert_called_with(event_1)
+
+    @patch('kytos.core.controller.Controller.notify_listeners')
+    def test_app_event_handler(self, mock_notify_listeners):
+        """Test app_event_handler async method by handling a shutdown event."""
+        event = MagicMock()
+        event.name = 'kytos/core.shutdown'
+        self.controller.buffers.app._queue.sync_q.put(event)
+
+        self.loop.run_until_complete(self.controller.app_event_handler())
+
+        mock_notify_listeners.assert_called_with(event)

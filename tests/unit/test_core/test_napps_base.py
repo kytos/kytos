@@ -32,9 +32,19 @@ class TestNapp(unittest.TestCase):
         """Test uri property."""
         self.assertEqual(self.napp.uri, 'any/kytos/napp-1.0')
 
+    @patch('kytos.core.napps.NApp._has_valid_repository', return_value=False)
+    def test_uri__false(self, _):
+        """Test uri property when repository is invalid."""
+        self.assertEqual(self.napp.uri, '')
+
     def test_package_url(self):
         """Test package_url property."""
         self.assertEqual(self.napp.package_url, 'any/kytos/napp-1.0.napp')
+
+    @patch('kytos.core.napps.NApp._has_valid_repository', return_value=False)
+    def test_package_url__none(self, _):
+        """Test package_url property when uri does not exist."""
+        self.assertEqual(self.napp.package_url, '')
 
     def test_create_from_uri(self):
         """Test create_from_uri method."""
@@ -44,6 +54,12 @@ class TestNapp(unittest.TestCase):
         self.assertEqual(napp.name, 'napp')
         self.assertEqual(napp.version, '1.0')
         self.assertEqual(napp.repository, 'file://any')
+
+    def test_create_from_uri__not(self):
+        """Test create_from_uri method when uri does not match."""
+        napp = NApp.create_from_uri('')
+
+        self.assertIsNone(napp)
 
     @patch('builtins.open')
     def test_create_from_json(self, mock_open):
@@ -101,6 +117,13 @@ class TestNapp(unittest.TestCase):
         repo_file.write.assert_called_with('any\n')
         self.assertEqual(str(extracted), '/tmp/kytos-napp-stem-123')
 
+    @patch('kytos.core.napps.NApp._has_valid_repository', return_value=False)
+    def test_download__none(self, _):
+        """Test download method when package_url does not exist."""
+        extracted = self.napp.download()
+
+        self.assertIsNone(extracted)
+
 
 # pylint: disable=no-member
 class KytosNAppChild(KytosNApp):
@@ -121,9 +144,14 @@ class TestKytosNApp(unittest.TestCase):
     """KytosNApp tests."""
 
     # pylint: disable=arguments-differ
+    @patch('kytos.core.napps.base.Event')
     @patch('builtins.open')
-    def setUp(self, mock_open):
+    def setUp(self, *args):
         """Execute steps before each tests."""
+        (mock_open, mock_event) = args
+        self.event = MagicMock()
+        mock_event.return_value = self.event
+
         data_file = MagicMock()
         data_file.read.return_value = '{"username": "kytos", \
                                         "name": "napp", \
@@ -132,8 +160,9 @@ class TestKytosNApp(unittest.TestCase):
 
         mock_open.return_value.__enter__.return_value = data_file
 
-        controller = MagicMock()
-        self.kytos_napp = KytosNAppChild(controller)
+        self.kytos_napp = KytosNAppChild(MagicMock())
+        self.kytos_napp.execute = MagicMock()
+        self.kytos_napp.shutdown = MagicMock()
 
     def test_napp_id(self):
         """Test napp_id property."""
@@ -156,3 +185,20 @@ class TestKytosNApp(unittest.TestCase):
         self.assertEqual(self.kytos_napp.name, 'napp')
         self.assertEqual(self.kytos_napp.version, '1.0')
         self.assertEqual(self.kytos_napp.repository, 'any')
+
+    def test_execute_as_loop_and_run(self):
+        """Test execute_as_loop and run methods."""
+        self.event.is_set.side_effect = [False, True]
+        self.kytos_napp.execute_as_loop(1)
+
+        self.kytos_napp.run()
+
+        self.assertEqual(self.kytos_napp.execute.call_count, 2)
+
+    def test_shutdown_handler(self):
+        """Test _shutdown_handler method."""
+        self.event.is_set.return_value = False
+
+        self.kytos_napp._shutdown_handler(MagicMock())
+
+        self.kytos_napp.shutdown.assert_called_once()

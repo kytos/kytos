@@ -1,4 +1,5 @@
 """Test kytos.core.connection module."""
+from socket import error as SocketError
 from unittest import TestCase
 from unittest.mock import MagicMock
 
@@ -11,8 +12,10 @@ class TestConnection(TestCase):
     def setUp(self):
         """Instantiate a Connection."""
         socket = MagicMock()
-        self.connection = Connection('addr', 123, socket)
-        self.connection.socket = MagicMock()
+        switch = MagicMock()
+        self.connection = Connection('addr', 123, socket, switch)
+
+        switch.connection = self.connection
 
     def test__str__(self):
         """Test __str__ method."""
@@ -34,6 +37,11 @@ class TestConnection(TestCase):
         self.connection.state = ConnectionState.FINISHED
         self.assertEqual(self.connection.state.value, 4)
 
+    def test_state__error(self):
+        """Test state property to error case."""
+        with self.assertRaises(Exception):
+            self.connection.state = 1000
+
     def test_id(self):
         """Test id property."""
         self.assertEqual(self.connection.id, ('addr', 123))
@@ -44,8 +52,33 @@ class TestConnection(TestCase):
 
         self.connection.socket.sendall.assert_called_with(b'data')
 
+    def test_send__error(self):
+        """Test send method to error case."""
+        self.connection.socket.sendall.side_effect = SocketError
+
+        self.connection.send(b'data')
+
+        self.assertIsNone(self.connection.socket)
+
     def test_close(self):
         """Test close method."""
+        self.connection.close()
+
+        self.assertIsNone(self.connection.socket)
+
+    def test_close__os_error(self):
+        """Test close method to OSError case."""
+        self.connection.socket.shutdown.side_effect = OSError
+
+        with self.assertRaises(OSError):
+            self.connection.close()
+
+        self.assertIsNotNone(self.connection.socket)
+
+    def test_close__attribute_error(self):
+        """Test close method to AttributeError case."""
+        self.connection.socket = None
+
         self.connection.close()
 
         self.assertIsNone(self.connection.socket)

@@ -13,7 +13,7 @@ class TestKytosEventBuffer(TestCase):
     def setUp(self):
         """Instantiate a KytosEventBuffer."""
         self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
+        asyncio.set_event_loop(self.loop)
 
         self.kytos_event_buffer = KytosEventBuffer('name', loop=self.loop)
 
@@ -39,6 +39,24 @@ class TestKytosEventBuffer(TestCase):
         self.kytos_event_buffer.put(event)
 
         self.assertTrue(self.kytos_event_buffer._reject_new_events)
+
+    def test_aput(self):
+        """Test aput async method."""
+        event = MagicMock()
+        event.name = 'kytos/core.shutdown'
+
+        self.loop.run_until_complete(self.kytos_event_buffer.aput(event))
+
+        self.assertTrue(self.kytos_event_buffer._reject_new_events)
+
+    def test_aget(self):
+        """Test aget async method."""
+        event = self.create_event_mock()
+        self.kytos_event_buffer._queue.sync_q.put(event)
+
+        expected = self.loop.run_until_complete(self.kytos_event_buffer.aget())
+
+        self.assertEqual(event, expected)
 
     @patch('janus._SyncQueueProxy.task_done')
     def test_task_done(self, mock_task_done):

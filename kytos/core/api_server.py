@@ -15,6 +15,7 @@ from urllib.request import urlopen, urlretrieve
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room
+from werkzeug.exceptions import HTTPException
 
 
 class APIServer:
@@ -60,6 +61,22 @@ class APIServer:
 
         # Update web-ui if necessary
         self.update_web_ui(force=False)
+
+        @self.app.errorhandler(HTTPException)
+        def handle_exception(exception):
+            # pylint: disable=unused-variable, invalid-name
+            """Return a json for HTTP errors
+
+            This handler allows NApps to return HTTP error messages
+            by raising a HTTPException. When raising the Exception,
+            create it with a description.
+            """
+            response = jsonify({
+                'code': exception.code,
+                'name': exception.name,
+                'description': exception.description
+            })
+            return response, exception.code
 
     def _enable_websocket_rooms(self):
         socket = self.server

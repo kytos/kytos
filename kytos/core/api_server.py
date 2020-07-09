@@ -63,7 +63,7 @@ class APIServer:
         self.update_web_ui(force=False)
 
         @self.app.errorhandler(HTTPException)
-        def handle_exception(e):
+        def handle_exception(exception):
             # pylint: disable=unused-variable, invalid-name
             """Return a json for HTTP errors
 
@@ -72,11 +72,11 @@ class APIServer:
             create it with a description.
             """
             response = jsonify({
-                'code': e.code,
-                'name': e.name,
-                'description': e.description
+                'code': exception.code,
+                'name': exception.name,
+                'description': exception.description
             })
-            return response, e.code
+            return response, exception.code
 
     def _enable_websocket_rooms(self):
         socket = self.server

@@ -108,11 +108,15 @@ def main():
     # Configure to log uncaught exceptions to errlog file
     sys.excepthook = exhandler
 
-    if config.foreground:
-        async_main(config)
-    else:
-        with daemon.DaemonContext():
+    if config.daemon:
+        if (config.foreground):
             async_main(config)
+        else:
+            with daemon.DaemonContext():
+                async_main(config)
+    else:
+        config.foreground = True
+        async_main(config))
 
 
 # pylint: disable=invalid-name

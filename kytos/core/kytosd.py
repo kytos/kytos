@@ -116,7 +116,7 @@ def main():
                 async_main(config)
     else:
         config.foreground = True
-        async_main(config))
+        async_main(config)
 
 
 # pylint: disable=invalid-name

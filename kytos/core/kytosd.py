@@ -109,7 +109,7 @@ def main():
     sys.excepthook = exhandler
 
     if config.daemon:
-        if (config.foreground):
+        if config.foreground:
             async_main(config)
         else:
             with daemon.DaemonContext():

@@ -148,7 +148,7 @@ class Link(GenericEntity):
     def available_vlans(self):
         """Get all available vlans from each interface in the link."""
         vlans_a = self._get_available_vlans(self.endpoint_a)
-        vlans_b = self._get_available_vlans(self.endpoint_a)
+        vlans_b = self._get_available_vlans(self.endpoint_b)
         return [vlan for vlan in vlans_a if vlan in vlans_b]
 
     @staticmethod

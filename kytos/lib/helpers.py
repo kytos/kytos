@@ -11,10 +11,10 @@ from kytos.core.link import Link
 from kytos.core.switch import Switch
 
 
-def get_controller_mock():
+def get_controller_mock(loop=None):
     """Return a controller mock."""
     options = KytosConfig().options['daemon']
-    controller = Controller(options)
+    controller = Controller(options, loop=loop)
     controller.log = Mock()
     return controller
 

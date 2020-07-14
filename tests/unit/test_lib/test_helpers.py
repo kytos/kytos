@@ -1,14 +1,24 @@
 """Test kytos.lib.helpers module."""
+import asyncio
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from kytos.lib.helpers import (get_connection_mock, get_interface_mock,
-                               get_kytos_event_mock, get_link_mock,
-                               get_switch_mock)
+from kytos.core.controller import Controller
+from kytos.lib.helpers import (get_connection_mock, get_controller_mock,
+                               get_interface_mock, get_kytos_event_mock,
+                               get_link_mock, get_switch_mock, get_test_client)
 
 
 class TestHelpers(TestCase):
     """Test the helpers methods."""
+
+    def test_controller_mock(self):
+        """Test controller mock."""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(None)
+        controller = get_controller_mock(loop)
+
+        self.assertEqual(type(controller), Controller)
 
     def test_interface_mock(self):
         """Test interface mock."""
@@ -65,3 +75,20 @@ class TestHelpers(TestCase):
         self.assertEqual(kytos_event_mock.message, 'msg')
         self.assertEqual(kytos_event_mock.destination, 'dest')
         self.assertEqual(kytos_event_mock.source, 'src')
+
+    def test_get_test_client(self):
+        """Test get_test_client method."""
+        napp = MagicMock()
+
+        api_server = MagicMock()
+        api_server.app.test_client.return_value = 'client'
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(None)
+        controller = get_controller_mock(loop)
+        controller.api_server = api_server
+
+        test_client = get_test_client(controller, napp)
+
+        api_server.register_napp_endpoints.assert_called_with(napp)
+        self.assertEqual(test_client, 'client')

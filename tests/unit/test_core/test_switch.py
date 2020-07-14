@@ -36,11 +36,11 @@ class TestSwitch(TestCase):
     @staticmethod
     def create_switch():
         """Create a new switch."""
-        switch = Switch('00:00:00:00:00:00:00:01')
-        switch.connection = MagicMock()
-        switch.connection.address = 'addr'
-        switch.connection.port = 'port'
-        switch.connection.protocol.version = 0x04
+        connection = MagicMock()
+        connection.address = 'addr'
+        connection.port = 'port'
+        connection.protocol.version = 0x04
+        switch = Switch('00:00:00:00:00:00:00:01', connection)
         switch._enabled = True
         return switch
 
@@ -48,6 +48,19 @@ class TestSwitch(TestCase):
         """Test repr() output."""
         expected_repr = "Switch('00:00:00:00:00:00:00:01')"
         self.assertEqual(repr(self.switch), expected_repr)
+
+    def test_id(self):
+        """Test id property."""
+        self.assertEqual(self.switch.id, '00:00:00:00:00:00:00:01')
+
+    def test_ofp_version(self):
+        """Test ofp_version property."""
+        self.assertEqual(self.switch.ofp_version, '0x04')
+
+    def test_ofp_version__none(self):
+        """Test ofp_version property when connection is none."""
+        self.switch.connection = None
+        self.assertIsNone(self.switch.ofp_version)
 
     def tearDown(self):
         """TearDown."""
@@ -106,8 +119,12 @@ class TestSwitch(TestCase):
 
     def test_disable(self):
         """Test disable method."""
+        interface = MagicMock()
+        self.switch.interfaces = {"1": interface}
+
         self.switch.disable()
 
+        interface.disable.assert_called()
         self.assertFalse(self.switch._enabled)
 
     def test_disconnect(self):
@@ -139,6 +156,44 @@ class TestSwitch(TestCase):
 
         self.assertEqual(expected_flow_1, flow_1)
         self.assertIsNone(expected_flow_2)
+
+    def test_is_connected__true(self):
+        """Test is_connected method."""
+        connection = MagicMock()
+        connection.is_alive.return_value = True
+        connection.is_established.return_value = True
+        self.switch.connection = connection
+        self.switch.is_active = MagicMock()
+        self.switch.is_active.return_value = True
+
+        self.assertTrue(self.switch.is_connected())
+
+    def test_is_connected__not_connection(self):
+        """Test is_connected method when connection does not exist."""
+        self.switch.connection = None
+        self.switch.is_active = MagicMock()
+        self.switch.is_active.return_value = True
+
+        self.assertFalse(self.switch.is_connected())
+
+    def test_is_connected__not_alive(self):
+        """Test is_connected method when switch is not active."""
+        connection = MagicMock()
+        connection.is_alive.return_value = True
+        connection.is_established.return_value = True
+        self.switch.connection = connection
+        self.switch.is_active = MagicMock()
+        self.switch.is_active.return_value = False
+
+        self.assertFalse(self.switch.is_connected())
+
+    def test_update_connection(self):
+        """Test update_connection method."""
+        connection = MagicMock()
+        self.switch.update_connection(connection)
+
+        self.assertEqual(self.switch.connection, connection)
+        self.assertEqual(self.switch.connection.switch, self.switch)
 
     def test_update_features(self):
         """Test update_features method."""
@@ -182,6 +237,25 @@ class TestSwitch(TestCase):
         self.switch.update_mac_table(mac, 2)
 
         self.assertEqual(self.switch.mac2port[mac.value], {1, 2})
+
+    def test_last_flood(self):
+        """Test last_flood method."""
+        self.switch.flood_table['hash'] = 'timestamp'
+        ethernet_frame = MagicMock()
+        ethernet_frame.get_hash.return_value = 'hash'
+
+        last_flood = self.switch.last_flood(ethernet_frame)
+
+        self.assertEqual(last_flood, 'timestamp')
+
+    def test_last_flood__error(self):
+        """Test last_flood method to error case."""
+        ethernet_frame = MagicMock()
+        ethernet_frame.get_hash.return_value = 'hash'
+
+        last_flood = self.switch.last_flood(ethernet_frame)
+
+        self.assertIsNone(last_flood)
 
     @patch('kytos.core.switch.now', return_value=get_date())
     def test_should_flood(self, _):

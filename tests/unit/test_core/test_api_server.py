@@ -75,7 +75,7 @@ class TestAPIServer(unittest.TestCase):
     def test_status_api(self):
         """Test status_api method."""
         status = self.api_server.status_api()
-        self.assertEqual(status, ('{"response": "running"}', 201))
+        self.assertEqual(status, ('{"response": "running"}', 200))
 
     @patch('kytos.core.api_server.urlopen')
     def test_stop_api_server(self, mock_urlopen):

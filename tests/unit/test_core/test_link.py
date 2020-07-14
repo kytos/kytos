@@ -2,9 +2,9 @@
 import logging
 import time
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
-from kytos.core.interface import Interface
+from kytos.core.interface import Interface, TAGType
 from kytos.core.link import Link
 from kytos.core.switch import Switch
 
@@ -75,13 +75,68 @@ class TestLink(unittest.TestCase):
     def test_init_with_null_endpoints(self):
         """Test initialization with None as endpoints."""
         with self.assertRaises(ValueError):
-            Link(None, None)
+            Link(self.iface1, None)
+
+        with self.assertRaises(ValueError):
+            Link(None, self.iface2)
 
     def test_link_id(self):
         """Test equality of links with the same values ​​in different order."""
         link1 = Link(self.iface1, self.iface2)
         link2 = Link(self.iface2, self.iface1)
         self.assertEqual(link1.id, link2.id)
+
+    def test_available_tags(self):
+        """Test available_tags property."""
+        link = Link(self.iface1, self.iface2)
+        tag_1 = Mock(tag_type=TAGType.VLAN)
+        tag_2 = Mock(tag_type=TAGType.VLAN)
+        tag_3 = Mock(tag_type=TAGType.VLAN_QINQ)
+        tag_4 = Mock(tag_type=TAGType.MPLS)
+        link.endpoint_a.available_tags = [tag_1, tag_2, tag_3, tag_4]
+        link.endpoint_b.available_tags = [tag_2, tag_3, tag_4]
+
+        self.assertEqual(link.available_tags, [tag_2, tag_3, tag_4])
+
+    @patch('kytos.core.interface.Interface.is_tag_available')
+    def test_use_tag__success(self, mock_is_tag_available):
+        """Test use_tag method to success case."""
+        mock_is_tag_available.side_effect = [True, True]
+        link = Link(self.iface1, self.iface2)
+
+        result = link.use_tag(Mock())
+        self.assertTrue(result)
+
+    @patch('kytos.core.interface.Interface.is_tag_available')
+    def test_use_tag__error(self, mock_is_tag_available):
+        """Test use_tag method to error case."""
+        mock_is_tag_available.side_effect = [True, False]
+        link = Link(self.iface1, self.iface2)
+
+        result = link.use_tag(Mock())
+        self.assertFalse(result)
+
+    @patch('kytos.core.interface.Interface.make_tag_available')
+    @patch('kytos.core.interface.Interface.is_tag_available')
+    def test_make_tag_available__success(self, *args):
+        """Test make_tag_available method to success case."""
+        mock_is_tag_available, _ = args
+        mock_is_tag_available.side_effect = [True, False]
+        link = Link(self.iface1, self.iface2)
+
+        result = link.make_tag_available(Mock())
+        self.assertTrue(result)
+
+    @patch('kytos.core.interface.Interface.make_tag_available')
+    @patch('kytos.core.interface.Interface.is_tag_available')
+    def test_make_tag_available__error(self, *args):
+        """Test make_tag_available method to error case."""
+        mock_is_tag_available, _ = args
+        mock_is_tag_available.side_effect = [True, True]
+        link = Link(self.iface1, self.iface2)
+
+        result = link.make_tag_available(Mock())
+        self.assertFalse(result)
 
     def test_get_next_available_tag(self):
         """Test get next available tags returns different tags"""
@@ -152,9 +207,26 @@ class TestLink(unittest.TestCase):
         self.assertEqual(_initial_size,
                          len(_link.endpoint_a.available_tags) + 40)
 
+    def test_available_vlans(self):
+        """Test available_vlans method."""
+        link = Link(self.iface1, self.iface2)
+        tag_1 = Mock(tag_type=TAGType.VLAN)
+        tag_2 = Mock(tag_type=TAGType.VLAN)
+        tag_3 = Mock(tag_type=TAGType.VLAN_QINQ)
+        tag_4 = Mock(tag_type=TAGType.MPLS)
+        link.endpoint_a.available_tags = [tag_1, tag_2, tag_3, tag_4]
+        link.endpoint_b.available_tags = [tag_2, tag_3, tag_4]
+
+        vlans = link.available_vlans()
+        self.assertEqual(vlans, [tag_2])
+
     def test_get_available_vlans(self):
         """Test _get_available_vlans method."""
         link = Link(self.iface1, self.iface2)
+        tag_1 = Mock(tag_type=TAGType.VLAN)
+        tag_2 = Mock(tag_type=TAGType.VLAN_QINQ)
+        tag_3 = Mock(tag_type=TAGType.MPLS)
+        link.endpoint_a.available_tags = [tag_1, tag_2, tag_3]
 
         vlans = link._get_available_vlans(link.endpoint_a)
-        self.assertEqual(len(vlans), 4095)
+        self.assertEqual(vlans, [tag_1])

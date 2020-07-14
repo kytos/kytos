@@ -44,7 +44,7 @@ class TestTAG(unittest.TestCase):
 
     def test__repr__(self):
         """Test __repr__ method."""
-        self.assertEqual(repr(self.tag), 'TAG(1, 123)')
+        self.assertEqual(repr(self.tag), 'TAG(<TAGType.VLAN: 1>, 123)')
 
 
 # pylint: disable=protected-access, too-many-public-methods
@@ -307,8 +307,8 @@ class TestUNI(unittest.TestCase):
         """Test is_valid method for a valid, invalid and none tag."""
         self.assertTrue(self.uni.is_valid())
 
-        self.uni.user_tag = TAG(999999, 123)
-        self.assertFalse(self.uni.is_valid())
+        with self.assertRaises(ValueError):
+            TAG(999999, 123)
 
         self.uni.user_tag = None
         self.assertTrue(self.uni.is_valid())

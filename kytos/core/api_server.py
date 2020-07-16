@@ -138,7 +138,7 @@ class APIServer:
     @staticmethod
     def status_api():
         """Display kytos status using the route ``/kytos/status/``."""
-        return '{"response": "running"}', HTTPStatus.CREATED.value
+        return '{"response": "running"}', HTTPStatus.OK.value
 
     def stop_api_server(self):
         """Send a shutdown request to stop Api Server."""

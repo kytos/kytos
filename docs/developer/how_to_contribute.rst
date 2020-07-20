@@ -173,8 +173,18 @@ For a better code and easier maintenance:
 
 - Include appropriate test cases to avoid bugs in the future;
 - Follow our `Coding Style`_;
-- Commit your changes using clear and descriptive messages;
-- Avoid big commits if you can split them in meaningful smaller ones.
+- Avoid big commits if you can split them in meaningful smaller ones;
+- Commit your changes using clear, descriptive and on-point commit messages;
+- Write useful descriptions and titles;
+- Add comments to help guide the reviewer;
+- Add some screenshots for your front-end changes;
+- Think of a pull request as a product, with the author as the seller, and
+  reviewers as customers;
+- Know that it's difficult to review pull requests.
+
+For more detailed tips on creating pull requests, read `The (written) unwritten
+guide to pull requests
+<https://www.atlassian.com/blog/git/written-unwritten-guide-pull-requests>`_.
 
 That's it! Thank you for your contribution!
 

@@ -66,7 +66,6 @@ Kytos Summit is the main Kytos Project’s event. In addition to afull schedule 
   installing
   configuring
   console
-  command_line
   napps
   upgrade_kytos
   uninstall_kytos

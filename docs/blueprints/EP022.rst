@@ -1,0 +1,72 @@
+:EP: EP022
+:Title: Kytos reports statistics
+:Authors:
+    - Antonio Francisco <antonio@ansp.br>
+:Created: 2020-07-16
+:Kytos-Version: 2020.2
+:Status: Draft
+:Type: Proposal
+
+
+Abstract
+========
+
+This blueprint proposes the implementation of reports and statistics of traffic
+per EVC and per NNI on `kytos/mef_eline` NApp.
+
+
+Motivation
+==========
+
+EVC statistics are essential to operate the network, so operators know what is
+happening, the traffic, erros, etc. 
+
+
+Specification
+=============
+
+In OpenFlow, statistics gathering is asynchronous, so Kytos has to make a
+request and create a listener to receive and deal with the response. The
+NApp `kytos/of_core` periodically requests flow stats but not port stats.
+`kytos/of_core` also listens to the answer from the switch and stores the
+flow info in memory.
+
+
+EVC stats
+---------
+
+To get traffic stats for EVCs it is enought to compute the traffic of a single
+flow in each direction. The request already made by :code:`kytos/of_core` is 
+enough for that, but the data received must be processed and stored in a permanent
+storage (:code:`kytos/kronos`).
+The data sent by the switch is the number of bytes in packets that matched the
+flow since the flow creation. We should store the traffic in bits/s. So, the
+previous read must be stored, so we can do the following calculation:
+
+:math:`traffic = 8*(bytes_2 - bytes_1)/(t_2 - t_1)`
+
+where :code:`t_2` is the timestamp of the read, :code:`t_1` is the timestamp of
+the previous read, :code:`bytes_2` is the traffic of the read and :code:`bytes_1`
+is the traffic of the previous read. Both :code:`traffic` and :code:`t_2` must
+be stored. This should be processed in :code:`kytos/mef_eline` as it reffers to 
+EVCs.
+
+NNI stats
+---------
+
+To get traffic status for NNI ports, we need to get that information from the
+switch. Port stats are not being requested, so the first thing to do is to
+request it, the same way :code:`kytos/of_core` does with flow stats. For consistency,
+this request just also happen in :code:`kytos/of_core`.
+
+**discussion** The listener for the response of the switch could either be
+in :code:`kytos/of_core` or :code:`kytos/mef_eline`. The data received should be
+processed the same way the data for EVCs is, and also stored using 
+:code:`kytos/kronos`.
+
+Reports
+-------
+
+The reports will be REST API methods returning JSON data. This way, an external monitoring
+application (like Zabbix) will be able to generate graphs and reports.
+This REST API should be made on a new NApp (`kytos/stats`?). It will be later be docuemnted.

@@ -649,9 +649,9 @@ class Controller:
         if not switch:
             return
 
-        vlan_pool = {}
+        vlan_pool = self.options.vlan_pool
         try:
-            vlan_pool = json.loads(self.options.vlan_pool)
+            # vlan_pool = json.loads(self.options.vlan_pool)
             if not vlan_pool:
                 return
         except (TypeError, json.JSONDecodeError) as err:

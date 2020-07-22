@@ -145,6 +145,10 @@ class KytosConfig():
 
         defaults.update(dict(config.items("daemon")))
 
+        # Gets vlan_pool after default is updated with values
+        # from config gile. then parses vlan_pool via json.loads
+        defaults.update(vlan_pool=json.loads(defaults.get('vlan_pool')))
+
         self.parser.set_defaults(**defaults)
 
         self.options['daemon'] = self._parse_options(argv)

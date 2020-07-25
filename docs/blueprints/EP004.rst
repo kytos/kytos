@@ -1,12 +1,6 @@
-######################
-Updating specification
-######################
-
-
-Status
-######
-
-Accepted
+:EP: 4
+:Title: Updating specification
+:Status: Accepted
 
 
 Note: all the (draft) code is available at https://transfer.sh/ac8jc/version-inheritance.tar.gz.

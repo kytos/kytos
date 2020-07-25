@@ -8,7 +8,6 @@ import re
 import sys
 from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
-from distutils.command.clean import clean  # pylint: disable=E0401,E0611
 from pathlib import Path
 from subprocess import CalledProcessError, call, check_call
 
@@ -17,7 +16,6 @@ try:
     import pip  # pylint: disable=unused-import
     from setuptools import Command, find_packages, setup
     from setuptools.command.egg_info import egg_info
-    from setuptools.command.install import install
 except ModuleNotFoundError:
     print('Please install python3-pip and run setup.py again.')
     sys.exit(-1)
@@ -100,17 +98,14 @@ class TestCommand(Command):
             sys.exit(-1)
 
 
-class Cleaner(clean):
+class Cleaner(SimpleCommand):
     """Custom clean command to tidy up the project root."""
 
     description = 'clean build, dist, pyc and egg from package and docs'
 
     def run(self):
         """Clean build, dist, pyc and egg from package and docs."""
-        super().run()
-        call('rm -vrf ./build ./dist ./*.egg-info', shell=True)
-        call('find . -name __pycache__ -type d | xargs rm -rf', shell=True)
-        call('test -d docs && make -C docs/ clean', shell=True)
+        call('make clean', shell=True)
 
 
 class Test(TestCommand):
@@ -133,6 +128,8 @@ class Test(TestCommand):
             check_call(cmd, shell=True)
         except CalledProcessError as exc:
             print(exc)
+            print('Unit tests failed. Fix the error(s) above and try again.')
+            sys.exit(-1)
 
 
 class TestCoverage(Test):
@@ -148,6 +145,8 @@ class TestCoverage(Test):
             check_call(cmd, shell=True)
         except CalledProcessError as exc:
             print(exc)
+            print('Coverage tests failed. Fix the errors above and try again.')
+            sys.exit(-1)
 
 
 class DocTest(SimpleCommand):
@@ -191,21 +190,21 @@ class CITest(TestCommand):
         check_call(cmd, shell=True)
 
 
-class InstallMode(install):
-    """Class used to overwrite the default installation using setuptools."""
+# class InstallMode(install):
+#     """Class used to overwrite the default installation using setuptools."""
 
-    def run(self):
-        """Install the package in install mode.
+#     def run(self):
+#         """Install the package in install mode.
 
-        super().run() does not install dependencies when running
-        ``python setup.py install`` (pypa/setuptools#456).
-        """
-        if 'bdist_wheel' in sys.argv:
-            # do not use eggs, but wheels
-            super().run()
-        else:
-            # force install of deps' eggs during setup.py install
-            self.do_egg_install()
+#         super().run() does not install dependencies when running
+#         ``python setup.py install`` (pypa/setuptools#456).
+#         """
+#         if 'bdist_wheel' in sys.argv:
+#             # do not use eggs, but wheels
+#             super().run()
+#         else:
+#             # force install of deps' eggs during setup.py install
+#             self.do_egg_install()
 
 
 # class DevelopMode(develop):
@@ -256,7 +255,6 @@ setup(name='kytos',
           'coverage': TestCoverage,
           'doctest': DocTest,
           'egg_info': EggInfo,
-          'install': InstallMode,
           'lint': Linter,
           'test': Test
       },

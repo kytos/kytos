@@ -1,17 +1,13 @@
+:EP: 17
+:Title: Improvement of `kytos/flow_manager` logic.
+:Status: Draft
+
 Summary
 =======
-
-Title
------
-Improvement of `kytos/flow_manager` logic.
 
 Authors
 -------
 Antonio Francisco (AmLight/Kytos), Beraldo Leal (Kytos)
-
-Blueprint Status
-----------------
-draft
 
 Priority
 --------

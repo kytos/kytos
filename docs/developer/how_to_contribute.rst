@@ -7,8 +7,7 @@ feedback is important for us to fix bugs, add new features and
 make it easier to create and share Network Applications.
 
 To give us your feedback, check the most appropriate instructions in the next
-section. You can also contact us directly and subscribe to mailing lists as
-described in the :doc:`/home/get_help` section.
+section. You can also contact us directly on the `Slack channel`_.
 
 Contributing Guidelines
 -----------------------
@@ -20,6 +19,7 @@ Here are the guidelines we follow for different ways of contributing:
 - `Want a Feature?`_
 - `Want a Doc Fix?`_
 - `Submission Guidelines`_
+- `Blueprints`_
 - `Coding Style`_
 - `Signing the CLA`_
 
@@ -27,8 +27,7 @@ Got a Question or Problem?
 --------------------------
 
 If you have questions about how to use any component of the Kytos project,
-direct them to our dev mailing list. We are also available on IRC. Check the
-details in the :doc:`/home/get_help` section.
+direct them to our `Slack channel`_.
 
 .. _contributing-issue:
 
@@ -50,10 +49,9 @@ If you would like to implement a new feature, then consider what kind of change
 it is:
 
 - **Major Changes** that you wish to contribute to the project should be
-  discussed first in our dev mailing list or IRC (see: :doc:`/home/get_help`
-  section), so that we can better coordinate our efforts, prevent work
-  duplication, and help you to craft the changes so they are successfully
-  integrated into the project.
+  discussed first in our `Slack channel`_, so that we can better coordinate our 
+  efforts, prevent work duplication, and help you craft the changes so they 
+  are successfully integrated into the project.
 
 - **Small Changes** can be crafted and submitted to the |repo| as Pull Requests.
 
@@ -116,6 +114,9 @@ possible:
 - **Error output** or logs pasted in your issue or in a
   `Gist <http://gist.github.com/>`__. When pasting them in the issue, wrap it
   with three backticks: **\`\`\`** so it renders nicely, like ``this``;
+- **Traffic files** - if your issue is related to network traffic, attach as
+  many traffic files as possible (i.e.: .pcap), as long as they don't contain
+  sensitive information;
 - **Steps to reproduce** - please inform all the steps to reproduce the error;
 - **Motivation or use case** - explain why this is a bug for you;
 - **System details** like what library or operating system you’re
@@ -208,6 +209,20 @@ Code contribution steps review
 #.  Create a new PR in GitHub
 #.  Respond to any code review feedback
 
+Blueprints
+----------
+
+We have a type of document used to describe our architectural choices, called 
+‘blueprint’. This document is written for our developers and users and records 
+all the main architectural decision proposals that were accepted or not in the 
+kytos project. Blueprints are used to specify the details of any process, 
+resource, and anything else that is desirable to be implemented, resulting in a 
+major architectural change. Anyone can make enhancement proposals 
+writing new `blueprints`, but first it is highly recommended that you take
+a look at our `blueprints section`_ to read about our past choices. 
+Remember that this document is not just for you, but mainly for other 
+developers. 
+
 Coding style
 ------------
 
@@ -232,4 +247,7 @@ must be signed. It's a quick process, we promise!
 .. _GitHub repository: https://github.com/kytos/
 .. _forking workflow: https://www.atlassian.com/git/tutorials/comparing-workflows#forking-workflow
 .. _Google-style docstrings: https://google.github.io/styleguide/pyguide.html?showone=Comments#Comments
-
+.. _Slack channel: https://join.slack.com/t/kytos/shared_
+  invite/enQtMjk0MTM0NjQwOTE1LTE2N2UyNWE2YjNjNzY0MTNiNDNiY2JmNGFlMGQxY2I5Y2IxY
+  jBhMTkwZjZjNDQ4Zjk3ZjExZGFjNGYzMzRjMDM
+.. _blueprints section: https://github.com/kytos/kytos/tree/master/docs/blueprints

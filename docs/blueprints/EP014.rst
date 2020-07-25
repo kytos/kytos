@@ -1,18 +1,14 @@
+:EP: 14
+:Title: Pathfinder NApp Improvements
+:Status: Finished
+
 Summary
 =======
-
-Title
------
-Pathfinder NApp Improvements
 
 Authors
 -------
 Jeronimo Bezerra (Amlight), Vinicius Arcanjo (RNP), Antonio Francisco (ANSP),
 Rogerio Motitsuki (ANSP), Beraldo Leal, (Kytos), Renan Rodrigo (Kytos)
-
-Blueprint Status
-----------------
-finished
 
 Priority
 --------

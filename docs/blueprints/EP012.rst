@@ -1,19 +1,14 @@
+:EP: 12
+:Title: MEF E-Line (or Point-to-Point Ethernet Virtual Circuit) Service Provisioning NApp
+:Status: Work-in-progress
+
 Summary
 =======
-
-Title
------
-MEF E-Line (or Point-to-Point Ethernet Virtual Circuit) Service Provisioning
-NApp
 
 Authors
 -------
 Jeronimo Bezerra (Amlight), Vinicius Arcanjo (RNP), Antonio Francisco (ANSP),
 Rogerio Motitsuki (ANSP), Beraldo Leal, (Kytos), Renan Rodrigo (Kytos)
-
-Blueprint Status
-----------------
-work-in-progress
 
 Priority
 --------

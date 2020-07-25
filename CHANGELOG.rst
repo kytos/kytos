@@ -27,6 +27,53 @@ Changed
 =======
 
 
+[2020.2b1] - "itamar" beta1 - 2020-09-08
+****************************************
+Added
+=====
+- Added Blueprints section to the "How to Contribute" guide.
+
+Fixed
+=====
+- Fixed bug when two NApps had methods with the same name
+  decorated with the ``@rest`` decorator.
+- Fixed authentication URLs in documentation.
+- Fixed interface tests.
+
+Changed
+=======
+- Changed ``dev`` requirements to install ``run`` requirements.
+- Changed Makefile to use ``python3`` instead of ``python3.6``.
+- Updated ``.travis.yml`` to use newest pip dependency resolver for tests.
+- Changed ``setup.py`` to alert when a test fails on Travis.
+
+
+[2020.1] - "helena" stable - 2020-08-07
+***************************************
+Added
+=====
+- Improve unit tests coverage from 55% to 93%.
+- Added new method to handle HTTPException - now it returns a JSON
+  with an error code.
+- Added tags decorator to run tests by type and size.
+- Added instruction for opening issues with traffic files in Dev Guide.
+- Added Pull Request Guidelines to the Developer Guide.
+
+Fixed
+=====
+- Fixed duplicated endpoint error in available_vlans method.
+- Fixed error when creating an EVC without a Tag.
+- Fixed packaging error by changing the ``six`` version.
+
+Changed
+=======
+- Updated setup.py to use native setuptools install.
+- Make speed property checks compliant with OF1.3 spec.
+- Updated controller mock method to accept loop parameter.
+- Changed API server status HTTP code to 200.
+- Updated documentation images, dates and links.
+
+
 [2020.1rc1] - "helena" release candidate 1 - 2020-06-17
 *******************************************************
 

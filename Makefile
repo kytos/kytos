@@ -1,12 +1,14 @@
 build: clean prepare
-	python3.6 setup.py sdist bdist_wheel
+	python3 setup.py sdist bdist_wheel
 	ls -l dist/
 
 clean:
-	rm -rf build/ dist/ *.egg-info/ kytos/web-ui-*
+	rm -vrf build/ dist/ *.egg-info/ kytos/web-ui-*
+	find . -name __pycache__ -type d | xargs rm -rf
+	test -d docs && make -C docs/ clean
 
 prepare:
-	pip3.6 install --upgrade pip setuptools wheel twine
+	pip3 install --upgrade pip setuptools wheel twine
 
 testupload: build
 	twine upload -r pypitest dist/*

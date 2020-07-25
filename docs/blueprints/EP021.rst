@@ -1,4 +1,4 @@
-:EP: BP021
+:EP: 21
 :Title: Kytos testing pipeline and definitions
 :Authors:
     - Humberto Diógenes <hdiogenes@gmail.com>

@@ -161,8 +161,7 @@ class TestLogManager(LogTester):
         LogManager.add_handler(handler)
 
         # Message based on the log output that ends with traceback plaintext as
-        # seen in lib/python3.6/site-packages/werkzeug/serving.py:225 of
-        # Werkzeug==0.12.1
+        # seen in site-packages/werkzeug/serving.py:225 of Werkzeug==0.12.1
         msg = "lorem ipsum KeyError: 'Session is disconnected'"
         logger = logging.getLogger('werkzeug')
         logger.setLevel(logging.ERROR)
@@ -178,8 +177,7 @@ class TestLogManager(LogTester):
         already existed before importing the "logs" module.
 
         Message based on the log output that ends with traceback plaintext as
-        seen in lib/python3.6/site-packages/werkzeug/serving.py:225 of
-        Werkzeug==0.12.1:
+        seen in site-packages/werkzeug/serving.py:225 of Werkzeug==0.12.1:
 
             - logger name: werkzeug
             - level: ERROR

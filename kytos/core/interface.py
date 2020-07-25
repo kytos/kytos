@@ -28,10 +28,12 @@ class TAG:
     """Class that represents a TAG."""
 
     def __init__(self, tag_type, value):
-        self.tag_type = tag_type
+        self.tag_type = TAGType(tag_type)
         self.value = value
 
     def __eq__(self, other):
+        if not other:
+            return False
         return self.tag_type == other.tag_type and self.value == other.value
 
     def as_dict(self):
@@ -61,7 +63,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
     # pylint: disable=too-many-arguments
     def __init__(self, name, port_number, switch, address=None, state=None,
-                 features=None, speed=None):
+                 features=None, speed=None, config=None):
         """Assign the parameters to instance attributes.
 
         Args:
@@ -76,6 +78,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             speed (int, float): Interface speed in bytes per second. Defaults
                 to what is informed by the switch. Return ``None`` if not set
                 and switch does not inform the speed.
+            config(|port_config|): Port config used to indicate interface
+                behavior. In general, the port config bits are set by the
+                controller and are not changed by the switch. Options
+                are: administratively down, ignore received packets, drop
+                forwarded packets, and/or do not send packet-in messages.
         """
         self.name = name
         self.port_number = int(port_number)
@@ -83,6 +90,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self.address = address
         self.state = state
         self.features = features
+        self.config = config
         self.nni = False
         self.endpoints = []
         self.stats = None
@@ -259,6 +267,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             int, None: Link speed in bytes per second or ``None``.
 
         """
+        speed = self.get_of_features_speed()
+
+        if speed is not None:
+            return speed
+
         if self._custom_speed is not None:
             return self._custom_speed
 
@@ -268,7 +281,16 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         if not self._is_v0x04() and self.port_number == PortNo01.OFPP_LOCAL:
             return 0
 
-        return self.get_of_features_speed()
+        # Warn unknown speed
+        # Use shorter switch ID with its beginning and end
+        if isinstance(self.switch.id, str) and len(self.switch.id) > 20:
+            switch_id = self.switch.id[:3] + '...' + self.switch.id[-3:]
+        else:
+            switch_id = self.switch.id
+        LOG.warning("Couldn't get port %s speed, sw %s, feats %s",
+                    self.port_number, switch_id, self.features)
+
+        return None
 
     def set_custom_speed(self, bytes_per_second):
         """Set a speed that overrides switch OpenFlow information.
@@ -298,17 +320,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         # Don't use switch.is_connected() because we can have the protocol
         if speed is None and self._is_v0x04():
             speed = self._get_v0x04_speed()
-        if speed is not None:
-            return speed
-        # Warn unknown speed
-        # Use shorter switch ID with its beginning and end
-        if isinstance(self.switch.id, str) and len(self.switch.id) > 20:
-            switch_id = self.switch.id[:3] + '...' + self.switch.id[-3:]
-        else:
-            switch_id = self.switch.id
-        LOG.warning("Couldn't get port %s speed, sw %s, feats %s",
-                    self.port_number, switch_id, self.features)
-        return None
+        return speed
 
     def _is_v0x04(self):
         """Whether the switch is connected using OpenFlow 1.3."""
@@ -448,8 +460,10 @@ class UNI:
 
     def as_dict(self):
         """Return a dict representating a UNI object."""
-        return {'interface_id': self.interface.id,
-                'tag': self.user_tag.as_dict()}
+        return {
+            'interface_id': self.interface.id,
+            'tag': self.user_tag.as_dict() if self.user_tag else None
+            }
 
     def as_json(self):
         """Return a json representating a UNI object."""

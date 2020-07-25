@@ -50,19 +50,18 @@ html_cov/index.html``).
 Pyenv
 =====
 
-Some distributions do not provide all python releases, specially the most
-recent ones such as ``>= 3.6``. The easiest *pythonic* way to setup your python
-environment with the correct python version and its dependencies is to use
-|pyenv|_ and |venv|_. So, here we will guide you on how to install those tools
-and use them.
+Some distributions do not provide all Python releases. The easiest *pythonic*
+way to setup your Python environment with the correct version and its
+dependencies is to use |pyenv|_ and |venv|_. So, here we will guide you on how
+to install those tools and use them.
 
 The following steps are focusing on Debian-Like systems, so some tweaks may be
-necessary for other distro based systems.
+necessary for other Linux distributions.
 
 On the end of this chapter there are also other reference links for you to
-better understand this projects and tools.
+better understand this project and its tools.
 
-.. note:: If you already have python 3.6 installed, you do not need to follow
+.. note:: If you already have Python 3.6+ installed, you do not need to follow
   this chapter. In such cases you can go straightforward to our
   :doc:`tutorial:napps/development_environment_setup` tutorial.
 
@@ -74,7 +73,7 @@ Here is the `tl;dr <https://en.wikipedia.org/wiki/TL;DR>`__ version to install
 
 .. code-block:: console
 
-  $ sudo apt-get install -y \
+  $ apt install -y \
       make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
       libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
       xz-utils tk-dev git
@@ -96,14 +95,14 @@ Now, to activate the environment you just need to run: ``pyenv activate kytos``
 Long version
 ------------
 
-Now the detailed/explained version.
+Now the detailed version.
 
 |pyenv_cbp|_ also recommends you to install some system tools to be able to
 build python versions (we have added git to that list):
 
 .. code-block:: bash
 
-  $ sudo apt-get install -y make \
+  $ apt install -y \
       make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
       libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
       xz-utils tk-dev git
@@ -150,18 +149,18 @@ Now you have |pyenv|_ and |pyenv_venv|_ tools available to be used on your shell
     installed it, you may need to run the commands on the shell or source your
     .bashrc file.
 
-Install python specific version
+Install specific Python version
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To install a specific version of python, such as 3.6.2, you just neeed to run:
+To install a specific version of Python, such as 3.6.2, you just need to run:
 
 .. code:: bash
 
   $ pyenv install 3.6.2
 
-Python community considers a best practice to use "virtual environments"
+The Python community considers a best practice to use "virtual environments"
 |venv|_ in order to avoid conflict between python dependencies among multiple
-projects, and even project and system python libraries. So, you may want to
+projects, and even project and system Python libraries. So, you may want to
 create a |venv|_ for kytos by doing:
 
 .. code:: bash

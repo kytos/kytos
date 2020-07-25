@@ -2,6 +2,7 @@
 -e git+git://github.com/kytos/sphinx-theme.git#egg=kytos-sphinx-theme
 pip-tools >= 2.0
 coverage
+pydocstyle
 pytest
 yala
 tox

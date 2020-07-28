@@ -28,10 +28,12 @@ class TAG:
     """Class that represents a TAG."""
 
     def __init__(self, tag_type, value):
-        self.tag_type = tag_type
+        self.tag_type = TAGType(tag_type)
         self.value = value
 
     def __eq__(self, other):
+        if not other:
+            return False
         return self.tag_type == other.tag_type and self.value == other.value
 
     def as_dict(self):
@@ -448,8 +450,10 @@ class UNI:
 
     def as_dict(self):
         """Return a dict representating a UNI object."""
-        return {'interface_id': self.interface.id,
-                'tag': self.user_tag.as_dict()}
+        return {
+            'interface_id': self.interface.id,
+            'tag': self.user_tag.as_dict() if self.user_tag else None
+            }
 
     def as_json(self):
         """Return a json representating a UNI object."""

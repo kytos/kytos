@@ -110,5 +110,5 @@ kytos/web-ui/index.html
 etc/kytos/kytos.conf
 etc/kytos/logging.ini
 
-# ignore Visual Studio folders
-*.vs/
+# Visual Studio
+.vs/

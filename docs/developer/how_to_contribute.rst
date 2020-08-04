@@ -116,6 +116,9 @@ possible:
 - **Error output** or logs pasted in your issue or in a
   `Gist <http://gist.github.com/>`__. When pasting them in the issue, wrap it
   with three backticks: **\`\`\`** so it renders nicely, like ``this``;
+- **Traffic files** - if your issue is on the network, attach as many
+  traffic files as possible (i.e.: .pcap), if they don't contain sensitive
+  information;
 - **Steps to reproduce** - please inform all the steps to reproduce the error;
 - **Motivation or use case** - explain why this is a bug for you;
 - **System details** like what library or operating system you’re

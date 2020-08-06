@@ -17,7 +17,6 @@ try:
     import pip  # pylint: disable=unused-import
     from setuptools import Command, find_packages, setup
     from setuptools.command.egg_info import egg_info
-    from setuptools.command.install import install
 except ModuleNotFoundError:
     print('Please install python3-pip and run setup.py again.')
     sys.exit(-1)
@@ -191,21 +190,21 @@ class CITest(TestCommand):
         check_call(cmd, shell=True)
 
 
-class InstallMode(install):
-    """Class used to overwrite the default installation using setuptools."""
+# class InstallMode(install):
+#     """Class used to overwrite the default installation using setuptools."""
 
-    def run(self):
-        """Install the package in install mode.
+#     def run(self):
+#         """Install the package in install mode.
 
-        super().run() does not install dependencies when running
-        ``python setup.py install`` (pypa/setuptools#456).
-        """
-        if 'bdist_wheel' in sys.argv:
-            # do not use eggs, but wheels
-            super().run()
-        else:
-            # force install of deps' eggs during setup.py install
-            self.do_egg_install()
+#         super().run() does not install dependencies when running
+#         ``python setup.py install`` (pypa/setuptools#456).
+#         """
+#         if 'bdist_wheel' in sys.argv:
+#             # do not use eggs, but wheels
+#             super().run()
+#         else:
+#             # force install of deps' eggs during setup.py install
+#             self.do_egg_install()
 
 
 # class DevelopMode(develop):
@@ -256,7 +255,6 @@ setup(name='kytos',
           'coverage': TestCoverage,
           'doctest': DocTest,
           'egg_info': EggInfo,
-          'install': InstallMode,
           'lint': Linter,
           'test': Test
       },

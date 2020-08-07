@@ -31,26 +31,27 @@ Changed
 ***************************************
 Added
 =====
-- Added tags decorator to run tests by type and size.
-- Added new method to handle HTTPException, now returns a JSON with error code.
-- Added Visual Studio folder to .gitignore.
 - Improve unit tests coverage from 55% to 93%.
+- Added new method to handle HTTPException - now it returns a JSON
+  with an error code.
+- Added tags decorator to run tests by type and size.
 - Added instruction for opening issues with traffic files in Dev Guide.
+- Added Pull Request Guidelines to the Developer Guide.
 
 Fixed
 =====
 - Fixed duplicated endpoint error in available_vlans method.
-- Fixed error when creating a EVC without Tag.
-- Fixed Travis error changing six version.
+- Fixed error when creating an EVC without a Tag.
+- Fixed packaging error by changing the ``six`` version.
 
 Changed
 =======
+- Updated setup.py to use native setuptools install.
+- Make speed property checks compliant with OF1.3 spec.
 - Updated controller mock method to accept loop parameter.
 - Changed API server status HTTP code to 200.
-- Updated Dev Guide (Added Pull Request Guidelines).
-- Updated documentation to remove outdated links and update date.
-- Updated setup.py to use native setuptools install.
-- Make speed property checks compliant w/ OF1.3 spec.
+- Updated documentation images, dates and links.
+
 
 [2020.1rc1] - "helena" release candidate 1 - 2020-06-17
 *******************************************************

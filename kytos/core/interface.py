@@ -261,6 +261,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             int, None: Link speed in bytes per second or ``None``.
 
         """
+        speed = self.get_of_features_speed()
+
+        if speed is not None:
+            return speed
+
         if self._custom_speed is not None:
             return self._custom_speed
 
@@ -270,7 +275,16 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         if not self._is_v0x04() and self.port_number == PortNo01.OFPP_LOCAL:
             return 0
 
-        return self.get_of_features_speed()
+        # Warn unknown speed
+        # Use shorter switch ID with its beginning and end
+        if isinstance(self.switch.id, str) and len(self.switch.id) > 20:
+            switch_id = self.switch.id[:3] + '...' + self.switch.id[-3:]
+        else:
+            switch_id = self.switch.id
+        LOG.warning("Couldn't get port %s speed, sw %s, feats %s",
+                    self.port_number, switch_id, self.features)
+
+        return None
 
     def set_custom_speed(self, bytes_per_second):
         """Set a speed that overrides switch OpenFlow information.
@@ -300,17 +314,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         # Don't use switch.is_connected() because we can have the protocol
         if speed is None and self._is_v0x04():
             speed = self._get_v0x04_speed()
-        if speed is not None:
-            return speed
-        # Warn unknown speed
-        # Use shorter switch ID with its beginning and end
-        if isinstance(self.switch.id, str) and len(self.switch.id) > 20:
-            switch_id = self.switch.id[:3] + '...' + self.switch.id[-3:]
-        else:
-            switch_id = self.switch.id
-        LOG.warning("Couldn't get port %s speed, sw %s, feats %s",
-                    self.port_number, switch_id, self.features)
-        return None
+        return speed
 
     def _is_v0x04(self):
         """Whether the switch is connected using OpenFlow 1.3."""

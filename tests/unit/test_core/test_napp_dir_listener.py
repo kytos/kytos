@@ -13,7 +13,20 @@ class TestNAppDirListener(TestCase):
         self.controller = Mock()
         self.controller.options.napps = '/tmp'
         self.napp_dir_listener = NAppDirListener(self.controller)
+        self.napp_dir_listener.observer = Mock()
         self.event = Mock(src_path='/tmp/username/napp_name/')
+
+    def test_start(self):
+        """Test start method."""
+        self.napp_dir_listener.start()
+
+        self.napp_dir_listener.observer.start.assert_called()
+
+    def test_stop(self):
+        """Test stop method."""
+        self.napp_dir_listener.stop()
+
+        self.napp_dir_listener.observer.stop.assert_called()
 
     def test_on_created(self):
         """Test whether on_created is calling load_napp."""

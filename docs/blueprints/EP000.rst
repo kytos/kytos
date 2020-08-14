@@ -1,0 +1,151 @@
+:EP: 00
+
+    :Title: Ehancement Proposals 
+
+    :Authors:- Antonio Francisco ajoaoff@gmail.com ;
+
+        - Carlos Magno <cmagnobarbosa@gmail.com>
+
+        - Gleyberson Andrade <gleybersonandrade@gmail.com>
+
+        - Humberto Diógenes hdiogenes@gmail.com;
+
+          - José Mauro Ribeiro zemauror@gmail.com; 
+
+    - Rogério Motitsuki <rogerio@ansp.br>
+
+    
+:Created: 2020-05-14
+:Kytos-Version: 2020.1
+:Status: Draft
+:Type: Standards Track
+
+
+########
+Abstract
+########
+This blueprint is proposed to clarify what a blueprint is, its purpose, list the types of blueprints, explain which sections should be included in a blueprint, the information that should be included in each topic and the workflow involving a blueprint proposal. Therefore, this blueprint is intended to work as meta blueprint.
+
+##########
+Motivation
+##########
+Kytos Project uses word 'blueprint' to refer a very especific type of document that have a very import role in development process. Anyone who are not familiar with the concept should be able to understand and start a draft blueprint using the EP0 (blueprint 00).
+
+
+#############
+What is a blueprint
+#############
+A blueprint is document used to specify the details of any process, features and anything else that is desirable to be implanted in Kytos Project and cannot be reduced to a Github issue or a meeting to be outlined.
+
+#########
+Audience
+#########
+The primary audience for EPs are the core developers, as well as network engineers involved at the Kytos Project . However, other parts of the Kytos community may use the EP's to understand many aspects of the project.
+
+#######
+Rationale
+#######
+This meta blueprint is intended to make the contributors workflow more clear about how to write a new blueprint.
+
+#############
+Specification
+#############
+
+Workflow
+**************
+Every blueprint should be follow the steps below in order to be finished:
+ 
+Outline the subject
+=================
+The process to write a blueprint should begins describing a new idea, a specification to something that it was defined to be deployed.  It is recommended that a single blueprint contain a single proposal. The more focused the blueprint the more successful it tends to be. The Kytos team have the right to reject or aprove any proposal. If in doubt, create a issue in the Kytos Project at Github and add a coment asking if the the issue could be a blueprint.
+
+Submitting a blueprint
+====================
+After create a first blueprint adding every necessary section (check the sections at "Sections that a blueprint should have") you are encouraged to create a pull request at repository kytos attending the following criteria:
+
+    - The file containing the proposal must be named "EP0.rst";
+
+    - The file must containing a header following the template avaible in Blueprint Header section;
+
+    - The file must int restructured text (RST) format like the others blueprints (as you can see at 'kytos/docs/blueprints').
+
+
+Blueprint review
+===============
+
+The following days after you submit your pull request the Kytos team will be reviewing the document adding comments and suggestions. So is very important that the author of the pull request pay attention to the Kytos team feedback to make review a quick process.
+
+
+Sections that a blueprint should have
+*****************************************************
+
+Header
+=======
+This section must  be use the template available at Blueprint Header section in this blueprint.
+
+Abstract
+========
+A short (~200 word) description of the technical issue being addressed.
+
+Motivation
+=========
+It should clearly explain why the blueprint is being proposed describing any techinal issue that is intended to be covered by the proposal.
+
+Rationale
+========
+The rationale fleshes out the specification by describing why particular design decisions were made.  It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other enviroments or scenarios.
+
+Specification
+===========
+The technical specification should describe the aspects of what is being proposed.
+
+Backwards Compatibility
+======================
+All Eps that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity.  The EP must explain how the author proposes to deal with these incompatibilities. 
+
+Security Implications 
+===================
+If there are security concerns in relation to the EP, those concerns should be explicitly written out to make sure reviewers of the EP are aware of them.
+
+Rejected Ideas
+=============
+Throughout the discussion of a EP, various ideas will be proposed which are not accepted. Those rejected ideas should be recorded along with the reasoning as to why they were rejected. This both helps record the thought process behind the final version of the EP as well as preventing people from bringing up the same rejected idea again in subsequent discussions.
+ 
+References
+==========
+References -- A collection of URLs used as references through the EP.
+
+Copyright/license
+================
+
+
+#############
+Blueprint Header 
+#############
+
+Every  blueprint proposal should be use this template to build their own header:
+
+:EP: <*EP number>
+:Title:  <EP title>
+:Authors: <list of authors' names and email addrs>
+:Created:  <date created on, in yyyy-mm-dd format>
+:Kytos-Version: <kytos version, in yyyy.v>
+:Status: <Draft | Active | Accepted | Provisional | Deferred | Rejected | Withdrawn | Final | Superseded>
+:Type: <Standards Track | Informational | Process>
+:**Replaces: <EP number>
+
+*EP number: should be fixed by Kytos team after the author submit the PR.
+**Optional field.
+
+##########
+References
+##########
+
+[1] https://www.python.org/dev/peps/pep-0001/#pep-audience
+
+#########
+Copyright
+#########
+
+This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.

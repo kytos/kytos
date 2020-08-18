@@ -12,7 +12,7 @@ from http import HTTPStatus
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen, urlretrieve
 
-from flask import Flask, jsonify, request, send_file
+from flask import Blueprint, Flask, jsonify, request, send_file
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room
 from werkzeug.exceptions import HTTPException
@@ -98,7 +98,8 @@ class APIServer:
                       stacklevel=2)
         if url.startswith('/'):
             url = url[1:]
-        self._start_endpoint(f'/kytos/{url}', function, methods=methods)
+        self._start_endpoint(self.app, f'/kytos/{url}', function,
+                             methods=methods)
 
     def start_api(self):
         """Start this APIServer instance API.
@@ -123,7 +124,8 @@ class APIServer:
 
         Not used by NApps, but controller.
         """
-        self._start_endpoint(self._CORE_PREFIX + rule, function, **options)
+        self._start_endpoint(self.app, self._CORE_PREFIX + rule, function,
+                             **options)
 
     def _register_web_ui(self):
         """Register routes to the admin-ui homepage."""
@@ -291,15 +293,27 @@ class APIServer:
     def register_napp_endpoints(self, napp):
         """Add all NApp REST endpoints with @rest decorator.
 
+        We are using Flask Blueprints to register these endpoints. Blueprints
+        are essentially the Flask equivalent of Python modules and are used to
+        keep related logic and assets grouped and separated from one another.
+
         URLs will be prefixed with ``/api/{username}/{napp_name}/``.
 
         Args:
             napp (Napp): Napp instance to register new endpoints.
         """
+        # Create a Flask Blueprint for a specific NApp
+        napp_blueprint = Blueprint(napp.napp_id, __name__)
+
+        # Start all endpoints for this NApp
         for function in self._get_decorated_functions(napp):
             for rule, options in function.route_params:
                 absolute_rule = self.get_absolute_rule(rule, napp)
-                self._start_endpoint(absolute_rule, function, **options)
+                self._start_endpoint(napp_blueprint, absolute_rule, function,
+                                     **options)
+
+        # Register this Flask Blueprint in the Flask App
+        self.app.register_blueprint(napp_blueprint)
 
     @staticmethod
     def _get_decorated_functions(napp):
@@ -323,14 +337,14 @@ class APIServer:
 
     # END decorator methods
 
-    def _start_endpoint(self, rule, function, **options):
+    def _start_endpoint(self, app, rule, function, **options):
         """Start ``function``'s endpoint.
 
         Forward parameters to ``Flask.add_url_rule`` mimicking Flask
         ``@route`` decorator.
         """
         endpoint = options.pop('endpoint', None)
-        self.app.add_url_rule(rule, endpoint, function, **options)
+        app.add_url_rule(rule, endpoint, function, **options)
         self.log.info('Started %s - %s', rule,
                       ', '.join(options.get('methods', self.DEFAULT_METHODS)))
 
@@ -356,6 +370,9 @@ class APIServer:
             # pylint: disable=protected-access
             self.app.url_map._rules.pop(index)
             # pylint: enable=protected-access
+
+        # Remove the Flask Blueprint of this NApp from the Flask App
+        self.app.blueprints.pop(napp.napp_id)
 
         self.log.info('The Rest endpoints from %s were disabled.', prefix)
 

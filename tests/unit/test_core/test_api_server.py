@@ -393,13 +393,15 @@ class RESTNApp:  # pylint: disable=too-few-public-methods
     def __init__(self):
         self.username = 'test'
         self.name = 'MyNApp'
+        self.napp_id = 'test/MyNApp'
 
 
 class TestAPIDecorator(unittest.TestCase):
     """@rest should have the same effect as ``Flask.route``."""
 
     @classmethod
-    def test_flask_call(cls):
+    @patch('kytos.core.api_server.Blueprint')
+    def test_flask_call(cls, mock_blueprint):
         """@rest params should be forwarded to Flask."""
         rule = 'rule'
         # Use sentinels to be sure they are not changed.
@@ -412,9 +414,12 @@ class TestAPIDecorator(unittest.TestCase):
             def my_endpoint(self):
                 """Do nothing."""
 
+        blueprint = Mock()
+        mock_blueprint.return_value = blueprint
+
         napp = MyNApp()
-        server = cls._mock_api_server(napp)
-        server.app.add_url_rule.assert_called_once_with(
+        cls._mock_api_server(napp)
+        blueprint.add_url_rule.assert_called_once_with(
             '/api/test/MyNApp/' + rule, None, napp.my_endpoint, **options)
 
     @classmethod
@@ -426,6 +431,7 @@ class TestAPIDecorator(unittest.TestCase):
             def __init__(self):
                 self.username = 'test'
                 self.name = 'MyNApp'
+                self.napp_id = 'test/MyNApp'
 
         napp = MyNApp()
         server = cls._mock_api_server(napp)
@@ -447,9 +453,11 @@ class TestAPIDecorator(unittest.TestCase):
         # pylint: disable=protected-access
         server.app.url_map._rules.pop.assert_called_once_with(0)
         # pylint: enable=protected-access
+        server.app.blueprints.pop.assert_called_once_with(napp.napp_id)
 
     @classmethod
-    def test_rule_with_slash(cls):
+    @patch('kytos.core.api_server.Blueprint')
+    def test_rule_with_slash(cls, mock_blueprint):
         """There should be no double slashes in a rule."""
         class MyNApp(RESTNApp):  # pylint: disable=too-few-public-methods
             """API decorator example usage."""
@@ -458,10 +466,13 @@ class TestAPIDecorator(unittest.TestCase):
             def my_endpoint(self):
                 """Do nothing."""
 
-        cls._assert_rule_is_added(MyNApp)
+        blueprint = Mock()
+        mock_blueprint.return_value = blueprint
+        cls._assert_rule_is_added(MyNApp, blueprint)
 
     @classmethod
-    def test_rule_from_classmethod(cls):
+    @patch('kytos.core.api_server.Blueprint')
+    def test_rule_from_classmethod(cls, mock_blueprint):
         """Use class methods as endpoints as well."""
         class MyNApp(RESTNApp):  # pylint: disable=too-few-public-methods
             """API decorator example usage."""
@@ -471,10 +482,13 @@ class TestAPIDecorator(unittest.TestCase):
             def my_endpoint(cls):
                 """Do nothing."""
 
-        cls._assert_rule_is_added(MyNApp)
+        blueprint = Mock()
+        mock_blueprint.return_value = blueprint
+        cls._assert_rule_is_added(MyNApp, blueprint)
 
     @classmethod
-    def test_rule_from_staticmethod(cls):
+    @patch('kytos.core.api_server.Blueprint')
+    def test_rule_from_staticmethod(cls, mock_blueprint):
         """Use static methods as endpoints as well."""
         class MyNApp(RESTNApp):  # pylint: disable=too-few-public-methods
             """API decorator example usage."""
@@ -484,14 +498,16 @@ class TestAPIDecorator(unittest.TestCase):
             def my_endpoint():
                 """Do nothing."""
 
-        cls._assert_rule_is_added(MyNApp)
+        blueprint = Mock()
+        mock_blueprint.return_value = blueprint
+        cls._assert_rule_is_added(MyNApp, blueprint)
 
     @classmethod
-    def _assert_rule_is_added(cls, napp_class):
+    def _assert_rule_is_added(cls, napp_class, blueprint):
         """Assert Flask's add_url_rule was called with the right parameters."""
         napp = napp_class()
-        server = cls._mock_api_server(napp)
-        server.app.add_url_rule.assert_called_once_with(
+        cls._mock_api_server(napp)
+        blueprint.add_url_rule.assert_called_once_with(
             '/api/test/MyNApp/rule', None, napp.my_endpoint)
 
     @staticmethod

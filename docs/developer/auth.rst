@@ -15,7 +15,7 @@ This endpoint creates new users:
 
 .. code-block:: shell
 
-    POST http://127.0.0.1:8181/api/kytos/auth/users/
+    POST http://127.0.0.1:8181/api/kytos/core/auth/users/
 
     $ curl -X POST \
         -H 'Content-Type: application/json' \
@@ -29,7 +29,7 @@ is correct:
 
 .. code-block:: shell
 
-    GET http://127.0.0.1:8181/api/kytos/auth/login/
+    GET http://127.0.0.1:8181/api/kytos/core/auth/login/
 
     $ curl -X GET \
         -H 'Accept:application/json' \
@@ -40,7 +40,7 @@ This endpoint lists the registered users:
 
 .. code-block:: shell
 
-    GET http://127.0.0.1:8181/api/kytos/auth/v1/users/
+    GET http://127.0.0.1:8181/api/kytos/core/auth/v1/users/
 
     $ curl -X GET \
         -H 'Accept:application/json' \
@@ -51,7 +51,7 @@ This endpoint gets details about a specific user:
 
 .. code-block:: shell
 
-    GET http://127.0.0.1:8181/api/kytos/auth/users/<user_id>/
+    GET http://127.0.0.1:8181/api/kytos/core/auth/users/<user_id>/
 
     $ curl -X GET \
         -H 'Content-type: application/json' \
@@ -65,7 +65,7 @@ This endpoint deletes a specific user.
 
 .. code-block:: shell
 
-    DELETE http://127.0.0.1:8181/api/kytos/auth/v1/users/<user_id>/
+    DELETE http://127.0.0.1:8181/api/kytos/core/auth/v1/users/<user_id>/
 
     $ curl -X DELETE \
         -H 'Content-type: application/json' \
@@ -78,7 +78,7 @@ This endpoint update a specific user:
 
 .. code-block:: shell
 
-    PATCH http://127.0.0.1:8181/api/kytos/auth/v1/users/<user_id>/
+    PATCH http://127.0.0.1:8181/api/kytos/core/auth/v1/users/<user_id>/
 
     $ curl -X PATCH \
         -H 'Content-Type: application/json' \

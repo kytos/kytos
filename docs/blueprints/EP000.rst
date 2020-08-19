@@ -1,5 +1,5 @@
 :EP: 00
-:Title: Ehancement Proposals 
+:Title: Enhancement Proposals
 :Authors:
     - Antonio Francisco <ajoaoff@gmail.com>
     - Carlos Magno <cmagnobarbosa@gmail.com>
@@ -21,7 +21,7 @@ This blueprint is proposed to clarify what a blueprint is, its purpose, list the
 ##########
 Motivation
 ##########
-Kytos Project uses word 'blueprint' to refer a very especific type of document that have a very import role in development process. Anyone who are not familiar with the concept should be able to understand and start a draft blueprint using the EP0 (blueprint 00).
+Kytos Project uses word 'blueprint' to refer a very specific type of document that have a very import role in development process. Anyone who are not familiar with the concept should be able to understand and start a draft blueprint using the EP0 (blueprint 00).
 
 
 ###################
@@ -45,19 +45,19 @@ Specification
 
 Workflow
 **************
-Every blueprint should be follow the steps below in order to be finished:
+Every blueprint should be followed the steps below in order to be finished:
  
 Outline the subject
 ===================
-The process to write a blueprint should begins describing a new idea, a specification to something that it was defined to be deployed. It is recommended that a single blueprint contain a single proposal. The more focused the blueprint the more successful it tends to be. The Kytos team have the right to reject or aprove any proposal. If in doubt, create a issue in the Kytos Project at Github and add a coment asking if the the issue could be a blueprint.
+The process to write a blueprint should begin describing a new idea, a specification to something that it was defined to be deployed. It is recommended that a single blueprint contain a single proposal. The more focused the blueprint the more successful it tends to be. The Kytos team have the right to reject or approve any proposal. If in doubt, create an issue in the Kytos Project at Github and add a comment asking if the issue could be a blueprint.
 
 Submitting a blueprint
 ======================
-After create a first blueprint adding every necessary section (check the sections at "Sections that a blueprint should have") you are encouraged to create a pull request at repository kytos attending the following criteria:
+After create a first blueprint adding every necessary section (check the sections in "Sections that a blueprint should have") you are encouraged to create a pull request at repository kytos attending the following criteria:
 
     - The file containing the proposal must be named "EPX.rst";
 
-    - The file must containing a header following the template avaible in Blueprint Header section;
+    - The file must contain a header following the template available in Blueprint Header section;
 
     - The file must int restructured text (RST) format like the others blueprints (as you can see at 'kytos/docs/blueprints').
 
@@ -73,7 +73,7 @@ Sections that a blueprint should have
 
 Header
 ======
-This section must  be use the template available at Blueprint Header section in this blueprint.
+This section must be use the template available at Blueprint Header section in this blueprint.
 
 Abstract
 ========
@@ -81,11 +81,11 @@ A short (~200 word) description of the technical issue being addressed.
 
 Motivation
 ==========
-It should clearly explain why the blueprint is being proposed describing any techinal issue that is intended to be covered by the proposal.
+It should clearly explain why the blueprint is being proposed describing any technical issue that is intended to be covered by the proposal.
 
 Rationale
 =========
-The rationale fleshes out the specification by describing why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other enviroments or scenarios.
+The rationale fleshes out the specification by describing why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other environments or scenarios.
 
 Specification
 =============
@@ -93,9 +93,9 @@ The technical specification should describe the aspects of what is being propose
 
 Backwards Compatibility
 =======================
-All Eps that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity.  The EP must explain how the author proposes to deal with these incompatibilities. 
+All EPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The EP must explain how the author proposes to deal with these incompatibilities.
 
-Security Implications 
+Security Implications
 =====================
 If there are security concerns in relation to the EP, those concerns should be explicitly written out to make sure reviewers of the EP are aware of them.
 
@@ -112,15 +112,15 @@ Copyright/license
 
 
 ################
-Blueprint Header 
+Blueprint Header
 ################
 
-Every  blueprint proposal should be use this template to build their own header:
+Every blueprint proposal should be used this template to build their own header:
 
 :EP: <\*EP number>
-:Title:  <EP title>
+:Title: <EP title>
 :Authors: <list of authors' names and email addrs>
-:Created:  <date created on, in yyyy-mm-dd format>
+:Created: <date created on, in yyyy-mm-dd format>
 :Kytos-Version: <kytos version, in yyyy.v>
 :Status: <Draft | Active | Accepted | Provisional | Deferred | Rejected | Withdrawn | Final | Superseded>
 :Type: <Standards Track | Informational | Process>
@@ -142,3 +142,4 @@ Copyright
 
 This document is placed in the public domain or under the
 CC0-1.0-Universal license, whichever is more permissive.
+

@@ -7,9 +7,7 @@ feedback is important for us to fix bugs, add new features and
 make it easier to create and share Network Applications.
 
 To give us your feedback, check the most appropriate instructions in the next
-section. You can also contact us directly on the `Slack channel <https://join.
-slack.com/t/kytos/shared_invite/enQtMjk0MTM0NjQwOTE1LTE2N2UyNWE2YjNjNzY0MTN
-iNDNiY2JmNGFlMGQxY2I5Y2IxYjBhMTkwZjZjNDQ4Zjk3ZjExZGFjNGYzMzRjMDM>`_.
+section. You can also contact us directly on the `Slack channel`_.
 
 Contributing Guidelines
 -----------------------
@@ -28,9 +26,7 @@ Got a Question or Problem?
 --------------------------
 
 If you have questions about how to use any component of the Kytos project,
-direct them to our `Slack channel <https://join.slack.com/t/kytos/shared_
-invite/enQtMjk0MTM0NjQwOTE1LTE2N2UyNWE2YjNjNzY0MTNiNDNiY2JmNGFlMGQxY2I5Y2IxY
-jBhMTkwZjZjNDQ4Zjk3ZjExZGFjNGYzMzRjMDM>`_.
+direct them to our `Slack channel`_.
 
 .. _contributing-issue:
 
@@ -52,9 +48,7 @@ If you would like to implement a new feature, then consider what kind of change
 it is:
 
 - **Major Changes** that you wish to contribute to the project should be
-  discussed first in our `Slack channel <https://join.slack.com/t/kytos/shared_
-  invite/enQtMjk0MTM0NjQwOTE1LTE2N2UyNWE2YjNjNzY0MTNiNDNiY2JmNGFlMGQxY2I5Y2IxY
-  jBhMTkwZjZjNDQ4Zjk3ZjExZGFjNGYzMzRjMDM>`_, so that we can better coordinate our 
+  discussed first in our `Slack channel`_, so that we can better coordinate our 
   efforts, prevent work duplication, and help you to craft the changes so they 
   are successfully integrated into the project.
 
@@ -249,3 +243,6 @@ must be signed. It's a quick process, we promise!
 .. _GitHub repository: https://github.com/kytos/
 .. _forking workflow: https://www.atlassian.com/git/tutorials/comparing-workflows#forking-workflow
 .. _Google-style docstrings: https://google.github.io/styleguide/pyguide.html?showone=Comments#Comments
+.. _Slack channel: https://join.slack.com/t/kytos/shared_
+  invite/enQtMjk0MTM0NjQwOTE1LTE2N2UyNWE2YjNjNzY0MTNiNDNiY2JmNGFlMGQxY2I5Y2IxY
+  jBhMTkwZjZjNDQ4Zjk3ZjExZGFjNGYzMzRjMDM

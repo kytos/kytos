@@ -7,8 +7,9 @@ feedback is important for us to fix bugs, add new features and
 make it easier to create and share Network Applications.
 
 To give us your feedback, check the most appropriate instructions in the next
-section. You can also contact us directly and subscribe to mailing lists as
-described in the :doc:`/home/get_help` section.
+section. You can also contact us directly on the `Slack channel <https://join.
+slack.com/t/kytos/shared_invite/enQtMjk0MTM0NjQwOTE1LTE2N2UyNWE2YjNjNzY0MTN
+iNDNiY2JmNGFlMGQxY2I5Y2IxYjBhMTkwZjZjNDQ4Zjk3ZjExZGFjNGYzMzRjMDM>`_.
 
 Contributing Guidelines
 -----------------------
@@ -27,8 +28,9 @@ Got a Question or Problem?
 --------------------------
 
 If you have questions about how to use any component of the Kytos project,
-direct them to our dev mailing list. We are also available on IRC. Check the
-details in the :doc:`/home/get_help` section.
+direct them to our `Slack channel <https://join.slack.com/t/kytos/shared_
+invite/enQtMjk0MTM0NjQwOTE1LTE2N2UyNWE2YjNjNzY0MTNiNDNiY2JmNGFlMGQxY2I5Y2IxY
+jBhMTkwZjZjNDQ4Zjk3ZjExZGFjNGYzMzRjMDM>`_.
 
 .. _contributing-issue:
 
@@ -50,10 +52,11 @@ If you would like to implement a new feature, then consider what kind of change
 it is:
 
 - **Major Changes** that you wish to contribute to the project should be
-  discussed first in our dev mailing list or IRC (see: :doc:`/home/get_help`
-  section), so that we can better coordinate our efforts, prevent work
-  duplication, and help you to craft the changes so they are successfully
-  integrated into the project.
+  discussed first in our `Slack channel <https://join.slack.com/t/kytos/shared_
+  invite/enQtMjk0MTM0NjQwOTE1LTE2N2UyNWE2YjNjNzY0MTNiNDNiY2JmNGFlMGQxY2I5Y2IxY
+  jBhMTkwZjZjNDQ4Zjk3ZjExZGFjNGYzMzRjMDM>`_, so that we can better coordinate our 
+  efforts, prevent work duplication, and help you to craft the changes so they 
+  are successfully integrated into the project.
 
 - **Small Changes** can be crafted and submitted to the |repo| as Pull Requests.
 
@@ -210,6 +213,17 @@ Code contribution steps review
 #.  Push to your origin repository
 #.  Create a new PR in GitHub
 #.  Respond to any code review feedback
+
+Blueprint
+---------
+
+We have a type of document used to describe our architectural choices, called a
+‘blueprint’. This document is used to specify the details of any process, 
+resources and anything else that is desirable to be implemented in the Kytos 
+Project and cannot be reduced to a Github problem or a meeting to be outlined. 
+This document records all the major architectural decisions made in the kytos 
+project, this document is developed for our current developers and mainly for 
+future developers.
 
 Coding style
 ------------

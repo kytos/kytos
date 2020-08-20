@@ -126,8 +126,9 @@ class KytosConfig():
                     'foreground': False,
                     'protocol_name': '',
                     'enable_entities_by_default': False,
-                    'napps_pre_installed': [],
-                    'vlan_pool': {},
+                    'napps_pre_installed': '[]',
+                    'authenticate_urls': '[]',
+                    'vlan_pool': '{}',
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()
@@ -148,6 +149,9 @@ class KytosConfig():
         self.parser.set_defaults(**defaults)
 
         self.options['daemon'] = self._parse_options(argv)
+        authenticate_urls = self.options['daemon'].authenticate_urls
+        self.options['daemon'].authenticate_urls = json.loads(
+            authenticate_urls)
 
     def _parse_options(self, argv):
         """Create a Namespace using the given argv.

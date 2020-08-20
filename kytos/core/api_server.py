@@ -17,6 +17,9 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room
 from werkzeug.exceptions import HTTPException
 
+from kytos.core.auth import authenticated
+from kytos.core.config import KytosConfig
+
 
 class APIServer:
     """Api server used to provide Kytos Controller routes."""
@@ -296,6 +299,31 @@ class APIServer:
             return function
         return store_route_params
 
+    @staticmethod
+    def get_authenticate_options():
+        """Return configuration options related to authentication."""
+        options = KytosConfig().options['daemon']
+        return options.authenticate_urls
+
+    def authenticate_endpoints(self, napp):
+        """Add authentication to defined REST endpoints.
+
+        If any URL marked for authentication uses a function,
+        that function will require authentication.
+        """
+        authenticate_urls = self.get_authenticate_options()
+        for function in self._get_decorated_functions(napp):
+            inner = getattr(function, '__func__', function)
+            inner.authenticated = False
+            for rule, _ in function.route_params:
+                if inner.authenticated:
+                    break
+                absolute_rule = self.get_absolute_rule(rule, napp)
+                for url in authenticate_urls:
+                    if url in absolute_rule:
+                        inner.authenticated = True
+                        break
+
     def register_napp_endpoints(self, napp):
         """Add all NApp REST endpoints with @rest decorator.
 
@@ -315,8 +343,10 @@ class APIServer:
         for function in self._get_decorated_functions(napp):
             for rule, options in function.route_params:
                 absolute_rule = self.get_absolute_rule(rule, napp)
-                self._start_endpoint(napp_blueprint, absolute_rule, function,
-                                     **options)
+                if getattr(function, 'authenticated', False):
+                    function = authenticated(function)
+                self._start_endpoint(napp_blueprint, absolute_rule,
+                                     function, **options)
 
         # Register this Flask Blueprint in the Flask App
         self.app.register_blueprint(napp_blueprint)

@@ -783,6 +783,7 @@ class Controller:
         self.napps[(username, napp_name)] = napp
 
         napp.start()
+        self.api_server.authenticate_endpoints(napp)
         self.api_server.register_napp_endpoints(napp)
 
         # pylint: disable=protected-access

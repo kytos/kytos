@@ -19,6 +19,7 @@ Here are the guidelines we follow for different ways of contributing:
 - `Want a Feature?`_
 - `Want a Doc Fix?`_
 - `Submission Guidelines`_
+- `Blueprint`_
 - `Coding Style`_
 - `Signing the CLA`_
 
@@ -211,13 +212,15 @@ Code contribution steps review
 Blueprint
 ---------
 
-We have a type of document used to describe our architectural choices, called a
-‘blueprint’. This document is used to specify the details of any process, 
-resources and anything else that is desirable to be implemented in the Kytos 
-Project and cannot be reduced to a Github problem or a meeting to be outlined. 
-This document records all the major architectural decisions made in the kytos 
-project, this document is developed for our current developers and mainly for 
-future developers.
+We have a type of document used to describe our architectural choices, called a 
+‘blueprint’. This document records all the main architectural decisions made in 
+the kytos project, this document is developed for our current developers and 
+mainly for our future developers. This document is used to specify the details 
+of any process, resource, and anything else that is desirable to be implemented, 
+resulting in a major architectural change. You can check out our blueprints to 
+learn more about our architectural choices in the `blueprint section`_. 
+Remember that this document is not just for you, but mainly for other 
+developers. 
 
 Coding style
 ------------
@@ -246,3 +249,4 @@ must be signed. It's a quick process, we promise!
 .. _Slack channel: https://join.slack.com/t/kytos/shared_
   invite/enQtMjk0MTM0NjQwOTE1LTE2N2UyNWE2YjNjNzY0MTNiNDNiY2JmNGFlMGQxY2I5Y2IxY
   jBhMTkwZjZjNDQ4Zjk3ZjExZGFjNGYzMzRjMDM
+.. _blueprint section: https://github.com/kytos/kytos/tree/master/docs/blueprints

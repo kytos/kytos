@@ -21,18 +21,18 @@ This blueprint is proposed to clarify what a blueprint is, its purpose, list the
 ##########
 Motivation
 ##########
-Kytos Project uses word 'blueprint' to refer a very specific type of document that have a very import role in development process. Anyone who are not familiar with the concept should be able to understand and start a draft blueprint using the EP0 (blueprint 00).
+Kytos Project uses word 'blueprint' to refer to a very specific type of document that plays a very important role in development process. Anyone who is not familiar with the concept should be able to understand and start a draft blueprint using the EP0 (blueprint 00).
 
 
 ###################
 What is a blueprint
 ###################
-A blueprint is document used to specify the details of any process, features and anything else that is desirable to be implanted in Kytos Project and cannot be reduced to a Github issue or a meeting to be outlined.
+A blueprint is a document used to specify the details of any process, features and anything else that is desirable to be implemented in Kytos Project and cannot be reduced to a Github issue or a meeting to be outlined.
 
 #########
 Audience
 #########
-The primary audience for EPs are the core developers, as well as network engineers involved at the Kytos Project. However, other parts of the Kytos community may use the EP's to understand many aspects of the project.
+The primary audience for EPs are the core developers, as well as network engineers involved in the Kytos Project. However, other parts of the Kytos community may use the EPs to understand many aspects of the project.
 
 #########
 Rationale
@@ -45,11 +45,11 @@ Specification
 
 Workflow
 **************
-Every blueprint should be followed the steps below in order to be finished:
+Every blueprint should follow the steps below in order to be finished:
  
 Outline the subject
 ===================
-The process to write a blueprint should begin describing a new idea, a specification to something that it was defined to be deployed. It is recommended that a single blueprint contain a single proposal. The more focused the blueprint the more successful it tends to be. The Kytos team have the right to reject or approve any proposal. If in doubt, create an issue in the Kytos Project at Github and add a comment asking if the issue could be a blueprint.
+The process for writing a blueprint should begin by describing a new idea, a specification to something that has been defined to be implemented. It is recommended that a single blueprint contain a single proposal. The more focused the blueprint, the more successful it tends to be. The Kytos team have the right to reject or approve any proposal. If in doubt, create an issue in the Kytos Project on Github and add a comment asking if the issue could be a blueprint.
 
 Submitting a blueprint
 ======================
@@ -59,13 +59,13 @@ After create a first blueprint adding every necessary section (check the section
 
     - The file must contain a header following the template available in Blueprint Header section;
 
-    - The file must int restructured text (RST) format like the others blueprints (as you can see at 'kytos/docs/blueprints').
+    - The file must be in restructured text (RST) format like the other blueprints (as you can see at 'kytos/docs/blueprints').
 
 
 Blueprint review
 ================
 
-The following days after you submit your pull request the Kytos team will be reviewing the document adding comments and suggestions. So is very important that the author of the pull request pay attention to the Kytos team feedback to make review a quick process.
+In the following days after you submit your pull request the Kytos team will review the document adding comments and suggestions. So it is very important that the author of the pull request pay attention to the Kytos team feedback to make the review a quick process.
 
 
 Sections that a blueprint should have
@@ -73,7 +73,7 @@ Sections that a blueprint should have
 
 Header
 ======
-This section must be use the template available at Blueprint Header section in this blueprint.
+This section must use the template available in the Blueprint Header section of this blueprint.
 
 Abstract
 ========
@@ -115,7 +115,7 @@ Copyright/license
 Blueprint Header
 ################
 
-Every blueprint proposal should be used this template to build their own header:
+Every blueprint proposal should use this template to build their own header:
 
 :EP: <\*EP number>
 :Title: <EP title>
@@ -142,4 +142,3 @@ Copyright
 
 This document is placed in the public domain or under the
 CC0-1.0-Universal license, whichever is more permissive.
-

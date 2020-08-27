@@ -136,7 +136,7 @@ class TestInterface(unittest.TestCase):
         self.assertEqual(expected_speed, iface.speed)
 
     def test_speed_removing_features(self):
-        """Should return custom's speed again when features' becomes None."""
+        """Should return custom speed again when features becomes None."""
         custom_speed = 101112
         of_speed = 10 * 10**6 / 8
         iface = self._get_v0x04_iface(speed=custom_speed,

@@ -19,7 +19,7 @@ Here are the guidelines we follow for different ways of contributing:
 - `Want a Feature?`_
 - `Want a Doc Fix?`_
 - `Submission Guidelines`_
-- `Blueprint`_
+- `Blueprints`_
 - `Coding Style`_
 - `Signing the CLA`_
 
@@ -50,7 +50,7 @@ it is:
 
 - **Major Changes** that you wish to contribute to the project should be
   discussed first in our `Slack channel`_, so that we can better coordinate our 
-  efforts, prevent work duplication, and help you to craft the changes so they 
+  efforts, prevent work duplication, and help you craft the changes so they 
   are successfully integrated into the project.
 
 - **Small Changes** can be crafted and submitted to the |repo| as Pull Requests.

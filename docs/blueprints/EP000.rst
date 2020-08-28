@@ -101,7 +101,7 @@ If there are security concerns in relation to the EP, those concerns should be e
 
 Rejected Ideas
 ==============
-Throughout the discussion of a EP, various ideas will be proposed which are not accepted. Those rejected ideas should be recorded along with the reasoning as to why they were rejected. This both helps record the thought process behind the final version of the EP as well as preventing people from bringing up the same rejected idea again in subsequent discussions.
+Throughout the discussion of an EP, various proposed ideas end up not being accepted. Those rejected ideas should be recorded along with the reasoning as to why they were rejected. This both helps record the thought process behind the final version of the EP as well as preventing people from bringing up the same rejected ideas again in subsequent discussions.
  
 References
 ==========

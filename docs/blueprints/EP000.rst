@@ -59,7 +59,7 @@ After create a first blueprint adding every necessary section (check the section
 
     - The file must contain a header following the template available in Blueprint Header section;
 
-    - The file must be in restructured text (RST) format like the other blueprints (as you can see at 'kytos/docs/blueprints').
+    - The file must be written in restructured text (RST) format like the other blueprints (as you can see at 'kytos/docs/blueprints').
 
 
 Blueprint review

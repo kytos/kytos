@@ -212,15 +212,14 @@ Code contribution steps review
 Blueprint
 ---------
 
-We have a type of document used to describe our architectural choices, called a 
-‘blueprint’. This document records all the main architectural decisions made in 
-the kytos project, this document is developed for our current developers and 
-mainly for our future developers. This document is used to specify the details 
-of any process, resource, and anything else that is desirable to be implemented, 
-resulting in a major architectural change. You can check out our blueprints to 
-learn more about our architectural choices in the `blueprint section`_. 
-Remember that this document is not just for you, but mainly for other 
-developers. 
+We have a type of document used to describe our architectural choices, called 
+‘blueprint’. This document is developed for our developers and records all the
+main architectural decisions made in the kytos project. Blueprints are used to
+specify the details of any process, resource, and anything else that is
+desirable to be implemented, resulting in a major architectural change. You can
+check out our blueprints to learn more about our architectural choices in the
+`blueprint section`_. Remember that this document is not just for you, but
+mainly for other developers.
 
 Coding style
 ------------

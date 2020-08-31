@@ -125,7 +125,6 @@ class TestInterface(unittest.TestCase):
     def test_speed_setter(self):
         """Should return speed that was set and not features'."""
         expected_speed = 12345
-        self.iface.features = PortFeatures.OFPPF_10MB_FD
         self.iface.set_custom_speed(expected_speed)
         actual_speed = self.iface.speed
         self.assertEqual(expected_speed, actual_speed)
@@ -133,20 +132,18 @@ class TestInterface(unittest.TestCase):
     def test_speed_in_constructor(self):
         """Custom speed should override features'."""
         expected_speed = 6789
-        iface = self._get_v0x04_iface(speed=expected_speed,
-                                      features=PortFeatures.OFPPF_10MB_FD)
-        actual_speed = iface.speed
-        self.assertEqual(expected_speed, actual_speed)
+        iface = self._get_v0x04_iface(speed=expected_speed)
+        self.assertEqual(expected_speed, iface.speed)
 
-    def test_remove_custom_speed(self):
-        """Should return features' speed again when custom's becomes None."""
+    def test_speed_removing_features(self):
+        """Should return custom speed again when features becomes None."""
         custom_speed = 101112
         of_speed = 10 * 10**6 / 8
         iface = self._get_v0x04_iface(speed=custom_speed,
                                       features=PortFeatures.OFPPF_10MB_FD)
-        self.assertEqual(custom_speed, iface.speed)
-        iface.set_custom_speed(None)
         self.assertEqual(of_speed, iface.speed)
+        iface.features = None
+        self.assertEqual(custom_speed, iface.speed)
 
     def test_interface_available_tags(self):
         """Test available_tags on Interface class."""

@@ -209,8 +209,8 @@ Code contribution steps review
 #.  Create a new PR in GitHub
 #.  Respond to any code review feedback
 
-Blueprint
----------
+Blueprints
+----------
 
 We have a type of document used to describe our architectural choices, called 
 ‘blueprint’. This document is developed for our developers and records all the
@@ -218,7 +218,7 @@ main architectural decisions made in the kytos project. Blueprints are used to
 specify the details of any process, resource, and anything else that is
 desirable to be implemented, resulting in a major architectural change. You can
 check out our blueprints to learn more about our architectural choices in the
-`blueprint section`_. Remember that this document is not just for you, but
+`blueprints section`_. Remember that this document is not just for you, but
 mainly for other developers.
 
 Coding style
@@ -248,4 +248,4 @@ must be signed. It's a quick process, we promise!
 .. _Slack channel: https://join.slack.com/t/kytos/shared_
   invite/enQtMjk0MTM0NjQwOTE1LTE2N2UyNWE2YjNjNzY0MTNiNDNiY2JmNGFlMGQxY2I5Y2IxY
   jBhMTkwZjZjNDQ4Zjk3ZjExZGFjNGYzMzRjMDM
-.. _blueprint section: https://github.com/kytos/kytos/tree/master/docs/blueprints
+.. _blueprints section: https://github.com/kytos/kytos/tree/master/docs/blueprints

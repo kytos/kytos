@@ -1,13 +1,6 @@
-##################
-OpenFlow Handshake
-##################
-
-
-Status
-######
-
-Accepted
-
+:EP: 2
+:Title: OpenFlow Handshake
+:Status: Accepted 
 
 Abstract
 ########

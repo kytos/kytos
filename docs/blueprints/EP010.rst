@@ -1,7 +1,6 @@
-########################
-Enhancement Proposal 010
-########################
-
+:EP: 10
+:Title: Implement OpenFlow protocol parsing headers
+:Status: Draft 
 
 Objective
 #########

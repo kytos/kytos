@@ -1,3 +1,14 @@
+:EP: 1
+:Title: Kytos testing pipeline and definitions
+:Authors:
+    - Renan Rodrigo Renan Rodrigo <renanrb@ime.usp.br>
+    - Macártur de Sousa Carvalho <macartur.sc@gmail.com>
+    - Erick Vermot <erick.vermot@gmail.com>
+:Created: 2017-03-31
+:Kytos-Version: 2017.1
+:Status: Accepted
+:Type: Informational
+
 ########################
 Enhancement Proposal 001
 ########################

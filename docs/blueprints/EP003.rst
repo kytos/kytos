@@ -1,13 +1,6 @@
-#####################
-python-openflow Tests
-#####################
-
-
-Status
-######
-
-Accepted
-
+:EP: 3
+:Title:  python-openflow Tests
+:Status: Accepted
 
 Abstract
 ########

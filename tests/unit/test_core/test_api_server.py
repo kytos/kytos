@@ -113,12 +113,22 @@ class TestAPIServer(unittest.TestCase):
             self.assertEqual(response.json, expected_json)
             self.assertEqual(response.status_code, 200)
 
+    @patch('os.path')
     @patch('kytos.core.api_server.send_file')
-    def test_web_ui(self, mock_send_file):
+    def test_web_ui__success(self, mock_send_file, ospath_mock):
         """Test web_ui method."""
+        ospath_mock.exists.return_value = True
         self.api_server.web_ui()
 
         mock_send_file.assert_called_with('flask_dir/index.html')
+
+    @patch('os.path')
+    def test_web_ui__error(self, ospath_mock):
+        """Test web_ui method."""
+        ospath_mock.exists.return_value = False
+        _, error = self.api_server.web_ui()
+
+        self.assertEqual(error, 404)
 
     @patch('kytos.core.api_server.urlretrieve')
     @patch('kytos.core.api_server.urlopen')

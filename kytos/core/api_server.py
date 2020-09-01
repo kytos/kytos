@@ -200,7 +200,10 @@ class APIServer:
 
     def web_ui(self):
         """Serve the index.html page for the admin-ui."""
-        return send_file(f"{self.flask_dir}/index.html")
+        index_path = f"{self.flask_dir}/index.html"
+        if os.path.exists(index_path):
+            return send_file(index_path)
+        return f"File '{index_path}' not found.", HTTPStatus.NOT_FOUND.value
 
     def update_web_ui(self, version='latest', force=True):
         """Update the static files for the Web UI.
@@ -227,6 +230,9 @@ class APIServer:
                 package = urlretrieve(uri)[0]
             except HTTPError:
                 return f"Uri not found {uri}."
+            except URLError:
+                self.log.warning("Error accessing the %s.", uri)
+                return f"Error accessing the {uri}."
 
             # test downloaded zip file
             zip_ref = zipfile.ZipFile(package, 'r')

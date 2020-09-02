@@ -213,13 +213,16 @@ Blueprints
 ----------
 
 We have a type of document used to describe our architectural choices, called 
-‘blueprint’. This document is developed for our developers and records all the
-main architectural decisions made in the kytos project. Blueprints are used to
-specify the details of any process, resource, and anything else that is
-desirable to be implemented, resulting in a major architectural change. You can
-check out our blueprints to learn more about our architectural choices in the
-`blueprints section`_. Remember that this document is not just for you, but
-mainly for other developers.
+‘blueprint’. This document is written for our developers and users and records 
+all the main architectural decision proposals that were accepted or not in the 
+kytos project. Blueprints are used to specify the details of any process, 
+resource, and anything else that is desirable to be implemented, resulting in a 
+major architectural change. You can check out our blueprints to learn more 
+about our architectural choices in the `blueprints section`_. Anyone can make 
+enhancement proposals writing `blueprints`, but first is highly recommended 
+with you know about our past choices by reading in the `blueprints section`_. 
+Remember that this document is not just for you, but mainly for other 
+developers. 
 
 Coding style
 ------------

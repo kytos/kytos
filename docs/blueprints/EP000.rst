@@ -53,7 +53,7 @@ The process for writing a blueprint should begin by describing a new idea, a spe
 
 Submitting a blueprint
 ======================
-After create a first blueprint adding every necessary section (check the sections in "Sections that a blueprint should have") you are encouraged to create a pull request at repository kytos attending the following criteria:
+After creating a first blueprint by adding every necessary section (check the sections under "Sections that a blueprint should have") you are encouraged to create a pull request in Kytos repository attending the following criteria:
 
     - The file containing the proposal must be named "EPX.rst";
 

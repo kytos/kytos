@@ -110,6 +110,15 @@ References -- A collection of URLs used as references through the EP.
 Copyright/license
 =================
 
+Types of blueprints
+*******************
+
+Standard: Describes a new feature and its implementation.
+
+Informational: Guidelines or information for the community and developers, but does not propose a new feature.
+
+Epic: Describes a problem and its solution.  
+
 
 ################
 Blueprint Header

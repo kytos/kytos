@@ -9,7 +9,8 @@ import json
 import random
 
 from kytos.core.common import GenericEntity
-from kytos.core.exceptions import KytosNoTagAvailableError
+from kytos.core.exceptions import (KytosLinkCreationError,
+                                   KytosNoTagAvailableError)
 from kytos.core.interface import TAGType
 
 
@@ -22,9 +23,9 @@ class Link(GenericEntity):
         Two kytos.core.interface.Interface are required as parameters.
         """
         if endpoint_a is None:
-            raise ValueError("endpoint_a cannot be None")
+            raise KytosLinkCreationError("endpoint_a cannot be None")
         if endpoint_b is None:
-            raise ValueError("endpoint_b cannot be None")
+            raise KytosLinkCreationError("endpoint_b cannot be None")
         self.endpoint_a = endpoint_a
         self.endpoint_b = endpoint_b
         super().__init__()

@@ -77,6 +77,10 @@ class KytosNoTagAvailableError(Exception):
         return msg
 
 
+class KytosLinkCreationError(Exception):
+    """Exception thrown when the link has an empty endpoint."""
+
+
 # Exceptions related  to NApps
 
 

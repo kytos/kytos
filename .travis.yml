@@ -1,6 +1,7 @@
 language: python
 python:
   - "3.6"
+  - "3.8"
 install:
   - pip install pip==20.2.2
   - pip install --use-feature=2020-resolver -r requirements/dev.txt

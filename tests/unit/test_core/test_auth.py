@@ -56,7 +56,6 @@ class TestAuth(TestCase):
     @staticmethod
     def get_auth_test_client(auth):
         """Return a flask api test client."""
-        auth.controller.api_server.register_napp_endpoints(auth)
         return auth.controller.api_server.app.test_client()
 
     @patch('kytos.core.auth.Auth._create_superuser')

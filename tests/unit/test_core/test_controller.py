@@ -60,7 +60,8 @@ class TestController(TestCase):
         # Restore original state
         logging.root.handlers = handlers_bak
 
-    def test_unload_napp_listener(self):
+    @patch('kytos.core.api_server.APIServer.remove_napp_endpoints')
+    def test_unload_napp_listener(self, _):
         """Call NApp shutdown listener on unload."""
         username, napp_name = 'test', 'napp'
         listener = self._add_napp(username, napp_name)
@@ -69,7 +70,8 @@ class TestController(TestCase):
         self.controller.unload_napp(username, napp_name)
         listener.assert_called()
 
-    def test_unload_napp_other_listener(self):
+    @patch('kytos.core.api_server.APIServer.remove_napp_endpoints')
+    def test_unload_napp_other_listener(self, _):
         """Should not call other NApps' shutdown listener on unload."""
         username, napp_name = 'test', 'napp1'
         self._add_napp(username, napp_name)

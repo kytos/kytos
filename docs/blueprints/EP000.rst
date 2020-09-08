@@ -55,7 +55,7 @@ Submitting a blueprint
 ======================
 After creating a first blueprint by adding every necessary section (check the sections under "Sections that a blueprint should have") you are encouraged to create a pull request in Kytos repository attending the following criteria:
 
-    - The file containing the proposal must be named "EPX.rst";
+    - The file containing the proposal must follow the naming convention "EP[number].rst", where [number] is a sequential number, e.g. "EP001.rst";
 
     - The file must contain a header following the template available in Blueprint Header section;
 

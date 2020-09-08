@@ -217,10 +217,9 @@ We have a type of document used to describe our architectural choices, called
 all the main architectural decision proposals that were accepted or not in the 
 kytos project. Blueprints are used to specify the details of any process, 
 resource, and anything else that is desirable to be implemented, resulting in a 
-major architectural change. You can check out our blueprints to learn more 
-about our architectural choices in the `blueprints section`_. Anyone can make 
-enhancement proposals writing `blueprints`, but first is highly recommended 
-with you know about our past choices by reading in the `blueprints section`_. 
+major architectural change. Anyone can make enhancement proposals 
+writing new `blueprints`, but first it is highly recommended that you take
+a look at our `blueprints section`_ to read about our past choices. 
 Remember that this document is not just for you, but mainly for other 
 developers. 
 

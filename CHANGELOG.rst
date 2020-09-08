@@ -27,6 +27,26 @@ Changed
 =======
 
 
+[2020.2b1] - "itamar" beta1 - 2020-09-08
+****************************************
+Added
+=====
+- Added Blueprints section to the "How to Contribute" guide.
+
+Fixed
+=====
+- Fixed auth URLs on documentation.
+- Fixed interface tests.
+
+Changed
+=======
+- Changed setup.py to alert when a test fail on Travis.
+- Changed dev requirements to install run requirements.
+- Changed Makefile to use the latest python 3 instead of python 3.6.
+- Updated APIServer to use Flask blueprints.
+- Updated .travis.yml to use newest pip dependency resolver for tests.
+
+
 [2020.1] - "helena" stable - 2020-08-07
 ***************************************
 Added

@@ -27,6 +27,27 @@ Changed
 =======
 
 
+[2020.2b1] - "itamar" beta1 - 2020-09-08
+****************************************
+Added
+=====
+- Added Blueprints section to the "How to Contribute" guide.
+
+Fixed
+=====
+- Fixed bug when two NApps had methods with the same name
+  decorated with the ``@rest`` decorator.
+- Fixed authentication URLs in documentation.
+- Fixed interface tests.
+
+Changed
+=======
+- Changed ``dev`` requirements to install ``run`` requirements.
+- Changed Makefile to use ``python3`` instead of ``python3.6``.
+- Updated ``.travis.yml`` to use newest pip dependency resolver for tests.
+- Changed ``setup.py`` to alert when a test fails on Travis.
+
+
 [2020.1] - "helena" stable - 2020-08-07
 ***************************************
 Added

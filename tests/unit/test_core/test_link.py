@@ -4,6 +4,7 @@ import time
 import unittest
 from unittest.mock import Mock, patch
 
+from kytos.core.exceptions import KytosLinkCreationError
 from kytos.core.interface import Interface, TAGType
 from kytos.core.link import Link
 from kytos.core.switch import Switch
@@ -74,10 +75,10 @@ class TestLink(unittest.TestCase):
 
     def test_init_with_null_endpoints(self):
         """Test initialization with None as endpoints."""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KytosLinkCreationError):
             Link(self.iface1, None)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KytosLinkCreationError):
             Link(None, self.iface2)
 
     def test_link_id(self):

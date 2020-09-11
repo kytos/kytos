@@ -41,7 +41,8 @@ class TestHelpers(TestCase):
 
         self.assertEqual(link_mock.endpoint_a, endpoint_a)
         self.assertEqual(link_mock.endpoint_b, endpoint_b)
-        self.assertEqual(link_mock.metadata, {"A": 0})
+        self.assertEqual(link_mock.metadata, {"A": 0, "BB": 0.0,
+                                              "CCC": "test"})
 
     def test_switch_mock(self):
         """Test switch mock."""

@@ -22,3 +22,4 @@ In this section you will learn about:
 - :doc:`Testing with Mininet </developer/testing_with_mininet/>`
 - :doc:`Unit Tests </developer/unit_tests/>`
 - :doc:`Python OpenFlow </developer/pyof/>`
+- :doc:`List REST Endpoints </developer/rest_endpoints/>`

@@ -69,8 +69,6 @@ def start_shell(controller=None):
         banner1 += f"    WEB UI........: http://{address}:{api_port}/\n"
         banner1 += f"    Kytos Version.: {__version__}"
 
-    banner1 += "\n"
-
     cfg = Config()
     cfg.TerminalInteractiveShell.autocall = 2
     cfg.TerminalInteractiveShell.show_rewritten_input = False
@@ -80,12 +78,17 @@ def start_shell(controller=None):
     # on Kytos shutdown
     cfg.HistoryAccessor.enabled = False
 
-    ipshell = InteractiveShellEmbed(config=cfg,
-                                    banner1=banner1,
-                                    exit_msg=exit_msg)
-    ipshell.prompts = KytosPrompt(ipshell)
+    if controller and controller.options.no_terminal:
+        banner1 += " \n"
+        banner1 += f"    Running Kytos without TERMINAL."
+        controller.log.info(banner1)
+    else:
+        ipshell = InteractiveShellEmbed(config=cfg,
+                                        banner1=banner1,
+                                        exit_msg=exit_msg)
+        ipshell.prompts = KytosPrompt(ipshell)
 
-    ipshell()
+        ipshell()
 
 
 # def disable_threadpool_exit():

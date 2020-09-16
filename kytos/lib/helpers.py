@@ -36,7 +36,7 @@ def get_link_mock(endpoint_a, endpoint_b):
     link = create_autospec(Link)
     link.endpoint_a = endpoint_a
     link.endpoint_b = endpoint_b
-    link.metadata = {"A": 0}
+    link.metadata = {"A": 0, "BB": 0.0, "CCC": "test"}
     return link
 
 

@@ -79,10 +79,10 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 to what is informed by the switch. Return ``None`` if not set
                 and switch does not inform the speed.
             config(|port_config|): Port config used to indicate interface
-                behavior (administratively down, ignore reveived packets, drop
-                forwarded packets, do not send packet-in messages). In general,
-                the port config bits are set by the controller and not changed
-                by the switch.
+                behavior. In general, the port config bits are set by the
+                controller and are not changed by the switch. Options
+                are: administratively down, ignore received packets, drop
+                forwarded packets, and/or do not send packet-in messages.
         """
         self.name = name
         self.port_number = int(port_number)

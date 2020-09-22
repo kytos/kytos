@@ -116,3 +116,6 @@ If you try to press `ctrl + space` a list of actions will appear at the center
 of Kytos UI. This is another way to trigger actions that you think that is not
 suitable for the toolbar, for instance.
 
+
+Check all UI components in `Kytos UI components section <https://docs.kytos.io/
+developer/kytos_ui_components>`_

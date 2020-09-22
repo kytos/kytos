@@ -88,6 +88,7 @@ Kytos Summit provides an opportunity for developers, contributors and other inte
    creating_a_napp
    auth
    web-ui
+   kytos_ui_components
    how_to_contribute
    hacking
    security

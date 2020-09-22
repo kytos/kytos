@@ -97,7 +97,7 @@ User Interface
 --------------
 You can create a NApp with UI, using our custom `Vue.js` and HTML components. 
 To learn more visit our 
-`Web Interface documentation </developer/web-ui/>` _
+`Web Interface documentation <../web-ui/>`_
 
 How to create a rest endpoint for your napp
 ===========================================

@@ -117,8 +117,7 @@ of Kytos UI. This is another way to trigger actions that you think that is not
 suitable for the toolbar, for instance.
 
 
-Check all UI components in `Kytos UI components section <https://docs.kytos.io/
-developer/kytos_ui_components>`_
+Check all UI components in `Kytos UI components section <../kytos_ui_components>`_
 
 Creating a NApp with UI
 ***********************

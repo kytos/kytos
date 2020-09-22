@@ -95,8 +95,8 @@ After created, your NApp will have the basic NApp structure.
 
 User Interface
 --------------
-You can create a NApp with UI, using our custom `Vue.js` and HTML components. 
-To learn more visit our 
+You can create a web UI for your NApp using our custom `Vue.js` and 
+HTML components. To learn more, visit our
 `Web Interface documentation <../web-ui/>`_
 
 How to create a rest endpoint for your napp

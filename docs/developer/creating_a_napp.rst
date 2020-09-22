@@ -93,11 +93,11 @@ After created, your NApp will have the basic NApp structure.
 - **ui**: Folder with components to be displayed in the Kytos UI.
 - **ui/README.rst**: A file with a brief description of your NApp components.
 
-UI
----
+User Interface
+--------------
 You can create a NApp with UI, using our custom `Vue.js` and HTML components. 
 To learn more visit our 
-`Web Interface documentation <https://docs.kytos.io/developer/web-ui/>` _
+`Web Interface documentation </developer/web-ui/>` _
 
 How to create a rest endpoint for your napp
 ===========================================

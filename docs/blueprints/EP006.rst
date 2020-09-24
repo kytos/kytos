@@ -1,12 +1,6 @@
-###################
-Version Inheritance
-###################
-
-
-Status
-######
-
-Accepted
+:EP: 6
+:Title: Version Inheritance
+:Status: Accepted
 
 
 Description

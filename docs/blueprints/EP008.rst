@@ -1,3 +1,7 @@
+:EP: 8
+:Title: Pack/unpack tests and how to capture/dump binary message packets
+:Status: Draft 
+
 ########################
 Enhancement Proposal 008
 ########################

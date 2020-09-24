@@ -1,7 +1,6 @@
-########################
-Enhancement Proposal 009
-########################
-
+:EP: 9
+:Title: Improve packing/unpacking message
+:Status: Draft 
 
 Objective
 #########

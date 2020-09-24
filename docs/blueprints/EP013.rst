@@ -1,18 +1,15 @@
+:EP: 13
+:Title: Topology NApp Improvements
+:Status: Finished
+
+
 Summary
 =======
-
-Title
------
-Topology NApp Improvements
 
 Authors
 -------
 Jeronimo Bezerra (Amlight), Vinicius Arcanjo (RNP), Antonio Francisco (ANSP),
 Rogerio Motitsuki (ANSP), Beraldo Leal, (Kytos), Renan Rodrigo (Kytos)
-
-Blueprint Status
-----------------
-finished
 
 Priority
 --------

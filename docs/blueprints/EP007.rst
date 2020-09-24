@@ -1,3 +1,7 @@
+:EP: 7
+:Title: OpenFlow handshake process on Kytos
+:Status: Draft 
+
 ########################
 Enhancement Proposal 007
 ########################

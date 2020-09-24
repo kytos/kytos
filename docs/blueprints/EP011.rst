@@ -1,13 +1,6 @@
-##########################
-Multipart Request Creation
-##########################
-
-
-Status
-######
-
-Proposed
-
+:EP: 11
+:Title: Multipart Request Creation
+:Status: Proposed
 
 Abstract
 ########

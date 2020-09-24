@@ -1,17 +1,13 @@
+:EP: 15
+:Title: System tests for NApps validation.
+:Status: Working-in-progress
+
 Summary
 =======
-
-Title
------
-System tests for NApps validation.
 
 Authors
 -------
 Vinicius Arcanjo (RNP/Kytos), Jeronimo Bezerra (FIU/Kytos), Antonio Francisco (AmLight/Kytos), Beraldo Leal (Kytos), Macartur Souza (Kytos), Humberto Diogenes (Kytos)
-
-Blueprint Status
-----------------
-work-in-progress
 
 Priority
 --------

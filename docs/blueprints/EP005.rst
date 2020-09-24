@@ -1,13 +1,6 @@
-###########################
-Version inheritance problem
-###########################
-
-
-Status
-######
-
-Accepted
-
+:EP: 5
+:Title: Version inheritance problem
+:Status: Accepted
 
 Description
 ###########

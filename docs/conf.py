@@ -368,6 +368,9 @@ rst_epilog = """
 .. |port_features| replace::
    :class:`~pyof.v0x01.common.phy_port.PortFeatures`
 
+.. |port_config| replace::
+   :class:`~pyof.v0x01.common.phy_port.PortConfig`
+
 .. |desc_stats| replace::
    :class:`~pyof.v0x01.controller2switch.common.DescStats`
 

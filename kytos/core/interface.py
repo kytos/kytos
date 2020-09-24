@@ -63,7 +63,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
     # pylint: disable=too-many-arguments
     def __init__(self, name, port_number, switch, address=None, state=None,
-                 features=None, speed=None):
+                 features=None, speed=None, config=None):
         """Assign the parameters to instance attributes.
 
         Args:
@@ -78,6 +78,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             speed (int, float): Interface speed in bytes per second. Defaults
                 to what is informed by the switch. Return ``None`` if not set
                 and switch does not inform the speed.
+            config(|port_config|): Port config used to indicate interface
+                behavior. In general, the port config bits are set by the
+                controller and are not changed by the switch. Options
+                are: administratively down, ignore received packets, drop
+                forwarded packets, and/or do not send packet-in messages.
         """
         self.name = name
         self.port_number = int(port_number)
@@ -85,6 +90,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self.address = address
         self.state = state
         self.features = features
+        self.config = config
         self.nni = False
         self.endpoints = []
         self.stats = None

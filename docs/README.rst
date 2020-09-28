@@ -5,7 +5,7 @@ Kytos Documentation
 Requirements
 ============
 
-To install the docs requirements you must have Python 3.6 and NodeJS
+To install the docs requirements you must have Python 3 and NodeJS
 9.5.0. After that, install the requirements to build the docs using the
 command below.
 
@@ -32,4 +32,4 @@ access the browser using the address http://localhost:8000 .
 
 .. code-block:: sh
 
-  python3.6 -m http.server
+  python3 -m http.server

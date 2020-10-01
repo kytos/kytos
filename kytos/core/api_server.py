@@ -231,8 +231,8 @@ class APIServer:
             except HTTPError:
                 return f"Uri not found {uri}."
             except URLError:
-                self.log.warning("Error accessing the %s.", uri)
-                return f"Error accessing the {uri}."
+                self.log.warning("Error accessing URL %s.", uri)
+                return f"Error accessing URL {uri}."
 
             # test downloaded zip file
             zip_ref = zipfile.ZipFile(package, 'r')

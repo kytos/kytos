@@ -1,11 +1,12 @@
-:EP: 00
+:EP: 0
 :Title: Enhancement Proposals
 :Authors:
+    - José Mauro Ribeiro <zemauror@gmail.com>
+:Reviewers:
     - Antonio Francisco <ajoaoff@gmail.com>
     - Carlos Magno <cmagnobarbosa@gmail.com>
     - Gleyberson Andrade <gleybersonandrade@gmail.com>
     - Humberto Diógenes <hdiogenes@gmail.com>
-    - José Mauro Ribeiro <zemauror@gmail.com>
     - Rogério Motitsuki <rogerio@ansp.br>
 :Created: 2020-05-14
 :Kytos-Version: 2020.1
@@ -21,18 +22,10 @@ This blueprint is proposed to clarify what a blueprint is, its purpose, list the
 ##########
 Motivation
 ##########
+
 Kytos Project uses the word 'blueprint' to refer to a very specific type of document that plays a very important role in the development process. Anyone who is not familiar with the concept should be able to understand and start a draft blueprint using the EP0 (blueprint 00).
-
-
-###################
-What is a blueprint
-###################
-A blueprint is a document used to specify the details of any process, features and anything else that is desirable to be implemented in Kytos Project and cannot be reduced to a Github issue or a meeting to be outlined.
-
-#########
-Audience
-#########
-The primary audience for EPs are the core developers, as well as network engineers involved in the Kytos Project. However, other parts of the Kytos community may use the EPs to understand many aspects of the project.
+A blueprint is a document used to specify the details of any process, features and anything else that is desirable to be implemented in Kytos Project and cannot be reduced to a Github issue or a meeting to be outlined, although a blueprint could start as an issue and become a blueprint after some discussion.
+This blueprint is intended to help anyone who wants to start a new blueprint. Besides that, the standard proposed here could save time for  the author of a blueprint who don't have to think about the structure of the project and avoid that different authors write blueprints in a very different way. Different blueprints with common section between them could help even the readers who are familiar with the structure once they could search for specific sections in it.
 
 #########
 Rationale
@@ -55,6 +48,7 @@ Submitting a blueprint
 ======================
 After creating a first blueprint by adding every necessary section (check the sections under "Sections that a blueprint should have") you are encouraged to create a pull request in Kytos repository attending the following criteria:
 
+    - The status of the blueprint should be "draft";
     - The file containing the proposal must follow the naming convention "EP[number].rst", where [number] is a sequential number, e.g. "EP001.rst";
 
     - The file must contain a header following the template available in Blueprint Header section;
@@ -64,7 +58,6 @@ After creating a first blueprint by adding every necessary section (check the se
 
 Blueprint review
 ================
-
 In the following days after you submit your pull request, the Kytos team will review the document adding comments and suggestions. So the author of the pull request must pay attention to the Kytos team feedback to make the review a quick process.
 
 
@@ -73,7 +66,22 @@ Sections that a blueprint should have
 
 Header
 ======
-This section must use the template available in the Blueprint Header section of this blueprint.
+Every blueprint proposal should use this template to build their own header:
+
+:EP: <\*EP number>
+:Title: <EP title>
+:Authors: <list of authors' names and email addrs>
+:Reviewers: <list of reviewers' names and email addrs>
+:Created: <date created on, in yyyy-mm-dd format>
+:Kytos-Version: <kytos version, in yyyy.v>
+:Status: <Draft | Accepted | Rejected | Final | Superseded>
+:Type: <Standards Track | Informational | Process>
+:\**Replaces: <EP number>
+
+\*EP number: should be fixed by Kytos team after the author submit the PR.
+
+\**Optional field.
+
 
 Abstract
 ========
@@ -115,29 +123,24 @@ Types of blueprints
 
 Standard: Describes a new feature and its implementation.
 
-Informational: Guidelines or information for the community and developers, but does not propose a new feature.
+Process: Guidelines or information for the community and developers, but does not propose a new feature.
 
 Epic: Describes a problem and its solution.  
 
+#######################
+Backwards Compatibility
+#######################
+At the moment that this blueprint is being proposed Kytos Project have the total of 21 blueprints created. The standard proposed in EP0 should be followed by any new blueprint proposed after the blueprint 21, and is established here that the update of the previous blueprints are not mandatory.
 
-################
-Blueprint Header
-################
+#####################
+Security Implications
+#####################
+Not applicable here
 
-Every blueprint proposal should use this template to build their own header:
-
-:EP: <\*EP number>
-:Title: <EP title>
-:Authors: <list of authors' names and email addrs>
-:Created: <date created on, in yyyy-mm-dd format>
-:Kytos-Version: <kytos version, in yyyy.v>
-:Status: <Draft | Active | Accepted | Provisional | Deferred | Rejected | Withdrawn | Final | Superseded>
-:Type: <Standards Track | Informational | Process>
-:\**Replaces: <EP number>
-
-\*EP number: should be fixed by Kytos team after the author submit the PR.
-
-\**Optional field.
+##############
+Rejected Ideas
+##############
+Not applicable here
 
 ##########
 References

@@ -4,6 +4,7 @@
     - José Mauro Ribeiro <zemauror@gmail.com>
 :Reviewers:
     - Antonio Francisco <ajoaoff@gmail.com>
+    - Beraldo Leal <beraldo@gmail.com>
     - Carlos Magno <cmagnobarbosa@gmail.com>
     - Gleyberson Andrade <gleybersonandrade@gmail.com>
     - Humberto Diógenes <hdiogenes@gmail.com>

@@ -17,15 +17,15 @@
 ########
 Abstract
 ########
-This blueprint is proposed to clarify what a blueprint is, its purpose, list the types of blueprints, explain which sections should be included in a blueprint, the information that should be included in each topic and the workflow involving a blueprint proposal. Therefore, this blueprint is intended to work as a meta blueprint.
+This blueprint is proposed to clarify what blueprints are, their purpose, list the types of blueprints, explain which sections should be included in a blueprint, the information that should be included in each topic and the workflow involving a blueprint proposal. Therefore, this blueprint is intended to work as a meta blueprint.
 
 ##########
 Motivation
 ##########
 
-Kytos Project uses the word 'blueprint' to refer to a very specific type of document that plays a very important role in the development process. Anyone who is not familiar with the concept should be able to understand and start a draft blueprint using the EP0 (blueprint 00).
-A blueprint is a document used to specify the details of any process, features and anything else that is desirable to be implemented in Kytos Project and cannot be reduced to a Github issue or a meeting to be outlined, although a blueprint could start as an issue and become a blueprint after some discussion.
-This blueprint is intended to help anyone who wants to start a new blueprint. Besides that, the standard proposed here could save time for  the author of a blueprint who don't have to think about the structure of the project and avoid that different authors write blueprints in a very different way. Different blueprints with common section between them could help even the readers who are familiar with the structure once they could search for specific sections in it.
+The Kytos Project uses the word 'blueprint' to refer to a specific type of document that plays a very important role in the development process. Anyone who is not familiar with the concept should be able to understand and start a draft blueprint using the EP0 (blueprint 0).
+A blueprint is a document used to specify the details of any process, features and anything else that is desirable to be implemented in Kytos Project and cannot be reduced to a GitHub issue or a meeting to be outlined, although a blueprint could start as an issue and become a blueprint after some discussion.
+This blueprint is intended to help anyone who wants to start a new blueprint. Besides that, the standard proposed here could save time for the author of a blueprint who doesn't have to think about the structure of the project and avoid that different authors write blueprints in a very different way. Separate blueprints with common sections between them could help even the readers who are familiar with the structure once they could search for specific sections in it.
 
 #########
 Rationale

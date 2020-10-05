@@ -56,6 +56,10 @@ class KytosConfig():
                             action='store_true',
                             help="Run in foreground (ctrl+c to stop)")
 
+        parser.add_argument('-i', '--interactive',
+                            action='store_true',
+                            help="Run with interactive terminal")
+
         parser.add_argument('-l', '--listen',
                             action='store',
                             help="IP/Interface to be listened")

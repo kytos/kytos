@@ -1,0 +1,256 @@
+:EP: 22
+:Title: Kytos Pathfinder Filter Paths by Metadata
+:Authors:
+    - David Ramirez <drami102@fiu.edu>
+    - Marvin Torres <mtorr068@fiu.edu>
+:Created: 2020-10-05
+:Kytos-Version: 2020.2b
+:Status: Draft
+
+Abstract
+========
+
+This blueprint is to add support for filtering by metadata using Kytos Pathfinder's `v2/` endpoint. In particular,
+`shortest_path`, the method decorated with `@rest('v2/', methods=['POST']`, should get the user's edge attribute
+requirements, remove best paths with edges that fail to meet those requirements, then return the remaining paths.
+It covers details of the test that determines whether a path is preserved, flexibility, the dependencies that must be added, and 
+the verification requirements.
+
+Motivation
+==========
+
+Currently, Kytos Pathfinder accepts the following parameters:
+ - Source
+ - Destination
+ - Desired links
+ - Undesired links
+ - Parameter
+
+*Desired links* and *undesired links* are noteworthy. They showcase Kytos Pathfinder's current filtering ability.
+Namely, they cause Kytos Pathfinder to remove edges that do not have all the desired links and none of the undesired ones. 
+
+In its current state, this list of parameters is insufficient for filtering out paths based on metadata information.
+Even *Parameter*, the only one that holds metadata information, can only hold one attribute name.
+
+In addition, Kytos Pathfinder's pathfinding ability is limited. While it can use weights, it assumes that the
+higher the weight, the worse its associated edge. While this is true for some attributes like delay and utilization,
+it is false for others like bandwidth. So finding the path with the highest bandwidth is currently impossible. Second,
+it can only find the best path in one area and not multiple - it can not find, for example, a path with ideal bandwidth
+and delay. Lastly, it finds the absolute best paths in the graph when the best might not be required. A user might
+look for a path that is good enough for their needs.
+
+Rationale
+=========
+
+These changes would give users better control over which circuits to reserve. This is because they add the following abilities:
+ - **Constraint Menu**: Users can declare constraints when searching for paths. 
+ - **Flexibility Toggle**: Users can soften the constraints, so if a path cannot be found, find a path using less constraints than before.
+
+Specification
+=============
+
+Details on testing a path and verifying these changes are discussed.
+
+Testing a Path
+--------------
+
+The path test assumes the following:
+
+Constraints were given by the user. For example:
+
+ - Bandwidth must be at least 34 units.
+ - Delay must be at most 45 units.
+ - Owner must be Joe.
+ - Reliability can be at least 3 units, or utilization can be at most 32 units, or both.
+ - Path must have links A and B.
+ - Path must not have link C.
+
+These are required because it will join attribute names in these constraints with the
+attribute names in an edge's metadata and see if the associated attribute values are
+high or low enough. 
+
+Also, it assumes that **all** edges in a graph have the following attributes:
+
+ - Bandwidth
+ - Delay
+ - Reliability
+ - Utilization
+ - Priority
+ - Ownership
+
+And that some attributes will have a maximum while others have a minimum:
+
+Minimum:
+ - Bandwidth
+ - Priority
+ - Reliability
+
+Maximum:
+  - Delay
+  - Utilization
+
+Equal:
+  - Ownership
+
+It will *pass* an edge if its metadata meets constraints, otherwise it will *fail* the edge. 
+Assume that a user wishes to check all edge attributes (checking all attributes is optional). First, it obtains 
+the constraint as a JSON object:
+
+  ::
+
+    "base_metrics": {
+      "bandwidth":A,
+      "delay":B,
+      "utilization":C,
+      "reliability":D,
+      "priority":E,
+      "ownership":F
+    }
+
+where **A** through **E** are floating point numbers or integers and **F** is a string.
+
+Then it retrieves an edge in the graph and performs the following test, which is a series of questions:
+
+ - bandwidth(edge) at least A?
+ - delay(edge) at most B?
+ - utilization(edge) at most C?
+ - reliability(edge) at least D?
+ - priority(edge) at least E?
+ - ownership(edge) equal to F?
+
+If YES to all questions, then it **passes** the edge.
+
+For example, assume that it receives the user constraint *Delay must be at most 45 units and bandwidth must be at least 30 units*.
+Then the incoming JSON object will be as follows:
+
+  .. code-block:: JSON
+
+    "base_metrics": {
+      "bandwidth":30,
+      "delay":45
+    }
+
+Then it will retrieve an edge and check if its bandwidth is at least 30 units and its delay
+is at most 45 units. If it does not have both qualities then it fails. Then it will repeat
+this for every subsequent edge it finds.
+
+A returned path will have all of the passing edges and none of the failing ones.
+
+To summarize, the input required is the user's constraint as a JSON object and the output is
+the set of paths that meets that constraint. 
+
+Flexibility in Theory
+---------------------
+
+Recall in the previous section that the test is a series of questions, and that a YES to all questions
+means a **passing result**.
+
+However, a user might be okay with some YESes. Support for flexibility can meet those needs.
+
+Flexible metrics are JSON objects, just like inflexible ones:
+
+  .. code-block:: JSON
+
+    "flexible_metrics": {
+      "bandwidth":A,
+      "delay":B,
+      "utilization":C,
+      "reliability":D,
+      "priority":E,
+      "ownership":F
+    }
+
+If a flexible part is included, then for each edge the test needs to see if it can answer YES to a minimum number of
+questions. Such edges would be marked as passing, while the rest would be marked as failing. This way,
+paths will have edges that meet the minimum requirements of the user.
+
+This requires finding the set of k-sized combinations from a set of n flexible metrics, where k is at least
+the minimum number of YES answers. For example, assume the user specifies the following constraint:
+
+  .. code-block:: JSON
+
+    "flexible_metrics": {
+      "bandwidth":30,
+      "delay":40,
+      "utilization":50,
+    }
+
+If they wish to find a path that has one of those qualities (e.g. "bandwidth is at least 30 units"), then
+the set will have to be split into c(3, 1) = 3 tests, each with a single question:
+
+ - bandwidth(edge) at least 30?
+ - delay(edge) at most 40?
+ - utilization(edge) at most 50?
+
+If it can pass at least one test, then it passes overall.
+
+Softening constraints to find more paths than usual is the main idea of flexibility. In practice, it is more nuanced than shown
+here to meet user needs. It will not test each edge, mark the ones that pass, and find the shortest
+paths using those marked edges. While this is the easiest way to be flexible, this presents a few issues:
+
+ 1. Edges along a path might have pass by having different qualities. For example, if a path has edges
+    A and B, A might have sufficient delay and bandwidth, while B might have sufficient utilization and ownership.
+    This means edges in a path will likely have no common wanted traits, which user might need.
+ 2. With edges failing to have common wanted traits, a path has a chance of having an edge with an unwanted trait.
+    So users will have to filter paths manually by finding such edges in their paths.
+
+To produce useful results, Kytos Pathfinder will have to find paths with edges that share common traits.
+
+Flexibility in Kytos Pathfinder
+------------------------------
+
+How it works is multiple tests will be done on one graph instead of the same test on multiple edges. In particular,
+if a constraint has *n* "questions", then the entire graph will be tested c(n, 1) + c(n, 2) + .. + c(n, k) times, where
+1 <= k <= n.
+
+Assume that a constraint is *{A, B, C}* (for simplicity's sake). What Kytos Pathfinder will do is
+find the *power set* of that constraint minus the empty set:
+
+{A, B, C}, {A, B}, {B, C}, {A, C}, {A}, {B}, {C}
+
+This totals up to 1 + 3 + 3 = 7 tests on the graph.
+
+Kytos Pathfinder will find passing edges with constraint {A, B, C}, find paths using those edges, 
+find new passing edges with constraint {A, B}, find paths using those new edges, and so on. Finally,
+it collects all the paths found. This will soften constraints while providing paths with guaranteed
+common traits among its edges, *e.g.* edges with sufficient bandwidth.
+
+The *minimum number* still applies here. It determines the smallest size of combinations to use.
+So if the constraint was {A, B, C} and the minimum number was 2, then tests for {A}, {B}, and {C} 
+would not exist. 
+
+Flexibility with Inflexibility
+------------------------------
+
+A constraint can be split into two parts: *flexible* and *inflexible*. These two constraints can
+work together to produce smarter searches than if they were mutually exclusive.
+
+For example, users can specify a zero (0) minimum. This would let all edges pass. This could be used with
+inflexible metrics to specify optional qualities on top of required ones. So it can, for example, find paths
+from flexible metrics as long as the paths are owned by "Joe".
+
+Dependencies
+------------
+
+ - **Itertool's Combination Function** To find the set of k-sized combinations from the set of n flexible metrics. These sets will serve as the tests done on edges.
+
+Verification
+------------
+
+One way to verify the test is to obtain two sets of links, one that passed and the other that failed.
+All the passing links should be present in the first set, and all the failing links should be present
+in the second. 
+
+Possible Implementation
+=======================
+
+The following is two approaches to implement the endpoint change:
+
+  1. Edit the method. The downside to this is the work required to inform current Kytos Pathfinder users regarding the update. 
+  1. Write a new method with a new endpoint decorator. The downside to this is that other NApps have to be aware of its existence, increasing coupling.
+
+References
+==========
+
+- Constrained Shortest Path Computation:
+    - http://www.cs.ust.hk/~dimitris/PAPERS/SSTD05-CSP.pdf

@@ -341,6 +341,18 @@ See more details about of_lldp REST Endpoints in `kytos/of_lldp
 
     POST http://0.0.0.0:8181/api/kytos/of_lldp/v1/interfaces/enable
 
+.. code:: console
+
+    GET http://0.0.0.0:8181/api/kytos/of_lldp/v1/polling_time
+
+.. code:: console
+
+    POST http://0.0.0.0:8181/api/kytos/of_lldp/v1/polling_time
+
+.. code:: console
+
+    GET http://0.0.0.0:8181/api/kytos/of_lldp/v1/
+
 **kytos/of_stats**
 
 See more details about of_stats REST Endpoints in `kytos/of_stats

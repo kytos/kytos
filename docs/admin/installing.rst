@@ -5,8 +5,8 @@ Installing
 Installing required dependencies
 ================================
 
-We use Python 3.6, so in order to use this software please install it
-into your environment beforehand. Note that an additional step is
+Kytos requires at least Python 3.6, so in order to use this software please 
+install it into your environment beforehand. Note that an additional step is 
 needed for Ubuntu releases older than 16.10.
 
 
@@ -20,15 +20,16 @@ install Python 3.6 packages. To add this PPA, use the commands:
 
   $ sudo add-apt-repository ppa:jonathonf/python-3.6
   $ sudo apt update
+  $ sudo apt install python-pip python3.6
 
 Required packages
 =================
 
-The required Ubuntu packages can be installed by:
+The required Debian/Ubuntu packages can be installed by:
 
 .. code-block:: bash
 
-  $ sudo apt install python-pip python3.6
+  $ sudo apt install python3-pip python3
 
 Installing with pip
 ===================
@@ -38,7 +39,7 @@ previous steps, then:
 
 .. code-block:: bash
 
-  $ pip install kytos kytos-utils
+  $ pip3 install kytos kytos-utils
 
 This will install the Kytos server and client, and also their dependencies,
 like the python-openflow library.

@@ -1,5 +1,5 @@
 """Test the logs module."""
-import imp
+import importlib
 import logging
 from copy import copy
 from inspect import FrameInfo
@@ -189,7 +189,7 @@ class TestLogManager(LogTester):
         logging.root.addHandler(old_handler)
         old_handler.addFilter.assert_not_called()
         # Importing the module should add the filter to existent root handlers.
-        imp.reload(logs)
+        importlib.reload(logs)
         old_handler.addFilter.assert_called_once_with(
             logs.LogManager.filter_session_disconnected)
 

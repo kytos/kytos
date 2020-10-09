@@ -13,6 +13,7 @@ In this section you will learn about:
 - :doc:`Architecture Overview  </developer/architecture>`
 - :doc:`Preparing your Development Environment </developer/setup_develop_environment/>`
 - :doc:`Kytos API </developer/kytos_api/kytos>`
+- :doc:`REST Endpoints </developer/rest_endpoints/>`
 - :doc:`How to develop your NApp </developer/creating_a_napp/>`
 - :doc:`Authentication Module </developer/auth/>`
 - :doc:`Web Interface </developer/web-ui/>`

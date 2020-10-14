@@ -61,8 +61,9 @@ class EggInfo(egg_info):
     def _install_deps_wheels():
         """Python wheels are much faster (no compiling)."""
         print('Installing dependencies...')
-        check_call([sys.executable, '-m', 'pip', 'install', '-r',
-                    'requirements/run.txt'])
+        check_call([sys.executable, '-m', 'pip', 'install',
+                    '--use-feature=2020-resolver',
+                    '-r', 'requirements/run.txt'])
 
 
 # pylint: disable=attribute-defined-outside-init, abstract-method

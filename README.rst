@@ -43,7 +43,7 @@ sure that you're using ``python3.6`` or a later version:
 
 .. code-block:: shell
 
-   $ apt-get install python3
+   $ apt install python3
 
 Then, the first step is to clone *kytos* repository:
 

@@ -9,20 +9,8 @@ locally.
 System Requirements
 ===================
 
-Before create your development environment you need install some libraries to
-support run `Python 3.6` packages and `git` commands.
-
-Ubuntu Old releases
--------------------
-
-If are you using an Ubuntu version less than 17.10 you need to add a PPA to
-able to install Python 3.6 packages. This step is made running the command
-below.
-
-.. code-block:: shell
-
-  $ sudo add-apt-repository ppa:jonathonf/python-3.6
-  $ sudo apt update
+Before creating your development environment you need to install some libraries
+to support running `Python 3` packages and `git` commands.
 
 
 Installing the required packages
@@ -33,7 +21,7 @@ command below.
 
 .. code-block:: shell
 
-  $ sudo apt install git libpython3.6-dev python3.6 python3-venv
+  $ apt install git python3 python3-venv libpython3-dev
 
 
 Setup a Virtual Environment
@@ -56,7 +44,7 @@ To create a new virtual environment named `kytos-environment` you will run:
 
 .. code-block:: shell
 
-  $ python3.6 -m venv kytos-environment
+  $ python3 -m venv kytos-environment
 
 After ran the command above a new folder named `kytos-environment` will be
 created.
@@ -97,29 +85,30 @@ If you want to remove an existing virtualenv, just delete its folder
 
 .. code-block:: shell
 
-  $ rm -rf kytos-environment
+  $ rm -vrf kytos-environment
 
 
 Installing from Source
 ======================
 
-To install the kytos from source you need follow the below steps.
+To install kytos from source you need to follow the steps below.
 
 
 Update the virtualenv
 ---------------------
 
-First of all activate the virtual environment and update the pip package that
+First activate the virtual environment and update the pip package that
 is already installed in the virtualenv, with setuptools and wheel.
 
 .. code-block:: shell
 
     (kytos-environment) $ pip install --upgrade pip setuptools wheel
 
-Download the kytos project from github
+Download the Kytos project from github
 --------------------------------------
 
-First, you need to run the commands below to clone the python-openflow, kytos-utils and kytos projects locally. 
+Run the commands below to clone the python-openflow, kytos-utils and kytos
+projects locally. 
 
 .. code-block:: shell
 

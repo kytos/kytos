@@ -65,7 +65,7 @@ class APIServer:
         @self.app.errorhandler(HTTPException)
         def handle_exception(exception):
             # pylint: disable=unused-variable, invalid-name
-            """Return a json for HTTP errors
+            """Return a json for HTTP errors.
 
             This handler allows NApps to return HTTP error messages
             by raising a HTTPException. When raising the Exception,

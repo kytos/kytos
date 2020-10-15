@@ -73,7 +73,7 @@ Here is the `tl;dr <https://en.wikipedia.org/wiki/TL;DR>`__ version to install
 
 .. code-block:: console
 
-  $ sudo apt-get install -y \
+  $ apt install -y \
       make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
       libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
       xz-utils tk-dev git
@@ -102,7 +102,7 @@ build python versions (we have added git to that list):
 
 .. code-block:: bash
 
-  $ sudo apt-get install -y make \
+  $ apt install -y \
       make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
       libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
       xz-utils tk-dev git

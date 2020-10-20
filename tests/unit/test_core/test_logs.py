@@ -61,6 +61,14 @@ class TestLogManager(LogTester):
         path.return_value.exists.return_value = False
         # Make sure we have the custome formatter section
         parser.__contains__.return_value = True
+
+        # Make 'parser' behave as a dict, this is necessary because the _PARSER
+        # is being patched returning a MagicMock (inside add_handler) and in
+        # 'logging' module (python 3.8) the 'Formatter' class includes a
+        # 'validate' method that breaks when receives a MagicMock object.
+        format_dict = {'formatter_console': {'format': None}}
+        parser.__getitem__.side_effect = format_dict.__getitem__
+
         handler = Mock()
 
         LogManager.add_handler(handler)

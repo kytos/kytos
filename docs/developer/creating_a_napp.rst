@@ -270,7 +270,7 @@ Request:
     -H 'Content-type: application/json' \
     -H 'Accept: application/json' \
     -H 'Authorization: Bearer ${TOKEN}' \
-    http://0.0.0.0:8181/api/<username>/<napp_name>/sample
+    http://127.0.0.1:8181/api/<username>/<napp_name>/sample
 
 Another example of the same request:
 

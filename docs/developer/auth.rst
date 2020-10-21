@@ -100,7 +100,7 @@ Response:
 
 .. code-block:: shell
  
-   {"data":{"email":"user_id@email.com","username":"user_id"}}
+   {"data": {"email": "user_id@email.com", "username": "user_id"}}
 
 Create extra users
 ==================

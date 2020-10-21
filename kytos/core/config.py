@@ -176,6 +176,9 @@ class KytosConfig():
             napps = options.napps_pre_installed
             options.napps_pre_installed = json.loads(napps)
 
+        if isinstance(options.vlan_pool, str):
+            options.vlan_pool = json.loads(options.vlan_pool)
+
         return options
 
 

@@ -1,5 +1,5 @@
 """Test the logs module."""
-import imp
+import importlib
 import logging
 from copy import copy
 from inspect import FrameInfo
@@ -61,6 +61,14 @@ class TestLogManager(LogTester):
         path.return_value.exists.return_value = False
         # Make sure we have the custome formatter section
         parser.__contains__.return_value = True
+
+        # Make 'parser' behave as a dict, this is necessary because the _PARSER
+        # is being patched returning a MagicMock (inside add_handler) and in
+        # 'logging' module (python 3.8) the 'Formatter' class includes a
+        # 'validate' method that breaks when receives a MagicMock object.
+        format_dict = {'formatter_console': {'format': None}}
+        parser.__getitem__.side_effect = format_dict.__getitem__
+
         handler = Mock()
 
         LogManager.add_handler(handler)
@@ -189,7 +197,7 @@ class TestLogManager(LogTester):
         logging.root.addHandler(old_handler)
         old_handler.addFilter.assert_not_called()
         # Importing the module should add the filter to existent root handlers.
-        imp.reload(logs)
+        importlib.reload(logs)
         old_handler.addFilter.assert_called_once_with(
             logs.LogManager.filter_session_disconnected)
 

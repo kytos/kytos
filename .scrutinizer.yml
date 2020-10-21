@@ -13,6 +13,7 @@ build:
         redis: false
     dependencies:
         before:
+            - pip install --upgrade pip
             - pip install coverage
     tests:
         override:

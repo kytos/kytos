@@ -128,7 +128,7 @@ class KytosConfig():
                     'enable_entities_by_default': False,
                     'napps_pre_installed': '[]',
                     'authenticate_urls': '[]',
-                    'vlan_pool': '{}',
+                    'vlan_pool': {},
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()

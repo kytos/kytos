@@ -18,7 +18,7 @@ To access the REST Endpoints related to Authentication, it is necessary to
 register a first user (Superuser). To do this, run kytos with the -f and -C 
 arguments:
 
-.. code-block:: shell 
+.. code-block:: console 
 
    $ kytosd -f -C
 
@@ -38,19 +38,19 @@ is correct:
 
 Endpoint:
 
-.. code-block:: shell
+.. code-block:: console
 
     GET /api/kytos/core/auth/login/
 
 Request:
 
-.. code-block :: shell
+.. code-block :: console
 
-    curl -u username:password http://127.0.0.1:8181/api/kytos/core/auth/login/
+    $ curl -u username:password http://127.0.0.1:8181/api/kytos/core/auth/login/
 
 Response:
 
-.. code-block:: shell
+.. code-block:: console
 
     {"token": token_here}
 
@@ -61,20 +61,20 @@ This endpoint lists the registered users:
 
 Endpoint:
 
-.. code-block:: shell
+.. code-block:: console
 
     GET /api/kytos/core/auth/users/
 
 Request:
 
-.. code-block :: shell
+.. code-block :: console
 
-    curl -i http://127.0.0.1:8181/api/kytos/core/auth/users \
-    -H "Authorization: Bearer token"
+    $ curl -i http://127.0.0.1:8181/api/kytos/core/auth/users \
+        -H "Authorization: Bearer token"
 
 Response:
 
-.. code-block:: shell
+.. code-block:: console
 
    {"users":[id]}
 
@@ -85,22 +85,22 @@ This endpoint gets details about a specific user:
 
 Endpoint:
 
-.. code-block:: shell
+.. code-block:: console
 
     GET /api/kytos/core/auth/users/<user_id>/
 
 Request:
 
-.. code-block :: shell
+.. code-block :: console
 
-    curl -i http://127.0.0.1:8181/api/kytos/core/auth/users/<user_id> \
-    -H "Authorization: Bearer token"
+    $ curl -i http://127.0.0.1:8181/api/kytos/core/auth/users/<user_id> \
+        -H "Authorization: Bearer token"
 
 Response:
 
-.. code-block:: shell
+.. code-block:: console
  
-   {"data": {"email": "user_id@email.com", "username": "user_id"}}
+   {"data": {"email": "babel42@email.com", "username": "user_id"}}
 
 Create extra users
 ==================
@@ -111,24 +111,24 @@ This endpoint requires a token.
 
 Endpoint:
 
-.. code-block:: shell
+.. code-block:: console
 
     POST /api/kytos/core/auth/users/
 
 Request:
 
-.. code-block :: shell
+.. code-block:: console
 
-    curl -d '{"username":"<your_name>", "password":"<pass>", 
-    "email": "<your_email>"}' \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer token" \
-    http://127.0.0.1:8181/api/kytos/core/auth/users/
+    $ curl -d '{"username": "<your_name>", "password": "<pass>", \ 
+        "email": "<your_email>"}' \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer token" \
+        http://127.0.0.1:8181/api/kytos/core/auth/users/
 
 
 Response:
 
-.. code-block:: shell
+.. code-block:: console
 
     User successfully created
 
@@ -139,22 +139,22 @@ This endpoint deletes a specific user.
 
 Endpoint:
 
-.. code-block:: shell
+.. code-block:: console
 
     DELETE /api/kytos/core/auth/users/<user_id>/
 
 Request:
 
-.. code-block :: shell
+.. code-block :: console
 
-    curl -X DELETE \
-    -H 'Authorization: Bearer token' \
-    http://127.0.0.1:8181/api/kytos/core/auth/users/<user_id>
+    $ curl -X DELETE \
+        -H 'Authorization: Bearer token' \
+        http://127.0.0.1:8181/api/kytos/core/auth/users/<user_id>
 
 
 Response:
 
-.. code-block :: shell
+.. code-block :: console
 
   User successfully deleted
 
@@ -165,23 +165,23 @@ This endpoint update a specific user:
 
 Endpoint:
 
-.. code-block:: shell
+.. code-block:: console
 
     PATCH /api/kytos/core/auth/users/<user_id>/
 
 Request:
 
-.. code-block :: shell
+.. code-block :: console
 
-    curl -X PATCH \
-    -H 'Content-Type: application/json' \
-    -H 'Authorization: Bearer token' \
-    -d '{"email": "teste2@gmail.com"}' \
-    http://127.0.0.1:8181/api/kytos/core/auth/users/<user_id>
+    $ curl -X PATCH \
+        -H 'Content-Type: application/json' \
+        -H 'Authorization: Bearer token' \
+        -d '{"email": "babel43@email.com"}' \
+        http://127.0.0.1:8181/api/kytos/core/auth/users/<user_id>
 
 Response:
 
-.. code-block :: shell
+.. code-block :: console
 
     User successfully updated
 

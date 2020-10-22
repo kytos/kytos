@@ -15,7 +15,7 @@ pidfile = {{ prefix }}/var/run/kytos/kytosd.pid
 # mode. On daemon mode, the process will detach from terminal when starts,
 # running in background. When running on 'interactive' mode, you will receive a
 # console right after the controller starts. Default is 'daemon' mode.
-# daemon = True
+daemon = True
 
 # Run the controller in debug mode or not. Default is False.
 debug = False

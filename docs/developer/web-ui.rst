@@ -201,6 +201,12 @@ have the following structure.
 When the administrator enables your NApp, Kytos will automatically scan the
 ``ui/*`` structure to properly export to GUI.
 
+.. note::
+  Kytos will parse the files structure and try to find your NApp components,
+  so you need to create a folder only for the specific UI sections that are
+  going to be used. So k-action-menu, k-info-panel and k-toolbar are the three
+  UI areas available for using, feel free to create as you need it or not.
+
 Component Template
 ==================
 

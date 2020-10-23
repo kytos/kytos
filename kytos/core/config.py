@@ -127,6 +127,7 @@ class KytosConfig():
                     'protocol_name': '',
                     'enable_entities_by_default': False,
                     'napps_pre_installed': [],
+                    'authenticate_urls': [],
                     'vlan_pool': {},
                     'debug': False}
 
@@ -172,9 +173,15 @@ class KytosConfig():
         result = options.enable_entities_by_default in ['True', True]
         options.enable_entities_by_default = result
 
-        if isinstance(options.napps_pre_installed, str):
-            napps = options.napps_pre_installed
-            options.napps_pre_installed = json.loads(napps)
+        def _parse_json(value):
+            """Parse JSON lists and dicts from the config file."""
+            if isinstance(value, str):
+                return json.loads(value)
+            return value
+
+        options.napps_pre_installed = _parse_json(options.napps_pre_installed)
+        options.vlan_pool = _parse_json(options.vlan_pool)
+        options.authenticate_urls = _parse_json(options.authenticate_urls)
 
         return options
 

@@ -2,9 +2,7 @@
 from datetime import datetime, timezone
 from threading import Thread
 
-from kytos.core.napps import rest
-
-__all__ = ['listen_to', 'now', 'rest', 'run_on_thread', 'get_time']
+__all__ = ['listen_to', 'now', 'run_on_thread', 'get_time']
 
 
 # APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"

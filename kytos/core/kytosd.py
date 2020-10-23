@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 """Start Kytos SDN Platform core."""
 import asyncio
 import functools

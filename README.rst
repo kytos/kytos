@@ -38,11 +38,12 @@ Just install docker from your package provider and run:
 Installing
 ==========
 
-We use Python 3.6, so you'll have to install it into your environment beforehand:
+If you don't have Python 3 installed, please install it. Please make
+sure that you're using ``python3.6`` or a later version:
 
 .. code-block:: shell
 
-   $ apt-get install python3.6
+   $ apt install python3
 
 Then, the first step is to clone *kytos* repository:
 
@@ -56,7 +57,7 @@ install procedure:
 .. code-block:: shell
 
    $ cd kytos
-   $ sudo python3.6 setup.py install
+   $ sudo python3 setup.py install
 
 Configuring
 ===========

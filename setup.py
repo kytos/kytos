@@ -8,7 +8,6 @@ import re
 import sys
 from abc import abstractmethod
 # Disabling checks due to https://github.com/PyCQA/pylint/issues/73
-from distutils.command.clean import clean  # pylint: disable=E0401,E0611
 from pathlib import Path
 from subprocess import CalledProcessError, call, check_call
 
@@ -99,17 +98,14 @@ class TestCommand(Command):
             sys.exit(-1)
 
 
-class Cleaner(clean):
+class Cleaner(SimpleCommand):
     """Custom clean command to tidy up the project root."""
 
     description = 'clean build, dist, pyc and egg from package and docs'
 
     def run(self):
         """Clean build, dist, pyc and egg from package and docs."""
-        super().run()
-        call('rm -vrf ./build ./dist ./*.egg-info', shell=True)
-        call('find . -name __pycache__ -type d | xargs rm -rf', shell=True)
-        call('test -d docs && make -C docs/ clean', shell=True)
+        call('make clean', shell=True)
 
 
 class Test(TestCommand):

@@ -202,13 +202,13 @@ that you want to protect.
       # KytosNapps class
       # all KytosNapps methods
       # call the rest decorator to register your endpoint
-      @rest('sample_endpoint/<name>', methods=['GET'])
+      @rest('/sample', methods=['GET'])
       @authenticated
-      def my_endpoint(self, name):
+      def my_endpoint(self):
           """Sample of documentation.
           Description for your method.
           """
-          result = {"name": name}
+          result = {"name": "NApp"}
           return jsonify(result), 200  # return a string and http status code.
 
 
@@ -225,15 +225,26 @@ the following message will be seen:
 Now, to access this endpoint you must login with the created user credentials
 by submitting the username and password.
 
+Endpoint:
+
 .. code-block:: shell
 
-  GET http://0.0.0.0:8181/api/kytos/core/auth/login/
+  GET api/kytos/core/auth/login/
+
+Request:
+
+.. code-block:: shell
 
   $ curl -X GET \
     -H 'Accept: application/json' \
     -H 'Authorization: Basic <username>: <password>' \
-    URL
+    http://127.0.0.1:8181/api/kytos/core/auth/login/
 
+Another example of the same request:
+
+.. code-block:: shell
+
+  curl -u username:password http://127.0.0.1:8181/api/kytos/core/auth/login/
 
 You will receive a token as response:
 
@@ -245,15 +256,28 @@ You will receive a token as response:
 
 Finally, you can access the protected endpoint sending the token:
 
+Endpoint:
+
 .. code-block:: shell
 
-  GET http://0.0.0.0:8181/api/<username>/<napp_name>/sample_endpoint/<name>
+  GET /api/<username>/<napp_name>/<endpoint>
+
+Request:
+
+.. code-block:: shell
 
   $ curl -X GET \
     -H 'Content-type: application/json' \
     -H 'Accept: application/json' \
     -H 'Authorization: Bearer ${TOKEN}' \
-    URL
+    http://127.0.0.1:8181/api/<username>/<napp_name>/sample
+
+Another example of the same request:
+
+.. code-block:: shell
+
+  curl -i http://127.0.0.1:8181/api/<username>/<napp_name>/sample
+  -H "Authorization: Bearer ${TOKEN}"
 
 You will receive a token as response:
 

@@ -628,12 +628,9 @@ class Controller:
             return
 
         vlan_pool = {}
-        try:
-            vlan_pool = json.loads(self.options.vlan_pool)
-            if not vlan_pool:
-                return
-        except (TypeError, json.JSONDecodeError) as err:
-            self.log.error("Invalid vlan_pool settings: %s", err)
+        vlan_pool = self.options.vlan_pool
+        if not vlan_pool:
+            return
 
         if vlan_pool.get(dpid):
             self.log.info("Loading vlan_pool configuration for dpid %s", dpid)
@@ -786,6 +783,7 @@ class Controller:
         self.napps[(username, napp_name)] = napp
 
         napp.start()
+        self.api_server.authenticate_endpoints(napp)
         self.api_server.register_napp_endpoints(napp)
 
         # pylint: disable=protected-access

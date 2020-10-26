@@ -27,6 +27,43 @@ Changed
 =======
 
 
+[2020.2b2] - "itamar" beta2 - 2020-10-23
+****************************************
+
+Added
+=====
+- Added authentication to REST methods based on configuration option
+- Create ``config`` field on ``Interface``
+- Added new exception ``KytosLinkCreationError``
+- [docs] Created a template blueprint - EP000
+- [docs] Added ``of_lldp``'s new REST Endpoints
+- [docs] Added "Kytos UI Components" section to Dev Guide
+- [docs] New note about the creation of UI folders
+- [tests] Added ``pydocstyle`` as a required linter
+
+Changed
+=======
+- [docs] Updated old blueprints to include standard headers
+- [docs] Moved section "Creating a NApp with UI" to the Web-UI documentation
+- [docs] Use friendlier ``apt`` command instead of ``apt-get``
+- [docs] Updated Authentication documentation
+- [docs] Updated tutorial "How protect a REST endpoint"
+- [tests] Changed tests to use multiple-letter keys in mock link metadata
+
+Removed
+=======
+- Removed hard-coded python3.6 references
+- [packaging] Remove the use of distutils from ``setup.py``
+
+Fixed
+=====
+- Improved support for newer versions of Python
+- Fixed exception when ``kytosd`` cannot update the web UI from GitHub
+- Fixed parsing of ``vlan_pool`` configuration option
+- [tests] Fixed test_logs for Python 3.8
+- [tests] Fixed automated packaging tests under GitHub Actions
+
+
 [2020.2b1] - "itamar" beta1 - 2020-09-08
 ****************************************
 Added

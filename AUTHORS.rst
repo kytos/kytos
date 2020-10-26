@@ -17,6 +17,7 @@ Authors
 Contributors
 ============
 
+- Bárbara Boechat <barbs DOT boechat AT gmail DOT com>
 - Erick Vermot <erick.vermot AT gmail DOT com>
 - Luan Gonçalves <luanlg.cco AT gmail DOT com>
 - Lucas Felix <lucasgsfelix AT gmail DOT com>

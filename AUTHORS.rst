@@ -18,9 +18,11 @@ Contributors
 ============
 
 - Bárbara Boechat <barbs DOT boechat AT gmail DOT com>
+- Daniel Bruce <dbruc009 AT fiu DOT edu>
 - Erick Vermot <erick.vermot AT gmail DOT com>
 - Luan Gonçalves <luanlg.cco AT gmail DOT com>
 - Lucas Felix <lucasgsfelix AT gmail DOT com>
+- Marvin Torres <mtorr068 AT fiu DOT edu>
 - Raphael Cóbe <rmcobe AT ncc DOT unesp DOT br>
 - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 - Thiago Lopes <thiagolopes AT ncc DOT unesp DOT br>

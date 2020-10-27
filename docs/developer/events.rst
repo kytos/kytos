@@ -38,13 +38,13 @@ in the `k-status-bar` as soon the Kytos Web UI DOM is rendered.
     /* All the javascript methods are optional */
     module.exports = {
         methods: { 
-            // put your javascript methods her 
+            // put your javascript methods here
         },
         mounted() {
             /* Will be displayed in kytos-blue */
-            this.$kytos.$emit('statusMessage', 'Your Message Here!')
+            this.$kytos.$emit('statusMessage', 'Your Message Here')
             /* Will be displayed in kytos-red */
-            this.$kytos.$emit('statusMessage', 'Your Message Here!', true)
+            this.$kytos.$emit('statusMessage', 'Your Message Here', true)
         }
     }
     </script>

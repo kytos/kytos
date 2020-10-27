@@ -9,7 +9,7 @@ Example request with ``curl``:
 
 .. code:: console
 
-    curl http://0.0.0.0:8181/api/kytos/core/napps_installed/
+    $ curl http://127.0.0.1:8181/api/kytos/core/napps_installed/
 
 
 
@@ -20,90 +20,90 @@ Reload all NApps
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/reload/all/
+    GET /api/kytos/core/reload/all/
 
 Update Web UI, used with command ``kytos web update``.
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/core/web/update/
+    POST /api/kytos/core/web/update/
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/core/web/update/<version>/
+    POST /api/kytos/core/web/update/<version>/
 
 Get a list of the installed NApps.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/napps_installed/
+    GET /api/kytos/core/napps_installed/
 
 Get enabled NApps.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/napps_enabled/
+    GET /api/kytos/core/napps_enabled/
 
 Shutdown, used by stop_api_server.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/shutdown/
+    GET /api/kytos/core/shutdown/
 
 Get kytos metadata:
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/metadata/
+    GET /api/kytos/core/metadata/
 
 
 Get API Server status.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/status/
+    GET /api/kytos/core/status/
 
 Get config.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/config/
+    GET /api/kytos/core/config/
 
 Uninstall a NApp.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/napps/<username>/<napp_name>/uninstall/
+    GET /api/kytos/core/napps/<username>/<napp_name>/uninstall/
 
 Get Metadata.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/napps/<username>/<napp_name>/metadata/<key>/
+    GET /api/kytos/core/napps/<username>/<napp_name>/metadata/<key>/
 
 Disable a NApp.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/napps/<username>/<napp_name>/disable
+    GET /api/kytos/core/napps/<username>/<napp_name>/disable
 
 Install a NApp.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/napps/<username>/<napp_name>/install
+    GET /api/kytos/core/napps/<username>/<napp_name>/install
 
 Enable a NApp.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/napps/<username>/<napp_name>/enable
+    GET /api/kytos/core/napps/<username>/<napp_name>/enable
 
 Reload a NApp.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/reload/<username>/<napp_name>/
+    GET /api/kytos/core/reload/<username>/<napp_name>/
 
 
 **Auth Endpoints**
@@ -114,39 +114,39 @@ Return a token if user and token are registered.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/auth/login/
+    GET /api/kytos/core/auth/login/
 
 
 Create new user.
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/core/auth/users/
+    POST /api/kytos/core/auth/users/
 
 
 Retrieve all registered users.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/auth/users/
+    GET /api/kytos/core/auth/users/
 
 Get details about a user.
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/core/auth/users/<uid>
+    GET /api/kytos/core/auth/users/<uid>
 
 Delete a user.
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181api/kytos/core/auth/users/<uid>
+    DELETE /api/kytos/core/auth/users/<uid>
 
 Update a user.
 
 .. code:: console
 
-    PATCH http://0.0.0.0:8181/api/kytos/core/auth/users/<uid>
+    PATCH /api/kytos/core/auth/users/<uid>
 
 You can see all core endpoints in kytos console.
 Run ``kytosd -f``, and run the code bellow on the kytos console:
@@ -171,27 +171,27 @@ See more details about flow_manager REST Endpoints in `kytos/flow_manager
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/flow_manager/v2/flows
+    GET /api/kytos/flow_manager/v2/flows
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/flow_manager/v2/flows/<dpid>
+    GET /api/kytos/flow_manager/v2/flows/<dpid>
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/flow_manager/v2/flows
+    POST /api/kytos/flow_manager/v2/flows
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/flow_manager/v2/flows/<dpid>
+    POST /api/kytos/flow_manager/v2/flows/<dpid>
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/flow_manager/v2/delete
+    POST /api/kytos/flow_manager/v2/delete
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/flow_manager/v2/delete/<dpid>
+    POST /api/kytos/flow_manager/v2/delete/<dpid>
 
 **kytos/kronos**
 
@@ -200,59 +200,59 @@ See more details about kronos REST Endpoints in `kytos/kronos
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/<value>
+    POST /api/kytos/kronos/v1/<namespace>/<value>
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/<value>/<timestamp>
+    POST /api/kytos/kronos/v1/<namespace>/<value>/<timestamp>
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/
+    DELETE /api/kytos/kronos/v1/<namespace>/
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/start/<start>
+    DELETE /api/kytos/kronos/v1/<namespace>/start/<start>
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/end/<end>
+    DELETE /api/kytos/kronos/v1/<namespace>/end/<end>
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/<start>/<end>
+    DELETE /api/kytos/kronos/v1/<namespace>/<start>/<end>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/kronos/v1/namespace/
+    GET /api/kytos/kronos/v1/namespace/
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/
+    GET /api/kytos/kronos/v1/<namespace>/
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/<start>/
+    GET /api/kytos/kronos/v1/<namespace>/<start>/
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/<end>/
+    GET /api/kytos/kronos/v1/<namespace>/<end>/
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/<start>/<end>
+    GET /api/kytos/kronos/v1/<namespace>/<start>/<end>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/<start>/<end>/interpol/<method>
+    GET /api/kytos/kronos/v1/<namespace>/<start>/<end>/interpol/<method>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/<start>/<end>/interpol/<method>/<filter>/
+    GET /api/kytos/kronos/v1/<namespace>/<start>/<end>/interpol/<method>/<filter>/
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/kronos/v1/<namespace>/<start>/<end>/interpol/<method>/<filter>/<group>
+    GET /api/kytos/kronos/v1/<namespace>/<start>/<end>/interpol/<method>/<filter>/<group>
 
 **kytos/maintenance**
 
@@ -261,27 +261,27 @@ See more details about maintenance REST Endpoints in `kytos/maintenance
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/maintenance/
+    GET /api/kytos/maintenance/
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/maintenance/<mw_id>
+    GET /api/kytos/maintenance/<mw_id>
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/maintenance/
+    POST /api/kytos/maintenance/
 
 .. code:: console
 
-    PATCH http://0.0.0.0:8181/api/kytos/maintenance/<mw_id>
+    PATCH /api/kytos/maintenance/<mw_id>
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181/api/kytos/maintenance/<mw_id>
+    DELETE /api/kytos/maintenance/<mw_id>
 
 .. code:: console
 
-    PATCH http://0.0.0.0:8181/api/kytos/maintenance/<mw_id>/end
+    PATCH /api/kytos/maintenance/<mw_id>/end
 
 **kytos/mef_eline**
 
@@ -290,39 +290,39 @@ See more details about mef_eline REST Endpoints in `kytos/mef_eline
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/mef_eline/v2/evc/
+    GET /api/kytos/mef_eline/v2/evc/
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/mef_eline/v2/evc/<circuit_id>
+    GET /api/kytos/mef_eline/v2/evc/<circuit_id>
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/mef_eline/v2/evc/
+    POST /api/kytos/mef_eline/v2/evc/
 
 .. code:: console
 
-    PATCH http://0.0.0.0:8181/api/kytos/mef_eline/v2/evc/<circuit_id>
+    PATCH /api/kytos/mef_eline/v2/evc/<circuit_id>
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181/api/kytos/mef_eline/v2/evc/<circuit_id>
+    DELETE /api/kytos/mef_eline/v2/evc/<circuit_id>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/mef_eline/v2/evc/schedule
+    GET /api/kytos/mef_eline/v2/evc/schedule
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/mef_eline/v2/evc/schedule/
+    POST /api/kytos/mef_eline/v2/evc/schedule/
 
 .. code:: console
 
-    PATCH http://0.0.0.0:8181/api/kytos/mef_eline/v2/evc/schedule/<schedule_id>
+    PATCH /api/kytos/mef_eline/v2/evc/schedule/<schedule_id>
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181/api/kytos/mef_eline/v2/evc/schedule/<schedule_id>
+    DELETE /api/kytos/mef_eline/v2/evc/schedule/<schedule_id>
 
 **kytos/of_lldp**
 
@@ -331,27 +331,27 @@ See more details about of_lldp REST Endpoints in `kytos/of_lldp
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/of_lldp/v1/interfaces
+    GET /api/kytos/of_lldp/v1/interfaces
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/of_lldp/v1/interfaces/disable
+    POST /api/kytos/of_lldp/v1/interfaces/disable
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/of_lldp/v1/interfaces/enable
+    POST /api/kytos/of_lldp/v1/interfaces/enable
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/of_lldp/v1/polling_time
+    GET /api/kytos/of_lldp/v1/polling_time
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/of_lldp/v1/polling_time
+    POST /api/kytos/of_lldp/v1/polling_time
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/of_lldp/v1/
+    GET /api/kytos/of_lldp/v1/
 
 **kytos/of_stats**
 
@@ -360,23 +360,23 @@ See more details about of_stats REST Endpoints in `kytos/of_stats
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/of_stats/v1/<dpid>/ports/<int:port>
+    GET /api/kytos/of_stats/v1/<dpid>/ports/<int:port>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/of_stats/v1/<dpid>/ports
+    GET /api/kytos/of_stats/v1/<dpid>/ports
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/of_stats/v1/<dpid>/flows/<flow_hash>
+    GET /api/kytos/of_stats/v1/<dpid>/flows/<flow_hash>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/of_stats/v1/<dpid>/flows
+    GET /api/kytos/of_stats/v1/<dpid>/flows
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/of_stats/v1/<dpid>/ports/<int:port>/random
+    GET /api/kytos/of_stats/v1/<dpid>/ports/<int:port>/random
 
 **kytos/pathfinder**
 
@@ -385,7 +385,7 @@ See more details about pathfinder REST Endpoints in `kytos/pathfinder
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/pathfinder/v2/
+    POST /api/kytos/pathfinder/v2/
 
 **kytos/status**
 
@@ -395,11 +395,11 @@ See more details about status REST Endpoints in `kytos/status
 .. code:: console
 
 
-    GET http://0.0.0.0:8181/api/kytos/status/v1/
+    GET /api/kytos/status/v1/
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/status/v1/napps
+    GET /api/kytos/status/v1/napps
 
 **kytos/storehouse**
 
@@ -408,47 +408,47 @@ See more details about storehouse REST Endpoints in `kytos/storehouse
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/storehouse/v1/<namespace>
+    POST /api/kytos/storehouse/v1/<namespace>
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/storehouse/v1/<namespace>/<name>
+    POST /api/kytos/storehouse/v1/<namespace>/<name>
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/storehouse/v2/<namespace>
+    POST /api/kytos/storehouse/v2/<namespace>
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/storehouse/v2/<namespace>/<box_id>
+    POST /api/kytos/storehouse/v2/<namespace>/<box_id>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/storehouse/v1/<namespace>
+    GET /api/kytos/storehouse/v1/<namespace>
 
 .. code:: console
 
-    PUT/PATCH http://0.0.0.0:8181/api/kytos/storehouse/v1/<namespace>/<box_id>
+    PUT/PATCH /api/kytos/storehouse/v1/<namespace>/<box_id>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/storehouse/v1/<namespace>/<box_id>
+    GET /api/kytos/storehouse/v1/<namespace>/<box_id>
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181/api/kytos/storehouse/v1/<namespace>/<box_id>
+    DELETE /api/kytos/storehouse/v1/<namespace>/<box_id>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/storehouse/v1/<namespace>/search_by/<filter_option>/<query>
+    GET /api/kytos/storehouse/v1/<namespace>/search_by/<filter_option>/<query>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/storehouse/v1/backup/<namespace>/
+    GET /api/kytos/storehouse/v1/backup/<namespace>/
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/storehouse/v1/backup/<namespace>/<box_id>
+    GET /api/kytos/storehouse/v1/backup/<namespace>/<box_id>
 
 **kytos/topology**
 
@@ -457,89 +457,89 @@ See more details about topology REST Endpoints in `kytos/topology
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/topology/v3/
+    GET /api/kytos/topology/v3/
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/topology/v3/restore
+    GET /api/kytos/topology/v3/restore
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/topology/v3/switches
+    GET /api/kytos/topology/v3/switches
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/topology/v3/switches/<dpid>/enable
+    POST /api/kytos/topology/v3/switches/<dpid>/enable
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/topology/v3/switches/<dpid>/disable
+    POST /api/kytos/topology/v3/switches/<dpid>/disable
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/topology/v3/switches/<dpid>/metadata
+    GET /api/kytos/topology/v3/switches/<dpid>/metadata
 
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/topology/v3/switches/<dpid>/metadata
+    POST /api/kytos/topology/v3/switches/<dpid>/metadata
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181/api/kytos/topology/v3/switches/<dpid>/metadata/<key>
+    DELETE /api/kytos/topology/v3/switches/<dpid>/metadata/<key>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/topology/v3/interfaces
+    GET /api/kytos/topology/v3/interfaces
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/topology/v3/interfaces/switch/<dpid>/enable
+    POST /api/kytos/topology/v3/interfaces/switch/<dpid>/enable
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/topology/v3/interfaces/<interface_enable_id>/enable
+    POST /api/kytos/topology/v3/interfaces/<interface_enable_id>/enable
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/topology/v3/interfaces/switch/<dpid>/disable
+    POST /api/kytos/topology/v3/interfaces/switch/<dpid>/disable
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/topology/v3/interfaces/<interface_disable_id>/disable
+    POST /api/kytos/topology/v3/interfaces/<interface_disable_id>/disable
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/topology/v3/interfaces/<interface_id>/metadata
+    GET /api/kytos/topology/v3/interfaces/<interface_id>/metadata
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/topology/v3/interfaces/<interface_id>/metadata
+    POST /api/kytos/topology/v3/interfaces/<interface_id>/metadata
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181/api/kytos/topology/v3/interfaces/<interface_id>/metadata/<key>
+    DELETE /api/kytos/topology/v3/interfaces/<interface_id>/metadata/<key>
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/topology/v3/links
+    GET /api/kytos/topology/v3/links
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/topology/v3/links/<link_id>/enable
+    POST /api/kytos/topology/v3/links/<link_id>/enable
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/topology/v3/links/<link_id>/disable
+    POST /api/kytos/topology/v3/links/<link_id>/disable
 
 .. code:: console
 
-    GET http://0.0.0.0:8181/api/kytos/topology/v3/links/<link_id>/metadata
+    GET /api/kytos/topology/v3/links/<link_id>/metadata
 
 .. code:: console
 
-    POST http://0.0.0.0:8181/api/kytos/topology/v3/links/<link_id>/metadata
+    POST /api/kytos/topology/v3/links/<link_id>/metadata
 
 .. code:: console
 
-    DELETE http://0.0.0.0:8181/api/kytos/topology/v3/links/<link_id>/metadata/<key>
+    DELETE /api/kytos/topology/v3/links/<link_id>/metadata/<key>

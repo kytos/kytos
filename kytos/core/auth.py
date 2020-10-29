@@ -54,7 +54,7 @@ class Auth:
         """
         self.controller = controller
         self.namespace = "kytos.core.auth.users"
-        self.token_expiration_time = self.get_token_expiration()
+        self.token_expiration_minutes = self.get_token_expiration()
         if self.controller.options.create_superuser is True:
             self._create_superuser()
 
@@ -62,7 +62,7 @@ class Auth:
     def get_token_expiration():
         """Return token expiration time in minutes defined in kytos conf."""
         options = KytosConfig().options['daemon']
-        return options.token_expiration_time
+        return options.token_expiration_minutes
 
     @classmethod
     def get_jwt_secret(cls):
@@ -154,7 +154,7 @@ class Auth:
             if user.get("password") != hashlib.sha512(password).hexdigest():
                 raise KeyError
             time_exp = datetime.datetime.utcnow() + datetime.timedelta(
-                minutes=self.token_expiration_time
+                minutes=self.token_expiration_minutes
             )
             token = self._generate_token(username, time_exp)
             return {"token": token.decode()}, HTTPStatus.OK.value

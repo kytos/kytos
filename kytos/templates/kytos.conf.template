@@ -71,7 +71,7 @@ vlan_pool = {}
 jwt_secret = {{ jwt_secret }}
 
 # Time to expire authentication token in minutes
-token_expiration_time = 180
+token_expiration_minutes = 180
 
 # Define URLs that will require authentication
 #

@@ -108,6 +108,7 @@ class KytosConfig():
                         'foreground': False,
                         'protocol_name': '',
                         'enable_entities_by_default': False,
+                        'token_expiration_time': 180,
                         'debug': False}
 
         """
@@ -129,6 +130,7 @@ class KytosConfig():
                     'napps_pre_installed': [],
                     'authenticate_urls': [],
                     'vlan_pool': {},
+                    'token_expiration_time': 180,
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()
@@ -169,6 +171,7 @@ class KytosConfig():
         options.port = int(options.port)
         options.api_port = int(options.api_port)
         options.protocol_name = str(options.protocol_name)
+        options.token_expiration_time = int(options.token_expiration_time)
 
         result = options.enable_entities_by_default in ['True', True]
         options.enable_entities_by_default = result

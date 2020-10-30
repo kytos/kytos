@@ -2,6 +2,10 @@
 :Title: Implement OpenFlow protocol parsing headers
 :Status: Draft 
 
+***************************************************
+EP010 - Implement OpenFlow protocol parsing headers
+***************************************************
+
 Objective
 #########
 Implement the OpenFlow protocol by parsing the ``OFX.X--openflow.h`` headers

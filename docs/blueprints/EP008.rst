@@ -2,6 +2,10 @@
 :Title: Pack/unpack tests and how to capture/dump binary message packets
 :Status: Draft 
 
+************************************************************************
+EP008 - Pack/unpack tests and how to capture/dump binary message packets
+************************************************************************
+
 ########################
 Enhancement Proposal 008
 ########################

@@ -9,6 +9,11 @@
 :Status: Accepted
 :Type: Informational
 
+
+**********************************************
+EP001 - Kytos testing pipeline and definitions
+**********************************************
+
 ########################
 Enhancement Proposal 001
 ########################

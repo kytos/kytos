@@ -6,6 +6,9 @@
 :Status: Draft
 :Type: Standards Track
 
+*************************************
+EP020 - Settings and Data Persistence
+*************************************
 
 Abstract
 ========

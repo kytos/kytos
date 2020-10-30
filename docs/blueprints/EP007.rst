@@ -2,6 +2,11 @@
 :Title: OpenFlow handshake process on Kytos
 :Status: Draft 
 
+
+*******************************************
+EP007 - OpenFlow handshake process on Kytos
+*******************************************
+
 ########################
 Enhancement Proposal 007
 ########################

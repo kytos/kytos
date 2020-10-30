@@ -2,6 +2,10 @@
 :Title: Improve packing/unpacking message
 :Status: Draft 
 
+*****************************************
+EP009 - Improve packing/unpacking message
+*****************************************
+
 Objective
 #########
 Offer a more high\-level message packing/unpacking interface to the user

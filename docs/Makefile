@@ -88,6 +88,7 @@ html:
 
 .PHONY: dirhtml
 dirhtml:
+	$(PYTHON) blueprints/make_blueprints_table.py
 	$(PYTHON) home/make_home.py
 	sphinx-apidoc -o ./developer/kytos_api ../kytos/ -d10 -M -T
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml

@@ -148,14 +148,14 @@ Update a user.
 
     PATCH /api/kytos/core/auth/users/<uid>
 
-You can see all core endpoints in kytos console.
-Run ``kytosd -f``, and run the code bellow on the kytos console:
+You can see a list of all the REST endpoints in the kytos console.
+Run ``kytosd -f``, and run the code below on the kytos console:
 
 .. code:: python
 
     urls = controller.api_server.app.url_map.iter_rules()
-    routes = [['%s' % rule, rule.methods] for rule in urls if 'kytos/core' in '%s' % rule]
-    routes
+    routes = [(str(rule), rule.methods) for rule in urls]
+    sorted(routes)
 
 
 NApps' REST Endpoints

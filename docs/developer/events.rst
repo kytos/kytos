@@ -1,6 +1,6 @@
-Kytos have some events available, and to call them you should use the sintaxe
+Kytos has some events available, and to call them you should use the syntax
 `this.$kytos.$emit()` passing as parameters the specific events names and its
-objects of acceptance as documented bellow:
+objects of acceptance as documented below:
 
 **k-action-menu**
 
@@ -61,4 +61,3 @@ name          type   description
 ============= ====== ================================== 
 statusMessage string Show a status message in StatusBar 
 ============= ====== ================================== 
-

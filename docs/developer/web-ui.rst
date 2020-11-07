@@ -251,3 +251,61 @@ displayed on our UI.
 
 You can use any **font-awesome icon**. Kytos ui interface will read that icon
 and create a new button into the **k-menu-bar**.
+
+
+Toolbar Component Formats
+=========================
+
+A Toolbar component has content defined by the NApps in case it needs some
+user input and can exist in two format versions: compressed and expanded. You
+can learn more about this at the :doc:`./web-ui` page.
+
+New Toolbar Components that can be displayed in compressed and expanded
+formats must declare style attributes for both versions in the style tag.
+For the contents of the toolbar, Kytos Input Components already handle both
+formats. For new Input Components, the developer must declare the styles for
+the formats.
+
+For the compressed view the developer must declare the styles in the class
+selector called ``compacted``.
+
+Below is an example of usage in the
+`Input <https://github.com/kytos/ui/blob/1.3.1/src/components/kytos/inputs/Input.vue#L104>`_ component:
+
+.. code-block:: html
+
+    <style lang="sass">
+      .k-input-wrap
+         border: 1px solid
+            ...
+      .compacted
+         .k-input-wrap
+            margin: 2px 5px
+    </style>
+
+First it declare the style for the expanded format in the `.k-input-wrap`
+class and then the compressed format in the `.compacted` / `.k-input-wrap`
+classes. This example apply for the toolbar component and input components.
+
+If the Toolbar Component is not suitable for display in compressed format, the
+developer can hide it completely, parts of its content, or just some Input
+components.
+
+A few Kytos Input components cannot be displayed in compressed format, such as
+TextArea, Table and PropertyPanel because they have dimensions that cannot fit
+in this toolbar format and are hidden by default.
+
+To hide a toolbar component or its content the developer must add the name
+``no-compact`` to the class attribute in the template. It will signal the view
+that the component will not be displayed in compressed form.
+
+Below is an example of usage the
+`Textarea <https://github.com/kytos/ui/blob/1.3.1/src/components/kytos/inputs/Textarea.vue#L2>`_ component:
+
+.. code-block:: html
+
+    <template>
+      <div class="k-textarea-wrap no-compact">
+        ...
+      </div>
+    </template>

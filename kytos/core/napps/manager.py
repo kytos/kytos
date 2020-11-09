@@ -125,8 +125,6 @@ class NAppsManager:
             try:
                 # Create symlink
                 enabled.symlink_to(installed)
-                if self._controller is not None:
-                    self._controller.load_napp(username, napp_name)
                 LOG.info("NApp enabled: %s", napp_id)
             except FileExistsError:
                 pass  # OK, NApp was already enabled

@@ -15,8 +15,9 @@ showInfoPanel Object Show the info panel in the right.
 hideInfoPanel NULL   Hide the info panel displayed in the right. 
 ============= ====== =========================================== 
 
-The `k-info-panel` can be triggered by a `k-button` or a `k-action-menu` or
-anything that calls the method created to set-up a new `k-info-panel`.
+The `k-info-panel` event can be triggered by a `k-button`, a
+`k-action-menu` or anything that calls the method created to
+set up a new `k-info-panel`.
 
 **Example**
 

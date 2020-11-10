@@ -34,7 +34,7 @@ set up a new `k-info-panel`.
             showInfoPanel()  {
                 var content = {
                     "component": 'search-hosts',
-                    "content": {}, /* Content used in the component */
+                    "content": {msg:"content used in the component"},
                     "icon": "search",
                     "title": "Search Hosts",
                     "subtitle": "by kytos/UI Test"

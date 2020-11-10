@@ -56,6 +56,10 @@ class KytosConfig():
                             action='store_true',
                             help="Run in foreground (ctrl+c to stop)")
 
+        parser.add_argument('-ft', '--no_terminal',
+                            action='store_true',
+                            help="Run in foreground without terminal (ctrl+c to stop).")
+
         parser.add_argument('-l', '--listen',
                             action='store',
                             help="IP/Interface to be listened")
@@ -124,6 +128,7 @@ class KytosConfig():
                     'listen': '0.0.0.0',
                     'port': 6653,
                     'foreground': False,
+                    'no_terminal': False,
                     'protocol_name': '',
                     'enable_entities_by_default': False,
                     'napps_pre_installed': [],
@@ -169,6 +174,8 @@ class KytosConfig():
         options.port = int(options.port)
         options.api_port = int(options.api_port)
         options.protocol_name = str(options.protocol_name)
+        if options.no_terminal:
+            options.foreground = True
 
         result = options.enable_entities_by_default in ['True', True]
         options.enable_entities_by_default = result

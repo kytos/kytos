@@ -70,6 +70,9 @@ vlan_pool = {}
 # The jwt_secret parameter is responsible for signing JSON Web Tokens.
 jwt_secret = {{ jwt_secret }}
 
+# Time to expire authentication token in minutes
+token_expiration_minutes = 180
+
 # Define URLs that will require authentication
 #
 # This must be a list of part of URLs. For example, if "kytos/mef_eline"

@@ -96,6 +96,8 @@ Additional Parameters Description
 -c ( --conf) FILE: The configuration file path. This parameters
 can be used to point *Kytos* to read another configuration file.
 
+-C (--create-superuser): Create a kytos superuser.
+
 -E (--enable_entities_by_default): Enable all new Entities by default.
 
 -f (--foreground): Run kytos in foreground.

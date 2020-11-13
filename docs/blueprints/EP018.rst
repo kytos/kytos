@@ -6,6 +6,10 @@
 :Status: Draft
 :Type: Standards Track
 
+********************************************
+EP018 - Kytos API Authentication definition.
+********************************************
+
 Abstract
 ========
 

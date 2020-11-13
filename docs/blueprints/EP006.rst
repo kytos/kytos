@@ -2,6 +2,9 @@
 :Title: Version Inheritance
 :Status: Accepted
 
+***************************
+EP006 - Version Inheritance
+***************************
 
 Description
 ###########

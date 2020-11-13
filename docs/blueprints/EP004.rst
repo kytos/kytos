@@ -2,6 +2,9 @@
 :Title: Updating specification
 :Status: Accepted
 
+******************************
+EP004 - Updating specification
+******************************
 
 Note: all the (draft) code is available at https://transfer.sh/ac8jc/version-inheritance.tar.gz.
 

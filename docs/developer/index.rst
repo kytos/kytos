@@ -96,3 +96,4 @@ Kytos Summit provides an opportunity for developers, contributors and other inte
    unit_tests
    pyof
    rest_endpoints
+   ../blueprints/index.rst

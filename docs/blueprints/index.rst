@@ -4,8 +4,12 @@
 Blueprints
 ##########
 
+Table of Blueprints
+
 .. toctree::
-  :caption: List of Blueprints
   :glob:
+  :hidden:
 
   EP*
+  
+.. include:: ./bp_table.rst

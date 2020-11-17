@@ -35,7 +35,7 @@ A GUI widget with a list of items (``k-accordion-item``) that can be switched be
 name       type    required default description                                                        
 ========== ======= ======== ======= =================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            A brief informative message triggered by mouse hover                                    
+tooltip    string  false            Defines a brief or informative message triggered by mouse hover                                    
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 ========== ======= ======== ======= =================================================================== 
@@ -372,7 +372,7 @@ A text input field with multi-line.
 name        type    required default                     description                                                        
 =========== ======= ======== =========================== ================================================================== 
 title       string  false                                Property representing a title                                      
-tooltip     string  false                                A tooltip displayed in the text-area                               
+tooltip     string  false                                Defines a brief or informative message triggered by mouse hover                               
 isDisabled  boolean false    false                       Property to represent show if the component is enabled ou disabled 
 icon        string  false                                An Icon string representing a awesome icon.                        
 value       string  false                                The value text used in TextArea.                                   
@@ -434,7 +434,7 @@ Represents a context where the developer can add any desired content.
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string  false            Defines a brief or informative message triggered by mouse hover                                   
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 subtitle   string  false                                                                               

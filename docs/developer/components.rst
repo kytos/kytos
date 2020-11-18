@@ -35,7 +35,7 @@ A GUI widget with a list of items (``k-accordion-item``) that can be switched be
 name       type    required default description                                                        
 ========== ======= ======== ======= =================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 ========== ======= ======== ======= =================================================================== 
@@ -84,7 +84,7 @@ A GUI widget that can be switched between hiding and showing content
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 checked    boolean false    true    Boolean value to represent whether the accordion item is checked.  
@@ -125,7 +125,7 @@ This component represents a button that triggers an event when clicked.
 name       type    required default                   description                                                        
 ========== ======= ======== ========================= ================================================================== 
 title      string  false                              Property representing a title                                      
-tooltip    string  false                              Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string  false                              A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false                     Property to represent show if the component is enabled ou disabled 
 icon       string  false                              An Icon string representing a awesome icon.                        
 on_click   func    false    function(val) { return; } Function called after the button is clicked.                       
@@ -172,7 +172,7 @@ Allows to group buttons (``k-button``), which trigger events when clicked.
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 ========== ======= ======== ======= ================================================================== 
 
@@ -206,7 +206,7 @@ A GUI widget that permits the user to make a binary choice, checked (ticked) whe
 name       type    required default                     description                                                                             
 ========== ======= ======== =========================== ======================================================================================= 
 title      string  false                                Property representing a title                                                           
-tooltip    string  false                                Defines a brief or informative message triggered by mouse hover                                                         
+tooltip    string  false                                A brief informative message triggered by mouse hover                                                          
 isDisabled boolean false    false                       Property to represent show if the component is enabled ou disabled                      
 icon       string  false                                An Icon string representing a awesome icon.                                             
 model      array   false                                Model store the checked values.                                                         
@@ -243,7 +243,7 @@ A toggleable menu that allows the user to choose one value from a predefined lis
 name       type    required default                     description                                                             
 ========== ======= ======== =========================== ======================================================================= 
 title      string  false                                Property representing a title                                           
-tooltip    string  false                                Defines a brief or informative message triggered by mouse hover                                         
+tooltip    string  false                                A brief informative message triggered by mouse hover                                          
 isDisabled boolean false    false                       Property to represent show if the component is enabled ou disabled      
 icon       string  false                                An Icon string representing a awesome icon.                             
 value      string  false    ""                          Property with the selected option.                                      
@@ -274,7 +274,7 @@ An input field where the user can enter data.
 name        type    required default                   description                                                        
 =========== ======= ======== ========================= ================================================================== 
 title       string  false                              Property representing a title                                      
-tooltip     string  false                              Defines a brief or informative message triggered by mouse hover                                    
+tooltip     string  false                              A brief informative message triggered by mouse hover                                     
 isDisabled  boolean false    false                     Property to represent show if the component is enabled ou disabled 
 icon        string  false                              An Icon string representing a awesome icon.                        
 value       string  false    ""                        The value to input button.                                         
@@ -310,7 +310,7 @@ input from a list of options.
 name       type    required default                     description                                                        
 ========== ======= ======== =========================== ================================================================== 
 title      string  false                                Property representing a title                                      
-tooltip    string  false                                Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string  false                                A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false                       Property to represent show if the component is enabled ou disabled 
 icon       string  false                                An Icon string representing a awesome icon.                        
 value      array   false                                                                                                   
@@ -346,7 +346,7 @@ A GUI widget that allows the users specify a numeric value which must be no less
 name         type    required default                   description                                                        
 ============ ======= ======== ========================= ================================================================== 
 title        string  false                              Property representing a title                                      
-tooltip      string  false                              Defines a brief or informative message triggered by mouse hover                                    
+tooltip      string  false                              A brief informative message triggered by mouse hover                                     
 isDisabled   boolean false    false                     Property to represent show if the component is enabled ou disabled 
 icon         string  false                              An Icon string representing a awesome icon.                        
 initialValue number  false    0                         Initial value assigned to slider input.                            
@@ -372,7 +372,7 @@ A text input field with multi-line.
 name        type    required default                     description                                                        
 =========== ======= ======== =========================== ================================================================== 
 title       string  false                                Property representing a title                                      
-tooltip     string  false                                Defines a brief or informative message triggered by mouse hover                               
+tooltip     string  false                                A brief informative message triggered by mouse hover                                
 isDisabled  boolean false    false                       Property to represent show if the component is enabled ou disabled 
 icon        string  false                                An Icon string representing a awesome icon.                        
 value       string  false                                The value text used in TextArea.                                   
@@ -403,7 +403,7 @@ hidden using the shortcut *Ctrl+Alt+Space*.
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 ========== ======= ======== ======= ================================================================== 
@@ -434,7 +434,7 @@ Represents a context where the developer can add any desired content.
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Defines a brief or informative message triggered by mouse hover                                   
+tooltip    string  false            A brief informative message triggered by mouse hover                                    
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 subtitle   string  false                                                                               
@@ -471,7 +471,7 @@ the panel.
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 subtitle   string  false                                                                               
@@ -510,7 +510,7 @@ A base components with icon in property.
 name       type      required default description                                                        
 ========== ========= ======== ======= ================================================================== 
 title      string    false            Property representing a title                                      
-tooltip    string    false            Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string    false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean   false    false   Property to represent show if the component is enabled ou disabled 
 icon       string    false            An Icon string representing a awesome icon.                        
 toggle     undefined false                                                                               
@@ -558,7 +558,7 @@ Component representing a toolbar item that create a new item in the
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 ========== ======= ======== ======= ================================================================== 
@@ -605,7 +605,7 @@ This component allows to create a table with two columns ( *name* and *value*). 
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 ========== ======= ======== ======= ================================================================== 
 
@@ -648,7 +648,7 @@ This component create a row in the table (``k-property-panel``) with two columns
 name       type          required default description                                                        
 ========== ============= ======== ======= ================================================================== 
 title      string        false            Property representing a title                                      
-tooltip    string        false            Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string        false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean       false    false   Property to represent show if the component is enabled ou disabled 
 name       string        true             Name displayed in the header of property panel item.               
 value      string|number true             Value displayed in the data of property panel item.                
@@ -670,7 +670,7 @@ This component allows to create a table.
 name       type    required default                   description                                                        
 ========== ======= ======== ========================= ================================================================== 
 title      string  false                              Property representing a title                                      
-tooltip    string  false                              Defines a brief or informative message triggered by mouse hover                                    
+tooltip    string  false                              A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false                     Property to represent show if the component is enabled ou disabled 
 headers    array   false    function() { return []; }                                                                    
 rows       array   false    function() { return []; }                                                                    

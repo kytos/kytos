@@ -23,8 +23,28 @@ Fixed
 Security
 ========
 
+
+
+[2020.2b3] - "itamar" beta3 - 2020-11-20
+****************************************
+
+Added
+=====
+- Added configuration field to change token expiration time in authentication.
+- [docs] Added "Blueprints" section to Dev Guide.
+- New section about implementation of compressed and expanded formats for 
+  toolbar components UI.
+
 Changed
 =======
+- [docs] Updated example of usage for the kytos component event in events.rst.
+- [docs] Updated components' docs: accordion, tooltip and title.
+- [docs] Updated admin guide with parameter to create a superuser.
+- Refactor method get_interface_by_port_no to work with v0x01 and v0x04. 
+
+Fixed
+=====
+- Fix name collision in Flask Blueprints creation.
 
 
 [2020.2b2] - "itamar" beta2 - 2020-10-23

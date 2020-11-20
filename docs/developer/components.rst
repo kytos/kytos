@@ -1,9 +1,7 @@
-=========
-accordion
-=========
+=======================
+Accordion | k-accordion
+=======================
 
-k-accordion
------------
 
 A GUI widget with a list of items (``k-accordion-item``) that can be switched between hiding and showing content.
 
@@ -17,30 +15,30 @@ A GUI widget with a list of items (``k-accordion-item``) that can be switched be
 .. code-block:: shell
 
     <k-accordion>
-   <k-accordion-item title="Custom Labels">
-       <k-dropdown title="Switch Labels:" icon="circle-o" :options="switchLabels" :event="{name: 'topology-toggle-label', content: {node_type: 'switch'}}"></k-dropdown>
-       <k-dropdown title="Interface Labels:" icon="plug" :options="interfaceLabels" :event="{name: 'topology-toggle-label', content: {node_type: 'interface'}}"></k-dropdown>
-   </k-accordion-item>
-   <k-accordion-item title="Background">
-       <k-button-group>
-         <k-button tooltip="Map Background" icon="globe"></k-button>
-         <k-button tooltip="Image Background (disabled)" icon="photo" :is-disabled="true"></k-button>
-         <k-button tooltip="No Background" icon="window-close-o"></k-button>
-       </k-button-group>
-       <k-slider icon="adjust" :initial-value="mapOpacity" :action="emitMapOpacity"></k-slider>
-   </k-accordion-item>
-  </k-accordion>
+        <k-accordion-item title="Custom Labels">
+            <k-dropdown title="Switch Labels:" icon="circle-o" :options="switchLabels" :event="{name: 'topology-toggle-label', content: {node_type: 'switch'}}"></k-dropdown>
+            <k-dropdown title="Interface Labels:" icon="plug" :options="interfaceLabels" :event="{name: 'topology-toggle-label', content: {node_type: 'interface'}}"></k-dropdown>
+        </k-accordion-item>
+        <k-accordion-item title="Background">
+            <k-button-group>
+                <k-button tooltip="Map Background" icon="globe"></k-button>
+                <k-button tooltip="Image Background (disabled)" icon="photo" :is-disabled="true"></k-button>
+                <k-button tooltip="No Background" icon="window-close-o"></k-button>
+            </k-button-group>
+            <k-slider icon="adjust" :initial-value="mapOpacity" :action="emitMapOpacity"></k-slider>
+        </k-accordion-item>
+    </k-accordion>
 
 **Parameters**
 
-========== ======= ======== ======= ================================================================== 
+========== ======= ======== ======= =================================================================== 
 name       type    required default description                                                        
-========== ======= ======== ======= ================================================================== 
+========== ======= ======== ======= =================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Property representing a tooltip                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
-========== ======= ======== ======= ================================================================== 
+========== ======= ======== ======= =================================================================== 
 
 **Methods**
 
@@ -54,8 +52,9 @@ name    description
 default Slot to be filled with accordion item 
 ======= ===================================== 
 
-k-accordion-item
-----------------
+============================
+Accordion | k-accordion-item
+============================
 
 A GUI widget that can be switched between hiding and showing content
 
@@ -64,15 +63,15 @@ A GUI widget that can be switched between hiding and showing content
 .. code-block:: shell
 
     <k-accordion>
-   <k-accordion-item title="Background">
-       <k-button-group>
-         <k-button tooltip="Map Background" icon="globe"></k-button>
-         <k-button tooltip="Image Background (disabled)" icon="photo" :is-disabled="true"></k-button>
-         <k-button tooltip="No Background" icon="window-close-o"></k-button>
-       </k-button-group>
-       <k-slider icon="adjust" :initial-value="mapOpacity" :action="emitMapOpacity"></k-slider>
-   </k-accordion-item>
-  </k-accordion>
+        <k-accordion-item title="Background">
+            <k-button-group>
+                <k-button tooltip="Map Background" icon="globe"></k-button>
+                <k-button tooltip="Image Background (disabled)" icon="photo" :is-disabled="true"></k-button>
+                <k-button tooltip="No Background" icon="window-close-o"></k-button>
+            </k-button-group>
+            <k-slider icon="adjust" :initial-value="mapOpacity" :action="emitMapOpacity"></k-slider>
+        </k-accordion-item>
+    </k-accordion>
 
 **Image**
 
@@ -85,7 +84,7 @@ A GUI widget that can be switched between hiding and showing content
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Property representing a tooltip                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 checked    boolean false    true    Boolean value to represent whether the accordion item is checked.  
@@ -103,12 +102,9 @@ name    description
 default Empty Pannel, please define some items inside. 
 ======= ============================================== 
 
-======
-inputs
-======
-
-k-button
---------
+=================
+Inputs | k-button
+=================
 
 This component represents a button that triggers an event when clicked.
 
@@ -129,7 +125,7 @@ This component represents a button that triggers an event when clicked.
 name       type    required default                   description                                                        
 ========== ======= ======== ========================= ================================================================== 
 title      string  false                              Property representing a title                                      
-tooltip    string  false                              Property representing a tooltip                                    
+tooltip    string  false                              A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false                     Property to represent show if the component is enabled ou disabled 
 icon       string  false                              An Icon string representing a awesome icon.                        
 on_click   func    false    function(val) { return; } Function called after the button is clicked.                       
@@ -149,8 +145,9 @@ name  type   description
 event object trigged event 
 ===== ====== ============= 
 
-k-button-group
---------------
+=======================
+Inputs | k-button-group
+=======================
 
 Allows to group buttons (``k-button``), which trigger events when clicked.
 
@@ -159,10 +156,10 @@ Allows to group buttons (``k-button``), which trigger events when clicked.
 .. code-block:: shell
 
     <k-button-group>
-    <k-button tooltip="Map Background" icon="globe"></k-button>
-    <k-button tooltip="Image Background (disabled)" icon="photo" :is-disabled="true"></k-button>
-    <k-button tooltip="No Background" icon="window-close-o"></k-button>
-  </k-button-group>
+        <k-button tooltip="Map Background" icon="globe"></k-button>
+        <k-button tooltip="Image Background (disabled)" icon="photo" :is-disabled="true"></k-button>
+        <k-button tooltip="No Background" icon="window-close-o"></k-button>
+    </k-button-group>
 
 **Image**
 
@@ -175,7 +172,7 @@ Allows to group buttons (``k-button``), which trigger events when clicked.
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Property representing a tooltip                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 ========== ======= ======== ======= ================================================================== 
 
@@ -191,8 +188,10 @@ name    description
 default Slot to be filled with a buttons set 
 ======= ==================================== 
 
-k-checkbox
-----------
+===================
+Inputs | k-checkbox
+===================
+
 
 A GUI widget that permits the user to make a binary choice, checked (ticked) when activated or not checked when disable.
 
@@ -207,7 +206,7 @@ A GUI widget that permits the user to make a binary choice, checked (ticked) whe
 name       type    required default                     description                                                                             
 ========== ======= ======== =========================== ======================================================================================= 
 title      string  false                                Property representing a title                                                           
-tooltip    string  false                                Property representing a tooltip                                                         
+tooltip    string  false                                A brief informative message triggered by mouse hover                                                          
 isDisabled boolean false    false                       Property to represent show if the component is enabled ou disabled                      
 icon       string  false                                An Icon string representing a awesome icon.                                             
 model      array   false                                Model store the checked values.                                                         
@@ -220,8 +219,10 @@ action     func    false    function(value) { return; } Optinal action called af
 
 **uuid4**: Return a uuid string
 
-k-dropdown
-----------
+
+===================
+Inputs | k-dropdown
+===================
 
 A toggleable menu that allows the user to choose one value from a predefined list.
 
@@ -229,7 +230,7 @@ A toggleable menu that allows the user to choose one value from a predefined lis
 
 .. code-block:: shell
 
-    k-dropdown title="Switch Labels:" icon="circle-o" :options="switchLabels" :event="{name: 'topology-toggle-label', content: {node_type: 'switch'}}"></k-dropdown>
+    <k-dropdown title="Switch Labels:" icon="circle-o" :options="switchLabels" :event="{name: 'topology-toggle-label', content: {node_type: 'switch'}}"></k-dropdown>
 
 **Image**
 
@@ -242,7 +243,7 @@ A toggleable menu that allows the user to choose one value from a predefined lis
 name       type    required default                     description                                                             
 ========== ======= ======== =========================== ======================================================================= 
 title      string  false                                Property representing a title                                           
-tooltip    string  false                                Property representing a tooltip                                         
+tooltip    string  false                                A brief informative message triggered by mouse hover                                          
 isDisabled boolean false    false                       Property to represent show if the component is enabled ou disabled      
 icon       string  false                                An Icon string representing a awesome icon.                             
 value      string  false    ""                          Property with the selected option.                                      
@@ -256,8 +257,9 @@ action     func    false    function(value) { return; } Optinal action called af
 
 **uuid4**: Return a uuid string
 
-k-input
--------
+===================
+Inputs | k-input
+===================
 
 An input field where the user can enter data.
 
@@ -272,7 +274,7 @@ An input field where the user can enter data.
 name        type    required default                   description                                                        
 =========== ======= ======== ========================= ================================================================== 
 title       string  false                              Property representing a title                                      
-tooltip     string  false                              Property representing a tooltip                                    
+tooltip     string  false                              A brief informative message triggered by mouse hover                                     
 isDisabled  boolean false    false                     Property to represent show if the component is enabled ou disabled 
 icon        string  false                              An Icon string representing a awesome icon.                        
 value       string  false    ""                        The value to input button.                                         
@@ -284,8 +286,9 @@ action      func    false    function(val) { return; } Function called after inp
 
 **uuid4**: Return a uuid string
 
-k-select
---------
+===================
+Inputs | k-select
+===================
 
 This component is a form control and can be used to collect the selected user
 input from a list of options.
@@ -307,7 +310,7 @@ input from a list of options.
 name       type    required default                     description                                                        
 ========== ======= ======== =========================== ================================================================== 
 title      string  false                                Property representing a title                                      
-tooltip    string  false                                Property representing a tooltip                                    
+tooltip    string  false                                A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false                       Property to represent show if the component is enabled ou disabled 
 icon       string  false                                An Icon string representing a awesome icon.                        
 value      array   false                                                                                                   
@@ -320,8 +323,9 @@ action     func    false    function(value) { return; }
 
 **uuid4**: Return a uuid string
 
-k-slider
---------
+=================
+Inputs | k-slider
+=================
 
 A GUI widget that allows the users specify a numeric value which must be no less than a given value, and no more than another given value.
 
@@ -342,7 +346,7 @@ A GUI widget that allows the users specify a numeric value which must be no less
 name         type    required default                   description                                                        
 ============ ======= ======== ========================= ================================================================== 
 title        string  false                              Property representing a title                                      
-tooltip      string  false                              Property representing a tooltip                                    
+tooltip      string  false                              A brief informative message triggered by mouse hover                                     
 isDisabled   boolean false    false                     Property to represent show if the component is enabled ou disabled 
 icon         string  false                              An Icon string representing a awesome icon.                        
 initialValue number  false    0                         Initial value assigned to slider input.                            
@@ -356,8 +360,9 @@ step         number  false    1                         The minimum change when 
 
 **uuid4**: Return a uuid string
 
-k-textarea
-----------
+===================
+Inputs | k-textarea
+===================
 
 A text input field with multi-line.
 
@@ -367,7 +372,7 @@ A text input field with multi-line.
 name        type    required default                     description                                                        
 =========== ======= ======== =========================== ================================================================== 
 title       string  false                                Property representing a title                                      
-tooltip     string  false                                A tooltip displayed in the text-area                               
+tooltip     string  false                                A brief informative message triggered by mouse hover                                
 isDisabled  boolean false    false                       Property to represent show if the component is enabled ou disabled 
 icon        string  false                                An Icon string representing a awesome icon.                        
 value       string  false                                The value text used in TextArea.                                   
@@ -380,12 +385,9 @@ action      func    false    function(value) { return; } Optimal action called a
 
 **uuid4**: Return a uuid string
 
-====
-misc
-====
-
-k-action-menu
--------------
+====================
+Misc | k-action-menu
+====================
 
 Menu with a list of actions and their shortcuts. The menu can be shown or
 hidden using the shortcut *Ctrl+Alt+Space*.
@@ -401,7 +403,7 @@ hidden using the shortcut *Ctrl+Alt+Space*.
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Property representing a tooltip                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 ========== ======= ======== ======= ================================================================== 
@@ -420,8 +422,9 @@ name    type   description
 options object An object with the params [name, author, shortkey, content] 
 ======= ====== =========================================================== 
 
-k-context-panel
----------------
+======================
+Misc | k-context-panel
+======================
 
 Represents a context where the developer can add any desired content.
 
@@ -431,7 +434,7 @@ Represents a context where the developer can add any desired content.
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Property representing a tooltip                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                    
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 subtitle   string  false                                                                               
@@ -449,8 +452,9 @@ name    description
 default Can be filled with the panel content 
 ======= ==================================== 
 
-k-info-panel
-------------
+===================
+Misc | k-info-panel
+===================
 
 Shows details about selected kytos components. This panel appears on the
 right of the Kytos GUI and the NApp developer can choose what to display on
@@ -467,7 +471,7 @@ the panel.
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Property representing a tooltip                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 subtitle   string  false                                                                               
@@ -494,8 +498,9 @@ content object An object filled with:
                }                                                       
 ======= ====== ======================================================= 
 
-k-menu-bar
-----------
+=================
+Misc | k-menu-bar
+=================
 
 A base components with icon in property.
 
@@ -505,7 +510,7 @@ A base components with icon in property.
 name       type      required default description                                                        
 ========== ========= ======== ======= ================================================================== 
 title      string    false            Property representing a title                                      
-tooltip    string    false            Property representing a tooltip                                    
+tooltip    string    false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean   false    false   Property to represent show if the component is enabled ou disabled 
 icon       string    false            An Icon string representing a awesome icon.                        
 toggle     undefined false                                                                               
@@ -516,8 +521,9 @@ compacted  undefined false
 
 **uuid4**: Return a uuid string
 
-k-status-bar
-------------
+===================
+Misc | k-status-bar
+===================
 
 A GUI widget the shows notifications and System Information.
 
@@ -539,8 +545,9 @@ message string  Message to be displayed.
 error   boolean If true will display the message in red, default is false 
 ======= ======= ========================================================= 
 
-k-toolbar-item
---------------
+=====================
+Misc | k-toolbar-item
+=====================
 
 Component representing a toolbar item that create a new item in the
 ``k-menu-bar`` and shows the content in the ``k-toolbar``.
@@ -551,7 +558,7 @@ Component representing a toolbar item that create a new item in the
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Property representing a tooltip                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 icon       string  false            An Icon string representing a awesome icon.                        
 ========== ======= ======== ======= ================================================================== 
@@ -568,12 +575,9 @@ name    description
 default Slot with the toolbar item. 
 ======= =========================== 
 
-======
-ppanel
-======
-
-k-property-panel
-----------------
+=========================
+ppanel | k-property-panel
+=========================
 
 This component allows to create a table with two columns ( *name* and *value*). Each row in the table is a ``k-property-panel-item`` component, with the *value* and *name*.
 
@@ -587,13 +591,13 @@ This component allows to create a table with two columns ( *name* and *value*). 
 .. code-block:: shell
 
     <k-property-panel>
-    <k-property-panel-item v-if="napps"
-                           v-for="napp in this.napps"
-                           :key="napp.name"
-                           :name="napp.name"
-                           :value="napp.version">
-    </k-property-panel-item>
-  </k-property-panel>
+        <k-property-panel-item v-if="napps"
+                            v-for="napp in this.napps"
+                            :key="napp.name"
+                            :name="napp.name"
+                            :value="napp.version">
+        </k-property-panel-item>
+    </k-property-panel>
 
 **Parameters**
 
@@ -601,7 +605,7 @@ This component allows to create a table with two columns ( *name* and *value*). 
 name       type    required default description                                                        
 ========== ======= ======== ======= ================================================================== 
 title      string  false            Property representing a title                                      
-tooltip    string  false            Property representing a tooltip                                    
+tooltip    string  false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
 ========== ======= ======== ======= ================================================================== 
 
@@ -617,8 +621,9 @@ name    description
 default Define a table content inside, a PropertyPanelItem can be used. 
 ======= =============================================================== 
 
-k-property-panel-item
----------------------
+==============================
+ppanel | k-property-panel-item
+==============================
 
 This component create a row in the table (``k-property-panel``) with two columns, *name* and *value*.
 
@@ -632,10 +637,10 @@ This component create a row in the table (``k-property-panel``) with two columns
 .. code-block:: shell
 
     <k-property-panel>
-    <k-property-panel-item :name="kytos/mef_eline"
-                           :value="2.2.0
-    </k-property-panel-item>
-  </k-property-panel>
+        <k-property-panel-item :name="kytos/mef_eline"
+                            :value="2.2.0
+        </k-property-panel-item>
+    </k-property-panel>
 
 **Parameters**
 
@@ -643,7 +648,7 @@ This component create a row in the table (``k-property-panel``) with two columns
 name       type          required default description                                                        
 ========== ============= ======== ======= ================================================================== 
 title      string        false            Property representing a title                                      
-tooltip    string        false            Property representing a tooltip                                    
+tooltip    string        false            A brief informative message triggered by mouse hover                                     
 isDisabled boolean       false    false   Property to represent show if the component is enabled ou disabled 
 name       string        true             Name displayed in the header of property panel item.               
 value      string|number true             Value displayed in the data of property panel item.                
@@ -653,12 +658,9 @@ value      string|number true             Value displayed in the data of propert
 
 **uuid4**: Return a uuid string
 
-=====
-table
-=====
-
-k-table
--------
+===============
+table | k-table
+===============
 
 This component allows to create a table.
 
@@ -668,7 +670,7 @@ This component allows to create a table.
 name       type    required default                   description                                                        
 ========== ======= ======== ========================= ================================================================== 
 title      string  false                              Property representing a title                                      
-tooltip    string  false                              Property representing a tooltip                                    
+tooltip    string  false                              A brief informative message triggered by mouse hover                                     
 isDisabled boolean false    false                     Property to represent show if the component is enabled ou disabled 
 headers    array   false    function() { return []; }                                                                    
 rows       array   false    function() { return []; }                                                                    
@@ -677,4 +679,3 @@ rows       array   false    function() { return []; }
 **Methods**
 
 **uuid4**: Return a uuid string
-

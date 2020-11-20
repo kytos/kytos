@@ -25,7 +25,7 @@ For more information about this project, please visit `Kytos project website
 
 .. TAGs
 
-.. |Experimental| image:: https://img.shields.io/badge/stability-experimental-orange.svg
+.. |Experimental| image:: https://img.shields.io/badge/stability-beta-orange.svg
    :target: https://github.com/kytos
 .. |Tag| image:: https://img.shields.io/github/tag/kytos/kytos.svg
    :target: https://github.com/kytos/kytos/tags

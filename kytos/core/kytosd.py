@@ -102,7 +102,7 @@ def main():
 
     config = KytosConfig().options['daemon']
 
-    if config.foreground:
+    if config.foreground or not config.daemon:
         async_main(config)
     else:
         with daemon.DaemonContext():

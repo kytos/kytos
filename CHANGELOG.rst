@@ -23,8 +23,35 @@ Fixed
 Security
 ========
 
+
+[2020.2b3] - "itamar" beta3 - 2020-11-20
+****************************************
+
+Added
+=====
+- Added configuration field to change token expiration time in
+  REST API authentication.
+- [ui] New UI component: Notification.
+- [ui] Added info-panel toggle button in tabs component.
+- [ui] Added close button to info-panel component.
+- [docs] Added a new "Blueprints" section to the Dev Guide.
+- [docs] New section about implementation of compressed and expanded
+  formats for toolbar components UI.
+
 Changed
 =======
+- Refactor method ``get_interface_by_port_no`` to work with
+  both``v0x01`` and ``v0x04`` ``port`` parameters. 
+- [ui][docs] Updated components' docs: accordion, tooltip and title.
+- [ui][docs] Updated usage example for the ``event`` component
+- [docs] Updated admin guide with parameter to create a superuser.
+- Changed stability badge in PyPI from experimental to beta.
+
+Fixed
+=====
+- Fixed double loading of NApps when installing via ``kytos napps install``
+- Fixed ``daemon`` configuration that was being ignored
+- [ui] Fixed overlay between tabs component and other components.
 
 
 [2020.2b2] - "itamar" beta2 - 2020-10-23

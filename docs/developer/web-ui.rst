@@ -270,7 +270,9 @@ For the compressed view the developer must declare the styles in the class
 selector called ``compacted``.
 
 Below is an example of usage in the
-`Input <https://github.com/kytos/ui/blob/1.3.1/src/components/kytos/inputs/Input.vue#L104>`_ component:
+`Input`_ component:
+
+.. _Input: https://github.com/kytos/ui/blob/1.3.1/src/components/kytos/inputs/Input.vue#L104
 
 .. code-block:: html
 
@@ -299,8 +301,9 @@ To hide a toolbar component or its content the developer must add the name
 ``no-compact`` to the class attribute in the template. It will signal the view
 that the component will not be displayed in compressed form.
 
-Below is an example of usage the
-`Textarea <https://github.com/kytos/ui/blob/1.3.1/src/components/kytos/inputs/Textarea.vue#L2>`_ component:
+Below is an example of usage the `Textarea`_ component:
+
+.. _Textarea: https://github.com/kytos/ui/blob/1.3.1/src/components/kytos/inputs/Textarea.vue#L2
 
 .. code-block:: html
 

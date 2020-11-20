@@ -139,6 +139,9 @@ class Switch(GenericEntity):
             :class:`~.core.switch.Interface`: Interface from specific port.
 
         """
+        # pyof v0x01 stores port_no in the value attribute
+        port_no = getattr(port_no, 'value', port_no)
+
         return self.interfaces.get(port_no)
 
     def get_flow_by_id(self, flow_id):

@@ -10,6 +10,7 @@ from pathlib import Path
 from random import randint
 from threading import Event, Thread
 
+from kytos.core.events import KytosEvent
 from kytos.core.logs import NAppLog
 
 __all__ = ('KytosNApp',)
@@ -250,7 +251,6 @@ class KytosNApp(Thread, metaclass=ABCMeta):
 
     def notify_loaded(self):
         """Inform this NApp has been loaded."""
-        from kytos.core import KytosEvent
         name = f'{self.username}/{self.name}.loaded'
         event = KytosEvent(name=name, content={})
         self.controller.buffers.app.put(event)

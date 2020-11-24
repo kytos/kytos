@@ -122,3 +122,38 @@ in the `k-status-bar` as soon the Kytos Web UI DOM is rendered.
         }
     }
     </script>
+
+**k-notification**
+
+=============== ====== ===========================================================
+name            type   description                        
+=============== ====== =========================================================== 
+setNotification object Define the icon, title and description of the notification 
+=============== ====== =========================================================== 
+
+To use the ``k-notification``, a notification object is necessary. Description
+and icon are optional - the only required parameter is the tittle. Usage
+example:
+
+.. code-block:: html
+    
+    <template>
+        ...
+    </template>
+
+    <script>
+    /* All the javascript methods are optional */
+    module.exports = {
+        methods: { 
+            // put your javascript methods here
+        },
+        mounted() {
+            let notification = {
+                title: 'Notification Title', 
+                description: 'Notification Description', 
+                icon: 'gear'
+            }
+            this.$kytos.$emit("Notification" , notification)
+        }
+    }
+    </script>

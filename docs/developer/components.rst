@@ -567,6 +567,28 @@ icon       string  false            An Icon string representing a awesome icon.
 
 **uuid4**: Return a uuid string
 
+=====================
+Misc | k-notification
+=====================
+
+Component representing a notification item that will be displayed
+in the ``k-tabs`` Notifications area.
+
+**Image**
+
+.. image:: /_static/images/components/misc/k-notification.png
+    :align: center
+
+**Parameters**
+
+=========== ======= ======== ======= ================================================================== 
+name        type    required default description                                                        
+=========== ======= ======== ======= ================================================================== 
+title       string  true             Defines the component title                                
+description string  false            A brief informative message about the notification
+icon        string  false    desktop An Icon string representing a awesome icon.                        
+=========== ======= ======== ======= ================================================================== 
+
 **Slots**
 
 ======= =========================== 

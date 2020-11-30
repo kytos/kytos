@@ -132,7 +132,8 @@ setNotification object Define the icon, title and description of the notificatio
 =============== ====== =========================================================== 
 
 To use the ``k-notification``, a notification object is necessary. Description
-and icon are optional - the only required parameter is the tittle. Usage
+and icon are optional - the only required parameter is the title. Usage
+
 example:
 
 .. code-block:: html

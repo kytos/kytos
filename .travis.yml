@@ -5,7 +5,7 @@ python:
   - "3.8"
 install:
   - pip install --upgrade pip
-  - pip install --use-feature=2020-resolver -r requirements/dev.txt
+  - pip install -r requirements/dev.txt
 script:
   - python setup.py lint
   - python setup.py coverage

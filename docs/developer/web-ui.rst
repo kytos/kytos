@@ -312,3 +312,31 @@ Below is an example of usage the `Textarea`_ component:
         ...
       </div>
     </template>
+
+Kytos Colors
+************
+We also have some standard colors that we strongly recommend to be used in your
+NApp's color scheme if needed.
+
+.. include:: ./kytos_colors.rst
+
+====================================== ===============
+Color                                  Hexadecimal    
+====================================== ===============
+:kytos-white:`kytos-white`             :hexa:`#EEE`
+:kytos-dark-white:`kytos-dark-white`   :hexa:`#CCC`
+:kytos-black:`kytos-black`             :hexa:`#222`
+:kytos-gray:`kytos-gray`               :hexa:`#515151`
+:kytos-light-gray:`kytos-light-gray`   :hexa:`#b3b3b3`
+:kytos-medium-gray:`kytos-medium-gray` :hexa:`#414141`
+:kytos-dark-gray:`kytos-dark-gray`     :hexa:`#313131`
+:kytos-extra-dark:`kytos-extra-dark`   :hexa:`#2a2a2a`
+:kytos-purple:`kytos-purple`           :hexa:`#554077`
+:kytos-dark-purple:`kytos-dark-purple` :hexa:`#322c5d`
+:kytos-blue:`kytos-blue`               :hexa:`#008690`
+:kytos-dark-blue:`kytos-dark-blue`     :hexa:`#008690`
+:kytos-green:`kytos-green`             :hexa:`#8bc34a`
+:kytos-yellow:`kytos-yellow`           :hexa:`#f9a825`
+:kytos-red:`kytos-red`                 :hexa:`#dd2c00`
+====================================== ===============
+

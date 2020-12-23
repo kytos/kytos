@@ -428,17 +428,31 @@ Misc | k-context-panel
 
 Represents a context where the developer can add any desired content.
 
+**Example**
+
+.. code-block:: html
+
+        <k-context-panel title_color="#554077" title="MapBox Settings" icon="gear">
+            <any-k-component></any-k-component>
+        </k-context-panel>
+ 
+**Image**
+
+.. image:: /_static/images/components/misc/k-context-panel.png
+    :align: center
+
 **Parameters**
 
-========== ======= ======== ======= ================================================================== 
-name       type    required default description                                                        
-========== ======= ======== ======= ================================================================== 
-title      string  false            Property representing a title                                      
-tooltip    string  false            A brief informative message triggered by mouse hover                                    
-isDisabled boolean false    false   Property to represent show if the component is enabled ou disabled 
-icon       string  false            An Icon string representing a awesome icon.                        
-subtitle   string  false                                                                               
-========== ======= ======== ======= ================================================================== 
+=========== ======= ======== ======= ================================================================== 
+name        type    required default description                                                        
+=========== ======= ======== ======= ================================================================== 
+title       string  false            Property representing a title                                      
+tooltip     string  false            A brief informative message triggered by mouse hover                                    
+isDisabled  boolean false    false   Property to represent show if the component is enabled ou disabled 
+icon        string  false            An Icon string representing a awesome icon.                        
+subtitle    string  false
+title_color string  false    #CCC    Define title color                                                                     
+=========== ======= ======== ======= ================================================================== 
 
 **Methods**
 
@@ -685,6 +699,35 @@ table | k-table
 ===============
 
 This component allows to create a table.
+
+**Example**
+
+.. code-block:: html
+
+    <template>
+        <k-table :headers=this.headers :rows=this.rows></k-table>
+    </template>
+    
+    <script>
+    /* All the javascript methods are optional */
+    module.exports = {
+         data () {
+            return {
+                headers: ['Header 1', 'Header 2'],
+                rows: [{hd1:"Item1", hd2:"Example1"}, {hd1:"Item2", hd2:"Example2"}, {hd1:"Item3", h2d:"Example3"}, {hd1:"item4", h2d:"Example4"}],
+            }
+        },
+        methods: { 
+            // put your javascript methods here
+        },
+    }
+    </script>
+
+
+**Image**
+
+.. image:: /_static/images/components/table/k-table.png
+    :align: center
 
 **Parameters**
 

@@ -28,16 +28,17 @@ Security
 Added
 =====
 - Added event to notify when a NApp was loaded.
-- [docs] Added ``k-notification`` component and its event docs.
-- [docs] Added table that lists the Kytos standard colors.
+- [docs][ui] Added ``k-notification`` component and its event docs.
+- [docs][ui] Added table that lists the Kytos standard colors.
 
 Fixed
 =====
-- Fixed the cells order when the Blueprints table is generated.
+- [docs] Fixed the cells' order when the Blueprints table is generated.
 
 Changed
 =======
-- [docs] Update k-context-panel and k-table examples of usage and images.
+- [docs] Updated ``k-context-panel`` and ``k-table`` images and usage examples.
+
 
 [2020.2b3] - "itamar" beta3 - 2020-11-20
 ****************************************

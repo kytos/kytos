@@ -26,11 +26,12 @@ def authenticated(func):
         try:
             content = request.headers.get("Authorization")
             if content is None:
-                raise AttributeError
+                raise ValueError("The attribute 'content' has an invalid "
+                                 "value 'None'.")
             token = content.split("Bearer ")[1]
             jwt.decode(token, key=Auth.get_jwt_secret())
         except (
-            AttributeError,
+            ValueError,
             IndexError,
             jwt.ExpiredSignature,
             jwt.exceptions.DecodeError,

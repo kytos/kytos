@@ -12,7 +12,7 @@ from http import HTTPStatus
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen, urlretrieve
 
-from flask import Blueprint, Flask, jsonify, request, send_file
+from flask import Blueprint, Flask, jsonify, send_file
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room
 from werkzeug.exceptions import HTTPException
@@ -153,17 +153,13 @@ class APIServer:
         except URLError:
             pass
 
+    @authenticated
     def shutdown_api(self):
         """Handle shutdown requests received by Api Server.
 
         This method must be called by kytos using the method
         stop_api_server, otherwise this request will be ignored.
         """
-        allowed_host = ['127.0.0.1:'+str(self.port),
-                        'localhost:'+str(self.port)]
-        if request.host not in allowed_host:
-            return "", HTTPStatus.FORBIDDEN.value
-
         self.server.stop()
 
         return 'Server shutting down...', HTTPStatus.OK.value

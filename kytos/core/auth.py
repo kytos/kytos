@@ -86,7 +86,9 @@ class Auth:
     def _create_superuser(self):
         """Create a superuser using Storehouse."""
         def _create_superuser_callback(_event, box, error):
-            if box and not error:
+            if error:
+                LOG.error('Superuser was not created. Error: %s', error)
+            if box:
                 LOG.info("Superuser successfully created")
 
         def get_username():

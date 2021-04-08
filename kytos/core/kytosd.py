@@ -5,6 +5,7 @@ import functools
 import os
 import signal
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import suppress
 from pathlib import Path
 
 import daemon
@@ -115,10 +116,11 @@ def async_main(config):
         """Stop the controller before quitting."""
         loop = asyncio.get_event_loop()
 
-        # If stop() hangs, old ctrl+c behaviour will be restored
-        loop.remove_signal_handler(signal.SIGINT)
-        loop.remove_signal_handler(signal.SIGTERM)
-
+        if loop:
+            # If stop() hangs, old ctrl+c behaviour will be restored
+            loop.remove_signal_handler(signal.SIGINT)
+            loop.remove_signal_handler(signal.SIGTERM)
+ 
         # disable_threadpool_exit()
 
         controller.log.info("Stopping Kytos controller...")
@@ -155,4 +157,12 @@ def async_main(config):
         controller.log.error(exc)
         controller.log.info("Shutting down Kytos...")
     finally:
+        pending = asyncio.Task.all_tasks()
+        for task in pending:
+            cancelled = task.cancel()
+            # Now we should await task to execute it's cancellation.
+            # Cancelled task raises asyncio.CancelledError that we suppress.
+            with suppress(asyncio.CancelledError):
+                loop.run_until_complete(task)
+
         loop.close()

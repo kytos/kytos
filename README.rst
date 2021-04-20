@@ -3,6 +3,14 @@ Kytos SDN Platform
 
 |Experimental| |Tag| |Release| |License| |Build| |Coverage| |Quality|
 
+**WARNING: As previously announced on our communication channels, the Kytos
+project will enter the "shutdown" phase on May 31, 2021. After this date,
+only critical patches (security and core bug fixes) will be accepted, and the
+project will be in "critical-only" mode for another six months (until November
+30, 2021). For more information visit the FAQ at <https://kytos.io/faq>. We'll
+have eternal gratitude to the entire community of developers and users that made
+the project so far.**
+
 `Kytos SDN Platform <https://kytos.io>`_ is the fastest way to deploy an SDN
 Network. With this you can deploy a basic OpenFlow controller or your own
 controller. Kytos was designed to be easy to install, use, develop and share

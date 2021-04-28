@@ -183,7 +183,7 @@ class TestController(TestCase):
         (_, mock_getpid) = args
         mock_getpid.return_value = 2
         with tempfile.NamedTemporaryFile() as tmp_file:
-            tmp_file.write(b'4194305') # pid_max +1
+            tmp_file.write(b'4194305')  # pid_max +1
             tmp_file.seek(0)
             self.controller.options.pidfile = tmp_file.name
 

@@ -57,7 +57,7 @@ endpoint, they must use the @authenticated decorator as shown:
 .. code:: python
 
     from kytos.core.decorators import rest, authenticated
-    
+
     @rest('endpoint')
     @authenticated
     def method():
@@ -73,8 +73,8 @@ can be implemented using the pyJWT library.
 Endpoints REST:
 ---------------
 
-.. code:: console
-    
+.. code:: shell
+
     POST /api/kytos/core/auth/users/ - This endpoint creates new users.
 
     $ curl -X POST \
@@ -82,7 +82,7 @@ Endpoints REST:
         -d '{"username":"babel42", "password":"youshallnotpass", "email": "babel42@email.com"}' \
         URL
 
-.. code:: console
+.. code:: shell
 
     GET /api/kytos/core/auth/login/ - This endpoint verifies a user and returns a valid token if authentication is correct.
 
@@ -91,7 +91,7 @@ Endpoints REST:
         -H 'Authorization:Basic username:password' \
         URL
 
-.. code:: console
+.. code:: shell
 
     GET /api/kytos/core/auth/users/ - This endpoint lists the registered users.
 
@@ -100,7 +100,7 @@ Endpoints REST:
         -H 'Authorization: Bearer ${TOKEN}' \
         URL
 
-.. code:: console
+.. code:: shell
 
     GET /api/kytos/core/auth/users/<user_id>/ - This endpoint gets details about a specific user.
 
@@ -111,9 +111,9 @@ Endpoints REST:
         -d '{"user_id":"001"}' \
         URL
 
-.. code:: console
+.. code:: shell
 
-    DELETE /api/kytos/core/auth/users/<user_id>/ - This endpoint delete a specific user.	
+    DELETE /api/kytos/core/auth/users/<user_id>/ - This endpoint delete a specific user.
 
     $ curl -X DELETE \
         -H 'Content-type:application/json' \
@@ -122,7 +122,7 @@ Endpoints REST:
         -d '{"user_id":"001"}' \
         URL
 
-.. code:: console
+.. code:: shell
 
     PATCH /api/kytos/core/auth/users/<user_id>/ - This endpoint update a specific user.
 

@@ -5,7 +5,7 @@ Kytos Console
 Start Kytos in foreground mode with the `-f` parameter, and you should see
 the Kytos console:
 
-.. code-block:: console
+.. code-block:: shell-session
 
   $ kytosd -f
         _          _
@@ -32,7 +32,7 @@ the Kytos console:
 
 The first thing you'll notice is the real time log:
 
-.. code-block:: console
+.. code-block:: shell
 
   2018-06-26 13:02:01,972 - INFO [atcp_server] (MainThread) New connection from 192.168.0.200:53068
   2018-06-26 13:02:01,980 - INFO [controller] (MainThread) Handling kytos/core.connection.new...
@@ -40,7 +40,7 @@ The first thing you'll notice is the real time log:
 
 Then you can poke into Kytos internals, like listing switches and napps:
 
-.. code-block:: console
+.. code-block:: shell
 
   kytos $> controller.switches
   {'00:00:00:00:00:00:00:01': <kytos.core.switch.Switch at 0x10bfef7f0>}

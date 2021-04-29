@@ -14,11 +14,11 @@ kytos installation:
 Creating superusers
 ===================
 
-To access the REST Endpoints related to Authentication, it is necessary to 
-register a first user (Superuser). To do this, run kytos with the -f and -C 
+To access the REST Endpoints related to Authentication, it is necessary to
+register a first user (Superuser). To do this, run kytos with the -f and -C
 arguments:
 
-.. code-block:: console 
+.. code-block:: shell
 
    $ kytosd -f -C
 
@@ -27,7 +27,7 @@ arguments:
     email: <your_email>
     password: <your_pass>
     re-password: <your_pass>
-   
+
 
 
 Login
@@ -38,19 +38,19 @@ is correct:
 
 Endpoint:
 
-.. code-block:: console
+.. code-block:: shell
 
     GET /api/kytos/core/auth/login/
 
 Request:
 
-.. code-block :: console
+.. code-block :: shell
 
     $ curl -u username:password http://127.0.0.1:8181/api/kytos/core/auth/login/
 
 Response:
 
-.. code-block:: console
+.. code-block:: shell
 
     {"token": token_here}
 
@@ -61,20 +61,20 @@ This endpoint lists the registered users:
 
 Endpoint:
 
-.. code-block:: console
+.. code-block:: shell
 
     GET /api/kytos/core/auth/users/
 
 Request:
 
-.. code-block :: console
+.. code-block :: shell
 
     $ curl -i http://127.0.0.1:8181/api/kytos/core/auth/users \
         -H "Authorization: Bearer token"
 
 Response:
 
-.. code-block:: console
+.. code-block:: shell
 
    {"users":[id]}
 
@@ -85,21 +85,21 @@ This endpoint gets details about a specific user:
 
 Endpoint:
 
-.. code-block:: console
+.. code-block:: shell
 
     GET /api/kytos/core/auth/users/<user_id>/
 
 Request:
 
-.. code-block :: console
+.. code-block :: shell
 
     $ curl -i http://127.0.0.1:8181/api/kytos/core/auth/users/<user_id> \
         -H "Authorization: Bearer token"
 
 Response:
 
-.. code-block:: console
- 
+.. code-block:: shell
+
    {"data": {"email": "babel42@email.com", "username": "user_id"}}
 
 Create extra users
@@ -111,15 +111,15 @@ This endpoint requires a token.
 
 Endpoint:
 
-.. code-block:: console
+.. code-block:: shell
 
     POST /api/kytos/core/auth/users/
 
 Request:
 
-.. code-block:: console
+.. code-block:: shell
 
-    $ curl -d '{"username": "<your_name>", "password": "<pass>", \ 
+    $ curl -d '{"username": "<your_name>", "password": "<pass>", \
         "email": "<your_email>"}' \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer token" \
@@ -128,7 +128,7 @@ Request:
 
 Response:
 
-.. code-block:: console
+.. code-block:: shell
 
     User successfully created
 
@@ -139,13 +139,13 @@ This endpoint deletes a specific user.
 
 Endpoint:
 
-.. code-block:: console
+.. code-block:: shell
 
     DELETE /api/kytos/core/auth/users/<user_id>/
 
 Request:
 
-.. code-block :: console
+.. code-block :: shell
 
     $ curl -X DELETE \
         -H 'Authorization: Bearer token' \
@@ -154,7 +154,7 @@ Request:
 
 Response:
 
-.. code-block :: console
+.. code-block :: shell
 
   User successfully deleted
 
@@ -165,13 +165,13 @@ This endpoint update a specific user:
 
 Endpoint:
 
-.. code-block:: console
+.. code-block:: shell
 
     PATCH /api/kytos/core/auth/users/<user_id>/
 
 Request:
 
-.. code-block :: console
+.. code-block :: shell
 
     $ curl -X PATCH \
         -H 'Content-Type: application/json' \
@@ -181,7 +181,7 @@ Request:
 
 Response:
 
-.. code-block :: console
+.. code-block :: shell
 
     User successfully updated
 

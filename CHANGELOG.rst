@@ -23,6 +23,31 @@ Fixed
 Security
 ========
 
+
+[2021.rc1] - stable release - 2021-04-30
+****************************************
+
+Added
+=====
+- New log message when handle errors at superuser creation.
+- Added file to provide support to Dependabot.
+- New blueprint: EP022 - Kytos reports statistics.
+- New method ``from_dict`` to instatiate Interface, UNI, Link and Switch 
+  classes from python dictionary.
+- [docs] New documentation for consistency system.
+- Add ``ex_handler`` method to log uncaughted exceptions.
+
+Fixed
+=====
+- Fix PID value to fix errors in unit test execution (fix #1242).  
+- [docs] Fixed warning in code-block section in auth documentation.
+- Fix pytest-runner error raised by Scrutinizer CI. 
+
+Security
+========
+- Update dependecies.
+
+
 [2020.2] - "itamar" stable release - 2020-12-30
 ***********************************************
 

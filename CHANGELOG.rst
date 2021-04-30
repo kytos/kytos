@@ -23,6 +23,31 @@ Fixed
 Security
 ========
 
+
+[2021.1rc1] - "final" release candidate 1 - 2021-04-30
+******************************************************
+
+Added
+=====
+- New blueprint: EP022 - Kytos reports statistics.
+- New method ``from_dict`` to instantiate Interface, UNI, Link
+  and Switch classes from python dictionary.
+- Log uncaught exceptions to console and/or log files.
+- New log message when handling errors at superuser creation.
+- Added file to provide support for Dependabot.
+- [docs] New documentation for consistency system.
+
+Fixed
+=====
+- [tests] Fix PID value to fix errors in unit test execution (fix #1242).  
+- [tests] Fix pytest-runner error raised by Scrutinizer CI. 
+- [docs] Fixed warning in code-block section in auth documentation.
+
+Security
+========
+- Updated dependencies.
+
+
 [2020.2] - "itamar" stable release - 2020-12-30
 ***********************************************
 

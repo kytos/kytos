@@ -117,7 +117,7 @@ Endpoint:
 
 Request:
 
-.. code-block:: console
+.. code-block:: shell
 
     $ curl -d '{"username": "<your_name>", "password": "<pass>", \ 
         "email": "<your_email>"}' \

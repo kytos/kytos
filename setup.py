@@ -23,6 +23,9 @@ except ModuleNotFoundError:
 BASE_ENV = Path(os.environ.get('VIRTUAL_ENV', '/'))
 ETC_FILES = []
 
+NEEDS_PYTEST = {'pytest', 'test', 'coverage'}.intersection(sys.argv)
+PYTEST_RUNNER = ['pytest-runner'] if NEEDS_PYTEST else []
+
 
 class SimpleCommand(Command):
     """Make Command implementation simpler."""
@@ -247,7 +250,7 @@ setup(name='kytos',
       install_requires=[line.strip()
                         for line in open("requirements/run.txt").readlines()
                         if not line.startswith('#')],
-      setup_requires=['pytest-runner'],
+      setup_requires=PYTEST_RUNNER,
       tests_require=['pytest'],
       cmdclass={
           'clean': Cleaner,

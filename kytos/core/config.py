@@ -56,7 +56,7 @@ class KytosConfig():
                             action='store_true',
                             help="Run in foreground (ctrl+c to stop)")
 
-        parser.add_argument('-ft', '--no_terminal',
+        parser.add_argument('-F', '--no-terminal',
                             action='store_true',
                             help="Run in foreground without terminal (ctrl+c to stop).")
 

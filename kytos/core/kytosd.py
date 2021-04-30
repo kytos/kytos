@@ -120,7 +120,7 @@ def async_main(config):
             # If stop() hangs, old ctrl+c behaviour will be restored
             loop.remove_signal_handler(signal.SIGINT)
             loop.remove_signal_handler(signal.SIGTERM)
- 
+
         # disable_threadpool_exit()
 
         controller.log.info("Stopping Kytos controller...")
@@ -151,18 +151,28 @@ def async_main(config):
         executor = ThreadPoolExecutor(max_workers=1)
         loop.create_task(start_shell_async())
 
+    # For compatibility with python versions 3.6 or earlier.
+    # asyncio.Task.all_tasks() is fully moved to asyncio.all_tasks()
+    # starting with 3.9. Also applies to current_task.
+    try:
+        asyncio_all_tasks = asyncio.all_tasks
+        asyncio_current_task = asyncio.current_task
+    except AttributeError:
+        asyncio_all_tasks = asyncio.Task.all_tasks
+        asyncio_current_task = asyncio.Task.current_task
+
     try:
         loop.run_forever()
     except SystemExit as exc:
         controller.log.error(exc)
         controller.log.info("Shutting down Kytos...")
     finally:
-        pending = asyncio.Task.all_tasks()
+        pending = [t for t in asyncio_all_tasks() if
+                   t is not asyncio_current_task()]
+
         for task in pending:
-            cancelled = task.cancel()
-            # Now we should await task to execute it's cancellation.
-            # Cancelled task raises asyncio.CancelledError that we suppress.
+            task.cancel()
+            # Now we should await task to execute its cancellation.
+            # A cancelled task raises asyncio.CancelledError that we suppress.
             with suppress(asyncio.CancelledError):
                 loop.run_until_complete(task)
-
-        loop.close()

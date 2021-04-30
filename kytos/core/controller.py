@@ -46,6 +46,20 @@ from kytos.core.switch import Switch
 __all__ = ('Controller',)
 
 
+def exc_handler(_, exc, __):
+    """Log uncaught exceptions.
+
+    Args:
+        exc_type (ignored): exception type
+        exc: exception instance
+        tb (ignored): traceback
+    """
+    logging.basicConfig(filename='errlog.log',
+                        format='%(asctime)s:%(pathname)'
+                        's:%(levelname)s:%(message)s')
+    logging.exception('Uncaught Exception: %s', exc)
+
+
 class Controller:
     """Main class of Kytos.
 
@@ -128,6 +142,7 @@ class Controller:
         #: Now you can access the enabled napps with:
         #: from napps.<username>.<napp_name> import ?....
         sys.path.append(os.path.join(self.options.napps, os.pardir))
+        sys.excepthook = exc_handler
 
     def enable_logs(self):
         """Register kytos log and enable the logs."""

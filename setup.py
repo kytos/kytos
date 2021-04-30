@@ -123,7 +123,7 @@ class Test(TestCommand):
 
     def run(self):
         """Run tests."""
-        cmd = 'python setup.py pytest %s' % self.get_args()
+        cmd = 'python setup.py test %s' % self.get_args()
         try:
             check_call(cmd, shell=True)
         except CalledProcessError as exc:
@@ -139,7 +139,7 @@ class TestCoverage(Test):
 
     def run(self):
         """Run tests quietly and display coverage report."""
-        cmd = 'coverage3 run setup.py pytest %s' % self.get_args()
+        cmd = 'coverage3 run setup.py test %s' % self.get_args()
         cmd += '&& coverage3 report'
         try:
             check_call(cmd, shell=True)

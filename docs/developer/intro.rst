@@ -16,6 +16,7 @@ In this section you will learn about:
 - :doc:`REST Endpoints </developer/rest_endpoints/>`
 - :doc:`How to develop your NApp </developer/creating_a_napp/>`
 - :doc:`Authentication Module </developer/auth/>`
+- :doc:`Consistency Module </developer/consistency/>`
 - :doc:`Web Interface </developer/web-ui/>`
 - :doc:`Kytos UI Components </developer/kytos_ui_components/>`
 - :doc:`How to Contribute </developer/how_to_contribute/>`

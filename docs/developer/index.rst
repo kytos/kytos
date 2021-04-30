@@ -87,6 +87,7 @@ Kytos Summit provides an opportunity for developers, contributors and other inte
    Kytos API <./kytos_api/kytos>
    creating_a_napp
    auth
+   consistency
    web-ui
    kytos_ui_components
    how_to_contribute

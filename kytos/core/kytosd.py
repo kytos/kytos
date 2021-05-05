@@ -167,12 +167,13 @@ def async_main(config):
         controller.log.error(exc)
         controller.log.info("Shutting down Kytos...")
     finally:
-        pending = [t for t in asyncio_all_tasks() if
-                   t is not asyncio_current_task()]
+        if loop.is_running():
+            pending = [t for t in asyncio_all_tasks() if
+                    t is not asyncio_current_task()]
 
-        for task in pending:
-            task.cancel()
-            # Now we should await task to execute its cancellation.
-            # A cancelled task raises asyncio.CancelledError that we suppress.
-            with suppress(asyncio.CancelledError):
-                loop.run_until_complete(task)
+            for task in pending:
+                task.cancel()
+                # Now we should await task to execute its cancellation.
+                # A cancelled task raises asyncio.CancelledError that we suppress.
+                with suppress(asyncio.CancelledError):
+                    loop.run_until_complete(task)

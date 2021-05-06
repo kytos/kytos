@@ -158,6 +158,7 @@ def async_main(config):
         asyncio_all_tasks = asyncio.all_tasks
         asyncio_current_task = asyncio.current_task
     except AttributeError:
+        # pylint: disable=no-member
         asyncio_all_tasks = asyncio.Task.all_tasks
         asyncio_current_task = asyncio.Task.current_task
 
@@ -169,11 +170,12 @@ def async_main(config):
     finally:
         if loop.is_running():
             pending = [t for t in asyncio_all_tasks() if
-                    t is not asyncio_current_task()]
+                       t is not asyncio_current_task()]
 
             for task in pending:
                 task.cancel()
                 # Now we should await task to execute its cancellation.
-                # A cancelled task raises asyncio.CancelledError that we suppress.
+                # A cancelled task raises asyncio.CancelledError that
+                # we suppress.
                 with suppress(asyncio.CancelledError):
                     loop.run_until_complete(task)

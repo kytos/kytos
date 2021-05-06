@@ -7,7 +7,7 @@
 backcall==0.1.0           # via ipython
 click==7.1.1              # via flask
 decorator==4.4.2          # via ipython, traitlets
-docutils==0.17            # via python-daemon
+docutils>=0.16            # via python-daemon
 flask-cors==3.0.8         # via -r requirements/run.in
 flask-socketio==4.2.1     # via -r requirements/run.in
 flask==1.1.2              # via -r requirements/run.in, flask-cors, flask-socketio
@@ -25,13 +25,13 @@ pexpect==4.8.0            # via ipython
 pickleshare==0.7.5        # via ipython
 prompt-toolkit==3.0.5     # via ipython
 ptyprocess==0.6.0         # via pexpect
-pygments==2.8.1           # via ipython
+pygments>=2.8.1           # via ipython
 pyjwt==1.7.1              # via -r requirements/run.in
 python-daemon==2.2.4      # via -r requirements/run.in
 python-engineio==3.12.1   # via python-socketio
 python-openflow==2021.1rc1  # via -r requirements/run.in
 python-socketio==4.5.1    # via flask-socketio
-six==1.15.0               # via flask-cors, python-socketio, traitlets
+six>=1.15.0               # via flask-cors, python-socketio, traitlets
 traitlets==4.3.3          # via ipython
 watchdog==0.10.2          # via -r requirements/run.in
 wcwidth==0.1.9            # via prompt-toolkit

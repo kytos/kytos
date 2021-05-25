@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 
 
 class Switch(GenericEntity):
-    """Switch class is a abstraction from switches.
+    """Switch class is an abstraction from switches.
 
     A new Switch will be created every time the handshake process is done
     (after receiving the first FeaturesReply). Considering this, the
@@ -33,7 +33,7 @@ class Switch(GenericEntity):
     effective connection between the switch and the controller.
 
     :attr:`connection_id` is a tuple, composed by the ip and port of the
-    stabilished connection (if any). It will be used to help map the connection
+    established connection (if any). It will be used to help map the connection
     to the Switch and vice-versa.
 
     :attr:`ofp_version` is a string representing the accorded version of
@@ -42,7 +42,7 @@ class Switch(GenericEntity):
 
     :attr:`features` is an instance of
     :class:`pyof.*.controller2switch.FeaturesReply` representing the current
-    featues of the switch.
+    features of the switch.
     """
 
     # pylint: disable=too-many-instance-attributes
@@ -198,7 +198,7 @@ class Switch(GenericEntity):
 
         Args:
             interface (:class:`~kytos.core.switch.Interface`):
-                Interface object to be storeged.
+                Interface object to be stored.
         """
         self.interfaces[interface.port_number] = interface
 
@@ -297,6 +297,7 @@ class Switch(GenericEntity):
                 'hardware': "Open vSwitch",
                 'software': 2.5,
                 'data_path': "",
+                'interfaces': {},
                 'metadata': {},
                 'active': True,
                 'enabled': False
@@ -330,7 +331,7 @@ class Switch(GenericEntity):
                 'enabled': self.is_enabled()}
 
     def as_json(self):
-        """Return a json with switch'attributes.
+        """Return JSON with switch's attributes.
 
         Example of output:
 
@@ -349,7 +350,7 @@ class Switch(GenericEntity):
              "connection": ""}
 
         Returns:
-            string: Json filled with switch'attributes.
+            string: JSON filled with switch's attributes.
 
         """
         return json.dumps(self.as_dict())

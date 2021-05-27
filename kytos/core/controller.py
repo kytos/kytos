@@ -85,6 +85,8 @@ class Controller:
 
         self._loop = loop or asyncio.get_event_loop()
         self._pool = ThreadPoolExecutor(max_workers=1)
+        # asyncio tasks
+        self._tasks = []
 
         #: dict: keep the main threads of the controller (buffers and handler)
         self._threads = {}
@@ -293,11 +295,16 @@ class Controller:
                       len(completed), len(pending))
 
         task = self._loop.create_task(self.raw_event_handler())
+        self._tasks.append(task)
         task = self._loop.create_task(self.msg_in_event_handler())
+        self._tasks.append(task)
         task = self._loop.create_task(self.msg_out_event_handler())
+        self._tasks.append(task)
         task = self._loop.create_task(self.app_event_handler())
+        self._tasks.append(task)
         task = self._loop.create_task(_run_api_server_thread(self._pool))
         task.add_done_callback(_stop_loop)
+        self._tasks.append(task)
 
         self.log.info("ThreadPool started: %s", self._pool)
 
@@ -405,7 +412,11 @@ class Controller:
         self.log.debug("%s threads before threadpool shutdown: %s",
                        len(threads), threads)
 
-        self._pool.shutdown(wait=graceful)
+        try:
+            # Python >= 3.9
+            self._pool.shutdown(wait=graceful, cancel_futures=True)
+        except TypeError:
+            self._pool.shutdown(wait=graceful)
 
         # self.server.socket.shutdown()
         # self.server.socket.close()
@@ -422,6 +433,10 @@ class Controller:
         self.started_at = None
         self.unload_napps()
         self.buffers = KytosBuffers()
+
+        # Cancel all async tasks (event handlers and servers)
+        for task in self._tasks:
+            task.cancel()
 
         # ASYNC TODO: close connections
         # self.server.server_close()

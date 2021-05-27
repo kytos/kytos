@@ -12,7 +12,7 @@ from http import HTTPStatus
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen, urlretrieve
 
-from flask import Blueprint, Flask, jsonify, send_file
+from flask import Blueprint, Flask, jsonify, request, send_file
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room
 from werkzeug.exceptions import HTTPException
@@ -107,9 +107,11 @@ class APIServer:
     def start_api(self):
         """Start this APIServer instance API.
 
-        Start /api/kytos/core/shutdown/ and status/ endpoints, web UI.
+        Start /api/kytos/core/_shutdown/ and status/ endpoints, web UI.
+        The '_shutdown' endpoint should not be public and is intended to
+        shutdown the APIServer.
         """
-        self.register_core_endpoint('shutdown/', self.shutdown_api)
+        self.register_core_endpoint('_shutdown/', self.shutdown_api)
         self.register_core_endpoint('status/', self.status_api)
         self.register_core_endpoint('web/update/<version>/',
                                     self.update_web_ui,
@@ -146,23 +148,27 @@ class APIServer:
         return '{"response": "running"}', HTTPStatus.OK.value
 
     def stop_api_server(self):
-        """Send a shutdown request to stop Api Server."""
+        """Send a shutdown request to stop API Server."""
         try:
-            url = f'http://127.0.0.1:{self.port}/api/kytos/core/shutdown'
+            url = f'http://127.0.0.1:{self.port}/api/kytos/core/_shutdown'
             urlopen(url)
         except URLError:
             pass
 
-    @authenticated
     def shutdown_api(self):
-        """Handle shutdown requests received by Api Server.
+        """Handle requests received to shutdown the API Server.
 
         This method must be called by kytos using the method
         stop_api_server, otherwise this request will be ignored.
         """
+        allowed_host = ['127.0.0.1:'+str(self.port),
+                        'localhost:'+str(self.port)]
+        if request.host not in allowed_host:
+            return "", HTTPStatus.FORBIDDEN.value
+
         self.server.stop()
 
-        return 'Server shutting down...', HTTPStatus.OK.value
+        return 'API Server shutting down...', HTTPStatus.OK.value
 
     def static_web_ui(self, username, napp_name, filename):
         """Serve static files from installed napps."""

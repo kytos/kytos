@@ -54,28 +54,20 @@ class TestAPIServer(unittest.TestCase):
 
         mock_exit.assert_called()
 
-    @patch('kytos.core.auth.request')
-    @patch('kytos.core.auth.jwt.decode', return_value=True)
-    def test_shutdown_api(self, _, mock_request):
+    @patch('kytos.core.api_server.request')
+    def test_shutdown_api(self, mock_request):
         """Test shutdown_api method."""
+        mock_request.host = 'localhost:8181'
 
-        mock_request.headers = {'Authorization': 'Bearer 123'}
         self.api_server.shutdown_api()
 
         self.api_server.server.stop.assert_called()
 
-    @patch('kytos.core.auth.jsonify')
-    @patch('kytos.core.auth.request')
-    def test_shutdown_api__error(self, mock_request, mock_jsonify):
+    @patch('kytos.core.api_server.request')
+    def test_shutdown_api__error(self, mock_request):
         """Test shutdown_api method to error case."""
-
-        mock_request.headers = {'Authorization': None}
+        mock_request.host = 'any:port'
         self.api_server.shutdown_api()
-
-        exc_msg = "The attribute 'content' has an invalid value 'None'."
-        msg = f"Token not sent or expired: {exc_msg}"
-
-        mock_jsonify.assert_called_with({"error": msg})
 
         self.api_server.server.stop.assert_not_called()
 
@@ -89,7 +81,7 @@ class TestAPIServer(unittest.TestCase):
         """Test stop_api_server method."""
         self.api_server.stop_api_server()
 
-        url = "%s/shutdown" % API_URI
+        url = "%s/_shutdown" % API_URI
         mock_urlopen.assert_called_with(url)
 
     @patch('kytos.core.api_server.send_file')

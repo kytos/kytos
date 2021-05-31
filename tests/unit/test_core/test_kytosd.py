@@ -2,7 +2,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from kytos.core.kytosd import _create_pid_dir, async_main, main, start_shell
+from kytos.core.kytosd import _create_pid_dir, async_main, create_shell, main
 
 
 class TestKytosd(TestCase):
@@ -33,7 +33,8 @@ class TestKytosd(TestCase):
     @patch('kytos.core.kytosd.InteractiveShellEmbed')
     def test_start_shell(mock_interactive_shell):
         """Test stop_api_server method."""
-        start_shell(MagicMock())
+        ipshell = create_shell(MagicMock())
+        ipshell()
 
         mock_interactive_shell.assert_called()
 

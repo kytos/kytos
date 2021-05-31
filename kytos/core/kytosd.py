@@ -35,7 +35,7 @@ def _create_pid_dir():
         os.chmod(pid_dir, 0o1777)  # permissions like /tmp
 
 
-def start_shell(controller=None):
+def create_shell(controller=None):
     """Load Kytos interactive shell."""
     kytos_ascii = r"""
       _          _
@@ -84,8 +84,7 @@ def start_shell(controller=None):
                                     banner1=banner1,
                                     exit_msg=exit_msg)
     ipshell.prompts = KytosPrompt(ipshell)
-
-    ipshell()
+    return ipshell
 
 
 # def disable_threadpool_exit():
@@ -111,43 +110,52 @@ def main():
 
 def async_main(config):
     """Start main Kytos Daemon with asyncio loop."""
-    def stop_controller(controller):
+    def stop_controller(controller, shell_task=None):
         """Stop the controller before quitting."""
         loop = asyncio.get_event_loop()
 
-        # If stop() hangs, old ctrl+c behaviour will be restored
-        loop.remove_signal_handler(signal.SIGINT)
-        loop.remove_signal_handler(signal.SIGTERM)
+        if loop:
+            # If stop() hangs, old ctrl+c behaviour will be restored
+            loop.remove_signal_handler(signal.SIGINT)
+            loop.remove_signal_handler(signal.SIGTERM)
 
         # disable_threadpool_exit()
 
         controller.log.info("Stopping Kytos controller...")
         controller.stop()
 
+        if shell_task:
+            shell_task.cancel()
+
     async def start_shell_async():
         """Run the shell inside a thread and stop controller when done."""
-        _start_shell = functools.partial(start_shell, controller)
-        data = await loop.run_in_executor(executor, _start_shell)
-        executor.shutdown()
-        stop_controller(controller)
+        interactive_shell = create_shell(controller)
+
+        try:
+            data = await loop.run_in_executor(executor, interactive_shell)
+        finally:
+            # Exit all embedded code in shell
+            interactive_shell.magic("%exit_raise")
+            stop_controller(controller)
         return data
 
     loop = asyncio.get_event_loop()
 
     controller = Controller(config)
 
-    kill_handler = functools.partial(stop_controller, controller)
-    loop.add_signal_handler(signal.SIGINT, kill_handler)
-    loop.add_signal_handler(signal.SIGTERM, kill_handler)
-
     if controller.options.debug:
         loop.set_debug(True)
 
     loop.call_soon(controller.start)
 
+    shell_task = None
     if controller.options.foreground:
         executor = ThreadPoolExecutor(max_workers=1)
-        loop.create_task(start_shell_async())
+        shell_task = loop.create_task(start_shell_async())
+
+    kill_handler = functools.partial(stop_controller, controller, shell_task)
+    loop.add_signal_handler(signal.SIGINT, kill_handler)
+    loop.add_signal_handler(signal.SIGTERM, kill_handler)
 
     try:
         loop.run_forever()
@@ -155,4 +163,5 @@ def async_main(config):
         controller.log.error(exc)
         controller.log.info("Shutting down Kytos...")
     finally:
+
         loop.close()

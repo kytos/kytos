@@ -23,6 +23,13 @@ Fixed
 Security
 ========
 
+[2021.1rc1] - "final" - 2021-05-31
+**********************************
+
+Changed
+=======
+- Update shutdown endpoint name and improved their descriptions.
+- Fix ``Switch`` docstrings.
 
 [2021.1rc1] - "final" release candidate 1 - 2021-04-30
 ******************************************************

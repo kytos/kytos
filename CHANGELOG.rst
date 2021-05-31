@@ -24,6 +24,23 @@ Security
 ========
 
 
+[2021.1] - "final" - 2021-05-31
+*******************************
+
+Added
+=====
+- New blueprint: EP023 - Kytos Pathfinder Filter Paths by Metadata.
+
+Changed
+=======
+- Renamed ``shutdown`` REST endpoint to ``_shutdown`` and improved
+  its description.
+- Fixed ``Switch`` class docstrings.
+
+Fixed
+=====
+- Fixed ``RuntimeError`` when shutting down Kytos.
+
 [2021.1rc1] - "final" release candidate 1 - 2021-04-30
 ******************************************************
 

@@ -26,7 +26,7 @@ class TestKytosd(TestCase):
         (mock_mkdirs, mock_chmod) = args
         _create_pid_dir()
 
-        mock_mkdirs.assert_called_with('/var/run/kytos', exist_ok=Tre)
+        mock_mkdirs.assert_called_with('/var/run/kytos', exist_ok=True)
         mock_chmod.assert_called_with('/var/run/kytos', 0o1777)
 
     @staticmethod

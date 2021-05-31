@@ -23,13 +23,20 @@ Fixed
 Security
 ========
 
-[2021.1rc1] - "final" - 2021-05-31
-**********************************
+
+[2021.1] - "final" - 2021-05-31
+*******************************
 
 Changed
 =======
-- Update shutdown endpoint name and improved their descriptions.
-- Fix ``Switch`` docstrings.
+- Renamed ``shutdown`` REST endpoint to ``_shutdown`` and improved
+  its description.
+- Fixed ``Switch`` class docstrings.
+
+Fixed
+=====
+- Fixed Runtime errors when shutting down Kytos.
+
 
 [2021.1rc1] - "final" release candidate 1 - 2021-04-30
 ******************************************************

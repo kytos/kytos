@@ -2,7 +2,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from kytos.core.kytosd import _create_pid_dir, async_main, main, create_shell
+from kytos.core.kytosd import _create_pid_dir, async_main, create_shell, main
 
 
 class TestKytosd(TestCase):

@@ -414,7 +414,9 @@ class Controller:
 
         try:
             # Python >= 3.9
+            # pylint: disable=unexpected-keyword-arg
             self._pool.shutdown(wait=graceful, cancel_futures=True)
+            # pylint: enable=unexpected-keyword-arg
         except TypeError:
             self._pool.shutdown(wait=graceful)
 

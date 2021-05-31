@@ -100,15 +100,15 @@ It will *pass* an edge if its metadata meets constraints, otherwise it will *fai
 Assume that a user wishes to check all edge attributes (checking all attributes is optional). First, it obtains 
 the constraint as a JSON object:
 
-  ::
+  .. code-block:: JSON
 
     "mandatory_filters": {
-      "bandwidth":A,
-      "delay":B,
-      "utilization":C,
-      "reliability":D,
-      "priority":E,
-      "ownership":F
+      "bandwidth": "A",
+      "delay": "B",
+      "utilization": "C",
+      "reliability": "D",
+      "priority": "E",
+      "ownership": "F"
     }
 
 where **A** through **E** are floating point numbers or integers and **F** is a string.
@@ -130,8 +130,8 @@ Then the incoming JSON object will be as follows:
   .. code-block:: JSON
 
     "mandatory_filters": {
-      "bandwidth":30,
-      "delay":45
+      "bandwidth": 30,
+      "delay": 45
     }
 
 Then it will retrieve an edge and check if its bandwidth is at least 30 units and its delay
@@ -155,14 +155,16 @@ Flexible metrics are JSON objects, just like inflexible ones:
 
   .. code-block:: JSON
 
-    "optional_filters": {
-      "bandwidth":A,
-      "delay":B,
-      "utilization":C,
-      "reliability":D,
-      "priority":E,
-      "ownership":F
-    }
+     "optional_filters": {
+        "bandwidth": "A",
+        "delay": "B",
+        "utilization": "C",
+        "reliability": "D",
+        "priority": "E",
+        "ownership": "F"
+      }
+
+
 
 If a flexible part is included, then for each edge the test needs to see if it can answer YES to a minimum number of
 questions. Such edges would be marked as passing, while the rest would be marked as failing. This way,
@@ -174,9 +176,9 @@ the minimum number of YES answers. For example, assume the user specifies the fo
   .. code-block:: JSON
 
     "optional_filters": {
-      "bandwidth":30,
-      "delay":40,
-      "utilization":50,
+      "bandwidth": 30,
+      "delay": 40,
+      "utilization": 50
     }
 
 If they wish to find a path that has one of those qualities (e.g. "bandwidth is at least 30 units"), then
@@ -256,9 +258,9 @@ paths are expected to have at least 30 bandwidth, at most 40 delay, and at most 
   .. code-block:: JSON
 
     "mandatory_filters": {
-      "bandwidth":30,
-      "delay":40,
-      "utilization":50,
+      "bandwidth": 30,
+      "delay": 40,
+      "utilization": 50
     }
 
 An extended version of this object could use explicit relational operators:
@@ -266,9 +268,9 @@ An extended version of this object could use explicit relational operators:
   .. code-block:: JSON
 
     "mandatory_filters": {
-      "bandwidth":">=30",
-      "delay":">40",
-      "utilization":"=50",
+      "bandwidth": ">=30",
+      "delay": ">40",
+      "utilization": "=50"
     }
 
 These paths are expected to have at least 30 bandwidth, greater than 40 delay, and exactly 50 utilization.

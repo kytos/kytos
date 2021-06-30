@@ -149,7 +149,8 @@ class Switch(GenericEntity):
 
 
     def update_or_create_interface(self, port_no, name=None, address=None,
-                                   state=None, features=None):
+                                   state=None, features=None, speed=None,
+                                   config=None):
         """Get and upated an interface or create one if it does not exist."""
         with self._interface_lock:
             interface = self.get_interface_by_port_no(port_no)      
@@ -158,13 +159,18 @@ class Switch(GenericEntity):
                 interface.address = address or interface.address
                 interface.state = state or interface.state
                 interface.features = features or interface.features
+                interface.config = config
+                if speed:
+                    interface.set_custom_speed(speed)
             else:
                 interface = Interface(name=name,
                                       address=address,
                                       port_number=port_no,
                                       switch=self,
                                       state=state,
-                                      features=features)
+                                      features=features,
+                                      speed=speed,
+                                      config=config)
                 self.update_interface(interface)
 
     def get_flow_by_id(self, flow_id):

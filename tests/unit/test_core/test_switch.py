@@ -6,6 +6,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
 from kytos.core import Controller
+from kytos.core import interface
 from kytos.core.config import KytosConfig
 from kytos.core.constants import FLOOD_TIMEOUT
 from kytos.core.interface import Interface
@@ -145,6 +146,35 @@ class TestSwitch(TestCase):
         self.assertEqual(expected_interface_1, interface_1)
         self.assertIsNone(expected_interface_2)
 
+    def test_update_or_create_interface_case1(self):
+        """Test update_or_create_interface method."""
+        interface_1 = Interface(name='interface_2', port_number=2,
+                                switch=self.switch)
+        self.switch.interfaces = {2:interface_1}
+
+        self.switch.update_or_create_interface(2, name='new_interface_2')
+        self.assertEqual(self.switch.interfaces[2].name, 'new_interface_2')
+
+    def test_update_or_create_interface_case2(self):
+        """Test update_or_create_interface method."""
+        interface_1 = Interface(name='interface_2', port_number=2,
+                                switch=self.switch)
+        self.switch.interfaces = {2:interface_1}
+
+        self.switch.update_or_create_interface(3, name='new_interface_3')
+        self.assertEqual(self.switch.interfaces[2].name, 'interface_2')
+        self.assertEqual(self.switch.interfaces[3].name, 'new_interface_3')
+
+    def test_update_or_create_interface_case3(self):
+        """Test update_or_create_interface method."""
+        interface_1 = Interface(name='interface_2', port_number=2,
+                                switch=self.switch)
+        self.switch.interfaces = {2:interface_1}
+
+        self.switch.update_or_create_interface(3, name='new_interface_3')
+        self.assertEqual(self.switch.interfaces[2].name, 'interface_2')
+        self.assertEqual(self.switch.interfaces[3].name, 'new_interface_3')
+        
     def test_get_flow_by_id(self):
         """Test get_flow_by_id method."""
         flow_1 = MagicMock(id='1')

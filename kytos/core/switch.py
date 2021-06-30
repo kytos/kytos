@@ -1,6 +1,8 @@
 """Module with main classes related to Switches."""
 import json
+from kytos.core.interface import Interface
 import logging
+from threading import Lock
 
 from kytos.core.common import GenericEntity
 from kytos.core.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
@@ -78,6 +80,7 @@ class Switch(GenericEntity):
         self.interfaces = {}
         self.flows = []
         self.description = {}
+        self._interface_lock = Lock()
 
         if connection:
             connection.switch = self
@@ -143,6 +146,26 @@ class Switch(GenericEntity):
         port_no = getattr(port_no, 'value', port_no)
 
         return self.interfaces.get(port_no)
+
+
+    def update_or_create_interface(self, port_no, name=None, address=None,
+                                   state=None, features=None):
+        """Get and upated an interface or create one if it does not exist."""
+        with self._interface_lock:
+            interface = self.get_interface_by_port_no(port_no)      
+            if interface:
+                interface.name = name or interface.name
+                interface.address = address or interface.address
+                interface.state = state or interface.state
+                interface.features = features or interface.features
+            else:
+                interface = Interface(name=name,
+                                      address=address,
+                                      port_number=port_no,
+                                      switch=self,
+                                      state=state,
+                                      features=features)
+                self.update_interface(interface)
 
     def get_flow_by_id(self, flow_id):
         """Return a Flow using the flow_id given. None if not found in flows.

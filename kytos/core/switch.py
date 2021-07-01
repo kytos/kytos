@@ -172,6 +172,7 @@ class Switch(GenericEntity):
                                       speed=speed,
                                       config=config)
                 self.update_interface(interface)
+            return interface
 
     def get_flow_by_id(self, flow_id):
         """Return a Flow using the flow_id given. None if not found in flows.

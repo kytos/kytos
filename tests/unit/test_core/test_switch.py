@@ -6,7 +6,6 @@ from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
 from kytos.core import Controller
-from kytos.core import interface
 from kytos.core.config import KytosConfig
 from kytos.core.constants import FLOOD_TIMEOUT
 from kytos.core.interface import Interface
@@ -120,12 +119,12 @@ class TestSwitch(TestCase):
 
     def test_disable(self):
         """Test disable method."""
-        interface = MagicMock()
-        self.switch.interfaces = {"1": interface}
+        intf = MagicMock()
+        self.switch.interfaces = {"1": intf}
 
         self.switch.disable()
 
-        interface.disable.assert_called()
+        intf.disable.assert_called()
         self.assertFalse(self.switch._enabled)
 
     def test_disconnect(self):
@@ -150,7 +149,7 @@ class TestSwitch(TestCase):
         """Test update_or_create_interface method."""
         interface_1 = Interface(name='interface_2', port_number=2,
                                 switch=self.switch)
-        self.switch.interfaces = {2:interface_1}
+        self.switch.interfaces = {2: interface_1}
 
         self.switch.update_or_create_interface(2, name='new_interface_2')
         self.assertEqual(self.switch.interfaces[2].name, 'new_interface_2')
@@ -159,7 +158,7 @@ class TestSwitch(TestCase):
         """Test update_or_create_interface method."""
         interface_1 = Interface(name='interface_2', port_number=2,
                                 switch=self.switch)
-        self.switch.interfaces = {2:interface_1}
+        self.switch.interfaces = {2: interface_1}
 
         self.switch.update_or_create_interface(3, name='new_interface_3')
         self.assertEqual(self.switch.interfaces[2].name, 'interface_2')
@@ -169,12 +168,12 @@ class TestSwitch(TestCase):
         """Test update_or_create_interface method."""
         interface_1 = Interface(name='interface_2', port_number=2,
                                 switch=self.switch)
-        self.switch.interfaces = {2:interface_1}
+        self.switch.interfaces = {2: interface_1}
 
         self.switch.update_or_create_interface(3, name='new_interface_3')
         self.assertEqual(self.switch.interfaces[2].name, 'interface_2')
         self.assertEqual(self.switch.interfaces[3].name, 'new_interface_3')
-        
+
     def test_get_flow_by_id(self):
         """Test get_flow_by_id method."""
         flow_1 = MagicMock(id='1')
@@ -253,10 +252,10 @@ class TestSwitch(TestCase):
 
     def test_remove_interface(self):
         """Test remove_interface method."""
-        interface = MagicMock(port_number=1)
-        self.switch.interfaces[1] = interface
+        intf = MagicMock(port_number=1)
+        self.switch.interfaces[1] = intf
 
-        self.switch.remove_interface(interface)
+        self.switch.remove_interface(intf)
 
         self.assertEqual(self.switch.interfaces, {})
 

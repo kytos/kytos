@@ -1,12 +1,12 @@
 """Module with main classes related to Switches."""
 import json
-from kytos.core.interface import Interface
 import logging
 from threading import Lock
 
 from kytos.core.common import GenericEntity
 from kytos.core.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
 from kytos.core.helpers import now
+from kytos.core.interface import Interface
 
 __all__ = ('Switch',)
 
@@ -147,13 +147,13 @@ class Switch(GenericEntity):
 
         return self.interfaces.get(port_no)
 
-
     def update_or_create_interface(self, port_no, name=None, address=None,
                                    state=None, features=None, speed=None,
                                    config=None):
+        # pylint: disable=too-many-arguments
         """Get and upated an interface or create one if it does not exist."""
         with self._interface_lock:
-            interface = self.get_interface_by_port_no(port_no)      
+            interface = self.get_interface_by_port_no(port_no)
             if interface:
                 interface.name = name or interface.name
                 interface.address = address or interface.address

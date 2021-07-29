@@ -9,4 +9,4 @@ install:
 script:
   - python setup.py lint
   - python setup.py coverage
-  - python setup.py doctest
+  # - python setup.py doctest

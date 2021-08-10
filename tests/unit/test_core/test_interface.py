@@ -66,6 +66,7 @@ class TestInterface(unittest.TestCase):
         switch = Switch('dpid')
         switch.connection = Mock()
         switch.connection.protocol.version = 0x04
+        switch.update_lastseen()
         return Interface('name', 42, switch, *args, **kwargs)
 
     def test_speed_feature_none(self):

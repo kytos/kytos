@@ -5,7 +5,7 @@ from threading import Lock
 
 from kytos.core.common import GenericEntity
 from kytos.core.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
-from kytos.core.helpers import now
+from kytos.core.helpers import get_time, now
 from kytos.core.interface import Interface
 
 __all__ = ('Switch',)
@@ -63,7 +63,7 @@ class Switch(GenericEntity):
         self.connection = connection
         self.features = features
         self.firstseen = now()
-        self.lastseen = now()
+        self.lastseen = get_time("0001-01-01T00:00:00")
         self.sent_xid = None
         self.waiting_for_reply = False
         self.request_timestamp = 0

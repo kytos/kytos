@@ -120,6 +120,7 @@ class Controller:
         #:
         #: The key is the switch dpid, while the value is a Switch object.
         self.switches = {}  # dpid: Switch()
+        self._switches_lock = threading.Lock()
 
         #: datetime.datetime: Time when the controller finished starting.
         self.started_at = None
@@ -611,7 +612,7 @@ class Controller:
         """
         return self.switches.get(dpid)
 
-    def get_switch_or_create(self, dpid, connection):
+    def get_switch_or_create(self, dpid, connection=None):
         """Return switch or create it if necessary.
 
         Args:
@@ -624,29 +625,33 @@ class Controller:
             :class:`~kytos.core.switch.Switch`: new or existent switch.
 
         """
-        self.create_or_update_connection(connection)
-        switch = self.get_switch_by_dpid(dpid)
-        event_name = 'kytos/core.switch.'
+        with self._switches_lock:
+            if connection:
+                self.create_or_update_connection(connection)
 
-        if switch is None:
-            switch = Switch(dpid=dpid)
-            self.add_new_switch(switch)
-            event_name += 'new'
-        else:
-            event_name += 'reconnected'
+            switch = self.get_switch_by_dpid(dpid)
+            event_name = 'kytos/core.switch.'
 
-        self.set_switch_options(dpid=dpid)
-        event = KytosEvent(name=event_name, content={'switch': switch})
+            if switch is None:
+                switch = Switch(dpid=dpid)
+                self.add_new_switch(switch)
+                event_name += 'new'
+            else:
+                event_name += 'reconnected'
 
-        old_connection = switch.connection
-        switch.update_connection(connection)
+            self.set_switch_options(dpid=dpid)
+            event = KytosEvent(name=event_name, content={'switch': switch})
 
-        if old_connection is not connection:
-            self.remove_connection(old_connection)
+            if connection:
+                old_connection = switch.connection
+                switch.update_connection(connection)
 
-        self.buffers.app.put(event)
+                if old_connection is not connection:
+                    self.remove_connection(old_connection)
 
-        return switch
+            self.buffers.app.put(event)
+
+            return switch
 
     def set_switch_options(self, dpid):
         """Update the switch settings based on kytos.conf options.

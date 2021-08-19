@@ -1,7 +1,7 @@
 """Test kytos.core.switch module."""
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
@@ -42,6 +42,7 @@ class TestSwitch(TestCase):
         connection.protocol.version = 0x04
         switch = Switch('00:00:00:00:00:00:00:01', connection)
         switch._enabled = True
+        switch.update_lastseen()
         return switch
 
     def test_repr(self):
@@ -363,3 +364,12 @@ class TestSwitch(TestCase):
                                     'enabled': True})
 
         self.assertEqual(self.switch.as_json(), expected_json)
+
+    def test_switch_initial_lastseen(self):
+        """Test lastseen attribute initialization."""
+        connection = MagicMock()
+        connection.protocol.version = 0x04
+        switch = Switch('00:00:00:00:00:00:00:01', connection)
+        self.assertEqual(switch.is_active(), False)
+        self.assertEqual(switch.lastseen,
+                         datetime(1, 1, 1, 0, 0, 0, 0, timezone.utc))

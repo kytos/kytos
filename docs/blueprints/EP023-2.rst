@@ -1,0 +1,360 @@
+:EP: 23
+:Title: Kytos Pathfinder Filter Paths by Metadata - Part 2
+:Authors:
+    - David Ramirez <drami102@fiu.edu>
+    - Marvin Torres <mtorr068@fiu.edu>
+    - Vinicius Arcanjo <vinicius@amlight.net>
+    - Jeronimo Bezerra <jbezerra@fiu.edu>
+:Created: 2021-10-11
+:Kytos-Version:
+:Status: Draft
+
+************************************************************
+EP023-2 - Kytos pathfinder Filter Paths by Metadata - Part 2
+************************************************************
+
+
+Abstract
+========
+
+This blueprint is the second refined part of the `EP-023 [1] <https://github.com/kytos-ng/kytos/blob/master/docs/blueprints/EP023.rst>`_ blueprint since new requirements are being prioritized. This blueprint will add support for filtering by metadata using Kytos pathfinder's root `POST /` endpoint. The additional requirements and differences from EP023 are described in the section ``Additional changes on EP23``.
+
+
+The additional filtering capabilities and CSPF (Constrained Shortest Path First) computation will be augmented on the ``shortest_path`` method decorated with ``@rest('v2/', methods=['POST']``, which should get the user's path or links attribute requirements, remove best paths with links (edges) that fail to meet those requirements, then return the remaining paths. Both link or path filtering attributes could be set depending on what the user wants to target, the API is supposed to provide flexibility and fine control without breaking changes. This specification also covers details of the logic that determines whether a path is preserved, flexibility, the dependencies that must be added, and the verification requirements.
+
+
+Motivation
+==========
+
+Currently, Kytos pathfinder accepts the following parameters:
+
+ - Source
+ - Destination
+ - Desired links
+ - Undesired links
+ - Parameter
+
+
+Desired links and undesired links are noteworthy. They showcase Kytos pathfinder's current filtering ability. Namely, they cause Kytos pathfinder to remove edges that do not have all the desired links and none of the undesired ones. In its current state, this list of parameters is insufficient for filtering out paths based on metadata information. Even Parameter, the only one that holds metadata information, can only hold one attribute name [2].
+
+In addition, Kytos pathfinder's pathfinding ability is limited. While it can use weights, it assumes that the higher the weight, the worse its associated edge. While this is true for some attributes like delay and utilization, it is false for others like bandwidth. So finding the path with the highest bandwidth is currently impossible. Second, it can only find the best path in one attribute and not multiple - it can not find, for example, a path with ideal bandwidth and delay. Lastly, it finds the absolute best paths in the graph when the best might not be required. A user might look for a path that is good enough for their needs [2].
+
+
+Rationale
+=========
+
+These changes would add the following to the backend of Kytos pathfinder: 
+
+ - **REST Endpoint**: The endpoint `/v2` that accepts the source, destination, and constraints, and outputs the constrained shortest path. 
+ - **Filter Functionality**: The ability to find the subgraph of the *graph* instance variable, namely one that contains only qualifying edges.
+
+
+Use Cases
+=========
+
+This section documents some generic use cases to cover the overall use cases using high level networking diagrams that pathfinder should be able to handle when finding paths with additional constraints. The use cases are described in order of complexity in terms of implementing the functionality on pathfinder. 
+
+Use Case 1
+----------
+
+As a network operator, I would like to find the best paths based on the mandatory filters on link’s metadata attributes such as bandwidth, delay, reliability, utilization, priority and ownership.  In this use case, the operator would like pathfinder to find the best path with the following constraints:
+
+- ``source: S1:eth1``
+- ``destination: S3:eth1``
+- ``mandatory filters: ownership: blue``
+
+  .. image:: https://lh3.googleusercontent.com/pw/AM-JKLX7e7rled2W6Fl2Qv74srH1ZdjEKktVjnVSZebwFQkjSG0apUzg6bCpVbnv3ZfNleoHmG95KoYYfQZKsufuGTlGyLGRtOw6EAYxqEeweiGrN0ZKS4gpHH4QG9xd24zEIbEc0qeU0Jwn6xhRvetvajWw=w1272-h695-no?authuser=0
+
+  Figure 1
+
+
+The expected best path would be one highlighted by the blue line in Figure 1, since it has the mandatory filter ownership blue, and also has the lowest number of hops considering the other available path via S2, so both should be returned in order.
+
+
+Use Case 2
+----------
+
+As a network operator, I would like to find the best paths based on mandatory attribute filters as described in Use Case 1, but also be able to specify optional flexible attributes to be filtered for and the minimum expected number of metric hits that should share common attributes. In this use case, the operator would like pathfinder to find the best path with the following criteria:
+
+- ``source: S1:eth1``
+- ``destination: S3:eth1``
+- ``mandatory filters: ownership: red``
+- ``flexible filters: bandwidth: 200 Gbps, delay: 250 ms``
+- ``minimum flexible hits: 1``
+
+  .. image:: https://lh3.googleusercontent.com/pw/AM-JKLUOARYR6OgekAp8LDYI5s4-lqmAJJesN951Sg50BvzvgH4JqZqT4zPB0wdbvv3Gm_bHJ4z15FGck0Wvg4_x4KG56v4to5o_TKreIqnBmizhsnNSVshVFuKS_a5-YXrjCM_ZTLjdedEd8RY6bLU3NJW3=w1299-h696-no?authuser=0
+
+  Figure 2
+
+The expected best path should be the one in red in the Figure 2, in this case, first the mandatory filters should be applied, qualifying only links (edges) with ``ownership: red``, and then since only a single flexible metric is expected to be qualifying when filtering for in the worst case, then as long as either the bandwidth is at least 200 Gbps or the link delay is not higher than 250 ms it should be qualified as long as these as shared common attributes of the path. 
+
+
+Use Case 3
+----------
+
+As a network operator, I would like to find the best paths based on the minimum accumulated value of an attribute such as delay (or any other attribute in the future that would be reasonable to accumulate their value) and also be able to use the filters described on Use Case 2. In this use case, the operator would like pathfinder to find the best paths with the following criteria:
+
+- ``source: S1:eth1``
+- ``destination: S3:eth3``
+- ``mandatory filters: ownership: red``
+- ``spf (shortest path first) parameter: delay``
+- ``spf maximum path cost: delay 300 ms``
+
+  .. image:: https://lh3.googleusercontent.com/pw/AM-JKLUIirOIUduuhJJ-UkBNH3Vp6VGpvrQSifxsLOa0PLaXEawT8LtAYf7UTR94_ICH2Wwr0Juvfnb0TPKv0YduJ_IIh8bdByaReMfYjHBblskd_nDm-xjwf8y67sU0hQMtIBb35NcFYgvN66UTS_yRORAH=w1311-h716-no?authuser=0
+
+  Figure 3
+
+The expected best path is highlighted in red in Figure 3, the mandatory filter ``ownership: red`` resulted in a sub-graph in the topology with qualifying edges, and the upper path via S2 ended up being the best path because the accumulated delay is 90 ms, despite S1 having a direct path to S3 which should also be returned since its total accumulated delay is still less than 300 ms that was required by the operator. 
+
+
+Path Finding Requirements
+=========================
+
+Attributes and metrics
+----------------------
+
+As a network operator, I would like pathfinder to be able to find network best paths while optionally filtering unqualified links based on these network link attributes:
+
+
+- **Bandwidth**
+
+  - Network speed of the link in Gbps. It should be a positive float number.
+
+- **Delay**
+
+  - Propagation delay of the link in milliseconds. It should be a positive float number.
+
+- **Reliability**
+
+  - Percentage of the reliability of the link. It should be a float number from 0 to 100 inclusive. In this case, reliability as 0 would mean always down, which could be configured in the medata.
+
+- **Utilization**
+
+  - Average percentage of utilization of the link. It should be a float number between 0 and 100 inclusive. The average utilization will likely be on a weekly basis or greater.
+
+- **Priority**
+
+  - Priority of the link. The priority of the link could be set based on certain administrative traffic-engineering criteria. It should be an integer greater than or equal to 0, the upper limit will be specified later.
+
+- **Ownership**
+
+  _ The exact user who should have ownership or be authorized to use the link. The ownership will support associating multiple owners, including some of the owner ownership attributes if needed such as maximum utilization of the link.
+
+Each of these attributes are expected to have a predefined function that will filter for minimum, maximum or if it contains the value or not depending on the semantics of each attribute, for instance:
+
+- Minimum:
+
+  - Bandwidth
+  - Priority
+  - Reliability
+
+- Maximum:
+
+  - Delay
+  - Utilization
+
+- Contain:
+  
+  - Ownership
+
+
+These attributes and metrics, in an initial implementation of this specification, will be set via metadata, a Python dictionary on Kytos ``Generic Entity``, in this case, a network link, and in the future, it is also desirable to derive their values when applicable or allow them to be set dynamically via a third party system or application. For instance, the bandwidth metric when absent in the metadata, it could be derived from the link speed, and the utilization or reliability metric could be periodically set. If any of the metrics are not present in the link but requested to be filtered out **they will not be excluded**. 
+
+
+The ownership of a link usually belongs to a single customer, however, some network links might have shared owners. When the ownership is shared, a utilization percentage metric should also be set to specify how much of the maximum percentage utilization of the link the owner is entitled to use, which in the future once the link utilization metric could be reliability computed, this will be taken into account accordingly based on the proportion that the customer could use, and it is up to the network operator to decide and configure if the link would be oversubscribed or not. 
+
+
+Mandatory and optional filtering metrics
+----------------------------------------
+
+As a pathfinder client, I would like to be able to specify mandatory and flexible attributes that should be filtered for. 
+
+It should pass a network link (an edge) if its metadata meets constraints, otherwise it will fail the edge. Assume that a user wishes to check all edge attributes (checking all attributes is optional) [2]:
+
+
+  .. code-block:: JSON
+
+    "mandatory_metrics": {
+      "bandwidth": "A",
+      "delay": "B",
+      "utilization": "C",
+      "reliability": "D",
+      "priority": "E",
+      "ownership": "F"
+    }
+
+Then it retrieves an edge in the graph and performs the following test, which is a series of questions:
+
+- bandwidth(edge) at least A?
+- delay(edge) at most B?
+- utilization(edge) at most C?
+- reliability(edge) at least D?
+- priority(edge) at least E?
+- ownership(edge) contains F?
+
+If YES to all questions, then it **passes** the edge. For example, assume that it receives the user constraint delay of the link must be at most 100 milliseconds and bandwidth must be at least 40 Gbps:
+
+
+  .. code-block:: JSON
+
+    "mandatory_metrics": {
+      "bandwidth": 40,
+      "delay": 100
+    }
+
+
+Then it will retrieve an edge and check if its bandwidth is at least 40 Gbps and its delay is at most 100 milliseconds. If it does not have both qualities then it fails. Then it will repeat this for every subsequent edge it finds. A returned path will have all of the passing edges and none of the failing ones. However, a user might be okay with some YESes. Support for flexibility can meet those needs:
+
+  .. code-block:: JSON
+
+    "flexible_metrics": {
+       "bandwidth": "A",
+       "delay": "B",
+       "utilization": "C",
+       "reliability": "D",
+       "priority": "E",
+       "ownership": "F"
+     }
+
+If a flexible part is included, then for each edge the test needs to see if it can answer YES to a minimum number of questions. Such edges would be marked as passing, while the rest would be marked as failing. This way, paths will have edges that meet the minimum requirements of the user. This requires finding the set of k-sized combinations from a set of n flexible metrics, where k is at least the minimum number of YES answers (and this value will also be exposed as a parameter in the API as ‘min_flexible_hits’). If the operator wishes to find a path that has one of three qualities bandwidth, delay and utilization for instance, then the set will have to be split into c(3, 1) = 3 tests, each with a single question:
+
+- bandwidth(edge) at least X Gbps?
+- delay(edge) at most X milliseconds?
+- utilization(edge) at most X percent?
+
+If it can pass at least one test, then it passes overall. Softening constraints to find more paths than usual is the main idea of flexibility. In practice, it is more nuanced than shown here to meet user needs. It will not test each edge, mark the ones that pass, and find the best paths using those marked edges. To produce useful results, pathfinder will have to find paths with edges that share common traits.
+
+
+SPF (Shortest Path First) computation
+-------------------------------------
+
+Currently, pathfinder computes the best paths based on the minimum number of edges, and it also exposes an attribute named ``parameter`` that could be used to compute based on a custom attribute such as delay that could have been via metadata, which is quite useful depending on the use case at hand that the path is being computed for, and the response returned is defined by this data structure:
+
+  .. code-block:: JSON
+
+    {
+      "paths": [
+        {
+          "hops": [
+            "00:00:00:00:00:00:00:01:1",
+            "00:00:00:00:00:00:00:01",
+            "00:00:00:00:00:00:00:01:3",
+            "00:00:00:00:00:00:00:03:2",
+            "00:00:00:00:00:00:00:03",
+            "00:00:00:00:00:00:00:03:1"
+          ]
+        },
+        {
+          "hops": [
+            "00:00:00:00:00:00:00:01:1",
+            "00:00:00:00:00:00:00:01",
+            "00:00:00:00:00:00:00:01:2",
+            "00:00:00:00:00:00:00:02:2",
+            "00:00:00:00:00:00:00:02",
+            "00:00:00:00:00:00:00:02:3",
+            "00:00:00:00:00:00:00:03:3",
+            "00:00:00:00:00:00:00:03",
+            "00:00:00:00:00:00:00:03:1"
+          ]
+        }
+      ]
+    }
+
+
+However, it does not return the accumulated cost of each path nor does it provide a way to only return the best paths constrained by a maximum path accumulated cost. For example, if the user wanted to find best paths based on the maximum accumulated delay that is not supported at the moment, which could be a major requirement for certain applications. The total maximum accumulated cost also could be leveraged by other applications like mef_eline to compute paths accordingly, and in the future, new accumulated metrics could also be introduced. The response could include the cost and the computed metrics:
+
+
+  .. code-block:: JSON
+
+      {
+      "paths": [
+        {
+          "hops": [
+            "00:00:00:00:00:00:00:01:1",
+            "00:00:00:00:00:00:00:01",
+            "00:00:00:00:00:00:00:01:3",
+            "00:00:00:00:00:00:00:03:2",
+            "00:00:00:00:00:00:00:03",
+            "00:00:00:00:00:00:00:03:1"
+          ],
+          "cost": {
+            "delay": 50
+          },
+          "metrics": {
+            "ownership": "blue"
+          }
+        },
+        {
+          "hops": [
+            "00:00:00:00:00:00:00:01:1",
+            "00:00:00:00:00:00:00:01",
+            "00:00:00:00:00:00:00:01:2",
+            "00:00:00:00:00:00:00:02:2",
+            "00:00:00:00:00:00:00:02",
+            "00:00:00:00:00:00:00:02:3",
+            "00:00:00:00:00:00:00:03:3",
+            "00:00:00:00:00:00:00:03",
+            "00:00:00:00:00:00:00:03:1"
+          ],
+          "cost": {
+            "delay": 100
+          },
+          "metrics": {
+            "ownership": "blue"
+          }
+        }
+      ]
+    }
+
+
+In order to have this feature, in the pathfinder POST endpoint it would need to be augmented to support these parameters:
+
+- **spf_max_path_cost**
+
+  - Specifies the maximum expected accumulated path cost of some attributes of the best paths. This is meant to be used to constrain attributes that have a useful meaning when accumulated, such as `delay` and `priority` or any other that might be introduced in the future. For example:
+
+
+  .. code-block:: JSON
+
+    {
+       "spf_max_path_cost": {"delay": 100, "priority": 20}
+    }
+
+- **spf_attribute**
+
+  - Specifies which attribute the spf should use to compute the best paths, this attribute currently exists named as ``parameter``, if ``parameter`` is not too clear then perhaps adding an alias or deprecating ``parameter`` depending how many clients are using it might be an option.
+
+- **spf_max_paths**
+
+  - Specifies how many maximum paths should be computed, this is for optimization purposes when the user only needs a single best path, or when computing multiple flexible paths to set an upper bound limit to return early avoiding extra computation when applicable. 
+
+
+Links Metadata 
+==============
+
+pathfinder plans to make use of the following metadata attributes:
+
+- ``link.metadata["bandwidth"]``
+- ``link.metadata["delay"]``
+- ``link.metadata["reliability"]``
+- ``link.metadata["utilization"]``
+- ``link.metadata["priority"]``
+- ``link.metadata["ownership"]``
+
+All of these attributes will only be read and not set from pathfinder's perspective.
+
+Additional changes on EP23
+==========================
+
+
+- Specify the units for each metric attribute being used to minimize ambiguity for network operators and consumers of pathfinder, and also later on try to infer the attributes and metrics not only from metadata but also from Switches/Interface/Link like bandwidth for instance.
+- The ownership attribute is usually expected to have a 1-to-1 relationship between a link and an owner, but it has been proposed to be augmented to support multiple owners, including which utilization percentage each owner should be entitled to use. 
+- Augment how the SPF is being computed, allowing a way to specify the maximum cost of the paths being computed, and also potentially limiting the upper bound of the number of paths being computed.
+- Review maximum and minimum values for each attribute that should be allowed when setting the attributes. 
+
+
+References
+==========
+
+- [1] `EP-023 blueprint <https://github.com/kytos-ng/kytos/blob/master/docs/blueprints/EP023.rst>`_
+- [2] `EP-023 motivation <https://github.com/kytos-ng/kytos/blob/master/docs/blueprints/EP023.rst#motivation>`_

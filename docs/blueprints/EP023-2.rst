@@ -138,7 +138,7 @@ As a network operator, I would like pathfinder to be able to find network best p
 
 - **Ownership**
 
-  _ The exact user who should have ownership or be authorized to use the link. The ownership will support associating multiple owners, including some of the owner ownership attributes if needed such as maximum utilization of the link.
+  - The exact user who should have ownership or be authorized to use the link. The ownership will support associating multiple owners, including some of the owner ownership attributes if needed such as maximum utilization of the link.
 
 Each of these attributes are expected to have a predefined function that will filter for minimum, maximum or if it contains the value or not depending on the semantics of each attribute, for instance:
 

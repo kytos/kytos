@@ -145,12 +145,12 @@ Each of these attributes are expected to have a predefined function that will fi
 - Minimum:
 
   - Bandwidth
-  - Priority
   - Reliability
 
 - Maximum:
 
   - Delay
+  - Priority
   - Utilization
 
 - Contain:
@@ -189,7 +189,7 @@ Then it retrieves an edge in the graph and performs the following test, which is
 - delay(edge) at most B?
 - utilization(edge) at most C?
 - reliability(edge) at least D?
-- priority(edge) at least E?
+- priority(edge) at most E?
 - ownership(edge) contains F?
 
 If YES to all questions, then it **passes** the edge. For example, assume that it receives the user constraint delay of the link must be at most 100 milliseconds and bandwidth must be at least 40 Gbps:

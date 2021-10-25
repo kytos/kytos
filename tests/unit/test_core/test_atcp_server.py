@@ -80,6 +80,7 @@ class TestKytosServerProtocol:
         self.connection.port = 123
 
         self.server_protocol = KytosServerProtocol()
+        self.server_protocol._loop = MagicMock()
         self.server_protocol.server = MagicMock()
         self.server_protocol.connection = self.connection
 

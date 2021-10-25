@@ -28,13 +28,11 @@ class TestKytosServer:
 
     def test_connection_to_server(self):
         """Test if we really can connect to TEST_ADDRESS."""
-        @asyncio.coroutine
-        def wait_and_go():
+        async def wait_and_go():
             """Wait a little for the server to go up, then connect."""
-            yield from asyncio.sleep(0.01, loop=self.loop)
+            await asyncio.sleep(0.01, loop=self.loop)
             # reader, writer = ...
-            _ = yield from asyncio.open_connection(
-                *TEST_ADDRESS, loop=self.loop)
+            _ = await asyncio.open_connection(*TEST_ADDRESS, loop=self.loop)
 
         self.loop.run_until_complete(wait_and_go())
 

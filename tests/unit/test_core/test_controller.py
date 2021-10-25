@@ -216,11 +216,8 @@ class TestController(TestCase):
         controller.start_controller()
 
         controller.server.serve_forever.assert_called()
-        calls = [call(mock_raw_event_handler.return_value),
-                 call(mock_msg_in_event_handler.return_value),
-                 call(mock_msg_out_event_handler.return_value),
-                 call(mock_app_event_handler.return_value)]
-        loop.create_task.assert_has_calls(calls)
+        loop.create_task.call_count == 5
+        assert len(controller._tasks) == 5
         mock_pre_install_napps.assert_called_with([napp])
         mock_load_napps.assert_called()
 

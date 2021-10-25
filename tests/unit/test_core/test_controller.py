@@ -202,9 +202,7 @@ class TestController(TestCase):
     @patch('kytos.core.controller.Controller.pre_install_napps')
     def test_start_controller(*args):
         """Test activate method."""
-        (mock_pre_install_napps, mock_load_napps, mock_raw_event_handler,
-         mock_msg_in_event_handler, mock_msg_out_event_handler,
-         mock_app_event_handler, _) = args
+        (mock_pre_install_napps, mock_load_napps, _, _, _, _, _) = args
 
         napp = MagicMock()
         loop = MagicMock()
@@ -216,7 +214,7 @@ class TestController(TestCase):
         controller.start_controller()
 
         controller.server.serve_forever.assert_called()
-        loop.create_task.call_count == 5
+        assert loop.create_task.call_count == 5
         assert len(controller._tasks) == 5
         mock_pre_install_napps.assert_called_with([napp])
         mock_load_napps.assert_called()

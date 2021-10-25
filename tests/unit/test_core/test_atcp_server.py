@@ -11,6 +11,7 @@ from kytos.core.atcp_server import (KytosServer, KytosServerProtocol,
 # Using "nettest" TCP port as a way to avoid conflict with a running
 # Kytos server on 6653.
 TEST_ADDRESS = ('127.0.0.1', 4138)
+# pylint: disable=protected-access
 
 
 class TestKytosServer:

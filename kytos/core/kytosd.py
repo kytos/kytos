@@ -35,7 +35,7 @@ def _create_pid_dir():
         os.chmod(pid_dir, 0o1777)  # permissions like /tmp
 
 
-def create_shell(controller=None):
+def start_shell(controller=None):
     """Load Kytos interactive shell."""
     kytos_ascii = r"""
       _          _
@@ -84,7 +84,7 @@ def create_shell(controller=None):
                                     banner1=banner1,
                                     exit_msg=exit_msg)
     ipshell.prompts = KytosPrompt(ipshell)
-    return ipshell
+    ipshell()
 
 
 # def disable_threadpool_exit():
@@ -129,13 +129,11 @@ def async_main(config):
 
     async def start_shell_async():
         """Run the shell inside a thread and stop controller when done."""
-        interactive_shell = create_shell(controller)
+        _start_shell = functools.partial(start_shell, controller)
 
         try:
-            data = await loop.run_in_executor(executor, interactive_shell)
+            data = await loop.run_in_executor(executor, _start_shell)
         finally:
-            # Exit all embedded code in shell
-            interactive_shell.magic("%exit_raise")
             stop_controller(controller)
         return data
 

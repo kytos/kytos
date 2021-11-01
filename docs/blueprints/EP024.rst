@@ -84,7 +84,7 @@ This section describe new requirements that will be implemented as a result of t
 
 - **R1, R2 and R4)** Adapt the ``flow_list`` to store the flow states indexed by ``cookie`` instead of OpenFlow commands. 
 - **R3)** To support overlapping flows, ``flow_manager`` must have to check if the FlowMod being installed overlaps with an existing one, and if it does, replace it in the stored structure. ``OFPFC_MODIFY`` might be considered if there's a need in the future to preserve such stats. 
-- **R5)** The consistency check routine should be aware of recent added flows and consider a grace period based on the stats interval before making a final about it's fate.
+- **R5)** The consistency check routine should be aware of recent added flows and consider a grace period based on the stats interval before making a final decision about a flow's fate. 
 - **R6)** When sending FlowMods to a switch, even if it's disconnected, the ``FlowFactory`` is supposed to still work. Assess the possibility to store the negotiated OpenFlow version. 
 - **R7)** Generate KytosEvent for added, removed and errored flows once they have been confirmed in the consistency check. ``flow_manager`` should listen for OF `OFPT_FLOW_REMOVED` to be as event-driven as possible when notifying about flow removals. **The cookie should be provided. **
 - **R8)** The consistency check routine should keep track of all OpenFlow tables, not just table 0, unless there is a setting to ignore an specific table.

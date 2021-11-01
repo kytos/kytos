@@ -54,22 +54,19 @@ class TestAPIServer(unittest.TestCase):
 
         mock_exit.assert_called()
 
-    @patch('kytos.core.api_server.request')
-    def test_shutdown_api(self, mock_request):
+    def test_shutdown_api(self):
         """Test shutdown_api method."""
-        mock_request.host = 'localhost:8181'
+        path = "http://localhost:8181"
+        with self.api_server.app.test_request_context(path=path):
+            self.api_server.shutdown_api()
+            self.api_server.server.stop.assert_called()
 
-        self.api_server.shutdown_api()
-
-        self.api_server.server.stop.assert_called()
-
-    @patch('kytos.core.api_server.request')
-    def test_shutdown_api__error(self, mock_request):
+    def test_shutdown_api__error(self):
         """Test shutdown_api method to error case."""
-        mock_request.host = 'any:port'
-        self.api_server.shutdown_api()
-
-        self.api_server.server.stop.assert_not_called()
+        path = "http://any:port"
+        with self.api_server.app.test_request_context(path=path):
+            self.api_server.shutdown_api()
+            self.api_server.server.stop.assert_not_called()
 
     def test_status_api(self):
         """Test status_api method."""

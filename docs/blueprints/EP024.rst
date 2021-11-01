@@ -82,23 +82,23 @@ New Requirements ``flow_manager``
 This section describe new requirements that will be implemented as a result of the problems presented in this document, the team has brainstormed and broke them down. The requirements from **R1** to **R6** are supposed to solve respectively issues from number 1 to 6 that were introduced in this document:
 
 
-- **R1, R2 and R4)** Adapt the ``flow_list`` to store the flow states indexed by ``cookie`` instead of OpenFlow commands. `See this issue on GitHub <https://github.com/kytos-ng/flow_manager/issues/34>`_.
-- **R3)** To support overlapping flows, ``flow_manager`` must have to check if the FlowMod being installed overlaps with an existing one, and if it does, replace it in the stored structure. OFPFC_MODIFY` might be considered if there's a need in the future to preserve such stats. `See this issue on GitHub <https://github.com/kytos-ng/flow_manager/issues/23>`_.
-- **R5)** The consistency check routine should be aware of recent added flows and consider a grace period based on the stats interval before making a final about it's fate. See `issue #29 <https://github.com/kytos-ng/flow_manager/issues/29>`_
-- **R6)** When sending FlowMods to a switch, even if it's disconnected, the ``FlowFactory`` is supposed to still work. Assess the possibility to store the negotiated OpenFlow version. `See this issue on GitHub <https://github.com/kytos-ng/flow_manager/issues/26>`_
-- **R7)** Generate KytosEvent for added, removed and errored flows once they have been confirmed in the consistency check. `See this issue on GitHub <https://github.com/kytos-ng/flow_manager/issues/2>`_.
-- **R8)** The consistency check routine should keep track of all OpenFlow tables, not just table 0, unless there is a setting to ignore an specific table. `See this issue on GitHub <https://github.com/kytos-ng/flow_manager/issues/10>`_
-- **R9)** ``flow_manager`` should leverage ``BarrierRequest/BarrierReply`` to make sure all the actions were applied before proceeding `see proof-of-concept <https://github.com/kytos-ng/flow_manager/issues/7>`_.
-- **R10)** Add unit test confirming that experimenter actions won't impact consistency check, making sure the equality function works as intended. `See this issue on GitHub <https://github.com/kytos-ng/of_core/issues/30>`_.
-- **R11)** Keep track of both removed and updated flows for auditing, operations and troubleshooting. The list should keep track and store up to a configurable number of flows, excluding them when the list overflows. `See this issue on GitHub <https://github.com/kytos-ng/flow_manager/issues/33>`_.
-- **R12)** Add informational logs logging for flows being inserted, removed and changed, consider also including the flow id if it helps. `See this issue on GitHub <https://github.com/kytos-ng/flow_manager/issues/27>`_.
-- **R13)** The consistency check routine when running for a switch should have a have a timeout or skip mechanism for concurrency control, only a single one is expected to run. `See this issue on GitHub <https://github.com/kytos-ng/flow_manager/issues/32>`_
-- **R14)** Recently added flows should only be checked by the consistency after one cycle of the stats interval. `See this issue on GitHub <https://github.com/kytos-ng/flow_manager/issues/29>`_.
-- **R15)** ``flow_manager`` should persist the flow request before trying to send a FlowMod. See `issue 26 <https://github.com/kytos-ng/flow_manager/issues/26>`_, which leads to `mef_eline <https://github.com/kytos-ng/mef_eline/issues/82>`_
+- **R1, R2 and R4)** Adapt the ``flow_list`` to store the flow states indexed by ``cookie`` instead of OpenFlow commands. 
+- **R3)** To support overlapping flows, ``flow_manager`` must have to check if the FlowMod being installed overlaps with an existing one, and if it does, replace it in the stored structure. OFPFC_MODIFY` might be considered if there's a need in the future to preserve such stats. 
+- **R5)** The consistency check routine should be aware of recent added flows and consider a grace period based on the stats interval before making a final about it's fate.
+- **R6)** When sending FlowMods to a switch, even if it's disconnected, the ``FlowFactory`` is supposed to still work. Assess the possibility to store the negotiated OpenFlow version. 
+- **R7)** Generate KytosEvent for added, removed and errored flows once they have been confirmed in the consistency check.
+- **R8)** The consistency check routine should keep track of all OpenFlow tables, not just table 0, unless there is a setting to ignore an specific table.
+- **R9)** ``flow_manager`` should leverage ``BarrierRequest/BarrierReply`` to make sure all the actions were applied before proceeding.
+- **R10)** Add unit test confirming that experimenter actions won't impact consistency check, making sure the equality function works as intended.
+- **R11)** Keep track of both removed and updated flows for auditing, operations and troubleshooting. The list should keep track and store up to a configurable number of flows, excluding them when the list overflows.
+- **R12)** Add informational logs logging for flows being inserted, removed and changed, consider also including the flow id if it helps.
+- **R13)** The consistency check routine when running for a switch should have a have a timeout or skip mechanism for concurrency control, only a single one is expected to run. 
+- **R14)** Recently added flows should only be checked by the consistency after one cycle of the stats interval.
+- **R15)** ``flow_manager`` should persist the flow request before trying to send a FlowMod. 
 - **R16)** Set a default production grade backend for storehouse like etcd or any other potential one that could also augment query capabilities, at the moment the FS back-end is meant for out of the box non production use.
 - **R17)** Keep in mind that in the future new southbound like p4runtime or gRPC might be used to potentially evolve as a new southbound become available, it's desirable to be ready to evolve.
 
-The following table categorize tries to initially summarize the issues types and their priorities:
+The following table categorize tries to initially summarize the issues types, priorities and GitHub links:
 
 .. list-table:: 
    :widths: 25 25 25 50
@@ -111,63 +111,63 @@ The following table categorize tries to initially summarize the issues types and
    * - R1
      - fix
      - high
-     - `flow_manager #34 <https://github.com/kytos-ng/flow_manager/issues/34>`_.
+     - `flow_manager #34 <https://github.com/kytos-ng/flow_manager/issues/34>`_
    * - R2
      - fix
      - high
-     - `flow_manager #34 <https://github.com/kytos-ng/flow_manager/issues/34>`_.
+     - `flow_manager #34 <https://github.com/kytos-ng/flow_manager/issues/34>`_
    * - R3
      - fix
      - medium
-     - `flow_manager #23 <https://github.com/kytos-ng/flow_manager/issues/23>`_.
+     - `flow_manager #23 <https://github.com/kytos-ng/flow_manager/issues/23>`_
    * - R4
      - fix
      - high
-     - `flow_manager #34 <https://github.com/kytos-ng/flow_manager/issues/34>`_.
+     - `flow_manager #34 <https://github.com/kytos-ng/flow_manager/issues/34>`_
    * - R5
      - fix
      - medium
-     - `flow_manager #29 <https://github.com/kytos-ng/flow_manager/issues/29>`_.
+     - `flow_manager #29 <https://github.com/kytos-ng/flow_manager/issues/29>`_
    * - R6
      - fix
      - high
-     - `flow_manager #26 <https://github.com/kytos-ng/flow_manager/issues/26>`_.
+     - `flow_manager #26 <https://github.com/kytos-ng/flow_manager/issues/26>`_
    * - R7
      - fix
      - high
-     - `flow_manager #2 <https://github.com/kytos-ng/flow_manager/issues/2>`_.
+     - `flow_manager #2 <https://github.com/kytos-ng/flow_manager/issues/2>`_
    * - R8
      - fix
      - low?
-     - `flow_manager #10 <https://github.com/kytos-ng/flow_manager/issues/10>`_.
+     - `flow_manager #10 <https://github.com/kytos-ng/flow_manager/issues/10>`_
    * - R9
      - enhancement
      - high
-     - `flow_manager #7 <https://github.com/kytos-ng/flow_manager/issues/7>`_.
+     - `flow_manager #7 <https://github.com/kytos-ng/flow_manager/issues/7>`_
    * - R10
      - test
      - high
-     - `of_core #30 <https://github.com/kytos-ng/of_core/issues/30>`_.
+     - `of_core #30 <https://github.com/kytos-ng/of_core/issues/30>`_
    * - R11
      - enhancement
      - high
-     - `flow_manager #11 <https://github.com/kytos-ng/flow_manager/issues/11>`_.
+     - `flow_manager #33 <https://github.com/kytos-ng/flow_manager/issues/33>`_
    * - R12
      - enhancement
      - high
-     - `flow_manager #27 <https://github.com/kytos-ng/flow_manager/issues/27>`_.
+     - `flow_manager #27 <https://github.com/kytos-ng/flow_manager/issues/27>`_
    * - R13
      - fix
      - medium
-     - `flow_manager #32 <https://github.com/kytos-ng/flow_manager/issues/32>`_.
+     - `flow_manager #32 <https://github.com/kytos-ng/flow_manager/issues/32>`_
    * - R14
      - enhancement
      - medium
-     - `flow_manager #29 <https://github.com/kytos-ng/flow_manager/issues/29>`_.
+     - `flow_manager #29 <https://github.com/kytos-ng/flow_manager/issues/29>`_
    * - R15
      - fix
      - high
-     - `flow_manager #26 <https://github.com/kytos-ng/flow_manager/issues/26>`_.
+     - `flow_manager #26 <https://github.com/kytos-ng/flow_manager/issues/26>`_
    * - R16
      - enhancement
      - medium
@@ -192,7 +192,7 @@ Issue 4: Store flows indexed by ``cookie``
 Since the team has started using ``cookie`` to tag a set of FlowMods, and also is reserving a ``cookie`` range that should be used by every NApp, see `mef_eline cookie prefix 0xaa for instance <https://github.com/kytos-ng/mef_eline/blob/master/models.py#L762-L764>_`, most FlowMods being installed or removed will have a ``cookie``. With this assumption, if we optimize the ``flow_list`` to be an ordered dict indexed by ``cookie`` to an ordered list of flows, that way the lookup would be on average ``O(log n) + O(k)`` where ``n`` is the number of different cookies stored and ``k`` would be number of flows with that same ``cookie`` key value:
 
 
-  .. code-block:: JSON
+  .. code-block:: python
 
      {
         "dpid_a": {

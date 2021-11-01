@@ -11,6 +11,7 @@ from kytos.core.atcp_server import (KytosServer, KytosServerProtocol,
 # Using "nettest" TCP port as a way to avoid conflict with a running
 # Kytos server on 6653.
 TEST_ADDRESS = ('127.0.0.1', 4138)
+# pylint: disable=protected-access
 
 
 class TestKytosServer:
@@ -27,13 +28,11 @@ class TestKytosServer:
 
     def test_connection_to_server(self):
         """Test if we really can connect to TEST_ADDRESS."""
-        @asyncio.coroutine
-        def wait_and_go():
+        async def wait_and_go():
             """Wait a little for the server to go up, then connect."""
-            yield from asyncio.sleep(0.01, loop=self.loop)
+            await asyncio.sleep(0.01, loop=self.loop)
             # reader, writer = ...
-            _ = yield from asyncio.open_connection(
-                *TEST_ADDRESS, loop=self.loop)
+            _ = await asyncio.open_connection(*TEST_ADDRESS, loop=self.loop)
 
         self.loop.run_until_complete(wait_and_go())
 
@@ -80,6 +79,7 @@ class TestKytosServerProtocol:
         self.connection.port = 123
 
         self.server_protocol = KytosServerProtocol()
+        self.server_protocol._loop = MagicMock()
         self.server_protocol.server = MagicMock()
         self.server_protocol.connection = self.connection
 

@@ -17,7 +17,7 @@ EP024 - Managed resources consistency checks
 Abstract
 ========
 
-This document will describe some existing shortcomings of the current consistency checks on `flow_manager <https://github.com/kytos-ng/flow_manager>`_, and propose some improvements and also general development and usage guidelines.
+This document will describe some existing shortcomings of the current consistency checks on `flow_manager <https://github.com/kytos-ng/flow_manager>`_, and propose some improvements and also general development and usage guidelines. This document extends the `previous Kytos consistency documentation  <https://docs.kytos.io/developer/consistency/>`.
 
 Consistency Checks
 ------------------

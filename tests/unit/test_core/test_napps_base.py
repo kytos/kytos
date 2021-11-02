@@ -21,7 +21,7 @@ class TestNapp(unittest.TestCase):
 
     def test__repr__(self):
         """Test __repr__ method."""
-        self.assertEqual(repr(self.napp), f'NApp(kytos/napp)')
+        self.assertEqual(repr(self.napp), 'NApp(kytos/napp)')
 
     def test_id(self):
         """Test id property."""

@@ -111,7 +111,7 @@ class Connection:
         except OSError as exception:
             if exception.errno not in (ENOTCONN, EBADF):
                 raise exception
-        except AttributeError as exception:
+        except AttributeError:
             LOG.debug('Socket Already Closed: %s', self.id)
 
     def is_alive(self):

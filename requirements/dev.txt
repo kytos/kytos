@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements/dev.txt requirements/dev.in requirements/run.txt
 #
--e git+https://github.com/kytos/sphinx-theme.git#egg=kytos-sphinx-theme  # via -r requirements/dev.in
+-e git+https://github.com/kytos-ng/sphinx-theme.git#egg=kytos-sphinx-theme  # via -r requirements/dev.in
 -e git+https://github.com/kytos-ng/python-openflow.git#egg=python-openflow  # via -r requirements/dev.in, -r requirements/run.txt
 alabaster==0.7.12         # via sphinx
 appdirs==1.4.3            # via virtualenv

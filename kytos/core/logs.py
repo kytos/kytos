@@ -142,7 +142,7 @@ class NAppLog:
     def __getattribute__(self, name):
         """Detect NApp ID and use its logger."""
         napp_id = _detect_napp_id()
-        logger = getLogger(f"kytos.napps")
+        logger = getLogger("kytos.napps")
 
         # if napp_id is detected, get the napp logger.
         if napp_id:

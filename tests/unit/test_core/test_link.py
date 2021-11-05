@@ -187,7 +187,6 @@ class TestLink(unittest.TestCase):
         def test_get_next_available_tag():
             """Assert that get_next_available_tag() returns different tags."""
             _i.append(1)
-            _i_len = len(_i)
             tag = _link.get_next_available_tag()
             time.sleep(0.0001)
             _link.use_tag(tag)

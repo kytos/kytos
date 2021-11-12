@@ -26,6 +26,7 @@ from importlib import import_module
 from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+from socket import error as SocketError
 
 from kytos.core.api_server import APIServer
 # from kytos.core.tcp_server import KytosRequestHandler, KytosServer
@@ -96,7 +97,7 @@ class Controller:
         #:
         #: This dict stores all connections between the controller and the
         #: switches. The key for this dict is a tuple (ip, port). The content
-        #: is another dict with the connection information.
+        #: is a Connection
         self.connections = {}
         #: dict: mapping of events and event listeners.
         #:
@@ -529,6 +530,18 @@ class Controller:
                 self.log.debug("Message In Event handler stopped")
                 break
 
+    async def publish_connection_error(self, event):
+        """Publish connection error event.
+
+        Args:
+            event (KytosEvent): Event that triggered for error propagation.
+        """
+        event.name = \
+            f"kytos/core.{event.destination.protocol.name}.connection.error"
+        error_msg = f"Connection state: {event.destination.state}"
+        event.content["exception"] = error_msg
+        await self.buffers.app.aput(event)
+
     async def msg_out_event_handler(self):
         """Handle msg_out events.
 
@@ -545,21 +558,30 @@ class Controller:
 
             message = triggered_event.content['message']
             destination = triggered_event.destination
-            if (destination and
-                    not destination.state == ConnectionState.FINISHED):
-                packet = message.pack()
-                destination.send(packet)
-                self.log.debug('Connection %s: OUT OFP, '
-                               'version: %s, type: %s, xid: %s - %s',
-                               destination.id,
-                               message.header.version,
-                               message.header.message_type,
-                               message.header.xid,
-                               packet.hex())
-                self.notify_listeners(triggered_event)
-                self.log.debug("Message Out Event handler called")
-            else:
-                self.log.info("connection closed. Cannot send message")
+            try:
+                if (destination and
+                        not destination.state == ConnectionState.FINISHED):
+                    packet = message.pack()
+                    if "crash" in triggered_event.content and random.randint(0, 10) >= 7:
+                        self.log.info("boom")
+                        raise OSError("boom")
+                    destination.send(packet)
+                    self.log.debug('Connection %s: OUT OFP, '
+                                   'version: %s, type: %s, xid: %s - %s',
+                                   destination.id,
+                                   message.header.version,
+                                   message.header.message_type,
+                                   message.header.xid,
+                                   packet.hex())
+                    self.notify_listeners(triggered_event)
+                    self.log.debug("Message Out Event handler called")
+                    continue
+
+            except (OSError, SocketError):
+                pass
+
+            await self.publish_connection_error(triggered_event)
+            self.log.info("connection closed. Cannot send message")
 
     async def app_event_handler(self):
         """Handle app events.

@@ -562,9 +562,6 @@ class Controller:
                 if (destination and
                         not destination.state == ConnectionState.FINISHED):
                     packet = message.pack()
-                    if "crash" in triggered_event.content and random.randint(0, 10) >= 7:
-                        self.log.info("boom")
-                        raise OSError("boom")
                     destination.send(packet)
                     self.log.debug('Connection %s: OUT OFP, '
                                    'version: %s, type: %s, xid: %s - %s',

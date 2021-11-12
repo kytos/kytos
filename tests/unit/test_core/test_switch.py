@@ -2,9 +2,9 @@
 import asyncio
 import json
 from datetime import datetime, timezone
+from socket import error as SocketError
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
-from socket import error as SocketError
 
 from kytos.core import Controller
 from kytos.core.config import KytosConfig

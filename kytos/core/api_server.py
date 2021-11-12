@@ -249,13 +249,12 @@ class APIServer:
                 return f'Zip file from {uri} is corrupted.', HTTPStatus.INTERNAL_SERVER_ERROR.value
 
             # backup the old web-ui files and create a new web-ui folder
+            # if there is no path to backup, extractall will create the path.
             if os.path.exists(self.flask_dir):
                 self.log.info("Web update - Performing UI backup.")
                 date = datetime.now().strftime("%Y%m%d%H%M%S")
                 shutil.move(self.flask_dir, f"{self.flask_dir}-{date}")
                 os.mkdir(self.flask_dir)
-            else:
-                self.log.error("Web update - Web UI backup failed.")
 
             # unzip and extract files to web-ui/*
             zip_ref.extractall(self.flask_dir)

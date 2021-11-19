@@ -247,7 +247,7 @@ class APIServer:
             # test downloaded zip file
             with zipfile.ZipFile(package, 'r') as zip_ref:
                 if zip_ref.testzip() is not None:
-                    self.log.error("Web update - Zip file from %s"
+                    self.log.error("Web update - Zip file from %s "
                                    "is corrupted.", uri)
                     return (f'Zip file from {uri} is corrupted.',
                             HTTPStatus.INTERNAL_SERVER_ERROR.value)

@@ -5,6 +5,7 @@ import logging
 from janus import Queue
 
 from kytos.core.events import KytosEvent
+from kytos.core.helpers import get_thread_pool_max_workers
 
 __all__ = ('KytosBuffers', )
 
@@ -14,17 +15,20 @@ LOG = logging.getLogger(__name__)
 class KytosEventBuffer:
     """KytosEventBuffer represents a queue to store a set of KytosEvents."""
 
-    def __init__(self, name, event_base_class=None, loop=None):
+    def __init__(self, name, event_base_class=None, loop=None,
+                 maxsize=get_thread_pool_max_workers()):
         """Contructor of KytosEventBuffer receive the parameters below.
 
         Args:
             name (string): name of KytosEventBuffer.
             event_base_class (class): Class of KytosEvent.
+            loop (class): asyncio event loop
+            maxsize (int): maxsize _queue producer buffer
         """
         self.name = name
         self._event_base_class = event_base_class
         self._loop = loop
-        self._queue = Queue(loop=self._loop)
+        self._queue = Queue(maxsize=maxsize, loop=self._loop)
         self._reject_new_events = False
 
     def put(self, event):

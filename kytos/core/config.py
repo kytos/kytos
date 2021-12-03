@@ -88,6 +88,10 @@ class KytosConfig():
                             action='store_true',
                             help="Create a kytos superuser.")
 
+        parser.add_argument('-t', '--thread_pool_max_workers',
+                            action='store',
+                            help="Maximum number of threads in the pool.")
+
         self.conf_parser, self.parser = conf_parser, parser
         self.parse_args()
 
@@ -109,6 +113,7 @@ class KytosConfig():
                         'protocol_name': '',
                         'enable_entities_by_default': False,
                         'token_expiration_minutes': 180,
+                        'thread_pool_max_workers': 256,
                         'debug': False}
 
         """
@@ -131,6 +136,7 @@ class KytosConfig():
                     'authenticate_urls': [],
                     'vlan_pool': {},
                     'token_expiration_minutes': 180,
+                    'thread_pool_max_workers': 256,
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()

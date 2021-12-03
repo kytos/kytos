@@ -1,11 +1,23 @@
 """Utilities functions used in Kytos."""
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from threading import Thread
+
+from kytos.core.config import KytosConfig
 
 __all__ = ['listen_to', 'now', 'run_on_thread', 'get_time']
 
 
 # APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
+
+
+def get_thread_pool_max_workers():
+    """Get the number of thread pool max workers."""
+    return int(KytosConfig().options["daemon"].thread_pool_max_workers)
+
+
+if get_thread_pool_max_workers():
+    executor = ThreadPoolExecutor(max_workers=get_thread_pool_max_workers())
 
 
 def listen_to(event, *events):
@@ -56,7 +68,7 @@ def listen_to(event, *events):
             def my_stats_handler_of_any_message(self, event):
                 # Do stuff here...
     """
-    def decorator(handler):
+    def thread_decorator(handler):
         """Decorate the handler method.
 
         Returns:
@@ -73,7 +85,25 @@ def listen_to(event, *events):
         threaded_handler.events.extend(events)
         return threaded_handler
 
-    return decorator
+    def thread_pool_decorator(handler):
+        """Decorate the handler method.
+
+        Returns:
+            A method with an `events` attribute (list of events to be listened)
+            and also decorated to run on in the thread pool
+
+        """
+        def inner(*args):
+            """Decorate the handler to run in the thread pool."""
+            executor.submit(handler, *args)
+
+        inner.events = [event]
+        inner.events.extend(events)
+        return inner
+
+    if get_thread_pool_max_workers():
+        return thread_pool_decorator
+    return thread_decorator
 
 
 def now(tzone=timezone.utc):

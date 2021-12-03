@@ -137,21 +137,30 @@ class TestAPIServer(unittest.TestCase):
         (_, _, mock_exists, mock_zipfile, mock_urlopen,
          mock_urlretrieve) = args
         zipfile = MagicMock()
-        zipfile.testzip.return_value = None
+        zip_data = MagicMock()
+        zipfile.__enter__.return_value = zip_data
+        zip_data.testzip.return_value = None
         mock_zipfile.return_value = zipfile
 
-        data = json.dumps({'tag_name': 1.0})
+        data = json.dumps({'tag_name': '1.4.1'})
         url_response = MagicMock()
-        url_response.readlines.return_value = [data]
+        response_data = MagicMock()
+        # response object
+        url_response.__enter__.return_value = response_data
+        # response data
+        response_data.readlines.return_value = [data]
+
         mock_urlopen.return_value = url_response
 
         mock_exists.side_effect = [False, True]
 
         response = self.api_server.update_web_ui()
 
-        url = 'https://github.com/kytos/ui/releases/download/1.0/latest.zip'
+        url = 'https://github.com/kytos-ng/ui/releases/' + \
+              'download/1.4.1/latest.zip'
         mock_urlretrieve.assert_called_with(url)
-        self.assertEqual(response, 'updated the web ui')
+        self.assertEqual(response[0], 'updated the web ui')
+        self.assertEqual(response[1], 200)
 
     @patch('kytos.core.api_server.urlretrieve')
     @patch('kytos.core.api_server.urlopen')
@@ -160,9 +169,14 @@ class TestAPIServer(unittest.TestCase):
         """Test update_web_ui method to http error case."""
         (mock_exists, mock_urlopen, mock_urlretrieve) = args
 
-        data = json.dumps({'tag_name': 1.0})
+        data = json.dumps({'tag_name': '1.4.1'})
         url_response = MagicMock()
-        url_response.readlines.return_value = [data]
+        response_data = MagicMock()
+        # response object
+        url_response.__enter__.return_value = response_data
+        # response data
+        response_data.readlines.return_value = [data]
+
         mock_urlopen.return_value = url_response
         mock_urlretrieve.side_effect = HTTPError('url', 123, 'msg', 'hdrs',
                                                  MagicMock())
@@ -171,9 +185,10 @@ class TestAPIServer(unittest.TestCase):
 
         response = self.api_server.update_web_ui()
 
-        expected_response = 'Uri not found https://github.com/kytos/ui/' + \
-                            'releases/download/1.0/latest.zip.'
-        self.assertEqual(response, expected_response)
+        expected_response = 'Uri not found https://github.com/kytos-ng/ui/' + \
+                            'releases/download/1.4.1/latest.zip.'
+        self.assertEqual(response[0], expected_response)
+        self.assertEqual(response[1], 500)
 
     @patch('kytos.core.api_server.urlretrieve')
     @patch('kytos.core.api_server.urlopen')
@@ -181,23 +196,30 @@ class TestAPIServer(unittest.TestCase):
     @patch('os.path.exists')
     def test_update_web_ui__zip_error(self, *args):
         """Test update_web_ui method to error case in zip file."""
+        # pylint: disable=W0612
         (mock_exists, mock_zipfile, mock_urlopen, _) = args
         zipfile = MagicMock()
         zipfile.testzip.return_value = 'any'
         mock_zipfile.return_value = zipfile
 
-        data = json.dumps({'tag_name': 1.0})
-        url_response = MagicMock()
-        url_response.readlines.return_value = [data]
-        mock_urlopen.return_value = url_response
+        data = json.dumps({'tag_name': '1.4.1'})
 
-        mock_exists.return_value = False
+        url_response = MagicMock()
+        response_data = MagicMock()
+        # response object
+        url_response.__enter__.return_value = response_data
+        # response data
+        response_data.readlines.return_value = [data]
+
+        mock_urlopen.return_value = url_response
 
         response = self.api_server.update_web_ui()
 
-        expected_response = 'Zip file from https://github.com/kytos/ui/' + \
-                            'releases/download/1.0/latest.zip is corrupted.'
-        self.assertEqual(response, expected_response)
+        expected_response = 'Zip file from ' + \
+                            'https://github.com/kytos-ng/ui/releases/' + \
+                            'download/1.4.1/latest.zip is corrupted.'
+        self.assertEqual(response[0], expected_response)
+        self.assertEqual(response[1], 500)
 
     def test_enable_napp__error_not_installed(self):
         """Test _enable_napp method error case when napp is not installed."""

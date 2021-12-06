@@ -29,7 +29,7 @@ class Link(GenericEntity):
             raise KytosLinkCreationError("endpoint_b cannot be None")
         self.endpoint_a = endpoint_a
         self.endpoint_b = endpoint_b
-        self._available_tag_lock = Lock()
+        self._get_next_available_tag_lock = Lock()
         super().__init__()
 
     def __hash__(self):
@@ -114,7 +114,7 @@ class Link(GenericEntity):
 
     def get_next_available_tag(self):
         """Return the next available tag if exists."""
-        with self._available_tag_lock:
+        with self._get_next_available_tag_lock:
             # Copy the available tags because in case of error
             # we will remove and add elements to the available_tags
             available_tags_a = self.endpoint_a.available_tags.copy()
@@ -143,12 +143,11 @@ class Link(GenericEntity):
 
     def make_tag_available(self, tag):
         """Add a specific tag in available_tags."""
-        with self._available_tag_lock:
-            if not self.is_tag_available(tag):
-                self.endpoint_a.make_tag_available(tag)
-                self.endpoint_b.make_tag_available(tag)
-                return True
-            return False
+        if not self.is_tag_available(tag):
+            self.endpoint_a.make_tag_available(tag)
+            self.endpoint_b.make_tag_available(tag)
+            return True
+        return False
 
     def available_vlans(self):
         """Get all available vlans from each interface in the link."""

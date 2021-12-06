@@ -247,7 +247,7 @@ class Auth:
             nonlocal response
             if not box:
                 response = {
-                    "answer": f'User already exists',
+                    "answer": 'User already exists',
                     "code": HTTPStatus.CONFLICT.value,
                 }
             elif error:

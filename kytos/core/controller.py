@@ -898,7 +898,7 @@ class Controller:
         mod_name = '.'.join(['napps', username, napp_name, napp_file])
         try:
             napp_module = import_module(mod_name)
-        except ModuleNotFoundError as err:
+        except ModuleNotFoundError:
             self.log.error("Module '%s' not found", mod_name)
             raise
         try:

@@ -1,0 +1,432 @@
+:EP: 24
+:Title: Managed resources consistency checks
+:Authors:
+    - Antonio Francisco <antonio@ansp.br>
+    - Italo Valcy <idasilva@fiu.edu>
+    - Jeronimo Bezerra <jbezerra@fiu.edu>
+    - Vinicius Arcanjo <vindasil@fiu.edu>
+:Created: 2021-11-01
+:Kytos-Version:
+:Status: Draft
+
+********************************************
+EP024 - Managed resources consistency checks
+********************************************
+
+
+Abstract
+========
+
+This document will describe some existing shortcomings of the current consistency checks on `flow_manager <https://github.com/kytos-ng/flow_manager>`_, and propose some improvements and also general development and usage guidelines. This document extends the `previous Kytos consistency documentation  <https://docs.kytos.io/developer/consistency/>`.
+
+Consistency Checks
+------------------
+
+The overall idea of consistency checks boils down to making sure that whichever managed resource that is requested will eventually be created and is supposed to still exist until its lifetime is over. This explicit resource management control is needed to ensure correctness and to avoid unexpected behaviors or interfering management from other actors or entities that could manage the resource. The managed resource in case of ``flow_manager`` currently is OpenFlow table entries. Therefore, NApps that need to CRUD (create, read, update or delete) flow table entries is expected to do it via ``flow_manager``. Additional level of consistency checks might be created when critically applicable, this document will highlight when that's the case, and how clients are expected to interface when dealing with a managed resource that has consistency checks.
+
+
+Consistency Checks ``flow_manager``
+-----------------------------------
+
+``flow_manager (v4.x)`` has a consistency check feature that keeps track of all of the existing flows that are supposed to exist in the switches. It relies on OF flow stats data to keep checking with the existing flows that have been stored by ``flow_manager``, and based on that list, if some flows are missing they'll be sent as flow mod to be re-installed or if there are alien flows (i.e., flows not originated by `flow_manager`) going to be deleted, unless these flows have certain cookie values that are supposed to be ignored.
+
+Consistency Check Current Requirements
+--------------------------------------
+
+- It must ensure that flows that are supposed to be installed via ``flow_manager`` are installed.
+- It must ensure that flows that aren't supposed to be installed should be removed, except if they have a certain cookie value that should be ignored.
+- It must run periodically, the interval period must be configurable.
+
+All of these requirements have been implemented. However, there are some pain points that will be covered in this document.
+
+Consistency Check Development Guidelines
+----------------------------------------
+
+This subsection has some recommended guidelines regarding the development of resource managers and clients.
+
+- Client NApps that need to CRUD the managed resource must do it via the manager NApp. 
+- The manager NApp is expected to provide a response to NApp clients know if the operation succeeded or not asynchronously via an event.
+- The asynchronous event response can be consumed by one or multiple NApps. So, client NApps should subscribe to the event responses and react accordingly. The event response notification might be implemented via a function callback when only a single consumer needs to be notified.
+- If the ``update`` functionality isn't available, the client is supposed to send a ``delete`` followed by a ``create``.
+- A NApp providing consistency checks is supposed to be trusted reliably, meaning that it'll have mechanisms that will eventually compute what was asked, and return whether or not the operation succeeded. So, additional levels of consistency checks should only be created if critically needed and when the existing ones can't completely provide what's needed to be consistently tracked.
+
+
+Current pain points
+-------------------
+
+- **1)** ``flow_manager`` is keeping track of FlowMod commands ``OFPFC_ADD(s)`` and ``OFPFC_DELETE(s)`` in an ordered list (``flow_list``) indexed by dpid in a Python dictionary. 
+
+  - The list keeps growing linearly for both ``ADD(s)`` and ``DELETE(s)``. This can snowball significantly when storing a significant number of flows after some operations, contributing to slowness and overload in general.
+
+- **2)** The ``DELETE(s)`` are never removed from the ``flow_list`` even though it's removing some ``ADD(s)`` when they match. 
+
+  - This can snowball, and also can send unnecessary ``OFPFC_DELETE`` to the switch in some cases, which could lead to issues overtime if the flows installed have diverged, meaning that the deleted flows aren't relevant anymore after some time. Trying to re-apply a ``OFPFC_DELETE`` isn't necessarily deterministic and safe after some delta T since the switch table could have more flows installed overtime.
+
+- **3)** Since ``flow_manager`` is storing the commands as opposed to flow states, if an overlapping matching flow is installed it would lead to inconsistencies
+
+  - It has be reported this on `issue #13 <https://github.com/kytos-ng/flow_manager/issues/23>`_, it results in looping forever trying to re install the flow that has got overwritten since it doesn't have awareness that a previous ``OFPFC_ADD`` was overwritten since it still exists in the ``flow_list``. The workaround is to delete first before trying to installing, but if ``flow_manager`` tried to verify if an overlapping ``OFPFC_ADD`` is being installed that would mitigate the root cause of the problem (however as it is, that would require another ``O(n)`` lookup in the ``flow_list`` to figure that out).
+
+- **4)** The way the flows are stored they aren't being optimized for any type of lookup of a particular field, so any check in the list would take ``O(n)`` in the worst case, so the higher the number of entries the slower it'll become.
+
+  - This can be concerning especially when a large table that has thousand of flows, and if we can identify a way to store them optimal for a particular type of lookup we might be able to do it more efficiently. For example, what if we had the flows indexed by ``cookie`` or ``priority``? Assuming one of these would constantly be used for our NApps, that would speed things up considerably. 
+
+- **5)** When a flow is created/removed right after the switch has sent its FlowStats, flow_manager's consistency check routine will complain about it (inconsistent) and send a new FlowMod. The point is: from the storehouse perspective, as soon as you submit the request for a new flow, it will be saved to the storehouse; from the switch perspective, the existence of a flow will depend on when you've requested the FlowStats. Thus, before considering a flow as inconsistent, flow_manager should check if the flow was created/modified/deleted within the FlowStats request time interval. If that is true, ignore that stored flow for now and leave it to be validated in the next cycle. See `issue #29 <https://github.com/kytos-ng/flow_manager/issues/29>`_
+
+- **6)** As part of the current consistency check routine, ``flow_manager`` makes usage of the of_core's ``FlowFactory``, which depends on an active OpenFlow connection. Therefore, we have to be careful and **check for an active connection during every step of the process**. Thus, we will avoid Exceptions due to a switch disconnection while running the consistency. **It is desirable to be resilient and possibly keep track of the negotiated OF version, avoiding this being coupled with the connection**.
+
+
+
+New Requirements ``flow_manager``
+---------------------------------
+
+This section describe new requirements that will be implemented as a result of the problems presented in this document, the team has brainstormed and broke them down. The requirements from **R1** to **R6** are supposed to solve respectively issues from number 1 to 6 that were introduced in this document:
+
+
+- **R1, R2 and R4)** Adapt the ``flow_list`` to store the flow states indexed by ``cookie`` instead of OpenFlow commands. 
+- **R3)** To support overlapping flows, ``flow_manager`` must have to check if the FlowMod being installed overlaps with an existing one, and if it does, replace it in the stored structure. ``OFPFC_MODIFY`` might be considered if there's a need in the future to preserve such stats. 
+- **R5)** The consistency check routine should be aware of recent added flows and consider a grace period based on the stats interval before making a final decision about a flow's fate. 
+- **R6)** When sending FlowMods to a switch, even if it's disconnected, the ``FlowFactory`` is supposed to still work. Assess the possibility to store the negotiated OpenFlow version. 
+- **R7)** Generate KytosEvent for added, removed and errored flows once they have been confirmed in the consistency check. ``flow_manager`` should listen for OF `OFPT_FLOW_REMOVED` to be as event-driven as possible when notifying about flow removals. **The cookie should be provided. **
+- **R8)** The consistency check routine should keep track of all OpenFlow tables, not just table 0, unless there is a setting to ignore an specific table.
+- **R9)** ``flow_manager`` should leverage ``BarrierRequest/BarrierReply`` to make sure all the actions were applied before proceeding.
+- **R10)** Add unit test confirming that experimenter actions won't impact consistency check, making sure the equality function works as intended.
+- **R11)** Keep track of both removed and updated flows for auditing, operations and troubleshooting. The list should keep track and store up to a configurable number of flows, excluding them when the list overflows.
+- **R12)** Add informational logs logging for flows being inserted, removed and changed, consider also including the flow id if it helps.
+- **R13)** The consistency check routine when running for a switch should have a have a timeout or skip mechanism for concurrency control, only a single one is expected to run. 
+- **R14)** Recently added flows should only be checked by the consistency after one cycle of the stats interval.
+- **R15)** ``flow_manager`` should persist the flow request before trying to send a FlowMod. 
+- **R16)** Set a default production grade backend for storehouse like etcd or any other potential one that could also augment query capabilities, at the moment the FS back-end is meant for out of the box non production use.
+- **R17)** Keep in mind that in the future new southbound like p4runtime or gRPC might be used to potentially evolve as a new southbound become available, it's desirable to be ready to evolve.
+
+The following table categorize tries to initially summarize the issues types, priorities and GitHub links:
+
+.. list-table:: 
+   :widths: 25 25 25 50
+   :header-rows: 1
+
+   * - Requirement number
+     - Requirement category
+     - Requirement priority
+     - GitHub URL
+   * - R1
+     - fix
+     - high
+     - `flow_manager #34 <https://github.com/kytos-ng/flow_manager/issues/34>`_
+   * - R2
+     - fix
+     - high
+     - `flow_manager #34 <https://github.com/kytos-ng/flow_manager/issues/34>`_
+   * - R3
+     - fix
+     - medium
+     - `flow_manager #23 <https://github.com/kytos-ng/flow_manager/issues/23>`_
+   * - R4
+     - fix
+     - high
+     - `flow_manager #34 <https://github.com/kytos-ng/flow_manager/issues/34>`_
+   * - R5
+     - fix
+     - medium
+     - `flow_manager #29 <https://github.com/kytos-ng/flow_manager/issues/29>`_
+   * - R6
+     - fix
+     - high
+     - `flow_manager #26 <https://github.com/kytos-ng/flow_manager/issues/26>`_
+   * - R7
+     - fix
+     - high
+     - `flow_manager #2 <https://github.com/kytos-ng/flow_manager/issues/2>`_
+   * - R8
+     - fix
+     - low?
+     - `flow_manager #10 <https://github.com/kytos-ng/flow_manager/issues/10>`_
+   * - R9
+     - enhancement
+     - high
+     - `flow_manager #7 <https://github.com/kytos-ng/flow_manager/issues/7>`_
+   * - R10
+     - test
+     - high
+     - `of_core #30 <https://github.com/kytos-ng/of_core/issues/30>`_
+   * - R11
+     - enhancement
+     - high
+     - `flow_manager #33 <https://github.com/kytos-ng/flow_manager/issues/33>`_
+   * - R12
+     - enhancement
+     - high
+     - `flow_manager #27 <https://github.com/kytos-ng/flow_manager/issues/27>`_
+   * - R13
+     - fix
+     - medium
+     - `flow_manager #32 <https://github.com/kytos-ng/flow_manager/issues/32>`_
+   * - R14
+     - enhancement
+     - medium
+     - `flow_manager #29 <https://github.com/kytos-ng/flow_manager/issues/29>`_
+   * - R15
+     - fix
+     - high
+     - `flow_manager #26 <https://github.com/kytos-ng/flow_manager/issues/26>`_
+   * - R16
+     - enhancement
+     - medium
+     - TDB
+   * - R17
+     - enhancement
+     - medium
+     - TDB
+
+
+Proposed solutions
+------------------
+
+Issue 1 and 2: Keep track of flows
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Keep track of state instead of commands. This would solve issue 1 and 2 assuming that we would only keep track of which flows should be installed and present in a switch. That way, if flows are missing they're supposed to be installed again (unless they have a cookie value that's supposed to be ignored). This proposed data modelling approach follows closely what the switch has, so it would be simpler to maintain and fewer edge cases compared to the current approach. In the worst case, the `flow_list` would be as large as the switch table, but without growing linearly based on the number of FlowMod commands.
+
+Issue 4: Store flows indexed by ``cookie``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Since the team has started using ``cookie`` to tag a set of FlowMods, and also is reserving a ``cookie`` range that should be used by every NApp, see `mef_eline cookie prefix 0xaa for instance <https://github.com/kytos-ng/mef_eline/blob/master/models.py#L762-L764>_`, most FlowMods being installed or removed will have a ``cookie``. With this assumption, if we optimize the ``flow_list`` to be an ordered dict indexed by ``cookie`` to an ordered list of flows, that way the lookup would be on average ``O(log n) + O(k)`` where ``n`` is the number of different cookies stored and ``k`` would be number of flows with that same ``cookie`` key value:
+
+
+  .. code-block:: python
+
+     {
+        "dpid_a": {
+          cookie_0: [],
+          cookie_2: [],
+          None: [],
+        },
+        "dpid_b": {
+          cookie_0: [],
+          cookie_3: [],
+          None: [],
+        }
+     }
+
+Assuming ``k`` isn't too large, and if most ``flow_manager`` consumers use the ``cookie`` accordingly when applicable like ``mef_eline`` does (and we could document this as a recommended guideline for ``flow_manager`` clients), then the overall time complexity should tend to be logarithmic. This is optimizing for exact lookups and not ranged masked ones (but it should have the same time complexity of an ordered list when sweeping the values). This approach would also store in order the flows that they were requested on ``flow_manager`` so it would be deterministic when re-installing in the same order that ``flow_manager`` has received them. 
+
+For a comparison to recap, this is the current ``flows_persistence`` and ``flow_list``:
+
+
+
+  .. code-block:: JSON
+
+    {
+      "flow_persistence": {
+        "00:00:00:00:00:00:00:01": {
+          "flow_list": [
+            {
+              "command": "add",
+              "flow": {
+                "actions": [
+                  {
+                    "action_type": "push_vlan",
+                    "tag_type": "s"
+                  },
+                  {
+                    "action_type": "set_vlan",
+                    "vlan_id": 2006
+                  },
+                  {
+                    "action_type": "output",
+                    "port": 2
+                  }
+                ],
+                "cookie": 12278192752580311000,
+                "match": {
+                  "in_port": 1
+                }
+              }
+            },
+            {
+              "command": "add",
+              "flow": {
+                "actions": [
+                  {
+                    "action_type": "pop_vlan"
+                  },
+                  {
+                    "action_type": "output",
+                    "port": 1
+                  }
+                ],
+                "cookie": 12278192752580311000,
+                "match": {
+                  "dl_vlan": 2006,
+                  "in_port": 2
+                }
+              }
+            }
+          ]
+        },
+        "00:00:00:00:00:00:00:02": {
+          "flow_list": [
+            {
+              "command": "add",
+              "flow": {
+                "actions": [
+                  {
+                    "action_type": "push_vlan",
+                    "tag_type": "s"
+                  },
+                  {
+                    "action_type": "set_vlan",
+                    "vlan_id": 2006
+                  },
+                  {
+                    "action_type": "output",
+                    "port": 2
+                  }
+                ],
+                "cookie": 12278192752580311000,
+                "match": {
+                  "in_port": 1
+                }
+              }
+            },
+            {
+              "command": "add",
+              "flow": {
+                "actions": [
+                  {
+                    "action_type": "pop_vlan"
+                  },
+                  {
+                    "action_type": "output",
+                    "port": 1
+                  }
+                ],
+                "cookie": 12278192752580311000,
+                "match": {
+                  "dl_vlan": 2006,
+                  "in_port": 2
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+
+
+And this is the proposed data structure, indexing flows by ``dpid`` by ``cookie``, ``flow_persistance`` would be the box ``id`` on ``storehouse``:
+
+  .. code-block:: JSON
+
+    {
+      "00:00:00:00:00:00:00:01": {
+        12278192752580311000: [
+          {
+            "actions": [
+              {
+                "action_type": "push_vlan",
+                "tag_type": "s"
+              },
+              {
+                "action_type": "set_vlan",
+                "vlan_id": 2006
+              },
+              {
+                "action_type": "output",
+                "port": 2
+              }
+            ],
+            "cookie": 12278192752580311000,
+            "match": {
+              "in_port": 1
+            }
+          },
+          {
+            "actions": [
+              {
+                "action_type": "pop_vlan"
+              },
+              {
+                "action_type": "output",
+                "port": 1
+              }
+            ],
+            "cookie": 12278192752580311000,
+            "match": {
+              "dl_vlan": 2006,
+              "in_port": 2
+            }
+          }
+        ]
+      },
+      "00:00:00:00:00:00:00:02": {
+        12278192752580311000: [
+          {
+            "actions": [
+              {
+                "action_type": "push_vlan",
+                "tag_type": "s"
+              },
+              {
+                "action_type": "set_vlan",
+                "vlan_id": 2006
+              },
+              {
+                "action_type": "output",
+                "port": 2
+              }
+            ],
+            "cookie": 12278192752580311000,
+            "match": {
+              "in_port": 1
+            }
+          },
+          {
+            "actions": [
+              {
+                "action_type": "pop_vlan"
+              },
+              {
+                "action_type": "output",
+                "port": 1
+              }
+            ],
+            "cookie": 12278192752580311000,
+            "match": {
+              "dl_vlan": 2006,
+              "in_port": 2
+            }
+          }
+        ]
+      }
+    }
+
+
+Issue 4: Self-balancing tree ordered by ``priority``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before thinking about the idea to index by the ``cookie`` value to solve issue 4, using a self-balancing tree data structure ordered by ``priority`` `like OVS does <https://www.usenix.org/system/files/conference/nsdi15/nsdi15-paper-pfaff.pdf>`_ was considered as an option, that way it would have optimal insertions and lookups by priority and it would keep the list in the same order as it would be installed in the switch (highest priority being first), but if most of the clients don't always make use of the ``priority`` and ``cookie`` is already more widespread and will be used by the clients, then indexing by ``cookie`` would be more appropriate for this problem, so that would lead to more efficient lookups when adding and removing flows assuming most flows will have ``cookie`` set.
+
+
+Issue 3: Check for overlapping flows before storing a flow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To support overlapping flows, ``flow_manager`` would have to check if the FlowMod being installed overlaps with an existing one, and if it does, replace it in the stored structure. This lookup would tend to have a time logarithmic complexity, assuming ``cookie`` would be embraced and encouraged to use, otherwise it would have a linear ``O(n)`` time complexity.
+
+
+Related Questions
+-----------------
+
+- How should we deal with ownership of flows? Or we don't? Flow ownership may be necessary for the Napps relationship, such as ``mef_eline`` and ``mirror`` (the ``mirror`` NApp will need to modify ``mef_eline's`` flows to mirror the traffic to a requested target.).
+
+  - Decision: We won't have explicit enforced ownership, it's out of scope. However, the reserved usage of ``cookie`` values partly solves that problem, and ``flow_manager`` main clients are supposed to be other NApps that should expose high level functionality to network operators. If multiple NApps need to manage or modify flows they should subscribe to the events and handle accordingly.
+
+
+- Should ``flow_manager`` provide means to report the synchronization status of a switch? Something like: syncing, synced, unknown (e.g., when the switch first connects and didn't receive the first FlowStats, the status should be something like unknown; during the consistency routine execution, the status should be syncing - we should handle exceptions, to avoid getting stuck in the syncing status)
+
+  - Decision: This idea was rejected. It's an eventual consistency problem at the switch level that would be costly to maintain. But, ``flow_manager`` could provide the state of each flow individually, which could be exposed via an API. The asynchronous events partly helps with this case as well since clients won't keep polling to know if flows are synced but instead listen to when they are successfully installed or not. 
+
+
+Open Questions
+--------------
+
+- Refine what's going to be the expected behavior when a switch isn't connected but a FlowMod is requested, this is expected to be considered in requirement **R6**. It was also discussed about a possibility of having an optional force argument or would a force be a default behavior since ``flow_manager`` should reliably (with internal mechanism) and asynchronously send flow mods and abstract that away?

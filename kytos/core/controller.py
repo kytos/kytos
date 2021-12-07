@@ -411,7 +411,7 @@ class Controller:
 
         self.log.info("Stopping threadpool: %s", self._pool)
         if executor_pool:
-            self.log.info(f"Stopping threadpool: {executor_pool}")
+            self.log.info("Stopping threadpool: %s", executor_pool)
 
         threads = threading.enumerate()
         self.log.debug("%s threads before threadpool shutdown: %s",

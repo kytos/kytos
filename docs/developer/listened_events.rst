@@ -38,6 +38,40 @@ with all classes and NApps who can listen to these Events.
 | kytos/core.openflow.raw.in        | Napp: kytos/of_core                             | - :func:`kytos/of_core.handle_raw_in`                             |
 +-----------------------------------+-------------------------------------------------+-------------------------------------------------------------------+
 
+Events
+======
+
+* ``kytos/core.openflow.connection.new``
+
+  * Producer:
+
+    * ``kytos.core.atcp_server.KytosServerProtocol.connection_made``
+
+  * Consumer:
+
+    * ``kytos.core.controller.Controller.new_connection``
+
+
+* ``kytos/core.openflow.connection.error``
+
+  * Producer:
+
+    * ``kytos.core.controller.Controller.msg_out_event_handler``
+
+  * Consumer:
+
+    * ``napps.kytos.flow_manager.main.Main.on_openflow_connection_error``
+
+* ``kytos/core.openflow.connection.lost``
+
+  * Producer:
+
+    * ``kytos.core.atcp_server.KytosServerProtocol.connection_lost``
+
+  * Consumer:
+
+    * ``napps.kytos.topology.main.Main.handle_connection_lost``
+
 OpenFlow Event Message
 ======================
 

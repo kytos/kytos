@@ -166,7 +166,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
     def is_tag_available(self, tag):
         """Check if a tag is available."""
-        return tag in self.available_tags
+        with self._tag_lock:
+            return tag in self.available_tags
 
     def get_next_available_tag(self):
         """Get the next available tag from the interface.

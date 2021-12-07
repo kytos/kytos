@@ -16,6 +16,7 @@ def get_thread_pool_max_workers():
     return int(KytosConfig().options["daemon"].thread_pool_max_workers)
 
 
+executor = None
 if get_thread_pool_max_workers():
     executor = ThreadPoolExecutor(max_workers=get_thread_pool_max_workers())
 
@@ -93,9 +94,15 @@ def listen_to(event, *events):
             and also decorated to run on in the thread pool
 
         """
+        def done_callback(future):
+            """Done callback."""
+            if not future.exception():
+                _ = future.result()
+
         def inner(*args):
             """Decorate the handler to run in the thread pool."""
-            executor.submit(handler, *args)
+            future = executor.submit(handler, *args)
+            future.add_done_callback(done_callback)
 
         inner.events = [event]
         inner.events.extend(events)

@@ -219,46 +219,60 @@ class APIServer:
         """
         if version == 'latest':
             try:
-                url = 'https://api.github.com/repos/kytos/ui/releases/latest'
-                response = urlopen(url)
-                data = response.readlines()[0]
-                version = json.loads(data)['tag_name']
+                url = ('https://api.github.com/repos/kytos-ng/'
+                       'ui/releases/latest')
+                with urlopen(url) as response:
+                    data = response.readlines()[0]
+                    version = json.loads(data)['tag_name']
             except URLError:
-                version = '1.1.1'
+                version = '1.4.1'
 
-        repository = "https://github.com/kytos/ui"
+        repository = "https://github.com/kytos-ng/ui"
         uri = repository + f"/releases/download/{version}/latest.zip"
 
         if not os.path.exists(self.flask_dir) or force:
             # download from github
             try:
+                self.log.info("Web update - Downloading UI from %s.", uri)
                 package = urlretrieve(uri)[0]
             except HTTPError:
-                return f"Uri not found {uri}."
+                self.log.error("Web update - Uri not found %s.", uri)
+                return (f"Uri not found {uri}.",
+                        HTTPStatus.INTERNAL_SERVER_ERROR.value)
             except URLError:
-                self.log.warning("Error accessing URL %s.", uri)
-                return f"Error accessing URL {uri}."
+                self.log.error("Web update - Error accessing URL %s.", uri)
+                return (f"Error accessing URL {uri}.",
+                        HTTPStatus.INTERNAL_SERVER_ERROR.value)
 
             # test downloaded zip file
-            zip_ref = zipfile.ZipFile(package, 'r')
+            with zipfile.ZipFile(package, 'r') as zip_ref:
+                if zip_ref.testzip() is not None:
+                    self.log.error("Web update - Zip file from %s "
+                                   "is corrupted.", uri)
+                    return (f'Zip file from {uri} is corrupted.',
+                            HTTPStatus.INTERNAL_SERVER_ERROR.value)
 
-            if zip_ref.testzip() is not None:
-                return f'Zip file from {uri} is corrupted.'
+                # backup the old web-ui files and create a new web-ui folder
+                # if there is no path to backup, zip.extractall will
+                # create the path.
+                if os.path.exists(self.flask_dir):
+                    self.log.info("Web update - Performing UI backup.")
+                    date = datetime.now().strftime("%Y%m%d%H%M%S")
+                    shutil.move(self.flask_dir, f"{self.flask_dir}-{date}")
+                    os.mkdir(self.flask_dir)
 
-            # backup the old web-ui files and create a new web-ui folder
-            if os.path.exists(self.flask_dir):
-                date = datetime.now().strftime("%Y%m%d%H%M%S")
-                shutil.move(self.flask_dir, f"{self.flask_dir}-{date}")
-                os.mkdir(self.flask_dir)
+                # unzip and extract files to web-ui/*
+                zip_ref.extractall(self.flask_dir)
+                zip_ref.close()
 
-            # unzip and extract files to web-ui/*
-            zip_ref.extractall(self.flask_dir)
-            zip_ref.close()
+            self.log.info("Web update - Updated")
+            return "updated the web ui", HTTPStatus.OK.value
 
-        return "updated the web ui"
+        self.log.error("Web update - Web UI was not updated")
+        return ("Web ui was not updated",
+                HTTPStatus.INTERNAL_SERVER_ERROR.value)
 
     # BEGIN decorator methods
-
     @staticmethod
     def decorate_as_endpoint(rule, **options):
         """Decorate methods as REST endpoints.

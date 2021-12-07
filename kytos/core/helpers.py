@@ -16,6 +16,7 @@ def get_thread_pool_max_workers():
     return int(KytosConfig().options["daemon"].thread_pool_max_workers)
 
 
+# pylint: disable=invalid-name
 executor = None
 if get_thread_pool_max_workers():
     executor = ThreadPoolExecutor(max_workers=get_thread_pool_max_workers())

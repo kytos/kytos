@@ -22,15 +22,16 @@ class TestHelpers(TestCase):
 
         mock_thread.return_value.start.assert_called()
 
+    @staticmethod
     @patch('kytos.core.helpers.executor')
-    def test_listen_to_run_on_threadpool_by_default(self, mock_executor):
+    def test_listen_to_run_on_threadpool_by_default(mock_executor):
         """Test listen_to runs on ThreadPoolExecutor by default."""
 
         assert get_thread_pool_max_workers() > 0
 
         @listen_to("some_event")
         def test(event):
-            pass
+            _ = event
 
         assert test({}) is None
         mock_executor.submit.assert_called()

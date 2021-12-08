@@ -52,11 +52,12 @@ class TestConnection(TestCase):
 
         self.connection.socket.sendall.assert_called_with(b'data')
 
-    def test_send__error(self):
+    def test_send_error(self):
         """Test send method to error case."""
         self.connection.socket.sendall.side_effect = SocketError
 
-        self.connection.send(b'data')
+        with self.assertRaises(SocketError):
+            self.connection.send(b'data')
 
         self.assertIsNone(self.connection.socket)
 
@@ -65,6 +66,7 @@ class TestConnection(TestCase):
         self.connection.close()
 
         self.assertIsNone(self.connection.socket)
+        self.assertIsNotNone(self.connection)
 
     def test_close__os_error(self):
         """Test close method to OSError case."""

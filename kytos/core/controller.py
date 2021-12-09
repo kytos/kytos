@@ -36,6 +36,7 @@ from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 from kytos.core.connection import ConnectionState
 from kytos.core.events import KytosEvent
+from kytos.core.helpers import executor as executor_pool
 from kytos.core.helpers import now
 from kytos.core.interface import Interface
 from kytos.core.logs import LogManager
@@ -86,6 +87,7 @@ class Controller:
 
         self._loop = loop or asyncio.get_event_loop()
         self._pool = ThreadPoolExecutor(max_workers=1)
+
         # asyncio tasks
         self._tasks = []
 
@@ -409,6 +411,8 @@ class Controller:
         self.napp_dir_listener.stop()
 
         self.log.info("Stopping threadpool: %s", self._pool)
+        if executor_pool:
+            self.log.info("Stopping threadpool: %s", executor_pool)
 
         threads = threading.enumerate()
         self.log.debug("%s threads before threadpool shutdown: %s",
@@ -418,9 +422,12 @@ class Controller:
             # Python >= 3.9
             # pylint: disable=unexpected-keyword-arg
             self._pool.shutdown(wait=graceful, cancel_futures=True)
-            # pylint: enable=unexpected-keyword-arg
+            if executor_pool:
+                executor_pool.shutdown(wait=graceful, cancel_futures=True)
         except TypeError:
             self._pool.shutdown(wait=graceful)
+            if executor_pool:
+                executor_pool.shutdown(wait=graceful)
 
         # self.server.socket.shutdown()
         # self.server.socket.close()

@@ -2,7 +2,8 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from kytos.core.helpers import get_time, run_on_thread
+from kytos.core.helpers import (get_thread_pool_max_workers, get_time,
+                                listen_to, run_on_thread)
 
 
 class TestHelpers(TestCase):
@@ -20,6 +21,20 @@ class TestHelpers(TestCase):
         test()
 
         mock_thread.return_value.start.assert_called()
+
+    @staticmethod
+    @patch('kytos.core.helpers.executor')
+    def test_listen_to_run_on_threadpool_by_default(mock_executor):
+        """Test listen_to runs on ThreadPoolExecutor by default."""
+
+        assert get_thread_pool_max_workers() > 0
+
+        @listen_to("some_event")
+        def test(event):
+            _ = event
+
+        assert test({}) is None
+        mock_executor.submit.assert_called()
 
     def test_get_time__str(self):
         """Test get_time method passing a string as parameter."""

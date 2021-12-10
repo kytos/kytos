@@ -94,13 +94,11 @@ class Connection:
         except (OSError, SocketError) as exception:
             LOG.debug('Could not send packet. Exception: %s', exception)
             self.close()
+            raise
 
     def close(self):
         """Close the socket from connection instance."""
         self.state = ConnectionState.FINISHED
-        if self.switch and self.switch.connection is self:
-            self.switch.connection = None
-
         LOG.debug('Shutting down Connection %s', self.id)
 
         try:

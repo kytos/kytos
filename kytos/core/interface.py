@@ -2,6 +2,7 @@
 import json
 import logging
 from enum import IntEnum
+from threading import Lock
 
 from pyof.v0x01.common.phy_port import Port as PortNo01
 from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
@@ -97,6 +98,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self.link = None
         self.lldp = True
         self._custom_speed = speed
+        self._tag_lock = Lock()
         self.set_available_tags(range(1, 4096))
 
         super().__init__()
@@ -134,12 +136,13 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         Args:
             iterable ([int]): range of VLANs.
         """
-        self.available_tags = []
+        with self._tag_lock:
+            self.available_tags = []
 
-        for i in iterable:
-            vlan = TAGType.VLAN
-            tag = TAG(vlan, i)
-            self.available_tags.append(tag)
+            for i in iterable:
+                vlan = TAGType.VLAN
+                tag = TAG(vlan, i)
+                self.available_tags.append(tag)
 
     def enable(self):
         """Enable this interface instance.
@@ -155,14 +158,16 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         Return False in case the tag is already removed.
         """
         try:
-            self.available_tags.remove(tag)
+            with self._tag_lock:
+                self.available_tags.remove(tag)
         except ValueError:
             return False
         return True
 
     def is_tag_available(self, tag):
         """Check if a tag is available."""
-        return tag in self.available_tags
+        with self._tag_lock:
+            return tag in self.available_tags
 
     def get_next_available_tag(self):
         """Get the next available tag from the interface.
@@ -172,14 +177,16 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         If no tag is available return False.
         """
         try:
-            return self.available_tags.pop()
+            with self._tag_lock:
+                return self.available_tags.pop()
         except IndexError:
             return False
 
     def make_tag_available(self, tag):
         """Add a specific tag in available_tags."""
         if not self.is_tag_available(tag):
-            self.available_tags.append(tag)
+            with self._tag_lock:
+                self.available_tags.append(tag)
             return True
         return False
 

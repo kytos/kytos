@@ -2,6 +2,7 @@
 import asyncio
 import json
 from datetime import datetime, timezone
+from socket import error as SocketError
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
@@ -236,6 +237,13 @@ class TestSwitch(TestCase):
         self.switch.send('buffer')
 
         self.switch.connection.send.assert_called_with('buffer')
+
+    def test_send_error(self):
+        """Test send method to error case."""
+        self.switch.connection.send.side_effect = SocketError
+
+        with self.assertRaises(SocketError):
+            self.switch.send(b'data')
 
     @patch('kytos.core.switch.now', return_value=get_date())
     def test_update_lastseen(self, mock_now):

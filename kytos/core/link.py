@@ -33,6 +33,9 @@ class Link(GenericEntity):
     def __hash__(self):
         return hash(self.id)
 
+    def __repr__(self):
+        return f"Link({self.endpoint_a!r}, {self.endpoint_b!r})"
+
     def is_enabled(self):
         """Override the is_enabled method.
 

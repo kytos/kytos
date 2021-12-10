@@ -48,6 +48,13 @@ class TestLink(unittest.TestCase):
         self.assertTrue(link_1.__eq__(link_2))
         self.assertFalse(link_1.__eq__(link_3))
 
+    def test__repr__(self):
+        """Test __repr__ method."""
+        link = Link(self.iface1, self.iface2)
+        expected = ("Link(Interface('interface1', 41, Switch('dpid1')), "
+                    "Interface('interface2', 42, Switch('dpid2')))")
+        self.assertEqual(repr(link), expected)
+
     def test_id(self):
         """Test id property."""
         link = Link(self.iface1, self.iface2)

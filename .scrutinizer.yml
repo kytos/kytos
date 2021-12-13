@@ -2,24 +2,42 @@ checks:
     python:
         code_rating: true
         duplicate_code: true
-filter:
-    paths: ['kytos/*', 'tests/*']
-    excluded_paths:
-        - 'kytos/web-ui/*'
 build:
-    environment:
-        python: 3.6
-        postgresql: false
-        redis: false
-    dependencies:
-        before:
-            - pip install coverage
-    tests:
-        override:
-            -
-                command: 'tox'
-                coverage:
-                    file: '.coverage'
-                    config_file: '.coveragerc'
-                    format: 'py-cc'
-            - py-scrutinizer-run
+    nodes:
+        py37:
+            environment:
+                python: 3.7.1
+                postgresql: false
+                redis: false
+            dependencies:
+                before:
+                    - pip install coverage
+            tests:
+                override:
+                    -
+                        command: 'tox -e py37'
+                        only_if: 'tox -a | grep -q py37'
+                        idle_timeout: 300
+                        coverage:
+                            file: '.coverage'
+                            config_file: '.coveragerc'
+                            format: 'py-cc'
+                    - py-scrutinizer-run
+        pyOthers:
+            environment:
+                python: 3.6
+                postgresql: false
+                redis: false
+            dependencies:
+                before:
+                    - pip install coverage
+            tests:
+                override:
+                    -
+                        command: 'for env in $(tox -a | grep -v py37); do tox -e $env; done'
+                        idle_timeout: 300
+                        coverage:
+                            file: '.coverage'
+                            config_file: '.coveragerc'
+                            format: 'py-cc'
+                    - py-scrutinizer-run

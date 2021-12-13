@@ -675,6 +675,7 @@ class Controller:
                 if old_connection is not connection:
                     self.remove_connection(old_connection)
 
+            switch.update_lastseen()
             self.buffers.app.put(event)
 
             return switch

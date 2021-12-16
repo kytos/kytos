@@ -6,13 +6,11 @@ import sys
 import tempfile
 import warnings
 from copy import copy
-from datetime import timedelta
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock, call, patch
 
 from kytos.core import Controller
 from kytos.core.config import KytosConfig
-from kytos.core.helpers import now
 from kytos.core.logs import LogManager
 
 
@@ -356,13 +354,11 @@ class TestController(TestCase):
         """Test status_api method when switch exists."""
         dpid = '00:00:00:00:00:00:00:01'
         switch = MagicMock(dpid=dpid)
-        switch.update_lastseen = MagicMock()
         self.controller.switches = {dpid: switch}
 
         connection = MagicMock()
         resp_switch = self.controller.get_switch_or_create(dpid, connection)
 
-        self.assertEqual(switch.update_lastseen.call_count, 1)
         self.assertEqual(resp_switch, switch)
 
     def test_get_switch_or_create__not_exists(self):
@@ -372,7 +368,6 @@ class TestController(TestCase):
         dpid = '00:00:00:00:00:00:00:01'
         connection = MagicMock()
         switch = self.controller.get_switch_or_create(dpid, connection)
-        self.assertTrue(switch.lastseen + timedelta(seconds=10) >= now())
 
         expected_switches = {'00:00:00:00:00:00:00:01': switch}
         self.assertEqual(self.controller.switches, expected_switches)

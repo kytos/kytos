@@ -194,29 +194,32 @@ class TestSwitch(TestCase):
         connection.is_alive.return_value = True
         connection.is_established.return_value = True
         self.switch.connection = connection
-        self.switch.is_active = MagicMock()
-        self.switch.is_active.return_value = True
 
         self.assertTrue(self.switch.is_connected())
 
     def test_is_connected__not_connection(self):
         """Test is_connected method when connection does not exist."""
         self.switch.connection = None
-        self.switch.is_active = MagicMock()
-        self.switch.is_active.return_value = True
 
         self.assertFalse(self.switch.is_connected())
 
     def test_is_connected__not_alive(self):
-        """Test is_connected method when switch is not active."""
+        """Test is_connected method when switch has connection timeout."""
         connection = MagicMock()
         connection.is_alive.return_value = True
         connection.is_established.return_value = True
         self.switch.connection = connection
-        self.switch.is_active = MagicMock()
-        self.switch.is_active.return_value = False
+        self.switch.lastseen = datetime(1, 1, 1, 0, 0, 0, 0, timezone.utc)
 
         self.assertFalse(self.switch.is_connected())
+
+    def test_is_active(self):
+        """Test is_active method."""
+        self.switch.is_connected = MagicMock()
+        self.switch.is_connected.return_value = True
+        self.assertTrue(self.switch.is_active())
+        self.switch.is_connected.return_value = False
+        self.assertFalse(self.switch.is_active())
 
     def test_update_connection(self):
         """Test update_connection method."""

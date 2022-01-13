@@ -187,13 +187,14 @@ class Switch(GenericEntity):
 
     def is_active(self):
         """Return true if the switch connection is alive."""
-        return (now() - self.lastseen).seconds <= CONNECTION_TIMEOUT
+        return self.is_connected()
 
     def is_connected(self):
         """Verify if the switch is connected to a socket."""
         return (self.connection is not None and
                 self.connection.is_alive() and
-                self.connection.is_established() and self.is_active())
+                self.connection.is_established() and
+                (now() - self.lastseen).seconds <= CONNECTION_TIMEOUT)
 
     def update_connection(self, connection):
         """Update switch connection.

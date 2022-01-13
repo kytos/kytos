@@ -2,7 +2,7 @@
 # pin versions outside pypi, i.e. latest git master branch version.
 ipython
 lockfile
-python-openflow>=2022.1rc1
+python-openflow
 flask-socketio
 flask_cors
 flask

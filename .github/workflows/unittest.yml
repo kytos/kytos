@@ -1,4 +1,4 @@
-name: kytos unit tests
+name: Unit Tests
 
 on:
   push:

@@ -29,7 +29,7 @@ pygments>=2.8.1           # via ipython
 pyjwt==1.7.1              # via -r requirements/run.in
 python-daemon==2.2.4      # via -r requirements/run.in
 python-engineio==3.12.1   # via python-socketio
-python-openflow==2022.1rc1   # via -r requirements/run.in
+python-openflow           # via -r requirements/run.in
 python-socketio==4.5.1    # via flask-socketio
 six>=1.15.0               # via flask-cors, python-socketio, traitlets
 traitlets==4.3.3          # via ipython

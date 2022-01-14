@@ -24,6 +24,23 @@ Security
 ========
 
 
+[2022.1rc1] - "jovelina" - 2022-01-14
+*************************************
+
+Added
+=====
+- Support python 3.9.
+- Method to create or update interface.
+
+Changed
+=======
+- Run tests using GitHub Actions.
+
+Fixed
+=====
+- Lock to avoid race conditions when selecting a tag.
+- Lock to avoid race conditions when getting or creating a Switch.
+
 [2021.1] - "final" - 2021-05-31
 *******************************
 

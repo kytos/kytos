@@ -103,73 +103,24 @@ The Web Admin User Interface
 *Kytos* is running, the Web UI runs in your localhost and can be accessed via
 browser, in `<http://localhost:8181>`_. Have fun (:
 
-Get Help
-********
-
-You can find us on the **#kytos** IRC channel on **freenode.net** network.
-
-We also have two mailing lists:
-
-- **Community List** `<community (at) lists (dot) kytos (dot) io>
-  <https://lists.kytos.io/listinfo/community>`__ - where you can get help, from
-  us and also from *Kytos* community, and also exchange experiences with other
-  users.
-- **Devel List** `<devel (at) lists (dot) kytos (dot) io>
-  <https://lists.kytos.io/listinfo/devel>`__ - *Kytos* developers mailing list,
-  in which the development of the project is discussed.
-
 
 Submit an Issue
 ===============
 
 If you find a bug or a mistake in the documentation, you can help us by
-submitting an issue to our `repo <https://github.com/kytos-ng/kytos>`_. Even
-better, you can submit a Pull Request to fix it. Before sharing a fix with the
-Kytos Community, **please, check the**
-:ref:`contributing-submission-guidelines` **section**.
+submitting an issue to our `repo <https://github.com/kytos-ng/kytos>`_. 
 
-Get Involved
-************
-
-We'd love for you to contribute to our source code and to make Kytos better
-than it is today!
-
-This is one component of the *Kytos* project. For more information on how to
-get involved, please, visit the section :doc:`/developer/how_to_contribute` of
-the *Kytos* documentation. Our mailing lists are in :doc:`/home/get_help`.
 
 Authors
 *******
 
 For a complete list of authors, please see ``AUTHORS.rst``.
 
-Contributing
-************
-
-If you want to contribute to this project, please read `Kytos Documentation
-<https://docs.kytos.io/kytos/developer/how_to_contribute/>`__ website.
-
 License
 *******
 
 This software is under *MIT-License*. For more information please read
 ``LICENSE`` file.
-
-What's Next
-***********
-
-You are now ready to browse our guide for :doc:`administrators </admin/intro>` or :doc:`developers </developer/intro>`. Check out!
-
-
-.. raw:: html
-
-    <div id="outer-clipart">
-        <a href="/admin" id="clipart-admin" class="col-md-6"></a>
-        <a href="/developer" id="clipart-devel" class="col-md-6"></a>
-    </div>
-
-    <style> .prev-next-nav li:last-child { display: none; } </style>
-
 
 .. TAGs
 

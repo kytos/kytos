@@ -13,7 +13,7 @@ Authors
 - Jose Mauro <zemauror AT gmail DOT com>
 - Gleyberson Andrade <gleybersonandrade AT gmail DOT com>
 - Italo Valcy <idasilva AT fiu DOT edu>
-- Vinicius Arcanjo <viniciusarcanjov AT gmail DOT com>
+- Vinicius Arcanjo <vindasil AT fiu DOT edu>
 - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 
 

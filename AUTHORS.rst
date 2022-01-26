@@ -12,6 +12,9 @@ Authors
 - Carlos Magno Barbosa <cmagnobarbosa AT gmail DOT com>
 - Jose Mauro <zemauror AT gmail DOT com>
 - Gleyberson Andrade <gleybersonandrade AT gmail DOT com>
+- Italo Valcy <idasilva AT fiu DOT edu>
+- Vinicius Arcanjo <vindasil AT fiu DOT edu>
+- Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 
 
 Contributors
@@ -24,7 +27,5 @@ Contributors
 - Lucas Felix <lucasgsfelix AT gmail DOT com>
 - Marvin Torres <mtorr068 AT fiu DOT edu>
 - Raphael Cóbe <rmcobe AT ncc DOT unesp DOT br>
-- Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 - Thiago Lopes <thiagolopes AT ncc DOT unesp DOT br>
 - Valessio Soares de Brito <contato AT valessiobrito DOT com DOT br>
-- Vinicius Arcanjo <viniciusarcanjov AT gmail DOT com>

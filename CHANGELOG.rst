@@ -24,6 +24,14 @@ Security
 ========
 
 
+[2022.1] - "jovelina" - 2022-01-21
+**********************************
+
+Changed
+=======
+- New README reflecting the change to Kytos NG.
+
+
 [2022.1rc1] - "jovelina" - 2022-01-14
 *************************************
 

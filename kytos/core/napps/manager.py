@@ -242,7 +242,10 @@ class NAppsManager:
             LOG.warning("NApps dir (%s) doesn't exist.", path)
             return []
 
-        jsons = path.glob('*/*/kytos.json')
+        jsons = sorted(
+            path.glob('*/*/kytos.json'),
+            key=lambda f: f.stat().st_mtime
+        )
         return [NApp.create_from_json(j) for j in jsons]
 
     @staticmethod

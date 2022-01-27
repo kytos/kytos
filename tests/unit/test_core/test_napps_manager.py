@@ -235,7 +235,10 @@ class TestNAppsManager(unittest.TestCase):
         napp = MagicMock()
         mock_create_from_json.return_value = napp
 
-        self.napps_manager._installed_path = self.get_path(['json'])
+        json1 = MagicMock()
+        json1.stat.return_value = MagicMock(st_mtime=2)
+
+        self.napps_manager._installed_path = self.get_path([json1])
         napps = self.napps_manager.get_all_napps()
 
         self.assertEqual(napps, [napp])
@@ -247,7 +250,7 @@ class TestNAppsManager(unittest.TestCase):
         napp.enabled = False
         mock_create_from_json.return_value = napp
 
-        self.napps_manager._enabled_path = self.get_path(['json'])
+        self.napps_manager._enabled_path = self.get_path([MagicMock()])
         napps = self.napps_manager.get_enabled_napps()
 
         self.assertEqual(napps, [napp])
@@ -260,8 +263,12 @@ class TestNAppsManager(unittest.TestCase):
         napp_2 = MagicMock()
         mock_create_from_json.side_effect = [napp_1, napp_2, napp_1]
 
-        self.napps_manager._installed_path = self.get_path(['json1', 'json2'])
-        self.napps_manager._enabled_path = self.get_path(['json1'])
+        json1 = MagicMock()
+        json1.stat.return_value = MagicMock(st_mtime=1)
+        json2 = MagicMock()
+        json2.stat.return_value = MagicMock(st_mtime=1)
+        self.napps_manager._installed_path = self.get_path([json1, json2])
+        self.napps_manager._enabled_path = self.get_path([MagicMock()])
         napps = self.napps_manager.get_disabled_napps()
 
         self.assertEqual(napps, [napp_2])
@@ -272,7 +279,7 @@ class TestNAppsManager(unittest.TestCase):
         napp = MagicMock()
         mock_create_from_json.return_value = napp
 
-        self.napps_manager._installed_path = self.get_path(['json'])
+        self.napps_manager._installed_path = self.get_path([MagicMock()])
         napps = self.napps_manager.get_installed_napps()
 
         self.assertEqual(napps, [napp])
@@ -310,7 +317,7 @@ class TestNAppsManager(unittest.TestCase):
         napp = MagicMock()
         mock_create_from_json.return_value = napp
 
-        path = self.get_path(['json'])
+        path = self.get_path([MagicMock()])
         napps = self.napps_manager.get_napps_from_path(path)
 
         self.assertEqual(napps, [napp])

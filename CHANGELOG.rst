@@ -24,6 +24,15 @@ Security
 ========
 
 
+[2022.1.1] - "jovelina" - 2022-02-01
+************************************
+
+Fixed
+=====
+- Load NApps ordered by modification, allowing the administrator
+  to set a desired order of loading.
+
+
 [2022.1] - "jovelina" - 2022-01-21
 **********************************
 

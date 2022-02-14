@@ -1,4 +1,4 @@
-This document describes Kytos-ng's team and contributors. `AUTHORS.rst <../AUTHORS.rst>`_ describes the complete list of Kytos' authors and contributors.
+This document describes Kytos-ng's team, authors, and contributors. `AUTHORS.rst <../AUTHORS.rst>`_ describes the complete list of Kytos' authors and contributors.
 
 Core Team
 *********

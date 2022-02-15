@@ -19,3 +19,5 @@ Contributors
 - Arturo Quintana <arturocu81 AT gmail DOT com>
 - Marvin Torres <mtorr068 AT fiu DOT edu>
 - David Ramirez <davramir AT fiu DOT edu>
+- Daniela Garcia Toranzo <dgarciat AT fiu DOT edu>
+- Luis Marin Vera <lmarinve AT fiu DOT edu>

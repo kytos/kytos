@@ -32,19 +32,19 @@ Specification
 
 It is desirable to support a configuration that can be changed dynamically via API. Since this feature is relatively small and wouldn't require much extra entries or states, then using `topology` switches' and interfaces' metadata storage would simplify the implementation and maintenance since currently adding support to a new storage with storehouse requires a significant effort development-wise. In the future, we might migrate to an storage if we have alternatives available. The following metadata would be used:
 
-- `switches.<dpid>.metadata.settings.of_lldp.ignored_loops`:
+- ``switches.<dpid>.metadata.settings.of_lldp.ignored_loops``:
 
-This is for configuring which loops should be ignored on a `<dpid>`, the value is a list of list pair of interface port numbers. For instance, if it's desirable to ignore a loop between interface number 5 and 6, and also between port 1 and itself: [[5, 6], [1,1]]
+This is for configuring which loops should be ignored on a ``<dpid>``, the value is a list of list pair of interface port numbers. For instance, if it's desirable to ignore a loop between interface number 5 and 6, and also between port 1 and itself: ``[[5, 6], [1,1]]``
 
-- `switches.<dpid>.metadata.settings.of_lldp.actions`:
+- ``switches.<dpid>.metadata.settings.of_lldp.actions``:
 
-This is for configuring which actions should be taken once a loop is found. The actions are a list of strings, `log` and `disable` are both supported. The `log` action will log an warning message informing that a loop was detected on a dpid and on which interfaces. The `disable` action will disable an interface via `topology`. For instance, `['log', 'disable']` would apply both actions to any loop that isn't ignored and is found.
+This is for configuring which actions should be taken once a loop is found. The actions are a list of strings, ``log`` and ``disable`` are both supported. The ``log`` action will log an warning message informing that a loop was detected on a dpid and on which interfaces. The ``disable`` action will disable an interface via the ``topology`` NApp. For instance, ``['log', 'disable']`` would apply both actions to any loop that isn't ignored and is found.
 
-- `switches.<dpid>.metadata.settings.of_lldp.log_every`:
+- ``switches.<dpid>.metadata.settings.of_lldp.log_every``:
 
 This is for configuring which frequency in seconds the `log` action should emit a log whenever a loop is found, by default it's 60 seconds, this is to avoid a flood of messages.
 
-- `interfaces.<interface_id>.metadata.of_lldp.looped`:
+- ``interfaces.<interface_id>.metadata.of_lldp.looped``:
 
 This `looped` attribute is for state management, it will contain the following object whenever a loop is in place:
 
@@ -55,7 +55,7 @@ This `looped` attribute is for state management, it will contain the following o
      'created_at': <str>, in this format %Y-%m-%dT%H:%M:%S
    }
 
-Loops will be removed if the interface has been disabled or deactivated, also there should be a periodic routine to remove the `looped` metadata interface attributes if the loop hasn't been detected anymore, this clean up routine should run at a lower pace than of_lldp polling, usually 3-4 times slower, and if the loop hasn't been seen within this time frame again then it would assume that the loop has stopped.
+Loops will be removed if the interface has been disabled or deactivated, also there should be a periodic routine to remove the ``looped`` metadata interface attributes if the loop hasn't been detected anymore, this clean up routine should run at a lower pace than of_lldp polling, usually 3-4 times slower, and if the loop hasn't been seen within this time frame again then it would assume that the loop has stopped.
 
 Events
 ======

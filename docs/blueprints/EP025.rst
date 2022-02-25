@@ -43,7 +43,7 @@ This ``looped`` attribute is for state management, it will contain the following
 .. code-block:: python3
 
    {
-     'port_number': <int>
+     'port_numbers': [<int>, <int>]
      'created_at': <str>, in this format %Y-%m-%dT%H:%M:%S
    }
 
@@ -89,6 +89,7 @@ Content:
    {
      'dpid': <str>,
      'interface_id': <str>,
+     'port_numbers': [<int>, <int>],
    }
 
 
@@ -106,4 +107,5 @@ Content:
    {
      'dpid': <str>,
      'interface_id': <str>,
+     'port_numbers': [<int>, <int>],
    }

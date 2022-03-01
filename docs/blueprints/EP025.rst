@@ -53,7 +53,7 @@ The following options would be configurable on settings:
 
 - ``LLDP_LOOP_ACTIONS``:
 
-This is for configuring which actions should be taken once a loop is found. The actions are a list of strings, ``log`` and ``disable`` are both supported. The ``log`` action will log an warning message informing that a loop was detected on a dpid and on which interfaces. The ``disable`` action will disable an interface via the ``topology`` NApp. For instance, ``['log', 'disable']`` would apply both actions to any loop that isn't ignored and is found. The default actions would be ``['log', 'disable']``.
+This is for configuring which actions should be taken once a loop is found. The actions are a list of strings, ``log`` and ``disable`` are both supported. The ``log`` action will log an warning message informing that a loop was detected on a dpid and on which interfaces. The ``disable`` action will disable an interface via the ``topology`` NApp, and eventually enable it again if the loop stops. For instance, ``['log', 'disable']`` would apply both actions to any loop that isn't ignored and is found. The default actions would be ``['log', 'disable']``.
 
 - ``LOOP_LOG_EVERY``:
 

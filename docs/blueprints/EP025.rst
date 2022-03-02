@@ -44,7 +44,7 @@ This ``looped`` attribute is for state management, it will contain the following
 
    {
      'port_numbers': [<int>, <int>]
-     'created_at': <str>, in this format %Y-%m-%dT%H:%M:%S
+     'detected_at': <str>, in this format %Y-%m-%dT%H:%M:%S
    }
 
 Looped states should be removed if the interface has been disabled or deactivated, also there should be a periodic routine to remove the ``looped`` metadata interface state if the loop hasn't been detected anymore, this clean up routine should run at a lower pace than of_lldp polling, usually 3-4 times slower, and if the loop hasn't been seen within this time frame again then it would assume that the loop has stopped.
@@ -75,8 +75,8 @@ Subscribed
 Published
 ---------
 
-of_lldp/loop.detected
-~~~~~~~~~~~~~~~~~~~~~
+kytos.of_lldp/loop.detected
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *buffer*: ``app``
 
@@ -93,8 +93,8 @@ Content:
    }
 
 
-of_lldp/loop.stopped
-~~~~~~~~~~~~~~~~~~~~
+kytos.of_lldp/loop.stopped
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *buffer*: ``app``
 

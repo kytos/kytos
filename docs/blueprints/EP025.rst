@@ -57,7 +57,7 @@ This is for configuring which actions should be taken once a loop is found. The 
 
 - ``LOOP_LOG_EVERY``:
 
-This is for configuring which frequency in seconds the `log` action should emit a log whenever a loop is found, by default it's 60 seconds, this is for avoiding a flood of messages.
+This is for configuring which frequency in seconds the `log` action should emit a log whenever a loop is found, by default it's 300 seconds, this is for avoiding a flood of messages.
 
 
 Events

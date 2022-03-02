@@ -38,7 +38,7 @@ This is for configuring which loops should be ignored on a ``<dpid>``, the value
 
 - ``interfaces.<interface_id>.metadata.looped``:
 
-This ``looped`` attribute is for state management, it will contain the following object whenever a loop is in place:
+This ``looped`` attribute is for state management, it will contain the following object whenever a loop is in place, the ``detected_at`` string datetime will be in UTC without any ``Z`` modifier:
 
 .. code-block:: python3
 

@@ -114,7 +114,8 @@ submitting an issue to our `repo <https://github.com/kytos-ng/kytos>`_.
 Authors
 *******
 
-For a complete list of authors, please see ``AUTHORS.rst``.
+* `AUTHORS_NG.rst <AUTHORS_NG.rst>`_ describes Kytos-ng's team, authors, and contributors. 
+* `AUTHORS.rst <AUTHORS.rst>`_ describes the complete list of Kytos' authors, and contributors. 
 
 License
 *******

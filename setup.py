@@ -254,7 +254,7 @@ setup(name='kytos',
                         for line in open("requirements/run.txt").readlines()
                         if not line.startswith('#')],
       setup_requires=PYTEST_RUNNER,
-      tests_require=['pytest'],
+      tests_require=['pytest==7.0.0'],
       cmdclass={
           'clean': Cleaner,
           'ci': CITest,

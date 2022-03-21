@@ -24,7 +24,7 @@ This blueprint proposes a loop detection mechanism on interfaces of a switch via
 Motivation
 ==========
 
-A loop on a switch interface can be intentionally or not. Typically, intentional loops are for re-injecting packets in the switch pipeline to perform another packet transformation. On the other hand, unintentional loops can lead to major dataplane problems, especially if that interface has significant network traffic being being forwarded. A loop detection mechanism via LLDP will empower operators to define certain actions to be taken when a loop happens.
+A loop on a switch interface can be intentional or not. Typically, intentional loops are for re-injecting packets in the switch pipeline to perform another packet transformation. On the other hand, unintentional loops can lead to major data plane problems, especially if that interface has significant network traffic being forwarded. A loop detection mechanism via LLDP will empower operators to define certain actions to be taken when a loop happens.
 
 
 Specification

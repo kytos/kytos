@@ -1,4 +1,6 @@
 """Utilities functions used in Kytos."""
+import logging
+
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from threading import Thread
@@ -7,6 +9,7 @@ from kytos.core.config import KytosConfig
 
 __all__ = ['listen_to', 'now', 'run_on_thread', 'get_time']
 
+LOG = logging.getLogger(__name__)
 
 # APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
 
@@ -99,10 +102,21 @@ def listen_to(event, *events):
             """Done callback."""
             if not future.exception():
                 _ = future.result()
+            else:
+                exc_str = f"{type(future.exception())}: {future.exception()}"
+                args = (
+                    getattr(future, "__inner_args")
+                    if hasattr(future, "__inner_args")
+                    else tuple()
+                )
+                LOG.error(f"listen_to handler: {handler}, "
+                          f"args: {args}, exception: {exc_str}")
 
         def inner(*args):
             """Decorate the handler to run in the thread pool."""
             future = executor.submit(handler, *args)
+            inner_args = args[1:] if len(args) > 1 else args
+            setattr(future, "__inner_args", inner_args)
             future.add_done_callback(done_callback)
 
         inner.events = [event]

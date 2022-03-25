@@ -1,6 +1,5 @@
 """Utilities functions used in Kytos."""
 import logging
-
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from threading import Thread

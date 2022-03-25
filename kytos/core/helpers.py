@@ -114,8 +114,7 @@ def listen_to(event, *events):
         def inner(*args):
             """Decorate the handler to run in the thread pool."""
             future = executor.submit(handler, *args)
-            inner_args = args[1:] if len(args) > 1 else args
-            setattr(future, "__inner_args", inner_args)
+            setattr(future, "__inner_args", args)
             future.add_done_callback(done_callback)
 
         inner.events = [event]

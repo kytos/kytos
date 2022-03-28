@@ -7,6 +7,7 @@ UNRELEASED - Under development
 ******************************
 Added
 =====
+- Unhandled exception on a ``listen_to`` decorated function (running in a ThreadPool) is logged as error.
 
 Changed
 =======

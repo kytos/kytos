@@ -19,6 +19,10 @@ from werkzeug.exceptions import HTTPException
 
 from kytos.core.auth import authenticated
 from kytos.core.config import KytosConfig
+from elasticapm.contrib.flask import ElasticAPM
+
+apm_logger = logging.getLogger("elasticapm")
+# apm_logger.setLevel(logging.DEBUG)
 
 
 class APIServer:
@@ -52,8 +56,11 @@ class APIServer:
         self.listen = listen
         self.port = port
 
+        self.apm = ElasticAPM()
         self.app = Flask(app_name, root_path=self.flask_dir,
                          static_folder="dist", static_url_path="/dist")
+        self.apm.init_app(self.app, service_name='kytos', secret_token='kytospw')
+        # self.app.config["TEMPLATES_AUTO_RELOAD"] = True
         self.server = SocketIO(self.app, async_mode='threading')
         self._enable_websocket_rooms()
         # ENABLE CROSS ORIGIN RESOURCE SHARING

@@ -6,6 +6,11 @@ from threading import Thread
 
 from kytos.core.config import KytosConfig
 
+import elasticapm
+from elasticapm import Client
+apm_client = Client(service_name="kytos", server_url="http://localhost:8200")
+elasticapm.instrument()
+
 __all__ = ['listen_to', 'now', 'run_on_thread', 'get_time']
 
 LOG = logging.getLogger(__name__)
@@ -99,21 +104,28 @@ def listen_to(event, *events):
         """
         def done_callback(future):
             """Done callback."""
+            args = (
+                getattr(future, "__args")
+                if hasattr(future, "__args")
+                else tuple()
+            )
+            if len(args) > 1 and hasattr(future, "__transaction"):
+                tx = getattr(future, "__transaction")
+                tx.name = f"{args[1].name}@{args[0].napp_id}"
+                tx.end()
+                apm_client.tracer.queue_func("transaction", tx.to_dict())
             if not future.exception():
                 _ = future.result()
             else:
                 exc_str = f"{type(future.exception())}: {future.exception()}"
-                args = (
-                    getattr(future, "__args")
-                    if hasattr(future, "__args")
-                    else tuple()
-                )
                 LOG.error(f"listen_to handler: {handler}, "
                           f"args: {args}, exception: {exc_str}")
 
         def inner(*args):
             """Decorate the handler to run in the thread pool."""
+            tx = apm_client.begin_transaction(transaction_type="kytos_event")
             future = executor.submit(handler, *args)
+            setattr(future, "__transaction", tx)
             setattr(future, "__args", args)
             future.add_done_callback(done_callback)
 

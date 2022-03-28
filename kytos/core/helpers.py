@@ -104,8 +104,8 @@ def listen_to(event, *events):
             else:
                 exc_str = f"{type(future.exception())}: {future.exception()}"
                 args = (
-                    getattr(future, "__inner_args")
-                    if hasattr(future, "__inner_args")
+                    getattr(future, "__args")
+                    if hasattr(future, "__args")
                     else tuple()
                 )
                 LOG.error(f"listen_to handler: {handler}, "
@@ -114,7 +114,7 @@ def listen_to(event, *events):
         def inner(*args):
             """Decorate the handler to run in the thread pool."""
             future = executor.submit(handler, *args)
-            setattr(future, "__inner_args", args)
+            setattr(future, "__args", args)
             future.add_done_callback(done_callback)
 
         inner.events = [event]

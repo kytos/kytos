@@ -34,7 +34,7 @@ The main motivation to have a canonical document-oriented recommended database a
 Requirements
 ============
 
-The following are the requirements that for a canonical document-oriented NoSQL database:
+The following are the requirements for a canonical document-oriented NoSQL database:
 
 1. It must have been designed for performance in terms of IO, concurrency, production-grade and has been battle tested.
 2. It must be able to index JSON documents, including nested ones providing optimal query lookups.

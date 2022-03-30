@@ -28,7 +28,7 @@ The main motivation to have a canonical document-oriented recommended database a
 
 - A database must have been designed for performance in terms of IO, concurrency, production-grade and has been battle tested.
 - A database must provide indexed and advanced query capabilities over documents and collections.
-- ``storehouse`` NApp abstracts different kind of storages but it was primarily meant to be used as a plug and play file system storage, and it has served well so far, however, when it tries to expose other storage backends with a common interface it falls short to provide flexible queries, bulk operations with transactions and indexing capabilities that are considered must have in production. Also, when other client NApps use ``storehouse`` asynchronously, and potential race conditions can happen and interfacing concurrently and safely can be difficult.
+- ``storehouse`` NApp abstracts different kind of storages but it was primarily meant to be used as a plug and play file system storage, and it has served well so far, however, when it tries to expose other storage backends with a common interface it falls short to provide flexible queries, bulk operations with transactions and indexing capabilities that are considered must have in production. Also, when other client NApps use ``storehouse`` asynchronously potential race conditions can happen and interfacing concurrently and safely can be difficult.
 
 
 Requirements

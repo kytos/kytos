@@ -41,7 +41,7 @@ The following are the requirements for a canonical document-oriented NoSQL datab
 3. It must provide ACID transactions for multi-documents and for multi collections.
 4. It must be able to scale horizontally through clustering, and it should be able to maintain strong consistency.
 5. It must be able to provide immediate consistency and also provides options to leverage eventual consistency when applicable.
-6. It must be able to deploy in a Docker container, and ideally have support to easily deploy on Kubernetes.
+6. It must be deployable in a Docker container, and ideally have support to easily deploy on Kubernetes.
 7. The database should be open source and be well maintained. 
 8. The database Python library driver must be well maintained, support ``gevent`` to be compatible with Flask SocketIO threading mode. 
 9. The database Python library driver should either be compatible with ``asyncio`` or have an alternative ``asyncio`` library.

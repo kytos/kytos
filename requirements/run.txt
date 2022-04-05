@@ -36,6 +36,9 @@ traitlets==4.3.3          # via ipython
 watchdog==0.10.2          # via -r requirements/run.in
 wcwidth==0.1.9            # via prompt-toolkit
 werkzeug==1.0.1           # via flask
+pydantic==1.9.0           # via -r requirements/run.in
+pymongo==4.0.2            # via -r requirements/run.in
+typing-extensions==4.0.1  # via pydantic
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

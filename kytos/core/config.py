@@ -137,6 +137,7 @@ class KytosConfig():
                     'vlan_pool': {},
                     'token_expiration_minutes': 180,
                     'thread_pool_max_workers': 256,
+                    'database': '',
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()

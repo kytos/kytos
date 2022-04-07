@@ -1,4 +1,6 @@
 """DB client."""
+# pylint: disable=invalid-name,redefined-outer-name,too-many-arguments
+# pylint: disable=unsubscriptable-object,inconsistent-return-statements
 
 import logging
 import os
@@ -16,9 +18,12 @@ LOG = logging.getLogger(__name__)
 
 
 def _log_pymongo_thread_traceback() -> None:
-    """Log pymongo thread traceback, originally it printed out to sys.stderr
-    poluting it when handling certain asynchronous errors that can happen,
-    with this patched function it logs to LOG.error instead."""
+    """Log pymongo thread traceback.
+
+    Originally, it printed out to sys.stderr poluting it when handling
+    certain asynchronous errors that can happen, with this patched function
+    it logs to LOG.error instead.
+    """
     if sys.stderr:
         einfo = sys.exc_info()
         try:
@@ -50,18 +55,18 @@ def mongo_client(
     serverselectiontimeoutms=30000,
     **kwargs,
 ) -> MongoClient:
-    """Instantiate a MongoClient instance. MongoClient is thread-safe
-    and has connection-pooling built in.
+    """Instantiate a MongoClient instance.
 
-    NApps are supposed to use the Mongo class that wraps a MongoClient. NApps
-    might use a new MongoClient instance for exceptional cases where a NApp
+    MongoClient is thread-safe and has connection-pooling built in. NApps are
+    supposed to use the Mongo class that wraps a MongoClient. NApps might
+    use a new MongoClient instance for exceptional cases where a NApp
     needs to parametrize differently.
     """
     return MongoClient(
         host_seeds.split(","),
         username=username,
         password=password,
-        connect=False,
+        connect=connect,
         authsource=database,
         retrywrites=retrywrites,
         retryreads=retryreads,

@@ -1,19 +1,19 @@
 """Test kytos.core.db module."""
-from unittest import TestCase
-from unittest.mock import call, MagicMock, patch
+# pylint: disable=invalid-name
 
-from kytos.core.db import (
-    _mongo_conn_wait,
-    Mongo,
-    db_conn_wait,
-    _log_pymongo_thread_traceback,
-)
-from kytos.core.exceptions import KytosDBInitException
+from unittest import TestCase
+from unittest.mock import MagicMock, call, patch
 
 from pymongo.errors import OperationFailure
 
+from kytos.core.db import (Mongo, _log_pymongo_thread_traceback,
+                           _mongo_conn_wait, db_conn_wait)
+from kytos.core.exceptions import KytosDBInitException
+
 
 class TestDb(TestCase):
+    """TestDB."""
+
     def setUp(self):
         """setUp."""
         self.client = MagicMock()

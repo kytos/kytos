@@ -12,6 +12,8 @@ Added
 - MongoDB client for NApps, ``Mongo`` available on ``kytos.core.db`` module
 - Added a wait mechanism during controller startup time to ensure the database is reachable if it's been configured
 - ``pymongo`` and ``pydantic`` (for database models) are now core dependencies
+- Added MongoDB environment variables ``MONGO_HOST_SEEDS, MONGO_USERNAME, MONGO_PASSWORD``
+- Added optional MongoDB environment ``MONGO_DBNAME, MONGO_MAX_POOLSIZE, MONGO_MIN_POOLSIZE``
 
 Changed
 =======

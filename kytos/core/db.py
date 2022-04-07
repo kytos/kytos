@@ -77,6 +77,7 @@ class Mongo:
     """MongoClient instance for NApps."""
 
     client = mongo_client(connect=False)
+    db_name = os.environ.get("MONGO_DBNAME") or "napps"
 
     @classmethod
     def bootstrap_index(
@@ -84,11 +85,10 @@ class Mongo:
         collection: str,
         index: str,
         direction: int,
-        db_name=os.environ.get("MONGO_DBNAME", "napps"),
         **kwargs,
     ) -> Optional[str]:
         """Bootstrap index."""
-        db = cls.client[db_name]
+        db = cls.client[cls.db_name]
         indexes = set()
 
         for value in db[collection].index_information().values():

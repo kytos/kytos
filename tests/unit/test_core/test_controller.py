@@ -11,7 +11,6 @@ from unittest.mock import MagicMock, Mock, call, patch
 
 from kytos.core import Controller
 from kytos.core.config import KytosConfig
-from kytos.core.exceptions import KytosDBInitException
 from kytos.core.logs import LogManager
 
 
@@ -194,7 +193,7 @@ class TestController(TestCase):
         mock_enable_logs.assert_called()
         mock_create_pidfile.assert_called()
         mock_start_controller.assert_called()
-        mock_db_conn_or_shutdown.assert_not_called()
+        mock_db_conn_or_shutdown.assert_called()
 
     @patch('kytos.core.controller.sys.exit')
     @patch('kytos.core.controller.Controller.start_controller')

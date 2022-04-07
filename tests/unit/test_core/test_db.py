@@ -52,12 +52,11 @@ class TestDb(TestCase):
 
     def test_boostrap_index(self) -> None:
         """test_boostrap_index."""
-        db_name = "napps"
-        db = self.client[db_name]
+        db = self.client[Mongo().db_name]
         coll = "switches"
 
         db[coll].index_information.return_value = {}
-        Mongo().bootstrap_index(coll, "interfaces.id", 1, db_name=db_name)
+        Mongo().bootstrap_index(coll, "interfaces.id", 1)
         assert db[coll].create_index.call_count == 1
         db[coll].create_index.assert_called_with([("interfaces.id", 1)])
 

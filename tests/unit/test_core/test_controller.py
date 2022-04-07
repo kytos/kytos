@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, Mock, call, patch
 
 from kytos.core import Controller
 from kytos.core.config import KytosConfig
+from kytos.core.exceptions import KytosDBInitException
 from kytos.core.logs import LogManager
 
 
@@ -164,17 +165,48 @@ class TestController(TestCase):
         self.assertRaises(ValueError,
                           self.controller.toggle_debug, name="foobar")
 
+    @patch('kytos.core.controller.Controller.db_conn_or_core_shutdown')
     @patch('kytos.core.controller.Controller.start_controller')
     @patch('kytos.core.controller.Controller.create_pidfile')
     @patch('kytos.core.controller.Controller.enable_logs')
     def test_start(self, *args):
-        """Test activate method."""
-        (mock_enable_logs, mock_create_pidfile, mock_start_controller) = args
+        """Test start method."""
+        (mock_enable_logs, mock_create_pidfile,
+         mock_start_controller, mock_db_conn_or_shutdown) = args
         self.controller.start()
 
         mock_enable_logs.assert_called()
         mock_create_pidfile.assert_called()
         mock_start_controller.assert_called()
+        mock_db_conn_or_shutdown.assert_not_called()
+
+    @patch('kytos.core.controller.Controller.db_conn_or_core_shutdown')
+    @patch('kytos.core.controller.Controller.start_controller')
+    @patch('kytos.core.controller.Controller.create_pidfile')
+    @patch('kytos.core.controller.Controller.enable_logs')
+    def test_start_with_mongodb(self, *args):
+        """Test start method with database option set."""
+        (mock_enable_logs, mock_create_pidfile,
+         mock_start_controller, mock_db_conn_or_shutdown) = args
+        self.controller.options.database = "mongodb"
+        self.controller.start()
+
+        mock_enable_logs.assert_called()
+        mock_create_pidfile.assert_called()
+        mock_start_controller.assert_called()
+        mock_db_conn_or_shutdown.assert_not_called()
+
+    @patch('kytos.core.controller.sys.exit')
+    @patch('kytos.core.controller.Controller.start_controller')
+    @patch('kytos.core.controller.Controller.enable_logs')
+    def test_start_with_invalid_database_backend(self, *args):
+        """Test start method with unsupported database backend."""
+        (mock_enable_logs, mock_start_controller, mock_sys_exit) = args
+        self.controller.options.database = "invalid"
+        self.controller.start()
+        mock_enable_logs.assert_called()
+        mock_start_controller.assert_called()
+        mock_sys_exit.assert_called()
 
     @patch('os.getpid')
     @patch('kytos.core.controller.atexit')

@@ -8,9 +8,14 @@ UNRELEASED - Under development
 Added
 =====
 - Unhandled exception on a ``listen_to`` decorated function (running in a ThreadPool) is logged as error.
+- New ``--database`` configuration option that supports ``mongodb``
+- MongoDB client for NApps, ``Mongo`` available on ``kytos.core.db`` module
+- Added a wait mechanism during controller startup time to ensure the database is reachable if it's been configured
+- ``pymongo`` and ``pydantic`` (for database models) are now core dependencies
 
 Changed
 =======
+- Kytos controller can shutdown if the database is configured but not reachable during startup time.
 
 Deprecated
 ==========

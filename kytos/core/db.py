@@ -3,6 +3,7 @@
 import logging
 import os
 import sys
+import time
 from typing import Optional
 
 import pymongo.helpers
@@ -101,7 +102,8 @@ class Mongo:
         return None
 
 
-def _mongo_conn_wait(mongo_client=mongo_client, retries=12, timeout_ms=10000) -> None:
+def _mongo_conn_wait(mongo_client=mongo_client, retries=10,
+                     timeout_ms=10000) -> None:
     """Try to run 'hello' command on MongoDB and wait for it with retries."""
     try:
         client = mongo_client(maxpoolsize=6, minpoolsize=3)
@@ -111,6 +113,7 @@ def _mongo_conn_wait(mongo_client=mongo_client, retries=12, timeout_ms=10000) ->
     except (OperationFailure, AutoReconnect) as exc:
         retries -= 1
         if retries > 0:
+            time.sleep(max(timeout_ms / 1000, 1))
             return _mongo_conn_wait(mongo_client, retries, timeout_ms)
         LOG.error("Maximum retries reached when waiting for MongoDB")
         raise KytosDBInitException(str(exc), exc)

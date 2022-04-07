@@ -28,7 +28,8 @@ class TestDb(TestCase):
         mongo_client.assert_called_with(maxpoolsize=6, minpoolsize=3)
         assert client.db.command.mock_calls == [call("hello")]
 
-    def test_mongo_conn_wait_retries(self) -> None:
+    @patch("kytos.core.db.time.sleep")
+    def test_mongo_conn_wait_retries(self, mock_sleep) -> None:
         """test _mongo_conn_wait with retries."""
         client = MagicMock()
         mongo_client = MagicMock(return_value=client)
@@ -37,6 +38,7 @@ class TestDb(TestCase):
         with self.assertRaises(KytosDBInitException):
             _mongo_conn_wait(mongo_client, retries=retries)
         assert mongo_client.call_count == retries
+        mock_sleep.assert_called()
 
     @staticmethod
     @patch("kytos.core.db._mongo_conn_wait")

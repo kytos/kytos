@@ -197,10 +197,12 @@ class TestController(TestCase):
 
     @patch('kytos.core.controller.sys.exit')
     @patch('kytos.core.controller.Controller.start_controller')
+    @patch('kytos.core.controller.Controller.create_pidfile')
     @patch('kytos.core.controller.Controller.enable_logs')
     def test_start_with_invalid_database_backend(self, *args):
         """Test start method with unsupported database backend."""
-        (mock_enable_logs, mock_start_controller, mock_sys_exit) = args
+        (mock_enable_logs, mock_pid,
+         mock_start_controller, mock_sys_exit) = args
         self.controller.options.database = "invalid"
         self.controller.start()
         mock_enable_logs.assert_called()

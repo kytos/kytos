@@ -117,7 +117,7 @@ class KytosDBInitException(Exception):
     """Exception raised on Database initialization issues."""
 
     def __init__(self, message: str, _class=None) -> None:
-        """DBException."""
+        """KytosDBInitException."""
         super().__init__()
         self.message = message
         self._class = _class

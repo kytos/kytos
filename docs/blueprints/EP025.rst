@@ -1,0 +1,111 @@
+:EP: 25
+:Title: Interface loop detection via LLDP
+:Authors:
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Antonio Francisco <ajoaoff AT gmail DOT com>
+    - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
+    - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
+:Created: 2022-02-22
+:Kytos-Version:
+:Status: Draft
+
+*****************************************
+EP025 - Interface loop detection via LLDP
+*****************************************
+
+
+Abstract
+========
+
+This blueprint proposes a loop detection mechanism on interfaces of a switch via LLDP, leveraging ``of_lldp`` existing capabilities, and also which events, states and configuration options will be available.
+
+
+Motivation
+==========
+
+A loop on a switch interface can be intentional or not. Typically, intentional loops are for re-injecting packets in the switch pipeline to perform another packet transformation. On the other hand, unintentional loops can lead to major data plane problems, especially if that interface has significant network traffic being forwarded. A loop detection mechanism via LLDP will empower operators to define certain actions to be taken when a loop happens.
+
+
+Specification
+=============
+
+It is desirable to support ignored loops configuration that can be changed dynamically via API. Since this feature is relatively small and wouldn't require much extra entries or states, then using `topology` switches' and interfaces' metadata storage would simplify the implementation and maintenance since currently adding support to a new storage with storehouse requires a significant effort development-wise. In the future, this can be migrated to another storage (collection) when an alternative is available. The following metadata would be used:
+
+- ``switches.<dpid>.metadata.ignored_loops``:
+
+This is for configuring which loops should be ignored on a ``<dpid>``, the value is a list of list pair of interface port numbers. For instance, if it's desirable to ignore a loop between interface number 5 and 6, and also between port 1 and itself: ``[[5, 6], [1,1]]``
+
+- ``interfaces.<interface_id>.metadata.looped``:
+
+This ``looped`` attribute is for state management, it will contain the following object whenever a loop is in place, the ``detected_at``, string datetime will be in UTC without any ``Z`` modifier, ``detected_at`` will be updated when a non ignored loop is first detected (first seen):
+
+.. code-block:: python3
+
+   {
+     'port_numbers': [<int>, <int>]
+     'detected_at': <str>, in this format %Y-%m-%dT%H:%M:%S
+   }
+
+Looped states should be removed if the interface has been disabled or deactivated, also there should be a periodic routine to remove the ``looped`` metadata interface state if the loop hasn't been detected anymore, this clean up routine should run at a lower pace than of_lldp polling, usually 3-4 times slower, and if the loop hasn't been seen within this time frame again then it would assume that the loop has stopped.
+
+The following options would be configurable on settings:
+
+- ``LLDP_LOOP_ACTIONS``:
+
+This is for configuring which default actions should be taken once a loop is found. The actions are a list of strings, ``log`` and ``disable`` are both supported. The ``log`` action will log an warning message informing that a loop was detected on a dpid and on which interfaces. The ``disable`` action will disable an interface via the ``topology`` NApp (through the ``topology/v3/interfaces/<intf_id>/disable`` endpoint), and eventually enable it again if the loop stops (through the ``topology/v3/interfaces/<intf_id>/enable`` endpoint). For instance, ``['log', 'disable']`` would apply both actions to any loop that isn't ignored and is found. The default actions would be ``['log']`` based on what's expected to be used in production in this first iteration.
+
+- ``LOOP_LOG_EVERY``:
+
+This is for configuring which frequency in seconds the `log` action should emit a log whenever a loop is found, by default it's 300 seconds, this is for avoiding a flood of messages.
+
+
+Events
+======
+
+The following events will be published and subscribed.
+
+Subscribed
+----------
+
+- ``kytos/topology.topology_loaded``
+- ``kytos/topology.link_down``
+- ``kytos/topology.interface.disabled`` (not implemented on topology yet)
+
+Published
+---------
+
+kytos.of_lldp/loop.detected
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*buffer*: ``app``
+
+Event reporting that a loop has been detected.
+
+Content:
+
+.. code-block:: python3
+
+   {
+     'dpid': <str>,
+     'interface_id': <str>,
+     'port_numbers': [<int>, <int>],
+   }
+
+
+kytos.of_lldp/loop.stopped
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*buffer*: ``app``
+
+Event reporting that a loop has been stopped.
+
+Content:
+
+.. code-block:: python3
+
+   {
+     'dpid': <str>,
+     'interface_id': <str>,
+     'port_numbers': [<int>, <int>],
+   }

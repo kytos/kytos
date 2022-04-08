@@ -14,6 +14,7 @@ Added
 - ``pymongo`` and ``pydantic`` (for database models) are now core dependencies
 - Added MongoDB environment variables ``MONGO_HOST_SEEDS, MONGO_USERNAME, MONGO_PASSWORD``
 - Added optional MongoDB environment ``MONGO_DBNAME, MONGO_MAX_POOLSIZE, MONGO_MIN_POOLSIZE``
+- Added a docker-compose.yml file for local development to compose with MongoDB replica set cluster
 
 Changed
 =======

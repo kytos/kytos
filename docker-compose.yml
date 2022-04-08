@@ -1,0 +1,59 @@
+################################################################
+# This docker-compose file is meant for LOCAL development only #
+################################################################
+
+version: '3.3'
+
+services:
+  mongo-setup:
+    container_name: mongo-rs-init
+    image: mongo:5.0
+    restart: on-failure
+    volumes:
+      - ./docker/scripts:/scripts
+    entrypoint: ["/scripts/rs-init.sh"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root_user}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-root_pw}
+      MONGO_USERNAME: ${MONGO_USERNAME:-napp_user}
+      MONGO_PASSWORD: ${MONGO_PASSWORD:-napp_pw}
+      MONGO_DBNAME: ${MONGO_DBNAME:-napps}
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+  mongo1:
+    container_name: mongo1
+    image: mongo:5.0
+    volumes:
+      - mongo1_data:/data/db
+    ports:
+      - 27017:27017
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0"]
+    depends_on:
+      - mongo2
+      - mongo3
+  mongo2:
+    container_name: mongo2
+    image: mongo:5.0
+    volumes:
+      - mongo2_data:/data/db
+    ports:
+      - 27018:27018
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0", "--port", "27018" ]
+  mongo3:
+    container_name: mongo3
+    image: mongo:5.0
+    volumes:
+      - mongo3_data:/data/db
+    ports:
+      - 27019:27019
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0", "--port", "27019" ]
+
+volumes:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:

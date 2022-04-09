@@ -96,6 +96,26 @@ With the above commands your controller will be running and ready to be used.
 Please note that you have to run it as an user with permission to
 open sockets at ports 6653 and 8181.
 
+How to use with MongoDB
+***********************
+
+If you're developing locally and using the core MongoDB integration, you can use ``docker-compose`` to spin up a MongoDB replica set cluster. You'll also need to run the ``add-etc-hosts.sh`` script at least once when setting up your environment:
+
+.. code-block:: shell
+
+   $ sudo ./docker/scripts/add-etc-hosts.sh
+
+.. code-block:: shell
+
+   $ docker-compose up -d
+
+.. code-block:: shell
+
+   $ kytosd -f --database mongodb
+
+If you're using the ``--database mongodb`` option in production, make sure to
+use a recommended ``WiredTiger Storage Engine`` file system, inject environment variables safely, have backup and restore procedures and also allocate sufficient RAM and CPU depending on the expected workload.
+
 The Web Admin User Interface
 ============================
 

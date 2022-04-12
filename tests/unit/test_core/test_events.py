@@ -1,5 +1,8 @@
 """Test kytos.core.events module."""
+import json
+from datetime import datetime, timezone
 from unittest import TestCase
+from uuid import UUID
 
 from kytos.core.events import KytosEvent
 
@@ -45,3 +48,27 @@ class TestKytosEvent(TestCase):
 
         self.event.content = {"message": "msg"}
         self.assertEqual(self.event.message, 'msg')
+
+    def test_init_attrs(self):
+        """Test init attrs."""
+        assert self.event.name == "kytos/core.any"
+        assert self.event.content == {}
+        assert self.event.timestamp <= datetime.now(timezone.utc)
+        assert self.event.id and isinstance(self.event.id, UUID)
+        assert self.event.reinjections == 0
+
+    def test_as_dict(self):
+        """Test as_dict."""
+        expected = {'content': {}, 'id': str(self.event.id),
+                    'name': 'kytos/core.any', 'reinjections': 0,
+                    'timestamp': self.event.timestamp}
+        self.assertDictEqual(self.event.as_dict(), expected)
+
+    def test_as_json(self):
+        """Test as_json."""
+        ts = datetime.strftime(self.event.timestamp, '%Y-%m-%dT%H:%M:%S')
+        expected = {'content': {}, 'id': str(self.event.id),
+                    'name': 'kytos/core.any', 'reinjections': 0,
+                    'timestamp': ts}
+        self.assertDictEqual(json.loads(self.event.as_json()), expected)
+

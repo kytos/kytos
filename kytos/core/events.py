@@ -36,7 +36,7 @@ class KytosEvent:
     def as_dict(self):
         """Return KytosEvent as a dict."""
         return {'id': str(self.id), 'name': self.name, 'content': self.content,
-                'timestamp': self.timestamp, 'reinjections': 0}
+                'timestamp': self.timestamp, 'reinjections': self.reinjections}
 
     def as_json(self):
         """Return KytosEvent as json."""

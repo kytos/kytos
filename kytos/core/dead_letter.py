@@ -41,7 +41,11 @@ class DeadLetter:
         self._lock = Lock()
         self._max_len_per_topic = 100000
 
-    def register_endpoints(self) -> None:
+    def _get_request(self):
+        """Get request context."""
+        return request
+
+    def register_endpoints(self):
         """Register core endpoints."""
         api = self.controller.api_server
         api.register_core_endpoint("dead_letter/", self.rest_list,
@@ -53,7 +57,7 @@ class DeadLetter:
 
     def rest_list(self):
         """List dead letter topics."""
-        topic = request.args.get("topic")
+        topic = self._get_request().args.get("topic")
         response = (
             self.list_topics()
             if not topic
@@ -63,7 +67,7 @@ class DeadLetter:
 
     def rest_patch(self):
         """Reinject dead letter events."""
-        body = request.json or {}
+        body = self._get_request().json or {}
         try:
             body = DeadLetterPatchPayload(**body)
         except ValidationError as exc:
@@ -89,7 +93,7 @@ class DeadLetter:
         topic 'all' means explicitly delete all topics and events
 
         """
-        body = request.json or {}
+        body = self._get_request().json or {}
         try:
             body = DeadLetterDeletePayload(**body)
         except ValidationError as exc:
@@ -102,7 +106,7 @@ class DeadLetter:
             return jsonify()
 
         if topic not in self.dict:
-            return NotFound(f"topic {topic} not found")
+            raise NotFound(f"topic {topic} not found")
 
         diff_ids = set(body.ids) - set(self.dict[topic].keys())
         if diff_ids:

@@ -101,15 +101,19 @@ def listen_to(event, *events):
             """Done callback."""
             if not future.exception():
                 _ = future.result()
-            else:
-                exc_str = f"{type(future.exception())}: {future.exception()}"
-                args = (
-                    getattr(future, "__args")
-                    if hasattr(future, "__args")
-                    else tuple()
-                )
-                LOG.error(f"listen_to handler: {handler}, "
-                          f"args: {args}, exception: {exc_str}")
+                return
+
+            exc_str = f"{type(future.exception())}: {future.exception()}"
+            args = (
+                getattr(future, "__args")
+                if hasattr(future, "__args")
+                else tuple()
+            )
+            LOG.error(f"listen_to handler: {handler}, "
+                      f"args: {args}, exception: {exc_str}")
+            if len(args) > 1 and hasattr(args[0], "controller"):
+                cls, kytos_event = args[0], args[1]
+                cls.controller.dead_letter.add_event(kytos_event)
 
         def inner(*args):
             """Decorate the handler to run in the thread pool."""

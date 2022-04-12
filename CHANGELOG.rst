@@ -15,6 +15,14 @@ Added
 - Added MongoDB environment variables ``MONGO_HOST_SEEDS, MONGO_USERNAME, MONGO_PASSWORD``
 - Added optional MongoDB environment ``MONGO_DBNAME, MONGO_MAX_POOLSIZE, MONGO_MIN_POOLSIZE``
 - Added a docker-compose.yml file for local development to compose with MongoDB replica set cluster
+- Added an in-memory dead letter structure for storing KytosEvents indexed by ``listen_to`` subscribed topics.
+- Added core endpoints for dead letter structure:
+
+  .. code:: console
+
+   GET /api/kytos/core/dead_letter/?topic=<topic>
+   PATCH /api/kytos/core/dead_letter/ (requires request body)
+   DELETE /api/kytos/core/dead_letter/ (requires request body)
 
 Changed
 =======

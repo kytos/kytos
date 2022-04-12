@@ -1,17 +1,13 @@
 """Dead letter dict tructure."""
 import json
 from collections import OrderedDict, defaultdict
+from enum import Enum
 from threading import Lock
-
-from werkzeug.exceptions import BadRequest, NotFound
-
-from flask import jsonify, request
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import constr
 from typing import List
 
-from enum import Enum
+from flask import jsonify, request
+from pydantic import BaseModel, ValidationError, constr
+from werkzeug.exceptions import BadRequest, NotFound
 
 
 class KytosQueueBufferNames(str, Enum):

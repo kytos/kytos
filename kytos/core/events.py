@@ -46,7 +46,7 @@ class KytosEvent:
         try:
             return json.dumps(as_dict)
         except TypeError:
-            as_dict.pop('content', None)
+            as_dict['content'] = str(as_dict['content'])
             return json.dumps(as_dict)
 
     @property

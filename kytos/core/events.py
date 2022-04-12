@@ -24,8 +24,11 @@ class KytosEvent:
         self.name = name
         self.content = content if content is not None else {}
         self.timestamp = now()
-        self.id = uuid4()
         self.reinjections = 0
+
+        # pylint: disable=invalid-name
+        self.id = uuid4()
+        # pylint: enable=invalid-name
 
     def __str__(self):
         return self.name
@@ -41,8 +44,9 @@ class KytosEvent:
     def as_json(self):
         """Return KytosEvent as json."""
         as_dict = self.as_dict()
-        ts = datetime.strftime(as_dict['timestamp'], '%Y-%m-%dT%H:%M:%S')
-        as_dict['timestamp'] = ts
+        timestamp = datetime.strftime(as_dict['timestamp'],
+                                      '%Y-%m-%dT%H:%M:%S')
+        as_dict['timestamp'] = timestamp
         try:
             return json.dumps(as_dict)
         except TypeError:

@@ -3,6 +3,7 @@
 
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
+
 from werkzeug.exceptions import NotFound
 
 from kytos.core.dead_letter import DeadLetter

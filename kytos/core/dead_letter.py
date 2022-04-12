@@ -6,11 +6,14 @@ from threading import Lock
 from typing import List
 
 from flask import jsonify, request
+# pylint: disable=no-name-in-module
 from pydantic import BaseModel, ValidationError, constr
+# pylint: enable=no-name-in-module
 from werkzeug.exceptions import BadRequest, NotFound
 
 
 class KytosQueueBufferNames(str, Enum):
+    """KytosQueueBufferNames."""
     app = "app"
     msg_in = "msg_in"
 
@@ -41,7 +44,8 @@ class DeadLetter:
         self._lock = Lock()
         self._max_len_per_topic = 100000
 
-    def _get_request(self):
+    @staticmethod
+    def _get_request():
         """Get request context."""
         return request
 
@@ -123,14 +127,15 @@ class DeadLetter:
         """List dead letter by topic."""
         response = defaultdict(dict)
         for key, value in self.dict[topic].items():
-            response[topic][str(value.id)] = json.loads(value.as_json())
+            response[topic][key] = json.loads(value.as_json())
         return response
 
     def list_topics(self):
+        """List dead letter topics."""
         response = defaultdict(dict)
         for topic, _dict in self.dict.items():
             for key, value in _dict.items():
-                response[topic][str(value.id)] = json.loads(value.as_json())
+                response[topic][key] = json.loads(value.as_json())
         return response
 
     def add_event(self, event):

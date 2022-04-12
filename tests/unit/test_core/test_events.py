@@ -66,9 +66,9 @@ class TestKytosEvent(TestCase):
 
     def test_as_json(self):
         """Test as_json."""
-        ts = datetime.strftime(self.event.timestamp, '%Y-%m-%dT%H:%M:%S')
+        timestamp = datetime.strftime(self.event.timestamp,
+                                      '%Y-%m-%dT%H:%M:%S')
         expected = {'content': {}, 'id': str(self.event.id),
                     'name': 'kytos/core.any', 'reinjections': 0,
-                    'timestamp': ts}
+                    'timestamp': timestamp}
         self.assertDictEqual(json.loads(self.event.as_json()), expected)
-

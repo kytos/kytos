@@ -1,4 +1,7 @@
 """Module with Kytos Events."""
+import json
+from datetime import datetime
+from uuid import uuid4
 
 from kytos.core.helpers import now
 
@@ -21,12 +24,30 @@ class KytosEvent:
         self.name = name
         self.content = content if content is not None else {}
         self.timestamp = now()
+        self.id = uuid4()
+        self.reinjections = 0
 
     def __str__(self):
         return self.name
 
     def __repr__(self):
         return f"KytosEvent({self.name!r}, {self.content!r})"
+
+    def as_dict(self):
+        """Return KytosEvent as a dict."""
+        return {'id': str(self.id), 'name': self.name, 'content': self.content,
+                'timestamp': self.timestamp, 'reinjections': 0}
+
+    def as_json(self):
+        """Return KytosEvent as json."""
+        as_dict = self.as_dict()
+        ts = datetime.strftime(as_dict['timestamp'], '%Y-%m-%dT%H:%M:%S')
+        as_dict['timestamp'] = ts
+        try:
+            return json.dumps(as_dict)
+        except TypeError:
+            as_dict.pop('content', None)
+            return json.dumps(as_dict)
 
     @property
     def destination(self):

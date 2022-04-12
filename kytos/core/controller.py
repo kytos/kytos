@@ -36,6 +36,7 @@ from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 from kytos.core.connection import ConnectionState
 from kytos.core.db import db_conn_wait
+from kytos.core.dead_letter import DeadLetter
 from kytos.core.events import KytosEvent
 from kytos.core.exceptions import KytosDBInitException
 from kytos.core.helpers import executor as executor_pool
@@ -144,6 +145,7 @@ class Controller:
                                     self.napps_manager, self.options.napps)
 
         self.auth = Auth(self)
+        self.dead_letter = DeadLetter(self)
 
         self._register_endpoints()
         #: Adding the napps 'enabled' directory into the PATH
@@ -353,6 +355,7 @@ class Controller:
         self.api_server.register_core_endpoint('reload/all',
                                                self.rest_reload_all_napps)
         self.auth.register_core_auth_services()
+        self.dead_letter.register_endpoints()
 
     def register_rest_endpoint(self, url, function, methods):
         """Deprecate in favor of @rest decorator."""

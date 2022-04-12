@@ -725,3 +725,8 @@ class TestController(TestCase):
         self.loop.run_until_complete(self.controller.app_event_handler())
 
         mock_notify_listeners.assert_called_with(event)
+
+    def test_init_attrs(self):
+        """Test init attrs."""
+        assert self.controller.auth
+        assert self.controller.dead_letter

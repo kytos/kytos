@@ -40,14 +40,14 @@ class TestDeadLetter(TestCase):
         assert self.dead_letter.delete_event(mock_ev.name, mock_ev.id)
         assert mock_ev.id not in self.dead_letter.dict[mock_ev.name]
 
-    def test_delete_topic(self):
-        """test delete_topic."""
-        topic = "topic"
-        assert topic not in self.dead_letter.dict
-        self.dead_letter.dict["topic"] = "some_value"
-        assert topic in self.dead_letter.dict
-        self.dead_letter.delete_topic(topic)
-        assert topic not in self.dead_letter.dict
+    def test_delete_event_name(self):
+        """test delete_event_name."""
+        event_name = "event_name"
+        assert event_name not in self.dead_letter.dict
+        self.dead_letter.dict[event_name] = "some_value"
+        assert event_name in self.dead_letter.dict
+        self.dead_letter.delete_event_name(event_name)
+        assert event_name not in self.dead_letter.dict
 
     def test_register_endpoints(self):
         """test register_endpoints."""
@@ -67,11 +67,12 @@ class TestDeadLetter(TestCase):
         jsonify.assert_called()
 
     @patch("kytos.core.dead_letter.jsonify")
-    def test_rest_patch_topic_not_found(self, _):
-        """test rest_patch topic not found."""
-        topic = "some_topic"
+    def test_rest_patch_event_name_not_found(self, _):
+        """test rest_patch event_name not found."""
+        event_name = "some_name"
         ids = ["id"]
-        body = {"topic": topic, "ids": ids, "kytos_queue_buffer": "app"}
+        body = {"event_name": event_name, "ids": ids,
+                "kytos_queue_buffer": "app"}
         request = self.dead_letter._get_request
         resp = MagicMock()
         resp.json = body
@@ -81,40 +82,42 @@ class TestDeadLetter(TestCase):
 
     @patch("kytos.core.dead_letter.jsonify")
     def test_rest_patch_ids_not_found(self, _):
-        """test rest_patch topic ids found."""
-        topic = "some_topic"
+        """test rest_patch event_name ids found."""
+        event_name = "some_name"
         ids = ["id"]
-        body = {"topic": topic, "ids": ids, "kytos_queue_buffer": "app"}
+        body = {"event_name": event_name, "ids": ids,
+                "kytos_queue_buffer": "app"}
         request = self.dead_letter._get_request
         resp = MagicMock()
         resp.json = body
         request.return_value = resp
-        self.dead_letter.dict[topic] = {}
+        self.dead_letter.dict[event_name] = {}
         with self.assertRaises(NotFound):
             self.dead_letter.rest_patch()
 
     @patch("kytos.core.dead_letter.jsonify")
     def test_rest_patch(self, _):
         """test rest_patch."""
-        topic = "some_topic"
+        event_name = "some_name"
         ids = ["id", "id2"]
-        body = {"topic": topic, "ids": ids, "kytos_queue_buffer": "app"}
+        body = {"event_name": event_name, "ids": ids,
+                "kytos_queue_buffer": "app"}
         request = self.dead_letter._get_request
         resp = MagicMock()
         resp.json = body
         request.return_value = resp
         for _id in ids:
-            self.dead_letter.dict[topic][_id] = {}
+            self.dead_letter.dict[event_name][_id] = {}
         self.dead_letter.reinject = MagicMock()
 
         self.dead_letter.rest_patch()
         assert self.dead_letter.reinject.call_count == len(ids)
 
     @patch("kytos.core.dead_letter.jsonify")
-    def test_rest_delete_topic_not_found(self, _):
-        """test rest_delete topic not found."""
+    def test_rest_delete_event_name_not_found(self, _):
+        """test rest_delete event_name not found."""
         ids = ["id"]
-        body = {"topic": "inexistent", "ids": ids}
+        body = {"event_name": "inexistent", "ids": ids}
         request = self.dead_letter._get_request
         resp = MagicMock()
         resp.json = body
@@ -124,16 +127,16 @@ class TestDeadLetter(TestCase):
 
     @patch("kytos.core.dead_letter.jsonify")
     def test_rest_delete_ids_not_found(self, _):
-        """test rest_delete topic ids found."""
+        """test rest_delete event_name ids found."""
 
-        topic = "some_topic"
+        event_name = "some_name"
         ids = ["id"]
-        body = {"topic": topic, "ids": ids}
+        body = {"event_name": event_name, "ids": ids}
         request = self.dead_letter._get_request
         resp = MagicMock()
         resp.json = body
         request.return_value = resp
-        self.dead_letter.dict[topic] = {}
+        self.dead_letter.dict[event_name] = {}
         with self.assertRaises(NotFound):
             self.dead_letter.rest_delete()
 
@@ -141,27 +144,27 @@ class TestDeadLetter(TestCase):
     def test_rest_delete(self, _):
         """test rest_delete."""
 
-        topic = "some_topic"
+        event_name = "some_name"
         ids = ["id", "id2"]
-        body = {"topic": topic, "ids": ids}
+        body = {"event_name": event_name, "ids": ids}
         request = self.dead_letter._get_request
         resp = MagicMock()
         resp.json = body
         request.return_value = resp
         for _id in ids:
-            self.dead_letter.dict[topic][_id] = {}
+            self.dead_letter.dict[event_name][_id] = {}
 
-        assert len(self.dead_letter.dict[topic]) == len(ids)
+        assert len(self.dead_letter.dict[event_name]) == len(ids)
         self.dead_letter.rest_delete()
-        assert len(self.dead_letter.dict[topic]) == 0
+        assert len(self.dead_letter.dict[event_name]) == 0
 
     @patch("kytos.core.dead_letter.jsonify")
     def test_reinject(self, _):
         """test reinject."""
         mock_ev = MagicMock()
         mock_ev.reinjections = 0
-        topic = "topic"
+        event_name = "event_name"
         _id = "id"
-        self.dead_letter.dict[topic][_id] = mock_ev
-        self.dead_letter.reinject(topic, _id, "app")
+        self.dead_letter.dict[event_name][_id] = mock_ev
+        self.dead_letter.reinject(event_name, _id, "app")
         assert mock_ev.reinjections == 1

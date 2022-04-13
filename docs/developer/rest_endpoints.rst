@@ -159,25 +159,25 @@ Run ``kytosd -f``, and run the code below on the kytos console:
 
 **Dead Letter Endpoints**
 
-List KytosEvent dead letter structure (and filter a given subscribed topic).
+List KytosEvent dead letter structure (and filter a given KytosEvent name).
 
 .. code:: console
 
-   GET /api/kytos/core/dead_letter/?topic=<topic>
+   GET /api/kytos/core/dead_letter/?event_name=<name>
 
-Reinject KytosEvents from a given subscribed topic back into a Kytos buffer queue (``app`` or ``msg_in``).
+Reinject KytosEvents into a Kytos buffer queue (``app`` or ``msg_in``).
 
 .. code:: console
 
    PATCH /api/kytos/core/dead_letter/
-   request body: {"topic": "some_topic", "ids": ["id"], "kytos_queue_buffer": "app"}
+   request body: {"event_name": "some_name", "ids": ["id"], "kytos_queue_buffer": "app"}
 
-Delete a single KytosEvent or all from a given subscribed topic.
+Delete a single KytosEvent or all.
 
 .. code:: console
 
    DELETE /api/kytos/core/dead_letter/
-   request body: {"topic": "all", "ids": ["id"]}
+   request body: {"event_name": "all", "ids": ["id"]}
 
 
 NApps' REST Endpoints

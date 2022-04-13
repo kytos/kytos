@@ -20,7 +20,7 @@ class KytosQueueBufferNames(str, Enum):
 
 class DeadLetterDeletePayload(BaseModel):
     """DeadLetterDeletePayload."""
-    topic: constr(min_length=1)
+    event_name: constr(min_length=1)
     ids: List[str] = []
 
 
@@ -40,9 +40,9 @@ class DeadLetter:
 
         """
         self.controller = controller
-        self.dict = defaultdict(OrderedDict)  # topic dict of KytosEvents
+        self.dict = defaultdict(OrderedDict)  # dict of KytosEvents by name
         self._lock = Lock()
-        self._max_len_per_topic = 100000
+        self._max_len_per_event_name = 50000
 
     @staticmethod
     def _get_request():
@@ -60,12 +60,12 @@ class DeadLetter:
                                    methods=["PATCH"])
 
     def rest_list(self):
-        """List dead letter topics."""
-        topic = self._get_request().args.get("topic")
+        """List dead letter events."""
+        event_name = self._get_request().args.get("event_name")
         response = (
-            self.list_topics()
-            if not topic
-            else self.list_topic(topic)
+            self.list_events()
+            if not event_name
+            else self.list_event(event_name)
         )
         return jsonify(response)
 
@@ -77,24 +77,24 @@ class DeadLetter:
         except ValidationError as exc:
             raise BadRequest(exc.errors())
 
-        topic = body.topic
-        if topic not in self.dict:
-            raise NotFound(f"topic {topic} not found")
+        event_name = body.event_name
+        if event_name not in self.dict:
+            raise NotFound(f"event_name {event_name} not found")
 
-        diff_ids = set(body.ids) - set(self.dict[topic].keys())
+        diff_ids = set(body.ids) - set(self.dict[event_name].keys())
         if diff_ids:
             raise NotFound(f"KytosEvent ids not found: {diff_ids}")
 
-        _ids = body.ids or self.dict[topic].keys()
+        _ids = body.ids or self.dict[event_name].keys()
         for _id in _ids:
-            self.reinject(topic, _id, body.kytos_queue_buffer)
+            self.reinject(event_name, _id, body.kytos_queue_buffer)
 
         return jsonify()
 
     def rest_delete(self):
         """Delete dead letter events.
 
-        topic 'all' means explicitly delete all topics and events
+        event_name 'all' means explicitly delete all event names
 
         """
         body = self._get_request().json or {}
@@ -103,61 +103,61 @@ class DeadLetter:
         except ValidationError as exc:
             raise BadRequest(exc.errors())
 
-        topic = body.topic
-        if topic == "all":
-            for topic in self.dict.keys():
-                self.delete_topic(topic)
+        event_name = body.event_name
+        if event_name == "all":
+            for event_name in self.dict.keys():
+                self.delete_event_name(event_name)
             return jsonify()
 
-        if topic not in self.dict:
-            raise NotFound(f"topic {topic} not found")
+        if event_name not in self.dict:
+            raise NotFound(f"event_name {event_name} not found")
 
-        diff_ids = set(body.ids) - set(self.dict[topic].keys())
+        diff_ids = set(body.ids) - set(self.dict[event_name].keys())
         if diff_ids:
             raise NotFound(f"KytosEvent ids not found: {diff_ids}")
 
         if not body.ids:
-            self.delete_topic(topic)
+            self.delete_event_name(event_name)
         else:
             for _id in body.ids:
-                self.delete_event(topic, _id)
+                self.delete_event(event_name, _id)
         return jsonify()
 
-    def list_topic(self, topic: str):
-        """List dead letter by topic."""
+    def list_event(self, event_name: str):
+        """List dead letter by event name."""
         response = defaultdict(dict)
-        for key, value in self.dict[topic].items():
-            response[topic][key] = json.loads(value.as_json())
+        for key, value in self.dict[event_name].items():
+            response[event_name][key] = json.loads(value.as_json())
         return response
 
-    def list_topics(self):
-        """List dead letter topics."""
+    def list_events(self):
+        """List dead letter events."""
         response = defaultdict(dict)
-        for topic, _dict in self.dict.items():
+        for event_name, _dict in self.dict.items():
             for key, value in _dict.items():
-                response[topic][key] = json.loads(value.as_json())
+                response[event_name][key] = json.loads(value.as_json())
         return response
 
     def add_event(self, event):
         """Add a KytoEvent to the dead letter."""
-        if len(self.dict[event.name]) >= self._max_len_per_topic:
+        if len(self.dict[event.name]) >= self._max_len_per_event_name:
             self.dict[event.name].popitem(last=False)
         self.dict[event.name][str(event.id)] = event
 
-    def delete_event(self, topic: str, event_id: str):
+    def delete_event(self, event_name: str, event_id: str):
         """Delete a KytoEvent from the dead letter."""
-        return self.dict[topic].pop(event_id, None)
+        return self.dict[event_name].pop(event_id, None)
 
-    def delete_topic(self, topic: str):
-        """Delete a topic from the dead letter."""
-        return self.dict.pop(topic, None)
+    def delete_event_name(self, event_name: str):
+        """Delete a event_name from the dead letter."""
+        return self.dict.pop(event_name, None)
 
-    def reinject(self, topic: str, event_id: str, buffer_name: str):
+    def reinject(self, event_name: str, event_id: str, buffer_name: str):
         """Reinject an KytosEvent into a KytosEventBuffer."""
         if buffer_name not in {"app", "msg_in"}:
             return
         with self._lock:
-            kytos_event = self.dict[topic].pop(event_id, None)
+            kytos_event = self.dict[event_name].pop(event_id, None)
             if not kytos_event:
                 return
             kytos_event.reinjections += 1

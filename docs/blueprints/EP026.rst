@@ -26,22 +26,22 @@ Motivation
 
 The main motivation to have a canonical document-oriented recommended database are driven by these reasons:
 
-- A database must have been designed for performance in terms of IO, concurrency, production-grade and has battle been tested.
+- A database must have been designed for performance in terms of IO, concurrency, production-grade and has been battle tested.
 - A database must provide indexed and advanced query capabilities over documents and collections.
-- ``storehouse`` NApp abstracts different kind of storages but it was primarily meant to be used as a plug and play file system storage, and it has served well so far, however, when it tries to expose other storage backends with a common interface it falls short to provide flexible queries, bulk operations with transactions and indexing capabilities that are considered must have in production. Also, when other client NApps use ``storehouse`` asynchronously, and potential race conditions can happen and interfacing concurrently and safely can be difficult.
+- ``storehouse`` NApp abstracts different kind of storages but it was primarily meant to be used as a plug and play file system storage, and it has served well so far, however, when it tries to expose other storage backends with a common interface it falls short to provide flexible queries, bulk operations with transactions and indexing capabilities that are considered must have in production. Also, when other client NApps use ``storehouse`` asynchronously potential race conditions can happen and interfacing concurrently and safely can be difficult.
 
 
 Requirements
 ============
 
-The following are the requirements that for a canonical document-oriented NoSQL database:
+The following are the requirements for a canonical document-oriented NoSQL database:
 
 1. It must have been designed for performance in terms of IO, concurrency, production-grade and has been battle tested.
 2. It must be able to index JSON documents, including nested ones providing optimal query lookups.
 3. It must provide ACID transactions for multi-documents and for multi collections.
 4. It must be able to scale horizontally through clustering, and it should be able to maintain strong consistency.
 5. It must be able to provide immediate consistency and also provides options to leverage eventual consistency when applicable.
-6. It must be able to deploy in a Docker container, and ideally have support to easily deploy on Kubernetes.
+6. It must be deployable in a Docker container, and ideally have support to easily deploy on Kubernetes.
 7. The database should be open source and be well maintained. 
 8. The database Python library driver must be well maintained, support ``gevent`` to be compatible with Flask SocketIO threading mode. 
 9. The database Python library driver should either be compatible with ``asyncio`` or have an alternative ``asyncio`` library.
@@ -132,7 +132,7 @@ The following table compares both MongoDB and ArangoDB in terms of the requireme
 
 * **Requirement 13)**
 
-  * `MongoDB's documentation <https://docs.mongodb.com/manual/tutorial/backup-and-restore-tools/>`_ is very detailed compared to `Arango's <https://www.arangodb.com/docs/stable/backup-restore.html>`_, both have the tools to dump and restore. It's worth pointing out that ``mongodump`` and ``mongorestore`` `as mentioned here <https://docs.mongodb.com/manual/tutorial/backup-and-restore-tools/#restore-a-database-with-mongorestore>`_ cannot be used in a sharded clusters that have transaction in progress, so temporarily stopping writes might be needed if using these tools, alternatively if a Linux LVM if available, and it can create snapshots, then one can also leverage this mechanism to have point-in-time backups `as documented here <https://docs.mongodb.com/manual/core/backups/#back-up-with-filesystem-snapshots>`_. There are other alternatives, including cloud-based ones, each with their trade-offs. If `Mongo's Ops Manager <https://www.mongodb.com/products/ops-manager>`_ were free to use in production that'd be great.
+  * `MongoDB's documentation <https://docs.mongodb.com/manual/tutorial/backup-and-restore-tools/>`_ is very detailed compared to `Arango's <https://www.arangodb.com/docs/stable/backup-restore.html>`_, both have the tools to dump and restore. It's worth pointing out that ``mongodump`` and ``mongorestore`` `as mentioned here <https://docs.mongodb.com/manual/tutorial/backup-and-restore-tools/#restore-a-database-with-mongorestore>`_ cannot be used in a sharded clusters that have transaction in progress, so temporarily stopping writes might be needed if using these tools, alternatively if a Linux LVM is available, and it can create snapshots, then one can also leverage this mechanism to have point-in-time backups `as documented here <https://docs.mongodb.com/manual/core/backups/#back-up-with-filesystem-snapshots>`_. There are other alternatives, including cloud-based ones, each with their trade-offs. If `Mongo's Ops Manager <https://www.mongodb.com/products/ops-manager>`_ were free to use in production that'd be great.
 
 
 Canonical Chosen Database

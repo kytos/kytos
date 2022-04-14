@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 import time
-from typing import Optional
+from typing import List, Optional, Tuple
 
 import pymongo.helpers
 from pymongo import MongoClient
@@ -89,20 +89,21 @@ class Mongo:
     def bootstrap_index(
         cls,
         collection: str,
-        index: str,
-        direction: int,
+        keys: List[Tuple[str, int]],
         **kwargs,
     ) -> Optional[str]:
         """Bootstrap index."""
         db = cls.client[cls.db_name]
         indexes = set()
+        if "background" not in kwargs:
+            kwargs["background"] = True
 
         for value in db[collection].index_information().values():
             if "key" in value and isinstance(value["key"], list):
-                indexes.add(value["key"][0])
+                indexes.add(tuple(value["key"]))
 
-        if (index, direction) not in indexes:
-            return db[collection].create_index([(index, direction)], **kwargs)
+        if tuple(keys) not in indexes:
+            return db[collection].create_index(keys, **kwargs)
 
         return None
 

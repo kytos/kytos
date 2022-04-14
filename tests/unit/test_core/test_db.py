@@ -58,9 +58,16 @@ class TestDb(TestCase):
         coll = "switches"
 
         db[coll].index_information.return_value = {}
-        Mongo().bootstrap_index(coll, "interfaces.id", 1)
+        keys = [("interfaces.id", 1)]
+        Mongo().bootstrap_index(coll, keys)
         assert db[coll].create_index.call_count == 1
-        db[coll].create_index.assert_called_with([("interfaces.id", 1)])
+        db[coll].create_index.assert_called_with(keys, background=True)
+
+        keys = [("interfaces.id", 1), ("interfaces.name", 1)]
+        Mongo().bootstrap_index(coll, keys)
+        assert db[coll].create_index.call_count == 2
+        db[coll].create_index.assert_called_with(keys,
+                                                 background=True)
 
     @staticmethod
     @patch("kytos.core.db.LOG")

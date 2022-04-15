@@ -83,6 +83,7 @@ database =
 # MONGO_DBNAME=napps
 # MONGO_MAX_POOLSIZE=300
 # MONGO_MIN_POOLSIZE=30
+# MONGO_TIMEOUTMS=30000
 
 # Define URLs that will require authentication
 #

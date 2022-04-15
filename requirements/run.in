@@ -11,3 +11,6 @@ janus
 jinja2
 watchdog
 pyjwt
+pymongo==4.1.0
+pydantic==1.9.0
+tenacity=8.0.1

@@ -35,7 +35,10 @@ from kytos.core.auth import Auth
 from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 from kytos.core.connection import ConnectionState
+from kytos.core.db import db_conn_wait
+from kytos.core.dead_letter import DeadLetter
 from kytos.core.events import KytosEvent
+from kytos.core.exceptions import KytosDBInitException
 from kytos.core.helpers import executor as executor_pool
 from kytos.core.helpers import now
 from kytos.core.interface import Interface
@@ -142,6 +145,7 @@ class Controller:
                                     self.napps_manager, self.options.napps)
 
         self.auth = Auth(self)
+        self.dead_letter = DeadLetter(self)
 
         self._register_endpoints()
         #: Adding the napps 'enabled' directory into the PATH
@@ -206,6 +210,8 @@ class Controller:
     def start(self, restart=False):
         """Create pidfile and call start_controller method."""
         self.enable_logs()
+        if self.options.database:
+            self.db_conn_or_core_shutdown()
         if not restart:
             self.create_pidfile()
         self.start_controller()
@@ -323,6 +329,13 @@ class Controller:
 
         self.started_at = now()
 
+    def db_conn_or_core_shutdown(self):
+        """Ensure db connection or core shutdown."""
+        try:
+            db_conn_wait(db_backend=self.options.database)
+        except KytosDBInitException as exc:
+            sys.exit(f"Kytos couldn't start because of {str(exc)}")
+
     def _register_endpoints(self):
         """Register all rest endpoint served by kytos.
 
@@ -342,6 +355,7 @@ class Controller:
         self.api_server.register_core_endpoint('reload/all',
                                                self.rest_reload_all_napps)
         self.auth.register_core_auth_services()
+        self.dead_letter.register_endpoints()
 
     def register_rest_endpoint(self, url, function, methods):
         """Deprecate in favor of @rest decorator."""

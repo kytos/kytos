@@ -36,7 +36,7 @@ The APM should be configurable on Kytos and it shouldn't be loaded by default. T
 - **2)** It must be open-source and free to use its main functionalities.
 - **3)** It must be possible to add custom instrumentation if needed.
 - **4)** It must support Python 3.9+.
-- **5)** It should provide automatic instrumentation for requests, be able to handle asyncio, and pymongo.
+- **5)** It should provide automatic instrumentation for Flask, requests, be able to handle asyncio, and pymongo.
 
 Candidates
 ==========

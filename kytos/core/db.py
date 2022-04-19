@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 def _log_pymongo_thread_traceback() -> None:
     """Log pymongo thread traceback.
 
-    Originally, it printed out to sys.stderr poluting it when handling
+    Originally, it printed out to sys.stderr polluting it when handling
     certain asynchronous errors that can happen, with this patched function
     it logs to LOG.error instead.
     """
@@ -52,7 +52,7 @@ def mongo_client(
     readconcernlevel="majority",
     maxpoolsize=int(os.environ.get("MONGO_MAX_POOLSIZE") or 300),
     minpoolsize=int(os.environ.get("MONGO_MIN_POOLSIZE") or 30),
-    serverselectiontimeoutms=30000,
+    serverselectiontimeoutms=int(os.environ.get("MONGO_TIMEOUTMS") or 30000),
     **kwargs,
 ) -> MongoClient:
     """Instantiate a MongoClient instance.
@@ -108,11 +108,12 @@ class Mongo:
         return None
 
 
-def _mongo_conn_wait(mongo_client=mongo_client, retries=10,
+def _mongo_conn_wait(mongo_client=mongo_client, retries=12,
                      timeout_ms=10000) -> None:
     """Try to run 'hello' command on MongoDB and wait for it with retries."""
     try:
-        client = mongo_client(maxpoolsize=6, minpoolsize=3)
+        client = mongo_client(maxpoolsize=6, minpoolsize=3,
+                              serverselectiontimeoutms=timeout_ms)
         LOG.info("Trying to run 'hello' command on MongoDB...")
         client.db.command("hello")
         LOG.info("Ran 'hello' command on MongoDB successfully. It's ready!")

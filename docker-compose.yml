@@ -62,6 +62,9 @@ services:
       - cluster.routing.allocation.disk.threshold_enabled=false
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - xpack.monitoring.enabled=true
+      - xpack.security.enabled=true
+      - xpack.security.authc.api_key.enabled=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-elastic_pw}
     volumes:
       - esdata:/usr/share/elasticsearch/data
     ports:
@@ -77,6 +80,9 @@ services:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - xpack.apm.enabled=false
+      - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME:-elastic}
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD:-elastic_pw}
+      - XPACK_SECURITY_ENABLED=true
     volumes:
       - kibana_data:/usr/share/kibana/data
     ports:
@@ -102,7 +108,11 @@ services:
          -E setup.template.settings.index.number_of_replicas=0
          -E apm-server.kibana.enabled=true
          -E apm-server.kibana.host=kibana:5601
+         -E apm-server.kibana.username=${ELASTIC_USERNAME:-elastic}
+         -E apm-server.kibana.password=${ELASTIC_PASSWORD:-elastic_pw}
          -E output.elasticsearch.hosts=["elasticsearch:9200"]
+         -E output.elasticsearch.username=${ELASTIC_USERNAME:-elastic}
+         -E output.elasticsearch.password=${ELASTIC_PASSWORD:-elastic_pw}
 
 
 volumes:

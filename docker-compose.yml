@@ -104,6 +104,8 @@ services:
     command: >
        apm-server -e
          -E apm-server.rum.enabled=true
+         -E apm-server.auth.api_key.enabled=true
+         -E apm-server.auth.secret_token=${ELASTIC_APM_SECRET_TOKEN:-elasticapm_token}
          -E setup.kibana.host=kibana:5601
          -E setup.template.settings.index.number_of_replicas=0
          -E apm-server.kibana.enabled=true

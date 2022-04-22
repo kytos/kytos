@@ -1,7 +1,8 @@
 """Test kytos.core.events module."""
 import json
 from datetime import datetime, timezone
-from unittest import MagicMock, TestCase
+from unittest import TestCase
+from unittest.mock import MagicMock
 from uuid import UUID
 
 from kytos.core.events import KytosEvent

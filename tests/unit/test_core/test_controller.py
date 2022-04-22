@@ -193,7 +193,7 @@ class TestController(TestCase):
          mock_start_controller, mock_db_conn_or_shutdown,
          mock_init_apm_or_shutdown) = args
         self.controller.options.database = "mongodb"
-        self.controller.options.apm = "elasticsearch"
+        self.controller.options.apm = "es"
         self.controller.start()
 
         mock_enable_logs.assert_called()

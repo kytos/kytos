@@ -154,7 +154,7 @@ def listen_to(event, *events):
             return result
 
         handler_func, kwargs = handler_context, {}
-        if get_apm_name() == "elasticsearch":
+        if get_apm_name() == "es":
             handler_func = handler_context_apm
             kwargs = dict(apm_client=ElasticAPM.get_client())
 

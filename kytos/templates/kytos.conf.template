@@ -85,7 +85,7 @@ database =
 # MONGO_MIN_POOLSIZE=30
 # MONGO_TIMEOUTMS=30000
 
-# APM backend. Supported values: elasticsearch (don't use quotes in the string)
+# APM backend. Supported values: es (elasticsearch, don't use quotes in the string)
 apm =
 # The following environment variables should be accordingly if you're using elasticsearch:
 # ELASTIC_APM_URL=http://localhost:8200

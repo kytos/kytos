@@ -9,9 +9,9 @@ from elasticapm.traces import execution_context
 from kytos.core.exceptions import KytosAPMInitException
 
 
-def init_apm(apm_backend="elasticsearch", **kwargs):
+def init_apm(apm_backend="es", **kwargs):
     """Init APM backend."""
-    backends = {"elasticsearch": ElasticAPM}
+    backends = {"es": ElasticAPM}
     try:
         return backends[apm_backend].init_client(**kwargs)
     except KeyError:

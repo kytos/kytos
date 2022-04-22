@@ -29,7 +29,7 @@ class TestElasticAPM(TestCase):
     @patch("kytos.core.apm.ElasticAPM.init_client")
     def test_init_apm(self, mock_init):
         """Test init_apm."""
-        init_apm("elasticsearch")
+        init_apm("es")
         assert mock_init.call_count == 1
 
         with self.assertRaises(KytosAPMInitException):

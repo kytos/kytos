@@ -96,6 +96,10 @@ class KytosConfig():
                             action='store',
                             help="Database backend.")
 
+        parser.add_argument('-a', '--apm',
+                            action='store',
+                            help="APM backend.")
+
         self.conf_parser, self.parser = conf_parser, parser
         self.parse_args()
 

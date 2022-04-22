@@ -85,6 +85,14 @@ database =
 # MONGO_MIN_POOLSIZE=30
 # MONGO_TIMEOUTMS=30000
 
+# APM backend. Supported values: elasticsearch (don't use quotes in the string)
+apm =
+# The following environment variables should be accordingly if you're using elasticsearch:
+# ELASTIC_APM_URL=http://localhost:8200
+# Optionally, these environment variables can also be set:
+# ELASTIC_APM_SERVICE_NAME=kytos
+# ELASTIC_APM_SECRET_TOKEN=
+
 # Define URLs that will require authentication
 #
 # This must be a list of part of URLs. For example, if "kytos/mef_eline"

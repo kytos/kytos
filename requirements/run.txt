@@ -40,6 +40,10 @@ pydantic==1.9.0           # via -r requirements/run.in
 pymongo==4.1.0            # via -r requirements/run.in
 typing-extensions==4.0.1  # via pydantic
 tenacity==8.0.1           # via -r requirements/run.in
+elastic-apm[flask]==6.9.1 # via -r requirements/run.in
+certifi==2021.10.8        # via elastic-apm
+urllib3==1.26.7           # via elastic-apm
+blinker==1.4              # via elastic-apm
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

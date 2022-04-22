@@ -92,6 +92,10 @@ class KytosConfig():
                             action='store',
                             help="Maximum number of threads in the pool.")
 
+        parser.add_argument('-d', '--database',
+                            action='store',
+                            help="Database backend.")
+
         self.conf_parser, self.parser = conf_parser, parser
         self.parse_args()
 
@@ -137,6 +141,7 @@ class KytosConfig():
                     'vlan_pool': {},
                     'token_expiration_minutes': 180,
                     'thread_pool_max_workers': 256,
+                    'database': '',
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()

@@ -35,7 +35,9 @@ from kytos.core.auth import Auth
 from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 from kytos.core.connection import ConnectionState
+from kytos.core.db import db_conn_wait
 from kytos.core.events import KytosEvent
+from kytos.core.exceptions import KytosDBInitException
 from kytos.core.helpers import executor as executor_pool
 from kytos.core.helpers import now
 from kytos.core.interface import Interface
@@ -206,6 +208,8 @@ class Controller:
     def start(self, restart=False):
         """Create pidfile and call start_controller method."""
         self.enable_logs()
+        if self.options.database:
+            self.db_conn_or_core_shutdown()
         if not restart:
             self.create_pidfile()
         self.start_controller()
@@ -322,6 +326,13 @@ class Controller:
         self.load_napps()
 
         self.started_at = now()
+
+    def db_conn_or_core_shutdown(self):
+        """Ensure db connection or core shutdown."""
+        try:
+            db_conn_wait(db_backend=self.options.database)
+        except KytosDBInitException as exc:
+            sys.exit(f"Kytos couldn't start because of {str(exc)}")
 
     def _register_endpoints(self):
         """Register all rest endpoint served by kytos.

@@ -4,12 +4,8 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from threading import Thread
 
+from kytos.core.apm import ElasticAPM
 from kytos.core.config import KytosConfig
-
-import elasticapm
-from elasticapm import Client
-apm_client = Client(service_name="kytos", server_url="http://localhost:8200")
-elasticapm.instrument()
 
 __all__ = ['listen_to', 'now', 'run_on_thread', 'get_time']
 
@@ -21,6 +17,11 @@ LOG = logging.getLogger(__name__)
 def get_thread_pool_max_workers():
     """Get the number of thread pool max workers."""
     return int(KytosConfig().options["daemon"].thread_pool_max_workers)
+
+
+def get_apm_name():
+    """Get apm backend name."""
+    return KytosConfig().options["daemon"].apm
 
 
 # pylint: disable=invalid-name
@@ -94,6 +95,7 @@ def listen_to(event, *events):
         threaded_handler.events.extend(events)
         return threaded_handler
 
+    # pylint: disable=broad-except
     def thread_pool_decorator(handler):
         """Decorate the handler method.
 
@@ -104,38 +106,61 @@ def listen_to(event, *events):
         """
         def done_callback(future):
             """Done callback."""
-            args = (
-                getattr(future, "__args")
-                if hasattr(future, "__args")
-                else tuple()
-            )
-            if len(args) > 1 and hasattr(future, "__transaction"):
-                tx = getattr(future, "__transaction")
-                tx.name = f"{args[1].name}@{args[0].napp_id}"
-                tx.end()
-                apm_client.tracer.queue_func("transaction", tx.to_dict())
             if not future.exception():
                 _ = future.result()
                 return
 
-            exc_str = f"{type(future.exception())}: {future.exception()}"
-            args = (
-                getattr(future, "__args")
-                if hasattr(future, "__args")
-                else tuple()
-            )
-            LOG.error(f"listen_to handler: {handler}, "
-                      f"args: {args}, exception: {exc_str}")
-            if len(args) > 1 and hasattr(args[0], "controller"):
-                cls, kytos_event = args[0], args[1]
-                cls.controller.dead_letter.add_event(kytos_event)
+        # pylint: disable=unused-argument
+        def handler_context(*args, **kwargs):
+            """Handler's context for ThreadPool."""
+            cls, kytos_event = args[0], args[1]
+            try:
+                result = handler(*args)
+            except Exception as exc:
+                result = None
+                exc_str = f"{type(exc)}: {str(exc)}"
+                LOG.error(f"listen_to handler: {handler}, "
+                          f"args: {args}, exception: {exc_str}")
+                if hasattr(cls, "controller"):
+                    cls.controller.dead_letter.add_event(kytos_event)
+            return result
+
+        def handler_context_apm(*args, apm_client=None):
+            """Handler's context for ThreadPool APM instrumentation."""
+            cls, kytos_event = args[0], args[1]
+            trace_parent = kytos_event.trace_parent
+            tx_type = "kytos_event"
+            tx = apm_client.begin_transaction(transaction_type=tx_type,
+                                              trace_parent=trace_parent)
+            kytos_event.trace_parent = tx.trace_parent
+            tx.name = f"{kytos_event.name}@{cls.napp_id}"
+            try:
+                result = handler(*args)
+                tx.result = result
+            except Exception as exc:
+                result = None
+                exc_str = f"{type(exc)}: {str(exc)}"
+                LOG.error(f"listen_to handler: {handler}, "
+                          f"args: {args}, exception: {exc_str}")
+                if hasattr(cls, "controller"):
+                    cls.controller.dead_letter.add_event(kytos_event)
+                apm_client.capture_exception(
+                    exc_info=(type(exc), exc, exc.__traceback__),
+                    context={"args": args},
+                    handled=False,
+                )
+            tx.end()
+            apm_client.tracer.queue_func("transaction", tx.to_dict())
+            return result
+
+        handler_func, kwargs = handler_context, {}
+        if get_apm_name() == "elasticsearch":
+            handler_func = handler_context_apm
+            kwargs = dict(apm_client=ElasticAPM.get_client())
 
         def inner(*args):
             """Decorate the handler to run in the thread pool."""
-            tx = apm_client.begin_transaction(transaction_type="kytos_event")
-            future = executor.submit(handler, *args)
-            setattr(future, "__transaction", tx)
-            setattr(future, "__args", args)
+            future = executor.submit(handler_func, *args, **kwargs)
             future.add_done_callback(done_callback)
 
         inner.events = [event]

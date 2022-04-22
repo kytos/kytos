@@ -26,9 +26,9 @@ Added
 
 - Added ``tenacity`` as a core dependency for retries.
 - New ``--apm`` configuration option that supports ``elasticsearch`` APM (Application Performance Monitoring)
-- ``kytosd`` Elastic APM integration provides instrumentation for MongoDB, Flask, requests and ``KytosEvent``.
-- ``@begin_span`` decorator for on-demand APM custom functions/methods instrumentation.
-- Augmented docker-compose.yml to also spin up Elastsearch, Kibana and APM server with authentication.
+- ``kytosd`` Elastic APM integration provides instrumentation for MongoDB, Flask, requests and ``KytosEvent``
+- ``@begin_span`` decorator for on-demand APM custom functions/methods instrumentation
+- Augmented docker-compose.yml to also spin up Elastsearch, Kibana and APM server with authentication
 
 Changed
 =======

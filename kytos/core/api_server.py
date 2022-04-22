@@ -51,6 +51,7 @@ class APIServer:
 
         self.listen = listen
         self.port = port
+
         self.app = Flask(app_name, root_path=self.flask_dir,
                          static_folder="dist", static_url_path="/dist")
         self.server = SocketIO(self.app, async_mode='threading')

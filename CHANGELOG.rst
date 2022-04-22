@@ -25,11 +25,16 @@ Added
    DELETE /api/kytos/core/dead_letter/ (requires request body)
 
 - Added ``tenacity`` as a core dependency for retries.
+- New ``--apm`` configuration option that supports ``elasticsearch`` APM (Application Performance Monitoring)
+- ``kytosd`` Elastic APM integration provides instrumentation for MongoDB, Flask, requests and ``KytosEvent``.
+- ``@begin_span`` decorator for on-demand APM custom functions/methods instrumentation.
+- Augmented docker-compose.yml to also spin up Elastsearch, Kibana and APM server with authentication.
 
 Changed
 =======
 - Kytos controller can shutdown if the database is configured but not reachable during startup time.
 - Augmented ``KytosEvent`` with internal attributes (``id`` and ``reinjections``), no breaking changes.
+- ``KytosEvent`` now optionally supports a ``trace_parent`` argument for APM distributed tracing to also instrument and correlate ``KytosEvent``.
 
 Deprecated
 ==========

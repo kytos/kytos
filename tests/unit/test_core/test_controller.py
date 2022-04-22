@@ -164,6 +164,7 @@ class TestController(TestCase):
         self.assertRaises(ValueError,
                           self.controller.toggle_debug, name="foobar")
 
+    @patch('kytos.core.controller.Controller.init_apm_or_core_shutdown')
     @patch('kytos.core.controller.Controller.db_conn_or_core_shutdown')
     @patch('kytos.core.controller.Controller.start_controller')
     @patch('kytos.core.controller.Controller.create_pidfile')
@@ -171,29 +172,35 @@ class TestController(TestCase):
     def test_start(self, *args):
         """Test start method."""
         (mock_enable_logs, mock_create_pidfile,
-         mock_start_controller, mock_db_conn_or_shutdown) = args
+         mock_start_controller, mock_db_conn_or_shutdown,
+         mock_init_apm_or_shutdown) = args
         self.controller.start()
 
         mock_enable_logs.assert_called()
         mock_create_pidfile.assert_called()
         mock_start_controller.assert_called()
         mock_db_conn_or_shutdown.assert_not_called()
+        mock_init_apm_or_shutdown.assert_not_called()
 
+    @patch('kytos.core.controller.Controller.init_apm_or_core_shutdown')
     @patch('kytos.core.controller.Controller.db_conn_or_core_shutdown')
     @patch('kytos.core.controller.Controller.start_controller')
     @patch('kytos.core.controller.Controller.create_pidfile')
     @patch('kytos.core.controller.Controller.enable_logs')
-    def test_start_with_mongodb(self, *args):
-        """Test start method with database option set."""
+    def test_start_with_mongodb_and_apm(self, *args):
+        """Test start method with database and APM options set."""
         (mock_enable_logs, mock_create_pidfile,
-         mock_start_controller, mock_db_conn_or_shutdown) = args
+         mock_start_controller, mock_db_conn_or_shutdown,
+         mock_init_apm_or_shutdown) = args
         self.controller.options.database = "mongodb"
+        self.controller.options.apm = "elasticsearch"
         self.controller.start()
 
         mock_enable_logs.assert_called()
         mock_create_pidfile.assert_called()
         mock_start_controller.assert_called()
         mock_db_conn_or_shutdown.assert_called()
+        mock_init_apm_or_shutdown.assert_called()
 
     @patch('kytos.core.controller.sys.exit')
     @patch('kytos.core.controller.Controller.start_controller')

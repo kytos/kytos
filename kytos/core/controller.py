@@ -29,6 +29,7 @@ from pathlib import Path
 from socket import error as SocketError
 
 from kytos.core.api_server import APIServer
+from kytos.core.apm import init_apm
 # from kytos.core.tcp_server import KytosRequestHandler, KytosServer
 from kytos.core.atcp_server import KytosServer, KytosServerProtocol
 from kytos.core.auth import Auth
@@ -38,7 +39,7 @@ from kytos.core.connection import ConnectionState
 from kytos.core.db import db_conn_wait
 from kytos.core.dead_letter import DeadLetter
 from kytos.core.events import KytosEvent
-from kytos.core.exceptions import KytosDBInitException
+from kytos.core.exceptions import KytosAPMInitException, KytosDBInitException
 from kytos.core.helpers import executor as executor_pool
 from kytos.core.helpers import now
 from kytos.core.interface import Interface
@@ -212,6 +213,8 @@ class Controller:
         self.enable_logs()
         if self.options.database:
             self.db_conn_or_core_shutdown()
+        if self.options.apm:
+            self.init_apm_or_core_shutdown()
         if not restart:
             self.create_pidfile()
         self.start_controller()
@@ -334,6 +337,16 @@ class Controller:
         try:
             db_conn_wait(db_backend=self.options.database)
         except KytosDBInitException as exc:
+            sys.exit(f"Kytos couldn't start because of {str(exc)}")
+
+    def init_apm_or_core_shutdown(self, **kwargs):
+        """Init APM instrumentation or core shutdown."""
+        if not self.options.apm:
+            return
+        try:
+            init_apm(self.options.apm, app=self.api_server.app,
+                     **kwargs)
+        except KytosAPMInitException as exc:
             sys.exit(f"Kytos couldn't start because of {str(exc)}")
 
     def _register_endpoints(self):

@@ -14,3 +14,4 @@ pyjwt
 pymongo==4.1.0
 pydantic==1.9.0
 tenacity=8.0.1
+elastic-apm[flask]==6.9.1

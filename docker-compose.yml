@@ -89,7 +89,22 @@ services:
       - 5601:5601
     depends_on:
       - elasticsearch
-
+  logstash:
+    container_name: logstash
+    image: docker.elastic.co/logstash/logstash:7.17.1
+    environment:
+      - "LS_JAVA_OPTS=-Xmx512m -Xms512m"
+      - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME:-elastic}
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD:-elastic_pw}
+      - ELASTICSEARCH_HOSTS="elasticsearch:9200"
+    volumes:
+      - ./docker/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./docker/logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5000:5000/udp"
+      - "9600:9600"
+    depends_on:
+      - elasticsearch
   apm-server:
     container_name: apm
     image: docker.elastic.co/apm/apm-server:7.17.1

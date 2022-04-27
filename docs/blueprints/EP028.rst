@@ -1,0 +1,153 @@
+:EP: 28
+:Title: Searchable structured logs
+:Authors:
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Antonio Francisco <ajoaoff AT gmail DOT com>
+    - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
+    - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
+:Created: 2022-04-27
+:Kytos-Version:
+:Status: Draft
+
+**********************************
+EP028 - Searchable structured logs
+**********************************
+
+
+Abstract
+========
+
+This blueprint proposes a solution for searchable structured logs.
+
+
+Motivation
+==========
+
+Kytos-ng has a first-class standard logging support with flexible configuration options. However, in production, it's desirable to have query capabilities to be able to find log information more effectively and precisely. This blueprint will propose a solution that fits well with the existing logging and the existing supporting infrastructure services that Kytos-ng leverages, minimizing the effort and maintenance.
+
+
+Specification
+=============
+
+The following are the requirements for searchable structured logs:
+
+- The solution must be designed for advanced text search and be able to structure logs.
+- It must be production-grade and battle-tested.
+- It should be compatible with the existing supporting infrastructure services.
+- It must be open source and free to use.
+
+Considering all these requirements, ``Elasticsearch`` (ES) meets all of them, and ES has been a strategic part of the supporting infrastructure services that's being used to provide APM (Application Performance Monitoring) services.
+
+
+Integration
+===========
+
+The following is the proposed solution with ES, Kibana and `Filebeat <https://www.elastic.co/beats/filebeat>`_ service. Filebeat is a lightweight shipper for logs, that's also supports `several input sources <https://www.elastic.co/guide/en/beats/filebeat/current/configuration-filebeat-options.html#filebeat-input-types>`_ (files, TCP, UDP, and many other protocols or services), with backpressure capabilities when sending data to ES. In this integration, the input type ``log`` using a file handler will be used to integrate reliably and seamlessly with logging.ini:
+
+
+.. code-block:: none
+
+    +---------------------+        +---------------------+  Submit log queries
+    |                     |        |                     |
+    |                     |        |                     |
+    |Elasticsearch service|<-------+   Kibana service    |<---------- Network Operators/Developers
+    |                     |        |                     |
+    |                     |        |                     |
+    +-----------^---------+        +---------------------+
+                |
+                | send
+    +-----------+---------+
+    |                     |
+    |                     |
+    | Filebeat service    |
+    |                     |
+    |                     |
+    +----------^----------+
+               |
+               | input source: log file
+               |
+    +----------+----------+
+    |                     |
+    |                     |
+    | kytos.log (file)    |
+    |                     |
+    |                     |
+    +----------^----------+
+               |
+               | write
+               |
+    +----------+----------+
+    |                     |
+    |                     |
+    |                     |
+    | RotatingFileHandler |
+    |                     |
+    | logging.ini         |
+    |                     |
+    |                     |
+    |                     |
+    |                     |
+    +---------------------+
+
+
+As represented in this diagram, as long as ``logging.ini`` has a handler that's writing to a file, Filebeat can read from it as an input, so it's up to network operators to configure it accordingly and also make sure to use the same formatter and dissect processors to parse and structure the fields of the log messages. For instance, this ``logging.ini`` below is based on `amlight/kytos-docker logging.ini <https://github.com/amlight/kytos-docker/blob/master/logging.ini>`_:
+
+.. code-block:: none
+
+    [formatters]
+    keys: file
+
+    [loggers]
+    keys: root
+
+    [formatter_file]
+    format: %(asctime)s - %(levelname)s [%(name)s] [%(filename)s:%(lineno)d:%(funcName)s] (%(threadName)s) %(message)s
+
+    [handler_file]
+    class: handlers.RotatingFileHandler
+    args:["/var/log/kytos/kytos.log", "a", 10*1024*1024, 5]
+    formatter: file
+    level: INFO
+
+    [logger_root]
+    level: INFO
+    handlers: file
+    propagate: True
+
+The following ``filebeat.yml`` configuration would correctly process, ingest and process the structured logs based on the expected placeholders of the file formatter, notice that the tokenizer with this configuration ``'%{kytos.timestamp} - %{kytos.level} [%{kytos.logger}] [%{kytos.file}:%{kytos.line}:%{kytos.func}] (%{kytos.thread}) %{kytos.message}'`` matches accordingly the expected fields in the formatter:
+
+.. code-block:: none
+
+    ---
+    filebeat.modules:
+    - module: system
+      syslog:
+        enabled: false
+      auth:
+        enabled: false
+
+    processors:
+      - dissect:
+          # kytos log formatter tokenizer to be able to search for fields easily
+          tokenizer: '%{kytos.timestamp} - %{kytos.level} [%{kytos.logger}] [%{kytos.file}:%{kytos.line}:%{kytos.func}] (%{kytos.thread}) %{kytos.message}'
+          field: "message"
+          target_prefix: ""
+
+    filebeat.inputs:
+    - type: log
+      enabled: true
+      # Paths that should be crawled and fetched. Glob based paths.
+      # Make sure not file is defined twice as this can lead to unexpected behaviour.
+      paths:
+        - /var/log/kytos/kytos.log
+
+    output.elasticsearch:
+      hosts: ${ELASTICSEARCH_HOSTS}
+      username: ${ELASTICSEARCH_USERNAME}
+      password: ${ELASTICSEARCH_PASSWORD}
+
+    setup.kibana:
+      host: ${KIBANA_HOST}
+      username: ${ELASTICSEARCH_USERNAME}
+      password: ${ELASTICSEARCH_PASSWORD}

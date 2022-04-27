@@ -111,3 +111,17 @@ class KytosNAppMissingInitArgument(KytosNAppException):
             message (str): Name of the missed argument.
         """
         super().__init__(message=message)
+
+
+class KytosDBInitException(Exception):
+    """Exception raised on Database initialization issues."""
+
+    def __init__(self, message: str, _class=None) -> None:
+        """KytosDBInitException."""
+        super().__init__()
+        self.message = message
+        self._class = _class
+
+    def __str__(self):
+        _class = f" {self._class.__class__.__name__}" if self._class else ""
+        return f"KytosDBInitException{_class}: {self.message}"

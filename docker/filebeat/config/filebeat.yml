@@ -1,0 +1,35 @@
+---
+# https://github.com/elastic/beats/blob/main/filebeat/filebeat.reference.yml
+
+filebeat.modules:
+- module: system
+  syslog:
+    enabled: false
+  auth:
+    enabled: false
+
+processors:
+  - dissect:
+      # kytos log formatter tokenizer to be able to search for fields easily
+      tokenizer: '%{kytos.timestamp} - %{kytos.level} [%{kytos.logger}] [%{kytos.file}:%{kytos.line}:%{kytos.func}] (%{kytos.thread}) %{kytos.message}'
+      field: "message"
+      target_prefix: ""
+
+filebeat.inputs:
+- type: log
+  enabled: true
+  # Paths that should be crawled and fetched. Glob based paths.
+  # Make sure not file is defined twice as this can lead to unexpected behaviour.
+  paths:
+    # /kytos will be mounted when developing locally
+    - /kytos/*.log
+
+output.elasticsearch:
+  hosts: ${ELASTICSEARCH_HOSTS}
+  username: ${ELASTICSEARCH_USERNAME}
+  password: ${ELASTICSEARCH_PASSWORD}
+
+setup.kibana:
+  host: ${KIBANA_HOST}
+  username: ${ELASTICSEARCH_USERNAME}
+  password: ${ELASTICSEARCH_PASSWORD}

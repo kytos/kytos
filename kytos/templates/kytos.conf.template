@@ -73,6 +73,18 @@ jwt_secret = {{ jwt_secret }}
 # Time to expire authentication token in minutes
 token_expiration_minutes = 180
 
+# NApps database. Supported values: mongodb (don't use quotes in the string)
+database =
+# The following environment variables should be accordingly if you're using mongodb:
+# MONGO_HOST_SEEDS=mongo1:27017,mongo2:27018,mongo3:27019
+# MONGO_USERNAME=
+# MONGO_PASSWORD=
+# Optionally, these environment variables can also be set:
+# MONGO_DBNAME=napps
+# MONGO_MAX_POOLSIZE=300
+# MONGO_MIN_POOLSIZE=30
+# MONGO_TIMEOUTMS=30000
+
 # Define URLs that will require authentication
 #
 # This must be a list of part of URLs. For example, if "kytos/mef_eline"

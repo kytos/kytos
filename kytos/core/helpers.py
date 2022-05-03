@@ -11,12 +11,10 @@ __all__ = ['listen_to', 'now', 'run_on_thread', 'get_time']
 
 LOG = logging.getLogger(__name__)
 
-# APP_MSG = "[App %s] %s | ID: %02d | R: %02d | P: %02d | F: %s"
-
 
 def get_thread_pool_max_workers():
     """Get the number of thread pool max workers."""
-    return int(KytosConfig().options["daemon"].thread_pool_max_workers)
+    return KytosConfig().options["daemon"].thread_pool_max_workers
 
 
 def get_apm_name():
@@ -25,12 +23,12 @@ def get_apm_name():
 
 
 # pylint: disable=invalid-name
-executor = None
-if get_thread_pool_max_workers():
-    executor = ThreadPoolExecutor(max_workers=get_thread_pool_max_workers())
+executors = {name: ThreadPoolExecutor(max_workers=max_workers,
+                                      thread_name_prefix=f"thread_pool_{name}")
+             for name, max_workers in get_thread_pool_max_workers().items()}
 
 
-def listen_to(event, *events):
+def listen_to(event, *events, pool=None):
     """Decorate Event Listener methods.
 
     This decorator was built to be used on NAPPs methods to define which
@@ -47,6 +45,11 @@ def listen_to(event, *events):
     The event that will be listened to is always a string, but it can represent
     a regular expression to match against multiple Event Types. All listened
     events are documented in :doc:`/developer/listened_events` section.
+
+    The pool option gives you control on which ThreadPoolExecutor that will
+    execute the decorated handler. This knob is meant for prioritization,
+    allowing executions on different pools depending on the handler primary
+    responsibility and importance to avoid potential scheduling starvation.
 
     Example of usage:
 
@@ -158,8 +161,17 @@ def listen_to(event, *events):
             handler_func = handler_context_apm
             kwargs = dict(apm_client=ElasticAPM.get_client())
 
+        def get_executor(pool, event, default_pool="app"):
+            """Get executor."""
+            if pool:
+                return executors[pool]
+            if event.name.startswith("kytos/of_core") and "sb" in executors:
+                return executors["sb"]
+            return executors[default_pool]
+
         def inner(*args):
             """Decorate the handler to run in the thread pool."""
+            executor = get_executor(pool, args[1])
             future = executor.submit(handler_func, *args, **kwargs)
             future.add_done_callback(done_callback)
 
@@ -167,7 +179,7 @@ def listen_to(event, *events):
         inner.events.extend(events)
         return inner
 
-    if get_thread_pool_max_workers():
+    if executors:
         return thread_pool_decorator
     return thread_decorator
 

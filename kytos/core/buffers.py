@@ -15,8 +15,7 @@ LOG = logging.getLogger(__name__)
 class KytosEventBuffer:
     """KytosEventBuffer represents a queue to store a set of KytosEvents."""
 
-    def __init__(self, name, event_base_class=None, loop=None,
-                 maxsize=get_thread_pool_max_workers()):
+    def __init__(self, name, event_base_class=None, loop=None, maxsize=0):
         """Contructor of KytosEventBuffer receive the parameters below.
 
         Args:
@@ -150,11 +149,20 @@ class KytosBuffers:
         :attr:`app`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
         sent to NApps.
         """
+        self._pool_max_workers = get_thread_pool_max_workers()
         self._loop = loop
-        self.raw = KytosEventBuffer('raw_event', loop=self._loop)
-        self.msg_in = KytosEventBuffer('msg_in_event', loop=self._loop)
-        self.msg_out = KytosEventBuffer('msg_out_event', loop=self._loop)
-        self.app = KytosEventBuffer('app_event', loop=self._loop)
+        self.raw = KytosEventBuffer("raw_event", loop=self._loop,
+                                    maxsize=self._get_maxsize("sb"))
+        self.msg_in = KytosEventBuffer("msg_in_event", loop=self._loop,
+                                       maxsize=self._get_maxsize("sb"))
+        self.msg_out = KytosEventBuffer('msg_out_event', loop=self._loop,
+                                        maxsize=self._get_maxsize("sb"))
+        self.app = KytosEventBuffer('app_event', loop=self._loop,
+                                    maxsize=self._get_maxsize("app"))
+
+    def _get_maxsize(self, queue_name):
+        """Get queue maxsize if it's been set."""
+        return self._pool_max_workers.get(queue_name, 0)
 
     def send_stop_signal(self):
         """Send a ``kytos/core.shutdown`` event to each buffer."""

@@ -70,6 +70,13 @@ vlan_pool = {}
 # The jwt_secret parameter is responsible for signing JSON Web Tokens.
 jwt_secret = {{ jwt_secret }}
 
+# Maximum number of thread workers in a thread pool, if it's set as empty dict {} no thread pools will be used.
+# The following pools are available by default to be used in the listen_to decorator:
+# - sb: it's used automatically by kytos/of_core.* events, it's meant for southbound related messages
+# - app: it's meant for general NApps event, it's default pool if no other one has been specified
+# - db: it can be used by for higher priority db related tasks (need to be parametrized on decorator)
+thread_pool_max_workers = {"sb": 256, "db": 256, "app": 256}
+
 # Time to expire authentication token in minutes
 token_expiration_minutes = 180
 

@@ -165,13 +165,19 @@ def listen_to(event, *events, pool=None):
             """Get executor."""
             if pool:
                 return executors[pool]
+            if not event:
+                return executors[default_pool]
+
             if event.name.startswith("kytos/of_core") and "sb" in executors:
                 return executors["sb"]
+            if event.name.startswith("kytos.storehouse") and "db" in executors:
+                return executors["db"]
             return executors[default_pool]
 
         def inner(*args):
             """Decorate the handler to run in the thread pool."""
-            executor = get_executor(pool, args[1])
+            event = args[1] if len(args) > 1 else None
+            executor = get_executor(pool, event)
             future = executor.submit(handler_func, *args, **kwargs)
             future.add_done_callback(done_callback)
 

@@ -174,7 +174,8 @@ def listen_to(event, *events, pool=None):
 
             if event.name.startswith("kytos/of_core") and "sb" in executors:
                 return executors["sb"]
-            if event.name.startswith("kytos/core") and "sb" in executors:
+            core_of = "kytos/core.openflow"
+            if event.name.startswith(core_of) and "sb" in executors:
                 return executors["sb"]
             if event.name.startswith("kytos.storehouse") and "db" in executors:
                 return executors["db"]

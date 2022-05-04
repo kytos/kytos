@@ -30,6 +30,7 @@ Added
 - ``@begin_span`` decorator for on-demand APM custom functions/methods instrumentation
 - Augmented docker-compose.yml to also spin up Elastsearch, Kibana and APM server with authentication
 - Augmented docker-compose to also spin up Filebeat, integrating log file as input
+- The ``listen_to`` decorator now supports a ``pool`` keyword argument to specify which thread pool the execution should be submitted
 
 Changed
 =======
@@ -37,6 +38,14 @@ Changed
 - Augmented ``KytosEvent`` with internal attributes (``id`` and ``reinjections``), no breaking changes.
 - ``KytosEvent`` now optionally supports a ``trace_parent`` argument for APM distributed tracing to also instrument and correlate ``KytosEvent``.
 - Added file formatter and file handler boilerplate on logging.ini.template to facilitate hooking the file handler on logger_root and logger_kytos as needed.
+- Broke compatibility in the ``thread_pool_max_workers``, it uses a dict now instead of a single integer. If you were using a single integer for a global pool, please migrate it to ``{"sb": 256, "db": 256, "app": x}``, where x should be the value that you used to use or the default 512.
+- The following pools are available by default to be used in the listen_to decorator with the ``pool`` option:
+
+  .. code-block:: console
+
+   sb: it's used automatically by kytos/of_core.* events, it's meant for southbound related messages
+   app: it's meant for general NApps event, it's default pool if no other one has been specified
+   db: it can be used by for higher priority db related tasks (need to be parametrized on decorator), it's also used automatically by kytos.storehouse.* events
 
 Deprecated
 ==========

@@ -80,6 +80,10 @@ def listen_to(event, *events, pool=None):
             @listen_to('kytos/of_core.message.*')
             def my_stats_handler_of_any_message(self, event):
                 # Do stuff here...
+
+            @listen_to("some_db_oriented_event", pool="db")
+            def db_update(self, event):
+                # Do stuff here...
     """
     def thread_decorator(handler):
         """Decorate the handler method.

@@ -40,8 +40,7 @@ from kytos.core.db import db_conn_wait
 from kytos.core.dead_letter import DeadLetter
 from kytos.core.events import KytosEvent
 from kytos.core.exceptions import KytosAPMInitException, KytosDBInitException
-from kytos.core.helpers import executors
-from kytos.core.helpers import now
+from kytos.core.helpers import executors, now
 from kytos.core.interface import Interface
 from kytos.core.logs import LogManager
 from kytos.core.napps.base import NApp

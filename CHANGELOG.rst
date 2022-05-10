@@ -8,9 +8,26 @@ UNRELEASED - Under development
 Added
 =====
 - Unhandled exception on a ``listen_to`` decorated function (running in a ThreadPool) is logged as error.
+- New ``--database`` configuration option that supports ``mongodb``
+- MongoDB client for NApps, ``Mongo`` available on ``kytos.core.db`` module
+- Added a wait mechanism during controller startup time to ensure the database is reachable if it's been configured
+- ``pymongo`` and ``pydantic`` (for database models) are now core dependencies
+- Added MongoDB environment variables ``MONGO_HOST_SEEDS, MONGO_USERNAME, MONGO_PASSWORD``
+- Added optional MongoDB environment ``MONGO_DBNAME, MONGO_MAX_POOLSIZE, MONGO_MIN_POOLSIZE, MONGO_TIMEOUTMS``
+- Added a docker-compose.yml file for local development to compose with MongoDB replica set cluster
+- Added an in-memory dead letter structure for unhandled exceptions of KytosEvents indexed by their names
+- Added core endpoints for the dead letter structure:
+
+  .. code:: console
+
+   GET /api/kytos/core/dead_letter/?event_name=<name>
+   PATCH /api/kytos/core/dead_letter/ (requires request body)
+   DELETE /api/kytos/core/dead_letter/ (requires request body)
 
 Changed
 =======
+- Kytos controller can shutdown if the database is configured but not reachable during startup time.
+- Augmented ``KytosEvent`` with internal attributes (``id`` and ``reinjections``), no breaking changes.
 
 Deprecated
 ==========

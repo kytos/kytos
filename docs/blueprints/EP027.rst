@@ -1,0 +1,50 @@
+:EP: 27
+:Title: Application Performance and Monitoring (APM) client
+:Authors:
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Antonio Francisco <ajoaoff AT gmail DOT com>
+    - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
+    - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
+:Created: 2022-04-19
+:Kytos-Version:
+:Status: Draft
+
+***********************************************************
+EP027 - Application Performance and Monitoring (APM) client
+***********************************************************
+
+
+Abstract
+========
+
+This blueprint proposes integrating an APM client on Kytos to have performance and monitoring metrics.
+
+
+Motivation
+==========
+
+Currently, there aren't exposed metrics in terms of latency and executions that certain functions, IO operations, endpoints or events handlers are consuming. Therefore, it's difficult to assess the runtime workload, the baseline under normal circumstances, how many events and requests are being handled, and in case of potential slowness or crash to identify which parts of the code would be causing problems.
+
+
+Specification
+=============
+
+The APM should be configurable on Kytos and it shouldn't be loaded by default. The APM has to meet the following requirements:
+
+- **1)** The APM agent must be production-grade and designed for minimal latency overhead when instrumenting code.
+- **2)** It must be open-source and free to use its main functionalities.
+- **3)** It must be possible to add custom instrumentation if needed.
+- **4)** It must support Python 3.9+.
+- **5)** It should provide automatic instrumentation for Flask, requests, be able to handle asyncio, and pymongo.
+
+Candidates
+==========
+
+The following APM agents were considered:
+
+- `Elastic APM Agent 7+ <https://www.elastic.co/observability/application-performance-monitoring>`_
+- `New Relic <https://newrelic.com/products/application-monitoring>`_
+- `Datadog APM <https://www.datadoghq.com/product/apm/>`_
+
+Elastic APM meets all the requirements and it's a great candidate since it leverages Elasticsearch, which is also a piece of infrastructure that's being planned for searchable logs. New Relic and Datadog APM, as of now in 2022 aren't completely free to use the main functionalities.

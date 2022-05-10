@@ -14,18 +14,21 @@ from werkzeug.exceptions import BadRequest, NotFound
 
 class KytosQueueBufferNames(str, Enum):
     """KytosQueueBufferNames."""
+
     app = "app"
     msg_in = "msg_in"
 
 
 class DeadLetterDeletePayload(BaseModel):
     """DeadLetterDeletePayload."""
+
     event_name: constr(min_length=1)
     ids: List[str] = []
 
 
 class DeadLetterPatchPayload(DeadLetterDeletePayload):
     """DeadLetterPatchPayload."""
+
     kytos_queue_buffer: KytosQueueBufferNames
 
 

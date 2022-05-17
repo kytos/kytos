@@ -233,6 +233,8 @@ traitlets==4.3.3
     # via
     #   -r requirements/run.txt
     #   ipython
+tenacity==8.0.1
+    # via -r requirements/run.txt
 typing-extensions==4.0.1
     # via
     #   -r requirements/run.txt

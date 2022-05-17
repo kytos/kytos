@@ -24,6 +24,8 @@ Added
    PATCH /api/kytos/core/dead_letter/ (requires request body)
    DELETE /api/kytos/core/dead_letter/ (requires request body)
 
+- Added ``tenacity`` as a core dependency for retries.
+
 Changed
 =======
 - Kytos controller can shutdown if the database is configured but not reachable during startup time.

@@ -1,9 +1,11 @@
 """Retry utilities module."""
 import logging
+
 from functools import wraps
 from typing import Callable
 
 from tenacity import retry
+
 
 LOG = logging.getLogger(__name__)
 

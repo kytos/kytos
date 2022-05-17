@@ -2,8 +2,6 @@ checks:
     python:
         code_rating: true
         duplicate_code: true
-filter:
-    paths: ['*']
 build:
     environment:
         python: 3.9.12

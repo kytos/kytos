@@ -151,3 +151,13 @@ The following ``filebeat.yml`` configuration would correctly process, ingest and
       host: ${KIBANA_HOST}
       username: ${ELASTICSEARCH_USERNAME}
       password: ${ELASTICSEARCH_PASSWORD}
+
+
+Points of attention
+===================
+
+After deploying such a feature, the administrator/network-operator must be aware of the following aspects:
+
+- The Elasticsearch/Kibana web interface must be restricted to allow access only from trusted networks
+- Elasticsearch must define rotation policies to avoid problems with the storage of the logs
+- Whenever possible, the filebeat service architecture should provide means of running it in a different host (avoiding I/O concurrency with normal Kytos server)

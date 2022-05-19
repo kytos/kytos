@@ -115,7 +115,7 @@ As represented in this diagram, as long as ``logging.ini`` has a handler that's 
     handlers: file
     propagate: True
 
-The following ``filebeat.yml`` configuration would correctly process, ingest and process the structured logs based on the expected placeholders of the file formatter, notice that the tokenizer with this configuration ``'%{kytos.timestamp} - %{kytos.level} [%{kytos.logger}] [%{kytos.file}:%{kytos.line}:%{kytos.func}] (%{kytos.thread}) %{kytos.message}'`` matches accordingly the expected fields in the formatter:
+The following ``filebeat.yml`` configuration would correctly process, ingest and send the structured logs based on the expected placeholders of the file formatter, notice that the tokenizer with this configuration ``'%{kytos.timestamp} - %{kytos.level} [%{kytos.logger}] [%{kytos.file}:%{kytos.line}:%{kytos.func}] (%{kytos.thread}) %{kytos.message}'`` matches accordingly the expected fields in the formatter:
 
 .. code-block:: none
 

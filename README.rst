@@ -35,7 +35,7 @@ Just install docker from your package provider and run:
 
    $ sudo docker run -d -it --privileged -p 8181:8181 -p 6653:6653 amlight/kytos:latest
 
-Then, open your internet browser and point it to `http://localhost:8181`.
+Then, open your internet browser and point it to `http://localhost:8181` (Mininet is available inside the docker container, if you wanna try some topologies).
 
 Installing
 ==========

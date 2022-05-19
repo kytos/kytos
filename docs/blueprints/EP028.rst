@@ -1,8 +1,8 @@
 :EP: 28
 :Title: Searchable structured logs
 :Authors:
-    - Italo Valcy <idasilva AT fiu DOT edu>
     - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Italo Valcy <idasilva AT fiu DOT edu>
     - Antonio Francisco <ajoaoff AT gmail DOT com>
     - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
     - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>

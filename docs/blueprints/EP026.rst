@@ -1,0 +1,157 @@
+:EP: 26
+:Title: Document-oriented NoSQL database
+:Authors:
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Antonio Francisco <ajoaoff AT gmail DOT com>
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
+    - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
+:Created: 2022-03-03
+:Kytos-Version: 2022.2
+:Status: Draft
+
+****************************************
+EP025 - Document-oriented NoSQL database
+****************************************
+
+
+Abstract
+========
+
+This blueprint presents requirements and features that a document-oriented NoSQL database must have in order to be considered a canonical recommended document-oriented storage for NApps that need this kind of storage. In addition, this document will choose a database based on these requirements. NApps can use other databases when this document-oriented database doesn't fit well, however, by providing a recommended database, it should facilitate for NApps when it comes to make this decision, and Kytos core will ship with a library driver that should be compatible with the core dependencies and the runtime threading mode.
+
+
+Motivation
+==========
+
+The main motivation to have a canonical document-oriented recommended database are driven by these reasons:
+
+- A database must have been designed for performance in terms of IO, concurrency, production-grade and has been battle tested.
+- A database must provide indexed and advanced query capabilities over documents and collections.
+- ``storehouse`` NApp abstracts different kind of storages but it was primarily meant to be used as a plug and play file system storage, and it has served well so far, however, when it tries to expose other storage backends with a common interface it falls short to provide flexible queries, bulk operations with transactions and indexing capabilities that are considered must have in production. Also, when other client NApps use ``storehouse`` asynchronously potential race conditions can happen and interfacing concurrently and safely can be difficult.
+
+
+Requirements
+============
+
+The following are the requirements for a canonical document-oriented NoSQL database:
+
+1. It must have been designed for performance in terms of IO, concurrency, production-grade and has been battle tested.
+2. It must be able to index JSON documents, including nested ones providing optimal query lookups.
+3. It must provide ACID transactions for multi-documents and for multi collections.
+4. It must be able to scale horizontally through clustering, and it should be able to maintain strong consistency.
+5. It must be able to provide immediate consistency and also provides options to leverage eventual consistency when applicable.
+6. It must be deployable in a Docker container, and ideally have support to easily deploy on Kubernetes.
+7. The database should be open source and be well maintained. 
+8. The database Python library driver must be well maintained, support ``gevent`` to be compatible with Flask SocketIO threading mode. 
+9. The database Python library driver should either be compatible with ``asyncio`` or have an alternative ``asyncio`` library.
+10. It should provide aggregations and transformations query capabilities.
+11. It should provide a mechanism to explain resulting queries for debugging.
+12. It is desirable to be compatible with Elastic APM (application and performance monitoring).
+13. It should have a way to perform backup and restore on premises and detailed documentation.
+
+
+Database Candidates
+===================
+
+These three databases are being considered as potential candidates:
+
+- `MongoDB <https://mongodb.com>`_
+- `ArangoDB <https://arangodb.com>`_
+- `CouchDB <https://couchdb.apache.org>`_
+
+Considering these three databases, CouchDB doesn't completely support requirement 4 and 5 (immediate/strong consistency), it has been designed for eventual consistency, so it won't be recommended as a canonical database for NApps. Eventual consistency has great uses cases and NApps might leverage it when applicable, but as a canonical recommended document-oriented database it a must to support immediate consistency while being flexible for eventual consistency, that way fitting better for a wider range of use cases with reasonable default options.
+
+The following table compares both MongoDB and ArangoDB in terms of the requirements:
+
++----------------------+------------+-----------+
+|   Requirement Number |  MongoDB   | ArangoDB  |
++======================+============+===========+
+| 1                    | yes        | yes       |
++----------------------+------------+-----------+
+| 2                    | yes        | yes       |
++----------------------+------------+-----------+
+| 3                    | yes        | partly    |
++----------------------+------------+-----------+
+| 4                    | yes        | yes       |
++----------------------+------------+-----------+
+| 5                    | yes        | yes       |
++----------------------+------------+-----------+
+| 6                    | yes        | yes       |
++----------------------+------------+-----------+
+| 7                    | yes        | yes       |
++----------------------+------------+-----------+
+| 8                    | yes        | has issue |
++----------------------+------------+-----------+
+| 9                    | yes        | not stable|
++----------------------+------------+-----------+
+| 10                   | yes        | yes       |
++----------------------+------------+-----------+
+| 11                   | yes        | yes       |
++----------------------+------------+-----------+
+| 12                   | yes        | no        |
++----------------------+------------+-----------+
+| 13                   | yes        | yes       |
++----------------------+------------+-----------+
+
+* **Requirement 3)**
+
+  * ArangoDB `has limitations ensuring ACID transactions with multi collections in a cluster <https://www.arangodb.com/docs/stable/architecture-single-instance-vs-cluster.html#transactions>`_.
+* **Requirement 4)**
+
+  * MongoDB used to have weaker immediate consistent writes with the default ``write concern "w:1"`` option, but `since version 5.0 <https://www.mongodb.com/blog/post/default-majority-write-concern-providing-stronger-durability-guarantees-out-box>`_ it has been providing stronger writes guarantees out of the box with ``write concern "w:majority"``.
+
+* **Requirement 5)**
+
+  * MongoDB empowers the application to set `the read preference <https://docs.mongodb.com/manual/core/read-preference/#>`_, which should allow eventual consistent reads. Writes are only allowed in the primary node though, so compared to CouchDB (which chooses availability over consistency) writes on MongoDB can have a higher latency until a new primary is elected in a case of failure.
+  * ArangoDB `based on the documentation <https://www.arangodb.com/docs/stable/architecture-deployment-modes-cluster-architecture.html>`_, any coordinator should be able to provide reads in case of another coordinator node fails, it doesn't provide that much granular control, however in term of strong consistency it also supports active/active so arguably slightly more robust than MongoDB that only supports a single primary node when it comes to failover of writes. MongoDB also has `recommendations on how to avoid single point of failures <https://docs.mongodb.com/manual/core/replica-set-architecture-geographically-distributed/>`_ but still can only have a single primary node. `According to MongoDB documentation <https://docs.mongodb.com/manual/core/replica-set-elections/>`_, a new primary node election on MongoDB shouldn't take longer than 12 seconds though.
+
+
+* **Requirement 7)**
+
+  * Both `MongoDB <https://github.com/mongodb/mongo>`_ and `ArangoDB <https://github.com/arangodb/arangodb>`_ GitHub repositories seem to be well maintained and active with recent releases. MongoDB documentation is more detailed, and MongoDB seems to have a higher number of users.
+
+
+* **Requirement 8)**
+
+  * `pymongo <https://github.com/mongodb/mongo-python-driver>`_ MongoDB's Python official library driver claims that `gevent is supported <https://pymongo.readthedocs.io/en/stable/examples/gevent.html>`_.
+  * `pyarango <https://github.com/ArangoDB-Community/pyArango>`_ official ArangoDB's Python library driver has an `issue <https://github.com/ArangoDB-Community/pyArango/issues/65>`_ reporting a case where incorrect responses where observed in a highly concurrent scenario, so it might have other potential issues and unknowns.
+
+
+* **Requirement 9)**
+
+  * pymongo doesn't support asyncio out of the box, but MongoDB's official `motor project <https://github.com/mongodb/motor>`_ is recommended for asyncio users, and it uses pymongo under the hood. It's great to know that as NApps start to making more use of asyncio this library could be leveraged in the future.
+  * ArangoDB doesn't have an official supported client but there are some project initiatives mentioned `in this thread <https://github.com/ArangoDB-Community/python-arango/issues/95>`_, and it doesn't seem that these initiatives have been battle tested yet.
+
+
+* **Requirement 12)**
+
+  * Elastic APM `supports for pymongo ">=2.9,<3.8" <https://www.elastic.co/guide/en/apm/agent/python/current/supported-technologies.html#automatic-instrumentation-db-mongodb>`_.
+  * Elastic APM doesn't claim to support pyarango nor a custom library instrumented has been found yet.
+
+
+* **Requirement 13)**
+
+  * `MongoDB's documentation <https://docs.mongodb.com/manual/tutorial/backup-and-restore-tools/>`_ is very detailed compared to `Arango's <https://www.arangodb.com/docs/stable/backup-restore.html>`_, both have the tools to dump and restore. It's worth pointing out that ``mongodump`` and ``mongorestore`` `as mentioned here <https://docs.mongodb.com/manual/tutorial/backup-and-restore-tools/#restore-a-database-with-mongorestore>`_ cannot be used in a sharded clusters that have transaction in progress, so temporarily stopping writes might be needed if using these tools, alternatively if a Linux LVM is available, and it can create snapshots, then one can also leverage this mechanism to have point-in-time backups `as documented here <https://docs.mongodb.com/manual/core/backups/#back-up-with-filesystem-snapshots>`_. There are other alternatives, including cloud-based ones, each with their trade-offs. If `Mongo's Ops Manager <https://www.mongodb.com/products/ops-manager>`_ were free to use in production that'd be great.
+
+
+Canonical Chosen Database
+=========================
+
+All in all, considering the requirements represented, MongoDB meets the requirements and based on this initial research it can fit very well as a canonical document-oriented database for general usage that NApps can leverage. The ``topology`` NApp will be the first NApp to replace storehouse with a new MongoDB client, once it has been successfully confirmed in practice, then MongoDB will be confirmed as a canonical solution. ArangoDB supports a multi-model that could be very useful for not only document-oriented but also for graphs, and its clustering active/active capability seemed very powerful and resilient, however, since some of the requirements weren't met it won't be considered a canonical recommended database. 
+
+
+Handling Database Failures
+==========================
+
+Currently, several NApps aren't handling database IO failures or some integrity error conflicts, and they are assuming that certain asynchronous write would always succeed in the file system, for instance, this example on ``flow_manager`` `_save_flow_callback <https://github.com/kytos-ng/flow_manager/blob/master/storehouse.py#L131-L138>`_, even though currently storehouse can report back an error, notice that it's not really handling it other than logging, other NApps are also doing the same thing, for instance ``mef_eline`` `save_evc_callback <https://github.com/kytos-ng/mef_eline/blob/master/storehouse.py#L118-L125>`_. All of these writes when migrating to use a new client to write to the database will have to be taken into consideration, and also it makes a difference if the write is happening when handling a KytosEvent or a Request, either way an error should be reported back to the caller just so it can retry later and or revert any operation as a result of that. Ideally, retries should be leveraged for transient errors.
+
+In production, either replica sets or a sharded cluster, this will still be further refined, will be used to increase high-availability, however a full database outage might still happen in the worst case, and assuming that Kytos can still be running and if asynchronous KytosEvent might still being processed and if a database write or read would be needed, then this should be handled accordingly. So kytos core should also provide a dead queue letter mechanism for NApps to keep failed event in memory and potentially try to retry them later once the DB is operational again, especially for KytosEvent that can't be returned to a caller, such as when processing a network message like a ``OFPT_PORT_STATUS`` and it needs to be update a flow state in the database. If the DB is completely unavailable and it's a HTTP request that's being handled then it should return the proper status code, returning errors in a request response cycle isn't as difficult.
+
+Next Steps
+==========
+
+* Migrate ``topology`` NApp storage from ``storehouse`` to ``pymongo``.
+* Compose Mongo nodes with replica sets for development and this initial assessment. Potentially assess sharding in the future.
+* Stress tests on requests endpoints to measure the performance and make sure no regressions were introduced in the current tests.
+* Simulate and handle database node failures ensuring the NApp still handles it as expected.

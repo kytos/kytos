@@ -33,7 +33,9 @@ Just install docker from your package provider and run:
 
 .. code-block:: shell
 
-   $ sudo docker run -it --privileged kytos/tryfirst
+   $ sudo docker run -d -it --privileged -p 8181:8181 -p 6653:6653 amlight/kytos:latest
+
+Then, open your internet browser and point it to `http://localhost:8181` (Mininet is available inside the docker container, if you wanna try some topologies).
 
 Installing
 ==========
@@ -104,6 +106,11 @@ If you're developing locally and using the core MongoDB integration, you can use
 .. code-block:: shell
 
    $ sudo ./docker/scripts/add-etc-hosts.sh
+
+.. code-block:: shell
+
+   $ export MONGO_USERNAME=mymongouser
+   $ export MONGO_PASSWORD=mymongopass
 
 .. code-block:: shell
 

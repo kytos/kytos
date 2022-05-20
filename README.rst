@@ -33,7 +33,9 @@ Just install docker from your package provider and run:
 
 .. code-block:: shell
 
-   $ sudo docker run -it --privileged kytos/tryfirst
+   $ sudo docker run -d -it --privileged -p 8181:8181 -p 6653:6653 amlight/kytos:latest
+
+Then, open your internet browser and point it to `http://localhost:8181` (Mininet is available inside the docker container, if you wanna try some topologies).
 
 Installing
 ==========
@@ -95,6 +97,31 @@ command line.
 With the above commands your controller will be running and ready to be used.
 Please note that you have to run it as an user with permission to
 open sockets at ports 6653 and 8181.
+
+How to use with MongoDB
+***********************
+
+If you're developing locally and using the core MongoDB integration, you can use ``docker-compose`` to spin up a MongoDB replica set cluster. You'll also need to run the ``add-etc-hosts.sh`` script at least once when setting up your environment:
+
+.. code-block:: shell
+
+   $ sudo ./docker/scripts/add-etc-hosts.sh
+
+.. code-block:: shell
+
+   $ export MONGO_USERNAME=mymongouser
+   $ export MONGO_PASSWORD=mymongopass
+
+.. code-block:: shell
+
+   $ docker-compose up -d
+
+.. code-block:: shell
+
+   $ kytosd -f --database mongodb
+
+If you're using the ``--database mongodb`` option in production, make sure to
+use a recommended ``WiredTiger Storage Engine`` file system, inject environment variables safely, have backup and restore procedures and also allocate sufficient RAM and CPU depending on the expected workload.
 
 The Web Admin User Interface
 ============================

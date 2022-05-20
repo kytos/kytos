@@ -157,6 +157,28 @@ Run ``kytosd -f``, and run the code below on the kytos console:
     routes = [(str(rule), rule.methods) for rule in urls]
     sorted(routes)
 
+**Dead Letter Endpoints**
+
+List KytosEvent dead letter structure (and filter a given KytosEvent name).
+
+.. code:: console
+
+   GET /api/kytos/core/dead_letter/?event_name=<name>
+
+Reinject KytosEvents into a Kytos buffer queue (``app`` or ``msg_in``).
+
+.. code:: console
+
+   PATCH /api/kytos/core/dead_letter/
+   request body: {"event_name": "some_name", "ids": ["id"], "kytos_queue_buffer": "app"}
+
+Delete a single KytosEvent or all.
+
+.. code:: console
+
+   DELETE /api/kytos/core/dead_letter/
+   request body: {"event_name": "all", "ids": ["id"]}
+
 
 NApps' REST Endpoints
 =====================

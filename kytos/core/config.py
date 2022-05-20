@@ -96,6 +96,10 @@ class KytosConfig():
                             action='store',
                             help="Database backend.")
 
+        parser.add_argument('-a', '--apm',
+                            action='store',
+                            help="APM backend.")
+
         self.conf_parser, self.parser = conf_parser, parser
         self.parse_args()
 
@@ -142,6 +146,7 @@ class KytosConfig():
                     'token_expiration_minutes': 180,
                     'thread_pool_max_workers': 256,
                     'database': '',
+                    'apm': '',
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()

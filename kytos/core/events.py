@@ -13,13 +13,18 @@ class KytosEvent:
     dictionary.
     """
 
-    def __init__(self, name=None, content=None):
+    def __init__(self, name=None, content=None, trace_parent=None):
         """Create an event to be published.
 
         Args:
             name (string): The name of the event. You should prepend it with
                            the name of the napp.
             content (dict): Dictionary with any extra data for the event.
+            trace_parent (object): APM TraceParent for distributed tracing,
+                                   if you have APM enabled, @listen_to will
+                                   set the root parent, and then you have to
+                                   pass the trace_parent to subsequent
+                                   correlated KytosEvent(s).
         """
         self.name = name
         self.content = content if content is not None else {}
@@ -28,7 +33,7 @@ class KytosEvent:
 
         # pylint: disable=invalid-name
         self.id = uuid4()
-        # pylint: enable=invalid-name
+        self.trace_parent = trace_parent
 
     def __str__(self):
         return self.name

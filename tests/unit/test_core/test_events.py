@@ -2,6 +2,7 @@
 import json
 from datetime import datetime, timezone
 from unittest import TestCase
+from unittest.mock import MagicMock
 from uuid import UUID
 
 from kytos.core.events import KytosEvent
@@ -56,6 +57,12 @@ class TestKytosEvent(TestCase):
         assert self.event.timestamp <= datetime.now(timezone.utc)
         assert self.event.id and isinstance(self.event.id, UUID)
         assert self.event.reinjections == 0
+
+    def test_trace_parent(self):
+        """Test trace_parent."""
+        parent = MagicMock()
+        event = KytosEvent('kytos/core.any', trace_parent=parent)
+        self.assertEqual(event.trace_parent, parent)
 
     def test_as_dict(self):
         """Test as_dict."""

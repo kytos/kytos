@@ -170,7 +170,7 @@ pymongo==4.1.0
     # via -r requirements/run.txt
 pyparsing==2.4.6
     # via packaging
-pytest==5.4.1
+pytest==7.0.0
     # via -r requirements/dev.in
 python-daemon==2.2.4
     # via -r requirements/run.txt

@@ -1,4 +1,5 @@
 """Test kytos.core.retry module."""
+# pylint: disable=no-self-use
 
 from unittest.mock import MagicMock, patch
 
@@ -32,8 +33,7 @@ def test_for_all_methods_retries():
     class SomeClass:
         """SomeClass."""
 
-        @staticmethod
-        def some_method(mock) -> None:
+        def some_method(self, mock) -> None:
             """some_method."""
             mock()
             raise ValueError("some error")

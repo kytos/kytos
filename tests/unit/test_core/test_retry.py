@@ -1,8 +1,10 @@
 """Test kytos.core.retry module."""
 
-from unittest.mock import patch, MagicMock
-from kytos.core.retry import before_sleep, for_all_methods, retries
+from unittest.mock import MagicMock, patch
+
 from tenacity import retry_if_exception_type, stop_after_attempt
+
+from kytos.core.retry import before_sleep, for_all_methods, retries
 
 
 @patch("kytos.core.retry.LOG")
@@ -28,7 +30,11 @@ def test_for_all_methods_retries():
         reraise=True,
     )
     class SomeClass:
-        def some_method(self, mock) -> None:
+        """SomeClass."""
+
+        @staticmethod
+        def some_method(mock) -> None:
+            """some_method."""
             mock()
             raise ValueError("some error")
 

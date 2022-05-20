@@ -1,8 +1,8 @@
 :EP: 28
 :Title: Searchable structured logs
 :Authors:
-    - Italo Valcy <idasilva AT fiu DOT edu>
     - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Italo Valcy <idasilva AT fiu DOT edu>
     - Antonio Francisco <ajoaoff AT gmail DOT com>
     - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
     - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
@@ -115,7 +115,7 @@ As represented in this diagram, as long as ``logging.ini`` has a handler that's 
     handlers: file
     propagate: True
 
-The following ``filebeat.yml`` configuration would correctly process, ingest and process the structured logs based on the expected placeholders of the file formatter, notice that the tokenizer with this configuration ``'%{kytos.timestamp} - %{kytos.level} [%{kytos.logger}] [%{kytos.file}:%{kytos.line}:%{kytos.func}] (%{kytos.thread}) %{kytos.message}'`` matches accordingly the expected fields in the formatter:
+The following ``filebeat.yml`` configuration would correctly process, ingest and send the structured logs based on the expected placeholders of the file formatter, notice that the tokenizer with this configuration ``'%{kytos.timestamp} - %{kytos.level} [%{kytos.logger}] [%{kytos.file}:%{kytos.line}:%{kytos.func}] (%{kytos.thread}) %{kytos.message}'`` matches accordingly the expected fields in the formatter:
 
 .. code-block:: none
 
@@ -151,3 +151,13 @@ The following ``filebeat.yml`` configuration would correctly process, ingest and
       host: ${KIBANA_HOST}
       username: ${ELASTICSEARCH_USERNAME}
       password: ${ELASTICSEARCH_PASSWORD}
+
+
+Points of attention
+===================
+
+After deploying such a feature, the administrator/network-operator must be aware of the following aspects:
+
+- The Elasticsearch/Kibana web interface must be restricted to allow access only from trusted networks
+- Elasticsearch must define rotation policies to avoid problems with the storage of the logs
+- Whenever possible, the filebeat service architecture should provide means of running it in a different host (avoiding I/O concurrency with normal Kytos server)

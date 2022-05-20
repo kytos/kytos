@@ -79,7 +79,6 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - xpack.apm.enabled=false
       - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME:-elastic}
       - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD:-elastic_pw}
       - XPACK_SECURITY_ENABLED=true
@@ -89,7 +88,24 @@ services:
       - 5601:5601
     depends_on:
       - elasticsearch
-
+  filebeat:
+    container_name: filebeat
+    image: docker.elastic.co/beats/filebeat:7.17.3
+    command: >
+       filebeat -e
+         --strict.perms=false
+         -E output.elasticsearch.hosts=["elasticsearch:9200"]
+    environment:
+      - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME:-elastic}
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD:-elastic_pw}
+      - ELASTICSEARCH_HOSTS="elasticsearch:9200"
+      - KIBANA_HOST="kibana:5601"
+    volumes:
+      - ./docker/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - .:/kytos:ro
+      - filebeat_data:/usr/share/filebeat/data
+    depends_on:
+      - elasticsearch
   apm-server:
     container_name: apm
     image: docker.elastic.co/apm/apm-server:7.17.3
@@ -123,3 +139,4 @@ volumes:
   mongo3_data:
   esdata:
   kibana_data:
+  filebeat_data:

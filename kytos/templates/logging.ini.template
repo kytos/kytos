@@ -1,8 +1,8 @@
 [formatters]
-keys: console,syslog
+keys: console,syslog,file
 
 [handlers]
-keys: console,syslog
+keys: console,syslog,file
 
 [loggers]
 keys: root,kytos,api_server,socket
@@ -13,6 +13,9 @@ format: %(name)s:%(levelname)s %(module)s:%(lineno)d:  %(message)s
 [formatter_console]
 format: %(asctime)s - %(levelname)s [%(name)s] (%(threadName)s) %(message)s
 
+[formatter_file]
+format: %(asctime)s - %(levelname)s [%(name)s] [%(filename)s:%(lineno)d:%(funcName)s] (%(threadName)s) %(message)s
+
 [handler_console]
 class: StreamHandler
 args:[sys.stdout]
@@ -22,6 +25,12 @@ formatter: console
 class: handlers.SysLogHandler
 args: {{syslog_args}}
 formatter: syslog
+
+[handler_file]
+class: handlers.RotatingFileHandler
+args:["kytos.log", "a", 10*1024*1024, 5]
+formatter: file
+level: INFO
 
 [logger_root]
 level: INFO

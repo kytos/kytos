@@ -40,8 +40,7 @@ from kytos.core.db import db_conn_wait
 from kytos.core.dead_letter import DeadLetter
 from kytos.core.events import KytosEvent
 from kytos.core.exceptions import KytosAPMInitException, KytosDBInitException
-from kytos.core.helpers import executor as executor_pool
-from kytos.core.helpers import now
+from kytos.core.helpers import executors, now
 from kytos.core.interface import Interface
 from kytos.core.logs import LogManager
 from kytos.core.napps.base import NApp
@@ -438,8 +437,8 @@ class Controller:
         self.napp_dir_listener.stop()
 
         self.log.info("Stopping threadpool: %s", self._pool)
-        if executor_pool:
-            self.log.info("Stopping threadpool: %s", executor_pool)
+        for pool_name in executors:
+            self.log.info("Stopping threadpool: %s", pool_name)
 
         threads = threading.enumerate()
         self.log.debug("%s threads before threadpool shutdown: %s",
@@ -449,11 +448,11 @@ class Controller:
             # Python >= 3.9
             # pylint: disable=unexpected-keyword-arg
             self._pool.shutdown(wait=graceful, cancel_futures=True)
-            if executor_pool:
+            for executor_pool in executors.values():
                 executor_pool.shutdown(wait=graceful, cancel_futures=True)
         except TypeError:
             self._pool.shutdown(wait=graceful)
-            if executor_pool:
+            for executor_pool in executors.values():
                 executor_pool.shutdown(wait=graceful)
 
         # self.server.socket.shutdown()

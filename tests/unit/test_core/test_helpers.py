@@ -1,9 +1,9 @@
 """Test kytos.core.helpers module."""
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
-from kytos.core.helpers import (get_thread_pool_max_workers, get_time,
-                                listen_to, run_on_thread)
+from kytos.core.helpers import (executors, get_thread_pool_max_workers,
+                                get_time, listen_to, run_on_thread)
 
 
 class TestHelpers(TestCase):
@@ -23,11 +23,19 @@ class TestHelpers(TestCase):
         mock_thread.return_value.start.assert_called()
 
     @staticmethod
-    @patch('kytos.core.helpers.executor')
-    def test_listen_to_run_on_threadpool_by_default(mock_executor):
+    def test_default_executors():
+        """Test default expected executors."""
+        pools = ["app", "db", "sb"]
+        assert sorted(pools) == sorted(executors.keys())
+
+    @staticmethod
+    def test_listen_to_run_on_threadpool_by_default():
         """Test listen_to runs on ThreadPoolExecutor by default."""
 
-        assert get_thread_pool_max_workers() > 0
+        assert get_thread_pool_max_workers()
+        assert "app" in executors
+        executors["app"] = MagicMock()
+        mock_executor = executors["app"]
 
         @listen_to("some_event")
         def test(event):

@@ -144,7 +144,7 @@ class KytosConfig():
                     'authenticate_urls': [],
                     'vlan_pool': {},
                     'token_expiration_minutes': 180,
-                    'thread_pool_max_workers': 256,
+                    'thread_pool_max_workers': {},
                     'database': '',
                     'apm': '',
                     'debug': False}
@@ -201,6 +201,8 @@ class KytosConfig():
         options.napps_pre_installed = _parse_json(options.napps_pre_installed)
         options.vlan_pool = _parse_json(options.vlan_pool)
         options.authenticate_urls = _parse_json(options.authenticate_urls)
+        thread_pool_max_workers = options.thread_pool_max_workers
+        options.thread_pool_max_workers = _parse_json(thread_pool_max_workers)
 
         return options
 

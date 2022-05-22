@@ -5,6 +5,7 @@ import re
 import sys
 import tarfile
 import urllib
+import ssl
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from random import randint
@@ -131,6 +132,7 @@ class NApp:
         if not self.package_url:
             return None
 
+        ssl._create_default_https_context = ssl._create_unverified_context
         package_filename = urllib.request.urlretrieve(self.package_url)[0]
         extracted = self._extract(package_filename)
         Path(package_filename).unlink()

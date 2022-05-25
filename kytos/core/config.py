@@ -227,8 +227,7 @@ def _render_config_templates(templates,
     # Create the paths used by Kytos.
     directories = [os.path.join(BASE_ENV, ETC_KYTOS)]
     for directory in directories:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
 
     tmpl_path = Path(os.path.abspath(os.path.dirname(__file__))).parent
 

@@ -31,6 +31,7 @@ Added
 - Augmented docker-compose.yml to also spin up Elastsearch, Kibana and APM server with authentication
 - Augmented docker-compose to also spin up Filebeat, integrating log file as input
 - The ``listen_to`` decorator now supports a ``pool`` keyword argument to specify which thread pool the execution should be submitted
+- New core ``kytos.core.retry`` module provides decorators for retries based on ``tenacity``
 
 Changed
 =======

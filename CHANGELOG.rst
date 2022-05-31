@@ -56,6 +56,7 @@ Removed
 
 Fixed
 =====
+- Fixed file already exists error when creating config dirs, issue 222
 
 Security
 ========

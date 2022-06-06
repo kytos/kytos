@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, Mock, call, patch
 
 from kytos.core import Controller
 from kytos.core.config import KytosConfig
+from kytos.core.events import KytosEvent
 from kytos.core.logs import LogManager
 
 
@@ -706,13 +707,10 @@ class TestController(TestCase):
         msg = MagicMock()
         msg.pack.return_value = packet
 
-        event_1 = MagicMock()
-        event_1.name = 'kytos/core.any'
-        event_1.destination = dst
-        event_1.content = {"message": msg}
+        event_1 = KytosEvent('kytos/core.any',
+                             content={'message': msg, 'destination': dst})
 
-        event_2 = MagicMock()
-        event_2.name = 'kytos/core.shutdown'
+        event_2 = KytosEvent('kytos/core.shutdown')
 
         self.controller.buffers.msg_out._queue.sync_q.put(event_1)
         self.controller.buffers.msg_out._queue.sync_q.put(event_2)

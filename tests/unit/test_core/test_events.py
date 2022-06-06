@@ -25,9 +25,19 @@ class TestKytosEvent(TestCase):
                               "source": "src",
                               "message": "msg"}
         expected = "KytosEvent('kytos/core.any', {'destination': 'dest', " + \
-                   "'source': 'src', 'message': 'msg'})"
+                   "'source': 'src', 'message': 'msg'}, 0)"
 
         self.assertEqual(repr(self.event), expected)
+
+    def test__lt__(self):
+        """test less than operator."""
+        event_a = KytosEvent('a', priority=5)
+        event_b = KytosEvent('b', priority=-10)
+        assert event_b < event_a
+
+        event_a = KytosEvent('a')
+        event_b = KytosEvent('b')
+        assert event_a < event_b
 
     def test_destination(self):
         """Test destination property and set_destination method."""
@@ -57,6 +67,7 @@ class TestKytosEvent(TestCase):
         assert self.event.timestamp <= datetime.now(timezone.utc)
         assert self.event.id and isinstance(self.event.id, UUID)
         assert self.event.reinjections == 0
+        assert self.event.priority == 0
 
     def test_trace_parent(self):
         """Test trace_parent."""

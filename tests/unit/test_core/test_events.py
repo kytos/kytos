@@ -29,7 +29,8 @@ class TestKytosEvent(TestCase):
 
         self.assertEqual(repr(self.event), expected)
 
-    def test__lt__(self):
+    @staticmethod
+    def test__lt__():
         """test less than operator."""
         event_a = KytosEvent('a', priority=5)
         event_b = KytosEvent('b', priority=-10)

@@ -1,8 +1,7 @@
 """Kytos Buffer Classes, based on Python Queue."""
 import logging
 
-from janus import Queue
-from janus import PriorityQueue
+from janus import PriorityQueue, Queue
 
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import get_thread_pool_max_workers

@@ -123,6 +123,25 @@ If you're developing locally and using the core MongoDB integration, you can use
 If you're using the ``--database mongodb`` option in production, make sure to
 use a recommended ``WiredTiger Storage Engine`` file system, inject environment variables safely, have backup and restore procedures and also allocate sufficient RAM and CPU depending on the expected workload.
 
+How to use with Elastic APM
+***************************
+
+``kytosd`` has been integrated with Elastic APM (application performance monitoring) Python agent. If you're developing locally, you can spin up the APM and the Elasticsearch infrastructure with docker compose:
+
+.. code-block:: shell
+
+   $ docker-compose up -d
+
+
+In order to enable the Elastic APM agent, you have to pass the ``--apm es`` option to ``kytosd``, for instance:
+
+.. code-block:: shell
+
+  $ kytosd -f --database mongodb --apm es
+
+You should be able to login on `Kibana <http://localhost:5601/app/apm/traces>`_ and browse the APM traces. Kibana default development credentials can be found on `docker-compose.yml <./docker-compose.yml>`_.
+
+
 The Web Admin User Interface
 ============================
 

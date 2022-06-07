@@ -141,6 +141,7 @@ In order to enable the Elastic APM agent, you have to pass the ``--apm es`` opti
 
 You should be able to login on `Kibana <http://localhost:5601/app/apm/traces>`_ and browse the APM traces. Kibana default development credentials can be found on `docker-compose.yml <./docker-compose.yml>`_.
 
+If you need further information, including examples of the ``@begin_span`` you can check out the [original PR](https://github.com/kytos-ng/kytos/pull/209).
 
 The Web Admin User Interface
 ============================

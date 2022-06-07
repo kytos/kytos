@@ -1,8 +1,7 @@
 """Kytos Buffer Classes, based on Python Queue."""
 import logging
 
-# from queue import Queue
-from janus import Queue
+from janus import PriorityQueue, Queue
 
 from kytos.core.events import KytosEvent
 from kytos.core.helpers import get_thread_pool_max_workers
@@ -15,7 +14,8 @@ LOG = logging.getLogger(__name__)
 class KytosEventBuffer:
     """KytosEventBuffer represents a queue to store a set of KytosEvents."""
 
-    def __init__(self, name, event_base_class=None, loop=None, maxsize=0):
+    def __init__(self, name, event_base_class=None, loop=None, maxsize=0,
+                 queue_cls=Queue):
         """Contructor of KytosEventBuffer receive the parameters below.
 
         Args:
@@ -23,11 +23,12 @@ class KytosEventBuffer:
             event_base_class (class): Class of KytosEvent.
             loop (class): asyncio event loop
             maxsize (int): maxsize _queue producer buffer
+            queue_cls (class): queue class from janus
         """
         self.name = name
         self._event_base_class = event_base_class
         self._loop = loop
-        self._queue = Queue(maxsize=maxsize, loop=self._loop)
+        self._queue = queue_cls(maxsize=maxsize, loop=self._loop)
         self._reject_new_events = False
 
     def put(self, event):
@@ -59,14 +60,9 @@ class KytosEventBuffer:
             event (:class:`~kytos.core.events.KytosEvent`):
                 KytosEvent sent to queue.
         """
-        # qsize = self._queue.async_q.qsize()
-        # print('qsize before:', qsize)
         if not self._reject_new_events:
             await self._queue.async_q.put(event)
             LOG.debug('[buffer: %s] Added: %s', self.name, event.name)
-
-        # qsize = self._queue.async_q.qsize()
-        # print('qsize after:', qsize)
 
         if event.name == "kytos/core.shutdown":
             LOG.info('[buffer: %s] Stop mode enabled. Rejecting new events.',
@@ -156,7 +152,8 @@ class KytosBuffers:
         self.msg_in = KytosEventBuffer("msg_in_event", loop=self._loop,
                                        maxsize=self._get_maxsize("sb"))
         self.msg_out = KytosEventBuffer('msg_out_event', loop=self._loop,
-                                        maxsize=self._get_maxsize("sb"))
+                                        maxsize=0,
+                                        queue_cls=PriorityQueue)
         self.app = KytosEventBuffer('app_event', loop=self._loop,
                                     maxsize=self._get_maxsize("app"))
 

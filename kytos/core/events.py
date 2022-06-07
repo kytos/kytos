@@ -13,7 +13,7 @@ class KytosEvent:
     dictionary.
     """
 
-    def __init__(self, name=None, content=None, trace_parent=None):
+    def __init__(self, name=None, content=None, trace_parent=None, priority=0):
         """Create an event to be published.
 
         Args:
@@ -25,11 +25,14 @@ class KytosEvent:
                                    set the root parent, and then you have to
                                    pass the trace_parent to subsequent
                                    correlated KytosEvent(s).
+            priority (int): Priority of this event if a PriorityQueue is being
+                            used, the lower the number the higher the priority.
         """
         self.name = name
         self.content = content if content is not None else {}
         self.timestamp = now()
         self.reinjections = 0
+        self.priority = priority
 
         # pylint: disable=invalid-name
         self.id = uuid4()
@@ -39,7 +42,13 @@ class KytosEvent:
         return self.name
 
     def __repr__(self):
-        return f"KytosEvent({self.name!r}, {self.content!r})"
+        return f"KytosEvent({self.name!r}, {self.content!r}, {self.priority})"
+
+    def __lt__(self, other):
+        """Less than operator."""
+        if self.priority != other.priority:
+            return self.priority < other.priority
+        return self.timestamp < other.timestamp
 
     def as_dict(self):
         """Return KytosEvent as a dict."""

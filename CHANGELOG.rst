@@ -48,6 +48,8 @@ Changed
    app: it's meant for general NApps event, it's default pool if no other one has been specified
    db: it can be used by for higher priority db related tasks (need to be parametrized on decorator), it's also used automatically by kytos.storehouse.* events
 
+- ``msg_out`` core queue now leverages a PriorityQueue instead of a FIFO Queue.
+
 Deprecated
 ==========
 

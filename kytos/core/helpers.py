@@ -1,5 +1,6 @@
 """Utilities functions used in Kytos."""
 import logging
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from threading import Thread
@@ -127,7 +128,8 @@ def listen_to(event, *events, pool=None):
                 result = None
                 exc_str = f"{type(exc)}: {str(exc)}"
                 LOG.error(f"listen_to handler: {handler}, "
-                          f"args: {args}, exception: {exc_str}")
+                          f"args: {args}, exception: {exc_str} "
+                          f"traceback: {traceback.format_exc()}")
                 if hasattr(cls, "controller"):
                     cls.controller.dead_letter.add_event(kytos_event)
             return result
@@ -148,7 +150,8 @@ def listen_to(event, *events, pool=None):
                 result = None
                 exc_str = f"{type(exc)}: {str(exc)}"
                 LOG.error(f"listen_to handler: {handler}, "
-                          f"args: {args}, exception: {exc_str}")
+                          f"args: {args}, exception: {exc_str} "
+                          f"traceback: {traceback.format_exc()}")
                 if hasattr(cls, "controller"):
                     cls.controller.dead_letter.add_event(kytos_event)
                 apm_client.capture_exception(

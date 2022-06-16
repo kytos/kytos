@@ -146,6 +146,7 @@ class Controller:
 
         self.auth = Auth(self)
         self.dead_letter = DeadLetter(self)
+        self._alisten_tasks = set()
 
         self._register_endpoints()
         #: Adding the napps 'enabled' directory into the PATH
@@ -529,7 +530,12 @@ class Controller:
             if re.match(event_regex, event.name):
                 # self.log.debug('Calling listeners for %s', event)
                 for listener in listeners:
-                    listener(event)
+                    if asyncio.iscoroutinefunction(listener):
+                        task = asyncio.create_task(listener(event))
+                        self._alisten_tasks.add(task)
+                        task.add_done_callback(self._alisten_tasks.discard)
+                    else:
+                        listener(event)
 
     async def raw_event_handler(self):
         """Handle raw events.

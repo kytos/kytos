@@ -1,8 +1,9 @@
 """Test kytos.core.buffers module."""
 import asyncio
-import pytest
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from kytos.core.buffers import KytosBuffers, KytosEventBuffer
 from kytos.core.events import KytosEvent

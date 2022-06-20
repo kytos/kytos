@@ -208,7 +208,7 @@ def alisten_to(event, *events):
             A method with an `events` attribute (list of events to be listened)
             and also decorated as an asyncio task.
         """
-        # pylint: disable=unused-argument
+        # pylint: disable=unused-argument,broad-except
         async def handler_context(*args, **kwargs):
             """Async handler's execution context."""
             cls, kytos_event = args[0], args[1]

@@ -219,7 +219,10 @@ pyparsing==2.4.6
 pytest==7.0.0
     # via
     #   kytos
+    #   pytest-asyncio
     #   pytest-cov
+pytest-asyncio==0.18.3
+    # via -r requirements/dev.in
 pytest-cov==3.0.0
     # via kytos
 python-daemon==2.2.4

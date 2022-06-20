@@ -133,7 +133,7 @@ class KytosBuffers:
     def __init__(self, loop=None):
         """Build four KytosEventBuffers.
 
-        :attr:`raw`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
+        :attr:`conn`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
         received from connection events.
 
         :attr:`raw`: :class:`~kytos.core.buffers.KytosEventBuffer` with events

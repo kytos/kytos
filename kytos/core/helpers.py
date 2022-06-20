@@ -210,7 +210,7 @@ def alisten_to(event, *events):
         """
         # pylint: disable=unused-argument
         async def handler_context(*args, **kwargs):
-            """Handler's context for ThreadPool."""
+            """Async handler's execution context."""
             cls, kytos_event = args[0], args[1]
             try:
                 result = await handler(*args)
@@ -224,7 +224,7 @@ def alisten_to(event, *events):
             return result
 
         async def handler_context_apm(*args, apm_client=None):
-            """Handler's context for ThreadPool APM instrumentation."""
+            """Async handler's execution context with APM instrumentation."""
             cls, kytos_event = args[0], args[1]
             trace_parent = kytos_event.trace_parent
             tx_type = "kytos_event"

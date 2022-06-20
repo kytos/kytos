@@ -235,15 +235,13 @@ class TestController(TestCase):
 
     @staticmethod
     @patch('kytos.core.controller.KytosServer')
-    @patch('kytos.core.controller.Controller.app_event_handler')
     @patch('kytos.core.controller.Controller.msg_out_event_handler')
-    @patch('kytos.core.controller.Controller.msg_in_event_handler')
-    @patch('kytos.core.controller.Controller.raw_event_handler')
+    @patch('kytos.core.controller.Controller.event_handler')
     @patch('kytos.core.controller.Controller.load_napps')
     @patch('kytos.core.controller.Controller.pre_install_napps')
     def test_start_controller(*args):
         """Test activate method."""
-        (mock_pre_install_napps, mock_load_napps, _, _, _, _, _) = args
+        (mock_pre_install_napps, mock_load_napps, _, _, _) = args
 
         napp = MagicMock()
         loop = MagicMock()
@@ -255,8 +253,11 @@ class TestController(TestCase):
         controller.start_controller()
 
         controller.server.serve_forever.assert_called()
-        assert loop.create_task.call_count == 5
-        assert len(controller._tasks) == 5
+        all_buffers = controller.buffers.get_all_buffers()
+
+        # It's expected that all buffers have a task + the api server task
+        assert loop.create_task.call_count == len(all_buffers) + 1
+        assert len(controller._tasks) == len(all_buffers) + 1
         mock_pre_install_napps.assert_called_with([napp])
         mock_load_napps.assert_called()
 
@@ -681,7 +682,7 @@ class TestController(TestCase):
         event.name = 'kytos/core.shutdown'
         self.controller.buffers.raw._queue.sync_q.put(event)
 
-        self.loop.run_until_complete(self.controller.raw_event_handler())
+        self.loop.run_until_complete(self.controller.event_handler("raw"))
 
         mock_notify_listeners.assert_called_with(event)
 
@@ -693,7 +694,7 @@ class TestController(TestCase):
         event.name = 'kytos/core.shutdown'
         self.controller.buffers.msg_in._queue.sync_q.put(event)
 
-        self.loop.run_until_complete(self.controller.msg_in_event_handler())
+        self.loop.run_until_complete(self.controller.event_handler("msg_in"))
 
         mock_notify_listeners.assert_called_with(event)
 
@@ -727,7 +728,7 @@ class TestController(TestCase):
         event.name = 'kytos/core.shutdown'
         self.controller.buffers.app._queue.sync_q.put(event)
 
-        self.loop.run_until_complete(self.controller.app_event_handler())
+        self.loop.run_until_complete(self.controller.event_handler("app"))
 
         mock_notify_listeners.assert_called_with(event)
 

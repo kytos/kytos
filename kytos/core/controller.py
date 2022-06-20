@@ -521,7 +521,9 @@ class Controller:
         Args:
             event (~kytos.core.KytosEvent): An instance of a KytosEvent.
         """
-        # self.log.debug("looking for listeners for %s", event)
+
+        if logging.DEBUG >= self.log.getEffectiveLevel():
+            self.log.debug("looking for listeners for %s", event)
         for event_regex, listeners in dict(self.events_listeners).items():
             # self.log.debug("listeners found for %s: %r => %s", event,
             #                event_regex, [l.__qualname__ for l in listeners])
@@ -530,7 +532,8 @@ class Controller:
             if event_regex[-1] != '$' or event_regex[-2] == '\\':
                 event_regex += '$'
             if re.match(event_regex, event.name):
-                # self.log.debug('Calling listeners for %s', event)
+                if logging.DEBUG >= self.log.getEffectiveLevel():
+                    self.log.debug('Calling listeners for %s', event)
                 for listener in listeners:
                     if asyncio.iscoroutinefunction(listener):
                         task = asyncio.create_task(listener(event))
@@ -583,13 +586,14 @@ class Controller:
                         not destination.state == ConnectionState.FINISHED):
                     packet = message.pack()
                     destination.send(packet)
-                    # self.log.debug('Connection %s: OUT OFP, '
-                    #                'version: %s, type: %s, xid: %s - %s',
-                    #                destination.id,
-                    #                message.header.version,
-                    #                message.header.message_type,
-                    #                message.header.xid,
-                    #                packet.hex())
+                    if logging.DEBUG >= self.log.getEffectiveLevel():
+                        self.log.debug('Connection %s: OUT OFP, '
+                                       'version: %s, type: %s, xid: %s - %s',
+                                       destination.id,
+                                       message.header.version,
+                                       message.header.message_type,
+                                       message.header.xid,
+                                       packet.hex())
                     self.notify_listeners(triggered_event)
                     continue
 

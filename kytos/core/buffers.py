@@ -43,7 +43,8 @@ class KytosEventBuffer:
         """
         if not self._reject_new_events:
             self._queue.sync_q.put(event)
-            # LOG.debug('[buffer: %s] Added: %s', self.name, event.name)
+            if logging.DEBUG >= LOG.getEffectiveLevel():
+                LOG.debug('[buffer: %s] Added: %s', self.name, event.name)
 
         if event.name == "kytos/core.shutdown":
             LOG.info('[buffer: %s] Stop mode enabled. Rejecting new events.',
@@ -62,7 +63,8 @@ class KytosEventBuffer:
         """
         if not self._reject_new_events:
             await self._queue.async_q.put(event)
-            # LOG.debug('[buffer: %s] Added: %s', self.name, event.name)
+            if logging.DEBUG >= LOG.getEffectiveLevel():
+                LOG.debug('[buffer: %s] Added: %s', self.name, event.name)
 
         if event.name == "kytos/core.shutdown":
             LOG.info('[buffer: %s] Stop mode enabled. Rejecting new events.',
@@ -79,7 +81,8 @@ class KytosEventBuffer:
         """
         event = self._queue.sync_q.get()
 
-        # LOG.debug('[buffer: %s] Removed: %s', self.name, event.name)
+        if logging.DEBUG >= LOG.getEffectiveLevel():
+            LOG.debug('[buffer: %s] Removed: %s', self.name, event.name)
 
         return event
 
@@ -93,7 +96,8 @@ class KytosEventBuffer:
         """
         event = await self._queue.async_q.get()
 
-        # LOG.debug('[buffer: %s] Removed: %s', self.name, event.name)
+        if logging.DEBUG >= LOG.getEffectiveLevel():
+            LOG.debug('[buffer: %s] Removed: %s', self.name, event.name)
 
         return event
 

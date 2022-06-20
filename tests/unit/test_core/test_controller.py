@@ -30,6 +30,7 @@ class TestController(TestCase):
         self.controller = Controller(self.options, loop=self.loop)
         self.controller.napps_manager = self.napps_manager
         self.controller.log = Mock()
+        self.controller.log.getEffectiveLevel.return_value = 20
 
     def test_configuration_endpoint(self):
         """Should return the attribute options as json."""

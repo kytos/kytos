@@ -147,7 +147,7 @@ class KytosServerProtocol(asyncio.Protocol):
         event = KytosEvent(name=event_name,
                            content={'source': self.connection})
 
-        self._loop.create_task(self.server.controller.buffers.raw.aput(event))
+        self._loop.create_task(self.server.controller.buffers.conn.aput(event))
 
     def data_received(self, data):
         """Handle each request and place its data in the raw event buffer.
@@ -160,8 +160,8 @@ class KytosServerProtocol(asyncio.Protocol):
 
         data = self._rest + data
 
-        LOG.debug("New data from %s:%s (%s bytes)",
-                  self.connection.address, self.connection.port, len(data))
+        # LOG.debug("New data from %s:%s (%s bytes)",
+        #           self.connection.address, self.connection.port, len(data))
 
         # LOG.debug("New data from %s:%s (%s bytes): %s", self.addr, self.port,
         #           len(data), binascii.hexlify(data))
@@ -191,4 +191,4 @@ class KytosServerProtocol(asyncio.Protocol):
             f'kytos/core.{self.connection.protocol.name}.connection.lost'
         event = KytosEvent(name=event_name, content=content)
 
-        self._loop.create_task(self.server.controller.buffers.app.aput(event))
+        self._loop.create_task(self.server.controller.buffers.conn.aput(event))

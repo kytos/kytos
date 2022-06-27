@@ -103,6 +103,8 @@ How to use with MongoDB
 
 If you're developing locally and using the core MongoDB integration, you can use ``docker-compose`` to spin up a MongoDB replica set cluster. You'll also need to run the ``add-etc-hosts.sh`` script at least once when setting up your environment:
 
+Go to the kytos repository directory and from there execute the following command.
+
 .. code-block:: shell
 
    $ sudo ./docker/scripts/add-etc-hosts.sh

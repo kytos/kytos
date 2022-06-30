@@ -1,0 +1,151 @@
+:EP: 30
+:Title: Link Liveness Detection via LLDP
+:Authors:
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Antonio Francisco <ajoaoff AT gmail DOT com>
+    - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
+    - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
+:Created: 2022-06-28
+:Kytos-Version:
+:Status: Draft
+
+****************************************
+EP030 - Link Liveness Detection via LLDP
+****************************************
+
+
+Abstract
+========
+
+This blueprint proposes a link liveness detection solution via LLDP. 
+
+
+Motivation
+==========
+
+In production networks, links can span over multiple transport technologies and carrier. Eventually, a segment of the end-to-end link can face an outage and this outage might not necessarily trigger a port down event at the endpoints. Under those circumstances, Kytos would see the endpoints (NNI) as UP, however there is no end-to-end connectivity. Link liveness is expected to detect such cases by using keepalive messages between the endpoints of a link. Whenever keepalive messages are no longer seen within a specified interval, Kytos will consider that the link is impaired. In this blueprint, our focus is on creating a solution to leverage the capabilities provided by the Link Layer Discovery Protocol protocol (IEEE 802.1AB). Other solutions and protocols are available. BFD (Bidirectional Forwarding Detection - RFC 5880) is another option that solves this problem.
+
+Requirements
+============
+
+- The Link liveness detection implementation must work bidirectionally.
+- The minimum expected liveness hello interval is 1s and the dead interval should be three times the hello interval. If three subsequent hellos aren't received the liveness status should be considered down.
+- Link liveness detection via LLDP will depend on LLDP being enabled on an interface in order to work, this is for reusing existing protocol packets and to avoid duplicating extra network packets that could become costly in terms of IO. Although link liveness will have its configuration, LLDP must be enabled, and if LLDP is disabled, link liveness will be disabled too. 
+- Link liveness detection should be configurable per interface, and the hello interval will be the same as the existing global ``POLLING_TIME`` to minimize IO and reuse the existing functionality.
+- For production networks, the minimum expected hello interval that will be used is 1s. The link liveness implementation should be able to handle this frequency.
+- When liveness goes down, ``Link.status`` must be ``EntityStatus.DOWN``, that way encapsulating this to keep compatible and minimize changes on existing NApps. No new actions such as shutdown will be needed on this iteration. In order to accomplish this, a link internal metadata ``liveness_status`` will be reserved.
+- For production networks, on average, there will be 30 links in total and 3 links per switch, to give a ballpark figure for stress testing and making sure that the minimum hello of 1s works as expected.
+
+
+Specification
+=============
+
+The following API endpoints can be used for configuration, the data will be persisted in a DB, and the body of the payloads to simplify for clients will follow a similar pattern that the existing v1 ``of_lldp`` API also uses:
+
+- ``POST v1/liveness/enable`` to enable liveness detection on interfaces:
+
+.. code-block:: python3
+
+   {
+     "interfaces": [<intf_id>]
+   }
+
+- ``POST v1/liveness/disable`` to disable liveness detection on interfaces:
+
+.. code-block:: python3
+
+   {
+     "interfaces": [<intf_id>]
+   }
+
+- ``GET v1/liveness/?interface_id`` to get the current liveness status of interfaces:
+
+.. code-block:: python3
+
+   {
+     "interfaces": [{"id": <intf_id>, "status": "init|up|down"}]
+   }
+
+
+``liveness_status`` will be an internal reserved link metadata. The values will be ``init``, ``up`` or ``down``:
+
+- ``links.<link_id>.metadata.liveness_status``: ``init|up|down``
+
+If ``liveness_status`` is ``down``, ``Link.status`` should be ``EntityStatus.DOWN``, just so other NApps can filter based on the status attribute. Also, whenever a link liveness detection goes up or down, ``topology`` NApp should generate respectively, ``kytos/topology.link_up`` and ``kytos/topology.link_down``, in addition to publishing ``kytos/topology.updated``.
+
+Published Events
+----------------
+
+``of_lldp`` will publish the following events, just so ``topology`` can subscribe to react accordingly.
+
+kytos/of_lldp.liveness.up
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*buffer*: ``app``
+
+Event reporting that link liveness is up on interfaces
+
+Content:
+
+.. code-block:: python3
+
+   {
+     "interfaces": [
+       {
+         "interface_a": <Interface obj>
+         "interface_b": <Interface obj>
+       }
+     ]
+   }
+
+kytos/of_lldp.liveness.down
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*buffer*: ``app``
+
+Event reporting that link liveness is down on interfaces
+
+Content:
+
+.. code-block:: python3
+
+   {
+     "interfaces": [
+       {
+         "interface_a": <Interface obj>
+         "interface_b": <Interface obj>
+       }
+     ]
+   }
+
+
+kytos/of_lldp.liveness.enabled
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*buffer*: ``app``
+
+Event reporting that liveness has been enabled on interfaces
+
+Content:
+
+.. code-block:: python3
+
+   {
+     "interfaces": [<Interface obj>]
+   }
+
+kytos/of_lldp.liveness.disabled
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*buffer*: ``app``
+
+Event reporting that liveness has been disabled on interfaces
+
+Content:
+
+.. code-block:: python3
+
+   {
+     "interfaces": [<Interface obj>]
+   }

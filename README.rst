@@ -41,11 +41,11 @@ Installing
 ==========
 
 If you don't have Python 3 installed, please install it. Please make
-sure that you're using ``python3.6`` or a later version:
+sure that you're using ``python3.9``:
 
 .. code-block:: shell
 
-   $ apt install python3
+   $ apt install python3.9
 
 Then, the first step is to clone *kytos* repository:
 
@@ -101,7 +101,7 @@ open sockets at ports 6653 and 8181.
 How to use with MongoDB
 ***********************
 
-If you're developing locally and using the core MongoDB integration, you can use ``docker-compose`` to spin up a MongoDB replica set cluster. You'll also need to run the ``add-etc-hosts.sh`` script at least once when setting up your environment:
+If you're developing locally and using the core MongoDB integration, you can use ``docker-compose`` to spin up a MongoDB replica set cluster. You'll also need to run the ``add-etc-hosts.sh`` script at least once when setting up your environment.Go to the this repository directory and execute the following commands:
 
 .. code-block:: shell
 

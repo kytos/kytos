@@ -41,7 +41,7 @@ Installing
 ==========
 
 If you don't have Python 3 installed, please install it. Please make
-sure that you're using ``python3.9`` or a later version:
+sure that you're using ``python3.9``:
 
 .. code-block:: shell
 

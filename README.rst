@@ -101,9 +101,7 @@ open sockets at ports 6653 and 8181.
 How to use with MongoDB
 ***********************
 
-If you're developing locally and using the core MongoDB integration, you can use ``docker-compose`` to spin up a MongoDB replica set cluster. You'll also need to run the ``add-etc-hosts.sh`` script at least once when setting up your environment:
-
-Go to the kytos repository directory and from there execute the following command.
+If you're developing locally and using the core MongoDB integration, you can use ``docker-compose`` to spin up a MongoDB replica set cluster. You'll also need to run the ``add-etc-hosts.sh`` script at least once when setting up your environment.Go to the this repository directory and execute the following commands:
 
 .. code-block:: shell
 

@@ -30,9 +30,9 @@ Requirements
 ============
 
 - The Link liveness detection implementation must work bidirectionally.
-- The minimum expected liveness hello interval is 1s and the dead interval should be three times the hello interval. If three subsequent hellos aren't received, from a live/connected switch on an active/enabled interface, then the liveness status should be considered down.
+- The minimum expected liveness hello interval is 1s and the dead interval, by default, should be three times the hello interval. If three subsequent hellos aren't received, from a live/connected switch on an active/enabled interface, then the liveness status should be considered down.
 - Link liveness detection via LLDP will depend on LLDP being enabled on an interface in order to work, this is for reusing existing protocol packets and to avoid duplicating extra network packets that could become costly in terms of IO. Although link liveness will have its configuration, LLDP must be enabled, and if LLDP is disabled, link liveness will be disabled too. 
-- Link liveness detection should be configurable per interface, and the hello interval will be the same as the existing global ``POLLING_TIME`` to minimize IO and reuse the existing functionality.
+- Link liveness detection should be configurable per interface, and the hello interval will be the same as the existing global ``POLLING_TIME`` to minimize IO and reuse the existing functionality. A new configuration option on settings ``LIVENESS_DEAD_MULTIPLIER`` will be available, this value multiplied by ``POLLING_TIME`` is the dead interval.
 - For production networks, the minimum expected hello interval that will be used is 1s. The link liveness implementation should be able to handle this frequency.
 - When liveness goes down, ``Link.status`` must be ``EntityStatus.DOWN``, that way encapsulating this to keep compatible and minimize changes on existing NApps. No new actions such as shutdown will be needed on this iteration. In order to accomplish this, a link internal metadata ``liveness_status`` will be reserved.
 

@@ -83,19 +83,15 @@ kytos/of_lldp.liveness.up
 
 *buffer*: ``app``
 
-Event reporting that link liveness is up on interfaces
+Event reporting that link liveness is up
 
 Content:
 
 .. code-block:: python3
 
    {
-     "interfaces": [
-       {
-         "interface_a": <Interface obj>
-         "interface_b": <Interface obj>
-       }
-     ]
+     "interface_a": <Interface obj>
+     "interface_b": <Interface obj>
    }
 
 kytos/of_lldp.liveness.down
@@ -103,19 +99,31 @@ kytos/of_lldp.liveness.down
 
 *buffer*: ``app``
 
-Event reporting that link liveness is down on interfaces
+Event reporting that link liveness is down
 
 Content:
 
 .. code-block:: python3
 
    {
-     "interfaces": [
-       {
-         "interface_a": <Interface obj>
-         "interface_b": <Interface obj>
-       }
-     ]
+     "interface_a": <Interface obj>
+     "interface_b": <Interface obj>
+   }
+
+kytos/of_lldp.liveness.init
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*buffer*: ``app``
+
+Event reporting that link liveness is init
+
+Content:
+
+.. code-block:: python3
+
+   {
+     "interface_a": <Interface obj>
+     "interface_b": <Interface obj>
    }
 
 

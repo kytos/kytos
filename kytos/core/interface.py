@@ -3,6 +3,7 @@ import json
 import logging
 from enum import IntEnum
 from threading import Lock
+from kytos.core.id import InterfaceID
 
 from pyof.v0x01.common.phy_port import Port as PortNo01
 from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
@@ -97,6 +98,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self.stats = None
         self.link = None
         self.lldp = True
+        self._id = InterfaceID(switch.id, port_number)
         self._custom_speed = speed
         self._tag_lock = Lock()
         self.set_available_tags(range(1, 4096))
@@ -123,7 +125,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             string: Interface id.
 
         """
-        return "{}:{}".format(self.switch.dpid, self.port_number)
+        return self._id
 
     @property
     def uni(self):

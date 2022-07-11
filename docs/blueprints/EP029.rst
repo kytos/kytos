@@ -92,16 +92,19 @@ Example 1:
 Let's take Topology 1 as the first example. Suppose that the primary path will be set up to `S - X - W - D`. The maximum disjoint path will be set up to `S - Z - W - I - D`. The following rules will be created before a link failure:
 
 - Rules for the primary path:
-```
-h1 -> S -> X -> W -> D -> h2
-h2 -> D -> W -> X -> S -> h1
-```
+
+.. code-block:: none
+
+    h1 -> S -> X -> W -> D -> h2
+    h2 -> D -> W -> X -> S -> h1
 
 - Rules for the failover path:
-```
-S -> Z -> W -> I -> D -> h2
-D -> I -> W -> Z -> S -> h1
-```
+
+.. code-block:: none
+
+    S -> Z -> W -> I -> D -> h2
+    D -> I -> W -> Z -> S -> h1
+
 
 - During the EVC operation, let's suppose the link `W - D` eventually goes DOWN. To handle this link_down event, MEF E-Line will have to only send two FlowMods: 1 FlowMod to switch S to setup `h1 -> S` (overriding the previous flows used to forward traffic using the primary path); 1 FlowMod to switch D to setup `h2 -> D` (overriding the previous flows used to forward traffic using the primary path)
 
@@ -113,16 +116,20 @@ Example 2:
 Let's take Topology 2 as the second example. Suppose that we have 10 EVCs with UNIs in Switch A and Z. Suppose that the primary path will be set up to `A - B - C - D - Z`. The maximum disjoint path will be set up to `A - B - E - F - D - Z`. The following rules will be created before a link failure:
 
 - Rules for the primary path (for each EVC):
-```
-h1 -> A -> B -> C -> D -> Z -> h2
-h2 -> A -> D -> C -> B -> A -> h1
-```
+
+.. code-block:: none
+
+    h1 -> A -> B -> C -> D -> Z -> h2
+    h2 -> A -> D -> C -> B -> A -> h1
+
 
 - Rules for the failover path (for each EVC):
-```
-A -> B -> E -> F -> D -> Z -> h2
-Z -> D -> F -> E -> B -> A -> h1
-```
+
+.. code-block:: none
+
+    A -> B -> E -> F -> D -> Z -> h2
+    Z -> D -> F -> E -> B -> A -> h1
+
 
 - During the EVC operation, let's suppose the link `B - C` eventually goes DOWN. To handle this link_down event, MEF E-Line will have to only send two FlowMods for each EVC: 1 FlowMod to switch A to setup `h1 -> A` (overriding the previous flows used to forward traffic using the primary path); 1 FlowMod to switch Z to setup `h2 -> Z` (overriding the previous flows used to forward traffic using the primary path)
 

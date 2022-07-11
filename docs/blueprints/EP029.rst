@@ -36,7 +36,7 @@ In all scenarios above, when the Kytos SDN controller observes a link failure, t
  4. The path from step 3 is configured (FLowMod Insert requests are sent to each switch)
  5. UNIs are reconfigured (FlowMod Insert requests are sent to UNI_A and UNI_Z's switches).
 
-Those steps are applied for each EVC, impacting the overall restoration time. Therefore, the restoration time of a particular EVC has its overhead (steps 2 to 5) plus the restoration time of all previous EVCs.
+Those steps are applied for each EVC, impacting the overall restoration time. Therefore, the restoration time of a particular EVC depens on its own overhead (steps 2 to 5) plus the restoration time of all previous EVCs.
 
 
 Protection Terminology
@@ -68,7 +68,7 @@ Path Failover Approach
 
 To provide service protection for EVCs, MEF E-Line will use the following strategy:
 
- - EVCs will have their primary path configured according to the user requirements (static or dynamic paths) and a failover/protection path. The failover/protection path will have its flows installed in advance (before failure events), including the forwarding rules for all switches in the path and egress forwarding rules at the UNI switches. Thus, only the ingress forwarding rules will have to be configured during a link failure.
+ - EVCs will have their primary path configured according to the user requirements (static or dynamic paths) and a failover/protection path. The failover/protection path will have its flows installed in advance (before failure events), including the forwarding rules for all switches in the path and egress forwarding rules at the UNI switches. Thus, only the ingress forwarding rules will have to be configured during a link failure. 
 
  - The failover/protection path will be configured to be the maximum disjoint path from the current path unless requested by the user through the `backup_path` EVC attribute.
 
@@ -78,10 +78,57 @@ To provide service protection for EVCs, MEF E-Line will use the following strate
 
  - Upon receiving link failure events, MEF E-line should check for EVCs affected by the link failure in the failover/protection path beside the current path. The check for affected EVCs in the failover/protection path should be done after handling the EVCs affected in the current_path.
 
- - A new EVC attribute will become available to store and display the failover/protection path. Some EVCs may have an empty failover/protection path, depending on the EVC parameters (e.g., EVCs with static path -- `dynamic_backup_path=False` -- and only `primary_path`)
+ - A new EVC attribute will become available to store and display the failover/protection path: `failover_path`. Some EVCs may have an empty failover/protection path, depending on the EVC parameters (e.g., EVCs with static path -- `dynamic_backup_path=False` -- and only `primary_path`)
 
  - If, for some reason, the failover/protection path fails to be established/used, MEF E-Line traditional failure handler should take place and guarantee the EVC gets updated (either with a new path or deactivated)
 
+Consider the following topologies as examples of the above strategy.
+
+  .. image:: https://drive.google.com/uc?export=view&id=1vyAbg2qhOm5kiMwoQqBzkm6ZOE5NWDe0
+  
+Example 1:
+----------
+
+Let's take Topology 1 as the first example. Suppose that the primary path will be set up to `S - X - W - D`. The maximum disjoint path will be set up to `S - Z - W - I - D`. The following rules will be created before a link failure:
+
+- Rules for the primary path:
+```
+h1 -> S -> X -> W -> D -> h2
+h2 -> D -> W -> X -> S -> h1
+```
+
+- Rules for the failover path:
+```
+S -> Z -> W -> I -> D -> h2
+D -> I -> W -> Z -> S -> h1
+```
+
+- During the EVC operation, let's suppose the link `W - D` eventually goes DOWN. To handle this link_down event, MEF E-Line will have to only send two FlowMods: 1 FlowMod to switch S to setup `h1 -> S` (overriding the previous flows used to forward traffic using the primary path); 1 FlowMod to switch D to setup `h2 -> D` (overriding the previous flows used to forward traffic using the primary path)
+
+- Note that right after those 2 FlowMods are executed, the EVC will switch to the failover path and it will continue its normal operation. There will be some flows installed in the previous primary path (S - X - W - D) that needs to be cleaned up. The removal of those flows will be left to be done as part of the consistency check. Thus, next consistency check execution, MEF E-Line will check the flows with FlowManager and match its current EVCs. Flows that are not correspondent to active EVCs will be considered alien and they will be removed (bulk removal).
+
+Example 2:
+----------
+
+Let's take Topology 2 as the second example. Suppose that we have 10 EVCs with UNIs in Switch A and Z. Suppose that the primary path will be set up to `A - B - C - D - Z`. The maximum disjoint path will be set up to `A - B - E - F - D - Z`. The following rules will be created before a link failure:
+
+- Rules for the primary path (for each EVC):
+```
+h1 -> A -> B -> C -> D -> Z -> h2
+h2 -> A -> D -> C -> B -> A -> h1
+```
+
+- Rules for the failover path (for each EVC):
+```
+A -> B -> E -> F -> D -> Z -> h2
+Z -> D -> F -> E -> B -> A -> h1
+```
+
+- During the EVC operation, let's suppose the link `B - C` eventually goes DOWN. To handle this link_down event, MEF E-Line will have to only send two FlowMods for each EVC: 1 FlowMod to switch A to setup `h1 -> A` (overriding the previous flows used to forward traffic using the primary path); 1 FlowMod to switch Z to setup `h2 -> Z` (overriding the previous flows used to forward traffic using the primary path)
+
+- During the handle link down method, MEF E-Line computes all the changes that have to be done (in this case, there will be 20 changes == 10 EVCs * 2 changes per EVC; 10 changes will be done in Switch A and 10 changes will be done in Switch Z) and send all the changes in a bulk update to FlowManager, grouped by the switch. This will optimize the processing of those changes in the underneath layers (e.g., FlowManager, MongoDB, etc)
+
+- Once again, the garbage collection will be executed as part of the consistency check (i.e., the removal of the flows from the 10 EVCs using the previous primary path)
 
 
 Points of attention

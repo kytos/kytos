@@ -33,6 +33,7 @@ Added
 - The ``listen_to`` decorator now supports a ``pool`` keyword argument to specify which thread pool the execution should be submitted
 - New core ``kytos.core.retry`` module provides decorators for retries based on ``tenacity``
 - Unhandled exceptions on ``@listen_to`` decorator now also include a traceback
+- Added ``@alisten_to`` decorator for ``async`` methods. NApps can subscribe to events asynchronously with this decorator as needed.
 
 Changed
 =======
@@ -50,6 +51,7 @@ Changed
    db: it can be used by for higher priority db related tasks (need to be parametrized on decorator), it's also used automatically by kytos.storehouse.* events
 
 - ``msg_out`` core queue now leverages a PriorityQueue instead of a FIFO Queue.
+- ``msg_in`` core queue now leverages a PriorityQueue instead of a FIFO Queue.
 
 Deprecated
 ==========

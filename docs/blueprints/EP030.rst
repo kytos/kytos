@@ -35,7 +35,8 @@ Requirements
 - Link liveness detection should be configurable per interface, and the hello interval will be the same as the existing global ``POLLING_TIME`` to minimize IO and reuse the existing functionality. A new configuration option on settings ``LIVENESS_DEAD_MULTIPLIER`` will be available, this value multiplied by ``POLLING_TIME`` is the dead interval.
 - For production networks, the minimum expected hello interval that will be used is 1s. The link liveness implementation should be able to handle this frequency.
 - When liveness goes down, ``Link.status`` must be ``EntityStatus.DOWN``, that way encapsulating this to keep compatible and minimize changes on existing NApps. No new actions such as shutdown will be needed on this iteration. In order to accomplish this, a link internal metadata ``liveness_status`` will be reserved.
-- A Kytos event must be published when Link liveness status changes, this must include protocol status changes (up and down) and administrative changes (enable and disable).
+- A Kytos event must be published when Link liveness status changes, this must include protocol status changes (up and down) and administrative changes (enable and disable). Event notification of topology changes should rely on checking the EntityStatus to play well with other features that also can send topology changes.
+- Link liveness is supposed to be considered up once a hello is received on both ends of the link.
 
 
 Specification

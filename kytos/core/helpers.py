@@ -1,5 +1,6 @@
 """Utilities functions used in Kytos."""
 import logging
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from threading import Thread
@@ -123,11 +124,11 @@ def listen_to(event, *events, pool=None):
             cls, kytos_event = args[0], args[1]
             try:
                 result = handler(*args)
-            except Exception as exc:
+            except Exception:
                 result = None
-                exc_str = f"{type(exc)}: {str(exc)}"
+                traceback_str = traceback.format_exc().replace("\n", ", ")
                 LOG.error(f"listen_to handler: {handler}, "
-                          f"args: {args}, exception: {exc_str}")
+                          f"args: {args} traceback: {traceback_str}")
                 if hasattr(cls, "controller"):
                     cls.controller.dead_letter.add_event(kytos_event)
             return result
@@ -146,9 +147,9 @@ def listen_to(event, *events, pool=None):
                 tx.result = result
             except Exception as exc:
                 result = None
-                exc_str = f"{type(exc)}: {str(exc)}"
+                traceback_str = traceback.format_exc().replace("\n", ", ")
                 LOG.error(f"listen_to handler: {handler}, "
-                          f"args: {args}, exception: {exc_str}")
+                          f"args: {args} traceback: {traceback_str}")
                 if hasattr(cls, "controller"):
                     cls.controller.dead_letter.add_event(kytos_event)
                 apm_client.capture_exception(
@@ -195,6 +196,74 @@ def listen_to(event, *events, pool=None):
     if executors:
         return thread_pool_decorator
     return thread_decorator
+
+
+def alisten_to(event, *events):
+    """Decorate async subscribing methods."""
+
+    def decorator(handler):
+        """Decorate the handler method.
+
+        Returns:
+            A method with an `events` attribute (list of events to be listened)
+            and also decorated as an asyncio task.
+        """
+        # pylint: disable=unused-argument,broad-except
+        async def handler_context(*args, **kwargs):
+            """Async handler's execution context."""
+            cls, kytos_event = args[0], args[1]
+            try:
+                result = await handler(*args)
+            except Exception as exc:
+                result = None
+                exc_str = f"{type(exc)}: {str(exc)}"
+                LOG.error(f"alisten_to handler: {handler}, "
+                          f"args: {args}, exception: {exc_str}")
+                if hasattr(cls, "controller"):
+                    cls.controller.dead_letter.add_event(kytos_event)
+            return result
+
+        async def handler_context_apm(*args, apm_client=None):
+            """Async handler's execution context with APM instrumentation."""
+            cls, kytos_event = args[0], args[1]
+            trace_parent = kytos_event.trace_parent
+            tx_type = "kytos_event"
+            tx = apm_client.begin_transaction(transaction_type=tx_type,
+                                              trace_parent=trace_parent)
+            kytos_event.trace_parent = tx.trace_parent
+            tx.name = f"{kytos_event.name}@{cls.napp_id}"
+            try:
+                result = await handler(*args)
+                tx.result = result
+            except Exception as exc:
+                result = None
+                exc_str = f"{type(exc)}: {str(exc)}"
+                LOG.error(f"alisten_to handler: {handler}, "
+                          f"args: {args}, exception: {exc_str}")
+                if hasattr(cls, "controller"):
+                    cls.controller.dead_letter.add_event(kytos_event)
+                apm_client.capture_exception(
+                    exc_info=(type(exc), exc, exc.__traceback__),
+                    context={"args": args},
+                    handled=False,
+                )
+            tx.end()
+            apm_client.tracer.queue_func("transaction", tx.to_dict())
+            return result
+
+        handler_func, kwargs = handler_context, {}
+        if get_apm_name() == "es":
+            handler_func = handler_context_apm
+            kwargs = dict(apm_client=ElasticAPM.get_client())
+
+        async def inner(*args):
+            """Inner decorated with events attribute."""
+            return await handler_func(*args, **kwargs)
+        inner.events = [event]
+        inner.events.extend(events)
+        return inner
+
+    return decorator
 
 
 def now(tzone=timezone.utc):

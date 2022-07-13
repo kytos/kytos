@@ -43,7 +43,8 @@ class KytosEventBuffer:
         """
         if not self._reject_new_events:
             self._queue.sync_q.put(event)
-            LOG.debug('[buffer: %s] Added: %s', self.name, event.name)
+            if logging.DEBUG >= LOG.getEffectiveLevel():
+                LOG.debug('[buffer: %s] Added: %s', self.name, event.name)
 
         if event.name == "kytos/core.shutdown":
             LOG.info('[buffer: %s] Stop mode enabled. Rejecting new events.',
@@ -62,7 +63,8 @@ class KytosEventBuffer:
         """
         if not self._reject_new_events:
             await self._queue.async_q.put(event)
-            LOG.debug('[buffer: %s] Added: %s', self.name, event.name)
+            if logging.DEBUG >= LOG.getEffectiveLevel():
+                LOG.debug('[buffer: %s] Added: %s', self.name, event.name)
 
         if event.name == "kytos/core.shutdown":
             LOG.info('[buffer: %s] Stop mode enabled. Rejecting new events.',
@@ -79,7 +81,8 @@ class KytosEventBuffer:
         """
         event = self._queue.sync_q.get()
 
-        LOG.debug('[buffer: %s] Removed: %s', self.name, event.name)
+        if logging.DEBUG >= LOG.getEffectiveLevel():
+            LOG.debug('[buffer: %s] Removed: %s', self.name, event.name)
 
         return event
 
@@ -93,7 +96,8 @@ class KytosEventBuffer:
         """
         event = await self._queue.async_q.get()
 
-        LOG.debug('[buffer: %s] Removed: %s', self.name, event.name)
+        if logging.DEBUG >= LOG.getEffectiveLevel():
+            LOG.debug('[buffer: %s] Removed: %s', self.name, event.name)
 
         return event
 
@@ -133,6 +137,9 @@ class KytosBuffers:
     def __init__(self, loop=None):
         """Build four KytosEventBuffers.
 
+        :attr:`conn`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
+        received from connection events.
+
         :attr:`raw`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
         received from network.
 
@@ -147,15 +154,24 @@ class KytosBuffers:
         """
         self._pool_max_workers = get_thread_pool_max_workers()
         self._loop = loop
-        self.raw = KytosEventBuffer("raw_event", loop=self._loop,
+        self.conn = KytosEventBuffer("conn", loop=self._loop)
+        self.raw = KytosEventBuffer("raw", loop=self._loop,
                                     maxsize=self._get_maxsize("sb"))
-        self.msg_in = KytosEventBuffer("msg_in_event", loop=self._loop,
-                                       maxsize=self._get_maxsize("sb"))
-        self.msg_out = KytosEventBuffer('msg_out_event', loop=self._loop,
-                                        maxsize=0,
+        self.msg_in = KytosEventBuffer("msg_in", loop=self._loop,
+                                       maxsize=self._get_maxsize("sb"),
+                                       queue_cls=PriorityQueue)
+        self.msg_out = KytosEventBuffer("msg_out", loop=self._loop,
+                                        maxsize=self._get_maxsize("sb"),
                                         queue_cls=PriorityQueue)
-        self.app = KytosEventBuffer('app_event', loop=self._loop,
+        self.app = KytosEventBuffer("app", loop=self._loop,
                                     maxsize=self._get_maxsize("app"))
+
+    def get_all_buffers(self):
+        """Get all KytosEventBuffer instances."""
+        return [
+            event_buffer for event_buffer in self.__dict__.values()
+            if isinstance(event_buffer, KytosEventBuffer)
+        ]
 
     def _get_maxsize(self, queue_name):
         """Get queue maxsize if it's been set."""
@@ -166,7 +182,5 @@ class KytosBuffers:
         LOG.info('Stop signal received by Kytos buffers.')
         LOG.info('Sending KytosShutdownEvent to all apps.')
         event = KytosEvent(name='kytos/core.shutdown')
-        self.raw.put(event)
-        self.msg_in.put(event)
-        self.msg_out.put(event)
-        self.app.put(event)
+        for buffer in self.get_all_buffers():
+            buffer.put(event)

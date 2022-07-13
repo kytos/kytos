@@ -146,6 +146,7 @@ class Controller:
 
         self.auth = Auth(self)
         self.dead_letter = DeadLetter(self)
+        self._alisten_tasks = set()
 
         self._register_endpoints()
         #: Adding the napps 'enabled' directory into the PATH
@@ -306,13 +307,15 @@ class Controller:
             log.debug('completed: %d, pending: %d',
                       len(completed), len(pending))
 
-        task = self._loop.create_task(self.raw_event_handler())
+        task = self._loop.create_task(self.event_handler("conn"))
         self._tasks.append(task)
-        task = self._loop.create_task(self.msg_in_event_handler())
+        task = self._loop.create_task(self.event_handler("raw"))
+        self._tasks.append(task)
+        task = self._loop.create_task(self.event_handler("msg_in"))
         self._tasks.append(task)
         task = self._loop.create_task(self.msg_out_event_handler())
         self._tasks.append(task)
-        task = self._loop.create_task(self.app_event_handler())
+        task = self._loop.create_task(self.event_handler("app"))
         self._tasks.append(task)
         task = self._loop.create_task(_run_api_server_thread(self._pool))
         task.add_done_callback(_stop_loop)
@@ -518,7 +521,9 @@ class Controller:
         Args:
             event (~kytos.core.KytosEvent): An instance of a KytosEvent.
         """
-        self.log.debug("looking for listeners for %s", event)
+
+        if logging.DEBUG >= self.log.getEffectiveLevel():
+            self.log.debug("looking for listeners for %s", event)
         for event_regex, listeners in dict(self.events_listeners).items():
             # self.log.debug("listeners found for %s: %r => %s", event,
             #                event_regex, [l.__qualname__ for l in listeners])
@@ -527,40 +532,25 @@ class Controller:
             if event_regex[-1] != '$' or event_regex[-2] == '\\':
                 event_regex += '$'
             if re.match(event_regex, event.name):
-                # self.log.debug('Calling listeners for %s', event)
+                if logging.DEBUG >= self.log.getEffectiveLevel():
+                    self.log.debug('Calling listeners for %s', event)
                 for listener in listeners:
-                    listener(event)
+                    if asyncio.iscoroutinefunction(listener):
+                        task = asyncio.create_task(listener(event))
+                        self._alisten_tasks.add(task)
+                        task.add_done_callback(self._alisten_tasks.discard)
+                    else:
+                        listener(event)
 
-    async def raw_event_handler(self):
-        """Handle raw events.
-
-        Listen to the raw_buffer and send all its events to the
-        corresponding listeners.
-        """
-        self.log.info("Raw Event Handler started")
+    async def event_handler(self, buffer_name: str):
+        """Default event handler that gets from an event buffer."""
+        event_buffer = getattr(self.buffers, buffer_name)
         while True:
-            event = await self.buffers.raw.aget()
+            event = await event_buffer.aget()
             self.notify_listeners(event)
-            self.log.debug("Raw Event handler called")
 
             if event.name == "kytos/core.shutdown":
                 self.log.debug("Raw Event handler stopped")
-                break
-
-    async def msg_in_event_handler(self):
-        """Handle msg_in events.
-
-        Listen to the msg_in buffer and send all its events to the
-        corresponding listeners.
-        """
-        self.log.info("Message In Event Handler started")
-        while True:
-            event = await self.buffers.msg_in.aget()
-            self.notify_listeners(event)
-            self.log.debug("Message In Event handler called")
-
-            if event.name == "kytos/core.shutdown":
-                self.log.debug("Message In Event handler stopped")
                 break
 
     async def publish_connection_error(self, event):
@@ -596,15 +586,15 @@ class Controller:
                         not destination.state == ConnectionState.FINISHED):
                     packet = message.pack()
                     destination.send(packet)
-                    self.log.debug('Connection %s: OUT OFP, '
-                                   'version: %s, type: %s, xid: %s - %s',
-                                   destination.id,
-                                   message.header.version,
-                                   message.header.message_type,
-                                   message.header.xid,
-                                   packet.hex())
+                    if logging.DEBUG >= self.log.getEffectiveLevel():
+                        self.log.debug('Connection %s: OUT OFP, '
+                                       'version: %s, type: %s, xid: %s - %s',
+                                       destination.id,
+                                       message.header.version,
+                                       message.header.message_type,
+                                       message.header.xid,
+                                       packet.hex())
                     self.notify_listeners(triggered_event)
-                    self.log.debug("Message Out Event handler called")
                     continue
 
             except (OSError, SocketError):
@@ -612,22 +602,6 @@ class Controller:
 
             await self.publish_connection_error(triggered_event)
             self.log.info("connection closed. Cannot send message")
-
-    async def app_event_handler(self):
-        """Handle app events.
-
-        Listen to the app buffer and send all its events to the
-        corresponding listeners.
-        """
-        self.log.info("App Event Handler started")
-        while True:
-            event = await self.buffers.app.aget()
-            self.notify_listeners(event)
-            self.log.debug("App Event handler called")
-
-            if event.name == "kytos/core.shutdown":
-                self.log.debug("App Event handler stopped")
-                break
 
     def get_interface_by_id(self, interface_id):
         """Find a Interface  with interface_id.

@@ -110,4 +110,4 @@ class TestKytosServerProtocol:
         expected_name = 'kytos/core.protocol.connection.lost'
         mock_kytos_event.assert_called_with(content=expected_content,
                                             name=expected_name)
-        buffers.app.aput.assert_called_with(mock_kytos_event.return_value)
+        buffers.conn.aput.assert_called_with(mock_kytos_event.return_value)

@@ -6,7 +6,6 @@ from threading import Lock
 from kytos.core.common import GenericEntity
 from kytos.core.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
 from kytos.core.helpers import get_time, now
-from kytos.core.id import SwitchID
 from kytos.core.interface import Interface
 
 __all__ = ('Switch',)
@@ -81,7 +80,7 @@ class Switch(GenericEntity):
         self.interfaces = {}
         self.flows = []
         self.description = {}
-        self._id = SwitchID(dpid)
+        self._id = dpid
         self._interface_lock = Lock()
 
         if connection:

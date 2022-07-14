@@ -1,11 +1,8 @@
-class SwitchID(str):
-    pass
-
 class InterfaceID(str):
     __slots__ = ("switch", "port")
-    def __new__(cls, switch:SwitchID, port:int):
+    def __new__(cls, switch:str, port:int):
         return super().__new__(cls, f"{switch}:{port}")
-    def __init__(self, switch:SwitchID, port:int):
+    def __init__(self, switch:str, port:int):
         #Used for sorting, but can be accessed
         self.switch = switch
         self.port = port

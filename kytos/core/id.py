@@ -1,3 +1,5 @@
+import hashlib
+
 class InterfaceID(str):
     __slots__ = ("switch", "port")
     def __new__(cls, switch:str, port:int):
@@ -23,4 +25,4 @@ class InterfaceID(str):
 
 class LinkID(str):
     def __new__(cls, interface_1:InterfaceID, interface_2:InterfaceID):
-        return super().__new__(cls, ":".join(sorted((interface_1, interface_2))))
+        return super().__new__(cls, hashlib.sha256(":".join(sorted((interface_1, interface_2))).encode('utf-8')).hexdigest())

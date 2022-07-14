@@ -18,32 +18,27 @@ class TestLink(unittest.TestCase):
 
     def setUp(self):
         """Create interface objects."""
-        self.iface1, self.iface2 = self._get_v0x04_ifaces()
+        self.switch1 = self._get_v0x04_switch('dpid1')
+        self.iface1 = Interface('interface1', 41, self.switch1)
+        self.switch2 = self._get_v0x04_switch('dpid2')
+        self.iface2 = Interface('interface2', 42, self.switch2)
 
     @staticmethod
-    def _get_v0x04_ifaces(*args, **kwargs):
-        """Create a pair of v0x04 interfaces with optional extra arguments."""
-        switch1 = Switch('dpid1')
-        switch1.connection = Mock()
-        switch1.connection.protocol.version = 0x04
-        iface1 = Interface('interface1', 41, switch1, *args, **kwargs)
-
-        switch2 = Switch('dpid2')
-        switch2.connection = Mock()
-        switch2.connection.protocol.version = 0x04
-        iface2 = Interface('interface2', 42, switch2, *args, **kwargs)
-
-        return iface1, iface2
+    def _get_v0x04_switch(name:str):
+        switch = Switch(name)
+        switch.connection = Mock()
+        switch.connection.protocol.version = 0x04
+        return switch
 
     def test__eq__(self):
         """Test __eq__ method."""
         link_1 = Link(self.iface1, self.iface2)
         link_2 = Link(self.iface2, self.iface1)
 
-        iface1, iface2 = self._get_v0x04_ifaces()
-        iface1.port_number = 1
-        iface2.port_number = 2
-        link_3 = Link(iface1, iface2)
+        iface3 = Interface('interface1', 1, self.switch1)
+        iface4 = Interface('interface2', 2, self.switch2)
+
+        link_3 = Link(iface3, iface4)
 
         self.assertTrue(link_1.__eq__(link_2))
         self.assertFalse(link_1.__eq__(link_3))
@@ -57,15 +52,13 @@ class TestLink(unittest.TestCase):
 
     def test_id(self):
         """Test id property."""
-        link = Link(self.iface1, self.iface2)
         ids = []
 
-        for value in [('A', 1, 'B', 2), ('B', 2, 'A', 1), ('A', 1, 'A', 2),
-                      ('A', 2, 'A', 1)]:
-            link.endpoint_a.switch.dpid = value[0]
-            link.endpoint_a.port_number = value[1]
-            link.endpoint_b.switch.dpid = value[2]
-            link.endpoint_b.port_number = value[3]
+        for value in [(self.switch1, 1, self.switch2, 2), (self.switch2, 2, self.switch1, 1), (self.switch1, 1, self.switch1, 2),
+                      (self.switch1, 2, self.switch1, 1)]:
+            iface1 = Interface('iface', value[1], value[0])
+            iface2 = Interface('iface', value[3], value[2])
+            link = Link(iface1, iface2)
 
             ids.append(link.id)
 

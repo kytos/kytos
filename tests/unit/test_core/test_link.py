@@ -24,7 +24,8 @@ class TestLink(unittest.TestCase):
         self.iface2 = Interface('interface2', 42, self.switch2)
 
     @staticmethod
-    def _get_v0x04_switch(name:str):
+    def _get_v0x04_switch(name: str):
+        """Create a v0x04 Switch"""
         switch = Switch(name)
         switch.connection = Mock()
         switch.connection.protocol.version = 0x04
@@ -54,7 +55,9 @@ class TestLink(unittest.TestCase):
         """Test id property."""
         ids = []
 
-        for value in [(self.switch1, 1, self.switch2, 2), (self.switch2, 2, self.switch1, 1), (self.switch1, 1, self.switch1, 2),
+        for value in [(self.switch1, 1, self.switch2, 2),
+                      (self.switch2, 2, self.switch1, 1),
+                      (self.switch1, 1, self.switch1, 2),
                       (self.switch1, 2, self.switch1, 1)]:
             iface1 = Interface('iface', value[1], value[0])
             iface2 = Interface('iface', value[3], value[2])

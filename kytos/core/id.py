@@ -1,13 +1,21 @@
+"""Module with identifier types for Links and Interfaces"""
+
 import hashlib
 
+
 class InterfaceID(str):
+    """Interface Identifier"""
+
     __slots__ = ("switch", "port")
-    def __new__(cls, switch:str, port:int):
+
+    def __new__(cls, switch: str, port: int):
         return super().__new__(cls, f"{switch}:{port}")
-    def __init__(self, switch:str, port:int):
-        #Used for sorting, but can be accessed
+
+    def __init__(self, switch: str, port: int):
+        # Used for sorting, but can be accessed
         self.switch = switch
         self.port = port
+        super().__init__()
 
     def __lt__(self, other):
         # Ensures that instances are sortable in a way that maintains backwards
@@ -18,11 +26,13 @@ class InterfaceID(str):
         port_b = other.port
         if dpid_a < dpid_b:
             return True
-        elif dpid_a == dpid_b and port_a < port_b:
-            return True
-        else:
-            return False
+        return dpid_a == dpid_b and port_a < port_b
+
 
 class LinkID(str):
-    def __new__(cls, interface_1:InterfaceID, interface_2:InterfaceID):
-        return super().__new__(cls, hashlib.sha256(":".join(sorted((interface_1, interface_2))).encode('utf-8')).hexdigest())
+    """Link Identifier"""
+
+    def __new__(cls, interface_1: InterfaceID, interface_2: InterfaceID):
+        raw_str = ":".join(sorted((interface_1, interface_2)))
+        digest = hashlib.sha256(raw_str.encode('utf-8')).hexdigest()
+        return super().__new__(cls, digest)

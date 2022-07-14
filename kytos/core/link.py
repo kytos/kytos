@@ -4,7 +4,6 @@ Links are low level abstractions representing connections between two
 interfaces.
 """
 
-import hashlib
 import json
 import random
 

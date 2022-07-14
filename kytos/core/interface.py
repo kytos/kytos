@@ -3,7 +3,6 @@ import json
 import logging
 from enum import IntEnum
 from threading import Lock
-from kytos.core.id import InterfaceID
 
 from pyof.v0x01.common.phy_port import Port as PortNo01
 from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
@@ -12,6 +11,7 @@ from pyof.v0x04.common.port import PortNo as PortNo04
 
 from kytos.core.common import GenericEntity
 from kytos.core.helpers import now
+from kytos.core.id import InterfaceID
 
 __all__ = ('Interface',)
 

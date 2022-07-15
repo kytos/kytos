@@ -141,14 +141,18 @@ class NAppLog:
 
     def __getattribute__(self, name):
         """Detect NApp ID and use its logger."""
-        napp_id = _detect_napp_id()
-        logger = getLogger("kytos.napps")
+        return get_napp_logger().__getattribute__(name)
 
-        # if napp_id is detected, get the napp logger.
-        if napp_id:
-            logger = logger.getChild(napp_id)
+def get_napp_logger():
+    """Detect NApp ID and get its logger."""
+    napp_id = _detect_napp_id()
+    logger = getLogger("kytos.napps")
 
-        return logger.__getattribute__(name)
+    # if napp_id is detected, get the napp logger.
+    if napp_id:
+        logger = logger.getChild(napp_id)
+
+    return logger
 
 
 #: Detect NApp ID from filename

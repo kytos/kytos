@@ -3,8 +3,25 @@ import asyncio
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from kytos.core.buffers import KytosBuffers, KytosEventBuffer
 from kytos.core.events import KytosEvent
+
+
+@pytest.mark.parametrize("queue_name", ["msg_out", "msg_in"])
+def test_priority_queues(queue_name):
+    """Test KytosBuffers priority queues."""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    buffers = KytosBuffers(loop=loop)
+
+    prios = [-10, 10, 0, -20]
+    for prio in prios:
+        queue = getattr(buffers, queue_name)
+        queue.put(KytosEvent(priority=prio))
+    for prio in sorted(prios):
+        assert queue.get().priority == prio
 
 
 # pylint: disable=protected-access
@@ -118,14 +135,6 @@ class TestKytosBuffers(TestCase):
         asyncio.set_event_loop(None)
 
         self.kytos_buffers = KytosBuffers(loop=self.loop)
-
-    def test_msg_out_queue_prio(self):
-        """Test msg_out queue priorities."""
-        prios = [-10, 10, 0, -20]
-        for prio in prios:
-            self.kytos_buffers.msg_out.put(KytosEvent(priority=prio))
-        for prio in sorted(prios):
-            assert self.kytos_buffers.msg_out.get().priority == prio
 
     def test_send_stop_signal(self):
         """Test send_stop_signal method."""

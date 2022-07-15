@@ -2,8 +2,26 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from kytos.core.helpers import (executors, get_thread_pool_max_workers,
-                                get_time, listen_to, run_on_thread)
+from kytos.core.helpers import (alisten_to, executors,
+                                get_thread_pool_max_workers, get_time,
+                                listen_to, run_on_thread)
+
+
+async def test_alisten_to():
+    """Test alisten_to decorator."""
+
+    class SomeClass:
+        """SomeClass."""
+
+        @alisten_to("some_event")
+        async def on_some_event(self, event):
+            """On some event handler."""
+            _ = event
+            return "some_response"
+
+    assert SomeClass.on_some_event.__name__ == "inner"
+    result = await SomeClass().on_some_event(MagicMock())
+    assert result == "some_response"
 
 
 class TestHelpers(TestCase):

@@ -4,13 +4,13 @@ Links are low level abstractions representing connections between two
 interfaces.
 """
 
-import hashlib
 import json
 import random
 
 from kytos.core.common import GenericEntity
 from kytos.core.exceptions import (KytosLinkCreationError,
                                    KytosNoTagAvailableError)
+from kytos.core.id import LinkID
 from kytos.core.interface import TAGType
 
 
@@ -28,6 +28,7 @@ class Link(GenericEntity):
             raise KytosLinkCreationError("endpoint_b cannot be None")
         self.endpoint_a = endpoint_a
         self.endpoint_b = endpoint_b
+        self._id = LinkID(endpoint_a.id, endpoint_b.id)
         super().__init__()
 
     def __hash__(self):
@@ -72,21 +73,7 @@ class Link(GenericEntity):
             string: link id.
 
         """
-        dpid_a = self.endpoint_a.switch.dpid
-        port_a = self.endpoint_a.port_number
-        dpid_b = self.endpoint_b.switch.dpid
-        port_b = self.endpoint_b.port_number
-        if dpid_a < dpid_b:
-            elements = (dpid_a, port_a, dpid_b, port_b)
-        elif dpid_a > dpid_b:
-            elements = (dpid_b, port_b, dpid_a, port_a)
-        elif port_a < port_b:
-            elements = (dpid_a, port_a, dpid_b, port_b)
-        else:
-            elements = (dpid_b, port_b, dpid_a, port_a)
-
-        str_id = "%s:%s:%s:%s" % elements
-        return hashlib.sha256(str_id.encode('utf-8')).hexdigest()
+        return self._id
 
     @property
     def available_tags(self):

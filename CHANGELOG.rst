@@ -32,8 +32,8 @@ Added
 - Augmented docker-compose to also spin up Filebeat, integrating log file as input
 - The ``listen_to`` decorator now supports a ``pool`` keyword argument to specify which thread pool the execution should be submitted
 - New core ``kytos.core.retry`` module provides decorators for retries based on ``tenacity``
-- Unhandled exceptions on ``@listen_to`` decorator now also include a traceback
 - Added ``@alisten_to`` decorator for ``async`` methods. NApps can subscribe to events asynchronously with this decorator as needed.
+- Unhandled exceptions on ``@listen_to`` and ``@alisten_to`` decorators now also include a traceback
 
 Changed
 =======

@@ -19,6 +19,26 @@ __all__ = (
     "__version__",
 )
 
-# Kept lowercase to be more user friendly.
-log = property(lambda self: self.get_napp_logger()) \
-              .__get__(sys.modules[__name__])
+
+def extend_descriptors(inst, **kwargs):
+    """Creates wrapper of instance with descriptors"""
+
+    class MFacade:
+        """Wrapper class for provided instance"""
+
+        def __getattr__(self, name):
+            return getattr(inst, name)
+
+    for (key, value) in kwargs.items():
+        setattr(MFacade, key, value)
+    return MFacade()
+
+
+@property
+def log(self):
+    """Get appropriate napp logger at module import time,
+    rather than module initialization time"""
+    return self.get_napp_logger()
+
+
+sys.modules[__name__] = extend_descriptors(sys.modules[__name__], log=log)

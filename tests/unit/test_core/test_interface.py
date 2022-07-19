@@ -288,7 +288,7 @@ class TestUNI(unittest.TestCase):
     def setUp(self):
         """Create UNI object."""
         switch = MagicMock()
-        switch.dpid = '00:00:00:00:00:00:00:01'
+        switch.id = '00:00:00:00:00:00:00:01'
         interface = Interface('name', 1, switch)
         user_tag = TAG(1, 123)
         self.uni = UNI(interface, user_tag)

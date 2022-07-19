@@ -214,11 +214,11 @@ def alisten_to(event, *events):
             cls, kytos_event = args[0], args[1]
             try:
                 result = await handler(*args)
-            except Exception as exc:
+            except Exception:
                 result = None
-                exc_str = f"{type(exc)}: {str(exc)}"
+                traceback_str = traceback.format_exc().replace("\n", ", ")
                 LOG.error(f"alisten_to handler: {handler}, "
-                          f"args: {args}, exception: {exc_str}")
+                          f"args: {args} traceback: {traceback_str}")
                 if hasattr(cls, "controller"):
                     cls.controller.dead_letter.add_event(kytos_event)
             return result
@@ -237,9 +237,9 @@ def alisten_to(event, *events):
                 tx.result = result
             except Exception as exc:
                 result = None
-                exc_str = f"{type(exc)}: {str(exc)}"
+                traceback_str = traceback.format_exc().replace("\n", ", ")
                 LOG.error(f"alisten_to handler: {handler}, "
-                          f"args: {args}, exception: {exc_str}")
+                          f"args: {args} traceback: {traceback_str}")
                 if hasattr(cls, "controller"):
                     cls.controller.dead_letter.add_event(kytos_event)
                 apm_client.capture_exception(

@@ -143,6 +143,7 @@ class NAppLog:
         """Detect NApp ID and use its logger."""
         return get_napp_logger().__getattribute__(name)
 
+
 def get_napp_logger():
     """Detect NApp ID and get its logger."""
     napp_id = _detect_napp_id()

@@ -1,0 +1,157 @@
+:EP: 29
+:Title: MEF E-Line EVC Service Protection
+:Authors:
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Antonio Francisco <ajoaoff AT gmail DOT com>
+    - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
+    - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
+:Created: 2022-06-27
+:Kytos-Version:
+:Status: Draft
+
+************************************************************
+EP029 - MEF E-Line EVC Service Protection
+************************************************************
+
+
+Abstract
+========
+
+This blueprint proposes a solution for MEF E-Line EVCs service protection. More specifically, this document is complementary to the `EP-012 [1] <https://github.com/kytos-ng/kytos/blob/master/docs/blueprints/EP012.rst>`_ and defines strategies to provide path protection/failover to meet resilience requirements for EVCs. This document is also aligned with `Technical Specification MEF 2 [2] <https://www.mef.net/wp-content/uploads/2020/09/MEF_2.pdf>`_
+
+Motivation
+==========
+
+Currently, Kytos MEF E-Line accepts the following parameters for EVC creation:
+
+ - `primary_path` (list of Links): list of Links describing the preferred route/path to be used by the EVC
+ - `backup_path` (list of Links): list of Links describing the backup/alternative route/path to be used by the EVC when the `primary_path` has any failure or unavailability condition (see section Protection Terminology)
+ - `dynamic_backup_path` (boolean): whether or not the path should be dynamic (internally obtained from pathfinder). This parameter provides three use cases: a) totally dynamic EVC -- meaning all the paths will be dynamic; b) only the backup path is dynamic -- when the user requests a primary_path and dynamic_backup_path; c) second-level backup path is dynamic -- when the user requests a primary_path, a backup_path, and dynamic_backup_path.
+
+In all scenarios above, when the Kytos SDN controller observes a link failure, the following procedure is applied:
+ 1. All EVCs are checked to verify if it is affected by the link failure;
+ 2. When a particular EVC is affected, the current_path is unconfigured (FlowMod Removal requests are sent to each switch in the current path);
+ 3. A dynamic or static path is determined, either from pathfinder (for dynamic EVCs) or user-provided parameters (static EVCs), along with the hop-by-hop service provider VLAN tag;
+ 4. The path from step 3 is configured (FLowMod Insert requests are sent to each switch)
+ 5. UNIs are reconfigured (FlowMod Insert requests are sent to UNI_A and UNI_Z's switches).
+
+Those steps are applied for each EVC, impacting the overall restoration time. Therefore, the restoration time of a particular EVC depens on its own overhead (steps 2 to 5) plus the restoration time of all previous EVCs.
+
+
+Protection Terminology
+======================
+
+This section provides some protection terminology adopted by this document.
+
+Failure Types and Unavailability
+--------------------------------
+
+Failures may occur in network nodes or on the links between nodes. The following list describes the failures considered by this document:
+
+ - Fail condition: Fail condition is a status of a resource in which it is unable to transfer traffic (e.g., Loss of Signal, port down)
+ - Degrade condition: Degrade Condition is a resource status in which traffic transfer might be continuing, but specific measured errors (e.g., Bit Error Rate, etc.) has reached a pre-determined threshold.
+ - Node Failure: A Node Failure is an event that occurs when a node is unable to transfer traffic between the links that terminate at it. Note that a note may have a failure in the control plane but not in the data plane, meaning: the node can forward traffic between links, but the node does not respond to control plane and management plane requests.
+ - Unavailability: unavailable resources are the ones that were administratively configured not to be used (e.g., due to a maintenance window, traffic engineering, etc.)
+
+Path Disjointness
+----------------
+
+Paths/routes between a given pair of source and destination in a network are called link disjoint if they have no links in common and node disjoint if they have no common nodes besides the source and destination nodes. Disjoint paths are required for reliability in communication once one can be used as a protection/failover route of the other. Ideally, the maximum disjoints an alternative route, the better (node and link disjoint). However, considering practical scenarios and limitations on the network topology, finding perfectly disjoint paths can become a complex task (especially if we also consider additional user requirements for the path, such as maximum end-to-end latency, for instance). Thus, it is reasonable to assume some hypotheses: i) nodes (switches) usually have more protection than links and are less susceptible to failures, so that link-disjoint usually offers a good level of protection; ii) in a medium/large topology, finding the entirely disjoint path can be very time consuming so that finding the maximum disjoint path among a few alternatives can be a more efficient approach.
+
+For this document, we define the disjointness level of a path as the complementary percentage of shared links with another path. For example, consider the following topology and let P1(L1,L2,L3) be a path between source node S and destination node D, composed of the links L1, L2, and L3. Furthermore, let P2(L4,L5,L3) and P3(L4,L5,L6,L7) be two alternative paths between S and D. The disjointness level between P1 and P2 is 66.6% (1 - 1/3), whereas the disjointness level between P1 and P3 is 100% (1 - 0/3). In this scenario, P3 is a better disjoint path from P1 than P2 is from P1. Note that there is another path P4(L4,L5,L6,L8,L9), that offers the same disjointness level as P3; however, P3 has the best cost than P4 (e.g., lower hop count).
+
+  .. image:: https://drive.google.com/uc?export=view&id=17kdq-S9ZZTySGsUaIYIWDxucUVSY0c7a
+
+Path Failover Approach
+======================
+
+To provide service protection for EVCs, MEF E-Line will use the following strategy:
+
+ - EVCs will have their primary path configured according to the user requirements (static or dynamic paths) and a failover/protection path. The failover/protection path will have its flows installed in advance (before failure events), including the forwarding rules for all switches in the path and egress forwarding rules at the UNI switches. Thus, only the ingress forwarding rules will have to be configured during a link failure. 
+
+ - The failover/protection path will be configured to be the maximum disjoint path from the current path unless requested by the user through the `backup_path` EVC attribute.
+
+ - The process of handling a link failure has to be very efficient. So that MEF E-Line should leverage async requests for inter-Napp communication (e.g., using Kytos Events APIs for flow_manager). Also, MEF E-Line should remove or delay logging calls to avoid additional overheads as part of the link failure handling process. Finally, MEF E-Line should leverage bulk updates as much as possible to persist EVCs changes and send requests for flow_manager.
+
+ - The removal of forwarding flows from the old path should be handled as part of the consistency check routine, thus avoiding additional overhead as part of the link failure handling process. In the meantime, garbage/alien flows will be in the flow table. Those alien flows will be removed at the subsequent MEF E-Line consistency check execution. Therefore, new failover/protection paths should be established after the consistency check clears alien flows to avoid uncontrolled growth in the flow table size.
+
+ - Upon receiving link failure events, MEF E-line should check for EVCs affected by the link failure in the failover/protection path beside the current path. The check for affected EVCs in the failover/protection path should be done after handling the EVCs affected in the current_path.
+
+ - A new EVC attribute will become available to store and display the failover/protection path: `failover_path`. Some EVCs may have an empty failover/protection path, depending on the EVC parameters (e.g., EVCs with static path -- `dynamic_backup_path=False` -- and only `primary_path`)
+
+ - If, for some reason, the failover/protection path fails to be established/used, MEF E-Line traditional failure handler should take place and guarantee the EVC gets updated (either with a new path or deactivated)
+
+Consider the following topologies as examples of the above strategy.
+
+  .. image:: https://drive.google.com/uc?export=view&id=1vyAbg2qhOm5kiMwoQqBzkm6ZOE5NWDe0
+  
+Example 1:
+----------
+
+Let's take Topology 1 as the first example. Suppose that the primary path will be set up to `S - X - W - D`. The maximum disjoint path will be set up to `S - Z - W - I - D`. The following rules will be created before a link failure:
+
+- Rules for the primary path:
+
+.. code-block:: none
+
+    h1 -> S -> X -> W -> D -> h2
+    h2 -> D -> W -> X -> S -> h1
+
+- Rules for the failover path:
+
+.. code-block:: none
+
+    S -> Z -> W -> I -> D -> h2
+    D -> I -> W -> Z -> S -> h1
+
+
+- During the EVC operation, let's suppose the link `W - D` eventually goes DOWN. To handle this link_down event, MEF E-Line will have to only send two FlowMods: 1 FlowMod to switch S to setup `h1 -> S` (overriding the previous flows used to forward traffic using the primary path); 1 FlowMod to switch D to setup `h2 -> D` (overriding the previous flows used to forward traffic using the primary path)
+
+- Note that right after those 2 FlowMods are executed, the EVC will switch to the failover path and it will continue its normal operation. There will be some flows installed in the previous primary path (S - X - W - D) that needs to be cleaned up. The removal of those flows will be left to be done as part of the consistency check. Thus, next consistency check execution, MEF E-Line will check the flows with FlowManager and match its current EVCs. Flows that are not correspondent to active EVCs will be considered alien and they will be removed (bulk removal).
+
+Example 2:
+----------
+
+Let's take Topology 2 as the second example. Suppose that we have 10 EVCs with UNIs in Switch A and Z. Suppose that the primary path will be set up to `A - B - C - D - Z`. The maximum disjoint path will be set up to `A - B - E - F - D - Z`. The following rules will be created before a link failure:
+
+- Rules for the primary path (for each EVC):
+
+.. code-block:: none
+
+    h1 -> A -> B -> C -> D -> Z -> h2
+    h2 -> A -> D -> C -> B -> A -> h1
+
+
+- Rules for the failover path (for each EVC):
+
+.. code-block:: none
+
+    A -> B -> E -> F -> D -> Z -> h2
+    Z -> D -> F -> E -> B -> A -> h1
+
+
+- During the EVC operation, let's suppose the link `B - C` eventually goes DOWN. To handle this link_down event, MEF E-Line will have to only send two FlowMods for each EVC: 1 FlowMod to switch A to setup `h1 -> A` (overriding the previous flows used to forward traffic using the primary path); 1 FlowMod to switch Z to setup `h2 -> Z` (overriding the previous flows used to forward traffic using the primary path)
+
+- During the handle link down method, MEF E-Line computes all the changes that have to be done (in this case, there will be 20 changes == 10 EVCs * 2 changes per EVC; 10 changes will be done in Switch A and 10 changes will be done in Switch Z) and send all the changes in a bulk update to FlowManager, grouped by the switch. This will optimize the processing of those changes in the underneath layers (e.g., FlowManager, MongoDB, etc)
+
+- Once again, the garbage collection will be executed as part of the consistency check (i.e., the removal of the flows from the 10 EVCs using the previous primary path)
+
+
+Points of attention
+===================
+
+After integrating such a feature into MEF E-Line, the administrator/network operator must be aware of the following aspects:
+
+- The number of flows in the network will increase significantly due to the failover/protection path being pre-configured at the switches
+
+- The existence of disjoint paths will improve the resilience of the protection solution
+
+- The restoration time still depends on the control plane overhead (i.e., latency from the control plane network plus processing time in the controller to react to network failures). More resilience can be added later by leveraging other approaches, such as Link aggregation, fast re-routing, etc.
+
+
+References
+==========
+
+- [1] `EP-012 blueprint <https://github.com/kytos-ng/kytos/blob/master/docs/blueprints/EP012.rst>`_
+- [2] `Technical Specification MEF 2 - Requirements and Framework for Ethernet Service Protection in Metro Ethernet Networks <https://www.mef.net/wp-content/uploads/2020/09/MEF_2.pdf>`_

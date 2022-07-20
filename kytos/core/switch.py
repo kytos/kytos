@@ -80,6 +80,7 @@ class Switch(GenericEntity):
         self.interfaces = {}
         self.flows = []
         self.description = {}
+        self._id = dpid
         self._interface_lock = Lock()
 
         if connection:
@@ -111,7 +112,7 @@ class Switch(GenericEntity):
             string: the switch id is the data_path_id from switch.
 
         """
-        return "{}".format(self.dpid)
+        return self._id
 
     @property
     def ofp_version(self):

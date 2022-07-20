@@ -7,7 +7,7 @@ interfaces.
 import json
 import random
 
-from kytos.core.common import GenericEntity
+from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.exceptions import (KytosLinkCreationError,
                                    KytosNoTagAvailableError)
 from kytos.core.id import LinkID
@@ -36,6 +36,18 @@ class Link(GenericEntity):
 
     def __repr__(self):
         return f"Link({self.endpoint_a!r}, {self.endpoint_b!r})"
+
+    @property
+    def status(self):
+        """Return the current status of the Entity."""
+        state = super().status
+        if state == EntityStatus.DISABLED:
+            return state
+
+        for status_func in self.status_funcs.values():
+            if status_func(self) == EntityStatus.DOWN:
+                return EntityStatus.DOWN
+        return state
 
     def is_enabled(self):
         """Override the is_enabled method.

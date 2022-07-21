@@ -1,4 +1,5 @@
 """Module with common classes for the controller."""
+from collections import OrderedDict
 from enum import Enum
 
 from kytos.core.config import KytosConfig
@@ -16,6 +17,8 @@ class EntityStatus(Enum):
 
 class GenericEntity:
     """Generic class that represents any Entity."""
+
+    status_funcs = OrderedDict()
 
     def __init__(self):
         """Create the GenericEntity object with empty metadata dictionary."""
@@ -40,6 +43,11 @@ class GenericEntity:
     def deactivate(self):
         """Deactivate the entity."""
         self._active = False
+
+    @classmethod
+    def register_status_func(cls, name: str, func):
+        """Register status func given its name and a callable at setup time."""
+        cls.status_funcs[name] = func
 
     @property
     def status(self):

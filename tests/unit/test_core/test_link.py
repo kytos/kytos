@@ -4,6 +4,7 @@ import time
 import unittest
 from unittest.mock import Mock, patch
 
+from kytos.core.common import EntityStatus
 from kytos.core.exceptions import KytosLinkCreationError
 from kytos.core.interface import Interface, TAGType
 from kytos.core.link import Link
@@ -12,7 +13,7 @@ from kytos.core.switch import Switch
 logging.basicConfig(level=logging.CRITICAL)
 
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access,too-many-public-methods
 class TestLink(unittest.TestCase):
     """Test Links."""
 
@@ -89,6 +90,59 @@ class TestLink(unittest.TestCase):
         link1 = Link(self.iface1, self.iface2)
         link2 = Link(self.iface2, self.iface1)
         self.assertEqual(link1.id, link2.id)
+
+    def test_status_funcs(self) -> None:
+        """Test status_funcs."""
+        # If it's enabled and active but a func returns DOWN, then DOWN
+        Link.register_status_func("some_napp_some_func",
+                                  lambda link: EntityStatus.DOWN)
+        for intf in (self.iface1, self.iface2):
+            intf.enable()
+            intf.activate()
+        link = Link(self.iface1, self.iface2)
+        link.enable()
+        link.activate()
+        assert link.status == EntityStatus.DOWN
+
+        # No changes in status if it returns None
+        Link.register_status_func("some_napp_some_func",
+                                  lambda link: None)
+        assert link.status == EntityStatus.UP
+
+        # If it's deactivated then it shouldn't be able to make it go UP
+        link.deactivate()
+        assert link.status == EntityStatus.DOWN
+        Link.register_status_func("some_napp_some_func",
+                                  lambda link: EntityStatus.UP)
+        assert link.status == EntityStatus.DOWN
+        link.activate()
+        assert link.status == EntityStatus.UP
+
+        # If it's disabled, then it shouldn't be considered DOWN
+        link.disable()
+        Link.register_status_func("some_napp_some_func",
+                                  lambda link: EntityStatus.DOWN)
+        assert link.status == EntityStatus.DISABLED
+
+    def test_multiple_status_funcs(self) -> None:
+        """Test multiple status_funcs."""
+        # If it's enabled and active but a func returns DOWN, then DOWN
+        Link.register_status_func("some_napp_some_func",
+                                  lambda link: None)
+        Link.register_status_func("some_napp_another_func",
+                                  lambda link: EntityStatus.DOWN)
+        for intf in (self.iface1, self.iface2):
+            intf.enable()
+            intf.activate()
+        link = Link(self.iface1, self.iface2)
+        link.enable()
+        link.activate()
+        assert link.status == EntityStatus.DOWN
+
+        # It should be UP if the func no longer returns DOWN
+        Link.register_status_func("some_napp_another_func",
+                                  lambda link: None)
+        assert link.status == EntityStatus.UP
 
     def test_available_tags(self):
         """Test available_tags property."""

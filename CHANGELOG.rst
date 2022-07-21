@@ -34,6 +34,7 @@ Added
 - New core ``kytos.core.retry`` module provides decorators for retries based on ``tenacity``
 - Added ``@alisten_to`` decorator for ``async`` methods. NApps can subscribe to events asynchronously with this decorator as needed.
 - Unhandled exceptions on ``@listen_to`` and ``@alisten_to`` decorators now also include a traceback
+- Added ``status_funcs`` on ``GenericEntity`` to allow NApps to register functions to compose ``status``.
 
 Changed
 =======

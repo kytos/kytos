@@ -28,11 +28,23 @@ class InterfaceID(str):
             return True
         return dpid_a == dpid_b and port_a < port_b
 
+    def __getnewargs__(self):
+        """To make sure it's pickleable"""
+        return (self.switch, self.port)
+
 
 class LinkID(str):
     """Link Identifier"""
 
-    def __new__(cls, interface_1: InterfaceID, interface_2: InterfaceID):
-        raw_str = ":".join(sorted((interface_1, interface_2)))
+    def __new__(cls, interface_a: InterfaceID, interface_b: InterfaceID):
+        raw_str = ":".join(sorted((interface_a, interface_b)))
         digest = hashlib.sha256(raw_str.encode('utf-8')).hexdigest()
         return super().__new__(cls, digest)
+
+    def __init__(self, interface_a: InterfaceID, interface_b: InterfaceID):
+        self.interfaces = (interface_a, interface_b)
+        super().__init__()
+
+    def __getnewargs__(self):
+        """To make sure it's pickleable"""
+        return self.interfaces

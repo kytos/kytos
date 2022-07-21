@@ -1,5 +1,6 @@
 """Interface tests."""
 import logging
+import pickle
 import unittest
 from unittest.mock import MagicMock, Mock
 
@@ -280,6 +281,15 @@ class TestInterface(unittest.TestCase):
 
         self.assertEqual(self.iface.link, link)
         self.assertEqual(interface.link, link)
+
+    @staticmethod
+    def test_pickleable_id() -> None:
+        """Test to make sure the id is pickleable."""
+        switch = Switch("dpid1")
+        interface = Interface("s1-eth1", 1, switch)
+        pickled = pickle.dumps(interface.as_dict())
+        intf_dict = pickle.loads(pickled)
+        assert intf_dict["id"] == interface.id
 
 
 class TestUNI(unittest.TestCase):

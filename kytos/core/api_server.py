@@ -13,12 +13,23 @@ from urllib.error import HTTPError, URLError
 from urllib.request import urlopen, urlretrieve
 
 from flask import Blueprint, Flask, jsonify, request, send_file
+from flask.json import JSONEncoder
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room
 from werkzeug.exceptions import HTTPException
 
 from kytos.core.auth import authenticated
 from kytos.core.config import KytosConfig
+
+
+# pylint: disable=method-hidden,arguments-differ
+class CustomJSONEncoder(JSONEncoder):
+    """CustomJSONEncoder."""
+
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.strftime("%Y-%m-%dT%H:%M:%S")
+        return JSONEncoder.default(self, obj)
 
 
 class APIServer:
@@ -54,6 +65,7 @@ class APIServer:
 
         self.app = Flask(app_name, root_path=self.flask_dir,
                          static_folder="dist", static_url_path="/dist")
+        self.app.json_encoder = CustomJSONEncoder
         self.server = SocketIO(self.app, async_mode='threading')
         self._enable_websocket_rooms()
         # ENABLE CROSS ORIGIN RESOURCE SHARING

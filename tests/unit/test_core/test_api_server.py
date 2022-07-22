@@ -2,16 +2,24 @@
 import json
 import unittest
 import warnings
+from datetime import datetime
 # Disable not-grouped imports that conflicts with isort
 from unittest.mock import (MagicMock, Mock, patch,  # pylint: disable=C0412
                            sentinel)
 from urllib.error import HTTPError
 
-from kytos.core.api_server import APIServer
+from kytos.core.api_server import APIServer, CustomJSONEncoder
 from kytos.core.napps import rest
 
 KYTOS_CORE_API = "http://127.0.0.1:8181/api/kytos/"
 API_URI = KYTOS_CORE_API+"core"
+
+
+def test_custom_encoder() -> None:
+    """Test CustomJSONEncoder."""
+    encoder = CustomJSONEncoder()
+    some_datetime = datetime(year=2022, month=1, day=30)
+    assert encoder.default(some_datetime) == "2022-01-30T00:00:00"
 
 
 # pylint: disable=protected-access, too-many-public-methods

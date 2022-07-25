@@ -54,6 +54,7 @@ Changed
 - ``msg_out`` core queue now leverages a PriorityQueue instead of a FIFO Queue.
 - ``msg_in`` core queue now leverages a PriorityQueue instead of a FIFO Queue.
 - ``kytos.core.log`` now directly provides the appropriate logger to the NAPP, rather than a facade
+- Flask will encode datetime objects format as ``%Y-%m-%dT%H:%M:%S`` str
 
 Deprecated
 ==========

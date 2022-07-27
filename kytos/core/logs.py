@@ -1,13 +1,15 @@
 """Handle logs displayed by Kytos SDN Platform."""
 import inspect
 import logging
+from queue import Queue
 import re
 from configparser import RawConfigParser
 # noqa so it does not conflict with grouped imports
 # pylint: disable=ungrouped-imports
-from logging import Formatter, config, getLogger
+from logging import Formatter, config, getLogger, handlers
 # pylint: enable=ungrouped-imports
 from pathlib import Path
+from kytos.core.apm import begin_span
 
 from kytos.core.websocket import WebSocketHandler
 
@@ -114,6 +116,58 @@ class LogManager:
         return not (record.name == 'werkzeug' and record.levelname == 'ERROR'
                     and record.args and isinstance(record.args[0], str)
                     and record.args[0].endswith(msg_end))
+
+    @staticmethod
+    def decorate_logger_class(decorator):
+        old_class = logging.getLoggerClass()
+        new_class = decorator(old_class)
+        logging.setLoggerClass(new_class)
+
+
+def logger_queue_decorator(klass):
+    class QueueLogger(klass):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.queue = Queue()
+            self.queueListener = handlers.QueueListener(self.queue, respect_handler_level=True)
+            self.queueListener.start()
+            super().addHandler(handlers.QueueHandler(self.queue))
+
+        def changeHandlers(self, *hdlrs):
+            self.queueListener.stop()
+            self.queueListener = handlers.QueueListener(self.queue, *hdlrs, respect_handler_level=True)
+            self.queueListener.start()
+
+        def addHandler(self, hdlr):
+            old_handlers = self.queueListener.handlers
+            self.changeHandlers(*old_handlers, hdlr)
+
+        def removeHandler(self, hdlr) -> None:
+            old_handlers = self.queueListener.handlers
+            new_handlers = [handler for handler in old_handlers if handler is not hdlr]
+            self.changeHandlers(*new_handlers)
+
+        def hasHandlers(self) -> bool:
+            if self.queueListener.handlers:
+                return True
+            if self.propagate:
+                return self.parent.hasHandlers()
+            return False
+
+    return QueueLogger
+
+def logger_apm_decorator(klass):
+    
+    class APMLogger(klass):
+        pass
+    
+    for func_name in ['debug', 'info', 'warning', 'error', 'exception', 'critical', 'fatal', 'log']:
+        setattr(APMLogger, func_name, begin_span(getattr(klass, func_name), 'logging'))
+
+    return APMLogger
+
+LogManager.decorate_logger_class(logger_queue_decorator)
+LogManager.decorate_logger_class(logger_apm_decorator)
 
 
 # Add filter to all pre-existing handlers

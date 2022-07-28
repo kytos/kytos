@@ -160,9 +160,8 @@ class KytosServerProtocol(asyncio.Protocol):
 
         data = self._rest + data
 
-        if logging.DEBUG >= LOG.getEffectiveLevel():
-            LOG.debug("New data from %s:%s (%s bytes)",
-                      self.connection.address, self.connection.port, len(data))
+        LOG.debug("New data from %s:%s (%s bytes)",
+                  self.connection.address, self.connection.port, len(data))
 
         # LOG.debug("New data from %s:%s (%s bytes): %s", self.addr, self.port,
         #           len(data), binascii.hexlify(data))

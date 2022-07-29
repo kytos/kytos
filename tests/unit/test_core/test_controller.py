@@ -51,7 +51,7 @@ class TestController(TestCase):
         handlers_bak = copy(logging.root.handlers)
 
         # Minimum to instantiate Controller
-        options = Mock(napps='')
+        options = Mock(napps='', logger_decorators=[])
         path.return_value.exists.return_value = False
         controller = Controller(options, loop=loop)
 

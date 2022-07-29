@@ -157,9 +157,27 @@ class Controller:
 
     def enable_logs(self):
         """Register kytos log and enable the logs."""
+        for decorator_name in self.options.logger_decorators:
+            decorator = self._resolve(decorator_name)
+            LogManager.decorate_logger_class(decorator)
         LogManager.load_config_file(self.options.logging, self.options.debug)
         LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
+
+    @staticmethod
+    def _resolve(name):
+        """Resolve a dotted name to a global object."""
+        name = name.split('.')
+        used = name.pop(0)
+        found = __import__(used)
+        for name_part in name:
+            used = used + '.' + name_part
+            try:
+                found = getattr(found, name_part)
+            except AttributeError:
+                __import__(used)
+                found = getattr(found, name_part)
+        return found
 
     @staticmethod
     def loggers():

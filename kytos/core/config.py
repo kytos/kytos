@@ -135,6 +135,8 @@ class KytosConfig():
                                                     '.installed'),
                     'conf': os.path.join(BASE_ENV, 'etc/kytos/kytos.conf'),
                     'logging': os.path.join(BASE_ENV, 'etc/kytos/logging.ini'),
+                    'logger_decorators':
+                        ["kytos.core.logger_decorators.queue_decorator"],
                     'listen': '0.0.0.0',
                     'port': 6653,
                     'foreground': False,
@@ -198,6 +200,7 @@ class KytosConfig():
                 return json.loads(value)
             return value
 
+        options.logger_decorators = _parse_json(options.logger_decorators)
         options.napps_pre_installed = _parse_json(options.napps_pre_installed)
         options.vlan_pool = _parse_json(options.vlan_pool)
         options.authenticate_urls = _parse_json(options.authenticate_urls)

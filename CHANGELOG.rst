@@ -5,6 +5,28 @@ All notable changes to the kytos project will be documented in this file.
 
 UNRELEASED - Under development
 ******************************
+
+Added
+=====
+
+Changed
+=======
+
+Deprecated
+==========
+
+Removed
+=======
+
+Fixed
+=====
+
+Security
+========
+
+[2022.2rc1] - "kiko" - 2022-07-25
+*********************************
+
 Added
 =====
 - Unhandled exception on a ``listen_to`` decorated function (running in a ThreadPool) is logged as error.
@@ -56,18 +78,9 @@ Changed
 - ``kytos.core.log`` now directly provides the appropriate logger to the NAPP, rather than a facade
 - Flask will encode datetime objects format as ``%Y-%m-%dT%H:%M:%S`` str
 
-Deprecated
-==========
-
-Removed
-=======
-
 Fixed
 =====
 - Fixed file already exists error when creating config dirs, issue 222
-
-Security
-========
 
 
 [2022.1.1] - "jovelina" - 2022-02-01

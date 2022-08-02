@@ -8,6 +8,7 @@ from configparser import RawConfigParser
 from logging import Formatter, config, getLogger
 # pylint: enable=ungrouped-imports
 from pathlib import Path
+from kytos.core.logger_decorators import root_decorator
 
 from kytos.core.websocket import WebSocketHandler
 
@@ -116,11 +117,24 @@ class LogManager:
                     and record.args[0].endswith(msg_end))
 
     @staticmethod
-    def decorate_logger_class(decorator):
-        """Decorates the logger class with the given decorator"""
-        old_class = logging.getLoggerClass()
-        new_class = decorator(old_class)
-        logging.setLoggerClass(new_class)
+    def decorate_logger_class(*decorators):
+        """Decorates the logger class with the given decorator.
+        Assumes no loggers have been retrieved."""
+        klass = logging.getLoggerClass()
+        for decorator in decorators:
+            klass = decorator(klass)
+        
+        old_root = logging.root
+        # Update root
+        new_root = root_decorator(klass)(old_root.level)
+        logging.root = new_root
+        logging.Logger.root = new_root
+
+        # Update Manager
+        # Force manager to forget all previous loggers
+        new_manager = logging.Manager(new_root)
+        new_manager.loggerClass = klass
+        logging.Logger.manager = new_manager
 
 
 # Add filter to all pre-existing handlers

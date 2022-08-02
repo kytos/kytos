@@ -1,5 +1,6 @@
 """Decorators for the logger class."""
 from logging.handlers import QueueHandler, QueueListener
+import logging
 from queue import Queue
 
 from kytos.core.apm import begin_span
@@ -62,3 +63,22 @@ def apm_decorator(klass):
                 begin_span(getattr(klass, func_name), 'logging'))
 
     return APMLogger
+
+def root_decorator(klass):
+    """Decorator for turning a logger class into a root logger class"""
+    class RootLogger(klass):
+        """
+        A root logger is not that different to any other logger, except that
+        it must have a logging level and there is only one instance of it in
+        the hierarchy.
+        """
+        def __init__(self, level):
+            """
+            Initialize the logger with the name "root".
+            """
+            super().__init__("root", level)
+
+        def __reduce__(self):
+            return logging.getLogger, ()
+    
+    return RootLogger

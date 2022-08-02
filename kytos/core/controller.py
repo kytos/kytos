@@ -15,6 +15,7 @@ Basic usage:
 """
 import asyncio
 import atexit
+import importlib
 import json
 import logging
 import os
@@ -157,12 +158,13 @@ class Controller:
 
     def enable_logs(self):
         """Register kytos log and enable the logs."""
-        for decorator_name in self.options.logger_decorators:
-            decorator = self._resolve(decorator_name)
-            LogManager.decorate_logger_class(decorator)
+        decorators = self.options.logger_decorators
+        decorators = [self._resolve(decorator) for decorator in decorators]
+        LogManager.decorate_logger_class(*decorators)
         LogManager.load_config_file(self.options.logging, self.options.debug)
         LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
+        self._reload_core()
 
     @staticmethod
     def _resolve(name):
@@ -178,6 +180,16 @@ class Controller:
                 __import__(used)
                 found = getattr(found, name_part)
         return found
+
+    @staticmethod
+    def _reload_core():
+        """Reload all modules in 'kytos.core'"""
+        match_str = 'kytos.core.'
+        str_len = len(match_str)
+        reloadable_mods = [module for mod_name, module in sys.modules.items()
+                           if mod_name[:str_len] == match_str]
+        for module in reloadable_mods:
+            importlib.reload(module)
 
     @staticmethod
     def loggers():

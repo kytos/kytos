@@ -8,8 +8,8 @@ from configparser import RawConfigParser
 from logging import Formatter, config, getLogger
 # pylint: enable=ungrouped-imports
 from pathlib import Path
-from kytos.core.logger_decorators import root_decorator
 
+from kytos.core.logger_decorators import root_decorator
 from kytos.core.websocket import WebSocketHandler
 
 __all__ = ('LogManager', 'NAppLog')
@@ -123,7 +123,7 @@ class LogManager:
         klass = logging.getLoggerClass()
         for decorator in decorators:
             klass = decorator(klass)
-        
+
         old_root = logging.root
         # Update root
         new_root = root_decorator(klass)(old_root.level)

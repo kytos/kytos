@@ -1,6 +1,6 @@
 """Decorators for the logger class."""
-from logging.handlers import QueueHandler, QueueListener
 import logging
+from logging.handlers import QueueHandler, QueueListener
 from queue import Queue
 
 from kytos.core.apm import begin_span
@@ -64,6 +64,7 @@ def apm_decorator(klass):
 
     return APMLogger
 
+
 def root_decorator(klass):
     """Decorator for turning a logger class into a root logger class"""
     class RootLogger(klass):
@@ -80,5 +81,5 @@ def root_decorator(klass):
 
         def __reduce__(self):
             return logging.getLogger, ()
-    
+
     return RootLogger

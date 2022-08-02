@@ -15,7 +15,6 @@ Basic usage:
 """
 import asyncio
 import atexit
-import importlib
 import json
 import logging
 import os
@@ -189,7 +188,7 @@ class Controller:
         reloadable_mods = [module for mod_name, module in sys.modules.items()
                            if mod_name[:str_len] == match_str]
         for module in reloadable_mods:
-            importlib.reload(module)
+            module.LOG = logging.getLogger(module.__name__)
 
     @staticmethod
     def loggers():

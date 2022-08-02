@@ -84,23 +84,9 @@ token_expiration_minutes = 180
 
 # NApps database. Supported values: mongodb (don't use quotes in the string)
 database =
-# The following environment variables should be accordingly if you're using mongodb:
-# MONGO_HOST_SEEDS=mongo1:27017,mongo2:27018,mongo3:27019
-# MONGO_USERNAME=
-# MONGO_PASSWORD=
-# Optionally, these environment variables can also be set:
-# MONGO_DBNAME=napps
-# MONGO_MAX_POOLSIZE=300
-# MONGO_MIN_POOLSIZE=30
-# MONGO_TIMEOUTMS=30000
 
 # APM backend. Supported values: es (elasticsearch, don't use quotes in the string)
 apm =
-# The following environment variables should be accordingly if you're using elasticsearch:
-# ELASTIC_APM_URL=http://localhost:8200
-# Optionally, these environment variables can also be set:
-# ELASTIC_APM_SERVICE_NAME=kytos
-# ELASTIC_APM_SECRET_TOKEN=
 
 # Define URLs that will require authentication
 #

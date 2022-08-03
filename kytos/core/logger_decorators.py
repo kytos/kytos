@@ -42,7 +42,7 @@ def queue_decorator(klass):
             """Check if the queue listener has any handlers"""
             if self.listener.handlers:
                 return True
-            if self.propagate:
+            if self.propagate and self.parent:
                 return self.parent.hasHandlers()
             return False
         # pylint: disable=invalid-name

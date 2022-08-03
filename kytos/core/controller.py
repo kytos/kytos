@@ -163,8 +163,8 @@ class Controller:
             decorators = [self._resolve(deco) for deco in decorators]
         except ModuleNotFoundError as err:
             sys.exit(f'Failed to resolve decorator module: {err.name}')
-        except AttributeError as err:
-            sys.exit(f'Failed to resolve decorator name')
+        except AttributeError:
+            sys.exit('Failed to resolve decorator name')
         LogManager.decorate_logger_class(*decorators)
         LogManager.load_config_file(self.options.logging, self.options.debug)
         LogManager.enable_websocket(self.api_server.server)

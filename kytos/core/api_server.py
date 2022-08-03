@@ -60,7 +60,6 @@ class APIServer:
         self.napps_dir = napps_dir
 
         self.flask_dir = os.path.join(dirname, '../web-ui')
-        
 
         self.listen = listen
         self.port = port
@@ -262,7 +261,7 @@ class APIServer:
             with zipfile.ZipFile(package, 'r') as zip_ref:
                 if zip_ref.testzip() is not None:
                     LOG.error("Web update - Zip file from %s "
-                                   "is corrupted.", uri)
+                              "is corrupted.", uri)
                     return (f'Zip file from {uri} is corrupted.',
                             HTTPStatus.INTERNAL_SERVER_ERROR.value)
 
@@ -412,7 +411,7 @@ class APIServer:
         endpoint = options.pop('endpoint', None)
         app.add_url_rule(rule, endpoint, function, **options)
         LOG.info('Started %s - %s', rule,
-                      ', '.join(options.get('methods', self.DEFAULT_METHODS)))
+                 ', '.join(options.get('methods', self.DEFAULT_METHODS)))
 
     def remove_napp_endpoints(self, napp):
         """Remove all decorated endpoints.

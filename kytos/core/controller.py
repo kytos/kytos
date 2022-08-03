@@ -15,6 +15,7 @@ Basic usage:
 """
 import asyncio
 import atexit
+import importlib
 import json
 import logging
 import os
@@ -158,31 +159,28 @@ class Controller:
     def enable_logs(self):
         """Register kytos log and enable the logs."""
         decorators = self.options.logger_decorators
-        decorators = [self._resolve(decorator) for decorator in decorators]
+        try:
+            decorators = [self._resolve(deco) for deco in decorators]
+        except ModuleNotFoundError as err:
+            sys.exit(f'Failed to resolve decorator module: {err.name}')
+        except AttributeError as err:
+            sys.exit(f'Failed to resolve decorator name')
         LogManager.decorate_logger_class(*decorators)
         LogManager.load_config_file(self.options.logging, self.options.debug)
         LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
-        self._reload_core()
+        self._patch_core_loggers()
 
     @staticmethod
     def _resolve(name):
         """Resolve a dotted name to a global object."""
-        name = name.split('.')
-        used = name.pop(0)
-        found = __import__(used)
-        for name_part in name:
-            used = used + '.' + name_part
-            try:
-                found = getattr(found, name_part)
-            except AttributeError:
-                __import__(used)
-                found = getattr(found, name_part)
-        return found
+        mod, _, attr = name.rpartition('.')
+        mod = importlib.import_module(mod)
+        return getattr(mod, attr)
 
     @staticmethod
-    def _reload_core():
-        """Reload all modules in 'kytos.core'"""
+    def _patch_core_loggers():
+        """Patch in updated loggers to 'kytos.core.*' modules"""
         match_str = 'kytos.core.'
         str_len = len(match_str)
         reloadable_mods = [module for mod_name, module in sys.modules.items()

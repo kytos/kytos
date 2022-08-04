@@ -23,6 +23,8 @@ debug = False
 # Logging config file. Please specify the full path of logging config file.
 logging = {{ prefix }}/etc/kytos/logging.ini
 
+# List of decorators to be applied to the Logger Class
+logger_decorators = ["kytos.core.logger_decorators.queue_decorator"]
 
 # The listen parameter tells kytos controller to accept incoming requests
 # only in the specified address. Default is 0.0.0.0.

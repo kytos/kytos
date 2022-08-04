@@ -15,6 +15,7 @@ Basic usage:
 """
 import asyncio
 import atexit
+import importlib
 import json
 import logging
 import os
@@ -157,9 +158,37 @@ class Controller:
 
     def enable_logs(self):
         """Register kytos log and enable the logs."""
+        decorators = self.options.logger_decorators
+        try:
+            decorators = [self._resolve(deco) for deco in decorators]
+        except ModuleNotFoundError as err:
+            print(f'Failed to resolve decorator module: {err.name}')
+            sys.exit(1)
+        except AttributeError:
+            print(f'Failed to resolve decorator name: {decorators}')
+            sys.exit(1)
+        LogManager.decorate_logger_class(*decorators)
         LogManager.load_config_file(self.options.logging, self.options.debug)
         LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
+        self._patch_core_loggers()
+
+    @staticmethod
+    def _resolve(name):
+        """Resolve a dotted name to a global object."""
+        mod, _, attr = name.rpartition('.')
+        mod = importlib.import_module(mod)
+        return getattr(mod, attr)
+
+    @staticmethod
+    def _patch_core_loggers():
+        """Patch in updated loggers to 'kytos.core.*' modules"""
+        match_str = 'kytos.core.'
+        str_len = len(match_str)
+        reloadable_mods = [module for mod_name, module in sys.modules.items()
+                           if mod_name[:str_len] == match_str]
+        for module in reloadable_mods:
+            module.LOG = logging.getLogger(module.__name__)
 
     @staticmethod
     def loggers():

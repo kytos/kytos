@@ -21,6 +21,8 @@ from werkzeug.exceptions import HTTPException
 from kytos.core.auth import authenticated
 from kytos.core.config import KytosConfig
 
+LOG = logging.getLogger(__name__)
+
 
 # pylint: disable=method-hidden,arguments-differ
 class CustomJSONEncoder(JSONEncoder):
@@ -58,7 +60,6 @@ class APIServer:
         self.napps_dir = napps_dir
 
         self.flask_dir = os.path.join(dirname, '../web-ui')
-        self.log = logging.getLogger(__name__)
 
         self.listen = listen
         self.port = port
@@ -104,7 +105,7 @@ class APIServer:
             self.server.run(self.app, self.listen, self.port)
         except OSError as exception:
             msg = "Couldn't start API Server: {}".format(exception)
-            self.log.critical(msg)
+            LOG.critical(msg)
             sys.exit(msg)
 
     def register_rest_endpoint(self, url, function, methods):
@@ -245,22 +246,22 @@ class APIServer:
         if not os.path.exists(self.flask_dir) or force:
             # download from github
             try:
-                self.log.info("Web update - Downloading UI from %s.", uri)
+                LOG.info("Web update - Downloading UI from %s.", uri)
                 package = urlretrieve(uri)[0]
             except HTTPError:
-                self.log.error("Web update - Uri not found %s.", uri)
+                LOG.error("Web update - Uri not found %s.", uri)
                 return (f"Uri not found {uri}.",
                         HTTPStatus.INTERNAL_SERVER_ERROR.value)
             except URLError:
-                self.log.error("Web update - Error accessing URL %s.", uri)
+                LOG.error("Web update - Error accessing URL %s.", uri)
                 return (f"Error accessing URL {uri}.",
                         HTTPStatus.INTERNAL_SERVER_ERROR.value)
 
             # test downloaded zip file
             with zipfile.ZipFile(package, 'r') as zip_ref:
                 if zip_ref.testzip() is not None:
-                    self.log.error("Web update - Zip file from %s "
-                                   "is corrupted.", uri)
+                    LOG.error("Web update - Zip file from %s "
+                              "is corrupted.", uri)
                     return (f'Zip file from {uri} is corrupted.',
                             HTTPStatus.INTERNAL_SERVER_ERROR.value)
 
@@ -268,7 +269,7 @@ class APIServer:
                 # if there is no path to backup, zip.extractall will
                 # create the path.
                 if os.path.exists(self.flask_dir):
-                    self.log.info("Web update - Performing UI backup.")
+                    LOG.info("Web update - Performing UI backup.")
                     date = datetime.now().strftime("%Y%m%d%H%M%S")
                     shutil.move(self.flask_dir, f"{self.flask_dir}-{date}")
                     os.mkdir(self.flask_dir)
@@ -277,10 +278,10 @@ class APIServer:
                 zip_ref.extractall(self.flask_dir)
                 zip_ref.close()
 
-            self.log.info("Web update - Updated")
+            LOG.info("Web update - Updated")
             return "updated the web ui", HTTPStatus.OK.value
 
-        self.log.error("Web update - Web UI was not updated")
+        LOG.error("Web update - Web UI was not updated")
         return ("Web ui was not updated",
                 HTTPStatus.INTERNAL_SERVER_ERROR.value)
 
@@ -409,8 +410,8 @@ class APIServer:
         """
         endpoint = options.pop('endpoint', None)
         app.add_url_rule(rule, endpoint, function, **options)
-        self.log.info('Started %s - %s', rule,
-                      ', '.join(options.get('methods', self.DEFAULT_METHODS)))
+        LOG.info('Started %s - %s', rule,
+                 ', '.join(options.get('methods', self.DEFAULT_METHODS)))
 
     def remove_napp_endpoints(self, napp):
         """Remove all decorated endpoints.
@@ -425,7 +426,7 @@ class APIServer:
             if rule.rule.startswith(prefix):
                 endpoints.add(rule.endpoint)
                 indexes.append(index)
-                self.log.info('Stopped %s - %s', rule, ','.join(rule.methods))
+                LOG.info('Stopped %s - %s', rule, ','.join(rule.methods))
 
         for endpoint in endpoints:
             self.app.view_functions.pop(endpoint)
@@ -438,7 +439,7 @@ class APIServer:
         # Remove the Flask Blueprint of this NApp from the Flask App
         self.app.blueprints.pop(napp.napp_id)
 
-        self.log.info('The Rest endpoints from %s were disabled.', prefix)
+        LOG.info('The Rest endpoints from %s were disabled.', prefix)
 
     def register_core_napp_services(self):
         """

@@ -112,6 +112,8 @@ If you're developing locally and using the core MongoDB integration, you can use
    $ export MONGO_USERNAME=mymongouser
    $ export MONGO_PASSWORD=mymongopass
 
+Optionally, you can also set these environment variables: ``MONGO_HOST_SEEDS``, ``MONGO_DBNAME``, ``MONGO_MAX_POOLSIZE``, ``MONGO_MIN_POOLSIZE``, ``MONGO_TIMEOUTMS``.
+
 .. code-block:: shell
 
    $ docker-compose up -d
@@ -132,6 +134,7 @@ How to use with Elastic APM
 
    $ docker-compose up -d
 
+Optionally, you can also set the following environment variables:  ``ELASTIC_APM_URL``, ``ELASTIC_APM_SERVICE_NAME``, ``ELASTIC_APM_SECRET_TOKEN``.
 
 In order to enable the Elastic APM agent, you have to pass the ``--apm es`` option to ``kytosd``, for instance:
 

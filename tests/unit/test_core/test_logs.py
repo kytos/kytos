@@ -203,6 +203,20 @@ class TestLogManager(LogTester):
 
         logging.root.removeHandler(old_handler)
 
+    def test_decorate_logger_class(self):
+        """Check that setting the decorator works correctly"""
+        class DummyWrapper(logging.Logger):
+            """Dummy class for comparison"""
+            pass
+
+        LogManager.decorate_logger_class(lambda arg: DummyWrapper)
+
+        self.assertEqual(logging.Logger.manager.loggerClass,
+                         DummyWrapper)
+
+        self.assertIsInstance(logging.root,
+                              DummyWrapper)
+
 
 class TestNAppLog(LogTester):
     """Test the log used by NApps."""

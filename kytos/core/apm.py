@@ -29,7 +29,8 @@ def begin_span(func, span_type="custom"):
     def wrapper(*args, **kwds):
         transaction = execution_context.get_transaction()
         if transaction:
-            transaction.begin_span(func.__name__, span_type)
+            transaction.begin_span(f'{func.__module__}.{func.__name__}',
+                                   span_type)
         result = func(*args, **kwds)
         if transaction:
             transaction.end_span()

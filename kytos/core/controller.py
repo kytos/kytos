@@ -15,6 +15,7 @@ Basic usage:
 """
 import asyncio
 import atexit
+import importlib
 import json
 import logging
 import os
@@ -157,9 +158,37 @@ class Controller:
 
     def enable_logs(self):
         """Register kytos log and enable the logs."""
+        decorators = self.options.logger_decorators
+        try:
+            decorators = [self._resolve(deco) for deco in decorators]
+        except ModuleNotFoundError as err:
+            print(f'Failed to resolve decorator module: {err.name}')
+            sys.exit(1)
+        except AttributeError:
+            print(f'Failed to resolve decorator name: {decorators}')
+            sys.exit(1)
+        LogManager.decorate_logger_class(*decorators)
         LogManager.load_config_file(self.options.logging, self.options.debug)
         LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
+        self._patch_core_loggers()
+
+    @staticmethod
+    def _resolve(name):
+        """Resolve a dotted name to a global object."""
+        mod, _, attr = name.rpartition('.')
+        mod = importlib.import_module(mod)
+        return getattr(mod, attr)
+
+    @staticmethod
+    def _patch_core_loggers():
+        """Patch in updated loggers to 'kytos.core.*' modules"""
+        match_str = 'kytos.core.'
+        str_len = len(match_str)
+        reloadable_mods = [module for mod_name, module in sys.modules.items()
+                           if mod_name[:str_len] == match_str]
+        for module in reloadable_mods:
+            module.LOG = logging.getLogger(module.__name__)
 
     @staticmethod
     def loggers():
@@ -522,8 +551,7 @@ class Controller:
             event (~kytos.core.KytosEvent): An instance of a KytosEvent.
         """
 
-        if logging.DEBUG >= self.log.getEffectiveLevel():
-            self.log.debug("looking for listeners for %s", event)
+        self.log.debug("looking for listeners for %s", event)
         for event_regex, listeners in dict(self.events_listeners).items():
             # self.log.debug("listeners found for %s: %r => %s", event,
             #                event_regex, [l.__qualname__ for l in listeners])
@@ -532,8 +560,7 @@ class Controller:
             if event_regex[-1] != '$' or event_regex[-2] == '\\':
                 event_regex += '$'
             if re.match(event_regex, event.name):
-                if logging.DEBUG >= self.log.getEffectiveLevel():
-                    self.log.debug('Calling listeners for %s', event)
+                self.log.debug('Calling listeners for %s', event)
                 for listener in listeners:
                     if asyncio.iscoroutinefunction(listener):
                         task = asyncio.create_task(listener(event))
@@ -586,14 +613,13 @@ class Controller:
                         not destination.state == ConnectionState.FINISHED):
                     packet = message.pack()
                     destination.send(packet)
-                    if logging.DEBUG >= self.log.getEffectiveLevel():
-                        self.log.debug('Connection %s: OUT OFP, '
-                                       'version: %s, type: %s, xid: %s - %s',
-                                       destination.id,
-                                       message.header.version,
-                                       message.header.message_type,
-                                       message.header.xid,
-                                       packet.hex())
+                    self.log.debug('Connection %s: OUT OFP, '
+                                   'version: %s, type: %s, xid: %s - %s',
+                                   destination.id,
+                                   message.header.version,
+                                   message.header.message_type,
+                                   message.header.xid,
+                                   packet.hex())
                     self.notify_listeners(triggered_event)
                     continue
 

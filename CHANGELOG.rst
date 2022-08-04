@@ -24,6 +24,32 @@ Fixed
 Security
 ========
 
+[2022.2rc2] - "kiko" - 2022-08-04
+*********************************
+
+Added
+=====
+ - Added configuration option `logger_decorators`. Allows for decorating the Logger class with 0 or more decorators. Decorators are applied in order provided.
+ - Added `kytos.core.logger_decorators.queue_decorator`. This decorator adds an internal queue for handling log messages. This decorator is intended to reduce latency associated with logging calls by offloading required IO operations to a separate thread.
+ - Added `kytos.core.logger_decorators.apm_decorator`. This decorator instruments various logging methods in order to measure performance, and reports the results to the apm backend.
+
+
+Changed
+=======
+ - Loggers are now by default decorated with `kytos.core.logger_decorators.queue_decorator`. Usage of this decorator has been observed to significantly reduce logging latency, with one scenario showing an improvement from 19.65ms average latency down to 0.55ms average latency.
+
+Deprecated
+==========
+
+Removed
+=======
+
+Fixed
+=====
+
+Security
+========
+
 [2022.2rc1] - "kiko" - 2022-07-25
 *********************************
 

@@ -37,7 +37,7 @@ port = 6653
 # Southbound protocol name of the TCP server. Don't use quotes in the string.
 protocol_name =
 
-# Switch connection timeout.
+# Switch connection timeout in seconds.
 connection_timeout = 130
 
 # The api_port parameter tells kytos controller to expose a port to accept

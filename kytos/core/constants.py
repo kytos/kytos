@@ -7,6 +7,6 @@ instantiation.
 from kytos.core.config import KytosConfig
 options = KytosConfig().options['daemon']
 
-CONNECTION_TIMEOUT = int(options.connection_timeout)
+CONNECTION_TIMEOUT = max(int(options.connection_timeout), 70)
 # FLOOD_TIMEOUT in microseconds
 FLOOD_TIMEOUT = 100000

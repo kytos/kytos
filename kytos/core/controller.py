@@ -7,7 +7,7 @@ Basic usage:
 
 .. code-block:: python3
 
-    from kytos.config import KytosConfig
+    from kytos.core.config import KytosConfig
     from kytos.core import Controller
     config = KytosConfig()
     controller = Controller(config.options)

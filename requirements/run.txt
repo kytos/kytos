@@ -4,38 +4,86 @@
 #
 #    pip-compile --output-file=requirements/run.txt requirements/run.in
 #
-backcall==0.1.0           # via ipython
-click==7.1.1              # via flask
-decorator==4.4.2          # via ipython, traitlets
-docutils>=0.16            # via python-daemon
-flask-cors==3.0.8         # via -r requirements/run.in
-flask-socketio==4.2.1     # via -r requirements/run.in
-flask==1.1.2              # via -r requirements/run.in, flask-cors, flask-socketio
-ipython-genutils==0.2.0   # via traitlets
-ipython==7.13.0           # via -r requirements/run.in
-itsdangerous==1.1.0       # via flask
-janus==0.4.0              # via -r requirements/run.in
-jedi==0.16.0              # via ipython
-jinja2==2.11.1            # via -r requirements/run.in, flask
-lockfile==0.12.2          # via -r requirements/run.in, python-daemon
-markupsafe==1.1.1         # via jinja2
-parso==0.6.2              # via jedi
-pathtools==0.1.2          # via watchdog
-pexpect==4.8.0            # via ipython
-pickleshare==0.7.5        # via ipython
-prompt-toolkit==3.0.5     # via ipython
-ptyprocess==0.6.0         # via pexpect
-pygments>=2.8.1           # via ipython
-pyjwt==1.7.1              # via -r requirements/run.in
-python-daemon==2.2.4      # via -r requirements/run.in
-python-engineio==3.12.1   # via python-socketio
-python-openflow==2021.1   # via -r requirements/run.in
-python-socketio==4.5.1    # via flask-socketio
-six>=1.15.0               # via flask-cors, python-socketio, traitlets
-traitlets==4.3.3          # via ipython
-watchdog==0.10.2          # via -r requirements/run.in
-wcwidth==0.1.9            # via prompt-toolkit
-werkzeug==1.0.1           # via flask
+backcall==0.1.0
+    # via ipython
+click==7.1.1
+    # via flask
+decorator==4.4.2
+    # via
+    #   ipython
+    #   traitlets
+docutils==0.19
+    # via python-daemon
+flask==1.1.2
+    # via
+    #   -r run.in
+    #   flask-cors
+    #   flask-socketio
+flask-cors==3.0.8
+    # via -r run.in
+flask-socketio==4.2.1
+    # via -r run.in
+ipython==7.34.0
+    # via -r run.in
+ipython-genutils==0.2.0
+    # via traitlets
+itsdangerous==1.1.0
+    # via flask
+janus==0.4.0
+    # via -r run.in
+jedi==0.16.0
+    # via ipython
+jinja2==2.11.1
+    # via
+    #   -r run.in
+    #   flask
+lockfile==0.12.2
+    # via
+    #   -r run.in
+    #   python-daemon
+markupsafe==1.1.1
+    # via jinja2
+matplotlib-inline==0.1.3
+    # via ipython
+parso==0.6.2
+    # via jedi
+pathtools==0.1.2
+    # via watchdog
+pexpect==4.8.0
+    # via ipython
+pickleshare==0.7.5
+    # via ipython
+prompt-toolkit==3.0.5
+    # via ipython
+ptyprocess==0.6.0
+    # via pexpect
+pygments==2.12.0
+    # via ipython
+pyjwt==1.7.1
+    # via -r run.in
+python-daemon==2.2.4
+    # via -r run.in
+python-engineio==3.12.1
+    # via python-socketio
+python-openflow==2021.1
+    # via -r run.in
+python-socketio==4.5.1
+    # via flask-socketio
+six==1.16.0
+    # via
+    #   flask-cors
+    #   python-socketio
+    #   traitlets
+traitlets==4.3.3
+    # via
+    #   ipython
+    #   matplotlib-inline
+watchdog==0.10.2
+    # via -r run.in
+wcwidth==0.1.9
+    # via prompt-toolkit
+werkzeug==1.0.1
+    # via flask
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

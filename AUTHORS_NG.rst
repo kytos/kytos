@@ -9,8 +9,8 @@ Core Team
 - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 - David Ramirez <davramir AT fiu DOT edu>
 
-Team Manager
-************
+Team Leader
+***********
 
 - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
 

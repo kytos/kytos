@@ -24,6 +24,14 @@ Fixed
 Security
 ========
 
+[2022.2.1] - "kiko" - 2022-08-19
+********************************
+
+Fixed
+=====
+- Added sanity safe guard on ``Interface.make_tag_available`` method
+
+
 [2022.2.0] - "kiko" - 2022-08-09
 ********************************
 

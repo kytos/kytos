@@ -186,7 +186,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
     def make_tag_available(self, tag):
         """Add a specific tag in available_tags."""
-        if not self.is_tag_available(tag):
+        if not self.is_tag_available(tag) and isinstance(tag, TAG):
             with self._tag_lock:
                 self.available_tags.append(tag)
             return True

@@ -203,6 +203,10 @@ class TestInterface(unittest.TestCase):
         is_success = self.iface.use_tag(tag)
         self.assertTrue(is_success)
 
+        # Test sanity safe guard
+        self.assertFalse(self.iface.make_tag_available(None))
+        self.assertTrue(None not in self.iface.available_tags)
+
     def test_enable(self):
         """Test enable method."""
         self.iface.switch = MagicMock()

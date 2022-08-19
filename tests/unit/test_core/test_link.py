@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 from kytos.core.common import EntityStatus
 from kytos.core.exceptions import KytosLinkCreationError
-from kytos.core.interface import Interface, TAGType
+from kytos.core.interface import TAG, Interface, TAGType
 from kytos.core.link import Link
 from kytos.core.switch import Switch
 
@@ -174,26 +174,22 @@ class TestLink(unittest.TestCase):
         result = link.use_tag(Mock())
         self.assertFalse(result)
 
-    @patch('kytos.core.interface.Interface.make_tag_available')
-    @patch('kytos.core.interface.Interface.is_tag_available')
-    def test_make_tag_available__success(self, *args):
+    def test_make_tag_available__success(self):
         """Test make_tag_available method to success case."""
-        mock_is_tag_available, _ = args
-        mock_is_tag_available.side_effect = [True, False]
         link = Link(self.iface1, self.iface2)
-
-        result = link.make_tag_available(Mock())
+        self.assertEqual(self.iface1.available_tags[-1],
+                         self.iface2.available_tags[-1])
+        next_value = self.iface1.available_tags[-1].value + 1
+        tag = TAG(TAGType.VLAN, next_value)
+        result = link.make_tag_available(tag)
         self.assertTrue(result)
+        self.assertTrue(tag in self.iface1.available_tags)
+        self.assertTrue(tag in self.iface2.available_tags)
 
-    @patch('kytos.core.interface.Interface.make_tag_available')
-    @patch('kytos.core.interface.Interface.is_tag_available')
-    def test_make_tag_available__error(self, *args):
+    def test_make_tag_available__error(self):
         """Test make_tag_available method to error case."""
-        mock_is_tag_available, _ = args
-        mock_is_tag_available.side_effect = [True, True]
         link = Link(self.iface1, self.iface2)
-
-        result = link.make_tag_available(Mock())
+        result = link.make_tag_available(self.iface1.available_tags[0])
         self.assertFalse(result)
 
     def test_get_next_available_tag(self):

@@ -204,8 +204,8 @@ class TestInterface(unittest.TestCase):
         self.assertTrue(is_success)
 
         # Test sanity safe guard
-        self.assertFalse(self.iface.use_tag(None))
-        self.assertFalse(None not in self.iface.available_tags)
+        self.assertFalse(self.iface.make_tag_available(None))
+        self.assertTrue(None not in self.iface.available_tags)
 
     def test_enable(self):
         """Test enable method."""

@@ -179,9 +179,12 @@ class TestLink(unittest.TestCase):
         link = Link(self.iface1, self.iface2)
         self.assertEqual(self.iface1.available_tags[-1],
                          self.iface2.available_tags[-1])
-        tag = TAG(TAGType.VLAN, self.iface1.available_tags[-1].value + 1)
+        next_value = self.iface1.available_tags[-1].value + 1
+        tag = TAG(TAGType.VLAN, next_value)
         result = link.make_tag_available(tag)
         self.assertTrue(result)
+        self.assertTrue(tag in self.iface1.available_tags)
+        self.assertTrue(tag in self.iface2.available_tags)
 
     def test_make_tag_available__error(self):
         """Test make_tag_available method to error case."""

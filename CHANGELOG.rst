@@ -24,6 +24,14 @@ Fixed
 Security
 ========
 
+[2022.2.2] - "kiko" - 2022-08-25
+********************************
+
+Fixed
+=====
+- Added connection_timeout as a default on KytosConfig to support older configuration files
+
+
 [2022.2.1] - "kiko" - 2022-08-19
 ********************************
 

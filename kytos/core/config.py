@@ -149,6 +149,7 @@ class KytosConfig():
                     'thread_pool_max_workers': {},
                     'database': '',
                     'apm': '',
+                    'connection_timeout': 130,
                     'debug': False}
 
         options, argv = self.conf_parser.parse_known_args()

@@ -1,0 +1,97 @@
+:EP: 32
+:Title: flow_stats stabilization v1
+:Authors:
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Gretel De la Peña <gdelapea AT fiu DOT edu>
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
+    - David Ramirez <davramir AT fiu DOT edu>
+    - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
+:Created: 2022-08-25
+:Kytos-Version:
+:Status: Draft
+
+***********************************
+EP032 - flow_stats stabilization v1
+***********************************
+
+
+Abstract
+========
+
+This blueprint will discuss existing major issues on ``flow_stats`` and propose changes to stabilize flow_stats v1 for production usage. The proposed changes will also need to augment ``sdntrace_cp``,  ``mef_eline``, and ``flow_manager``.
+
+Current major issues
+====================
+
+- **Issue 1)**  ``flow_stats`` currently has additional major responsibilities that ideally it shouldn't have to simplify maintainability such as matching and applying flows. ``flow_stats`` primary responsibility is supposed to be handling flow statistics and exposing such statistics to other NApps or clients. `Issue #30 on GitHub <https://github.com/kytos-ng/flow_stats/issues/30>`_.
+- **Issue 2)** ``flow_stats`` switch ``generic_flows`` copy that is consumed by ``sdntrace_cp`` can get easily outdated. `Issue #19 on GitHub <https://github.com/kytos-ng/flow_stats/issues/19>`_.
+- **Issue 3)** ``flow_stats`` doesn't use a database yet, statistics values and their history will be lost if switches restart.
+
+
+Issue #1
+========
+
+``flow_stats`` shouldn't have matching and applying responsibilities to simplify maintainability. Ideally, matching and applying responsibilities could be reused from ``flow_manager``, that could be an option, however, the existing matching code would need to be modified to try to match based on ``match_id`` to avoid full scans in the database, which isn't a minor change, or add new commonly supported index on the existing ``flows`` collections. Also, since ``sdntrace_cp`` use this matching and applying capabilities it can also have several steps, so it could increase many round trips in the database, traces aren't run that frequently but if a database will be used we'd better make sure the queries will performing well. With this point in mind, one of the safest and conservative alternative for now, would be to maintain in memory, reuse the existing matching and applying, move it all to ``sdntrace_cp`` but eliminating the ``GenericFlow`` abstraction, and then making sure that it is indexed efficiently in memory, similar approach that was implemented on ``flow_manager`` on `EP024 <https://github.com/kytos-ng/kytos/blob/blueprint/ep032/docs/blueprints/EP024.rst>`_. In the future, more operations can get offloaded to the database if it's worth it.
+
+
+Issue #2
+========
+
+``switch.generic_flows`` copy are updated on every ``kytos/of_core.flow_stats.received`` event that's published by ``of_core``. ``sdntrace_cp`` consumes the these flows to perform control plane traces, however, sometimes, it can lead to false positives trace outcomes, since a convergence can happen in the network while these flows haven't been updated yet. This is an eventual consistency that should be taken into account, ``flow_manager`` also had to deal with same challenges and has been stable, so following or adapting certain approaches that ``flow_manager`` has demonstrated to be successful can lead to to a more stable implementation eliminating the vast majority of false positives.
+
+``flow_manager`` primary approach to solve this problem is if the network is still converging, any flow that has been added, updated or removed within a certain period of time, then there is no point in trying to check the consistency since it can result in false positives. Also, flow manager keeps track of when the last consistency check execution happened in order to only run the consistency check if it hasn't been run within a configurable interval, so this is the ultimate control in order to make a decision. This decision could also be done through iterations or sliding window techniques, however time-based is a simpler implementation with fewer states to keep track for this case, since eventually the consistency has to make a decision, so this interval act like a final verdict ensuring a minimal interval has passed. The consistency check interval should accommodate for the slowest network convergence that can happen in the network, ideally, with extra seconds to have a margin error. A consistency check interval should be greater than any other underlying consistency check that it might rely on (a NApp shouldn't try to run its consistency faster than flow_manager if has transitive dependencies, for instance). It is OK to have a slowish non-immediate consistency check, it's desirable that consistency checks prioritize consistency and integrity in a distributed manner, and using locks everywhere isn't an option for performance reasons.
+
+
+Proposed solutions 
+------------------
+
+The following changes are proposed solutions for issues 1 and 2.
+
+flow_stats
+~~~~~~~~~~
+
+- Maintain in memory on ``flow_stats`` a dict of ``napps.kytos.of_core.v0x04.flow.Flow`` instances indexed by their id ``self.flows[flow.id]``, the flow instances will be updated from ``kytos/of_core.flow_stats.received``. This dict could've been indexed by dpid and cookie, however, since in the future it'll be stored in the database it's not worth pre-indexing and maintaining extra code that will be deleted, more details about storing in the database will be discussed on issue 3. This will impact on how ``byte_count``, ``duration_sec``, ``duration_sec``, and ``packet_count`` will be accessed since they'll be in the ``stats`` attribute, tests will have to be refactored.
+- Remove ``GenericFlow`` abstraction and its fields mappings since it's clear that OpenFlow1.3 with experimenter actions has been sufficient for production usage, and future efforts will focus on P4 and P4Runtime API. - Bump v1 on endpoint routes and remove the ``GET flow/match/<dpid>`` endpoint, update the API spec accordingly. 
+- Adapt ``GET flow/stats/<dpid>`` to return the flows with their stats instead of matching.
+- Reassess if endpoints ``GET packet_count/sum/{{dpid}}`` and ``GET /bytes_count/sum/{{dpid}}`` are being valuable for important use cases or should be removed.
+
+sdntrace_cp
+~~~~~~~~~~~
+
+1) Request consistent stored flows from ``flow_manager`` and map on-the-fly the existing flows in memory and move the existing match and apply functions from ``flow_stats`` to ``sdntrace_cp``. Add a new ``PUT /traces`` endpoint for bulk requests which will minimize round trip in the DB on ``flow_manager``, that way, a client can request 100s of traces with a single request, and still compute and match in memory on ``sdntrace_cp`` relatively efficiently, over time, more filtering can be offloaded to the DB when it's worth it. Also this is leveraging the existing guarantees that flow_manager provides with its consistency check. The current implementation run the trace on flows that are installed in the switch, but since flow_manager ``flows`` collection is the source of the truth of managed flows its consistency check will do its job, and mef_eline consistency can rely on it, assuming that when querying for flows it'll filter for state ``installed`` to make sure that flows have been installed on switches.
+
+2) Maintain another in memory dict of dpid of ``napps.kytos.of_core.v0x04.flow.Flow`` on ``sdntrace_cp`` in a ``self.flows`` attribute indexed by their ``id``, and move all matching and applying methods from ``flow_stats`` to ``sdntrace_cp``. However, this won't rely on ``kytos/of_core.flow_stats.received``, instead to be more responsive and less susceptible by FlowStats messages, rely on ``flow_manager`` events ``kytos/flow_manager.flow.added``, ``kytos/flow_manager.flow.removed`` since these events will only be published once they're confirmed. Also, when ``flow_stats`` is supposed to listen to a new event ``kytos/flow_manager.flow_manager_loaded`` and use a new endpoint to query once and create a new list of all the flows in this memory structure, after that, removal and insertions will be kept in sync via events the subscribed events. ``sdntrace_cp`` should be adapted to run its traces on this new ``self.flows``.  
+
+Between option 1) and option 2), option 1) is easier to maintain and evolve and is aligned with leveraging MongoDB as much as possible. Option 2) adds more technical debt, it would also need more threading locks, although such locks wouldn't impact much. Overall, option b) adds significant more code to maintain.
+
+flow_manager:
+~~~~~~~~~~~~~
+
+- Add new endpoints ``GET v2/stored_flows`` and ``GET v2/stored_flows/<dpid>``,  for listing flows from ``flows`` collection and exclude the ``_id`` from the database model in the response. Document the new endpoint and responses. Initial query parameter filter for ``state`` should be supported. In the future, more filtering capabilities will be provided, but that will depend on indexes that will be commonly supported.
+
+mef_eline
+~~~~~~~~~
+
+- Update the consistency check to only run for EVCs that are enabled, inactive and haven't been updated within a time interval slightly greater than ``flow_manager.settings.CONSISTENCY_MIN_VERDICT_INTERVAL = 60 * 2``, and haven't got flows removed recently. Evaluate if the new time interval will be set on ``settings.DEPLOY_EVCS_INTERVAL`` or a new one and impact on existing adaptations on the existing ``WAIT_FOR_OLD_PATH``.
+- Subscribe to ``kytos/flow_manager.flow.removed`` and keep track when the EVC got flows removed by deriving its cookie, in case alien flows got removed then it'll be used to skip the consistency check.
+- Add a new DB ascending index on ``evcs.updated_at`` and implement a query filtering for EVCs where is less than or equal a given datetime ``"updated_at": {"$lte": dt}``
+- Update the consistency check to use the new ``PUT /traces`` that will be implemented for the EVCs that can run the consistency after every time interval.
+
+
+Issue #3
+========
+
+``flow_stats`` doesn't store statistics in a database yet, statistics values and their history will be lost if switches restart.
+
+Proposed solution
+-----------------
+
+Although it's desirable to move to MongoDB and have persistent FlowStats, there are still requirements and statistics use cases that need to be better understood to define a data model and API that will meet such requirements and integrate well with the front-end and other NApps. Replacing the existing in memory storage with new collection might not be the right move if later on time series queries might be needed, requiring more refactoring and breaking changes, so it's worth deferring this for a future opportunity where its priority is aligned with the major version objectives.
+
+
+Future work
+===========
+
+- Assess Zabbix integration requirements and confirm if it'll be needed for 2022.3.
+- Double check if PortStats will also need to be be supported and used, if positive, maybe this NApp will turn into of_stats

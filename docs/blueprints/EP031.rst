@@ -1,0 +1,273 @@
+:EP: 31
+:Title: Enabling Telemetry for EVCs provisioned with Kytos-ng mef-eline
+:Authors:
+    - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+:Created: 2022-08-24
+:Kytos-Version: 2022.3
+:Status: Draft
+
+****************************************
+EP031 - Telemetry-enabled EVCs
+****************************************
+
+
+Abstract
+========
+
+Blueprint 31 presents requirements and features to support In-band Network Telemetry (a.k.a. INT or telemetry) for EVCs created by the Kytos **mef-eline** napp.
+
+
+Motivation
+==========
+
+INT enables per-packet monitoring and it is specified by the P4.org consortium as one of P4 use cases. To enable full network visibility, all EVCs must support INT. For the network devices available at AmLight, INT will be performed by the network data plane when instructed to do so via OpenFlow NoviFlow Experimenter's actions.
+
+Supporting INT with the current implementation of the NoviFlow's NoviWare OS won't be trivial due to many conditions imposed by NoviWare. This blueprint will focus on enabling a MINIMALLY functional support for INT over Kytos. Once this blueprint is implemented, new blueprints will be created addressing more complex requirements.
+
+
+I. Requirements
+===============
+
+This blueprint has the following characteristics:
+
+  1. There will be no concerns about number or location of the INT Hops switches. Currently, an INT Sink switch can only export up to 10 metadata stacked by the network.
+  2. There will be no concerns about MTU restrictions. NoviWare and Tofino support frames as large as 10KB which is more than enough. However, any legacy device in the middle must be previously identified since legacy devices usually have a MTU of up to 9216 Bytes.
+  3. There will be no concerns if INT Sink switches have loops for INT reports (Section III). This blueprint assumes physical loops are already deployed by the operators during the commissioning phase.
+  4. There will be no concerns about proxy ports and their mappings.
+  5. There is no need for persistent data. The **mef_eline** and **flow_manager** napps will persists their entries accordingly since **telemetry** will leverage **flow_manager**.
+  6. This version won't require changes to the way the **mef_eline** napp works.
+
+
+II. How INT works with NoviWare
+===============================
+
+Currently, the **mef_eline** napp creates Ethernet Virtual Circuits (EVCs) using *matches* `IN_PORT` and `VLAN_VID` and actions `PUSH/POP/SWAP VLAN`, `SET FIELD`, and `OUTPUT`. All EVCs' flow entries have the same priority. Currently, INT is only supported for IPv4 traffic with TCP and UDP protocols, which means that more specific matches will be needed to match IP and TCP/UDP. Non-IPV4 or non-TCP/UDP traffic will continue using the existing flow entries created by **mef_eline**. The **telemetry** napp only adds and removes flows for INT. Any other flows created by the **mef_eline** won't be affected. Example:
+
+- Current by **mef_eline**:
+
+  - 1 flow per direction
+  - priority: DEFAULT (32678)
+
+    - match: <in_port=10,vlan_vid=20>
+
+- New with **mef_eline** and **telemetry**:
+
+  - 3 flows per direction
+  - priority: Higher (40000) (created by **telemetry**)
+
+    - match: <in_port=10,vlan_vid=20,eth_type=0x800,ip_proto=6> for TCP
+  - priority: Higher (40000) (created by **telemetry**)
+
+    - match: <in_port=10,vlan_vid=20,eth_type=0x800,ip_proto=17> for UDP
+  - priority: DEFAULT (32678) (created by **mef_eline**)
+
+    - match: <in_port=10,vlan_vid=20> for everything else
+
+
+This new approach requires 3x more flows to manage, so scalability and a new pipeline could become a concern in the future. However, those concerns are out of the scope of Blueprint 31.
+
+Another change NoviWare requires to support INT is new OpenFlow actions. The Kytos **NoviFlow** napp already instantiates four new OpenFlow experimenter actions: `push_int`, `add_int_metadata`, `send_report`, and `pop_int`.  The IPv4+TCP and IPv4+UDP flows need the following workflow to support INT:
+
+1. The first NoviFlow switch in the path (a.k.a. INT Source switch) needs to execute two operations: `push_int` to create the INT header and `add_int_metadata` to add a per-hop telemetry data. However, due its implementation, these actions have to be executed in different tables:
+
+   1. Table 0 is where `push_int` is executed
+
+   2. Table 0+N (N>0) is where `add_int_metadata` is executed.
+
+   3. Example:
+
+      - table 0
+
+        - priority: Higher (40000)
+        - match: <in_port=10,vlan_vid=20,eth_type=0x800,ip_proto=6> # TCP ( IP protocol 6 )
+        - instructions:
+
+          - action: push_int
+          - action: goto_table 2
+
+        - priority: Higher (40000)
+        - match: <in_port=10,vlan_vid=20,eth_type=0x800,ip_proto=17> # UDP ( IP protocol 17 )
+        - instructions:
+
+          - action: push_int
+          - action: goto_table 2
+
+
+      - table 2
+
+        - priority: Any
+        - match: <in_port=10,vlan_vid=20>  # Just in_port and vlan_vid
+
+        - instructions:
+
+          - action: add_int_metadata
+          - action: <all original actions (set_queue, output, push/pop/swap vlan, etc.)>
+
+   - Note: `add_int_metadata` has to be added to the same flow entry where `output` action is, otherwise INT field "egress_id" will be set to 0.
+
+
+2. The last NoviFlow switch in the path (a.k.a. INT Sink switch) needs to execute two operations: `send_report` to send all metadata content previously added to the INT Collector and `pop_int` to remove the INT header and INT metadata, and return the packet to its initial configuration, including DSCP. However, `send_report`, and `pop_int` must be executed in different tables:
+
+   1. Table 0 is where `send_report` is executed
+   2. Table 0+N (N>0) is where `pop_int` is executed.
+   3. Example:
+
+      - table 0
+
+        - priority: Higher (40000)
+        - match: <in_port=10,vlan_vid=20,eth_type=0x800,ip_proto=6>. # TCP
+        - instrutions:
+
+          - action: send_report
+          - action: goto_table 2
+
+        - priority: Higher (40000)
+        - match: <in_port=10,vlan_vid=20,eth_type=0x800,ip_proto=17>. # UDP
+        - instrutions:
+
+          - action: send_report
+          - action: goto_table 2
+
+      - table 2
+
+        - priority: Any
+        - match: <in_port=10,vlan_vid=20>  # Just in_port and vlan_vid
+        - instructions:
+
+          - action: pop_int
+          - action: <all original actions (set_queue, output, push/pop/swap vlan, etc.)>
+
+  - The choice between adding telemetry or not at the INT Sink Switch will be discussed in Section III.
+  - There are other steps for the INT Sink to be discussed later in Section III.
+
+
+3. NoviFlow switches in the path (a.k.a. INT Hop switch) will only need to add telemetry data to IPv4/TCP/UDP packets.
+
+   1. Example:
+
+      - table 0
+
+        - priority: Higher (40000)
+        - match: <in_port=10,vlan_vid=20,eth_type=0x800,ip_proto=6>  # TCP
+        - instrutions:
+
+          - action: add_int_metadata
+          - action: <all original actions (set_queue, output, push/pop/swap vlan, etc.)>
+
+        - priority: Higher (40000)
+        - match: <in_port=10,vlan_vid=20,eth_type=0x800,ip_proto=17>. # UDP
+        - instrutions:
+
+          - action: add_int_metadata
+          - action: <all original actions (set_queue, output, push/pop/swap vlan, etc.)>
+
+
+
+III. Adding INT metadata at the INT Sink switch
+===============================================
+The NoviWare's INT implementation requires `send_report` action to be executed in Table 0. `send_report` is executed with higher priority than other INT actions, which means adding INT metadata at the INT Sink has to be performed before `send_report`. To address these requirements, the packets have to be re-injected into the pipeline using external connections via physical loops.
+
+To illustrate the challenge, consider an EVC terminating on INT Hop Z on port 23. The user packet with INT metadata comes from port 11. **mef_eline** would create the following flows (for simplicity, just one direction is presented):
+
+  0. **met_eline** default behavior:
+
+    - match:
+
+      - priority: DEFAULT (32678)
+      - match: <in_port=11,vlan_vid=20>
+
+    - instruction:
+
+      - action [set_queue, pop_vlan, etc.]
+      - action: output to port 23.
+
+To enable INT, first a physical loop has to be deployed. For this example, on INT Hop Z, port 1 is connected to port 2 by a physical fiber patch cord (done during commissioning). Then, the following flows need to be ADDED to the pipeline:
+
+  1. Adding INT metadata:
+
+    - match:
+
+      - table 0
+
+        - priority: Higher (40000)
+        - match: <in_port= **11**,vlan_vid=20,eth_type=0x800,ip_proto=6>  # TCP
+        - instrutions:
+
+          - action: add_int_metadata
+          - action [set_queue, pop_vlan, etc.]
+          - action: output port **1** (loop)
+
+        - priority: Higher (40000)
+        - match: <in_port= **11**,vlan_vid=20,eth_type=0x800,ip_proto=17>. # UDP
+        - instrutions:
+
+          - action: add_int_metadata
+          - action [set_queue, pop_vlan, etc.]
+          - action: output port **1** (loop)
+
+  2. Send Report and pop INT data (traffic is coming from port 2 that's the loop with port 1). Only INT data gets into the loop.
+
+    - match:
+
+      - table 0
+
+        - priority: Higher (40000)
+        - match: <in_port= **2**,vlan_vid=20>
+        - instrutions:
+
+          - action: send_report
+          - action go to table 2
+
+
+      - table 2
+
+        - priority: Higher (40000)
+        - match: <in_port= **2**,vlan_vid=20>
+        - instrutions:
+
+          - action: pop_int
+          - action [set_queue, pop_vlan, etc.]
+          - action: output port **23** (original port)
+
+
+IV. How to enable INT for EVCs
+==============================
+
+The goal for the **telemetry** app is to enable telemetry for ALL EVCs. However, it must support enabling and disabling telemetry for a single EVC or ALL EVCs. This is the approach:
+
+  1 . The **telemetry** napp will start operating once **mef_eline** is loaded and EVCs and their flows are pushed to the data plane.
+  2. **telemetry** will listen for events *kytos/mef_eline.(redeployed_link_(up|down)|deployed)* and *kytos.mef_eline.created* issued by **mef_eline**.
+  3. For each EVC identified, **telemetry** will
+    1. use EVC's cookie to get all flow entries created by **flow_manager** IF telemetry is not already enabled.
+    2. push more specific flows as described in Section II
+    3. add a key in the EVC's metadata called "telemetry" with value "enabled". key "telemetry" will be "disabled" once telemetry is disabled for an EVC.
+
+V. Events
+==========
+
+  1. Listening
+    1. *kytos/mef_eline.(redeployed_link_(up|down)|deployed)*
+    2. *kytos.mef_eline.created*
+
+  2. Issuing
+    1.  *kytos.telemetry.enabled*
+    2.  *kytos.telemetry.disabled*
+
+
+VI. REST API
+=============
+
+  - /telemetry/v1/evc/enable - POST - REST to enable/create INT flows for an EVC_ID.
+  - /telemetry/v1/evc/disable - POST - REST to disable/remove INT flows for an EVC_ID.
+  - /telemetry/v1 - GET - List all INT-enabled EVCs
+  - /telemetry/v1/proxies - GET - REST to return the list of proxy ports in the topology
+  - /telemetry/v1/all/disable - GET - REST to disable/remove INT flows for ALL EVC_ID.
+
+
+VII. Dependencies
+=================
+ * flow_manager
+ * mef_eline
+ * noviflow

@@ -31,7 +31,6 @@ from socket import error as SocketError
 
 from kytos.core.api_server import APIServer
 from kytos.core.apm import init_apm
-# from kytos.core.tcp_server import KytosRequestHandler, KytosServer
 from kytos.core.atcp_server import KytosServer, KytosServerProtocol
 from kytos.core.auth import Auth
 from kytos.core.buffers import KytosBuffers
@@ -79,7 +78,7 @@ class Controller:
 
     # Created issue #568 for the disabled checks.
     # pylint: disable=too-many-instance-attributes,too-many-public-methods
-    def __init__(self, options=None, loop=None):
+    def __init__(self, options=None):
         """Init method of Controller class takes the parameters below.
 
         Args:
@@ -89,7 +88,7 @@ class Controller:
         if options is None:
             options = KytosConfig().options['daemon']
 
-        self._loop = loop or asyncio.get_event_loop()
+        self._loop = asyncio.get_event_loop()
         self._pool = ThreadPoolExecutor(max_workers=1)
 
         # asyncio tasks
@@ -98,7 +97,7 @@ class Controller:
         #: dict: keep the main threads of the controller (buffers and handler)
         self._threads = {}
         #: KytosBuffers: KytosBuffer object with Controller buffers
-        self.buffers = KytosBuffers(loop=self._loop)
+        self.buffers: KytosBuffers = None
         #: dict: keep track of the socket connections labeled by ``(ip, port)``
         #:
         #: This dict stores all connections between the controller and the
@@ -304,6 +303,7 @@ class Controller:
         Load the installed apps.
         """
         self.log.info("Starting Kytos - Kytos Controller")
+        self.buffers = KytosBuffers()
         self.server = KytosServer((self.options.listen,
                                    int(self.options.port)),
                                   KytosServerProtocol,

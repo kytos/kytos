@@ -1,5 +1,4 @@
 """Test kytos.core.auth module."""
-import asyncio
 import base64
 import hashlib
 from unittest import TestCase
@@ -7,6 +6,7 @@ from unittest.mock import Mock, patch
 
 from kytos.core import Controller
 from kytos.core.auth import Auth
+from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 
 KYTOS_CORE_API = "http://127.0.0.1:8181/api/kytos/"
@@ -40,12 +40,10 @@ class TestAuth(TestCase):
 
     def _get_controller_mock(self):
         """Return a controller mock."""
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
         options = KytosConfig().options['daemon']
         options.jwt_secret = 'jwt_secret'
-
-        controller = Controller(options, loop=loop)
+        controller = Controller(options)
+        controller.buffers = KytosBuffers()
         controller.log = Mock()
 
         # Patch event callback trigger.

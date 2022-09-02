@@ -1,5 +1,4 @@
 """kytos.core.napps tests."""
-import asyncio
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -14,11 +13,8 @@ class TestNAppsManager(unittest.TestCase):
 
     def setUp(self):
         """Execute steps before each tests."""
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
-
         self.options = KytosConfig().options['daemon']
-        self.controller = Controller(self.options, loop=self.loop)
+        self.controller = Controller(self.options)
         self.controller.log = MagicMock()
         self.controller.load_napp = MagicMock()
         self.controller.unload_napp = MagicMock()

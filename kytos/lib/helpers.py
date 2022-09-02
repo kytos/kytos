@@ -2,6 +2,7 @@
 from unittest.mock import Mock, create_autospec
 
 from kytos.core import Controller
+from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 from kytos.core.connection import (Connection, ConnectionProtocol,
                                    ConnectionState)
@@ -11,10 +12,11 @@ from kytos.core.link import Link
 from kytos.core.switch import Switch
 
 
-def get_controller_mock(loop=None):
+def get_controller_mock():
     """Return a controller mock."""
     options = KytosConfig().options['daemon']
-    controller = Controller(options, loop=loop)
+    controller = Controller(options)
+    controller.buffers = KytosBuffers()
     controller.log = Mock()
     return controller
 

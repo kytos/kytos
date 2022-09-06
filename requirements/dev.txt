@@ -19,7 +19,7 @@ appdirs==1.4.3
     # via virtualenv
 argh==0.26.2
     # via sphinx-autobuild
-astroid==2.3.3
+astroid==2.12.5
     # via pylint
 asttokens==2.0.8
     # via
@@ -66,6 +66,8 @@ decorator==4.4.2
     #   -r requirements/run.txt
     #   ipython
     #   kytos
+dill==0.3.4
+    # via pylint
 distlib==0.3.0
     # via virtualenv
 docopt==0.6.2
@@ -142,7 +144,7 @@ jinja2==3.1.2
     #   flask
     #   kytos
     #   sphinx
-lazy-object-proxy==1.4.3
+lazy-object-proxy==1.7.1
     # via astroid
 livereload==2.6.1
     # via sphinx-autobuild
@@ -156,7 +158,6 @@ markupsafe==2.1.1
     #   -r requirements/run.txt
     #   jinja2
     #   kytos
-    #   werkzeug
 matplotlib-inline==0.1.6
     # via
     #   -r requirements/run.txt
@@ -188,6 +189,8 @@ pickleshare==0.7.5
     #   kytos
 pip-tools==4.5.1
     # via kytos
+platformdirs==2.5.2
+    # via pylint
 pluggy==0.13.1
     # via
     #   pytest
@@ -229,7 +232,7 @@ pyjwt==2.4.0
     # via
     #   -r requirements/run.txt
     #   kytos
-pylint==2.4.4
+pylint==2.15.0
     # via yala
 pymongo==4.1.0
     # via
@@ -269,7 +272,6 @@ requests==2.27.0
 six==1.16.0
     # via
     #   -r requirements/run.txt
-    #   astroid
     #   asttokens
     #   flask-cors
     #   kytos
@@ -310,7 +312,10 @@ toml==0.10.0
 tomli==2.0.1
     # via
     #   coverage
+    #   pylint
     #   pytest
+tomlkit==0.11.4
+    # via pylint
 tornado==6.0.4
     # via
     #   livereload
@@ -323,12 +328,14 @@ traitlets==5.3.0
     #   ipython
     #   kytos
     #   matplotlib-inline
-typing-extensions==4.0.1
+typing-extensions>=4.0.1
     # via
     #   -r requirements/run.txt
+    #   astroid
     #   janus
     #   kytos
     #   pydantic
+    #   pylint
 urllib3==1.26.7
     # via
     #   -r requirements/run.txt
@@ -347,7 +354,7 @@ wcwidth==0.1.9
     #   -r requirements/run.txt
     #   kytos
     #   prompt-toolkit
-werkzeug==2.2.2
+werkzeug==2.0.3
     # via
     #   -r requirements/run.txt
     #   flask

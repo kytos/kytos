@@ -157,5 +157,4 @@ def async_main(config):
         controller.log.error(exc)
         controller.log.info("Shutting down Kytos...")
     finally:
-
         loop.close()

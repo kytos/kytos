@@ -19,6 +19,11 @@ appdirs==1.4.3
     # via virtualenv
 argh==0.26.2
     # via sphinx-autobuild
+asgiref==3.5.2
+    # via
+    #   -r requirements/run.txt
+    #   flask
+    #   kytos
 astroid==2.12.5
     # via pylint
 asttokens==2.0.8
@@ -91,7 +96,7 @@ filelock==3.0.12
     # via
     #   tox
     #   virtualenv
-flask==2.1.3
+flask[async]==2.1.3
     # via
     #   -r requirements/run.txt
     #   flask-cors

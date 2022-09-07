@@ -71,19 +71,20 @@ class TestKytosd(TestCase):
         mock_async_main.assert_called()
 
     @staticmethod
+    @patch('kytos.core.kytosd.start_shell_async', spec=MagicMock)
     @patch('kytos.core.kytosd.asyncio')
     @patch('kytos.core.kytosd.InteractiveShellEmbed')
     @patch('kytos.core.kytosd.Controller')
     def test_async_main(*args):
         """Test async_main method."""
-        (mock_controller, _, mock_asyncio) = args
+        (mock_controller, _, mock_asyncio, _) = args
         controller = MagicMock()
         controller.options.debug = True
         controller.options.foreground = True
         mock_controller.return_value = controller
 
         event_loop = MagicMock()
-        mock_asyncio.get_event_loop.return_value = event_loop
+        mock_asyncio.new_event_loop.return_value = event_loop
 
         async_main(MagicMock())
 

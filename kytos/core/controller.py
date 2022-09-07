@@ -89,7 +89,6 @@ class Controller:
         if options is None:
             options = KytosConfig().options['daemon']
 
-        self._loop = asyncio.get_event_loop()
         self._pool = ThreadPoolExecutor(max_workers=1)
 
         # asyncio tasks
@@ -341,17 +340,18 @@ class Controller:
             log.debug('completed: %d, pending: %d',
                       len(completed), len(pending))
 
-        task = self._loop.create_task(self.event_handler("conn"))
+        loop = asyncio.get_running_loop()
+        task = loop.create_task(self.event_handler("conn"))
         self._tasks.append(task)
-        task = self._loop.create_task(self.event_handler("raw"))
+        task = loop.create_task(self.event_handler("raw"))
         self._tasks.append(task)
-        task = self._loop.create_task(self.event_handler("msg_in"))
+        task = loop.create_task(self.event_handler("msg_in"))
         self._tasks.append(task)
-        task = self._loop.create_task(self.msg_out_event_handler())
+        task = loop.create_task(self.msg_out_event_handler())
         self._tasks.append(task)
-        task = self._loop.create_task(self.event_handler("app"))
+        task = loop.create_task(self.event_handler("app"))
         self._tasks.append(task)
-        task = self._loop.create_task(_run_api_server_thread(self._pool))
+        task = loop.create_task(_run_api_server_thread(self._pool))
         task.add_done_callback(_stop_loop)
         self._tasks.append(task)
 

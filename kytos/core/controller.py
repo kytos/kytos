@@ -77,7 +77,8 @@ class Controller:
     """
 
     # Created issue #568 for the disabled checks.
-    # pylint: disable=too-many-instance-attributes,too-many-public-methods
+    # pylint: disable=too-many-instance-attributes,too-many-public-methods,
+    # pylint: disable=consider-using-with,unnecessary-dunder-call
     def __init__(self, options=None):
         """Init method of Controller class takes the parameters below.
 
@@ -195,6 +196,7 @@ class Controller:
 
         Return a list of Logger objects, with name and logging level.
         """
+        # pylint: disable=no-member
         return [logging.getLogger(name)
                 for name in logging.root.manager.loggerDict
                 if "kytos" in name]
@@ -211,6 +213,7 @@ class Controller:
         Args:
             name(text): Full hierarchy Logger name. Ex: "kytos.core.controller"
         """
+        # pylint: disable=no-member
         if name and name not in logging.root.manager.loggerDict:
             # A Logger name that is not declared in logging will raise an error
             # otherwise logging would create a new Logger.
@@ -269,13 +272,14 @@ class Controller:
 
         # Checks if a pidfile exists. Creates a new file.
         try:
-            pidfile = open(self.options.pidfile, mode='x')
+            pidfile = open(self.options.pidfile, mode='x', encoding="utf8")
         except OSError:
             # This happens if there is a pidfile already.
             # We shall check if the process that created the pidfile is still
             # running.
             try:
-                existing_file = open(self.options.pidfile, mode='r')
+                existing_file = open(self.options.pidfile, mode='r',
+                                     encoding="utf8")
                 old_pid = int(existing_file.read())
                 os.kill(old_pid, 0)
                 # If kill() doesn't return an error, there's a process running
@@ -286,7 +290,8 @@ class Controller:
                 sys.exit(error_msg.format(self.options.pidfile))
             except OSError:
                 try:
-                    pidfile = open(self.options.pidfile, mode='w')
+                    pidfile = open(self.options.pidfile, mode='w',
+                                   encoding="utf8")
                 except OSError as exception:
                     error_msg = "Failed to create pidfile {}: {}."
                     sys.exit(error_msg.format(self.options.pidfile, exception))
@@ -314,7 +319,7 @@ class Controller:
         self.server.serve_forever()
 
         def _stop_loop(_):
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             # print(_.result())
             threads = threading.enumerate()
             self.log.debug("%s threads before loop.stop: %s",
@@ -325,7 +330,7 @@ class Controller:
             log = logging.getLogger('kytos.core.controller.api_server_thread')
             log.debug('starting')
             # log.debug('creating tasks')
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             blocking_tasks = [
                 loop.run_in_executor(executor, self.api_server.run)
             ]
@@ -413,8 +418,9 @@ class Controller:
             string: Json with current kytos metadata.
 
         """
-        meta_path = "%s/metadata.py" % os.path.dirname(__file__)
-        meta_file = open(meta_path).read()
+        meta_path = f"{os.path.dirname(__file__)}/metadata.py"
+        with open(meta_path, encoding="utf8") as file:
+            meta_file = file.read()
         metadata = dict(re.findall(r"(__[a-z]+__)\s*=\s*'([^']+)'", meta_file))
         return json.dumps(metadata)
 
@@ -524,7 +530,7 @@ class Controller:
 
         """
         if self.started_at:
-            return "Running since %s" % self.started_at
+            return f"Running since {self.started_at}"
         return "Stopped"
 
     def uptime(self):

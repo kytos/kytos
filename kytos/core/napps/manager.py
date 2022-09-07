@@ -72,7 +72,7 @@ class NAppsManager:
 
     def uninstall(self, username, napp_name):
         """Remove a NApp from filesystem, if existent."""
-        napp_id = "{}/{}".format(username, napp_name)
+        napp_id = f"{username}/{napp_name}"
 
         if self.is_enabled(username, napp_name):
             LOG.warning("Unable to uninstall NApp %s. NApp currently in use.",
@@ -103,7 +103,7 @@ class NAppsManager:
 
     def enable(self, username, napp_name):
         """Enable a NApp if not already enabled."""
-        napp_id = "{}/{}".format(username, napp_name)
+        napp_id = f"{username}/{napp_name}"
 
         enabled = self._enabled_path / napp_id
         installed = self._installed_path / napp_id
@@ -136,7 +136,7 @@ class NAppsManager:
 
     def disable(self, username, napp_name):
         """Disable a NApp if it is enabled."""
-        napp_id = "{}/{}".format(username, napp_name)
+        napp_id = f"{username}/{napp_name}"
         enabled = self._enabled_path / napp_id
 
         new_manager = NewNAppManager(self._installed_path)
@@ -171,14 +171,14 @@ class NAppsManager:
 
     def is_enabled(self, username, napp_name):
         """Whether a NApp is enabled or not on this controller FS."""
-        napp_id = "{}/{}".format(username, napp_name)
+        napp_id = f"{username}/{napp_name}"
 
         napp = NApp.create_from_uri(napp_id)
         return napp in self.get_enabled_napps()
 
     def is_installed(self, username, napp_name):
         """Whether a NApp is installed or not on this controller."""
-        napp_id = "{}/{}".format(username, napp_name)
+        napp_id = f"{username}/{napp_name}"
         napp = NApp.create_from_uri(napp_id)
         return napp in self.get_all_napps()
 
@@ -225,7 +225,7 @@ class NAppsManager:
             meta (object): Value stored in kytos.json.
 
         """
-        napp_id = "{}/{}".format(username, napp_name)
+        napp_id = f"{username}/{napp_name}"
         kytos_json = self._installed_path / napp_id / 'kytos.json'
         try:
             with kytos_json.open() as file_descriptor:

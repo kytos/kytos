@@ -34,7 +34,7 @@ class KytosServer:
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  server_address, server_protocol, controller,
-                 protocol_name, loop=None):
+                 protocol_name):
         """Create the object without starting the server.
 
         Args:
@@ -54,12 +54,13 @@ class KytosServer:
         # This will be an `asyncio.Server` instance after `serve_forever` is
         # called
         self._server = None
+        self._task_server = None
 
         # Here we compose the received `server_protocol` class with a `server`
         # object pointing to this instance
         self.server_protocol.server = self
 
-        self.loop = loop or asyncio.get_event_loop()
+        self.loop = asyncio.get_running_loop()
         self.loop.set_exception_handler(exception_handler)
 
     def serve_forever(self):
@@ -70,11 +71,10 @@ class KytosServer:
                                                addr, port)
 
         try:
-            task = self.loop.create_task(self._server)
+            self._task_server = self.loop.create_task(self._server)
             LOG.info("Kytos listening at %s:%s", addr, port)
         except Exception:
             LOG.error('Failed to start Kytos TCP Server at %s:%s', addr, port)
-            task.close()
             raise
 
     def shutdown(self):
@@ -101,7 +101,7 @@ class KytosServerProtocol(asyncio.Protocol):
 
     def __init__(self):
         """Initialize protocol and check if server attribute was set."""
-        self._loop = asyncio.get_event_loop()
+        self._loop = asyncio.get_running_loop()
 
         self.connection = None
         self.transport = None

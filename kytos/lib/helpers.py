@@ -24,7 +24,7 @@ def get_controller_mock():
 def get_interface_mock(name, port_number, switch, address="00:00:00:00:00:00"):
     """Return a interface mock."""
     interface = create_autospec(Interface)
-    interface.id = "{}:{}".format(switch.dpid, port_number)
+    interface.id = f"{switch.dpid}:{port_number}"
     interface.name = name
     interface.port_number = port_number
     interface.switch = switch

@@ -379,8 +379,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         if speed == 10**12:
             return '1 Tbps'
         if speed >= 10**9:
-            return '{} Gbps'.format(round(speed / 10**9))
-        return '{} Mbps'.format(round(speed / 10**6))
+            return f"{round(speed / 10**9)} Gbps"
+        return f"{round(speed / 10**6)} Mbps"
 
     def as_dict(self):
         """Return a dictionary with Interface attributes.

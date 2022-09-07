@@ -35,7 +35,7 @@ class NApp:
         self.napp_dependencies = []
 
     def __str__(self):
-        return "{}/{}".format(self.username, self.name)
+        return f"{self.username}/{self.name}"
 
     def __repr__(self):
         return f"NApp({self.username}/{self.name})"
@@ -63,14 +63,14 @@ class NApp:
         # Use the next line after Diraol fix redirect using ":" for version
         # return "{}/{}:{}".format(self.repository, self.id, version)
 
-        return "{}/{}-{}".format(self.repository, self.id, version)
+        return f"{self.repository}/{self.id}-{version}"
 
     @property
     def package_url(self):
         """Return a fully qualified URL for a NApp package."""
         if not self.uri:
             return ""
-        return "{}.napp".format(self.uri)
+        return f"{self.uri}.napp"
 
     @classmethod
     def create_from_uri(cls, uri):
@@ -111,7 +111,7 @@ class NApp:
     def match(self, pattern):
         """Whether a pattern is present on NApp id, description and tags."""
         try:
-            pattern = '.*{}.*'.format(pattern)
+            pattern = f'.*{pattern}.*'
             pattern = re.compile(pattern, re.IGNORECASE)
             strings = [self.id, self.description] + self.tags
             return any(pattern.match(string) for string in strings)
@@ -144,7 +144,7 @@ class NApp:
         Return:
             pathlib.Path: Temp dir with package contents.
         """
-        random_string = '{:0d}'.format(randint(0, 10**6))
+        random_string = str(randint(0, 10**6))
         tmp = '/tmp/kytos-napp-' + Path(filename).stem + '-' + random_string
         os.mkdir(tmp)
         with tarfile.open(filename, 'r:xz') as tar:
@@ -157,7 +157,7 @@ class NApp:
 
     def _update_repo_file(self, destination=None):
         """Create or update the file '.repo' inside NApp package."""
-        with open("{}/.repo".format(destination), 'w') as repo_file:
+        with open(f"{destination}/.repo", 'w', encoding="utf8") as repo_file:
             repo_file.write(self.repository + '\n')
 
 
@@ -208,7 +208,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
     @property
     def napp_id(self):
         """username/name string."""
-        return "{}/{}".format(self.username, self.name)
+        return f"{self.username}/{self.name}"
 
     def listeners(self):
         """Return all listeners registered."""

@@ -195,13 +195,21 @@ class Linter(SimpleCommand):
 # some modules that are dependencies from this project and that were not yet
 # installed, since the requirements installation from this project hasn't yet
 # happened.
-META_FILE = open("kytos/core/metadata.py").read()
-METADATA = dict(re.findall(r"(__[a-z]+__)\s*=\s*'([^']+)'", META_FILE))
+with open("kytos/core/metadata.py", encoding="utf8") as file:
+    meta_file = file.read()
+METADATA = dict(re.findall(r"(__[a-z]+__)\s*=\s*'([^']+)'", meta_file))
+
+with open("README.pypi.rst", "r", encoding="utf8") as file:
+    long_description = file.read()
+
+with open("requirements/run.txt", "r", encoding="utf8") as file:
+    install_requires = [line.strip() for line in file
+                        if not line.startswith("#")]
 
 setup(name='kytos',
       version=METADATA.get('__version__'),
       description=METADATA.get('__description__'),
-      long_description=open("README.pypi.rst", "r").read(),
+      long_description=long_description,
       long_description_content_type='text/x-rst',
       url=METADATA.get('__url__'),
       author=METADATA.get('__author__'),
@@ -212,9 +220,7 @@ setup(name='kytos',
       include_package_data=True,
       data_files=[(os.path.join(BASE_ENV, 'etc/kytos'), ETC_FILES)],
       packages=find_packages(exclude=['tests']),
-      install_requires=[line.strip()
-                        for line in open("requirements/run.txt").readlines()
-                        if not line.startswith('#')],
+      install_requires=install_requires,
       extras_require={'dev': ['pip-tools >= 2.0', 'pytest==7.0.0',
                               'pytest-cov==3.0.0', 'pytest', 'yala', 'tox']},
       cmdclass={

@@ -4,8 +4,8 @@ import os
 import re
 import sys
 import tarfile
-import urllib
 import traceback
+import urllib
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from random import randint
@@ -238,6 +238,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         """
         self.__interval = interval
 
+    # pylint: disable=broad-except
     def run(self):
         """Call the execute method, looping as needed.
 
@@ -247,12 +248,16 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         LOG.info(f"Running NApp: {self}")
         try:
             self.execute()
-            while self.__interval > 0 and not self.__event.is_set():
-                self.__event.wait(self.__interval)
-                self.execute()
         except Exception:
             traceback_str = traceback.format_exc(chain=False)
             LOG.error(f"NApp: {self} unhandled exception {traceback_str}")
+        while self.__interval > 0 and not self.__event.is_set():
+            self.__event.wait(self.__interval)
+            try:
+                self.execute()
+            except Exception:
+                traceback_str = traceback.format_exc(chain=False)
+                LOG.error(f"NApp: {self} unhandled exception {traceback_str}")
 
     def notify_loaded(self):
         """Inform this NApp has been loaded."""

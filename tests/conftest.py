@@ -1,4 +1,5 @@
 """Unit test fixtures."""
+# pylint: disable=redefined-outer-name
 
 import pytest
 
@@ -17,3 +18,9 @@ def ev_loop(monkeypatch, event_loop) -> None:
 def controller() -> Controller:
     """Controller fixture."""
     yield get_controller_mock()
+
+
+@pytest.fixture
+def api_client(controller):
+    """Flask app test_client instance."""
+    yield controller.api_server.app.test_client()

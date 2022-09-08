@@ -5,6 +5,7 @@ import re
 import sys
 import tarfile
 import urllib
+import traceback
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from random import randint
@@ -243,11 +244,15 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         It should not be overriden.
         """
         self.notify_loaded()
-        LOG.info("Running NApp: %s", self)
-        self.execute()
-        while self.__interval > 0 and not self.__event.is_set():
-            self.__event.wait(self.__interval)
+        LOG.info(f"Running NApp: {self}")
+        try:
             self.execute()
+            while self.__interval > 0 and not self.__event.is_set():
+                self.__event.wait(self.__interval)
+                self.execute()
+        except Exception:
+            traceback_str = traceback.format_exc(chain=False)
+            LOG.error(f"NApp: {self} unhandled exception {traceback_str}")
 
     def notify_loaded(self):
         """Inform this NApp has been loaded."""

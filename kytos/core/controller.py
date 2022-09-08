@@ -471,10 +471,8 @@ class Controller:
         self.log.info("Stopping Kytos")
 
         self.buffers.send_stop_signal()
-        self.api_server.stop_api_server()
         self.napp_dir_listener.stop()
 
-        self.log.info("Stopping threadpool: %s", self._pool)
         for pool_name in executors:
             self.log.info("Stopping threadpool: %s", pool_name)
 
@@ -482,16 +480,8 @@ class Controller:
         self.log.debug("%s threads before threadpool shutdown: %s",
                        len(threads), threads)
 
-        try:
-            # Python >= 3.9
-            # pylint: disable=unexpected-keyword-arg
-            self._pool.shutdown(wait=graceful, cancel_futures=True)
-            for executor_pool in executors.values():
-                executor_pool.shutdown(wait=graceful, cancel_futures=True)
-        except TypeError:
-            self._pool.shutdown(wait=graceful)
-            for executor_pool in executors.values():
-                executor_pool.shutdown(wait=graceful)
+        for executor_pool in executors.values():
+            executor_pool.shutdown(wait=graceful, cancel_futures=True)
 
         # self.server.socket.shutdown()
         # self.server.socket.close()
@@ -516,6 +506,10 @@ class Controller:
         # ASYNC TODO: close connections
         # self.server.server_close()
 
+        self.log.info("Stopping API Server: %s", self._pool)
+        self.api_server.stop_api_server()
+        self.log.info("Stopping API Server threadpool: %s", self._pool)
+        self._pool.shutdown(wait=graceful, cancel_futures=True)
         # Shutdown the TCP server and the main asyncio loop
         self.server.shutdown()
 
@@ -583,7 +577,7 @@ class Controller:
             self.notify_listeners(event)
 
             if event.name == "kytos/core.shutdown":
-                self.log.debug("Raw Event handler stopped")
+                self.log.debug(f"Event handler {buffer_name} stopped")
                 break
 
     async def publish_connection_error(self, event):

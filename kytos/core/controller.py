@@ -341,16 +341,6 @@ class Controller:
                       len(completed), len(pending))
 
         loop = asyncio.get_running_loop()
-        task = loop.create_task(self.event_handler("conn"))
-        self._tasks.append(task)
-        task = loop.create_task(self.event_handler("raw"))
-        self._tasks.append(task)
-        task = loop.create_task(self.event_handler("msg_in"))
-        self._tasks.append(task)
-        task = loop.create_task(self.msg_out_event_handler())
-        self._tasks.append(task)
-        task = loop.create_task(self.event_handler("app"))
-        self._tasks.append(task)
         task = loop.create_task(_run_api_server_thread(self._pool))
         task.add_done_callback(_stop_loop)
         self._tasks.append(task)
@@ -365,6 +355,21 @@ class Controller:
         self.napp_dir_listener.start()
         self.pre_install_napps(self.options.napps_pre_installed)
         self.load_napps()
+
+        """
+        Start task handlers consumers after NApps to potentially
+        avoid discarding an event if a consumer isn't ready yet
+        """
+        task = loop.create_task(self.event_handler("conn"))
+        self._tasks.append(task)
+        task = loop.create_task(self.event_handler("raw"))
+        self._tasks.append(task)
+        task = loop.create_task(self.event_handler("msg_in"))
+        self._tasks.append(task)
+        task = loop.create_task(self.msg_out_event_handler())
+        self._tasks.append(task)
+        task = loop.create_task(self.event_handler("app"))
+        self._tasks.append(task)
 
         self.started_at = now()
 
@@ -572,6 +577,7 @@ class Controller:
     async def event_handler(self, buffer_name: str):
         """Default event handler that gets from an event buffer."""
         event_buffer = getattr(self.buffers, buffer_name)
+        self.log.info(f"Event handler {buffer_name} started")
         while True:
             event = await event_buffer.aget()
             self.notify_listeners(event)
@@ -598,7 +604,7 @@ class Controller:
         Listen to the msg_out buffer and send all its events to the
         corresponding listeners.
         """
-        self.log.info("Message Out Event Handler started")
+        self.log.info("Event handler msg_out started")
         while True:
             triggered_event = await self.buffers.msg_out.aget()
 

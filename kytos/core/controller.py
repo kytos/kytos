@@ -356,10 +356,8 @@ class Controller:
         self.pre_install_napps(self.options.napps_pre_installed)
         self.load_napps()
 
-        """
-        Start task handlers consumers after NApps to potentially
-        avoid discarding an event if a consumer isn't ready yet
-        """
+        # Start task handlers consumers after NApps to potentially
+        # avoid discarding an event if a consumer isn't ready yet
         task = loop.create_task(self.event_handler("conn"))
         self._tasks.append(task)
         task = loop.create_task(self.event_handler("raw"))

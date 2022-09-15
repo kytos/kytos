@@ -590,6 +590,24 @@ class TestController(TestCase):
 
         mock_load.assert_called_with('kytos', 'name')
 
+    @patch('kytos.core.controller.Controller.unload_napp')
+    def test_unload_napps(self, mock_unload):
+        """Test un_load_napps method."""
+        napp_tuples = [("kytos", "of_core"), ("kytos", "mef_eline")]
+        enabled_napps = []
+        expected_calls = []
+        for username, napp_name in napp_tuples:
+            mock = MagicMock()
+            mock.username = username
+            mock.name = napp_name
+            enabled_napps.append(mock)
+            expected_calls.append(call(mock.username, mock.name))
+        self.napps_manager.get_enabled_napps.return_value = enabled_napps
+
+        self.controller.unload_napps()
+        assert mock_unload.call_count == len(enabled_napps)
+        assert mock_unload.mock_calls == list(reversed(expected_calls))
+
     @patch('kytos.core.controller.import_module')
     def test_reload_napp_module__module_not_found(self, mock_import_module):
         """Test reload_napp_module method when module is not found."""

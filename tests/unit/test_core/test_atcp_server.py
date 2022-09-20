@@ -20,21 +20,19 @@ class TestKytosServer:
     def setup(self):
         """Start new asyncio loop and a test TCP server."""
         # pylint: disable=attribute-defined-outside-init
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
         self.server = KytosServer(TEST_ADDRESS, KytosServerProtocol,
-                                  None, 'openflow', loop=self.loop)
+                                  None, "openflow")
         self.server.serve_forever()
 
     def test_connection_to_server(self):
         """Test if we really can connect to TEST_ADDRESS."""
         async def wait_and_go():
             """Wait a little for the server to go up, then connect."""
-            await asyncio.sleep(0.01, loop=self.loop)
+            await asyncio.sleep(0.01)
             # reader, writer = ...
-            _ = await asyncio.open_connection(*TEST_ADDRESS, loop=self.loop)
+            _ = await asyncio.open_connection(*TEST_ADDRESS)
 
-        self.loop.run_until_complete(wait_and_go())
+        self.server.loop.run_until_complete(wait_and_go())
 
     def test_exception_handler_oserror(self, caplog):
         """Test the TCP Server Exception Handler.
@@ -48,12 +46,12 @@ class TestKytosServer:
         exception = TimeoutError()
         context = {"exception": exception,
                    "transport": "unit_tests"}
-        exception_handler(self.loop, context)
+        exception_handler(self.server.loop, context)
 
         exception2 = OSError(errno.EBADF, "Bad file descriptor")
         context2 = {"exception": exception2,
                     "transport": "unit_tests"}
-        exception_handler(self.loop, context2)
+        exception_handler(self.server.loop, context2)
 
         assert caplog.record_tuples == [
             ("kytos.core.atcp_server",

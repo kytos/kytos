@@ -29,11 +29,12 @@ def authenticated(func):
                 raise ValueError("The attribute 'content' has an invalid "
                                  "value 'None'.")
             token = content.split("Bearer ")[1]
-            jwt.decode(token, key=Auth.get_jwt_secret())
+            jwt.decode(token, key=Auth.get_jwt_secret(),
+                       algorithms=[Auth.encode_algorithm])
         except (
             ValueError,
             IndexError,
-            jwt.ExpiredSignature,
+            jwt.exceptions.ExpiredSignatureError,
             jwt.exceptions.DecodeError,
         ) as exc:
             msg = f"Token not sent or expired: {exc}"
@@ -45,6 +46,8 @@ def authenticated(func):
 
 class Auth:
     """Module used to provide Kytos authentication routes."""
+
+    encode_algorithm = "HS256"
 
     def __init__(self, controller):
         """Init method of Auth class takes the parameters below.
@@ -81,7 +84,7 @@ class Auth:
                 'exp': time_exp,
             },
             Auth.get_jwt_secret(),
-            algorithm='HS256',
+            algorithm=cls.encode_algorithm,
         )
 
     def _create_superuser(self):
@@ -160,7 +163,7 @@ class Auth:
                 minutes=self.token_expiration_minutes
             )
             token = self._generate_token(username, time_exp)
-            return {"token": token.decode()}, HTTPStatus.OK.value
+            return {"token": token}, HTTPStatus.OK.value
         except (AttributeError, KeyError) as exc:
             result = f"Incorrect username or password: {exc}"
             return result, HTTPStatus.UNAUTHORIZED.value

@@ -24,14 +24,14 @@ from kytos.core.config import KytosConfig
 LOG = logging.getLogger(__name__)
 
 
-# pylint: disable=method-hidden,arguments-differ
+# pylint: disable=method-hidden,arguments-differ,consider-using-f-string
 class CustomJSONEncoder(JSONEncoder):
     """CustomJSONEncoder."""
 
-    def default(self, obj):
-        if isinstance(obj, datetime):
-            return obj.strftime("%Y-%m-%dT%H:%M:%S")
-        return JSONEncoder.default(self, obj)
+    def default(self, o):
+        if isinstance(o, datetime):
+            return o.strftime("%Y-%m-%dT%H:%M:%S")
+        return JSONEncoder.default(self, o)
 
 
 class APIServer:
@@ -164,7 +164,8 @@ class APIServer:
         """Send a shutdown request to stop API Server."""
         try:
             url = f'http://127.0.0.1:{self.port}/api/kytos/core/_shutdown'
-            urlopen(url)
+            with urlopen(url):
+                pass
         except URLError:
             pass
 

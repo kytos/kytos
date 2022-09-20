@@ -1,5 +1,4 @@
 """Test kytos.core.switch module."""
-import asyncio
 import json
 from datetime import datetime, timezone
 from socket import error as SocketError
@@ -7,6 +6,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
 from kytos.core import Controller
+from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 from kytos.core.constants import FLOOD_TIMEOUT
 from kytos.core.interface import Interface
@@ -25,11 +25,9 @@ class TestSwitch(TestCase):
     def setUp(self):
         """Instantiate a controller."""
 
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
-
         self.options = KytosConfig().options['daemon']
-        self.controller = Controller(self.options, loop=self.loop)
+        self.controller = Controller(self.options)
+        self.controller.buffers = KytosBuffers()
         self.controller.log = Mock()
 
         self.switch = self.create_switch()
@@ -63,10 +61,6 @@ class TestSwitch(TestCase):
         """Test ofp_version property when connection is none."""
         self.switch.connection = None
         self.assertIsNone(self.switch.ofp_version)
-
-    def tearDown(self):
-        """TearDown."""
-        self.loop.close()
 
     def test_switch_vlan_pool_default(self):
         """Test default vlan_pool value."""

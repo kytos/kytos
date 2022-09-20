@@ -166,8 +166,7 @@ def test_concurrently(times):
             for thread in threads:
                 thread.join()
             if exceptions:
-                raise Exception('test_concurrently intercepted '
-                                '%s exceptions: %s' %
-                                (len(exceptions), exceptions))
+                raise Exception("test_concurrently intercepted "
+                                f"{len(exceptions)} exceptions: {exceptions}")
         return wrapper
     return test_concurrently_decorator

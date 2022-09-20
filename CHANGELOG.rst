@@ -12,6 +12,10 @@ Added
 Changed
 =======
 
+- Upstream core dependencies have been upgraded: ``ipython==8.1.1, flask-socketio==5.2.0, flask_cors==3.0.10, flask[async]==2.1.3, janus==1.0.0, jinja2==3.1.2, watchdog==2.1.9, pyjwt==2.4.0, pylint==2.15.0``
+- Flask/Werkzeug 2.0.0+ now provide ``async`` support, so NApps can leverage ``asyncio`` and its ecosystem when applicable using the same ``rest`` decorator
+- Replaced ``get_event_loop`` with ``get_running_loop`` when applicable to be compatible with python 3.9+ in the future
+
 Deprecated
 ==========
 
@@ -20,6 +24,8 @@ Removed
 
 Fixed
 =====
+- Log traceback error if NApps execute method doesn't handle an exception
+- Stop ``APIServer`` instance after unloading NApps
 
 Security
 ========

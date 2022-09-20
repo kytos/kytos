@@ -31,7 +31,6 @@ from socket import error as SocketError
 
 from kytos.core.api_server import APIServer
 from kytos.core.apm import init_apm
-# from kytos.core.tcp_server import KytosRequestHandler, KytosServer
 from kytos.core.atcp_server import KytosServer, KytosServerProtocol
 from kytos.core.auth import Auth
 from kytos.core.buffers import KytosBuffers
@@ -78,8 +77,9 @@ class Controller:
     """
 
     # Created issue #568 for the disabled checks.
-    # pylint: disable=too-many-instance-attributes,too-many-public-methods
-    def __init__(self, options=None, loop=None):
+    # pylint: disable=too-many-instance-attributes,too-many-public-methods,
+    # pylint: disable=consider-using-with,unnecessary-dunder-call
+    def __init__(self, options=None):
         """Init method of Controller class takes the parameters below.
 
         Args:
@@ -89,7 +89,6 @@ class Controller:
         if options is None:
             options = KytosConfig().options['daemon']
 
-        self._loop = loop or asyncio.get_event_loop()
         self._pool = ThreadPoolExecutor(max_workers=1)
 
         # asyncio tasks
@@ -98,7 +97,7 @@ class Controller:
         #: dict: keep the main threads of the controller (buffers and handler)
         self._threads = {}
         #: KytosBuffers: KytosBuffer object with Controller buffers
-        self.buffers = KytosBuffers(loop=self._loop)
+        self.buffers: KytosBuffers = None
         #: dict: keep track of the socket connections labeled by ``(ip, port)``
         #:
         #: This dict stores all connections between the controller and the
@@ -196,6 +195,7 @@ class Controller:
 
         Return a list of Logger objects, with name and logging level.
         """
+        # pylint: disable=no-member
         return [logging.getLogger(name)
                 for name in logging.root.manager.loggerDict
                 if "kytos" in name]
@@ -212,6 +212,7 @@ class Controller:
         Args:
             name(text): Full hierarchy Logger name. Ex: "kytos.core.controller"
         """
+        # pylint: disable=no-member
         if name and name not in logging.root.manager.loggerDict:
             # A Logger name that is not declared in logging will raise an error
             # otherwise logging would create a new Logger.
@@ -270,13 +271,14 @@ class Controller:
 
         # Checks if a pidfile exists. Creates a new file.
         try:
-            pidfile = open(self.options.pidfile, mode='x')
+            pidfile = open(self.options.pidfile, mode='x', encoding="utf8")
         except OSError:
             # This happens if there is a pidfile already.
             # We shall check if the process that created the pidfile is still
             # running.
             try:
-                existing_file = open(self.options.pidfile, mode='r')
+                existing_file = open(self.options.pidfile, mode='r',
+                                     encoding="utf8")
                 old_pid = int(existing_file.read())
                 os.kill(old_pid, 0)
                 # If kill() doesn't return an error, there's a process running
@@ -287,7 +289,8 @@ class Controller:
                 sys.exit(error_msg.format(self.options.pidfile))
             except OSError:
                 try:
-                    pidfile = open(self.options.pidfile, mode='w')
+                    pidfile = open(self.options.pidfile, mode='w',
+                                   encoding="utf8")
                 except OSError as exception:
                     error_msg = "Failed to create pidfile {}: {}."
                     sys.exit(error_msg.format(self.options.pidfile, exception))
@@ -304,6 +307,7 @@ class Controller:
         Load the installed apps.
         """
         self.log.info("Starting Kytos - Kytos Controller")
+        self.buffers = KytosBuffers()
         self.server = KytosServer((self.options.listen,
                                    int(self.options.port)),
                                   KytosServerProtocol,
@@ -314,7 +318,7 @@ class Controller:
         self.server.serve_forever()
 
         def _stop_loop(_):
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             # print(_.result())
             threads = threading.enumerate()
             self.log.debug("%s threads before loop.stop: %s",
@@ -325,7 +329,7 @@ class Controller:
             log = logging.getLogger('kytos.core.controller.api_server_thread')
             log.debug('starting')
             # log.debug('creating tasks')
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             blocking_tasks = [
                 loop.run_in_executor(executor, self.api_server.run)
             ]
@@ -336,17 +340,8 @@ class Controller:
             log.debug('completed: %d, pending: %d',
                       len(completed), len(pending))
 
-        task = self._loop.create_task(self.event_handler("conn"))
-        self._tasks.append(task)
-        task = self._loop.create_task(self.event_handler("raw"))
-        self._tasks.append(task)
-        task = self._loop.create_task(self.event_handler("msg_in"))
-        self._tasks.append(task)
-        task = self._loop.create_task(self.msg_out_event_handler())
-        self._tasks.append(task)
-        task = self._loop.create_task(self.event_handler("app"))
-        self._tasks.append(task)
-        task = self._loop.create_task(_run_api_server_thread(self._pool))
+        loop = asyncio.get_running_loop()
+        task = loop.create_task(_run_api_server_thread(self._pool))
         task.add_done_callback(_stop_loop)
         self._tasks.append(task)
 
@@ -360,6 +355,19 @@ class Controller:
         self.napp_dir_listener.start()
         self.pre_install_napps(self.options.napps_pre_installed)
         self.load_napps()
+
+        # Start task handlers consumers after NApps to potentially
+        # avoid discarding an event if a consumer isn't ready yet
+        task = loop.create_task(self.event_handler("conn"))
+        self._tasks.append(task)
+        task = loop.create_task(self.event_handler("raw"))
+        self._tasks.append(task)
+        task = loop.create_task(self.event_handler("msg_in"))
+        self._tasks.append(task)
+        task = loop.create_task(self.msg_out_event_handler())
+        self._tasks.append(task)
+        task = loop.create_task(self.event_handler("app"))
+        self._tasks.append(task)
 
         self.started_at = now()
 
@@ -413,8 +421,9 @@ class Controller:
             string: Json with current kytos metadata.
 
         """
-        meta_path = "%s/metadata.py" % os.path.dirname(__file__)
-        meta_file = open(meta_path).read()
+        meta_path = f"{os.path.dirname(__file__)}/metadata.py"
+        with open(meta_path, encoding="utf8") as file:
+            meta_file = file.read()
         metadata = dict(re.findall(r"(__[a-z]+__)\s*=\s*'([^']+)'", meta_file))
         return json.dumps(metadata)
 
@@ -465,10 +474,8 @@ class Controller:
         self.log.info("Stopping Kytos")
 
         self.buffers.send_stop_signal()
-        self.api_server.stop_api_server()
         self.napp_dir_listener.stop()
 
-        self.log.info("Stopping threadpool: %s", self._pool)
         for pool_name in executors:
             self.log.info("Stopping threadpool: %s", pool_name)
 
@@ -476,16 +483,8 @@ class Controller:
         self.log.debug("%s threads before threadpool shutdown: %s",
                        len(threads), threads)
 
-        try:
-            # Python >= 3.9
-            # pylint: disable=unexpected-keyword-arg
-            self._pool.shutdown(wait=graceful, cancel_futures=True)
-            for executor_pool in executors.values():
-                executor_pool.shutdown(wait=graceful, cancel_futures=True)
-        except TypeError:
-            self._pool.shutdown(wait=graceful)
-            for executor_pool in executors.values():
-                executor_pool.shutdown(wait=graceful)
+        for executor_pool in executors.values():
+            executor_pool.shutdown(wait=graceful, cancel_futures=True)
 
         # self.server.socket.shutdown()
         # self.server.socket.close()
@@ -510,6 +509,10 @@ class Controller:
         # ASYNC TODO: close connections
         # self.server.server_close()
 
+        self.log.info("Stopping API Server: %s", self._pool)
+        self.api_server.stop_api_server()
+        self.log.info("Stopping API Server threadpool: %s", self._pool)
+        self._pool.shutdown(wait=graceful, cancel_futures=True)
         # Shutdown the TCP server and the main asyncio loop
         self.server.shutdown()
 
@@ -524,7 +527,7 @@ class Controller:
 
         """
         if self.started_at:
-            return "Running since %s" % self.started_at
+            return f"Running since {self.started_at}"
         return "Stopped"
 
     def uptime(self):
@@ -572,12 +575,13 @@ class Controller:
     async def event_handler(self, buffer_name: str):
         """Default event handler that gets from an event buffer."""
         event_buffer = getattr(self.buffers, buffer_name)
+        self.log.info(f"Event handler {buffer_name} started")
         while True:
             event = await event_buffer.aget()
             self.notify_listeners(event)
 
             if event.name == "kytos/core.shutdown":
-                self.log.debug("Raw Event handler stopped")
+                self.log.debug(f"Event handler {buffer_name} stopped")
                 break
 
     async def publish_connection_error(self, event):
@@ -598,7 +602,7 @@ class Controller:
         Listen to the msg_out buffer and send all its events to the
         corresponding listeners.
         """
-        self.log.info("Message Out Event Handler started")
+        self.log.info("Event handler msg_out started")
         while True:
             triggered_event = await self.buffers.msg_out.aget()
 

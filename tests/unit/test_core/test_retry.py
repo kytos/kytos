@@ -1,5 +1,4 @@
 """Test kytos.core.retry module."""
-# pylint: disable=no-self-use
 
 from unittest.mock import MagicMock, patch
 

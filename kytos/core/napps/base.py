@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import tarfile
+import traceback
 import urllib
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
@@ -35,7 +36,7 @@ class NApp:
         self.napp_dependencies = []
 
     def __str__(self):
-        return "{}/{}".format(self.username, self.name)
+        return f"{self.username}/{self.name}"
 
     def __repr__(self):
         return f"NApp({self.username}/{self.name})"
@@ -63,14 +64,14 @@ class NApp:
         # Use the next line after Diraol fix redirect using ":" for version
         # return "{}/{}:{}".format(self.repository, self.id, version)
 
-        return "{}/{}-{}".format(self.repository, self.id, version)
+        return f"{self.repository}/{self.id}-{version}"
 
     @property
     def package_url(self):
         """Return a fully qualified URL for a NApp package."""
         if not self.uri:
             return ""
-        return "{}.napp".format(self.uri)
+        return f"{self.uri}.napp"
 
     @classmethod
     def create_from_uri(cls, uri):
@@ -111,7 +112,7 @@ class NApp:
     def match(self, pattern):
         """Whether a pattern is present on NApp id, description and tags."""
         try:
-            pattern = '.*{}.*'.format(pattern)
+            pattern = f'.*{pattern}.*'
             pattern = re.compile(pattern, re.IGNORECASE)
             strings = [self.id, self.description] + self.tags
             return any(pattern.match(string) for string in strings)
@@ -144,7 +145,7 @@ class NApp:
         Return:
             pathlib.Path: Temp dir with package contents.
         """
-        random_string = '{:0d}'.format(randint(0, 10**6))
+        random_string = str(randint(0, 10**6))
         tmp = '/tmp/kytos-napp-' + Path(filename).stem + '-' + random_string
         os.mkdir(tmp)
         with tarfile.open(filename, 'r:xz') as tar:
@@ -157,7 +158,7 @@ class NApp:
 
     def _update_repo_file(self, destination=None):
         """Create or update the file '.repo' inside NApp package."""
-        with open("{}/.repo".format(destination), 'w') as repo_file:
+        with open(f"{destination}/.repo", 'w', encoding="utf8") as repo_file:
             repo_file.write(self.repository + '\n')
 
 
@@ -208,7 +209,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
     @property
     def napp_id(self):
         """username/name string."""
-        return "{}/{}".format(self.username, self.name)
+        return f"{self.username}/{self.name}"
 
     def listeners(self):
         """Return all listeners registered."""
@@ -237,17 +238,26 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         """
         self.__interval = interval
 
+    # pylint: disable=broad-except
     def run(self):
         """Call the execute method, looping as needed.
 
         It should not be overriden.
         """
         self.notify_loaded()
-        LOG.info("Running NApp: %s", self)
-        self.execute()
+        LOG.info(f"Running NApp: {self}")
+        try:
+            self.execute()
+        except Exception:
+            traceback_str = traceback.format_exc(chain=False)
+            LOG.error(f"NApp: {self} unhandled exception {traceback_str}")
         while self.__interval > 0 and not self.__event.is_set():
             self.__event.wait(self.__interval)
-            self.execute()
+            try:
+                self.execute()
+            except Exception:
+                traceback_str = traceback.format_exc(chain=False)
+                LOG.error(f"NApp: {self} unhandled exception {traceback_str}")
 
     def notify_loaded(self):
         """Inform this NApp has been loaded."""

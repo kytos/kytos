@@ -313,7 +313,7 @@ class TestUNI(unittest.TestCase):
         interface = Interface('name', 2, MagicMock())
         other = UNI(interface, user_tag)
 
-        self.assertFalse(self.uni.__eq__(other))
+        self.assertFalse(self.uni == other)
 
     def test_is_valid(self):
         """Test is_valid method for a valid, invalid and none tag."""

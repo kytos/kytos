@@ -6,7 +6,7 @@ from threading import Lock
 from typing import List
 
 from flask import jsonify, request
-# pylint: disable=no-name-in-module
+# pylint: disable=no-name-in-module,invalid-name
 from pydantic import BaseModel, ValidationError, constr
 # pylint: enable=no-name-in-module
 from werkzeug.exceptions import BadRequest, NotFound

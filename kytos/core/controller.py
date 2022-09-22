@@ -941,13 +941,13 @@ class Controller:
             # pylint: enable=protected-access
 
     def unload_napps(self):
-        """Unload all loaded NApps that are not core NApps."""
-        # list() is used here to avoid the error:
-        # 'RuntimeError: dictionary changed size during iteration'
-        # This is caused by looping over an dictionary while removing
-        # items from it.
-        for (username, napp_name) in list(self.napps.keys()):  # noqa
-            self.unload_napp(username, napp_name)
+        """Unload all loaded NApps that are not core NApps
+
+        NApps are unloaded in the reverse order that they are enabled to
+        facilitate to shutdown gracefully.
+        """
+        for napp in reversed(self.napps_manager.get_enabled_napps()):
+            self.unload_napp(napp.username, napp.name)
 
     def reload_napp_module(self, username, napp_name, napp_file):
         """Reload a NApp Module."""

@@ -48,27 +48,31 @@ Proposed solutions
 
 The following changes are proposed solutions for issues 1 and 2.
 
-flow_stats
-~~~~~~~~~~
-
-- Maintain in memory on ``flow_stats`` a dict of ``napps.kytos.of_core.v0x04.flow.Flow`` instances indexed by their id ``self.flows[flow.id]``, the flow instances will be updated from ``kytos/of_core.flow_stats.received``. This dict could've been indexed by dpid and cookie, however, since in the future it'll be stored in the database it's not worth pre-indexing and maintaining extra code that will be deleted, more details about storing in the database will be discussed on issue 3. This will impact on how ``byte_count``, ``duration_sec``, ``duration_sec``, and ``packet_count`` will be accessed since they'll be in the ``stats`` attribute, tests will have to be refactored.
-- Remove ``GenericFlow`` abstraction and its fields mappings since it's clear that OpenFlow1.3 with experimenter actions has been sufficient for production usage, and future efforts will focus on P4 and P4Runtime API. - Bump v1 on endpoint routes and remove the ``GET flow/match/<dpid>`` endpoint, update the API spec accordingly. 
-- Adapt ``GET flow/stats/<dpid>`` to return the flows with their stats instead of matching.
-- Reassess if endpoints ``GET packet_count/sum/{{dpid}}`` and ``GET /bytes_count/sum/{{dpid}}`` are being valuable for important use cases or should be removed.
-
-sdntrace_cp
-~~~~~~~~~~~
-
-1) Request consistent stored flows from ``flow_manager`` and map on-the-fly the existing flows in memory and move the existing match and apply functions from ``flow_stats`` to ``sdntrace_cp``. Add a new ``PUT /traces`` endpoint for bulk requests which will minimize round trip in the DB on ``flow_manager``, that way, a client can request 100s of traces with a single request, and still compute and match in memory on ``sdntrace_cp`` relatively efficiently, over time, more filtering can be offloaded to the DB when it's worth it. Also this is leveraging the existing guarantees that flow_manager provides with its consistency check. The current implementation run the trace on flows that are installed in the switch, but since flow_manager ``flows`` collection is the source of the truth of managed flows its consistency check will do its job, and mef_eline consistency can rely on it, assuming that when querying for flows it'll filter for state ``installed`` to make sure that flows have been installed on switches.
-
-2) Maintain another in memory dict of dpid of ``napps.kytos.of_core.v0x04.flow.Flow`` on ``sdntrace_cp`` in a ``self.flows`` attribute indexed by their ``id``, and move all matching and applying methods from ``flow_stats`` to ``sdntrace_cp``. However, this won't rely on ``kytos/of_core.flow_stats.received``, instead to be more responsive and less susceptible by FlowStats messages, rely on ``flow_manager`` events ``kytos/flow_manager.flow.added``, ``kytos/flow_manager.flow.removed`` since these events will only be published once they're confirmed. Also, when ``flow_stats`` is supposed to listen to a new event ``kytos/flow_manager.flow_manager_loaded`` and use a new endpoint to query once and create a new list of all the flows in this memory structure, after that, removal and insertions will be kept in sync via events the subscribed events. ``sdntrace_cp`` should be adapted to run its traces on this new ``self.flows``.  
-
-Between option 1) and option 2), option 1) is easier to maintain and evolve and is aligned with leveraging MongoDB as much as possible. Option 2) adds more technical debt, it would also need more threading locks, although such locks wouldn't impact much. Overall, option b) adds significant more code to maintain.
-
 flow_manager:
 ~~~~~~~~~~~~~
 
 - Add new endpoints ``GET v2/stored_flows`` and ``GET v2/stored_flows/<dpid>``,  for listing flows from ``flows`` collection and exclude the ``_id`` from the database model in the response. Document the new endpoint and responses. Initial query parameter filter for ``state`` should be supported. In the future, more filtering capabilities will be provided, but that will depend on indexes that will be commonly supported.
+
+sdntrace_cp
+~~~~~~~~~~~
+
+- Request consistent stored flows from ``flow_manager`` and map on-the-fly the existing flows in memory and move the existing match and apply functions from ``flow_stats`` to ``sdntrace_cp``. Add a new ``PUT /traces`` endpoint for bulk requests which will minimize round trip in the DB on ``flow_manager``, that way, a client can request 100s of traces with a single request, and still compute and match in memory on ``sdntrace_cp`` relatively efficiently, over time, more filtering can be offloaded to the DB when it's worth it. Also this is leveraging the existing guarantees that flow_manager provides with its consistency check. The current implementation run the trace on flows that are installed in the switch, but since flow_manager ``flows`` collection is the source of the truth of managed flows its consistency check will do its job, and mef_eline consistency can rely on it, assuming that when querying for flows it'll filter for state ``installed`` to make sure that flows have been installed on switches.
+
+Option 2 (Alternative):
+
+- Maintain another in memory dict of dpid of ``napps.kytos.of_core.v0x04.flow.Flow`` on ``sdntrace_cp`` in a ``self.flows`` attribute indexed by their ``id``, and move all matching and applying methods from ``flow_stats`` to ``sdntrace_cp``. However, this won't rely on ``kytos/of_core.flow_stats.received``, instead to be more responsive and less susceptible by FlowStats messages, rely on ``flow_manager`` events ``kytos/flow_manager.flow.added``, ``kytos/flow_manager.flow.removed`` since these events will only be published once they're confirmed. Also, when ``flow_stats`` is supposed to listen to a new event ``kytos/flow_manager.flow_manager_loaded`` and use a new endpoint to query once and create a new list of all the flows in this memory structure, after that, removal and insertions will be kept in sync via events the subscribed events. ``sdntrace_cp`` should be adapted to run its traces on this new ``self.flows``.  
+
+The first option is easier to maintain and evolve and is aligned with leveraging MongoDB as much as possible. 
+Option 2) adds more technical debt, it would also need more threading locks, although such locks wouldn't impact much. Overall, option 2) adds significant more code to maintain.
+
+flow_stats
+~~~~~~~~~~
+
+- Maintain in memory on ``flow_stats`` a dict of ``napps.kytos.of_core.v0x04.flow.Flow`` instances indexed by their id ``self.flows[flow.id]``, the flow instances will be updated from ``kytos/of_core.flow_stats.received``. This dict could've been indexed by dpid and cookie, however, since in the future it'll be stored in the database it's not worth pre-indexing and maintaining extra code that will be deleted, more details about storing in the database will be discussed on issue 3. This will impact on how ``byte_count``, ``duration_sec``, ``duration_sec``, and ``packet_count`` will be accessed since they'll be in the ``stats`` attribute, tests will have to be refactored.
+- Remove ``GenericFlow`` abstraction and its fields mappings since it's clear that OpenFlow1.3 with experimenter actions has been sufficient for production usage, and future efforts will focus on P4 and P4Runtime API. 
+- Bump v1 on endpoint routes and remove the ``GET flow/match/<dpid>`` endpoint, update the API spec accordingly. 
+- Adapt ``GET flow/stats/<dpid>`` to return the flows with their stats instead of matching.
+- Reassess if endpoints ``GET packet_count/sum/{{dpid}}`` and ``GET /bytes_count/sum/{{dpid}}`` are being valuable for important use cases or should be removed.
 
 mef_eline
 ~~~~~~~~~
@@ -95,3 +99,4 @@ Future work
 
 - Assess Zabbix integration requirements and confirm if it'll be needed for 2022.3.
 - Double check if PortStats will also need to be be supported and used, if positive, maybe this NApp will turn into of_stats
+

@@ -65,7 +65,7 @@ By leveraging the UNI's Interface object's `metadata` attribute, EP033 aims to s
 III. Examples
 =============
 
-Some examples of deployment of **proxy ports** are provided in this section. However, those examples are not suggestions of how to implement or configure telemetry-enabled EVCs in production networks. Each approach presented in Section I has pros and cons; some were addressed but it wasn't the goal to exhaust all possibilities.
+Some examples of **proxy ports** deployment are provided in this section. However, those examples are not suggestions of how to implement or configure telemetry-enabled EVCs in production networks. Each approach presented in Section I has pros and cons; some were addressed but it wasn't the goal to exhaust all possibilities.
 
   1. **Example 1: All EVCs are intra-switch EVCs**.
 
@@ -91,7 +91,7 @@ There is one **proxy_port** named PP (interface 5).
                |
              User_C
 
-To enable telemetry, EVCs will use PP as the **proxy port** to re-inject packets into the pipeline. All user-to-network interfaces or UNIs (User_A, User_B, User_C, and User_D) will be configured to have PP in their metadata. For this example, consider `Switch_1`'s DPID: 00:00:00:00:00:00:00:01.
+To enable telemetry, EVCs will use PP as the **proxy port** to re-inject packets into the pipeline. All user-to-network interfaces or UNIs (User_A, User_B, User_C, and User_D) will be configured to have PP in their **proxy port** via metadata. For this example, consider `Switch_1`'s DPID: 00:00:00:00:00:00:00:01.
 
 ::
 
@@ -102,9 +102,12 @@ To enable telemetry, EVCs will use PP as the **proxy port** to re-inject packets
 
 Since all UNIs are configured to use the same **proxy port**, this **proxy port** is considered a shared **proxy port**.
 
-Pros of this solution: all EVCs will enhanced with telemetry and there is only one loopback connection.
+Pros of this solution:
+  * All EVCs will be enhanced with telemetry
+  * There is only one loopback connection.
 
-Cons of this solution: without enabling telemetry, there is no possible bottlenecks to from User_A to reach User_B and User_C. With telemetry, the **proxy port** becomes a bottleneck in case User_A and User_C decide to send as much traffic as possible to their users.
+Cons of this solution:
+  * Without enabling telemetry, there is no possible bottlenecks from User_A to reach User_B and User_C. With telemetry, the **proxy port** becomes a bottleneck in case User_A and User_C decide to send as much traffic as possible to their users.
 
 ATTENTION: Notice that, since there are only intra-switch EVCs, if telemetry is enabled for all directions (User_A to User_C and User_C to User_A, User_A to User_B and User_B to User_A, and User_C to User_D and User_D to User_C), ALL traffic in all directions will go through the same **proxy port** which could lead to a bottleneck even faster. In this case, it's recommended to have more than one **proxy port** on **Switch_1**.
 
@@ -165,7 +168,7 @@ With the configuration above, the EVCs will be become:
 
 
 Pros of this solution:
-  * all EVCs will enhanced with telemetry.
+  * All EVCs will be enhanced with telemetry.
   * User_A doesn't share bandwidth with User_D and User_E on Switch_1 although User_A, User_D and User_E are on the same switch.
 
 Cons of this solution:
@@ -213,10 +216,10 @@ With the configuration above, the EVCs will be become:
 
   1. EVC_A_B:
     1. User_A --> User_B: User_A (Switch_1 interface 2) to PP (Switch_3 interface 4) and PP (Switch_3 interface 4) to User_B (Switch_3 interface 1)
-    2. User_B --> User_A: User_B (Switch_3 interface 1) to User_A (Switch_1 interface 2)  # `No proxy port for User_A`
+    2. User_B --> User_A: User_B (Switch_3 interface 1) to User_A (Switch_1 interface 2)  # `No proxy port for User_A` - Just SEND_REPORT on Switch_1
   2. EVC_A_C:
-    1. User_A --> User_C: User_A (Switch_1 interface 2) to User_C (Switch_3 interface 3)  # `No proxy port for User_C`
-    2. User_C --> User_A: User_C (Switch_3 interface 3) to User_A (Switch_1 interface 2)  # `No proxy port for User_A`
+    1. User_A --> User_C: User_A (Switch_1 interface 2) to User_C (Switch_3 interface 3)  # `No proxy port for User_C` - Just SEND_REPORT on Switch_3
+    2. User_C --> User_A: User_C (Switch_3 interface 3) to User_A (Switch_1 interface 2)  # `No proxy port for User_A` - Just SEND_REPORT on Switch_1
   3. EVC_B_C:
     1. User_B --> User_C: User_B (Switch_3 interface 1) to User_C (Switch_3 interface 3)  # `No INT for this direction because there is no proxy port and it is intra-switch EVC`
     2. User_C --> User_B: User_C (Switch_3 interface 3) to PP (Switch_3 interface 4) and PP (Switch_3 interface 4) to User_B (Switch_3 interface 1)
@@ -224,23 +227,23 @@ With the configuration above, the EVCs will be become:
 
 Pros of this solution:
 
-  * all EVCs will enhanced with telemetry.
+  * All EVCs will be enhanced with telemetry.
   * User_B doesn't share bandwidth with User_C.
   * Only one **proxy port**.
   * As it is a simple configuration, with only User_A being part of intra-switch EVCs, INT will still provide accurate visibility.
 
 Cons of this solution:
-  * There is visibility of the traffic from User_A to User_C but not from User_B to User_C. In this case, network visibility is compromised.
+  * There is visibility of the traffic from User_A to User_C but not from User_B to User_C. In this case, network visibility is compromised for traffic going to User_C.
 
 
-IV. Recommendations
-===================
-Add the "proxy_port" metadata to the Interface object on https://kytos-ng.github.io/napps/metadata.html#kytoss-reserved-metadata.
+IV. RESERVED METADATA
+=====================
+Add the "proxy_port" key to the Interface object on https://kytos-ng.github.io/napps/metadata.html#kytoss-reserved-metadata.
 
 
 V. Dependencies
 ===============
- * topology
+ * Kytos-ng topology napp
 
 
 VI. Tools Used

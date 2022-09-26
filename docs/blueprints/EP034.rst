@@ -1,0 +1,87 @@
+:EP: 34
+:Title: MEF E-LINE CSPF integration
+:Authors:
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
+:Created: 2022-09-26
+:Kytos-Version:
+:Status: Draft
+
+***********************************
+EP033 - MEF E-LINE CSPF integration
+***********************************
+
+Abstract
+========
+
+This blueprint proposes how ``mef_eline`` will integrate with ``pathfinder`` to request CSPF paths.
+
+Motivation
+==========
+
+Production networks typically have multiple paths in the core of the network, often times, it can be desirable to have additional constraints (the constraints and variables and ``pathfinder`` exposes) when finding a new path to account for certain business or traffic-engineering requirements.
+
+Requirements
+============
+
+- When creating an EVC is created or updated, ``primary_constraints`` and ``secondary_constraints`` optional request attributes can be set. ``primary_constraints`` will be used when finding a dynamic primary path and ``secondary_constraints`` when finding a failover path. 
+- Optional constraints ``spf_attribute``, ``mandatory_metrics``, ``flexible_metrics``, ``minimum_flexible_hits``, ``minimum_flexible_hits``, ``spf_max_path_cost``, ``desired_links``, and ``undesired_links`` will be parametrized. 
+
+
+Use Case Example
+----------------
+
+
+This ring network topology represents a minimal network with multiple paths where an EVC will be created from H1 to H2. The dynamic primary path should have be at least 100Gbps and belong to ``blue`` as an owner, and the failover path should be at least 40Gbps and belong to ``red`` as an owner.
+
+.. code:: console
+
+                                 100G, "blue"
+               +------------------------------------------+
+               |                 link a                   |
+               |                                          |
+               |                                          |
+           +---+----+           +--------+           +----+---+
+           |        | 40G,"red" |        | 40G,"red" |        |
+           |  SW1   +-----------+  SW2   +-----------+  SW3   |
+  H1-------+        |  link b   |        |  link c   |        +-----H2
+           |        |           |        |           |        |
+           +--------+           +--------+           +--------+
+
+                                Ring Topology
+
+
+Two requests will be sent to ``pathfinder`` when the time comes to deploy either the primary or failover path with the respective constraints. For the failover, the disjointness algorithm will be computed on the resulting constraint paths.
+
+- Dynamic primary path request body:
+
+.. code:: python
+
+  {
+    "source": "H1",
+    "destination": "H2",
+    "spf_attribute": "hop",
+    "mandatory_metrics": {
+      "bandwidth": 100,
+      "ownership": "blue"
+    }
+  }
+
+The expected path result should be ``SW1 <-> SW3``.
+
+- Failover path request body:
+
+.. code:: python
+
+  {
+    "source": "H1",
+    "destination": "H2",
+    "spf_attribute": "hop",
+    "mandatory_metrics": {
+      "bandwidth": 40,
+      "ownership": "red"
+    }
+  }
+
+The expected path result should be ``SW1 <-> SW2 <-> SW3``.

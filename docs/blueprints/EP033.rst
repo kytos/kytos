@@ -1,0 +1,252 @@
+:EP: 33
+:Title: A strategy for creating proxy ports to support telemetry-enabled Ethernet Virtual Circuits
+:Authors:
+    - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+:Created: 2022-09-03
+:Kytos-Version: 2022.3
+:Status: Draft
+
+
+*******************************************************
+EP033 - Creating proxy ports for telemetry-enabled EVCs
+*******************************************************
+
+
+Abstract
+========
+
+EP033 describes the creation and maintenance of **proxy ports** to support EP031 when creating telemetry-enabled EVCs.
+
+Motivation
+==========
+
+EP031's item I.4 states that EP31 won't address how **proxy ports** will be handled. However, **proxy ports** are a main requirement for an INT deployment when using NoviWare's pipeline. EP033 aims to fill the gap and address how proxy ports should be created and maintained by Kytos. Blueprint EP33 suggests leveraging the Kytos-ng `topology` napp's resources to implement **proxy ports**.
+
+I. When to use proxy ports
+==========================
+
+When deploying INT-enabled EVCs for the NoviWare's pipeline, to be capable of adding metadata and sending reports at the same INT hop, a packet has to be re-injected into the pipeline via external loops.
+
+For this document, external loops are physical connections on which both sides of the connection are in the same network device or switch. To increase **scalability**, since **proxy ports** are only used in one direction and at the INT Sink switch, **proxy ports** can be created with a single QSFP/QSFP28 transceiver and a single optical fiber connecting TX (transmission) to RX (reception). This kind of connection is also known as a loopback connection.
+
+There are three ways of handling the need for the **proxy port** concept:
+
+1) Not using **proxy ports** at all.
+
+In networks where most or all traffic is transported over inter-switch EVCs (EVCs where UNIs are in different switches), **proxy ports** can be ignored since the `add_int_metadata` action will be executed by the penultimate INT hop only. This is acceptable because all NNI ports would be monitored with INT. However, if intra-EVCs exist in the INT Sink switch, network visibility is compromised without **proxy ports** since intra-EVCs could be responsible for bottlenecks and these bottlenecks wouldn't be detected. This approach can be used when loopback connections are not available on the INT Sink Switch.
+
+2) A shared **proxy port** for many UNIs (1:N).
+
+A share **proxy port** is a solution to address the need for full INT visibility when the amount of total traffic expected by all EVCs isn't higher than the capacity of the **proxy port**. This approach saves physical switch interfaces when users are not heavy users. For instance, consider a INT Sink switch where UNIs don't generate more than 10Gbps over a 100Gbps interface and there are four UNIs. Under normal circumstances, a 100Gbps **proxy port** should suffice for that INT Sink switch since we shouldn't see more than 40Gbps over that **proxy port**. Link aggregation can also be used to increase the **proxy port**'s capacity, for instance, to 200Gbps or more. A combination of #1 (Not using proxy ports) and #2 (Shared proxy port) can be implemented, where all inter-EVCs operate under the premises of #1 and intra-EVCs use the premises of #2.
+
+3) A dedicated **proxy port** per UNI (1:1).
+
+If one UNI along is responsible for 40% or higher of the capacity of a **proxy port**, EP033 suggests a dedicated **proxy port** for the offensive UNI. For instance, a heavy user could have a dedicated **proxy port** while non-heavy users can share a shared **proxy port** or mixing solutions #1, #2, and #3. Dedicated **proxy ports** are recommended for users considered high profile or burst traffic is expected.
+
+
+II. How to use proxy ports
+==========================
+
+As previously described, **proxy ports** are just physical loops placed by the network operators to re-inject packets into the pipeline for further processing. When **proxy ports** are used to enable telemetry, EVCs are broken down in two parts: (1) the source UNI to the **proxy port**, with support for telemetry, and (2) from the **proxy port** to the destination UNI without support for telemetry. The `Telemetry` napp will become responsible for addressing this new scenario as described in EP031.
+
+EP033 provides the following suggestion to integrate the approaches described in Section I with the `telemetry` napp:
+
+  * Leveraging the UNI's Interface object's `metadata` attribute to host a new key: "proxy_port". This new key can have the following values:
+
+    * 0 (Type Integer): When set to 0, any consumer of this attribute should assume that **proxy port** is not needed (Approach I.1). The same applies if there is not `proxy port` key in the metadata. If there is an intra-switch EVC and **proxy_port** is set to 0, there are two possibilities for the `telemetry` napp: use whatever **proxy port** is available or return to the operator that telemetry is not supported for such an EVC. EP031 is responsible for choosing the proper approach.
+
+    * Interface's port_number (Type Integer): When set to any Integer higher than 0, any consumer of this attribute should assume that the **proxy port** is the interface's port_number value provided. This interface could be shared or dedicated. The differentiation between **shared proxy port** and **dedicated proxy port** is defined by the network operators when populating the `proxy port` attribute during commissioning phase. It is the responsibility of the network operators to guarantee that the port_number in use is valid and represents a loopback connection.
+
+By leveraging the UNI's Interface object's `metadata` attribute, EP033 aims to simplify the addition of the **proxy port** functionality to the Kytos-ng SDN controller environment. No new `napps` and no new persistent mechanism is required since `metadata` attributes are already stored using Mongodb.
+
+
+III. Examples
+=============
+
+Some examples of **proxy ports** deployment are provided in this section. However, those examples are not suggestions of how to implement or configure telemetry-enabled EVCs in production networks. Each approach presented in Section I has pros and cons; some were addressed but it wasn't the goal to exhaust all possibilities.
+
+  1. **Example 1: All EVCs are intra-switch EVCs**.
+
+In this case, telemetry-enabled EVCs are only possible with the use of a **proxy port**. Consider three EVCs previously created by the `mef_eline` napp:
+
+  * EVC_A_B, connecting User_A (interface 1) to User_B (interface 2)
+  * EVC_A_C, connecting User_A (interface 1) to User_C (interface 3),
+  * EVC_C_D, connecting User_C (interface 3) to User_D (interface 4).
+
+There is one **proxy_port** named PP (interface 5).
+
+::
+
+           User_D  PP
+             |     |
+             4     5
+             |     |
+           ┌────────┐
+ User_A -1-│Switch_1│-2- User_B
+           └────────┘
+               |
+               3
+               |
+             User_C
+
+To enable telemetry, EVCs will use PP as the **proxy port** to re-inject packets into the pipeline. All user-to-network interfaces or UNIs (User_A, User_B, User_C, and User_D) will be configured to have PP in their **proxy port** via metadata. For this example, consider `Switch_1`'s DPID: 00:00:00:00:00:00:00:01.
+
+::
+
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:01:1/metadata -d '{"proxy_port": 5}'
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:01:2/metadata -d '{"proxy_port": 5}'
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:01:3/metadata -d '{"proxy_port": 5}'
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:01:4/metadata -d '{"proxy_port": 5}'
+
+Since all UNIs are configured to use the same **proxy port**, this **proxy port** is considered a shared **proxy port**.
+
+Pros of this solution:
+  * All EVCs will be enhanced with telemetry
+  * There is only one loopback connection.
+
+Cons of this solution:
+  * Without enabling telemetry, there is no possible bottlenecks from User_A to reach User_B and User_C. With telemetry, the **proxy port** becomes a bottleneck in case User_A and User_C decide to send as much traffic as possible to their users.
+
+ATTENTION: Notice that, since there are only intra-switch EVCs, if telemetry is enabled for all directions (User_A to User_C and User_C to User_A, User_A to User_B and User_B to User_A, and User_C to User_D and User_D to User_C), ALL traffic in all directions will go through the same **proxy port** which could lead to a bottleneck even faster. In this case, it's recommended to have more than one **proxy port** on **Switch_1**.
+
+
+  2. **Example 2: Intra-switch and Inter-switch EVCs with dedicated and shared proxy ports**.
+
+In this case, User_A is connected to `Switch_1`. User_A is considered high profile and has a dedicated **proxy port** represented by port PP1. All other users leverage shared **proxy ports**. Consider EVCs previously created by the `mef_eline` napp:
+
+  * EVC_A_B, connecting User_A (Switch_1 interface 3) to User_B (Switch_2 interface 2)
+  * EVC_A_C, connecting User_A (Switch_1 interface 3) to User_C (Switch_2 interface 3),
+  * EVC_C_D, connecting User_C (Switch_2 interface 3) to User_D (Switch_1 interface 2).
+  * EVC_B_C, connecting User_B (Switch_2 interface 2) to User_C (Switch_2 interface 3).
+
+This is the list of **proxy_ports**:
+
+  * PP1 on Switch_1 interface 5 - Dedicated to User_A
+  * PP2 on Switch_1 interface 4 - Shared for User_D and User_E
+  * PP3 on Switch_2 interface 5 - Shared for User_B and User_C
+
+::
+
+            PP1  User_E        PP3
+             |    |             |
+             5    6             5
+             |    |             |
+           ┌────────┐       ┌────────┐
+ User_A -3-│Switch_1│-1---1-│Switch_2│-2- User_B
+           └────────┘       └────────┘
+            |     |             |
+            2     4             3
+            |     |             |
+          User_D  PP2         User_C
+
+For this example, consider `Switch_1`'s DPID: 00:00:00:00:00:00:00:01 and `Switch_2`'s DPID: 00:00:00:00:00:00:00:02.
+
+::
+
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:01:3/metadata -d '{"proxy_port": 5}'
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:01:2/metadata -d '{"proxy_port": 4}'
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:01:6/metadata -d '{"proxy_port": 4}'
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:02:2/metadata -d '{"proxy_port": 5}'
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:02:3/metadata -d '{"proxy_port": 5}'
+
+With the configuration above, the EVCs will be become:
+
+  1. EVC_A_B:
+    1. User_A --> User_B: User_A (Switch_1 interface 3) to PP3 (Switch_2 interface 5) and PP3 (Switch_2 interface 5) to User_B (Switch_2 interface 2)
+    2. User_B --> User_A: User_B (Switch_2 interface 2) to PP1 (Switch_1 interface 5) and PP1 (Switch_1 interface 5) to User_A (Switch_1 interface 3)
+  2. EVC_A_C:
+    1. User_A --> User_C: User_A (Switch_1 interface 3) to PP3 (Switch_2 interface 5) and PP3 (Switch_2 interface 5) to User_C (Switch_2 interface 3)
+    2. User_C --> User_A: User_C (Switch_2 interface 3) to PP1 (Switch_1 interface 5) and PP1 (Switch_1 interface 5) to User_A (Switch_1 interface 3)
+  3. EVC_C_D:
+    1. User_C --> User_D: User_C (Switch_2 interface 3) to PP2 (Switch_1 interface 4) and PP2 (Switch_1 interface 4) to User_D (Switch_1 interface 2)
+    2. User_D --> User_C: User_D (Switch_1 interface 2) to PP3 (Switch_2 interface 5) and PP3 (Switch_2 interface 5) to User_C (Switch_2 interface 3)
+  4. EVC_B_C:
+    1. User_B --> User_C: User_B (Switch_2 interface 2) to PP3 (Switch_2 interface 5) and PP3 (Switch_2 interface 5) to User_C (Switch_2 interface 3)
+    2. User_C --> User_B: User_C (Switch_2 interface 3) to PP3 (Switch_2 interface 5) and PP3 (Switch_2 interface 5) to User_B (Switch_2 interface 2)
+
+
+Pros of this solution:
+  * All EVCs will be enhanced with telemetry.
+  * User_A doesn't share bandwidth with User_D and User_E on Switch_1 although User_A, User_D and User_E are on the same switch.
+
+Cons of this solution:
+  * Same limitations of the previous example for the intra-switch EVCs.
+  * There are two **proxy ports** on Switch_1.
+
+
+
+  3. **Example 3: Intra-switch and Inter-switch EVCs with no proxy port and a dedicated proxy port**
+
+For this example, User_A and User_C won't have a **proxy port** and User_B will have a dedicated **proxy port**.
+
+Consider EVCs previously created by the `mef_eline` napp:
+
+  * EVC_A_B, connecting User_A (Switch_1 interface 2) to User_B (Switch_3 interface 1)
+  * EVC_A_C, connecting User_A (Switch_1 interface 2) to User_C (Switch_3 interface 3)
+  * EVC_B_C, connecting User_B (Switch_3 interface 1) to User_C (Switch_3 interface 3).
+
+User_B's proxy port is PP (Switch_3 interface 4).
+
+::
+
+                                         PP
+                                         |
+                                         4
+                                         |
+           ┌────────┐   ┌────────┐   ┌────────┐
+ User_A -2-│Switch_1│-1-│Switch_2│-2-│Switch_3│-1- User_B
+           └────────┘   └────────┘   └────────┘
+                                          |
+                                          3
+                                          |
+                                        User_C
+
+For this example, consider `Switch_1`'s DPID: 00:00:00:00:00:00:00:01 and `Switch_3`'s DPID: 00:00:00:00:00:00:00:03.
+
+::
+
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:01:2/metadata -d '{"proxy_port": 0}'
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:03:3/metadata -d '{"proxy_port": 0}'
+ curl -s -X POST -H 'Content-type: application/json' http://localhost:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:03:1/metadata -d '{"proxy_port": 4}'
+
+
+With the configuration above, the EVCs will be become:
+
+  1. EVC_A_B:
+    1. User_A --> User_B: User_A (Switch_1 interface 2) to PP (Switch_3 interface 4) and PP (Switch_3 interface 4) to User_B (Switch_3 interface 1)
+    2. User_B --> User_A: User_B (Switch_3 interface 1) to User_A (Switch_1 interface 2)  # `No proxy port for User_A` - Just SEND_REPORT on Switch_1
+  2. EVC_A_C:
+    1. User_A --> User_C: User_A (Switch_1 interface 2) to User_C (Switch_3 interface 3)  # `No proxy port for User_C` - Just SEND_REPORT on Switch_3
+    2. User_C --> User_A: User_C (Switch_3 interface 3) to User_A (Switch_1 interface 2)  # `No proxy port for User_A` - Just SEND_REPORT on Switch_1
+  3. EVC_B_C:
+    1. User_B --> User_C: User_B (Switch_3 interface 1) to User_C (Switch_3 interface 3)  # `No INT for this direction because there is no proxy port and it is intra-switch EVC`
+    2. User_C --> User_B: User_C (Switch_3 interface 3) to PP (Switch_3 interface 4) and PP (Switch_3 interface 4) to User_B (Switch_3 interface 1)
+
+
+Pros of this solution:
+
+  * All EVCs will be enhanced with telemetry.
+  * User_B doesn't share bandwidth with User_C.
+  * Only one **proxy port**.
+  * As it is a simple configuration, with only User_A being part of intra-switch EVCs, INT will still provide accurate visibility.
+
+Cons of this solution:
+  * There is visibility of the traffic from User_A to User_C but not from User_B to User_C. In this case, network visibility is compromised for traffic going to User_C.
+
+
+IV. RESERVED METADATA
+=====================
+Add the "proxy_port" key to the Interface object on https://kytos-ng.github.io/napps/metadata.html#kytoss-reserved-metadata.
+
+
+V. Dependencies
+===============
+ * Kytos-ng topology napp
+
+
+VI. Tools Used
+==============
+  * To create diagrams: https://asciiflow.com/#/
+  * To test RST code: https://livesphinx.herokuapp.com

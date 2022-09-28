@@ -4,6 +4,7 @@
     - Vinicius Arcanjo <vindasil AT fiu DOT edu>
     - Italo Valcy <idasilva AT fiu DOT edu>
     - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
+    - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 :Created: 2022-09-26
 :Kytos-Version:
 :Status: Draft
@@ -25,7 +26,7 @@ Production networks typically have multiple paths in the core of the network, of
 Rationale
 =========
 
-In this iteration, the major goal is to integrate ``mef_eline`` with ``pathfinder`` and its existing filtering capabilities. ``mef_eline`` relies ``pathfinder`` to find dynamic paths for dynamic primary paths and failover paths. This proposed implementation will allow the constraints to be set individually for both primary and failover to allow it to evolve in a way where constraint requirements can be different to target a strategic set of network paths. The failover path plays a critical role in providing fast convergence, the failover path will still provide the same type of protection maximizing link disjointness but it'll compute it on top of any failover path constraints that might have been set. In the future, more granular control for how the failover path computes its disjointness might be available depending on production use cases. On mef_eline UI, users might not need to specify optional constraints both cases, we can have a strategic UX/UI, we can start with a case where if any optional constraint is given then parametrize to both dynamic primary and secondary, and gradually allowing users to have more control when ever needed.
+In this iteration, the major goal is to integrate ``mef_eline`` with ``pathfinder`` and its existing filtering capabilities. ``mef_eline`` relies on ``pathfinder`` to find paths for dynamic primary paths and failover paths. This proposed implementation will allow the constraints to be set individually for both primary and failover to allow it to evolve in a way where constraint requirements can be different to target a strategic set of network paths. The failover path plays a critical role in providing fast convergence, the failover path will still provide the same type of protection maximizing link disjointness but it'll compute it on top of any failover path constraints that might have been set. In the future, more granular control for how the failover path computes its disjointness might be available depending on production use cases. On ``mef_eline`` UI, users might not need to specify optional constraints both cases, we can have a strategic UX/UI, we can start with a case where if any optional constraint is given then parametrize to both dynamic primary and secondary, and gradually allowing users to have more control when ever needed.
 
 Specification
 =============
@@ -58,7 +59,7 @@ This ring network topology represents a minimal network with multiple paths wher
 
 EVC request payload from H1 to H2 with a dynamic paths and constraints:
 
-.. code:: python
+.. code:: javascript
 
   {
       "name": "epl",
@@ -90,7 +91,7 @@ Two requests will be sent to ``pathfinder`` when the time comes to deploy either
 
 - Dynamic primary path request body:
 
-.. code:: python
+.. code:: javascript
 
   {
     "source": "H1",
@@ -106,7 +107,7 @@ The expected path result should be ``["link a"]``.
 
 - Failover path request body:
 
-.. code:: python
+.. code:: javascript
 
   {
     "source": "H1",

@@ -38,7 +38,7 @@ Specification
 Use Case Example
 ----------------
 
-This ring network topology represents a minimal network with multiple paths where an EVC will be created from H1 to H2. The dynamic primary path should have be at least 100Gbps and ``blue`` ownership, and the failover path should be at least 40Gbps and ``red`` ownership.
+This ring network topology represents a minimal network with multiple paths where an EVC will be created from H1 to H2. The dynamic primary path should be at least 100Gbps and ``blue`` ownership, and the failover path should be at least 40Gbps and ``red`` ownership.
 
 
 .. code:: console

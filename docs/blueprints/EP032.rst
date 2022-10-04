@@ -99,4 +99,5 @@ Future work
 
 - Assess Zabbix integration requirements and confirm if it'll be needed for 2022.3.
 - Double check if PortStats will also need to be be supported and used, if positive, maybe this NApp will turn into of_stats
+- Double-check the UI to understand what can be leveraged from flow_stats to display at the UI (check what has been disabled before)
 

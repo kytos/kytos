@@ -343,7 +343,7 @@ class Switch(GenericEntity):
         if self.connection is not None:
             address = self.connection.address
             port = self.connection.port
-            connection = "{}:{}".format(address, port)
+            connection = f"{address}:{port}"
 
         return {'id': self.id,
                 'name': self.id,

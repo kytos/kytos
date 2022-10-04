@@ -86,7 +86,7 @@ class TestAPIServer(unittest.TestCase):
         """Test stop_api_server method."""
         self.api_server.stop_api_server()
 
-        url = "%s/_shutdown" % API_URI
+        url = f"{API_URI}/_shutdown"
         mock_urlopen.assert_called_with(url)
 
     @patch('kytos.core.api_server.send_file')
@@ -416,11 +416,6 @@ class TestAPIServer(unittest.TestCase):
         expected_metadata = json.dumps({'version': data})
         self.assertEqual(resp, expected_metadata)
         self.assertEqual(code, 200)
-
-    @staticmethod
-    def __custom_endpoint():
-        """Custom method used by APIServer."""
-        return "Custom Endpoint"
 
 
 class RESTNApp:  # pylint: disable=too-few-public-methods

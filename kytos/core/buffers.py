@@ -14,21 +14,19 @@ LOG = logging.getLogger(__name__)
 class KytosEventBuffer:
     """KytosEventBuffer represents a queue to store a set of KytosEvents."""
 
-    def __init__(self, name, event_base_class=None, loop=None, maxsize=0,
+    def __init__(self, name, event_base_class=None, maxsize=0,
                  queue_cls=Queue):
         """Contructor of KytosEventBuffer receive the parameters below.
 
         Args:
             name (string): name of KytosEventBuffer.
             event_base_class (class): Class of KytosEvent.
-            loop (class): asyncio event loop
             maxsize (int): maxsize _queue producer buffer
             queue_cls (class): queue class from janus
         """
         self.name = name
         self._event_base_class = event_base_class
-        self._loop = loop
-        self._queue = queue_cls(maxsize=maxsize, loop=self._loop)
+        self._queue = queue_cls(maxsize=maxsize)
         self._reject_new_events = False
 
     def put(self, event):
@@ -128,7 +126,7 @@ class KytosEventBuffer:
 class KytosBuffers:
     """Set of KytosEventBuffer used in Kytos."""
 
-    def __init__(self, loop=None):
+    def __init__(self):
         """Build four KytosEventBuffers.
 
         :attr:`conn`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
@@ -147,18 +145,15 @@ class KytosBuffers:
         sent to NApps.
         """
         self._pool_max_workers = get_thread_pool_max_workers()
-        self._loop = loop
-        self.conn = KytosEventBuffer("conn", loop=self._loop)
-        self.raw = KytosEventBuffer("raw", loop=self._loop,
-                                    maxsize=self._get_maxsize("sb"))
-        self.msg_in = KytosEventBuffer("msg_in", loop=self._loop,
+        self.conn = KytosEventBuffer("conn")
+        self.raw = KytosEventBuffer("raw", maxsize=self._get_maxsize("sb"))
+        self.msg_in = KytosEventBuffer("msg_in",
                                        maxsize=self._get_maxsize("sb"),
                                        queue_cls=PriorityQueue)
-        self.msg_out = KytosEventBuffer("msg_out", loop=self._loop,
+        self.msg_out = KytosEventBuffer("msg_out",
                                         maxsize=self._get_maxsize("sb"),
                                         queue_cls=PriorityQueue)
-        self.app = KytosEventBuffer("app", loop=self._loop,
-                                    maxsize=self._get_maxsize("app"))
+        self.app = KytosEventBuffer("app", maxsize=self._get_maxsize("app"))
 
     def get_all_buffers(self):
         """Get all KytosEventBuffer instances."""

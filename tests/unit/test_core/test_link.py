@@ -42,8 +42,8 @@ class TestLink(unittest.TestCase):
 
         link_3 = Link(iface3, iface4)
 
-        self.assertTrue(link_1.__eq__(link_2))
-        self.assertFalse(link_1.__eq__(link_3))
+        self.assertTrue(link_1 == link_2)
+        self.assertFalse(link_1 == link_3)
 
     def test__repr__(self):
         """Test __repr__ method."""
@@ -86,7 +86,7 @@ class TestLink(unittest.TestCase):
             Link(None, self.iface2)
 
     def test_link_id(self):
-        """Test equality of links with the same values ​​in different order."""
+        """Test equality of links with the same values in different order."""
         link1 = Link(self.iface1, self.iface2)
         link2 = Link(self.iface2, self.iface1)
         self.assertEqual(link1.id, link2.id)

@@ -87,12 +87,6 @@ def start_shell(controller=None):
     ipshell()
 
 
-# def disable_threadpool_exit():
-#     """Avoid traceback when ThreadPool tries to shut down threads again."""
-#     import atexit
-#     from concurrent.futures import thread, ThreadPoolExecutor
-#     atexit.unregister(thread._python_exit)
-
 def main():
     """Read config and start Kytos in foreground or daemon mode."""
     # data_files is not enough when installing from PyPI
@@ -108,36 +102,38 @@ def main():
             async_main(config)
 
 
+def stop_controller(controller, shell_task=None):
+    """Stop the controller before quitting."""
+    loop = asyncio.get_running_loop()
+
+    if loop:
+        # If stop() hangs, old ctrl+c behaviour will be restored
+        loop.remove_signal_handler(signal.SIGINT)
+        loop.remove_signal_handler(signal.SIGTERM)
+
+    controller.log.info("Stopping Kytos controller...")
+    controller.stop()
+
+    if shell_task:
+        shell_task.cancel()
+
+
+async def start_shell_async(controller, executor):
+    """Run the shell inside a thread and stop controller when done."""
+    _start_shell = functools.partial(start_shell, controller)
+    loop = asyncio.get_running_loop()
+
+    try:
+        data = await loop.run_in_executor(executor, _start_shell)
+    finally:
+        stop_controller(controller)
+    return data
+
+
 def async_main(config):
     """Start main Kytos Daemon with asyncio loop."""
-    def stop_controller(controller, shell_task=None):
-        """Stop the controller before quitting."""
-        loop = asyncio.get_event_loop()
-
-        if loop:
-            # If stop() hangs, old ctrl+c behaviour will be restored
-            loop.remove_signal_handler(signal.SIGINT)
-            loop.remove_signal_handler(signal.SIGTERM)
-
-        # disable_threadpool_exit()
-
-        controller.log.info("Stopping Kytos controller...")
-        controller.stop()
-
-        if shell_task:
-            shell_task.cancel()
-
-    async def start_shell_async():
-        """Run the shell inside a thread and stop controller when done."""
-        _start_shell = functools.partial(start_shell, controller)
-
-        try:
-            data = await loop.run_in_executor(executor, _start_shell)
-        finally:
-            stop_controller(controller)
-        return data
-
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
     controller = Controller(config)
 
@@ -149,7 +145,7 @@ def async_main(config):
     shell_task = None
     if controller.options.foreground:
         executor = ThreadPoolExecutor(max_workers=1)
-        shell_task = loop.create_task(start_shell_async())
+        shell_task = loop.create_task(start_shell_async(controller, executor))
 
     kill_handler = functools.partial(stop_controller, controller, shell_task)
     loop.add_signal_handler(signal.SIGINT, kill_handler)
@@ -161,5 +157,4 @@ def async_main(config):
         controller.log.error(exc)
         controller.log.info("Shutting down Kytos...")
     finally:
-
         loop.close()

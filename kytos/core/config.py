@@ -46,7 +46,7 @@ class KytosConfig():
 
         parser.add_argument('-v', '--version',
                             action='version',
-                            version="kytosd %s" % __version__)
+                            version=f"kytosd {__version__}")
 
         parser.add_argument('-D', '--debug',
                             action='store_true',
@@ -242,5 +242,5 @@ def _render_config_templates(templates,
             tmpl = tmpl.replace('templates', ETC_KYTOS) \
                        .replace('.template', '')
             dst_path = Path(destination) / tmpl
-            with open(dst_path, 'w') as dst_file:
+            with open(dst_path, 'w', encoding="utf8") as dst_file:
                 dst_file.write(content)

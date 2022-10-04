@@ -12,9 +12,7 @@ from kytos.core.events import KytosEvent
 @pytest.mark.parametrize("queue_name", ["msg_out", "msg_in"])
 def test_priority_queues(queue_name):
     """Test KytosBuffers priority queues."""
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    buffers = KytosBuffers(loop=loop)
+    buffers = KytosBuffers()
 
     prios = [-10, 10, 0, -20]
     for prio in prios:
@@ -33,7 +31,7 @@ class TestKytosEventBuffer(TestCase):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
 
-        self.kytos_event_buffer = KytosEventBuffer('name', loop=self.loop)
+        self.kytos_event_buffer = KytosEventBuffer('name')
 
     @staticmethod
     def create_event_mock(name='any'):
@@ -131,10 +129,7 @@ class TestKytosBuffers(TestCase):
 
     def setUp(self):
         """Instantiate a KytosBuffers."""
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
-
-        self.kytos_buffers = KytosBuffers(loop=self.loop)
+        self.kytos_buffers = KytosBuffers()
 
     def test_send_stop_signal(self):
         """Test send_stop_signal method."""

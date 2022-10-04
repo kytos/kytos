@@ -1,5 +1,4 @@
 """Test kytos.core.auth module."""
-import asyncio
 import base64
 import hashlib
 from unittest import TestCase
@@ -7,6 +6,7 @@ from unittest.mock import Mock, patch
 
 from kytos.core import Controller
 from kytos.core.auth import Auth
+from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 
 KYTOS_CORE_API = "http://127.0.0.1:8181/api/kytos/"
@@ -31,6 +31,7 @@ class TestAuth(TestCase):
             "email": "temp@kytos.io",
             "password": "password",
         }
+        self.auth_header = {"Authorization": f"Bearer {self.token}"}
 
     def _patch_event_trigger(self, event):
         """Patch event callback trigger."""
@@ -40,12 +41,10 @@ class TestAuth(TestCase):
 
     def _get_controller_mock(self):
         """Return a controller mock."""
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
         options = KytosConfig().options['daemon']
         options.jwt_secret = 'jwt_secret'
-
-        controller = Controller(options, loop=loop)
+        controller = Controller(options)
+        controller.buffers = KytosBuffers()
         controller.log = Mock()
 
         # Patch event callback trigger.
@@ -89,7 +88,7 @@ class TestAuth(TestCase):
         }
         # Patch _find_user_callback event callback.
         self.patched_events.append({'_find_user_callback': box})
-        url = "%s/auth/login/" % API_URI
+        url = f"{API_URI}/auth/login/"
         api = self.get_auth_test_client(self.auth)
         success_response = api.open(url, method='GET', headers=header)
 
@@ -129,7 +128,7 @@ class TestAuth(TestCase):
         }
         # Patch _find_user_callback event callback.
         self.patched_events.append({'_find_user_callback': box})
-        url = "%s/auth/login/" % API_URI
+        url = f"{API_URI}/auth/login/"
         api = self.get_auth_test_client(self.auth)
         success_response = api.open(url, method='GET', headers=valid_header)
         error_response = api.open(url, method='GET', headers=invalid_header)
@@ -140,7 +139,6 @@ class TestAuth(TestCase):
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_02_list_users_request(self, mock_jwt_secret):
         """Test auth list users endpoint."""
-        valid_header = {"Authorization": "Bearer %s" % self.token}
         invalid_header = {"Authorization": "Bearer invalidtoken"}
         schema = {"users": list}
         password = "password".encode()
@@ -151,8 +149,9 @@ class TestAuth(TestCase):
                         "password": hashlib.sha512(password).hexdigest()}]
         self.patched_events.append({'_list_users_callback': event_boxes})
         api = self.get_auth_test_client(self.auth)
-        url = "%s/auth/users/" % API_URI
-        success_response = api.open(url, method='GET', headers=valid_header)
+        url = f"{API_URI}/auth/users/"
+        success_response = api.open(url, method='GET',
+                                    headers=self.auth_header)
         error_response = api.open(url, method='GET', headers=invalid_header)
         is_valid = self._validate_schema(success_response.json, schema)
 
@@ -163,40 +162,38 @@ class TestAuth(TestCase):
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_03_create_user_request(self, mock_jwt_secret):
         """Test auth create user endpoint."""
-        header = {"Authorization": "Bearer %s" % self.token}
         # Patch _create_user_callback event callback.
         self.patched_events.append({'_create_user_callback': self.user_data})
         api = self.get_auth_test_client(self.auth)
-        url = "%s/auth/users/" % API_URI
+        url = f"{API_URI}/auth/users/"
         success_response = api.open(url, method='POST', json=self.user_data,
-                                    headers=header)
+                                    headers=self.auth_header)
 
         self.assertEqual(success_response.status_code, 200)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_03_create_user_request_error(self, mock_jwt_secret):
         """Test auth create user endpoint."""
-        header = {"Authorization": "Bearer %s" % self.token}
         # Patch _create_user_callback event callback.
         self.patched_events.append({'_create_user_callback': None})
         api = self.get_auth_test_client(self.auth)
-        url = "%s/auth/users/" % API_URI
+        url = f"{API_URI}/auth/users/"
         error_response = api.open(url, method='POST', json=self.user_data,
-                                  headers=header)
+                                  headers=self.auth_header)
 
         self.assertEqual(error_response.status_code, 409)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_04_list_user_request(self, mock_jwt_secret):
         """Test auth list user endpoint."""
-        valid_header = {"Authorization": "Bearer %s" % self.token}
         schema = {"data": {"email": str, "username": str}}
         box = Mock()
         box.data = self.user_data
         self.patched_events.append({'_find_user_callback': box})
         api = self.get_auth_test_client(self.auth)
-        url = "%s/auth/users/%s" % (API_URI, self.user_data.get("username"))
-        success_response = api.open(url, method='GET', headers=valid_header)
+        url = f"{API_URI}/auth/users/{self.user_data.get('username')}"
+        success_response = api.open(url, method='GET',
+                                    headers=self.auth_header)
         is_valid = self._validate_schema(success_response.json, schema)
 
         self.assertEqual(success_response.status_code, 200)
@@ -205,59 +202,56 @@ class TestAuth(TestCase):
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_04_list_user_request_error(self, mock_jwt_secret):
         """Test auth list user endpoint."""
-        valid_header = {"Authorization": "Bearer %s" % self.token}
         self.patched_events.append({'_find_user_callback': None})
         api = self.get_auth_test_client(self.auth)
-        url = "%s/auth/users/%s" % (API_URI, 'user3')
-        error_response = api.open(url, method='GET', headers=valid_header)
+        url = f"{API_URI}/auth/users/user3"
+        error_response = api.open(url, method='GET', headers=self.auth_header)
 
         self.assertEqual(error_response.status_code, 404)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_05_update_user_request(self, mock_jwt_secret):
         """Test auth update user endpoint."""
-        valid_header = {"Authorization": "Bearer %s" % self.token}
         data = {"email": "newemail_tempuser@kytos.io"}
         self.patched_events.append({'_update_user_callback': data})
         api = self.get_auth_test_client(self.auth)
-        url = "%s/auth/users/%s" % (API_URI, self.user_data.get("username"))
+        url = f"{API_URI}/auth/users/{self.user_data.get('username')}"
         success_response = api.open(url, method='PATCH', json=data,
-                                    headers=valid_header)
+                                    headers=self.auth_header)
 
         self.assertEqual(success_response.status_code, 200)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_05_update_user_request_error(self, mock_jwt_secret):
         """Test auth update user endpoint."""
-        valid_header = {"Authorization": "Bearer %s" % self.token}
         self.patched_events.append({'_update_user_callback': None})
         api = self.get_auth_test_client(self.auth)
-        url = "%s/auth/users/%s" % (API_URI, 'user5')
+        url = f"{API_URI}/auth/users/user5"
         error_response = api.open(url, method='PATCH', json={},
-                                  headers=valid_header)
+                                  headers=self.auth_header)
 
         self.assertEqual(error_response.status_code, 404)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_06_delete_user_request(self, mock_jwt_secret):
         """Test auth delete user endpoint."""
-        header = {"Authorization": "Bearer %s" % self.token}
         # Patch _delete_user_callback event callback.
         self.patched_events.append({'_delete_user_callback': self.user_data})
         api = self.get_auth_test_client(self.auth)
-        url = "%s/auth/users/%s" % (API_URI, self.user_data.get("username"))
-        success_response = api.open(url, method='DELETE', headers=header)
+        url = f"{API_URI}/auth/users/{self.user_data.get('username')}"
+        success_response = api.open(url, method='DELETE',
+                                    headers=self.auth_header)
 
         self.assertEqual(success_response.status_code, 200)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_06_delete_user_request_error(self, mock_jwt_secret):
         """Test auth delete user endpoint."""
-        header = {"Authorization": "Bearer %s" % self.token}
         # Patch _delete_user_callback event callback.
         self.patched_events.append({'_delete_user_callback': None})
         api = self.get_auth_test_client(self.auth)
-        url = "%s/auth/users/%s" % (API_URI, "nonexistent")
-        success_response = api.open(url, method='DELETE', headers=header)
+        url = f"{API_URI}/auth/users/nonexistent"
+        success_response = api.open(url, method='DELETE',
+                                    headers=self.auth_header)
 
         self.assertEqual(success_response.status_code, 404)

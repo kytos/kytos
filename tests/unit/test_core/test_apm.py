@@ -1,5 +1,4 @@
 """Test kytos.core.cpm module."""
-# pylint: disable=no-self-use
 
 from unittest import TestCase
 from unittest.mock import MagicMock, patch

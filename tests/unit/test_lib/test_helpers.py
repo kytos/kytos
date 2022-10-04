@@ -1,5 +1,4 @@
 """Test kytos.lib.helpers module."""
-import asyncio
 from unittest import TestCase
 from unittest.mock import MagicMock
 
@@ -14,10 +13,7 @@ class TestHelpers(TestCase):
 
     def test_controller_mock(self):
         """Test controller mock."""
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
-        controller = get_controller_mock(loop)
-
+        controller = get_controller_mock()
         self.assertEqual(type(controller), Controller)
 
     def test_interface_mock(self):
@@ -83,10 +79,7 @@ class TestHelpers(TestCase):
 
         api_server = MagicMock()
         api_server.app.test_client.return_value = 'client'
-
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
-        controller = get_controller_mock(loop)
+        controller = get_controller_mock()
         controller.api_server = api_server
 
         test_client = get_test_client(controller, napp)

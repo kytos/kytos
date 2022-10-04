@@ -3,6 +3,12 @@ Kytos SDN Platform
 
 |Stable| |Tag| |Release| |License| |Build| |Coverage| |Quality|
 
+.. raw:: html
+
+  <div align="center">
+    <img src="https://github.com/kytos-ng/ui/blob/master/src/assets/kytosng_logo_color.svg" alt="Kytos-ng logo"></img>
+  </div>
+
 `Kytos SDN Platform <https://kytos-ng.github.io/>`_ is the fastest way to deploy an SDN
 Network. With this you can deploy a basic OpenFlow controller or your own
 controller. Kytos was designed to be easy to install, use, develop and share

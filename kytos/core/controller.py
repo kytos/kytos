@@ -15,6 +15,7 @@ Basic usage:
 """
 import asyncio
 import atexit
+import email
 import importlib
 import json
 import logging
@@ -47,6 +48,7 @@ from kytos.core.napps.base import NApp
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.napps.napp_dir_listener import NAppDirListener
 from kytos.core.switch import Switch
+from kytos.core.user import UserDoc
 
 __all__ = ('Controller',)
 
@@ -145,6 +147,7 @@ class Controller:
                                     self.napps_manager, self.options.napps)
 
         self.auth = Auth(self)
+        self.user_doc = None
         self.dead_letter = DeadLetter(self)
         self._alisten_tasks = set()
 
@@ -154,6 +157,18 @@ class Controller:
         #: from napps.<username>.<napp_name> import ?....
         sys.path.append(os.path.join(self.options.napps, os.pardir))
         sys.excepthook = exc_handler
+
+    def add_user(self):
+        """Method to test the validation of user_doc"""
+        full_name = input("Input full name: ")
+        password = input("input password: ")
+        email = input("Input email: ")
+        data = dict()
+        data["full_name"] = full_name
+        data["password"] = password
+        data["email"] = email
+        self.user_doc = UserDoc(**data)
+        self.log.info("Created :D -> %s", self.user_doc)
 
     def enable_logs(self):
         """Register kytos log and enable the logs."""

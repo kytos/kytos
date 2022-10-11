@@ -1,4 +1,6 @@
 """Module with main classes related to Authentication."""
+
+# pylint: disable=invalid-name
 import datetime
 import getpass
 import hashlib
@@ -11,7 +13,9 @@ import jwt
 from flask import jsonify, request
 
 from kytos.core.config import KytosConfig
+from kytos.core.db import Mongo
 from kytos.core.events import KytosEvent
+from kytos.core.user import UserDoc
 
 __all__ = ['authenticated']
 
@@ -49,13 +53,17 @@ class Auth:
 
     encode_algorithm = "HS256"
 
-    def __init__(self, controller):
+    # pylint: disable=unnecessary-lambda
+    def __init__(self, controller, get_mongo=lambda: Mongo()):
         """Init method of Auth class takes the parameters below.
 
         Args:
             controller(kytos.core.controller): A Controller instance.
 
         """
+        self.mongo = get_mongo()
+        self.db_client = self.mongo.client
+        self.db = self.db_client[self.mongo.db_name]
         self.controller = controller
         self.namespace = "kytos.core.auth.users"
         self.token_expiration_minutes = self.get_token_expiration()
@@ -86,6 +94,76 @@ class Auth:
             Auth.get_jwt_secret(),
             algorithm=cls.encode_algorithm,
         )
+
+    def create_user(self):
+        """Create user to database"""
+        req = request.json
+        utc_now = datetime.datetime.utcnow()
+        data = {
+            "username": req["username"],
+            "email": req["email"],
+            "password": req["password"],
+            "inserted_at": utc_now,
+            "updated_at": utc_now,
+        }
+        try:
+            user = UserDoc(**data)
+        except ValueError as error:
+            raise error
+        result = self.db.users.insert_one(user.dict())
+        return result
+
+    def delete_user(self, uid):
+        """Delete user from database"""
+        result = self.db.users.delete_one({"id": uid})
+        return result
+
+    def update_user(self, uid):
+        """Update user from database"""
+        req = request.json
+        allowed = ["username", "email", "password"]
+
+        data = {}
+        for key, value in req.items():
+            if key in allowed:
+                data[key] = value
+        data.update({"updated_at": datetime.datetime.utcnow()})
+        result = self.db.users.find_one_and_update({"id": uid}, data)
+        return result
+
+    def get_user(self, uid):
+        """Return a user information from database"""
+        data = self.db.users.aggregate([
+            {
+                "$match": {"id": uid}
+            },
+            {
+                "$project": {
+                    "full_name": 1,
+                    "email": 1,
+                    "inserted_at": 1,
+                    "updated_at": 1,
+                    "deleted_at": 1,
+                }
+            }
+        ])
+        return data
+
+    def get_users(self):
+        """Return all the users"""
+        data = self.db.users.aggregate([
+            {
+                "$project": {
+                    "_id": 0,
+                    "full_name": 1,
+                    "email": 1,
+                    "inserted_at": 1,
+                    "updated_at": 1,
+                    "deleted_at": 1,
+                }
+            }
+        ])
+        return data
 
     def _create_superuser(self):
         """Create a superuser using Storehouse."""
@@ -150,6 +228,22 @@ class Auth:
         self.controller.api_server.register_core_endpoint(
             "auth/users/<uid>", self._update_user, methods=["PATCH"]
         )
+        self.controller.api_server.register_core_endpoint(
+            "auth/users/", self.create_user, methods=["POST"]
+        )
+        self.controller.api_server.register_core_endpoint(
+            "auth/users/<uid>", self.delete_user, methods=["DELETE"]
+        )
+        self.controller.api_server.register_core_endpoint(
+            "auth/users/<uid>", self.update_user, methods=["PATCH"]
+        )
+        self.controller.api_server.register_core_endpoint(
+            "auth/users/<uid>", self.get_user
+        )
+        self.controller.api_server.register_core_endpoint(
+            "auth/users/", self.get_users
+        )
+
 
     def _authenticate_user(self):
         """Authenticate a user using Storehouse."""

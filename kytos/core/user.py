@@ -1,7 +1,11 @@
+"""User authentification """
+import hashlib
+
 from datetime import datetime
-from optparse import Option
 from typing import Literal, Optional
-from pydantic import BaseModel, EmailStr, Field, KafkaDsn, constr, validator
+
+# pylint: disable=no-name-in-module
+from pydantic import BaseModel, EmailStr, Field, constr, validator
 
 
 class DocumentBaseModel(BaseModel):
@@ -25,21 +29,28 @@ class DocumentBaseModel(BaseModel):
 class UserDoc(DocumentBaseModel):
     """UserDocumentModel."""
 
-    full_name: str
+    username: str
     state: Literal['active', 'inactive'] = 'active'
     password: constr(min_length=8)
     email: EmailStr
 
-    @validator('password', pre=True, always=True)
+    @validator('password')
+    # pylint: disable=no-self-argument
     def have_digit_letter(cls, password):
         """Check if password has at least a letter and a number"""
-        letter = False
+        upper = False
+        lower = False
         number = False
         for char in password:
-            if char.isalpha():
-                letter = True
+            if char.isupper():
+                upper = True
             if char.isnumeric():
                 number = True
-            if letter and number:
-                return password
-        raise ValueError('Password should have a letter and a number.')
+            if char.islower():
+                lower = True
+            if number and upper and lower:
+                return hashlib.sha512(password.encode()).hexdigest()
+        raise ValueError('Password should contain:\n',
+                         '1. Minimun 8 characters.\n',
+                         '2. At least one upper case character.\n',
+                         '3. At least 1 numeric character [0-9].')

@@ -1,6 +1,5 @@
 """User authentification """
 import hashlib
-
 from datetime import datetime
 from typing import Literal, Optional
 
@@ -36,7 +35,7 @@ class UserDoc(DocumentBaseModel):
 
     @validator('password')
     # pylint: disable=no-self-argument
-    def have_digit_letter(cls, password):
+    def validate_password(cls, password):
         """Check if password has at least a letter and a number"""
         upper = False
         lower = False
@@ -54,3 +53,15 @@ class UserDoc(DocumentBaseModel):
                          '1. Minimun 8 characters.\n',
                          '2. At least one upper case character.\n',
                          '3. At least 1 numeric character [0-9].')
+
+    @staticmethod
+    def projection():
+        """Base model for projection."""
+        return {
+            "_id": 0,
+            "username": 1,
+            "email": 1,
+            "inserted_at": 1,
+            "updated_at": 1,
+            "deleted_at": 1,
+        }

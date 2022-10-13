@@ -55,7 +55,7 @@ class UserDoc(DocumentBaseModel):
                          '3. At least 1 numeric character [0-9].')
 
     @staticmethod
-    def projection():
+    def projection() -> dict:
         """Base model for projection."""
         return {
             "_id": 0,

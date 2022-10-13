@@ -5,6 +5,7 @@ import datetime
 import getpass
 import hashlib
 import logging
+from tabnanny import process_tokens
 import time
 from functools import wraps
 from http import HTTPStatus
@@ -107,15 +108,18 @@ class UserController:
         data.update({"updated_at": datetime.datetime.utcnow()})
         result = self.db.users.find_one_and_update(
             {"username": username},
-            data
+            {"$set": data},
+            return_document=ReturnDocument.AFTER
         )
         return result
 
     def get_user(self, username):
         """Return a user information from database"""
+        project = UserDoc.projection()
+        project["password"] = 1
         data = self.db.users.aggregate([
             {"$match": {"username": username}},
-            {"$project": UserDoc.projection()}
+            {"$project": project}
         ])
         return {"users": {value["username"]: value for value in data}}
 
@@ -244,12 +248,13 @@ class Auth:
         )
 
     def _authenticate_user(self):
-        """Authenticate a user using Storehouse."""
+        """Authenticate a user using MongoDB."""
         username = request.authorization["username"]
         password = request.authorization["password"].encode()
+
         try:
-            user = self._find_user(username)[0].get("data")
-            if user.get("password") != hashlib.sha512(password).hexdigest():
+            user = self._find_user(username)
+            if user["password"] != hashlib.sha512(password).hexdigest():
                 raise KeyError
             time_exp = datetime.datetime.utcnow() + datetime.timedelta(
                 minutes=self.token_expiration_minutes
@@ -260,52 +265,24 @@ class Auth:
             result = f"Incorrect username or password: {exc}"
             return result, HTTPStatus.UNAUTHORIZED.value
 
-    def _find_user(self, uid):
-        """Find a specific user using Storehouse."""
-        response = {}
-
-        def _find_user_callback(_event, box, error):
-            nonlocal response
-            if not box:
-                response = {
-                    "answer": f'User with uid {uid} not found',
-                    "code": HTTPStatus.NOT_FOUND.value
-                }
-            elif error:
-                response = {
-                    "answer": "User data cannot be shown",
-                    "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                }
-            else:
-                response = {
-                    "answer": {"data": box.data},
-                    "code": HTTPStatus.OK.value,
-                }
-
-        content = {
-            "box_id": uid,
-            "namespace": self.namespace,
-            "callback": _find_user_callback,
-        }
-        event = KytosEvent(name="kytos.storehouse.retrieve", content=content)
-        self.controller.buffers.app.put(event)
-        while True:
-            time.sleep(0.1)
-            if response:
-                break
-        return response["answer"], response["code"]
+    def _find_user(self, username):
+        """Find a specific user using MongoDB."""
+        user = self.user_controller.get_user(username)["users"]
+        return user[username]
 
     @authenticated
     def _list_user(self, username):
-        """List a specific user using Storehouse."""
+        """List a specific user using MongoDB."""
         answer = self.user_controller.get_user(username)
+        del answer["users"][username]["password"]
         return answer
 
     @authenticated
     def _list_users(self):
-        """List all users using Storehouse."""
+        """List all users using MongoDB."""
         answer = self.user_controller.get_users()
         return answer
+
 
     @staticmethod
     def _get_request():
@@ -330,7 +307,7 @@ class Auth:
 
     @authenticated
     def _create_user(self):
-        """Save a user using Storehouse."""
+        """Save a user using MongoDB."""
         req = self._get_request()
         try:
             data = {
@@ -346,14 +323,14 @@ class Auth:
 
     @authenticated
     def _delete_user(self, username):
-        """Delete a user using Storehouse."""
-        if self.user_controller.delete_user(username) is None:
+        """Delete a user using MongoDB."""
+        if self.user_controller.delete_user(username) == {}:
             return jsonify(f"User {username} not found"), 404
         return jsonify(f"User {username} deleted succesfully"), 200
 
     @authenticated
     def _update_user(self, username):
-        """Update user data using Storehouse."""
+        """Update user data using MongoDB."""
         req = self._get_request()
         allowed = ["username", "email", "password"]
         data = {}

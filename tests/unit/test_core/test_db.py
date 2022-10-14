@@ -8,6 +8,7 @@ from pymongo.errors import OperationFailure
 
 from kytos.core.db import (Mongo, _log_pymongo_thread_traceback,
                            _mongo_conn_wait, db_conn_wait)
+from kytos.core.db import mongo_client as _mongo_client
 from kytos.core.exceptions import KytosDBInitException
 
 
@@ -18,6 +19,35 @@ class TestDb(TestCase):
         """setUp."""
         self.client = MagicMock()
         Mongo.client = self.client
+
+    @patch("kytos.core.db.MongoClient")
+    def test_default_args(self, mock_client) -> None:
+        """test default args."""
+        _mongo_client(
+            host_seeds="mongo1:27017,mongo2:27018,mongo3:27019",
+            username="invalid_user",
+            password="invalid_password",
+            database="napps",
+            maxpoolsize=300,
+            minpoolsize=30,
+            serverselectiontimeoutms=30000,
+        )
+        assert mock_client.call_count == 1
+        mock_client.assert_called_with(
+            ["mongo1:27017", "mongo2:27018", "mongo3:27019"],
+            username="invalid_user",
+            password="invalid_password",
+            connect=False,
+            authsource="napps",
+            retrywrites=True,
+            retryreads=True,
+            readpreference="primaryPreferred",
+            w="majority",
+            maxpoolsize=300,
+            minpoolsize=30,
+            readconcernlevel="majority",
+            serverselectiontimeoutms=30000,
+        )
 
     @staticmethod
     def test_mongo_conn_wait() -> None:

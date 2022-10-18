@@ -1,9 +1,12 @@
 """Unit test fixtures."""
 # pylint: disable=redefined-outer-name
 
+from unittest.mock import MagicMock
+
 import pytest
 
 from kytos.core import Controller
+from kytos.core.auth import Auth
 from kytos.lib.helpers import get_controller_mock
 
 
@@ -17,6 +20,7 @@ def ev_loop(monkeypatch, event_loop) -> None:
 @pytest.fixture
 def controller() -> Controller:
     """Controller fixture."""
+    Auth.get_user_controller = MagicMock()
     yield get_controller_mock()
 
 

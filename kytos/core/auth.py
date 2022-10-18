@@ -5,8 +5,6 @@ import datetime
 import getpass
 import hashlib
 import logging
-from tabnanny import process_tokens
-import time
 from functools import wraps
 from http import HTTPStatus
 
@@ -14,11 +12,11 @@ import jwt
 import pymongo
 from flask import jsonify, request
 from pymongo.collection import ReturnDocument
-from werkzeug.exceptions import BadRequest, UnsupportedMediaType
+from werkzeug.exceptions import (BadRequest, Conflict, NotFound, Unauthorized,
+                                 UnsupportedMediaType)
 
 from kytos.core.config import KytosConfig
 from kytos.core.db import Mongo
-from kytos.core.events import KytosEvent
 from kytos.core.user import UserDoc
 
 __all__ = ['authenticated']
@@ -69,24 +67,24 @@ class UserController:
         for collection, keys in index_tuples:
             if self.mongo.bootstrap_index(collection, keys):
                 LOG.info(
-                    f"Created DB index {keys}, collection: {collection})"
+                    f"Created DB index {keys}, collection: {collection}"
                 )
 
     def create_user(self, user_data):
         """Create user to database"""
         utc_now = datetime.datetime.utcnow()
-        data = {
-            "username": user_data["username"],
-            "email": user_data["email"],
-            "password": user_data["password"],
-            "inserted_at": utc_now,
-            "updated_at": utc_now,
-        }
         try:
+            data = {
+                "username": user_data["username"],
+                "email": user_data["email"],
+                "password": user_data["password"],
+                "inserted_at": utc_now,
+                "updated_at": utc_now,
+            }
             user = UserDoc(**data)
-        except ValueError as error:
-            raise error
-        result = self.db.users.insert_one(user.dict())
+            result = self.db.users.insert_one(user.dict())
+        except (ValueError, KeyError, Exception) as e:
+            raise e
         return result
 
     def delete_user(self, username):
@@ -115,20 +113,18 @@ class UserController:
 
     def get_user(self, username):
         """Return a user information from database"""
-        project = UserDoc.projection()
-        project["password"] = 1
         data = self.db.users.aggregate([
             {"$match": {"username": username}},
-            {"$project": project}
+            {"$project": UserDoc.projection()}
         ])
-        return {"users": {value["username"]: value for value in data}}
+        return {"data": value for value in data}
 
     def get_users(self):
         """Return all the users"""
         data = self.db.users.aggregate([
-            {"$project": UserDoc.projection()}
+            {"$project": {'_id': 0, 'username': 1}}
         ])
-        return {"users": {value["username"]: value for value in data}}
+        return {'users': [value['username'] for value in data]}
 
 
 class Auth:
@@ -183,12 +179,6 @@ class Auth:
 
     def _create_superuser(self):
         """Create a superuser using Storehouse."""
-        def _create_superuser_callback(_event, box, error):
-            if error:
-                LOG.error('Superuser was not created. Error: %s', error)
-            if box:
-                LOG.info("Superuser successfully created")
-
         def get_username():
             return input("Username: ")
 
@@ -203,22 +193,11 @@ class Auth:
             re_password = getpass.getpass('Retype password: ')
             if password == re_password:
                 break
-            print('Passwords do not match. Try again')
-
         user = {
             "username": username,
             "email": email,
-            "password": hashlib.sha512(password.encode()).hexdigest(),
+            "password": password,
         }
-        content = {
-            "namespace": self.namespace,
-            "box_id": user["username"],
-            "data": user,
-            "callback": _create_superuser_callback,
-        }
-        event = KytosEvent(name="kytos.storehouse.create", content=content)
-        self.controller.buffers.app.put(event)
-        user["password"] = password
         self.user_controller.create_user(user)
 
     def register_core_auth_services(self):
@@ -232,7 +211,7 @@ class Auth:
             "auth/login/", self._authenticate_user
         )
         self.controller.api_server.register_core_endpoint(
-            "auth/users/", self._list_users
+            "auth/users/", self._list_users,
         )
         self.controller.api_server.register_core_endpoint(
             "auth/users/<username>", self._list_user
@@ -251,11 +230,11 @@ class Auth:
         """Authenticate a user using MongoDB."""
         username = request.authorization["username"]
         password = request.authorization["password"].encode()
-
         try:
-            user = self._find_user(username)
+            user = self._find_user(username)['data']
             if user["password"] != hashlib.sha512(password).hexdigest():
-                raise KeyError
+                result = 'Password is incorrect.'
+                raise Unauthorized(result)
             time_exp = datetime.datetime.utcnow() + datetime.timedelta(
                 minutes=self.token_expiration_minutes
             )
@@ -267,14 +246,17 @@ class Auth:
 
     def _find_user(self, username):
         """Find a specific user using MongoDB."""
-        user = self.user_controller.get_user(username)["users"]
-        return user[username]
+        user = self.user_controller.get_user(username)
+        if user == {}:
+            result = f"User {username} not found"
+            raise NotFound(result)
+        return user
 
     @authenticated
     def _list_user(self, username):
         """List a specific user using MongoDB."""
-        answer = self.user_controller.get_user(username)
-        del answer["users"][username]["password"]
+        answer = self._find_user(username)
+        del answer["data"]["password"]
         return answer
 
     @authenticated
@@ -282,7 +264,6 @@ class Auth:
         """List all users using MongoDB."""
         answer = self.user_controller.get_users()
         return answer
-
 
     @staticmethod
     def _get_request():
@@ -318,14 +299,16 @@ class Auth:
         except KeyError as error:
             return jsonify(f"{error} is not found in request"), 404
 
-        self.user_controller.create_user(data)
+        user = self.user_controller.create_user(data)
+        if user is None:
+            raise Conflict('User was not created')
         return jsonify("User successfully created"), 200
 
     @authenticated
     def _delete_user(self, username):
         """Delete a user using MongoDB."""
         if self.user_controller.delete_user(username) == {}:
-            return jsonify(f"User {username} not found"), 404
+            raise NotFound(f"User {username} not found")
         return jsonify(f"User {username} deleted succesfully"), 200
 
     @authenticated
@@ -337,5 +320,7 @@ class Auth:
         for key, value in req.items():
             if key in allowed:
                 data[key] = value
-        self.user_controller.update_user(username, data)
+        updated = self.user_controller.update_user(username, data)
+        if updated is None:
+            raise NotFound(f"User {username} not found")
         return jsonify("User successfully updated"), 200

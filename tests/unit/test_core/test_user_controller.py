@@ -1,7 +1,9 @@
 """Test kytos.core.auth.UserController"""
-from datetime import datetime
+
 from unittest import TestCase
 from unittest.mock import MagicMock
+
+from pydantic import ValidationError
 
 from kytos.core.auth import UserController
 from kytos.core.user import UserDoc
@@ -41,24 +43,14 @@ class TestUserController(TestCase):
         self.assertEqual(arg1[0]['username'], "authtempuser")
         self.assertEqual(arg1[0]["email"], "temp@kytos.io")
         self.assertEqual(arg1[0]["password"], pass_decoded)
-        self.assertEqual(type(arg1[0]["inserted_at"]), datetime)
-        self.assertEqual(type(arg1[0]["updated_at"]), datetime)
+        self.assertEqual(arg1[0]["inserted_at"], user_data["inserted_at"])
+        self.assertEqual(arg1[0]["updated_at"], user_data["updated_at"])
         self.assertEqual(arg1[0]["deleted_at"], None)
-
-    def test_create_user_value_error(self):
-        """Test create_user ValueError"""
-        user_data = {
-            "username": "authtempuser",
-            "email": "temp@kytos.io",
-            "password": "password",
-        }
-        with self.assertRaises(ValueError):
-            self.user.create_user(user_data)
 
     def test_create_user_key_error(self):
         """Test create_user KeyError"""
         user_data = {"username": "onlyname"}
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValidationError):
             self.user.create_user(user_data)
 
     def test_delete_user(self):
@@ -79,14 +71,31 @@ class TestUserController(TestCase):
         self.assertEqual(arg1, {"username": 'name'})
         self.assertEqual(arg2, {"$set": data})
 
+    def test_update_user_error(self):
+        """Test update_user error handling"""
+        data = {'password': 'password'}
+        with self.assertRaises(ValidationError):
+            self.user.update_user('name', data)
+
     def test_get_user(self):
         """Test get_user"""
-        self.assertEqual({}, self.user.get_user('name'))
+        self.user.get_user('name')
         self.assertEqual(self.user.db.users.aggregate.call_count, 1)
         arg = self.user.db.users.aggregate.call_args[0]
         expected_arg = [
             {"$match": {"username": "name"}},
             {"$project": UserDoc.projection()}
+        ]
+        self.assertEqual(arg[0], expected_arg)
+
+    def test_get_user_nopw(self):
+        """Test get_user_nopw"""
+        self.user.get_user_nopw('name')
+        self.assertEqual(self.user.db.users.aggregate.call_count, 1)
+        arg = self.user.db.users.aggregate.call_args[0]
+        expected_arg = [
+            {"$match": {"username": "name"}},
+            {"$project": UserDoc.projection_nopw()}
         ]
         self.assertEqual(arg[0], expected_arg)
 

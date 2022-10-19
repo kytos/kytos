@@ -10,7 +10,6 @@ from kytos.core.config import KytosConfig
 
 KYTOS_CORE_API = "http://127.0.0.1:8181/api/kytos/"
 API_URI = KYTOS_CORE_API+"core"
-STOREHOUSE_API_URI = KYTOS_CORE_API+"storehouse/v1/kytos.core.auth.users"
 
 
 # pylint: disable=unused-argument
@@ -33,12 +32,6 @@ class TestAuth(TestCase):
         }
         self.auth_header = {"Authorization": f"Bearer {self.token}"}
 
-    def _patch_event_trigger(self, event):
-        """Patch event callback trigger."""
-        for patched_event in self.patched_events:
-            box = patched_event.get(event.content.get('callback').__name__)
-            event.content.get('callback')(None, box, None)
-
     def _get_controller_mock(self):
         """Return a controller mock."""
         options = KytosConfig().options['daemon']
@@ -46,10 +39,6 @@ class TestAuth(TestCase):
         controller = Controller(options)
         controller.buffers = KytosBuffers()
         controller.log = Mock()
-
-        # Patch event callback trigger.
-        controller.buffers.app.put = self._patch_event_trigger
-
         return controller
 
     @staticmethod
@@ -73,8 +62,7 @@ class TestAuth(TestCase):
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def _get_token(self, mock_jwt_secret=None):
         """Make a request to get a token to be used in tests."""
-        box = {}
-        box['data'] = {
+        box = {
             # "password" digested
             'password': 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e073'
                         '94c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103'
@@ -92,7 +80,6 @@ class TestAuth(TestCase):
         success_response = api.open(url, method='GET', headers=header)
 
         json_response = success_response.json
-        print(json_response)
         return json_response["token"]
 
     def _validate_schema(self, my_dict, check_against):
@@ -123,7 +110,6 @@ class TestAuth(TestCase):
         api = self.get_auth_test_client(self.auth)
         success_response = api.open(url, method='GET', headers=valid_header)
         error_response = api.open(url, method='GET', headers=invalid_header)
-
         self.assertEqual(success_response.status_code, 200)
         self.assertEqual(error_response.status_code, 401)
 
@@ -132,17 +118,16 @@ class TestAuth(TestCase):
         """Test auth list users endpoint."""
         invalid_header = {"Authorization": "Bearer invalidtoken"}
         schema = {"users": list}
-        event_boxes = {'users': [
+        response = {'users': [
                         self.user_data['username'],
                         {"username": "authtempuser2"}
                     ]}
-        self.auth.user_controller.get_users.return_value = event_boxes
+        self.auth.user_controller.get_users.return_value = response
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/"
         success_response = api.open(url, method='GET',
                                     headers=self.auth_header)
         error_response = api.open(url, method='GET', headers=invalid_header)
-        print(success_response.json)
         is_valid = self._validate_schema(success_response.json, schema)
 
         self.assertEqual(success_response.status_code, 200)
@@ -166,16 +151,14 @@ class TestAuth(TestCase):
         url = f"{API_URI}/auth/users/"
         error_response = api.open(url, method='POST', json=self.user_data,
                                   headers=self.auth_header)
-        print(error_response.json)
         self.assertEqual(error_response.status_code, 409)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_04_list_user_request(self, mock_jwt_secret):
         """Test auth list user endpoint."""
-        schema = {"data": {"email": str, "username": str}}
-        box = {}
-        box['data'] = self.user_data
-        self.auth.user_controller.get_user.return_value = box
+        schema = {"email": str, "username": str}
+        box = self.user_data
+        self.auth.user_controller.get_user_nopw.return_value = box
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/{self.user_data.get('username')}"
         success_response = api.open(url, method='GET',
@@ -188,11 +171,10 @@ class TestAuth(TestCase):
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_04_list_user_request_error(self, mock_jwt_secret):
         """Test auth list user endpoint."""
-        self.auth.user_controller.get_user.return_value = {}
+        self.auth.user_controller.get_user_nopw.return_value = {}
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/user3"
         error_response = api.open(url, method='GET', headers=self.auth_header)
-        print(error_response.json)
         self.assertEqual(error_response.status_code, 404)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")

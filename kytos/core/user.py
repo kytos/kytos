@@ -61,5 +61,31 @@ class UserDoc(DocumentBaseModel):
             "_id": 0,
             "username": 1,
             "email": 1,
-            'password': 1
+            'password': 1,
+            'inserted_at': 1,
+            'updated_at': 1,
+            'deleted_at': 1
         }
+
+    @staticmethod
+    def projection_nopw() -> dict:
+        """Model for projection without password"""
+        return {
+            "_id": 0,
+            "username": 1,
+            "email": 1,
+            'inserted_at': 1,
+            'updated_at': 1,
+            'deleted_at': 1
+        }
+
+
+class UserDocUpdate(DocumentBaseModel):
+    "UserDocUpdate use to validate data before updating"
+
+    username: Optional[str]
+    password: Optional[constr(min_length=8)]
+    email: Optional[EmailStr]
+
+    _validate_password = validator('password',
+                                   allow_reuse=True)(UserDoc.validate_password)

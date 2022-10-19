@@ -5,19 +5,24 @@ import datetime
 import getpass
 import hashlib
 import logging
+import os
 from functools import wraps
 from http import HTTPStatus
 
 import jwt
 import pymongo
 from flask import jsonify, request
+from pydantic import ValidationError
 from pymongo.collection import ReturnDocument
+from pymongo.errors import AutoReconnect, DuplicateKeyError
+from tenacity import retry_if_exception_type, stop_after_attempt, wait_random
 from werkzeug.exceptions import (BadRequest, Conflict, NotFound, Unauthorized,
                                  UnsupportedMediaType)
 
 from kytos.core.config import KytosConfig
 from kytos.core.db import Mongo
-from kytos.core.user import UserDoc
+from kytos.core.retry import before_sleep, for_all_methods, retries
+from kytos.core.user import UserDoc, UserDocUpdate
 
 __all__ = ['authenticated']
 
@@ -50,6 +55,18 @@ def authenticated(func):
     return wrapper
 
 
+@for_all_methods(
+    retries,
+    stop=stop_after_attempt(
+        int(os.environ.get("MONGO_AUTO_RETRY_STOP_AFTER_ATTEMPT", 3))
+    ),
+    wait=wait_random(
+        min=int(os.environ.get("MONGO_AUTO_RETRY_WAIT_RANDOM_MIN", 0.1)),
+        max=int(os.environ.get("MONGO_AUTO_RETRY_WAIT_RANDOM_MAX", 1)),
+    ),
+    before_sleep=before_sleep,
+    retry=retry_if_exception_type((AutoReconnect,)),
+)
 class UserController:
     """UserController"""
 
@@ -60,34 +77,28 @@ class UserController:
         self.db = self.db_client[self.mongo.db_name]
 
     def bootstrap_indexes(self):
-        """Bootstrap all topology related indexes."""
+        """Bootstrap all users related indexes."""
         index_tuples = [
-            ("users", [("username", pymongo.ASCENDING)]),
+            ("users", [("username", pymongo.ASCENDING)], {"unique": True}),
         ]
-        for collection, keys in index_tuples:
-            if self.mongo.bootstrap_index(collection, keys):
+        for collection, keys, kwargs in index_tuples:
+            if self.mongo.bootstrap_index(collection, keys, **kwargs):
                 LOG.info(
                     f"Created DB index {keys}, collection: {collection}"
                 )
 
-    def create_user(self, user_data):
+    def create_user(self, user_data) -> pymongo.InsertOne:
         """Create user to database"""
-        utc_now = datetime.datetime.utcnow()
         try:
-            data = {
-                "username": user_data["username"],
-                "email": user_data["email"],
-                "password": user_data["password"],
-                "inserted_at": utc_now,
-                "updated_at": utc_now,
-            }
-            user = UserDoc(**data)
-            result = self.db.users.insert_one(user.dict())
-        except (ValueError, KeyError, Exception) as e:
+            utc_now = datetime.datetime.utcnow()
+            user_data.update({"inserted_at": utc_now})
+            user_data.update({"updated_at": utc_now})
+            result = self.db.users.insert_one(UserDoc(**user_data).dict())
+        except (ValidationError, DuplicateKeyError) as e:
             raise e
         return result
 
-    def delete_user(self, username):
+    def delete_user(self, username) -> dict:
         """Delete user from database"""
         utc_now = datetime.datetime.utcnow()
         update = {
@@ -101,25 +112,37 @@ class UserController:
         )
         return result
 
-    def update_user(self, username, data):
+    def update_user(self, username, data) -> dict:
         """Update user from database"""
-        data.update({"updated_at": datetime.datetime.utcnow()})
+        try:
+            data.update({"updated_at": datetime.datetime.utcnow()})
+            validated_data = UserDocUpdate(**data).dict(exclude_none=True)
+        except ValidationError as e:
+            raise e
         result = self.db.users.find_one_and_update(
             {"username": username},
-            {"$set": data},
+            {"$set": validated_data},
             return_document=ReturnDocument.AFTER
         )
         return result
 
-    def get_user(self, username):
+    def get_user(self, username) -> dict:
         """Return a user information from database"""
         data = self.db.users.aggregate([
             {"$match": {"username": username}},
             {"$project": UserDoc.projection()}
         ])
-        return {"data": value for value in data}
+        return data.next()
 
-    def get_users(self):
+    def get_user_nopw(self, username) -> dict:
+        """Return a user information from database without password"""
+        data = self.db.users.aggregate([
+            {"$match": {"username": username}},
+            {"$project": UserDoc.projection_nopw()}
+        ])
+        return data.next()
+
+    def get_users(self) -> dict:
         """Return all the users"""
         data = self.db.users.aggregate([
             {"$project": {'_id': 0, 'username': 1}}
@@ -178,7 +201,7 @@ class Auth:
         )
 
     def _create_superuser(self):
-        """Create a superuser using Storehouse."""
+        """Create a superuser using MongoDB."""
         def get_username():
             return input("Username: ")
 
@@ -231,23 +254,22 @@ class Auth:
         username = request.authorization["username"]
         password = request.authorization["password"].encode()
         try:
-            user = self._find_user(username)['data']
+            user = self._find_user(username)
             if user["password"] != hashlib.sha512(password).hexdigest():
-                result = 'Password is incorrect.'
-                raise Unauthorized(result)
+                raise Unauthorized
             time_exp = datetime.datetime.utcnow() + datetime.timedelta(
                 minutes=self.token_expiration_minutes
             )
             token = self._generate_token(username, time_exp)
             return {"token": token}, HTTPStatus.OK.value
-        except (AttributeError, KeyError) as exc:
+        except (AttributeError, KeyError, Unauthorized) as exc:
             result = f"Incorrect username or password: {exc}"
             return result, HTTPStatus.UNAUTHORIZED.value
 
     def _find_user(self, username):
         """Find a specific user using MongoDB."""
         user = self.user_controller.get_user(username)
-        if user == {}:
+        if not user:
             result = f"User {username} not found"
             raise NotFound(result)
         return user
@@ -255,8 +277,10 @@ class Auth:
     @authenticated
     def _list_user(self, username):
         """List a specific user using MongoDB."""
-        answer = self._find_user(username)
-        del answer["data"]["password"]
+        answer = self.user_controller.get_user_nopw(username)
+        if not answer:
+            result = f"User {username} not found"
+            raise NotFound(result)
         return answer
 
     @authenticated
@@ -289,18 +313,8 @@ class Auth:
     @authenticated
     def _create_user(self):
         """Save a user using MongoDB."""
-        req = self._get_request()
-        try:
-            data = {
-                "username": req["username"],
-                "email": req["email"],
-                "password": req["password"],
-            }
-        except KeyError as error:
-            return jsonify(f"{error} is not found in request"), 404
-
-        user = self.user_controller.create_user(data)
-        if user is None:
+        user = self.user_controller.create_user(self._get_request())
+        if not user:
             raise Conflict('User was not created')
         return jsonify("User successfully created"), 200
 
@@ -321,6 +335,6 @@ class Auth:
             if key in allowed:
                 data[key] = value
         updated = self.user_controller.update_user(username, data)
-        if updated is None:
+        if not updated:
             raise NotFound(f"User {username} not found")
         return jsonify("User successfully updated"), 200

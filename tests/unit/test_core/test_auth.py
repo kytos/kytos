@@ -22,6 +22,7 @@ class TestAuth(TestCase):
         self.patched_events = []  # {'event_name': box_object}
         self.server_name_url = 'http://localhost:8181/api/kytos'
         self.controller = self._get_controller_mock()
+        self.controller.start_auth()
         self.auth = Auth(self.controller)
         self.username, self.password = self._create_super_user()
         self.token = self._get_token()

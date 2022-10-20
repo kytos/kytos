@@ -1,5 +1,6 @@
 """Test kytos.core.auth.UserController"""
 
+from datetime import datetime
 from unittest import TestCase
 from unittest.mock import MagicMock
 
@@ -43,8 +44,8 @@ class TestUserController(TestCase):
         self.assertEqual(arg1[0]['username'], "authtempuser")
         self.assertEqual(arg1[0]["email"], "temp@kytos.io")
         self.assertEqual(arg1[0]["password"], pass_decoded)
-        self.assertEqual(arg1[0]["inserted_at"], user_data["inserted_at"])
-        self.assertEqual(arg1[0]["updated_at"], user_data["updated_at"])
+        self.assertEqual(type(arg1[0]["inserted_at"]), datetime)
+        self.assertEqual(type(arg1[0]["updated_at"]), datetime)
         self.assertEqual(arg1[0]["deleted_at"], None)
 
     def test_create_user_key_error(self):
@@ -69,7 +70,7 @@ class TestUserController(TestCase):
         self.assertEqual(self.user.db.users.find_one_and_update.call_count, 1)
         arg1, arg2 = self.user.db.users.find_one_and_update.call_args[0]
         self.assertEqual(arg1, {"username": 'name'})
-        self.assertEqual(arg2, {"$set": data})
+        self.assertEqual(type(arg2), dict)
 
     def test_update_user_error(self):
         """Test update_user error handling"""
@@ -84,7 +85,8 @@ class TestUserController(TestCase):
         arg = self.user.db.users.aggregate.call_args[0]
         expected_arg = [
             {"$match": {"username": "name"}},
-            {"$project": UserDoc.projection()}
+            {"$project": UserDoc.projection()},
+            {"$limit": 1}
         ]
         self.assertEqual(arg[0], expected_arg)
 
@@ -104,5 +106,5 @@ class TestUserController(TestCase):
         self.assertIn('users', self.user.get_users())
         self.assertEqual(self.user.db.users.aggregate.call_count, 1)
         arg = self.user.db.users.aggregate.call_args[0]
-        expected_arg = [{"$project": {"_id": 0, "username": 1}}]
+        expected_arg = [{"$project": UserDoc.projection_nopw()}]
         self.assertEqual(arg[0], expected_arg)

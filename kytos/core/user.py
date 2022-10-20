@@ -62,6 +62,7 @@ class UserDoc(DocumentBaseModel):
             "username": 1,
             "email": 1,
             'password': 1,
+            'state': 1,
             'inserted_at': 1,
             'updated_at': 1,
             'deleted_at': 1
@@ -74,6 +75,7 @@ class UserDoc(DocumentBaseModel):
             "_id": 0,
             "username": 1,
             "email": 1,
+            'state': 1,
             'inserted_at': 1,
             'updated_at': 1,
             'deleted_at': 1

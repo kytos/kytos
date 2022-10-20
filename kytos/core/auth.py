@@ -87,54 +87,60 @@ class UserController:
                     f"Created DB index {keys}, collection: {collection}"
                 )
 
-    def create_user(self, user_data) -> pymongo.InsertOne:
+    def create_user(self, user_data: dict) -> pymongo.InsertOne:
         """Create user to database"""
         try:
             utc_now = datetime.datetime.utcnow()
-            user_data.update({"inserted_at": utc_now})
-            user_data.update({"updated_at": utc_now})
-            result = self.db.users.insert_one(UserDoc(**user_data).dict())
+            result = self.db.users.insert_one(UserDoc(**{
+                **user_data,
+                **{"inserted_at": utc_now},
+                **{"updated_at": utc_now}
+            }).dict())
         except (ValidationError, DuplicateKeyError) as e:
             raise e
         return result
 
-    def delete_user(self, username) -> dict:
+    def delete_user(self, username: str) -> dict:
         """Delete user from database"""
         utc_now = datetime.datetime.utcnow()
-        update = {
-                "state": "inactive",
-                "deleted_at": utc_now,
-        }
         result = self.db.users.find_one_and_update(
             {"username": username},
-            {"$set": update},
+            {"$set": {
+                "state": "inactive",
+                "deleted_at": utc_now,
+            }},
             return_document=ReturnDocument.AFTER,
         )
         return result
 
-    def update_user(self, username, data) -> dict:
+    def update_user(self, username: str, data: dict) -> dict:
         """Update user from database"""
+        utc_now = datetime.datetime.utcnow()
         try:
-            data.update({"updated_at": datetime.datetime.utcnow()})
-            validated_data = UserDocUpdate(**data).dict(exclude_none=True)
+            result = self.db.users.find_one_and_update(
+                {"username": username},
+                {
+                    "$set": UserDocUpdate(**{
+                        **data,
+                        **{"updated_at": utc_now}
+                    }).dict(exclude_none=True)
+                },
+                return_document=ReturnDocument.AFTER
+            )
         except ValidationError as e:
             raise e
-        result = self.db.users.find_one_and_update(
-            {"username": username},
-            {"$set": validated_data},
-            return_document=ReturnDocument.AFTER
-        )
         return result
 
-    def get_user(self, username) -> dict:
+    def get_user(self, username: str) -> dict:
         """Return a user information from database"""
         data = self.db.users.aggregate([
             {"$match": {"username": username}},
-            {"$project": UserDoc.projection()}
+            {"$project": UserDoc.projection()},
+            {"$limit": 1}
         ])
         return data.next()
 
-    def get_user_nopw(self, username) -> dict:
+    def get_user_nopw(self, username: str) -> dict:
         """Return a user information from database without password"""
         data = self.db.users.aggregate([
             {"$match": {"username": username}},
@@ -145,9 +151,9 @@ class UserController:
     def get_users(self) -> dict:
         """Return all the users"""
         data = self.db.users.aggregate([
-            {"$project": {'_id': 0, 'username': 1}}
+            {"$project": UserDoc.projection_nopw()}
         ])
-        return {'users': [value['username'] for value in data]}
+        return {'users': list(value for value in data)}
 
 
 class Auth:
@@ -165,7 +171,6 @@ class Auth:
         self.user_controller = self.get_user_controller()
         self.user_controller.bootstrap_indexes()
         self.controller = controller
-        self.namespace = "kytos.core.auth.users"
         self.token_expiration_minutes = self.get_token_expiration()
         if self.controller.options.create_superuser is True:
             self._create_superuser()
@@ -313,7 +318,10 @@ class Auth:
     @authenticated
     def _create_user(self):
         """Save a user using MongoDB."""
-        user = self.user_controller.create_user(self._get_request())
+        try:
+            user = self.user_controller.create_user(self._get_request())
+        except (ValidationError, DuplicateKeyError) as e:
+            raise e
         if not user:
             raise Conflict('User was not created')
         return jsonify("User successfully created"), 200
@@ -334,7 +342,10 @@ class Auth:
         for key, value in req.items():
             if key in allowed:
                 data[key] = value
-        updated = self.user_controller.update_user(username, data)
+        try:
+            updated = self.user_controller.update_user(username, data)
+        except ValidationError as e:
+            raise e
         if not updated:
             raise NotFound(f"User {username} not found")
         return jsonify("User successfully updated"), 200

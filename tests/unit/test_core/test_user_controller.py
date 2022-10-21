@@ -97,7 +97,8 @@ class TestUserController(TestCase):
         arg = self.user.db.users.aggregate.call_args[0]
         expected_arg = [
             {"$match": {"username": "name"}},
-            {"$project": UserDoc.projection_nopw()}
+            {"$project": UserDoc.projection_nopw()},
+            {"$limit": 1}
         ]
         self.assertEqual(arg[0], expected_arg)
 

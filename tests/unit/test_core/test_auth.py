@@ -142,7 +142,7 @@ class TestAuth(TestCase):
         url = f"{API_URI}/auth/users/"
         success_response = api.open(url, method='POST', json=self.user_data,
                                     headers=self.auth_header)
-        self.assertEqual(success_response.status_code, 200)
+        self.assertEqual(success_response.status_code, 201)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_03_create_user_request_error(self, mock_jwt_secret):

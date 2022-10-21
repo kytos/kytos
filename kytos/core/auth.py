@@ -144,7 +144,8 @@ class UserController:
         """Return a user information from database without password"""
         data = self.db.users.aggregate([
             {"$match": {"username": username}},
-            {"$project": UserDoc.projection_nopw()}
+            {"$project": UserDoc.projection_nopw()},
+            {"$limit": 1}
         ])
         return data.next()
 
@@ -324,7 +325,7 @@ class Auth:
             raise e
         if not user:
             raise Conflict('User was not created')
-        return jsonify("User successfully created"), 200
+        return jsonify("User successfully created"), 201
 
     @authenticated
     def _delete_user(self, username):

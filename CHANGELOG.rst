@@ -16,8 +16,10 @@ Changed
 - Flask/Werkzeug 2.0.0+ now provide ``async`` support, so NApps can leverage ``asyncio`` and its ecosystem when applicable using the same ``rest`` decorator
 - Replaced ``get_event_loop`` with ``get_running_loop`` when applicable to be compatible with python 3.9+ in the future
 - NApps are unloaded in the reverse order that they are enabled to facilitate to shutdown gracefully.
+- ``MongoClient`` now has an explicit write_concern majority
 - Added dependencies ``dnspython==2.2.1, email-validator==1.3.0``
 - Auth storage has been migrated from the NApp ``storehouse`` to MongoDB with ``kytos/users.py`` collection
+
 
 Deprecated
 ==========

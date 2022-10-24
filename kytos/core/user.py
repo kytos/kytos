@@ -28,7 +28,7 @@ class DocumentBaseModel(BaseModel):
 class UserDoc(DocumentBaseModel):
     """UserDocumentModel."""
 
-    username: str
+    username: constr(min_length=1)
     state: Literal['active', 'inactive'] = 'active'
     password: constr(min_length=8)
     email: EmailStr

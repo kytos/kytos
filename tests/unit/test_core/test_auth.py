@@ -3,7 +3,9 @@ import base64
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
-from werkzeug.exceptions import BadRequest, Conflict, NotFound
+from pydantic import ValidationError
+from pymongo.errors import DuplicateKeyError
+from werkzeug.exceptions import NotFound
 
 from kytos.core import Controller
 from kytos.core.auth import Auth
@@ -142,7 +144,8 @@ class TestAuth(TestCase):
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_03_create_user_request_conflict(self, mock_jwt_secret):
         """Test auth create user endpoint."""
-        self.auth.user_controller.create_user.side_effect = Conflict
+        controller = self.auth.user_controller
+        controller.create_user.side_effect = DuplicateKeyError(0)
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/"
         error_response = api.open(url, method='POST', json=self.user_data,
@@ -152,7 +155,8 @@ class TestAuth(TestCase):
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_03_create_user_request_bad(self, mock_jwt_secret):
         """Test auth create user endpoint."""
-        self.auth.user_controller.create_user.side_effect = BadRequest
+        controller = self.auth.user_controller
+        controller.create_user.side_effect = ValidationError('', '')
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/"
         error_response = api.open(url, method='POST', json=self.user_data,
@@ -208,7 +212,8 @@ class TestAuth(TestCase):
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_05_update_user_request_bad(self, mock_jwt_secret):
         """Test auth update user endpoint"""
-        self.auth.user_controller.update_user.side_effect = BadRequest
+        controller = self.auth.user_controller
+        controller.update_user.side_effect = ValidationError('', '')
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/user5"
         error_response = api.open(url, method='PATCH', json={},

@@ -334,10 +334,10 @@ class Auth:
         """Save a user using MongoDB."""
         try:
             self.user_controller.create_user(self._get_request())
-        except BadRequest as err:
-            raise err
-        except Conflict as err:
-            raise err
+        except ValidationError as err:
+            raise BadRequest from err
+        except DuplicateKeyError as err:
+            raise Conflict from err
         return jsonify("User successfully created"), 201
 
     @authenticated
@@ -358,8 +358,8 @@ class Auth:
                 data[key] = value
         try:
             updated = self.user_controller.update_user(username, data)
-        except BadRequest as err:
-            raise err
+        except ValidationError as err:
+            raise BadRequest from err
         if not updated:
             raise NotFound(f"User {username} not found")
         return jsonify("User successfully updated"), 200

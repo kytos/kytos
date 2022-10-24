@@ -3,6 +3,8 @@ import base64
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
+from werkzeug.exceptions import BadRequest, Conflict, NotFound
+
 from kytos.core import Controller
 from kytos.core.auth import Auth
 from kytos.core.buffers import KytosBuffers
@@ -47,17 +49,10 @@ class TestAuth(TestCase):
         """Return a flask api test client."""
         return auth.controller.api_server.app.test_client()
 
-    @patch('kytos.core.auth.Auth._create_superuser')
-    def _create_super_user(self, mock_username=None):
+    def _create_super_user(self):
         """Create a superuser to integration test."""
         username = "test"
         password = "password"
-        email = "test@kytos.io"
-
-        mock_username.return_value.get_username.return_value = username
-        mock_username.return_value.get_email.return_value = email
-        self.auth._create_superuser()  # pylint: disable=protected-access
-
         return username, password
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
@@ -145,14 +140,24 @@ class TestAuth(TestCase):
         self.assertEqual(success_response.status_code, 201)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_03_create_user_request_error(self, mock_jwt_secret):
+    def test_03_create_user_request_conflict(self, mock_jwt_secret):
         """Test auth create user endpoint."""
-        self.auth.user_controller.create_user.return_value = None
+        self.auth.user_controller.create_user.side_effect = Conflict
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/"
         error_response = api.open(url, method='POST', json=self.user_data,
                                   headers=self.auth_header)
         self.assertEqual(error_response.status_code, 409)
+
+    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
+    def test_03_create_user_request_bad(self, mock_jwt_secret):
+        """Test auth create user endpoint."""
+        self.auth.user_controller.create_user.side_effect = BadRequest
+        api = self.get_auth_test_client(self.auth)
+        url = f"{API_URI}/auth/users/"
+        error_response = api.open(url, method='POST', json=self.user_data,
+                                  headers=self.auth_header)
+        self.assertEqual(error_response.status_code, 400)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_04_list_user_request(self, mock_jwt_secret):
@@ -172,7 +177,7 @@ class TestAuth(TestCase):
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_04_list_user_request_error(self, mock_jwt_secret):
         """Test auth list user endpoint."""
-        self.auth.user_controller.get_user_nopw.return_value = {}
+        self.auth.user_controller.get_user_nopw.return_value = None
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/user3"
         error_response = api.open(url, method='GET', headers=self.auth_header)
@@ -190,9 +195,9 @@ class TestAuth(TestCase):
         self.assertEqual(success_response.status_code, 200)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_05_update_user_request_error(self, mock_jwt_secret):
+    def test_05_update_user_request_not_found(self, mock_jwt_secret):
         """Test auth update user endpoint."""
-        self.auth.user_controller.update_user.return_value = None
+        self.auth.user_controller.update_user.return_value = {}
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/user5"
         error_response = api.open(url, method='PATCH', json={},
@@ -201,9 +206,19 @@ class TestAuth(TestCase):
         self.assertEqual(error_response.status_code, 404)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
+    def test_05_update_user_request_bad(self, mock_jwt_secret):
+        """Test auth update user endpoint"""
+        self.auth.user_controller.update_user.side_effect = BadRequest
+        api = self.get_auth_test_client(self.auth)
+        url = f"{API_URI}/auth/users/user5"
+        error_response = api.open(url, method='PATCH', json={},
+                                  headers=self.auth_header)
+
+        self.assertEqual(error_response.status_code, 400)
+
+    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_06_delete_user_request(self, mock_jwt_secret):
         """Test auth delete user endpoint."""
-        # Patch _delete_user_callback event callback.
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/{self.user_data.get('username')}"
         success_response = api.open(url, method='DELETE',
@@ -214,7 +229,6 @@ class TestAuth(TestCase):
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_06_delete_user_request_error(self, mock_jwt_secret):
         """Test auth delete user endpoint."""
-        # Patch _delete_user_callback event callback.
         self.auth.user_controller.delete_user.return_value = {}
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/nonexistent"
@@ -222,3 +236,10 @@ class TestAuth(TestCase):
                                     headers=self.auth_header)
 
         self.assertEqual(success_response.status_code, 404)
+
+    def test_07_find_user_error(self):
+        """Test _finb_user NotFound"""
+        self.auth.user_controller.get_user.return_value = None
+        with self.assertRaises(NotFound):
+            # pylint: disable=protected-access
+            self.auth._find_user("name")

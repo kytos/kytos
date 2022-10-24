@@ -96,8 +96,10 @@ class UserController:
                 **{"inserted_at": utc_now},
                 **{"updated_at": utc_now}
             }).dict())
-        except (ValidationError, DuplicateKeyError) as e:
-            raise e
+        except DuplicateKeyError as err:
+            raise err
+        except ValidationError as err:
+            raise err
         return result
 
     def delete_user(self, username: str) -> dict:
@@ -127,8 +129,10 @@ class UserController:
                 },
                 return_document=ReturnDocument.AFTER
             )
-        except ValidationError as e:
-            raise e
+        except ValidationError as err:
+            raise err
+        except DuplicateKeyError as err:
+            raise err
         return result
 
     def get_user(self, username: str) -> dict:
@@ -138,7 +142,11 @@ class UserController:
             {"$project": UserDoc.projection()},
             {"$limit": 1}
         ])
-        return data.next()
+        try:
+            user, *_ = list(value for value in data)
+            return user
+        except ValueError:
+            return None
 
     def get_user_nopw(self, username: str) -> dict:
         """Return a user information from database without password"""
@@ -147,7 +155,11 @@ class UserController:
             {"$project": UserDoc.projection_nopw()},
             {"$limit": 1}
         ])
-        return data.next()
+        try:
+            user, *_ = list(value for value in data)
+            return user
+        except ValueError:
+            return None
 
     def get_users(self) -> dict:
         """Return all the users"""
@@ -216,7 +228,6 @@ class Auth:
 
         username = get_username()
         email = get_email()
-
         while True:
             password = getpass.getpass()
             re_password = getpass.getpass('Retype password: ')
@@ -228,6 +239,8 @@ class Auth:
             "password": password,
         }
         self.user_controller.create_user(user)
+
+        return user
 
     def register_core_auth_services(self):
         """
@@ -268,8 +281,8 @@ class Auth:
             )
             token = self._generate_token(username, time_exp)
             return {"token": token}, HTTPStatus.OK.value
-        except (AttributeError, KeyError, Unauthorized) as exc:
-            result = f"Incorrect username or password: {exc}"
+        except Unauthorized:
+            result = "Incorrect username or password"
             return result, HTTPStatus.UNAUTHORIZED.value
 
     def _find_user(self, username):
@@ -283,17 +296,17 @@ class Auth:
     @authenticated
     def _list_user(self, username):
         """List a specific user using MongoDB."""
-        answer = self.user_controller.get_user_nopw(username)
-        if not answer:
+        user = self.user_controller.get_user_nopw(username)
+        if not user:
             result = f"User {username} not found"
             raise NotFound(result)
-        return answer
+        return user
 
     @authenticated
     def _list_users(self):
         """List all users using MongoDB."""
-        answer = self.user_controller.get_users()
-        return answer
+        users_list = self.user_controller.get_users()
+        return users_list
 
     @staticmethod
     def _get_request():
@@ -320,17 +333,17 @@ class Auth:
     def _create_user(self):
         """Save a user using MongoDB."""
         try:
-            user = self.user_controller.create_user(self._get_request())
-        except (ValidationError, DuplicateKeyError) as e:
-            raise e
-        if not user:
-            raise Conflict('User was not created')
+            self.user_controller.create_user(self._get_request())
+        except BadRequest as err:
+            raise err
+        except Conflict as err:
+            raise err
         return jsonify("User successfully created"), 201
 
     @authenticated
     def _delete_user(self, username):
         """Delete a user using MongoDB."""
-        if self.user_controller.delete_user(username) == {}:
+        if not self.user_controller.delete_user(username):
             raise NotFound(f"User {username} not found")
         return jsonify(f"User {username} deleted succesfully"), 200
 
@@ -345,8 +358,8 @@ class Auth:
                 data[key] = value
         try:
             updated = self.user_controller.update_user(username, data)
-        except ValidationError as e:
-            raise e
+        except BadRequest as err:
+            raise err
         if not updated:
             raise NotFound(f"User {username} not found")
         return jsonify("User successfully updated"), 200

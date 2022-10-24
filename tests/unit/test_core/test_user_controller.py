@@ -5,6 +5,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 
 from pydantic import ValidationError
+from pymongo.errors import DuplicateKeyError
 
 from kytos.core.auth import UserController
 from kytos.core.user import UserDoc
@@ -16,6 +17,11 @@ class TestUserController(TestCase):
     def setUp(self) -> None:
         """Execte steps before each steps."""
         self.user = UserController(MagicMock())
+        self.user_data = {
+            "username": "authtempuser",
+            "email": "temp@kytos.io",
+            "password": "Password1234",
+        }
 
     def test_boostrap_indexes(self):
         """Test bootstrap_indexes"""
@@ -30,15 +36,10 @@ class TestUserController(TestCase):
 
     def test_create_user(self):
         """Test create_user"""
-        user_data = {
-            "username": "authtempuser",
-            "email": "temp@kytos.io",
-            "password": "Password1234",
-        }
         pass_decoded = "20b0747eefcdc16fa4fb06bbf9284303645ecc3d2" \
                        "c43927878bd513f06853191c104aebae6d7fca629" \
                        "1f1e296c6af99ebf8a137cbd7a0d34f2e27b31cb4fecdb"
-        self.user.create_user(user_data)
+        self.user.create_user(self.user_data)
         self.assertEqual(self.user.db.users.insert_one.call_count, 1)
         arg1 = self.user.db.users.insert_one.call_args[0]
         self.assertEqual(arg1[0]['username'], "authtempuser")
@@ -50,9 +51,15 @@ class TestUserController(TestCase):
 
     def test_create_user_key_error(self):
         """Test create_user KeyError"""
-        user_data = {"username": "onlyname"}
+        wrong_data = {"username": "onlyname"}
         with self.assertRaises(ValidationError):
-            self.user.create_user(user_data)
+            self.user.create_user(wrong_data)
+
+    def test_create_user_key_duplicate(self):
+        """Test create_user with DuplicateKeyError"""
+        self.user.db.users.insert_one.side_effect = DuplicateKeyError(0)
+        with self.assertRaises(DuplicateKeyError):
+            self.user.create_user(self.user_data)
 
     def test_delete_user(self):
         """Test delete_user"""
@@ -78,9 +85,17 @@ class TestUserController(TestCase):
         with self.assertRaises(ValidationError):
             self.user.update_user('name', data)
 
+    def test_update_user_duplicate(self):
+        """Test update_user with DuplicateKeyError"""
+        db_base = self.user.db
+        db_base.users.find_one_and_update.side_effect = DuplicateKeyError(0)
+        with self.assertRaises(DuplicateKeyError):
+            self.user.update_user({}, {})
+
     def test_get_user(self):
         """Test get_user"""
-        self.user.get_user('name')
+        self.user.db.users.aggregate.return_value = [self.user_data]
+        result = self.user.get_user('name')
         self.assertEqual(self.user.db.users.aggregate.call_count, 1)
         arg = self.user.db.users.aggregate.call_args[0]
         expected_arg = [
@@ -89,10 +104,18 @@ class TestUserController(TestCase):
             {"$limit": 1}
         ]
         self.assertEqual(arg[0], expected_arg)
+        self.assertEqual(result, self.user_data)
+
+    def test_get_user_empty(self):
+        """Test get_user with empty return"""
+        self.user.db.users.aggregate.return_value = []
+        user = self.user.get_user('name')
+        self.assertEqual(user, None)
 
     def test_get_user_nopw(self):
         """Test get_user_nopw"""
-        self.user.get_user_nopw('name')
+        self.user.db.users.aggregate.return_value = [self.user_data]
+        result = self.user.get_user_nopw('name')
         self.assertEqual(self.user.db.users.aggregate.call_count, 1)
         arg = self.user.db.users.aggregate.call_args[0]
         expected_arg = [
@@ -101,6 +124,13 @@ class TestUserController(TestCase):
             {"$limit": 1}
         ]
         self.assertEqual(arg[0], expected_arg)
+        self.assertEqual(result, self.user_data)
+
+    def test_get_user_nopw_empty(self):
+        """Test get_user_nopw with empty return"""
+        self.user.db.users.aggregate.return_value = []
+        user = self.user.get_user_nopw('name')
+        self.assertEqual(user, None)
 
     def test_get_users(self):
         """Test get_users"""

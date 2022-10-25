@@ -15,6 +15,7 @@ from flask import jsonify, request
 from pydantic import ValidationError
 from pymongo.collection import ReturnDocument
 from pymongo.errors import AutoReconnect, DuplicateKeyError
+from pymongo.results import InsertOneResult
 from tenacity import retry_if_exception_type, stop_after_attempt, wait_random
 from werkzeug.exceptions import (BadRequest, Conflict, NotFound, Unauthorized,
                                  UnsupportedMediaType)
@@ -87,7 +88,7 @@ class UserController:
                     f"Created DB index {keys}, collection: {collection}"
                 )
 
-    def create_user(self, user_data: dict) -> pymongo.InsertOne:
+    def create_user(self, user_data: dict) -> InsertOneResult:
         """Create user to database"""
         try:
             utc_now = datetime.datetime.utcnow()

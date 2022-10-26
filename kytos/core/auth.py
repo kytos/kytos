@@ -6,6 +6,7 @@ import getpass
 import hashlib
 import logging
 import os
+import uuid
 from functools import wraps
 from http import HTTPStatus
 
@@ -93,6 +94,7 @@ class UserController:
         try:
             utc_now = datetime.datetime.utcnow()
             result = self.db.users.insert_one(UserDoc(**{
+                **{"_id": str(uuid.uuid4())},
                 **user_data,
                 **{"inserted_at": utc_now},
                 **{"updated_at": utc_now}
@@ -147,7 +149,7 @@ class UserController:
             user, *_ = list(value for value in data)
             return user
         except ValueError:
-            return None
+            return {}
 
     def get_user_nopw(self, username: str) -> dict:
         """Return a user information from database without password"""
@@ -160,7 +162,7 @@ class UserController:
             user, *_ = list(value for value in data)
             return user
         except ValueError:
-            return None
+            return {}
 
     def get_users(self) -> dict:
         """Return all the users"""
@@ -239,9 +241,14 @@ class Auth:
             "email": email,
             "password": password,
         }
-        self.user_controller.create_user(user)
+        try:
+            self.user_controller.create_user(user)
+        except ValidationError:
+            print("Inputs could not be validated.")
+        except DuplicateKeyError:
+            print(f"{username} already exist.")
 
-        return user
+        return "User successfully created"
 
     def register_core_auth_services(self):
         """

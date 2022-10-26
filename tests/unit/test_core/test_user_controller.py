@@ -110,7 +110,7 @@ class TestUserController(TestCase):
         """Test get_user with empty return"""
         self.user.db.users.aggregate.return_value = []
         user = self.user.get_user('name')
-        self.assertEqual(user, None)
+        self.assertEqual(user, {})
 
     def test_get_user_nopw(self):
         """Test get_user_nopw"""
@@ -130,7 +130,7 @@ class TestUserController(TestCase):
         """Test get_user_nopw with empty return"""
         self.user.db.users.aggregate.return_value = []
         user = self.user.get_user_nopw('name')
-        self.assertEqual(user, None)
+        self.assertEqual(user, {})
 
     def test_get_users(self):
         """Test get_users"""

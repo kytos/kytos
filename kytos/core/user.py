@@ -28,7 +28,7 @@ class DocumentBaseModel(BaseModel):
 class UserDoc(DocumentBaseModel):
     """UserDocumentModel."""
 
-    username: constr(min_length=1)
+    username: constr(min_length=1, max_length=64, regex="^[a-zA-Z0-9_-]+$")
     state: Literal['active', 'inactive'] = 'active'
     password: constr(min_length=8)
     email: EmailStr

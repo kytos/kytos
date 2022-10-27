@@ -280,18 +280,14 @@ class Auth:
         """Authenticate a user using MongoDB."""
         username = request.authorization["username"]
         password = request.authorization["password"].encode()
-        try:
-            user = self._find_user(username)
-            if user["password"] != hashlib.sha512(password).hexdigest():
-                raise Unauthorized
-            time_exp = datetime.datetime.utcnow() + datetime.timedelta(
-                minutes=self.token_expiration_minutes
-            )
-            token = self._generate_token(username, time_exp)
-            return {"token": token}, HTTPStatus.OK.value
-        except Unauthorized:
-            result = "Incorrect password"
-            return result, HTTPStatus.UNAUTHORIZED.value
+        user = self._find_user(username)
+        if user["password"] != hashlib.sha512(password).hexdigest():
+            raise Unauthorized("Incorrect password")
+        time_exp = datetime.datetime.utcnow() + datetime.timedelta(
+            minutes=self.token_expiration_minutes
+        )
+        token = self._generate_token(username, time_exp)
+        return {"token": token}, HTTPStatus.OK.value
 
     def _find_user(self, username):
         """Find a specific user using MongoDB."""

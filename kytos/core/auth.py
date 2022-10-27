@@ -290,7 +290,7 @@ class Auth:
             token = self._generate_token(username, time_exp)
             return {"token": token}, HTTPStatus.OK.value
         except Unauthorized:
-            result = "Incorrect username or password"
+            result = "Incorrect password"
             return result, HTTPStatus.UNAUTHORIZED.value
 
     def _find_user(self, username):
@@ -368,6 +368,8 @@ class Auth:
             updated = self.user_controller.update_user(username, data)
         except ValidationError as err:
             raise BadRequest from err
+        except DuplicateKeyError as err:
+            raise Conflict from err
         if not updated:
             raise NotFound(f"User {username} not found")
         return jsonify("User successfully updated"), 200

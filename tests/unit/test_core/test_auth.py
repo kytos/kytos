@@ -222,6 +222,18 @@ class TestAuth(TestCase):
         self.assertEqual(error_response.status_code, 400)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
+    def test_05_update_user_request_conflict(self, mock_jwt_secret):
+        """Test auth update user endpoint"""
+        controller = self.auth.user_controller
+        controller.update_user.side_effect = DuplicateKeyError(0)
+        api = self.get_auth_test_client(self.auth)
+        url = f"{API_URI}/auth/users/user5"
+        error_response = api.open(url, method='PATCH', json={},
+                                  headers=self.auth_header)
+
+        self.assertEqual(error_response.status_code, 409)
+
+    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_06_delete_user_request(self, mock_jwt_secret):
         """Test auth delete user endpoint."""
         api = self.get_auth_test_client(self.auth)

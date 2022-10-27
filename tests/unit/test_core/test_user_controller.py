@@ -15,7 +15,7 @@ class TestUserController(TestCase):
     """Test UserController"""
 
     def setUp(self) -> None:
-        """Execte steps before each steps."""
+        """Execute steps before each steps."""
         self.user = UserController(MagicMock())
         self.user_data = {
             "username": "authtempuser",

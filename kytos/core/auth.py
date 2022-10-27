@@ -1,17 +1,30 @@
 """Module with main classes related to Authentication."""
+
+# pylint: disable=invalid-name
 import datetime
 import getpass
 import hashlib
 import logging
-import time
+import os
+import uuid
 from functools import wraps
 from http import HTTPStatus
 
 import jwt
+import pymongo
 from flask import jsonify, request
+from pydantic import ValidationError
+from pymongo.collection import ReturnDocument
+from pymongo.errors import AutoReconnect, DuplicateKeyError
+from pymongo.results import InsertOneResult
+from tenacity import retry_if_exception_type, stop_after_attempt, wait_random
+from werkzeug.exceptions import (BadRequest, Conflict, NotFound, Unauthorized,
+                                 UnsupportedMediaType)
 
 from kytos.core.config import KytosConfig
-from kytos.core.events import KytosEvent
+from kytos.core.db import Mongo
+from kytos.core.retry import before_sleep, for_all_methods, retries
+from kytos.core.user import UserDoc, UserDocUpdate
 
 __all__ = ['authenticated']
 
@@ -44,6 +57,121 @@ def authenticated(func):
     return wrapper
 
 
+@for_all_methods(
+    retries,
+    stop=stop_after_attempt(
+        int(os.environ.get("MONGO_AUTO_RETRY_STOP_AFTER_ATTEMPT", 3))
+    ),
+    wait=wait_random(
+        min=int(os.environ.get("MONGO_AUTO_RETRY_WAIT_RANDOM_MIN", 0.1)),
+        max=int(os.environ.get("MONGO_AUTO_RETRY_WAIT_RANDOM_MAX", 1)),
+    ),
+    before_sleep=before_sleep,
+    retry=retry_if_exception_type((AutoReconnect,)),
+)
+class UserController:
+    """UserController"""
+
+    # pylint: disable=unnecessary-lambda
+    def __init__(self, get_mongo=lambda: Mongo()):
+        self.mongo = get_mongo()
+        self.db_client = self.mongo.client
+        self.db = self.db_client[self.mongo.db_name]
+
+    def bootstrap_indexes(self):
+        """Bootstrap all users related indexes."""
+        index_tuples = [
+            ("users", [("username", pymongo.ASCENDING)], {"unique": True}),
+        ]
+        for collection, keys, kwargs in index_tuples:
+            if self.mongo.bootstrap_index(collection, keys, **kwargs):
+                LOG.info(
+                    f"Created DB index {keys}, collection: {collection}"
+                )
+
+    def create_user(self, user_data: dict) -> InsertOneResult:
+        """Create user to database"""
+        try:
+            utc_now = datetime.datetime.utcnow()
+            result = self.db.users.insert_one(UserDoc(**{
+                **{"_id": str(uuid.uuid4())},
+                **user_data,
+                **{"inserted_at": utc_now},
+                **{"updated_at": utc_now}
+            }).dict())
+        except DuplicateKeyError as err:
+            raise err
+        except ValidationError as err:
+            raise err
+        return result
+
+    def delete_user(self, username: str) -> dict:
+        """Delete user from database"""
+        utc_now = datetime.datetime.utcnow()
+        result = self.db.users.find_one_and_update(
+            {"username": username},
+            {"$set": {
+                "state": "inactive",
+                "deleted_at": utc_now,
+            }},
+            return_document=ReturnDocument.AFTER,
+        )
+        return result
+
+    def update_user(self, username: str, data: dict) -> dict:
+        """Update user from database"""
+        utc_now = datetime.datetime.utcnow()
+        try:
+            result = self.db.users.find_one_and_update(
+                {"username": username},
+                {
+                    "$set": UserDocUpdate(**{
+                        **data,
+                        **{"updated_at": utc_now}
+                    }).dict(exclude_none=True)
+                },
+                return_document=ReturnDocument.AFTER
+            )
+        except ValidationError as err:
+            raise err
+        except DuplicateKeyError as err:
+            raise err
+        return result
+
+    def get_user(self, username: str) -> dict:
+        """Return a user information from database"""
+        data = self.db.users.aggregate([
+            {"$match": {"username": username}},
+            {"$project": UserDoc.projection()},
+            {"$limit": 1}
+        ])
+        try:
+            user, *_ = list(value for value in data)
+            return user
+        except ValueError:
+            return {}
+
+    def get_user_nopw(self, username: str) -> dict:
+        """Return a user information from database without password"""
+        data = self.db.users.aggregate([
+            {"$match": {"username": username}},
+            {"$project": UserDoc.projection_nopw()},
+            {"$limit": 1}
+        ])
+        try:
+            user, *_ = list(value for value in data)
+            return user
+        except ValueError:
+            return {}
+
+    def get_users(self) -> dict:
+        """Return all the users"""
+        data = self.db.users.aggregate([
+            {"$project": UserDoc.projection_nopw()}
+        ])
+        return {'users': list(value for value in data)}
+
+
 class Auth:
     """Module used to provide Kytos authentication routes."""
 
@@ -56,11 +184,17 @@ class Auth:
             controller(kytos.core.controller): A Controller instance.
 
         """
+        self.user_controller = self.get_user_controller()
+        self.user_controller.bootstrap_indexes()
         self.controller = controller
-        self.namespace = "kytos.core.auth.users"
         self.token_expiration_minutes = self.get_token_expiration()
         if self.controller.options.create_superuser is True:
             self._create_superuser()
+
+    @staticmethod
+    def get_user_controller():
+        """Get UserController"""
+        return UserController()
 
     @staticmethod
     def get_token_expiration():
@@ -88,13 +222,7 @@ class Auth:
         )
 
     def _create_superuser(self):
-        """Create a superuser using Storehouse."""
-        def _create_superuser_callback(_event, box, error):
-            if error:
-                LOG.error('Superuser was not created. Error: %s', error)
-            if box:
-                LOG.info("Superuser successfully created")
-
+        """Create a superuser using MongoDB."""
         def get_username():
             return input("Username: ")
 
@@ -103,27 +231,24 @@ class Auth:
 
         username = get_username()
         email = get_email()
-
         while True:
             password = getpass.getpass()
             re_password = getpass.getpass('Retype password: ')
             if password == re_password:
                 break
-            print('Passwords do not match. Try again')
-
         user = {
             "username": username,
             "email": email,
-            "password": hashlib.sha512(password.encode()).hexdigest(),
+            "password": password,
         }
-        content = {
-            "namespace": self.namespace,
-            "box_id": user["username"],
-            "data": user,
-            "callback": _create_superuser_callback,
-        }
-        event = KytosEvent(name="kytos.storehouse.create", content=content)
-        self.controller.buffers.app.put(event)
+        try:
+            self.user_controller.create_user(user)
+        except ValidationError:
+            print("Inputs could not be validated.")
+        except DuplicateKeyError:
+            print(f"{username} already exist.")
+
+        return "User successfully created"
 
     def register_core_auth_services(self):
         """
@@ -136,232 +261,111 @@ class Auth:
             "auth/login/", self._authenticate_user
         )
         self.controller.api_server.register_core_endpoint(
-            "auth/users/", self._list_users
+            "auth/users/", self._list_users,
         )
         self.controller.api_server.register_core_endpoint(
-            "auth/users/<uid>", self._list_user
+            "auth/users/<username>", self._list_user
         )
         self.controller.api_server.register_core_endpoint(
             "auth/users/", self._create_user, methods=["POST"]
         )
         self.controller.api_server.register_core_endpoint(
-            "auth/users/<uid>", self._delete_user, methods=["DELETE"]
+            "auth/users/<username>", self._delete_user, methods=["DELETE"]
         )
         self.controller.api_server.register_core_endpoint(
-            "auth/users/<uid>", self._update_user, methods=["PATCH"]
+            "auth/users/<username>", self._update_user, methods=["PATCH"]
         )
 
     def _authenticate_user(self):
-        """Authenticate a user using Storehouse."""
+        """Authenticate a user using MongoDB."""
         username = request.authorization["username"]
         password = request.authorization["password"].encode()
-        try:
-            user = self._find_user(username)[0].get("data")
-            if user.get("password") != hashlib.sha512(password).hexdigest():
-                raise KeyError
-            time_exp = datetime.datetime.utcnow() + datetime.timedelta(
-                minutes=self.token_expiration_minutes
-            )
-            token = self._generate_token(username, time_exp)
-            return {"token": token}, HTTPStatus.OK.value
-        except (AttributeError, KeyError) as exc:
-            result = f"Incorrect username or password: {exc}"
-            return result, HTTPStatus.UNAUTHORIZED.value
+        user = self._find_user(username)
+        if user["password"] != hashlib.sha512(password).hexdigest():
+            raise Unauthorized("Incorrect password")
+        time_exp = datetime.datetime.utcnow() + datetime.timedelta(
+            minutes=self.token_expiration_minutes
+        )
+        token = self._generate_token(username, time_exp)
+        return {"token": token}, HTTPStatus.OK.value
 
-    def _find_user(self, uid):
-        """Find a specific user using Storehouse."""
-        response = {}
-
-        def _find_user_callback(_event, box, error):
-            nonlocal response
-            if not box:
-                response = {
-                    "answer": f'User with uid {uid} not found',
-                    "code": HTTPStatus.NOT_FOUND.value
-                }
-            elif error:
-                response = {
-                    "answer": "User data cannot be shown",
-                    "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                }
-            else:
-                response = {
-                    "answer": {"data": box.data},
-                    "code": HTTPStatus.OK.value,
-                }
-
-        content = {
-            "box_id": uid,
-            "namespace": self.namespace,
-            "callback": _find_user_callback,
-        }
-        event = KytosEvent(name="kytos.storehouse.retrieve", content=content)
-        self.controller.buffers.app.put(event)
-        while True:
-            time.sleep(0.1)
-            if response:
-                break
-        return response["answer"], response["code"]
+    def _find_user(self, username):
+        """Find a specific user using MongoDB."""
+        user = self.user_controller.get_user(username)
+        if not user:
+            result = f"User {username} not found"
+            raise NotFound(result)
+        return user
 
     @authenticated
-    def _list_user(self, uid):
-        """List a specific user using Storehouse."""
-        answer, code = self._find_user(uid)
-        if code == HTTPStatus.OK.value:
-            del answer['data']['password']
-        return answer, code
+    def _list_user(self, username):
+        """List a specific user using MongoDB."""
+        user = self.user_controller.get_user_nopw(username)
+        if not user:
+            result = f"User {username} not found"
+            raise NotFound(result)
+        return user
 
     @authenticated
     def _list_users(self):
-        """List all users using Storehouse."""
-        response = {}
+        """List all users using MongoDB."""
+        users_list = self.user_controller.get_users()
+        return users_list
 
-        def _list_users_callback(_event, boxes, error):
-            nonlocal response
-            if error:
-                response = {
-                    "answer": "Users cannot be listed",
-                    "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                }
+    @staticmethod
+    def _get_request():
+        """Get JSON from request"""
+        try:
+            metadata = request.json
+            content_type = request.content_type
+        except BadRequest as err:
+            result = 'The request body is not a well-formed JSON.'
+            raise BadRequest(result) from err
+        if content_type is None:
+            result = 'The request body is empty.'
+            raise BadRequest(result)
+        if metadata is None:
+            if content_type != 'application/json':
+                result = ('The content type must be application/json '
+                          f'(received {content_type}).')
             else:
-                response = {
-                    "answer": {"users": boxes},
-                    "code": HTTPStatus.OK.value,
-                }
-
-        content = {
-            "namespace": self.namespace,
-            "callback": _list_users_callback,
-        }
-        event = KytosEvent(name="kytos.storehouse.list", content=content)
-        self.controller.buffers.app.put(event)
-        while True:
-            time.sleep(0.1)
-            if response:
-                break
-        return response["answer"], response["code"]
+                result = 'Metadata is empty.'
+            raise UnsupportedMediaType(result)
+        return metadata
 
     @authenticated
     def _create_user(self):
-        """Save a user using Storehouse."""
-        response = {}
-
-        def _create_user_callback(_event, box, error):
-            nonlocal response
-            if not box:
-                response = {
-                    "answer": 'User already exists',
-                    "code": HTTPStatus.CONFLICT.value,
-                }
-            elif error:
-                response = {
-                    "answer": "User has not been created",
-                    "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                }
-            else:
-                response = {
-                    "answer": "User successfully created",
-                    "code": HTTPStatus.OK.value,
-                }
-
-        req = request.json
-        password = req["password"].encode()
-        data = {
-            "username": req["username"],
-            "email": req["email"],
-            "password": hashlib.sha512(password).hexdigest(),
-        }
-        content = {
-            "namespace": self.namespace,
-            "box_id": data["username"],
-            "data": data,
-            "callback": _create_user_callback,
-        }
-        event = KytosEvent(name="kytos.storehouse.create", content=content)
-        self.controller.buffers.app.put(event)
-        while True:
-            time.sleep(0.1)
-            if response:
-                break
-        return response["answer"], response["code"]
+        """Save a user using MongoDB."""
+        try:
+            self.user_controller.create_user(self._get_request())
+        except ValidationError as err:
+            raise BadRequest from err
+        except DuplicateKeyError as err:
+            raise Conflict from err
+        return jsonify("User successfully created"), 201
 
     @authenticated
-    def _delete_user(self, uid):
-        """Delete a user using Storehouse."""
-        response = {}
-
-        def _delete_user_callback(_event, box, error):
-            nonlocal response
-            if not box:
-                response = {
-                    "answer": f'User with uid {uid} not found',
-                    "code": HTTPStatus.NOT_FOUND.value
-                }
-            elif error:
-                response = {
-                    "answer": "User has not been deleted",
-                    "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                }
-            else:
-                response = {
-                    "answer": "User successfully deleted",
-                    "code": HTTPStatus.OK.value,
-                }
-
-        content = {
-            "box_id": uid,
-            "namespace": self.namespace,
-            "callback": _delete_user_callback,
-        }
-        event = KytosEvent(name="kytos.storehouse.delete", content=content)
-        self.controller.buffers.app.put(event)
-        while True:
-            time.sleep(0.1)
-            if response:
-                break
-        return response["answer"], response["code"]
+    def _delete_user(self, username):
+        """Delete a user using MongoDB."""
+        if not self.user_controller.delete_user(username):
+            raise NotFound(f"User {username} not found")
+        return jsonify(f"User {username} deleted succesfully"), 200
 
     @authenticated
-    def _update_user(self, uid):
-        """Update user data using Storehouse."""
-        response = {}
-
-        def _update_user_callback(_event, box, error):
-            nonlocal response
-            if not box:
-                response = {
-                    "answer": f'User with uid {uid} not found',
-                    "code": HTTPStatus.NOT_FOUND.value
-                }
-            elif error:
-                response = {
-                    "answer": "User has not been updated",
-                    "code": HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                }
-            else:
-                response = {
-                    "answer": "User successfully updated",
-                    "code": HTTPStatus.OK.value,
-                }
-
-        req = request.json
+    def _update_user(self, username):
+        """Update user data using MongoDB."""
+        req = self._get_request()
         allowed = ["username", "email", "password"]
-
         data = {}
         for key, value in req.items():
             if key in allowed:
                 data[key] = value
-
-        content = {
-            "namespace": self.namespace,
-            "box_id": uid,
-            "data": data,
-            "callback": _update_user_callback,
-        }
-        event = KytosEvent(name="kytos.storehouse.update", content=content)
-        self.controller.buffers.app.put(event)
-        while True:
-            time.sleep(0.1)
-            if response:
-                break
-        return response["answer"], response["code"]
+        try:
+            updated = self.user_controller.update_user(username, data)
+        except ValidationError as err:
+            raise BadRequest from err
+        except DuplicateKeyError as err:
+            raise Conflict from err
+        if not updated:
+            raise NotFound(f"User {username} not found")
+        return jsonify("User successfully updated"), 200

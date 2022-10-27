@@ -144,7 +144,7 @@ class Controller:
                                     self.options.api_port,
                                     self.napps_manager, self.options.napps)
 
-        self.auth = Auth(self)
+        self.auth = None
         self.dead_letter = DeadLetter(self)
         self._alisten_tasks = set()
 
@@ -154,6 +154,11 @@ class Controller:
         #: from napps.<username>.<napp_name> import ?....
         sys.path.append(os.path.join(self.options.napps, os.pardir))
         sys.excepthook = exc_handler
+
+    def start_auth(self):
+        """Initialize Auth() and its services"""
+        self.auth = Auth(self)
+        self.auth.register_core_auth_services()
 
     def enable_logs(self):
         """Register kytos log and enable the logs."""
@@ -243,6 +248,7 @@ class Controller:
         self.enable_logs()
         if self.options.database:
             self.db_conn_or_core_shutdown()
+            self.start_auth()
         if self.options.apm:
             self.init_apm_or_core_shutdown()
         if not restart:
@@ -406,7 +412,6 @@ class Controller:
             self.rest_reload_napp)
         self.api_server.register_core_endpoint('reload/all',
                                                self.rest_reload_all_napps)
-        self.auth.register_core_auth_services()
         self.dead_letter.register_endpoints()
 
     def register_rest_endpoint(self, url, function, methods):

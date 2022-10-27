@@ -689,6 +689,7 @@ class TestController(TestCase):
 
     def test_init_attrs(self):
         """Test init attrs."""
+        self.controller.start_auth()
         assert self.controller.auth
         assert self.controller.dead_letter
 

@@ -108,8 +108,10 @@ class TestAuth(TestCase):
         api = self.get_auth_test_client(self.auth)
         success_response = api.open(url, method='GET', headers=valid_header)
         error_response = api.open(url, method='GET', headers=invalid_header)
+        fail_response = api.open(url, method='GET')
         self.assertEqual(success_response.status_code, 200)
         self.assertEqual(error_response.status_code, 401)
+        self.assertEqual(fail_response.status_code, 400)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_02_list_users_request(self, mock_jwt_secret):

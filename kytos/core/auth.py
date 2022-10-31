@@ -278,8 +278,11 @@ class Auth:
 
     def _authenticate_user(self):
         """Authenticate a user using MongoDB."""
-        username = request.authorization["username"]
-        password = request.authorization["password"].encode()
+        try:
+            username = request.authorization["username"]
+            password = request.authorization["password"].encode()
+        except TypeError as err:
+            raise BadRequest("Credentials were not sent.") from err
         user = self._find_user(username)
         if user["password"] != hashlib.sha512(password).hexdigest():
             raise Unauthorized("Incorrect password")

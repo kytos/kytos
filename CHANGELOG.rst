@@ -31,6 +31,7 @@ Fixed
 =====
 - Log traceback error if NApps execute method doesn't handle an exception
 - Stop ``APIServer`` instance after unloading NApps
+- Log traceback error if the header from authorization was empty resulting in ``HTTP 500``
 
 Security
 ========

@@ -4,8 +4,7 @@ import logging
 from collections import OrderedDict
 from threading import Lock
 
-from kytos.core.common import EntityStatus
-from kytos.core.common import GenericEntity
+from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
 from kytos.core.helpers import get_time, now
 from kytos.core.interface import Interface
@@ -50,9 +49,6 @@ class Switch(GenericEntity):
     """
 
     status_funcs = OrderedDict()
-
-    # pylint: disable=too-many-instance-attributes
-    # pylint: disable=too-many-public-methods
 
     def __init__(self, dpid, connection=None, features=None):
         """Contructor of switches have the below parameters.
@@ -172,7 +168,6 @@ class Switch(GenericEntity):
     def update_or_create_interface(self, port_no, name=None, address=None,
                                    state=None, features=None, speed=None,
                                    config=None):
-        # pylint: disable=too-many-arguments
         """Get and upated an interface or create one if it does not exist."""
         with self._interface_lock:
             interface = self.get_interface_by_port_no(port_no)

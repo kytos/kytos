@@ -3,10 +3,9 @@
 Links are low level abstractions representing connections between two
 interfaces.
 """
-from collections import OrderedDict
-
 import json
 import random
+from collections import OrderedDict
 
 from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.exceptions import (KytosLinkCreationError,

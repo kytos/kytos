@@ -3,6 +3,7 @@
 Links are low level abstractions representing connections between two
 interfaces.
 """
+from collections import OrderedDict
 
 import json
 import random
@@ -16,6 +17,8 @@ from kytos.core.interface import TAGType
 
 class Link(GenericEntity):
     """Define a link between two Endpoints."""
+
+    status_funcs = OrderedDict()
 
     def __init__(self, endpoint_a, endpoint_b):
         """Create a Link instance and set its attributes.
@@ -36,6 +39,11 @@ class Link(GenericEntity):
 
     def __repr__(self):
         return f"Link({self.endpoint_a!r}, {self.endpoint_b!r})"
+
+    @classmethod
+    def register_status_func(cls, name: str, func):
+        """Register status func given its name and a callable at setup time."""
+        cls.status_funcs[name] = func
 
     @property
     def status(self):

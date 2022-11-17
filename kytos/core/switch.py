@@ -1,8 +1,10 @@
 """Module with main classes related to Switches."""
 import json
 import logging
+from collections import OrderedDict
 from threading import Lock
 
+from kytos.core.common import EntityStatus
 from kytos.core.common import GenericEntity
 from kytos.core.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
 from kytos.core.helpers import get_time, now
@@ -46,6 +48,8 @@ class Switch(GenericEntity):
     :class:`pyof.*.controller2switch.FeaturesReply` representing the current
     features of the switch.
     """
+
+    status_funcs = OrderedDict()
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-public-methods
@@ -120,6 +124,23 @@ class Switch(GenericEntity):
         if self.connection:
             return '0x0' + str(self.connection.protocol.version)
         return None
+
+    @property
+    def status(self):
+        """Return the current status of the Entity."""
+        state = super().status
+        if state == EntityStatus.DISABLED:
+            return state
+
+        for status_func in self.status_funcs.values():
+            if status_func(self) == EntityStatus.DOWN:
+                return EntityStatus.DOWN
+        return state
+
+    @classmethod
+    def register_status_func(cls, name: str, func):
+        """Register status func given its name and a callable at setup time."""
+        cls.status_funcs[name] = func
 
     def disable(self):
         """Disable this switch instance.

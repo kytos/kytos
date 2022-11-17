@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, Mock
 
 from pyof.v0x04.common.port import PortFeatures
 
+from kytos.core.common import EntityStatus
 from kytos.core.interface import TAG, UNI, Interface, TAGType
 from kytos.core.switch import Switch
 
@@ -294,6 +295,18 @@ class TestInterface(unittest.TestCase):
         pickled = pickle.dumps(interface.as_dict())
         intf_dict = pickle.loads(pickled)
         assert intf_dict["id"] == interface.id
+
+    def test_status_funcs(self) -> None:
+        """Test status_funcs."""
+        self.iface.enable()
+        self.iface.activate()
+        assert self.iface.is_active()
+        Interface.register_status_func("some_napp_some_func",
+                                       lambda iface: EntityStatus.DOWN)
+        assert self.iface.status == EntityStatus.DOWN
+        Interface.register_status_func("some_napp_some_func",
+                                       lambda iface: None)
+        assert self.iface.status == EntityStatus.UP
 
 
 class TestUNI(unittest.TestCase):

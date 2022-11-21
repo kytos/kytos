@@ -37,25 +37,24 @@ def _create_pid_dir():
 
 def start_shell(controller=None):
     """Load Kytos interactive shell."""
+    documentation = "https://github.com/kytos-ng/" \
+                    "documentation/tree/master/tutorials/napps"
     kytos_ascii = r"""
-      _          _
-     | |        | |
-     | | ___   _| |_ ___  ___
-     | |/ / | | | __/ _ \/ __|
-     |   <| |_| | || (_) \__ \
-     |_|\_\__,  |\__\___/|___/
-            __/ |
-           |___/
+     _   __      _
+    | | / /     | |
+    | |/ / _   _| |_ ___  ___          _ __   __ _
+    |    \| | | | __/ _ \/ __| ______ | '_ \ / _` |
+    | |\  \ |_| | || (_) \__ \|______|| | | | (_| |
+    \_| \_/\__, |\__\___/|___/        |_| |_|\__, |
+            __/ |                             __/ |
+           |___/                             |___/
     """
 
     banner1 = f"""\033[95m{kytos_ascii}\033[0m
     Welcome to Kytos SDN Platform!
 
-    We are making a huge effort to make sure that this console will work fine
-    but for now it's still experimental.
-
-    Kytos website.: https://kytos.io/
-    Documentation.: https://docs.kytos.io/
+    Kytos website.: https://kytos-ng.github.io/about/
+    Documentation.: {documentation}
     OF Address....:"""
 
     exit_msg = "Stopping Kytos daemon... Bye, see you!"

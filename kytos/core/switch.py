@@ -1,9 +1,10 @@
 """Module with main classes related to Switches."""
 import json
 import logging
+from collections import OrderedDict
 from threading import Lock
 
-from kytos.core.common import GenericEntity
+from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.constants import CONNECTION_TIMEOUT, FLOOD_TIMEOUT
 from kytos.core.helpers import get_time, now
 from kytos.core.interface import Interface
@@ -47,8 +48,7 @@ class Switch(GenericEntity):
     features of the switch.
     """
 
-    # pylint: disable=too-many-instance-attributes
-    # pylint: disable=too-many-public-methods
+    status_funcs = OrderedDict()
 
     def __init__(self, dpid, connection=None, features=None):
         """Contructor of switches have the below parameters.
@@ -121,6 +121,23 @@ class Switch(GenericEntity):
             return '0x0' + str(self.connection.protocol.version)
         return None
 
+    @property
+    def status(self):
+        """Return the current status of the Entity."""
+        state = super().status
+        if state == EntityStatus.DISABLED:
+            return state
+
+        for status_func in self.status_funcs.values():
+            if status_func(self) == EntityStatus.DOWN:
+                return EntityStatus.DOWN
+        return state
+
+    @classmethod
+    def register_status_func(cls, name: str, func):
+        """Register status func given its name and a callable at setup time."""
+        cls.status_funcs[name] = func
+
     def disable(self):
         """Disable this switch instance.
 
@@ -151,7 +168,6 @@ class Switch(GenericEntity):
     def update_or_create_interface(self, port_no, name=None, address=None,
                                    state=None, features=None, speed=None,
                                    config=None):
-        # pylint: disable=too-many-arguments
         """Get and upated an interface or create one if it does not exist."""
         with self._interface_lock:
             interface = self.get_interface_by_port_no(port_no)

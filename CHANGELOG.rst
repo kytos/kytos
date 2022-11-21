@@ -19,6 +19,7 @@ Changed
 - ``MongoClient`` now has an explicit write_concern majority
 - Added dependencies ``dnspython==2.2.1, email-validator==1.3.0``
 - Auth storage has been migrated from the NApp ``storehouse`` to MongoDB with ``kytos/users.py`` collection
+- ``status_funcs`` have been moved to ``GenericEntity`` sub classes to avoid potential conflicts with different entities
 
 
 Deprecated

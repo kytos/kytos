@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 from kytos.core import Controller
 from kytos.core.buffers import KytosBuffers
+from kytos.core.common import EntityStatus
 from kytos.core.config import KytosConfig
 from kytos.core.constants import FLOOD_TIMEOUT
 from kytos.core.interface import Interface
@@ -378,3 +379,15 @@ class TestSwitch(TestCase):
         self.assertEqual(switch.is_active(), False)
         self.assertEqual(switch.lastseen,
                          datetime(1, 1, 1, 0, 0, 0, 0, timezone.utc))
+
+    def test_status_funcs(self) -> None:
+        """Test status_funcs."""
+        self.switch.enable()
+        self.switch.activate()
+        assert self.switch.is_active()
+        Switch.register_status_func("some_napp_some_func",
+                                    lambda switch: EntityStatus.DOWN)
+        assert self.switch.status == EntityStatus.DOWN
+        Switch.register_status_func("some_napp_some_func",
+                                    lambda iface: None)
+        assert self.switch.status == EntityStatus.UP

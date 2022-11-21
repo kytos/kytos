@@ -1,6 +1,7 @@
 """Module with main classes related to Interfaces."""
 import json
 import logging
+from collections import OrderedDict
 from enum import IntEnum
 from threading import Lock
 
@@ -9,7 +10,7 @@ from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
 from pyof.v0x04.common.port import PortFeatures as PortFeatures04
 from pyof.v0x04.common.port import PortNo as PortNo04
 
-from kytos.core.common import GenericEntity
+from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.helpers import now
 from kytos.core.id import InterfaceID
 
@@ -62,6 +63,8 @@ class TAG:
 
 class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     """Interface Class used to abstract the network interfaces."""
+
+    status_funcs = OrderedDict()
 
     # pylint: disable=too-many-arguments, too-many-public-methods
     def __init__(self, name, port_number, switch, address=None, state=None,
@@ -131,6 +134,23 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     def uni(self):
         """Return if an interface is a user-to-network Interface."""
         return not self.nni
+
+    @property
+    def status(self):
+        """Return the current status of the Entity."""
+        state = super().status
+        if state == EntityStatus.DISABLED:
+            return state
+
+        for status_func in self.status_funcs.values():
+            if status_func(self) == EntityStatus.DOWN:
+                return EntityStatus.DOWN
+        return state
+
+    @classmethod
+    def register_status_func(cls, name: str, func):
+        """Register status func given its name and a callable at setup time."""
+        cls.status_funcs[name] = func
 
     def set_available_tags(self, iterable):
         """Set a range of VLAN tags to be used by this Interface.

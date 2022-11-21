@@ -37,22 +37,24 @@ def _create_pid_dir():
 
 def start_shell(controller=None):
     """Load Kytos interactive shell."""
+    documentation = "https://github.com/kytos-ng/" \
+                    "documentation/tree/master/tutorials/napps"
     kytos_ascii = r"""
-      _   __      _                               
-     | | / /     | |                              
-     | |/ / _   _| |_ ___  ___ ______ _ __   __ _ 
-     |    \| | | | __/ _ \/ __|______| '_ \ / _` |
-     | |\  \ |_| | || (_) \__ \      | | | | (_| |
-     \_| \_/\__, |\__\___/|___/      |_| |_|\__, |
-             __/ |                           __/ |
-            |___/                           |___/ 
+     _   __      _
+    | | / /     | |
+    | |/ / _   _| |_ ___  ___ ______ _ __   __ _
+    |    \| | | | __/ _ \/ __|______| '_ \ / _` |
+    | |\  \ |_| | || (_) \__ \      | | | | (_| |
+    \_| \_/\__, |\__\___/|___/      |_| |_|\__, |
+            __/ |                           __/ |
+           |___/                           |___/
     """
 
     banner1 = f"""\033[95m{kytos_ascii}\033[0m
     Welcome to Kytos SDN Platform!
 
     Kytos website.: https://kytos-ng.github.io/about/
-    Documentation.: https://github.com/kytos-ng/documentation/tree/master/tutorials/napps
+    Documentation.: {documentation}
     OF Address....:"""
 
     exit_msg = "Stopping Kytos daemon... Bye, see you!"

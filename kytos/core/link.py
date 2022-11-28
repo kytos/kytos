@@ -4,8 +4,8 @@ Links are low level abstractions representing connections between two
 interfaces.
 """
 import json
-import random
 from collections import OrderedDict
+from threading import Lock
 
 from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.exceptions import (KytosLinkCreationError,
@@ -18,6 +18,7 @@ class Link(GenericEntity):
     """Define a link between two Endpoints."""
 
     status_funcs = OrderedDict()
+    _get_available_vlans_lock = Lock()
 
     def __init__(self, endpoint_a, endpoint_b):
         """Create a Link instance and set its attributes.
@@ -121,31 +122,30 @@ class Link(GenericEntity):
 
     def get_next_available_tag(self):
         """Return the next available tag if exists."""
-        # Copy the available tags because in case of error
-        # we will remove and add elements to the available_tags
-        available_tags_a = self.endpoint_a.available_tags.copy()
-        available_tags_b = self.endpoint_b.available_tags.copy()
-        random.shuffle(available_tags_a)
-        random.shuffle(available_tags_b)
+        with self._get_available_vlans_lock:
+            # Copy the available tags because in case of error
+            # we will remove and add elements to the available_tags
+            available_tags_a = self.endpoint_a.available_tags.copy()
+            available_tags_b = self.endpoint_b.available_tags.copy()
 
-        for tag in available_tags_a:
-            # Tag does not exist in endpoint B. Try another tag.
-            if tag not in available_tags_b:
-                continue
+            for tag in available_tags_a:
+                # Tag does not exist in endpoint B. Try another tag.
+                if tag not in available_tags_b:
+                    continue
 
-            # Tag already in use. Try another tag.
-            if not self.endpoint_a.use_tag(tag):
-                continue
+                # Tag already in use. Try another tag.
+                if not self.endpoint_a.use_tag(tag):
+                    continue
 
-            # Tag already in use in B. Mark the tag as available again.
-            if not self.endpoint_b.use_tag(tag):
-                self.endpoint_a.make_tag_available(tag)
-                continue
+                # Tag already in use in B. Mark the tag as available again.
+                if not self.endpoint_b.use_tag(tag):
+                    self.endpoint_a.make_tag_available(tag)
+                    continue
 
-            # Tag used successfully by both endpoints. Returning.
-            return tag
+                # Tag used successfully by both endpoints. Returning.
+                return tag
 
-        raise KytosNoTagAvailableError(self)
+            raise KytosNoTagAvailableError(self)
 
     def make_tag_available(self, tag):
         """Add a specific tag in available_tags."""

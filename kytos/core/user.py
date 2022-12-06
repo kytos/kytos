@@ -29,13 +29,14 @@ class UserDoc(DocumentBaseModel):
     """UserDocumentModel."""
 
     username: constr(min_length=1, max_length=64, regex="^[a-zA-Z0-9_-]+$")
+    salt: bytes
     state: Literal['active', 'inactive'] = 'active'
-    password: constr(min_length=8)
     email: EmailStr
+    password: constr(min_length=8, max_length=64)
 
     @validator('password')
     # pylint: disable=no-self-argument
-    def validate_password(cls, password):
+    def validate_password(cls, password, values):
         """Check if password has at least a letter and a number"""
         upper = False
         lower = False
@@ -48,7 +49,7 @@ class UserDoc(DocumentBaseModel):
             if char.islower():
                 lower = True
             if number and upper and lower:
-                return hashlib.sha512(password.encode()).hexdigest()
+                return cls.hashing(password.encode(), values['salt'])
         raise ValueError('Password should contain:\n',
                          '1. Minimun 8 characters.\n',
                          '2. At least one upper case character.\n',
@@ -62,11 +63,17 @@ class UserDoc(DocumentBaseModel):
             "username": 1,
             "email": 1,
             'password': 1,
+            'salt': 1,
             'state': 1,
             'inserted_at': 1,
             'updated_at': 1,
             'deleted_at': 1
         }
+
+    @staticmethod
+    def hashing(password, salt) -> str:
+        return hashlib.scrypt(password=password, salt=salt, n=8192,
+                              r=8, p=1).hex()
 
     @staticmethod
     def projection_nopw() -> dict:

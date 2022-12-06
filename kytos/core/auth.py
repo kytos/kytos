@@ -96,8 +96,9 @@ class UserController:
             result = self.db.users.insert_one(UserDoc(**{
                 **{"_id": str(uuid.uuid4())},
                 **user_data,
+                **{"salt": os.urandom(16)},
                 **{"inserted_at": utc_now},
-                **{"updated_at": utc_now}
+                **{"updated_at": utc_now},
             }).dict())
         except DuplicateKeyError as err:
             raise err
@@ -284,7 +285,8 @@ class Auth:
         except TypeError as err:
             raise BadRequest("Credentials were not sent.") from err
         user = self._find_user(username)
-        if user["password"] != hashlib.sha512(password).hexdigest():
+        password_hashed = UserDoc.hashing(password, user["salt"])
+        if user["password"] != password_hashed:
             raise Unauthorized("Incorrect password")
         time_exp = datetime.datetime.utcnow() + datetime.timedelta(
             minutes=self.token_expiration_minutes

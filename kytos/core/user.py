@@ -1,5 +1,6 @@
 """User authentification """
 import hashlib
+import os
 from datetime import datetime
 from typing import Literal, Optional
 
@@ -25,11 +26,19 @@ class DocumentBaseModel(BaseModel):
         return values
 
 
+class HashDoc(BaseModel):
+    """HashDoc. Parameters for hash.scrypt function"""
+    salt: Optional[bytes] = os.urandom(16)
+    n: Optional[int] = 8192
+    r: Optional[int] = 8
+    p: Optional[int] = 1
+
+
 class UserDoc(DocumentBaseModel):
     """UserDocumentModel."""
 
     username: constr(min_length=1, max_length=64, regex="^[a-zA-Z0-9_-]+$")
-    salt: bytes
+    hash: Optional[HashDoc] = HashDoc()
     state: Literal['active', 'inactive'] = 'active'
     email: EmailStr
     password: constr(min_length=8, max_length=64)
@@ -49,11 +58,18 @@ class UserDoc(DocumentBaseModel):
             if char.islower():
                 lower = True
             if number and upper and lower:
-                return cls.hashing(password.encode(), values['salt'])
+                return cls.hashing(password.encode(), values['hash'].dict())
         raise ValueError('Password should contain:\n',
                          '1. Minimun 8 characters.\n',
                          '2. At least one upper case character.\n',
                          '3. At least 1 numeric character [0-9].')
+
+    @staticmethod
+    def hashing(password: bytes, values: dict) -> str:
+        """Hash password and return it as string"""
+        return hashlib.scrypt(password=password, salt=values['salt'],
+                              n=values['n'], r=values['r'],
+                              p=values['p']).hex()
 
     @staticmethod
     def projection() -> dict:
@@ -63,17 +79,12 @@ class UserDoc(DocumentBaseModel):
             "username": 1,
             "email": 1,
             'password': 1,
-            'salt': 1,
+            'hash': 1,
             'state': 1,
             'inserted_at': 1,
             'updated_at': 1,
             'deleted_at': 1
         }
-
-    @staticmethod
-    def hashing(password, salt) -> str:
-        return hashlib.scrypt(password=password, salt=salt, n=8192,
-                              r=8, p=1).hex()
 
     @staticmethod
     def projection_nopw() -> dict:

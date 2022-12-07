@@ -58,13 +58,13 @@ class TestAuth(TestCase):
         return username, password
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def _get_token(self, mock_jwt_secret=None):
+    @patch('kytos.core.user.UserDoc.hashing')
+    def _get_token(self, mock_hashing=None, mock_jwt_secret=None):
         """Make a request to get a token to be used in tests."""
         box = {
+            'hash': '',
             # "password" digested
-            'password': 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e073'
-                        '94c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103'
-                        'fd07c95385ffab0cacbc86'
+            'password': 'password_mocked'
         }
         header = {
             "Authorization": "Basic "
@@ -73,6 +73,7 @@ class TestAuth(TestCase):
             ).decode("ascii")
         }
         self.auth.user_controller.get_user.return_value = box
+        mock_hashing.return_value = box["password"]
         url = f"{API_URI}/auth/login/"
         api = self.get_auth_test_client(self.auth)
         success_response = api.open(url, method='GET', headers=header)
@@ -90,7 +91,8 @@ class TestAuth(TestCase):
         return True
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_01_login_request(self, mock_jwt_secret):
+    @patch('kytos.core.user.UserDoc.hashing')
+    def test_01_login_request(self, mock_hashing, mock_jwt_secret):
         """Test auth login endpoint."""
         valid_header = {
             "Authorization": "Basic "
@@ -106,7 +108,9 @@ class TestAuth(TestCase):
         }
         url = f"{API_URI}/auth/login/"
         api = self.get_auth_test_client(self.auth)
+        mock_hashing.return_value = 'password_mocked'
         success_response = api.open(url, method='GET', headers=valid_header)
+        mock_hashing.return_value = 'password_incorrect'
         error_response = api.open(url, method='GET', headers=invalid_header)
         fail_response = api.open(url, method='GET')
         self.assertEqual(success_response.status_code, 200)

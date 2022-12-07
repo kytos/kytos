@@ -1,7 +1,7 @@
 """Testing of only DocumentBaseModel from user.py. UserDoc and
 UserDocUpdate have been indirectly tested in test_user_controller.py"""
 
-import hashlib
+import os
 from datetime import datetime
 from unittest import TestCase
 
@@ -30,11 +30,19 @@ class TestUserDoc(TestCase):
             "password": "Password123",
             "email": "test@kytos.io",
         }
-        encoded = hashlib.sha512("Password123".encode()).hexdigest()
+        correct_hash = {
+            "n": 8192,
+            "r": 8,
+            "p": 1
+        }
         user_doc = UserDoc(**correct_load).dict()
+        user_hash = user_doc["hash"]
         self.assertEqual(user_doc["username"], correct_load["username"])
-        self.assertEqual(user_doc["password"], encoded)
         self.assertEqual(user_doc["email"], correct_load["email"])
+        self.assertIsNotNone(user_hash["salt"])
+        self.assertEqual(user_hash["n"], correct_hash["n"])
+        self.assertEqual(user_hash["r"], correct_hash["r"])
+        self.assertEqual(user_hash["p"], correct_hash["p"])
 
     def test_user_doc_dict_user_error(self):
         """Test UserDoc user validation error"""
@@ -65,3 +73,51 @@ class TestUserDoc(TestCase):
         }
         with self.assertRaises(ValidationError):
             UserDoc(**incorrect_load)
+
+    def test_user_doc_projection(self):
+        """Test UserDoc projection return"""
+        expected_dict = {
+            "_id": 0,
+            "username": 1,
+            "email": 1,
+            'password': 1,
+            'hash': 1,
+            'state': 1,
+            'inserted_at': 1,
+            'updated_at': 1,
+            'deleted_at': 1
+        }
+        actual_dict = UserDoc.projection()
+        self.assertEqual(expected_dict, actual_dict)
+
+    def test_user_doc_projection_nopw(self):
+        """Test Userdoc projection without password"""
+        expected_dict = {
+            "_id": 0,
+            "username": 1,
+            "email": 1,
+            'state': 1,
+            'inserted_at': 1,
+            'updated_at': 1,
+            'deleted_at': 1
+        }
+        actual_dict = UserDoc.projection_nopw()
+        self.assertEqual(expected_dict, actual_dict)
+
+    def test_user_doc_hashing(self):
+        """Test UserDoc hashing of password"""
+        salt = os.urandom(16)
+        user_data = {
+            "username": "Test123-_",
+            "password": "Password123",
+            "email": "test@kytos.io",
+            "hash": {
+                "salt": salt,
+                "n": 2,
+                "r": 1,
+                "p": 1
+            }
+        }
+        user_doc = UserDoc(**user_data).dict()
+        pwd_hashed = UserDoc.hashing("Password123".encode(), user_data["hash"])
+        self.assertEqual(user_doc["password"], pwd_hashed)

@@ -36,18 +36,19 @@ class TestUserController(TestCase):
 
     def test_create_user(self):
         """Test create_user"""
-        pass_decoded = "20b0747eefcdc16fa4fb06bbf9284303645ecc3d2" \
-                       "c43927878bd513f06853191c104aebae6d7fca629" \
-                       "1f1e296c6af99ebf8a137cbd7a0d34f2e27b31cb4fecdb"
         self.user.create_user(self.user_data)
         self.assertEqual(self.user.db.users.insert_one.call_count, 1)
         arg1 = self.user.db.users.insert_one.call_args[0]
         self.assertEqual(arg1[0]['username'], "authtempuser")
         self.assertEqual(arg1[0]["email"], "temp@kytos.io")
-        self.assertEqual(arg1[0]["password"], pass_decoded)
+        self.assertIsNotNone(arg1[0]["password"])
         self.assertEqual(type(arg1[0]["inserted_at"]), datetime)
         self.assertEqual(type(arg1[0]["updated_at"]), datetime)
         self.assertEqual(arg1[0]["deleted_at"], None)
+        self.assertIsNotNone(arg1[0]["hash"]["salt"])
+        self.assertEqual(arg1[0]["hash"]["n"], 8192)
+        self.assertEqual(arg1[0]["hash"]["r"], 8)
+        self.assertEqual(arg1[0]["hash"]["p"], 1)
 
     def test_create_user_key_error(self):
         """Test create_user KeyError"""

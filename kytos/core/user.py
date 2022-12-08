@@ -5,7 +5,8 @@ from datetime import datetime
 from typing import Literal, Optional
 
 # pylint: disable=no-name-in-module
-from pydantic import BaseModel, EmailStr, Field, constr, validator
+from pydantic import (BaseModel, EmailStr, Field, constr, root_validator,
+                      validator)
 
 
 class DocumentBaseModel(BaseModel):
@@ -26,31 +27,31 @@ class DocumentBaseModel(BaseModel):
         return values
 
 
-class HashDoc(BaseModel):
-    """HashDoc. Parameters for hash.scrypt function"""
-    salt: Optional[bytes] = os.urandom(16)
-    n: Optional[int] = 8192
-    r: Optional[int] = 8
-    p: Optional[int] = 1
+class HashSubDoc(BaseModel):
+    """HashSubDoc. Parameters for hash.scrypt function"""
+    salt: bytes = None
+    n: int = 8192
+    r: int = 8
+    p: int = 1
 
 
 class UserDoc(DocumentBaseModel):
     """UserDocumentModel."""
 
     username: constr(min_length=1, max_length=64, regex="^[a-zA-Z0-9_-]+$")
-    hash: Optional[HashDoc] = HashDoc()
+    hash: HashSubDoc = HashSubDoc(**{})
     state: Literal['active', 'inactive'] = 'active'
     email: EmailStr
     password: constr(min_length=8, max_length=64)
 
-    @validator('password')
+    @root_validator
     # pylint: disable=no-self-argument
-    def validate_password(cls, password, values):
+    def validate_password(cls, values):
         """Check if password has at least a letter and a number"""
         upper = False
         lower = False
         number = False
-        for char in password:
+        for char in values['password']:
             if char.isupper():
                 upper = True
             if char.isnumeric():
@@ -58,7 +59,10 @@ class UserDoc(DocumentBaseModel):
             if char.islower():
                 lower = True
             if number and upper and lower:
-                return cls.hashing(password.encode(), values['hash'].dict())
+                values['hash'] = HashSubDoc(**{'salt': os.urandom(16)})
+                values['password'] = cls.hashing(values['password'].encode(),
+                                                 values['hash'].dict())
+                return values
         raise ValueError('Password should contain:\n',
                          '1. Minimun 8 characters.\n',
                          '2. At least one upper case character.\n',

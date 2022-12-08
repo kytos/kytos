@@ -53,7 +53,7 @@ class TestUserController(TestCase):
     def test_create_user_key_error(self):
         """Test create_user KeyError"""
         wrong_data = {"username": "onlyname"}
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(KeyError):
             self.user.create_user(wrong_data)
 
     def test_create_user_key_duplicate(self):
@@ -61,6 +61,16 @@ class TestUserController(TestCase):
         self.user.db.users.insert_one.side_effect = DuplicateKeyError(0)
         with self.assertRaises(DuplicateKeyError):
             self.user.create_user(self.user_data)
+
+    def test_create_user_validation_error(self):
+        """Test create_user with ValidationError"""
+        wrong_pwd = {
+            'username': "mock_user",
+            'email': "email@mock.com",
+            'password': 'wrong_pwd'
+        }
+        with self.assertRaises(ValidationError):
+            self.user.create_user(wrong_pwd)
 
     def test_delete_user(self):
         """Test delete_user"""

@@ -1,7 +1,6 @@
 """Testing of only DocumentBaseModel from user.py. UserDoc and
 UserDocUpdate have been indirectly tested in test_user_controller.py"""
 
-import os
 from datetime import datetime
 from unittest import TestCase
 
@@ -106,18 +105,12 @@ class TestUserDoc(TestCase):
 
     def test_user_doc_hashing(self):
         """Test UserDoc hashing of password"""
-        salt = os.urandom(16)
         user_data = {
             "username": "Test123-_",
             "password": "Password123",
             "email": "test@kytos.io",
-            "hash": {
-                "salt": salt,
-                "n": 2,
-                "r": 1,
-                "p": 1
-            }
         }
         user_doc = UserDoc(**user_data).dict()
-        pwd_hashed = UserDoc.hashing("Password123".encode(), user_data["hash"])
+        pwd_hashed = UserDoc.hashing("Password123".encode(),
+                                     user_doc["hash"])
         self.assertEqual(user_doc["password"], pwd_hashed)

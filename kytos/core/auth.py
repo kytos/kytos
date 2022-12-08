@@ -94,10 +94,14 @@ class UserController:
             utc_now = datetime.datetime.utcnow()
             result = self.db.users.insert_one(UserDoc(**{
                 **{"_id": str(uuid.uuid4())},
-                **user_data,
+                **{"username": user_data['username']},
+                **{"password": user_data["password"]},
+                **{"email": user_data["email"]},
                 **{"inserted_at": utc_now},
                 **{"updated_at": utc_now},
             }).dict())
+        except KeyError as err:
+            raise err
         except DuplicateKeyError as err:
             raise err
         except ValidationError as err:
@@ -246,6 +250,8 @@ class Auth:
             print("Inputs could not be validated.")
         except DuplicateKeyError:
             print(f"{username} already exist.")
+        except KeyError:
+            print("There is a missing field.")
 
         return "User successfully created"
 
@@ -341,6 +347,8 @@ class Auth:
         """Save a user using MongoDB."""
         try:
             self.user_controller.create_user(self._get_request())
+        except KeyError as err:
+            raise BadRequest from err
         except ValidationError as err:
             raise BadRequest from err
         except DuplicateKeyError as err:

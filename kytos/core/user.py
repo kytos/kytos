@@ -1,9 +1,10 @@
 """User authentification """
+# pylint: disable=no-name-in-module, no-self-argument
 import hashlib
+import os
 from datetime import datetime
 from typing import Literal, Optional
 
-# pylint: disable=no-name-in-module
 from pydantic import BaseModel, EmailStr, Field, constr, validator
 
 
@@ -25,17 +26,30 @@ class DocumentBaseModel(BaseModel):
         return values
 
 
+class HashSubDoc(BaseModel):
+    """HashSubDoc. Parameters for hash.scrypt function"""
+    salt: bytes = None
+    n: int = 8192
+    r: int = 8
+    p: int = 1
+
+    @validator('salt', pre=True, always=True)
+    def create_salt(cls, salt):
+        """Create random salt value"""
+        return salt or os.urandom(16)
+
+
 class UserDoc(DocumentBaseModel):
     """UserDocumentModel."""
 
     username: constr(min_length=1, max_length=64, regex="^[a-zA-Z0-9_-]+$")
+    hash: HashSubDoc
     state: Literal['active', 'inactive'] = 'active'
-    password: constr(min_length=8)
     email: EmailStr
+    password: constr(min_length=8, max_length=64)
 
     @validator('password')
-    # pylint: disable=no-self-argument
-    def validate_password(cls, password):
+    def validate_password(cls, password, values):
         """Check if password has at least a letter and a number"""
         upper = False
         lower = False
@@ -48,11 +62,18 @@ class UserDoc(DocumentBaseModel):
             if char.islower():
                 lower = True
             if number and upper and lower:
-                return hashlib.sha512(password.encode()).hexdigest()
-        raise ValueError('Password should contain:\n',
-                         '1. Minimun 8 characters.\n',
-                         '2. At least one upper case character.\n',
-                         '3. At least 1 numeric character [0-9].')
+                return cls.hashing(password.encode(), values['hash'].dict())
+        raise ValueError('value should contain ' +
+                         'minimun 8 characters, ' +
+                         'at least one upper case character, ' +
+                         'at least 1 numeric character [0-9]')
+
+    @staticmethod
+    def hashing(password: bytes, values: dict) -> str:
+        """Hash password and return it as string"""
+        return hashlib.scrypt(password=password, salt=values['salt'],
+                              n=values['n'], r=values['r'],
+                              p=values['p']).hex()
 
     @staticmethod
     def projection() -> dict:
@@ -62,6 +83,7 @@ class UserDoc(DocumentBaseModel):
             "username": 1,
             "email": 1,
             'password': 1,
+            'hash': 1,
             'state': 1,
             'inserted_at': 1,
             'updated_at': 1,
@@ -85,9 +107,11 @@ class UserDoc(DocumentBaseModel):
 class UserDocUpdate(DocumentBaseModel):
     "UserDocUpdate use to validate data before updating"
 
-    username: Optional[str]
-    password: Optional[constr(min_length=8)]
+    username: Optional[constr(min_length=1, max_length=64,
+                              regex="^[a-zA-Z0-9_-]+$")]
     email: Optional[EmailStr]
+    hash: Optional[HashSubDoc]
+    password: Optional[constr(min_length=8, max_length=64)]
 
     _validate_password = validator('password',
                                    allow_reuse=True)(UserDoc.validate_password)

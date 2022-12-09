@@ -63,6 +63,7 @@ class TestAuth(TestCase):
     def _get_token(self, mock_hashing=None, mock_jwt_secret=None):
         """Make a request to get a token to be used in tests."""
         box = {
+            'state': 'active',
             'hash': '',
             # "password" digested
             'password': 'password_mocked'
@@ -114,9 +115,12 @@ class TestAuth(TestCase):
         mock_hashing.return_value = 'password_incorrect'
         error_response = api.open(url, method='GET', headers=invalid_header)
         fail_response = api.open(url, method='GET')
+        self.auth.user_controller.get_user.return_value = {'state': ''}
+        inactive_response = api.open(url, method='GET', headers=valid_header)
         self.assertEqual(success_response.status_code, 200)
         self.assertEqual(error_response.status_code, 401)
         self.assertEqual(fail_response.status_code, 400)
+        self.assertEqual(inactive_response.status_code, 401)
 
     @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
     def test_02_list_users_request(self, mock_jwt_secret):

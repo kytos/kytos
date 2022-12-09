@@ -289,6 +289,8 @@ class Auth:
         except TypeError as err:
             raise BadRequest("Credentials were not sent.") from err
         user = self._find_user(username)
+        if user["state"] != 'active':
+            raise Unauthorized('This user is not active')
         password_hashed = UserDoc.hashing(password, user["hash"])
         if user["password"] != password_hashed:
             raise Unauthorized("Incorrect password")

@@ -93,13 +93,13 @@ class UserController:
         try:
             utc_now = datetime.datetime.utcnow()
             result = self.db.users.insert_one(UserDoc(**{
-                **{"_id": str(uuid.uuid4())},
-                **{"username": user_data.get('username')},
-                **{"hash": HashSubDoc()},
-                **{"password": user_data.get('password')},
-                **{"email": user_data.get('email')},
-                **{"inserted_at": utc_now},
-                **{"updated_at": utc_now},
+                "_id": str(uuid.uuid4()),
+                "username": user_data.get('username'),
+                "hash": HashSubDoc(),
+                "password": user_data.get('password'),
+                "email": user_data.get('email'),
+                "inserted_at": utc_now,
+                "updated_at": utc_now,
             }).dict())
         except DuplicateKeyError as err:
             raise err

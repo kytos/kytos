@@ -77,12 +77,13 @@ class TestUserController(TestCase):
 
     def test_update_user(self):
         """Test update_user"""
-        data = {'email': 'random@kytos.io'}
+        data = {'password': 'Mock_password1'}
         self.user.update_user('name', data)
         self.assertEqual(self.user.db.users.find_one_and_update.call_count, 1)
         arg1, arg2 = self.user.db.users.find_one_and_update.call_args[0]
         self.assertEqual(arg1, {"username": 'name'})
         self.assertEqual(type(arg2), dict)
+        self.assertIsNotNone(arg2["$set"]["hash"])
 
     def test_update_user_error(self):
         """Test update_user error handling"""

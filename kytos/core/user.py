@@ -107,9 +107,11 @@ class UserDoc(DocumentBaseModel):
 class UserDocUpdate(DocumentBaseModel):
     "UserDocUpdate use to validate data before updating"
 
-    username: Optional[str]
-    password: Optional[constr(min_length=8)]
+    username: Optional[constr(min_length=1, max_length=64,
+                              regex="^[a-zA-Z0-9_-]+$")]
     email: Optional[EmailStr]
+    hash: Optional[HashSubDoc]
+    password: Optional[constr(min_length=8, max_length=64)]
 
     _validate_password = validator('password',
                                    allow_reuse=True)(UserDoc.validate_password)

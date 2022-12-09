@@ -123,6 +123,8 @@ class UserController:
     def update_user(self, username: str, data: dict) -> dict:
         """Update user from database"""
         utc_now = datetime.datetime.utcnow()
+        if "password" in data:
+            data["hash"] = HashSubDoc()
         try:
             result = self.db.users.find_one_and_update(
                 {"username": username},

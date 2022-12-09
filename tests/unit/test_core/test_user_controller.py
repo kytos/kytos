@@ -50,12 +50,6 @@ class TestUserController(TestCase):
         self.assertEqual(arg1[0]["hash"]["r"], 8)
         self.assertEqual(arg1[0]["hash"]["p"], 1)
 
-    def test_create_user_key_error(self):
-        """Test create_user KeyError"""
-        wrong_data = {"username": "onlyname"}
-        with self.assertRaises(KeyError):
-            self.user.create_user(wrong_data)
-
     def test_create_user_key_duplicate(self):
         """Test create_user with DuplicateKeyError"""
         self.user.db.users.insert_one.side_effect = DuplicateKeyError(0)

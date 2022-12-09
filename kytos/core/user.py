@@ -1,12 +1,11 @@
 """User authentification """
+# pylint: disable=no-name-in-module, no-self-argument
 import hashlib
 import os
 from datetime import datetime
 from typing import Literal, Optional
 
-# pylint: disable=no-name-in-module
-from pydantic import (BaseModel, EmailStr, Field, constr, root_validator,
-                      validator)
+from pydantic import BaseModel, EmailStr, Field, constr, validator
 
 
 class DocumentBaseModel(BaseModel):
@@ -34,24 +33,28 @@ class HashSubDoc(BaseModel):
     r: int = 8
     p: int = 1
 
+    @validator('salt', pre=True, always=True)
+    def create_salt(cls, salt):
+        """Create random salt value"""
+        return salt or os.urandom(16)
+
 
 class UserDoc(DocumentBaseModel):
     """UserDocumentModel."""
 
     username: constr(min_length=1, max_length=64, regex="^[a-zA-Z0-9_-]+$")
-    hash: HashSubDoc = HashSubDoc(**{})
+    hash: HashSubDoc
     state: Literal['active', 'inactive'] = 'active'
     email: EmailStr
     password: constr(min_length=8, max_length=64)
 
-    @root_validator
-    # pylint: disable=no-self-argument
-    def validate_password(cls, values):
+    @validator('password')
+    def validate_password(cls, password, values):
         """Check if password has at least a letter and a number"""
         upper = False
         lower = False
         number = False
-        for char in values['password']:
+        for char in password:
             if char.isupper():
                 upper = True
             if char.isnumeric():
@@ -59,14 +62,11 @@ class UserDoc(DocumentBaseModel):
             if char.islower():
                 lower = True
             if number and upper and lower:
-                values['hash'] = HashSubDoc(**{'salt': os.urandom(16)})
-                values['password'] = cls.hashing(values['password'].encode(),
-                                                 values['hash'].dict())
-                return values
-        raise ValueError('Password should contain:\n',
-                         '1. Minimun 8 characters.\n',
-                         '2. At least one upper case character.\n',
-                         '3. At least 1 numeric character [0-9].')
+                return cls.hashing(password.encode(), values['hash'].dict())
+        raise ValueError('value should contain ' +
+                         'minimun 8 characters, ' +
+                         'at least one upper case character, ' +
+                         'at least 1 numeric character [0-9]')
 
     @staticmethod
     def hashing(password: bytes, values: dict) -> str:

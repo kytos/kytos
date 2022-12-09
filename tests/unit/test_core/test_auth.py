@@ -3,7 +3,8 @@ import base64
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
-from pydantic import ValidationError
+# pylint: disable=no-name-in-module
+from pydantic import BaseModel, ValidationError
 from pymongo.errors import DuplicateKeyError
 from werkzeug.exceptions import NotFound
 
@@ -162,7 +163,7 @@ class TestAuth(TestCase):
     def test_03_create_user_request_bad(self, mock_jwt_secret):
         """Test auth create user endpoint."""
         controller = self.auth.user_controller
-        controller.create_user.side_effect = ValidationError('', '')
+        controller.create_user.side_effect = ValidationError('', BaseModel)
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/"
         error_response = api.open(url, method='POST', json=self.user_data,
@@ -219,7 +220,7 @@ class TestAuth(TestCase):
     def test_05_update_user_request_bad(self, mock_jwt_secret):
         """Test auth update user endpoint"""
         controller = self.auth.user_controller
-        controller.update_user.side_effect = ValidationError('', '')
+        controller.update_user.side_effect = ValidationError('', BaseModel)
         api = self.get_auth_test_client(self.auth)
         url = f"{API_URI}/auth/users/user5"
         error_response = api.open(url, method='PATCH', json={},
@@ -266,3 +267,12 @@ class TestAuth(TestCase):
         with self.assertRaises(NotFound):
             # pylint: disable=protected-access
             self.auth._find_user("name")
+
+    def test_08_error_msg(self):
+        """Test error_msg"""
+        # ValidationErro mocked response
+        error_list = [{'loc': ('username', ), 'msg': 'mock_msg_1'},
+                      {'loc': ('email', ), 'msg': 'mock_msg_2'}]
+        actual_msg = self.auth.error_msg(error_list)
+        expected_msg = 'username: mock_msg_1; email: mock_msg_2'
+        self.assertEqual(actual_msg, expected_msg)

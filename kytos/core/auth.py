@@ -23,7 +23,7 @@ from werkzeug.exceptions import (BadRequest, Conflict, NotFound, Unauthorized,
 from kytos.core.config import KytosConfig
 from kytos.core.db import Mongo
 from kytos.core.retry import before_sleep, for_all_methods, retries
-from kytos.core.user import UserDoc, UserDocUpdate
+from kytos.core.user import HashSubDoc, UserDoc, UserDocUpdate
 
 __all__ = ['authenticated']
 
@@ -94,14 +94,13 @@ class UserController:
             utc_now = datetime.datetime.utcnow()
             result = self.db.users.insert_one(UserDoc(**{
                 **{"_id": str(uuid.uuid4())},
-                **{"username": user_data['username']},
-                **{"password": user_data["password"]},
-                **{"email": user_data["email"]},
+                **{"username": user_data.get('username')},
+                **{"hash": HashSubDoc()},
+                **{"password": user_data.get('password')},
+                **{"email": user_data.get('email')},
                 **{"inserted_at": utc_now},
                 **{"updated_at": utc_now},
             }).dict())
-        except KeyError as err:
-            raise err
         except DuplicateKeyError as err:
             raise err
         except ValidationError as err:
@@ -246,12 +245,11 @@ class Auth:
         }
         try:
             self.user_controller.create_user(user)
-        except ValidationError:
-            print("Inputs could not be validated.")
+        except ValidationError as err:
+            msg = self.error_msg(err.errors())
+            return f"Error: {msg}"
         except DuplicateKeyError:
-            print(f"{username} already exist.")
-        except KeyError:
-            print("There is a missing field.")
+            return f"Error: {username} already exist."
 
         return "User successfully created"
 
@@ -342,17 +340,29 @@ class Auth:
             raise UnsupportedMediaType(result)
         return metadata
 
+    @staticmethod
+    def error_msg(error_list: list) -> str:
+        """Return a more request friendly error message from ValidationError"""
+        msg = ""
+        for err in error_list:
+            for value in err['loc']:
+                msg += value + ", "
+            msg = msg[:-2]
+            msg += ": " + err["msg"] + "; "
+        return msg[:-2]
+
     @authenticated
     def _create_user(self):
         """Save a user using MongoDB."""
         try:
-            self.user_controller.create_user(self._get_request())
-        except KeyError as err:
-            raise BadRequest from err
+            user_data = self._get_request()
+            self.user_controller.create_user(user_data)
         except ValidationError as err:
-            raise BadRequest from err
+            msg = self.error_msg(err.errors())
+            raise BadRequest(msg) from err
         except DuplicateKeyError as err:
-            raise Conflict from err
+            msg = user_data.get("username") + " already exists."
+            raise Conflict(msg) from err
         return jsonify("User successfully created"), 201
 
     @authenticated
@@ -374,8 +384,10 @@ class Auth:
         try:
             updated = self.user_controller.update_user(username, data)
         except ValidationError as err:
-            raise BadRequest from err
+            msg = self.error_msg(err.errors())
+            raise BadRequest(msg) from err
         except DuplicateKeyError as err:
+            msg = username + " already exists."
             raise Conflict from err
         if not updated:
             raise NotFound(f"User {username} not found")

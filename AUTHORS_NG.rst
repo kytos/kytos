@@ -8,6 +8,7 @@ Core Team
 - Vinicius Arcanjo <vindasil AT fiu DOT edu>
 - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 - David Ramirez <davramir AT fiu DOT edu>
+- Gretel De la Peña <gdelapea AT fiu DOT edu>
 
 Team Leader
 ***********

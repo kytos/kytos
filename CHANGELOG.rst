@@ -6,36 +6,26 @@ All notable changes to the kytos project will be documented in this file.
 UNRELEASED - Under development
 ******************************
 
-Added
-=====
-
 Changed
 =======
+
+[2022.3.0]  2022-12-15
+**********************
 
 - Upstream core dependencies have been upgraded: ``ipython==8.1.1, flask-socketio==5.2.0, flask_cors==3.0.10, flask[async]==2.1.3, janus==1.0.0, jinja2==3.1.2, watchdog==2.1.9, pyjwt==2.4.0, pylint==2.15.0``
 - Flask/Werkzeug 2.0.0+ now provide ``async`` support, so NApps can leverage ``asyncio`` and its ecosystem when applicable using the same ``rest`` decorator
 - Replaced ``get_event_loop`` with ``get_running_loop`` when applicable to be compatible with python 3.9+ in the future
 - NApps are unloaded in the reverse order that they are enabled to facilitate to shutdown gracefully.
-- ``MongoClient`` now has an explicit write_concern majority
+- ``MongoClient`` now has an explicit ``write_concern`` majority
 - Added dependencies ``dnspython==2.2.1, email-validator==1.3.0``
 - Auth storage has been migrated from the NApp ``storehouse`` to MongoDB with ``kytos/users.py`` collection
 - ``status_funcs`` have been moved to ``GenericEntity`` sub classes to avoid potential conflicts with different entities
-
-
-Deprecated
-==========
-
-Removed
-=======
 
 Fixed
 =====
 - Log traceback error if NApps execute method doesn't handle an exception
 - Stop ``APIServer`` instance after unloading NApps
 - Log traceback error if the header from authorization was empty resulting in ``HTTP 500``
-
-Security
-========
 
 [2022.2.2] - "kiko" - 2022-08-25
 ********************************

@@ -8,7 +8,7 @@
     - José Mauro Ribeiro <zemauror@gmail.com>
 :Created: 2020-01-30
 :Kytos-Version: 2020.1
-:Status: Draft
+:Status: Accepted
 :Type: Informational
 
 

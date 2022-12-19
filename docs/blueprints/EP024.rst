@@ -7,7 +7,7 @@
     - Vinicius Arcanjo <vindasil@fiu.edu>
 :Created: 2021-11-01
 :Kytos-Version:
-:Status: Draft
+:Status: Finished
 
 ********************************************
 EP024 - Managed resources consistency checks

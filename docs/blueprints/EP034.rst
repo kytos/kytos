@@ -7,8 +7,8 @@
     - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
     - Antonio Francisco <ajoaoff AT gmail DOT com>
 :Created: 2022-09-26
-:Kytos-Version:
-:Status: Draft
+:Kytos-Version: 2022.3
+:Status: Finished
 
 ***********************************
 EP033 - MEF E-LINE CSPF integration

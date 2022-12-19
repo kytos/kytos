@@ -8,10 +8,10 @@
     - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 :Created: 2022-03-03
 :Kytos-Version: 2022.2
-:Status: Draft
+:Status: Finished
 
 ****************************************
-EP025 - Document-oriented NoSQL database
+EP026 - Document-oriented NoSQL database
 ****************************************
 
 

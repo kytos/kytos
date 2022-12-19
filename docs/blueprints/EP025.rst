@@ -7,8 +7,8 @@
     - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
     - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 :Created: 2022-02-22
-:Kytos-Version:
-:Status: Draft
+:Kytos-Version: 2022.2
+:Status: Finished
 
 *****************************************
 EP025 - Interface loop detection via LLDP

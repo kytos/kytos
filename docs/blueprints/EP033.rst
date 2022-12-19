@@ -6,7 +6,7 @@
     - Vinicius Arcanjo <vindasil AT fiu DOT edu>
 :Created: 2022-09-03
 :Kytos-Version: 2022.3
-:Status: Draft
+:Status: Accepted
 
 
 *******************************************************

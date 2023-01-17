@@ -8,8 +8,8 @@
     - David Ramirez <davramir AT fiu DOT edu>
     - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 :Created: 2022-08-25
-:Kytos-Version:
-:Status: Draft
+:Kytos-Version: 2023.3
+:Status: Finished
 
 ***********************************
 EP032 - flow_stats stabilization v1

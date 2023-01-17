@@ -3,7 +3,7 @@
 :Authors: Carlos Magno <cmagnobarbosa@gmail.com>; Gleyberson Andrade <gleybersonandrade@gmail.com>
 :Created: 2019-09-05
 :Kytos-Version: 2019.2
-:Status: Draft
+:Status: Finished
 :Type: Standards Track
 
 ********************************************

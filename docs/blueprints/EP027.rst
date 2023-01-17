@@ -7,8 +7,8 @@
     - Jeronimo Bezerra <jbezerra AT fiu DOT edu>
     - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 :Created: 2022-04-19
-:Kytos-Version:
-:Status: Draft
+:Kytos-Version: 2022.2
+:Status: Finished
 
 ***********************************************************
 EP027 - Application Performance and Monitoring (APM) client

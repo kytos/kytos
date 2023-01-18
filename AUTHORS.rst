@@ -4,7 +4,7 @@ Authors
 - Beraldo Leal <beraldo DOT leal AT cern DOT ch>
 - Arthur Baruchi <abaruchi AT ncc DOT unesp DOT br>
 - Carlos Eduardo Moreira dos Santos <cadu AT ncc DOT unesp DOT br>
-- Diego Rabatone Oliveira <diraol AT ncc DOT unesp DOT br>
+- Diego Rabatone Oliveira <diraol AT diraol DOT eng DOT br>
 - Macártur de Sousa Carvalho <macartur.sc AT gmail DOT com>
 - Renan Rodrigo <renanrb AT ime DOT usp DOT br>
 - Humberto Diógenes <hdiogenes AT gmail DOT com>

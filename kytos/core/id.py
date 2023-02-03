@@ -6,7 +6,7 @@ import hashlib
 class InterfaceID(str):
     """Interface Identifier"""
 
-    __slots__ = ("switch", "port")
+    __slots__ = ("switch", "port", "tuple")
 
     def __new__(cls, switch: str, port: int):
         return super().__new__(cls, f"{switch}:{port}")
@@ -15,22 +15,19 @@ class InterfaceID(str):
         # Used for sorting, but can be accessed
         self.switch = switch
         self.port = port
+        self.tuple = (switch, port)
         super().__init__()
 
     def __lt__(self, other):
         # Ensures that instances are sortable in a way that maintains backwards
         # compatibility when creating instances of LinkID
-        dpid_a = self.switch
-        port_a = self.port
-        dpid_b = other.switch
-        port_b = other.port
-        if dpid_a < dpid_b:
-            return True
-        return dpid_a == dpid_b and port_a < port_b
+        if isinstance(other, InterfaceID):
+            return self.tuple < other.tuple
+        return NotImplemented
 
     def __getnewargs__(self):
         """To make sure it's pickleable"""
-        return (self.switch, self.port)
+        return self.tuple
 
 
 class LinkID(str):
@@ -42,7 +39,7 @@ class LinkID(str):
         return super().__new__(cls, digest)
 
     def __init__(self, interface_a: InterfaceID, interface_b: InterfaceID):
-        self.interfaces = (interface_a, interface_b)
+        self.interfaces = tuple(sorted((interface_a, interface_b)))
         super().__init__()
 
     def __getnewargs__(self):

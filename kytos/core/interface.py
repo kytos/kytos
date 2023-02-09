@@ -494,7 +494,7 @@ class UNI:
 
     def is_valid(self):
         """Check if TAG is possible for this interface TAG pool."""
-        if self.user_tag and type(self.user_tag.value) is int:
+        if self.user_tag and isinstance(self.user_tag.value, int):
             return self.interface.is_tag_available(self.user_tag)
         return True
 

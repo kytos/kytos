@@ -633,19 +633,14 @@ class Controller:
                                    message.header.xid,
                                    packet.hex())
                     self.notify_listeners(triggered_event)
-                    continue
-
             except (OSError, SocketError):
-                pass
+                await self.publish_connection_error(triggered_event)
+                self.log.info("connection closed. Cannot send message")
             except PackException as err:
                 self.log.error(
                     f"Discarding message: {message}, event: {triggered_event} "
                     f"because of PackException {err}"
                 )
-                continue
-
-            await self.publish_connection_error(triggered_event)
-            self.log.info("connection closed. Cannot send message")
 
     def get_interface_by_id(self, interface_id):
         """Find a Interface  with interface_id.

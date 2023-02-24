@@ -8,6 +8,8 @@ from copy import copy
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock, call, patch
 
+from pyof.foundation.exceptions import PackException
+
 from kytos.core import Controller
 from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
@@ -734,6 +736,20 @@ class TestControllerAsync:
         await controller.msg_out_event_handler()
         dst.send.assert_called_with(packet)
         controller.notify_listeners.assert_called_with(event_1)
+
+    async def test_msg_out_event_handler_pack_exc(self, controller):
+        """Test msg_out_event_handler async pack exception."""
+        dst, msg = MagicMock(), MagicMock()
+        dst.state = 0
+        msg.pack.side_effect = PackException("some error")
+        event_1 = KytosEvent('kytos/core.any',
+                             content={'message': msg, 'destination': dst})
+        event_2 = KytosEvent('kytos/core.shutdown')
+
+        await controller.buffers.msg_out._queue.async_q.put(event_1)
+        await controller.buffers.msg_out._queue.async_q.put(event_2)
+        await controller.msg_out_event_handler()
+        assert controller.log.error.call_count == 1
 
     async def test_app_event_handler(self, controller):
         """Test app_event_handler async method by handling a shutdown event."""

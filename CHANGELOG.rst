@@ -6,6 +6,13 @@ All notable changes to the kytos project will be documented in this file.
 UNRELEASED - Under development
 ******************************
 
+[2022.3.1]  2023-02-17
+**********************
+
+Fixed
+=====
+- handled ``PackException`` to avoid crashing ``msg_out_event_handler`` coroutine
+
 [2022.3.0]  2022-12-15
 **********************
 

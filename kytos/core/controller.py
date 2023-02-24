@@ -29,6 +29,8 @@ from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from socket import error as SocketError
 
+from pyof.foundation.exceptions import PackException
+
 from kytos.core.api_server import APIServer
 from kytos.core.apm import init_apm
 from kytos.core.atcp_server import KytosServer, KytosServerProtocol
@@ -79,6 +81,7 @@ class Controller:
     # Created issue #568 for the disabled checks.
     # pylint: disable=too-many-instance-attributes,too-many-public-methods,
     # pylint: disable=consider-using-with,unnecessary-dunder-call
+    # pylint: disable=too-many-lines
     def __init__(self, options=None):
         """Init method of Controller class takes the parameters below.
 
@@ -630,13 +633,14 @@ class Controller:
                                    message.header.xid,
                                    packet.hex())
                     self.notify_listeners(triggered_event)
-                    continue
-
             except (OSError, SocketError):
-                pass
-
-            await self.publish_connection_error(triggered_event)
-            self.log.info("connection closed. Cannot send message")
+                await self.publish_connection_error(triggered_event)
+                self.log.info("connection closed. Cannot send message")
+            except PackException as err:
+                self.log.error(
+                    f"Discarding message: {message}, event: {triggered_event} "
+                    f"because of PackException {err}"
+                )
 
     def get_interface_by_id(self, interface_id):
         """Find a Interface  with interface_id.

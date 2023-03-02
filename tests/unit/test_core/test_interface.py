@@ -341,6 +341,12 @@ class TestUNI(unittest.TestCase):
         self.uni.user_tag = TAG(1, "untagged")
         self.assertTrue(self.uni.is_valid())
 
+        self.uni.user_tag = TAG(1, "any")
+        self.assertTrue(self.uni.is_valid())
+
+        self.uni.user_tag = TAG(1, "2/4094")
+        self.assertFalse(self.uni.is_valid())
+
     def test_as_dict(self):
         """Test as_dict method."""
         expected_dict = {'interface_id': '00:00:00:00:00:00:00:01:1',

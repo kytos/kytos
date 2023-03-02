@@ -494,9 +494,8 @@ class UNI:
 
     def is_valid(self):
         """Check if TAG is possible for this interface TAG pool."""
-        if self.user_tag is not None:
-            if self.user_tag.value in ("any", "untagged"):
-                return True
+        if self.user_tag and \
+           self.user_tag.value not in ("any", "untagged"):
             return self.interface.is_tag_available(self.user_tag)
         return True
 

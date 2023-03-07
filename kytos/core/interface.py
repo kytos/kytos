@@ -492,10 +492,20 @@ class UNI:
         return (self.user_tag == other.user_tag and
                 self.interface == other.interface)
 
+    def _is_reserved_valid_tag(self) -> bool:
+        """Check if TAG string is possible"""
+        reserved_tag = {"any", "untagged"}
+        if self.user_tag.value in reserved_tag:
+            return True
+        return False
+
     def is_valid(self):
         """Check if TAG is possible for this interface TAG pool."""
         if self.user_tag:
-            return self.interface.is_tag_available(self.user_tag)
+            if isinstance(self.user_tag.value, str):
+                return self._is_reserved_valid_tag()
+            if isinstance(self.user_tag.value, int):
+                return self.interface.is_tag_available(self.user_tag)
         return True
 
     def as_dict(self):

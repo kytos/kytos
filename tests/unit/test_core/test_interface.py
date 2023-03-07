@@ -338,6 +338,8 @@ class TestUNI(unittest.TestCase):
         self.uni.user_tag = None
         self.assertTrue(self.uni.is_valid())
 
+    def test_is_reserved_valid_tag(self):
+        """Test _is_reserved_valid_tag method for string TAG."""
         self.uni.user_tag = TAG(1, "untagged")
         self.assertTrue(self.uni.is_valid())
 

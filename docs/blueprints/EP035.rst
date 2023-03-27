@@ -1,0 +1,100 @@
+:EP: 35
+:Title: Kytos stats with OF table stats
+:Authors:
+    - Gretel Liz De la Peña <gdelapea AT fiu DOT edu>
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+:Created: 2023-03-13
+:Kytos-Version: 2023.1
+:Status: Draft
+
+***************************************
+EP035 - Kytos stats with OF table stats
+***************************************
+
+Abstract
+========
+
+This blueprint is to support table statistics and concentrate the statistics into a single NApp.
+Actions will involve ``flow_stats`` and ``of_core``.
+
+Motivation
+==========
+
+Currently ``flow_stats`` is responsible to deal with flow statistics, which are exposed in endpoints:
+
+- ``GET v1/flow/stats`` to get the flows stats by dpid.
+
+- ``GET v1/packet_count/<flow_id>`` for packet count of a specific flow.
+
+- ``GET v1/bytes_count/<flow_id>`` for bytes count of a specific flow.
+
+- ``GET v1/packet_count/per_flow/<dpid>`` for packet count per flow.
+
+- ``GET v1/bytes_count/per_flow/<dpid>`` for bytes count per flow.
+
+However, OF table stats are not supported. 
+
+The goal of this blueprint is to evolve ``flow_stats`` into ``kytos_stats`` for kytos statistics, including OF table stats support.
+
+Specification
+=============
+
+Information about tables is requested with the ``OFPMP_TABLE`` type of the ``OFPT_MULTIPART_REQUEST`` message. 
+The request does not contain any data in the body.
+The body of the reply consists of an array of struct ``ofp_table_stats``, which contains:
+- `table_id`: Identifier of table.
+- `active_count`: Number of active entries.
+- `lookup_count`: Number of packets looked up in table.
+- `matched_count`: Number of packets that hit table. 
+
+Proposed Changes
+----------------
+
+- Rename ``flow_stats`` to ``kytos_stats``. Adapt the zabbix wrapper to send requests to the correct endpoint.
+- New event from ``of_core``.
+- Update ``kytos_stats`` to suport OF table stats.
+- Update Zabbix Wrapper to print table stats.
+
+``of_core``
+-----------
+
+``of_core`` will support ``MultipartType.OFPMP_TABLE`` and a new event will be published, just so ``kytos_stats`` can subscribe and react accordingly. 
+ Will be requested by switch and sent only when the switch has confirmed its capabilities:
+```
+controller.switches[dpid].features.capabilities.value & Capabilities.OFPC_TABLE_STATS == Capabilities.OFPC_TABLE_STATS
+```
+
+Published Events
+----------------
+
+kytos/of_core.table_stats.received
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Event reporting OF table stats
+
+Content:
+
+.. code-block:: python3
+
+   {
+     "switch": <switch>
+     "replies_tables": [<Table stats>]
+   }
+
+
+``kytos_stats``
+~~~~~~~~~~~~~~
+
+- An equivalent behavior of flow stats to the current one in ``flow_stats`` will be kept.
+A data structure will be updated with the ``kytos/of_core.kytos_stats.table_stats.received`` event. 
+This structure will be indexed by `table_id`` and will allow the following API endpoints to be added:
+
+- ``GET v1/table/stats`` to get the statistics of tables. Will be provided query parameters filtering by dpid and optionally by table.
+
+Future work
+===========
+
+- Include the calculations to get statistics from EVCs, which is currently the responsibility of Zabbix wrapper.
+- Support time series stats like: number of EVCs, number of switches, number of interfaces, links, controller uptime.
+- Assess whether it is necessary to include prediction tools from the time series stats.

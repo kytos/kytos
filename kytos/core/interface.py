@@ -422,6 +422,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
              'lldp': True,
              'active': True,
              'enabled': False,
+             'status': '2',
              'link': ""
             }
 
@@ -442,6 +443,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                       'lldp': self.lldp,
                       'active': self.is_active(),
                       'enabled': self.is_enabled(),
+                      'status': self.status.value,
                       'link': self.link.id if self.link else ""}
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()

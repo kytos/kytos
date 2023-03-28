@@ -174,7 +174,8 @@ class Link(GenericEntity):
                 'endpoint_b': self.endpoint_b.as_dict(),
                 'metadata': self.get_metadata_as_dict(),
                 'active': self.is_active(),
-                'enabled': self.is_enabled()}
+                'enabled': self.is_enabled(),
+                'status': self.status.value}
 
     def as_json(self):
         """Return the Link as a JSON string."""

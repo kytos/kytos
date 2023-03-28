@@ -4,8 +4,8 @@ import logging
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
-from threading import Thread
 from pathlib import Path
+from threading import Thread
 
 from flask import request
 from openapi_core.contrib.flask import FlaskOpenAPIRequest

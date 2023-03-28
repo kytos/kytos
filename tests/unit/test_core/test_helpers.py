@@ -1,11 +1,11 @@
 """Test kytos.core.helpers module."""
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
-from kytos.core import helpers
 
-from kytos.core.helpers import (alisten_to, executors, load_spec,
+from kytos.core import helpers
+from kytos.core.helpers import (alisten_to, executors,
                                 get_thread_pool_max_workers, get_time,
-                                listen_to, run_on_thread)
+                                listen_to, load_spec, run_on_thread)
 
 
 async def test_alisten_to():

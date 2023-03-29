@@ -349,7 +349,7 @@ class Switch(GenericEntity):
                 'metadata': {},
                 'active': True,
                 'enabled': False,
-                'status': '2',
+                'status': 'DISABLED',
                 }
 
         Returns:

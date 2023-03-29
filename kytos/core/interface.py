@@ -422,7 +422,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
              'lldp': True,
              'active': True,
              'enabled': False,
-             'status': '2',
+             'status': 'DISABLED',
              'link': ""
             }
 

@@ -9,6 +9,7 @@ UNRELEASED - Under development
 Changed
 =======
 - Changed ``UNI.is_valid`` to allow tags such as ``any`` and ``untagged``
+- Changed ``EntityStatus`` value to string instead of integer
 
 
 [2022.3.1]  2023-02-17

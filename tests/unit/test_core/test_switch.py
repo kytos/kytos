@@ -349,7 +349,7 @@ class TestSwitch(TestCase):
                          'metadata': {},
                          'active': True,
                          'enabled': True,
-                         'status': '1'}
+                         'status': 'UP'}
         self.assertEqual(self.switch.as_dict(), expected_dict)
 
     def test_as_json(self):
@@ -369,7 +369,7 @@ class TestSwitch(TestCase):
                                     'metadata': {},
                                     'active': True,
                                     'enabled': True,
-                                    'status': '1'})
+                                    'status': 'UP'})
 
         self.assertEqual(self.switch.as_json(), expected_json)
 

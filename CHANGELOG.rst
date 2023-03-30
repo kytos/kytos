@@ -6,6 +6,10 @@ All notable changes to the kytos project will be documented in this file.
 UNRELEASED - Under development
 ******************************
 
+Added
+=====
+- Added ``@validate_openapi`` decorator to validate OpenAPI routes
+
 Changed
 =======
 - Changed ``UNI.is_valid`` to allow tags such as ``any`` and ``untagged``

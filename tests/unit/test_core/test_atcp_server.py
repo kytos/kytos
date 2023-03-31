@@ -17,7 +17,7 @@ TEST_ADDRESS = ('127.0.0.1', 4138)
 class TestKytosServer:
     """Test if a Kytos Server will go up and receive connections."""
 
-    def setup(self):
+    def setup_method(self):
         """Start new asyncio loop and a test TCP server."""
         # pylint: disable=attribute-defined-outside-init
         self.server = KytosServer(TEST_ADDRESS, KytosServerProtocol,
@@ -66,7 +66,7 @@ class TestKytosServer:
 class TestKytosServerProtocol:
     """KytosServerProtocol tests."""
 
-    def setup(self):
+    def setup_method(self):
         """Instantiate a KytosServerProtocol."""
         # pylint: disable=attribute-defined-outside-init
         loop = asyncio.new_event_loop()

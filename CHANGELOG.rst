@@ -6,10 +6,14 @@ All notable changes to the kytos project will be documented in this file.
 UNRELEASED - Under development
 ******************************
 
+Added
+=====
+- Added ``status`` to ``as_dict()`` from entities ``Interface``, ``Switch`` and ``Link``.
+
 Changed
 =======
 - Changed ``UNI.is_valid`` to allow tags such as ``any`` and ``untagged``
-- Changed ``EntityStatus`` value to string instead of integer
+- Changed ``EntityStatus`` value from 1, 2 and 3 to ``UP``, ``DISABLED`` and ``DOWN`` respectively.
 
 
 [2022.3.1]  2023-02-17

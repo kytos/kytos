@@ -348,7 +348,8 @@ class TestSwitch(TestCase):
                          'interfaces': {},
                          'metadata': {},
                          'active': True,
-                         'enabled': True}
+                         'enabled': True,
+                         'status': 'UP'}
         self.assertEqual(self.switch.as_dict(), expected_dict)
 
     def test_as_json(self):
@@ -367,7 +368,8 @@ class TestSwitch(TestCase):
                                     'interfaces': {},
                                     'metadata': {},
                                     'active': True,
-                                    'enabled': True})
+                                    'enabled': True,
+                                    'status': 'UP'})
 
         self.assertEqual(self.switch.as_json(), expected_json)
 

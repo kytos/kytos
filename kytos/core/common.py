@@ -9,9 +9,9 @@ __all__ = ('GenericEntity',)
 class EntityStatus(Enum):
     """Enumeration of possible statuses for GenericEntity instances."""
 
-    UP = 1  # pylint: disable=invalid-name
-    DISABLED = 2
-    DOWN = 3
+    UP = "UP"
+    DISABLED = "DISABLED"
+    DOWN = "DOWN"
 
 
 class GenericEntity:

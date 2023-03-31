@@ -72,7 +72,7 @@ class TestGenericEntity(TestCase):
 
         status = self.generic_entity.status
 
-        self.assertEqual(status.value, 1)
+        self.assertEqual(status.value, "UP")
 
     def test_status__disabled(self):
         """Test status property if _enabled is false."""
@@ -80,7 +80,7 @@ class TestGenericEntity(TestCase):
 
         status = self.generic_entity.status
 
-        self.assertEqual(status.value, 2)
+        self.assertEqual(status.value, "DISABLED")
 
     def test_status__down(self):
         """Test status property if _active is false."""
@@ -88,7 +88,7 @@ class TestGenericEntity(TestCase):
 
         status = self.generic_entity.status
 
-        self.assertEqual(status.value, 3)
+        self.assertEqual(status.value, "DOWN")
 
     def test_add_metadata__exists(self):
         """Test add_metadata method if metadata exists."""

@@ -348,7 +348,8 @@ class Switch(GenericEntity):
                 'interfaces': {},
                 'metadata': {},
                 'active': True,
-                'enabled': False
+                'enabled': False,
+                'status': 'DISABLED',
                 }
 
         Returns:
@@ -376,7 +377,8 @@ class Switch(GenericEntity):
                                for i in self.interfaces.values()},
                 'metadata': self.metadata,
                 'active': self.is_active(),
-                'enabled': self.is_enabled()}
+                'enabled': self.is_enabled(),
+                'status': self.status.value}
 
     def as_json(self):
         """Return JSON with switch's attributes.

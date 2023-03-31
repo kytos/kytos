@@ -8,11 +8,13 @@ UNRELEASED - Under development
 
 Added
 =====
+- Added ``status`` to ``as_dict()`` from entities ``Interface``, ``Switch`` and ``Link``.
 - Added ``@validate_openapi`` decorator to validate OpenAPI routes
 
 Changed
 =======
 - Changed ``UNI.is_valid`` to allow tags such as ``any`` and ``untagged``
+- Changed ``EntityStatus`` value from 1, 2 and 3 to ``UP``, ``DISABLED`` and ``DOWN`` respectively.
 
 
 [2022.3.1]  2023-02-17

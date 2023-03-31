@@ -2,9 +2,10 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from kytos.core import helpers
 from kytos.core.helpers import (alisten_to, executors,
                                 get_thread_pool_max_workers, get_time,
-                                listen_to, run_on_thread)
+                                listen_to, load_spec, run_on_thread)
 
 
 async def test_alisten_to():
@@ -22,6 +23,14 @@ async def test_alisten_to():
     assert SomeClass.on_some_event.__name__ == "inner"
     result = await SomeClass().on_some_event(MagicMock())
     assert result == "some_response"
+
+
+def test_load_spec(monkeypatch, minimal_openapi_spec_dict) -> None:
+    """Test load spec."""
+    monkeypatch.setattr(helpers, "_read_from_filename",
+                        lambda x: minimal_openapi_spec_dict)
+    spec = load_spec("mocked_path")
+    assert spec.accessor.lookup == minimal_openapi_spec_dict
 
 
 class TestHelpers(TestCase):

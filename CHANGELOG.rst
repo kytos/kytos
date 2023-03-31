@@ -9,6 +9,7 @@ UNRELEASED - Under development
 Added
 =====
 - Added ``status`` to ``as_dict()`` from entities ``Interface``, ``Switch`` and ``Link``.
+- Added ``@validate_openapi`` decorator to validate OpenAPI routes
 
 Changed
 =======

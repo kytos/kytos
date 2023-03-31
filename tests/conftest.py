@@ -28,3 +28,19 @@ def controller() -> Controller:
 def api_client(controller):
     """Flask app test_client instance."""
     yield controller.api_server.app.test_client()
+
+
+@pytest.fixture
+def minimal_openapi_spec_dict():
+    """Sample minimal openapi spec."""
+    return {
+        "openapi": "3.0.0",
+        "info": {"title": "Minimal OpenAPI specification", "version": "0.1"},
+        "paths": {
+            "/status": {
+                "get": {
+                    "responses": {"default": {"description": "status"}}
+                }
+            }
+        },
+    }

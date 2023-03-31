@@ -1,9 +1,19 @@
 """Utilities functions used in Kytos."""
+import functools
 import logging
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
+from pathlib import Path
 from threading import Thread
+
+from flask import request
+from openapi_core.contrib.flask import FlaskOpenAPIRequest
+from openapi_core.spec.shortcuts import create_spec
+from openapi_core.validation.request import openapi_request_validator
+from openapi_spec_validator import validate_spec
+from openapi_spec_validator.readers import read_from_filename
+from werkzeug.exceptions import BadRequest, UnsupportedMediaType
 
 from kytos.core.apm import ElasticAPM
 from kytos.core.config import KytosConfig
@@ -332,3 +342,65 @@ def get_time(data=None):
     else:
         return None
     return date.replace(tzinfo=timezone.utc)
+
+
+def _read_from_filename(yml_file_path: Path) -> dict:
+    """Read from yml filename."""
+    spec_dict, _ = read_from_filename(yml_file_path)
+    return spec_dict
+
+
+def load_spec(yml_file_path: Path):
+    """Load and validate spec object given a yml file path."""
+    spec_dict = _read_from_filename(yml_file_path)
+    validate_spec(spec_dict)
+    return create_spec(spec_dict)
+
+
+def validate_openapi(spec):
+    """Decorator to validate a REST endpoint input.
+
+    Uses the schema defined in the openapi.yml file
+    to validate.
+    """
+
+    def validate_decorator(func):
+        @functools.wraps(func)
+        def wrapper_validate(*args, **kwargs):
+            try:
+                data = request.get_json()
+            except BadRequest:
+                result = "The request body is not a well-formed JSON."
+                raise BadRequest(result) from BadRequest
+            if data is None:
+                result = "The request body mimetype is not application/json."
+                raise UnsupportedMediaType(result)
+
+            openapi_request = FlaskOpenAPIRequest(request)
+            result = openapi_request_validator.validate(spec, openapi_request)
+            if result.errors:
+                error_response = (
+                    "The request body contains invalid API data."
+                )
+                errors = result.errors[0]
+                if hasattr(errors, "schema_errors"):
+                    schema_errors = errors.schema_errors[0]
+                    error_log = {
+                        "error_message": schema_errors.message,
+                        "error_validator": schema_errors.validator,
+                        "error_validator_value": schema_errors.validator_value,
+                        "error_path": list(schema_errors.path),
+                        "error_schema": schema_errors.schema,
+                        "error_schema_path": list(schema_errors.schema_path),
+                    }
+                    LOG.debug(f"Invalid request (API schema): {error_log}")
+                    error_response += f" {schema_errors.message} for field"
+                    error_response += (
+                        f" {'/'.join(map(str,schema_errors.path))}."
+                    )
+                raise BadRequest(error_response) from BadRequest
+            return func(*args, data=data, **kwargs)
+
+        return wrapper_validate
+
+    return validate_decorator

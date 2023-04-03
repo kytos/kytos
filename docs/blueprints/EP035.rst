@@ -62,10 +62,10 @@ Proposed Changes
 - Update the routes in the e2e test suite for `flow_stats` to `kytos_stats`. 
 
 ``of_core``
------------
+~~~~~~~~~~~
 
-This napp will support ``MultipartType.OFPMP_TABLE`` and a new event will be published, just so ``kytos_stats`` can subscribe and react accordingly. 
- Will be requested by switch and sent only when the switch has confirmed its capabilities:
+This napp will support ``MultipartType.OFPMP_TABLE`` and a new event will be published, just so ``kytos_stats`` can subscribe and react accordingly.
+Will be requested by switch and sent only when the switch has confirmed its capabilities:
 
 ``controller.switches[dpid].features.capabilities.value & Capabilities.OFPC_TABLE_STATS == Capabilities.OFPC_TABLE_STATS``
 
@@ -101,18 +101,18 @@ This structure will be indexed by `dpid` and `table_id``, and will allow the fol
 
 .. code-block:: python3
 
-   {
+  {
     "dpid_1": {
-     0: {"table_id": 0, "active_count": a0, "lookup_count": b0, "matched_count": c0}
-     1: {"table_id": 1, "active_count": a1, "lookup_count": b1, "matched_count": c1}
-     ...
-     n: {"table_id": n, "active_count": an, "lookup_count": bn, "matched_count": cn}
+      0: {"table_id": 0, "active_count": a0, "lookup_count": b0, "matched_count": c0}
+      1: {"table_id": 1, "active_count": a1, "lookup_count": b1, "matched_count": c1}
+      ...
+      n: {"table_id": n, "active_count": an, "lookup_count": bn, "matched_count": cn}
     },
     ...
     "dpid_n": {
-    ...
+      ...
     }
-}
+  }
 
 Zabbix Wrapper
 ~~~~~~~~~~~~~~

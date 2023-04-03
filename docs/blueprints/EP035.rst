@@ -1,0 +1,208 @@
+:EP: 35
+:Title: Interruption Management
+:Authors:
+    - Jeronimo Bezerra jbezerra@fiu.edu;
+    - Arturo Quintana arquinta@fiu.edu ;
+    - Italo Valcy idasilva@fiu.edu
+    - David Ramirez <davramir@fiu.edu>
+:Issued Date: to be defined
+:Status: Draft
+:Type: Standards Track
+
+*******************************
+EP035 - Interruption Management
+*******************************
+
+########
+Abstract
+########
+
+This blueprint details a mechanism for NApps providing services
+to receive information on interruptions,
+and provide information on the affected services back
+to the source of the interruption.
+Additionally, this blueprint details how NApps which produce
+interruptions should signal them in order to take advantage
+of this new mechanism.
+
+##########
+Motivation
+##########
+
+In order for NApps which produce service interruptions
+to receive information on what services they are affecting,
+there needs to be a two way communication channel between
+the service provider and the interruption source.
+The kytos event bus provides only one way communication,
+making it unsuitable for this task.
+
+#############
+Specification
+#############
+
+The following is a set of proposed changes for
+how to handle interruptions in the future,
+in order to have visibility on there causes and effects.
+
+Kytos Core Changes
+##################
+
+In order for services to identify which interruptions are affecting the devices
+they use, a mechanism needs to be added to the device representation for
+identify interruption causes.
+
+
+Extend ``status_funcs`` to produce a ``status_reason``
+------------------------------------------------------
+
+Currently, when an object is queried about its ``status``,
+the reason for that status is unknown.
+What we propose here is adding a new property to
+``GenericEntity`` called ``status_reason``,
+and adding in ``status_reason_func``
+to produce values for ``status_reason``.
+The produced ``status_reason`` will be a set of strings,
+so all possible reasons a device might be disable
+can be easily represented.
+
+Example usage:
+
+.. code-block:: python3
+
+    from kytos.core.switch import Switch
+    maintenance_switches = set()
+
+    def switch_maintenance_status(switch):
+        if switch.id in maintenance_switches:
+            return EntityStatus.DOWN
+        return EntityStatus.UP
+
+    Switch.register_status_func('maintenance', switch_maintenance_status)
+
+    def switch_maintenance_reason(switch):
+        if switch.id in maintenance_switches:
+            return {'maintenance'}
+        return set()
+
+    Switch.register_status_reason_func('maintenance', switch_maintenance_reason)
+
+
+New Topology REST Endpoints
+###########################
+
+The following set of new endpoints are intended to allow
+for previewing the affects of adding in interruptions.
+
+
+REST Endpoint ``GET /topology/v3/preview_interruption``
+-------------------------------------------------------
+
+For all know service providers,
+previews affected if the specified interruption occurs now.
+
+Expected Input:
+
+.. code-block:: http
+
+    GET /topology/v3/preview_interruption?switch=<switch_id>&link=<link_id>&interface=<interface_id>&type=<interruption_type>
+
+
+Expected Response:
+
+.. code-block:: json
+
+    {
+        <provider name str>: [<service name str>],
+    }
+
+Side Effects:
+
+- None
+
+Notes:
+
+- Should support multiple key-value pairs with the same key in the query parameters.
+
+
+Endpoint: ``GET <url for previewing>``
+--------------------------------------
+
+For the given service provider,
+previews services affected if the specified interruption occurs now.
+
+Expected Input:
+
+.. code-block:: http
+
+    GET <preview_url>?switch=<switch_id>&link=<link_id>&interface=<interface_id>&type=<interruption_type>
+
+Expected Output:
+
+.. code-block:: json
+
+    [
+        {
+            'id': <service name str>,
+        },
+    ]
+
+Side Effects:
+
+- None
+
+Notes:
+
+- Should support multiple key-value pairs with the same key in the query parameters.
+
+New Kytos Events
+################
+
+The following set of event listeners are intended to be used to notify
+other NApps when a change to the status of a set of devices occurs.
+
+KytosEvent ``topology.interruptions.start``
+-------------------------------------------
+
+Notify services of an interruption starting,
+after the interruption provider has already updated the status.
+
+Expected Input:
+
+.. code-block:: python3
+
+    {
+        "type": <interruption type str>,
+        "switches": [<switch id>],
+        "interfaces": [<interface id>],
+        "links": [<link id>],
+    }
+
+Side Effects:
+
+- Notifies the other NApps of the start of the interruption on the selected devices.
+
+
+KytosEvent ``topology.interruptions.end``
+-----------------------------------------
+
+Notify services of an interruption ending,
+after the interruption provider has already updated the status.
+
+.. code-block:: python3
+
+    {
+        "type": <interruption type str>,
+        "switches": [<switch id>],
+        "interfaces": [<interface id>],
+        "links": [<link id>],
+    }
+
+##############
+Rejected Ideas
+##############
+
+Several different approaches had been considered during the creation of this blueprint.
+Originally it was intended that a REST API would be developed for controlling
+the state of interruptions in addition to querying there effects.
+That version of this proposal would have also required
+extending topology to manage the state of interruptions.

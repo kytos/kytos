@@ -1,4 +1,3 @@
 -e git+https://github.com/kytos-ng/python-openflow.git#egg=python-openflow
 -e git+https://github.com/kytos-ng/sphinx-theme.git#egg=kytos-sphinx-theme
 -e .[dev]
-pytest-asyncio==0.18.3

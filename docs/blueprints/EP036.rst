@@ -1,0 +1,164 @@
+:EP: 36
+:Title: Openflow multi-table pipeline processing
+:Authors:
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Italo Valcy <idasilva AT fiu DOT edu>
+    - Aldo Ortega <aortegay AT fiu DOT edu>
+
+:Created: 2022-02-04
+:Updated: 2022-02-04
+:Kytos-Version: 2022.3
+:Status: Draft
+
+***************************************************
+EP36 - Openflow multi-table pipeline processing
+***************************************************
+
+Abstract
+========
+
+This blueprint will present the requirements for the implementation of switch multi-tables through new NApp called **multi_tables**.
+
+Motivation
+==========
+
+Multi-table processing is desireable to take advantage of a pipelined processing of packets within a switch. It is necessary to ensure the consistency of tables to avoid missing packets thus a NApp will take care of the table system by being aware of all the flows created from NApps and users.
+
+Specification
+=============
+
+Define the table to be used by NApps and to be used by users which are going to be configurable.
+Also, a new NApp **multi_table** that will initially have the following responsibilities:
+
+  - Allow pipeline to be set
+  - Ensuring the existence of a reasonable table-miss flow
+  - Publish events to handle the assigned table of each NApp
+  - In charge of modifying **tables** collection
+
+How the table will be assigned
+===============================
+
+NApps that install flows, roughly explained:
+
+  - **mef_eline**: Users create EVCs which implement flows
+  - **of_lldp**: Flows connecting switches to the controller
+  - **coloting**: High priority flows with neighbors' colors.
+  - **telemetry_int**: (Not yet implemented) 2 extra flows through **mef_eline** for TCP and UDP
+
+The system of multi-tables will be replicated accross all switches. For now we will be working with a default table.
+
+  .. code:: console
+
+    +------------------+         +------------------+         +------------------+         +------------------+         +------------------+         +------------------+
+    |      table 0     |         |      table 1     |         |      table 2     |         |      table 3     |         |     table 4      |         |     table 5      |
+    |  *general users* |         |   *future use*   |         |     *mef EVPL*   |         |     *mef EVPL*   |         |      *INT*       |         |   *future use*   |
+    | (wildcard match) |         |                  |         |                  |         |                  |         |                  |         |                  |
+    |      of_lldp     |  ---->  |                  |  ---->  |   (exact match   |  ---->  |    (exact match  |  ---->  |      (exact      |  ---->  |    (wildcard)    |
+    |      coloring    |  ---->  |                  |  ---->  | in_port + vlan)  |  ---->  |      in_port)    |  ---->  |       match)     |  ---->  |                  |
+    |                  |         |                  |         |                  |         |                  |         |                  |         |                  |
+    |                  |         |                  |         |                  |         |                  |         |                  |         |                  |
+    |   goto_table: 1  |         |   goto_table: 2  |         |   goto_table: 3  |         |   goto_table: 5  |         |                  |         |                  |
+    +------------------+         +------------------+         +------------------+         +------------------+         +------------------+         +------------------+
+
+New collection, **tables**
+==========================
+
+Initially proposed here is a datastructured representing a linked list (without cycles)
+
+  .. code:: javascript
+
+    "pipeline": {
+      0: {
+        "table_miss_flow": {
+          "priority": 123, "match": {},
+          "instructions": [{"instruction_type": "goto_table", "table_id": 1}]
+        },
+        "napps_table_groups": {"coloring": ["base"],"of_lldp": ["base"]}
+      },
+      1: {
+        "table_miss_flow": {
+          "priority": 123, "match": {},
+          "instructions": [{"instruction_type": "goto_table","table_id": 2}]
+        },
+        "napps_table_groups": {"flow_manager": []}
+      },
+      2: {
+        "table_miss_flow": {
+          "priority": 123, "match": {},
+          "instructions": [{"instruction_type": "goto_table","table_id": 3}]
+        },
+        "napps_table_groups": {"mef_eline": ["evpl"]}
+      },
+      3: {
+        "table_miss_flow": {
+          "priority": 123, "match": {},
+          "instructions": [{"instruction_type": "goto_table","table_id": 5}]
+        },
+        "napps_table_groups": {"mef_eline": ["epl"]}
+      }
+      4: {
+        "table_miss_flow": {},
+        "napps_table_groups": {"INT": []}
+      }
+      5: {
+        "table_miss_flow": {},
+        "napps_table_groups": {}
+      }
+    }
+
+Events
+======
+
+Subscribed
+-----------
+  - **kytos/flow_manager.flow.added**
+  - **kytos/of_core.handshake.completed**
+
+Published
+---------
+
+kytos/multi_table.deploy_table
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This event should sent before any NApp sends its first flow to be published.
+
+.. code:: javascript
+
+  "content": {
+    "mef_eline": {"epl": 3, "evpl": 2},
+    "of_lldp": {"base": 0},
+    "coloring": {"base": 0}
+  }
+
+Deploying pipeline
+==================
+
+Im simple terms, deploying a pipeline will mean to modify every flow so it complies with the pipeline configuration. The process to achieve a successful deployment is as follows:
+
+  1. **multi_table** publishes `kytos/multi_table.deploy_table` event with pipeline content.
+  2. **multi_table** requests all flows from **flow_manager** API.
+  3. **multi_table** duplicates every flow with a different table (to achieve this, this NApp needs to be aware of every other NApp cookie to identify ownership).
+  4. The previous flows are deleted from the database
+  5. Consistency check will make sure that install/delete correctly every flow.
+
+NApp Processing
+================
+
+An example of a process where **of_lldp** needs to set its flows to table 1 (not recommended since the controller needs to know about the flow traffic).
+
+  1. Start Kytos
+  2. **multi-table** listens to `kytos/of_core.handshake.completed` to post a miss flow entry to every table in each switch.
+  3. **multi_table** publishes `kytos/multi_table.deploy_table` event with content ``{"content": {"of_lldp": {"base": 1}}}``.
+  4. **of_lldp** will listen to the event and request flows with the table assigned, 1.
+
+Dependencies
+============
+  - MongoDB
+  - of_core
+  - flow_manager
+
+Future plans
+=============
+  - The table system could be configurable. It is possible to have multiple pipelines with different status like `undeployed` and `deployed` where only one will should have the `deployed` status.
+  - Saving, configure and deploying a json representation of a table is suited better with a UI interface.
+

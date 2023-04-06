@@ -1,12 +1,12 @@
 :EP: 36
 :Title: Openflow multi-table pipeline processing
 :Authors:
+    - Aldo Ortega <aortegay AT fiu DOT edu>
     - Vinicius Arcanjo <vindasil AT fiu DOT edu>
     - Italo Valcy <idasilva AT fiu DOT edu>
-    - Aldo Ortega <aortegay AT fiu DOT edu>
 
-:Created: 2022-02-04
-:Updated: 2022-02-04
+:Created: 2022-05-04
+:Updated: 2022-06-04
 :Kytos-Version: 2022.3
 :Status: Draft
 
@@ -17,7 +17,7 @@ EP36 - Openflow multi-table pipeline processing
 Abstract
 ========
 
-This blueprint will present the requirements for the implementation of switch multi-tables through new NApp called **multi_tables**.
+This blueprint will present the requirements for the implementation of switch multi-tables through new NApp called **multi_table**.
 
 Motivation
 ==========
@@ -30,10 +30,26 @@ Specification
 Define the table to be used by NApps and to be used by users which are going to be configurable.
 Also, a new NApp **multi_table** that will initially have the following responsibilities:
 
-  - Allow pipeline to be set
+  - Know which table is enabled.
   - Ensuring the existence of a reasonable table-miss flow
   - Publish events to handle the assigned table of each NApp
-  - In charge of modifying **tables** collection
+  - In charge of modifying and analyzing **pipelines** collection
+  - The cookie prefix is **0xAD** for its posted flows.
+
+Pipeline Status: Enabled, Disabled
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The status of a pipeline dictates wheter it is applied as the current multi table system in every switch. Once a pipeline is ``enabled``, the previous one will be automatically ``disabled`` ensuring that there is always 1 or 0 (default pipeline is not counted) pipelines enabled.
+
+Default Pipeline
+~~~~~~~~~~~~~~~~
+
+The default pipeline is every flow in the table 0.
+
+Table Group
+~~~~~~~~~~~
+
+**multi_table** will let know other NApp about their determined table. Since it is not neccessary to send the entire pipeline, the content of the event **kytos/multi_table.enable_table** is obtained from the pipeline key ``napps_table_groups`` value. A value example could be ``{"mef_eline": ["epl"]}`` and it means that **mef_eline** EPL flows should be installed in the table where this value came from.
 
 How the table will be assigned
 ===============================
@@ -45,7 +61,9 @@ NApps that install flows, roughly explained:
   - **coloting**: High priority flows with neighbors' colors.
   - **telemetry_int**: (Not yet implemented) 2 extra flows through **mef_eline** for TCP and UDP
 
-The system of multi-tables will be replicated accross all switches. For now we will be working with a default table.
+The system of multi-tables will be replicated accross all switches. For now we will be working with a default table (all flows in table 0).
+
+Example of a multi table system in a switch:
 
   .. code:: console
 
@@ -60,49 +78,61 @@ The system of multi-tables will be replicated accross all switches. For now we w
     |   goto_table: 1  |         |   goto_table: 2  |         |   goto_table: 3  |         |   goto_table: 5  |         |                  |         |                  |
     +------------------+         +------------------+         +------------------+         +------------------+         +------------------+         +------------------+
 
-New collection, **tables**
-==========================
+New collection, **pipelines**
+=============================
 
-Initially proposed here is a datastructured representing a linked list (without cycles)
+There a couple of rules for a proper pipeline:
+
+  - The table number for the next table should be always higher than the current one. This number is found as the `table_id` value in the dictionary ``{"instruction_type": "goto_table", "table_id": 1}``
+  - The pipeline represents a linked list (no loops). A miss flow entry should be present in every table except in the end of the linked list which represents the end on the list.
+
+Initially proposed here is a datastructured representing a linked list. 
 
   .. code:: javascript
 
     "pipeline": {
-      0: {
-        "table_miss_flow": {
-          "priority": 123, "match": {},
-          "instructions": [{"instruction_type": "goto_table", "table_id": 1}]
-        },
-        "napps_table_groups": {"coloring": ["base"],"of_lldp": ["base"]}
-      },
-      1: {
-        "table_miss_flow": {
-          "priority": 123, "match": {},
-          "instructions": [{"instruction_type": "goto_table","table_id": 2}]
-        },
-        "napps_table_groups": {"flow_manager": []}
-      },
-      2: {
-        "table_miss_flow": {
-          "priority": 123, "match": {},
-          "instructions": [{"instruction_type": "goto_table","table_id": 3}]
-        },
-        "napps_table_groups": {"mef_eline": ["evpl"]}
-      },
-      3: {
-        "table_miss_flow": {
-          "priority": 123, "match": {},
-          "instructions": [{"instruction_type": "goto_table","table_id": 5}]
-        },
-        "napps_table_groups": {"mef_eline": ["epl"]}
-      }
-      4: {
-        "table_miss_flow": {},
-        "napps_table_groups": {"INT": []}
-      }
-      5: {
-        "table_miss_flow": {},
-        "napps_table_groups": {}
+      {
+        "id": "9cba7e27a33c45",
+        "status": "enabled",
+        "multi_table": 
+        {
+          0: {
+            "table_miss_flow": {
+              "priority": 123, "match": {},
+              "instructions": [{"instruction_type": "goto_table", "table_id": 1}]
+            },
+            "napps_table_groups": {"coloring": ["base"],"of_lldp": ["base"]}
+          },
+          1: {
+            "table_miss_flow": {
+              "priority": 123, "match": {},
+              "instructions": [{"instruction_type": "goto_table","table_id": 2}]
+            },
+            "napps_table_groups": {"flow_manager": []}
+          },
+          2: {
+            "table_miss_flow": {
+              "priority": 123, "match": {},
+              "instructions": [{"instruction_type": "goto_table","table_id": 3}]
+            },
+            "napps_table_groups": {"mef_eline": ["evpl"]}
+          },
+          3: {
+            "table_miss_flow": {
+              "priority": 123, "match": {},
+              "instructions": [{"instruction_type": "goto_table","table_id": 5}]
+            },
+            "napps_table_groups": {"mef_eline": ["epl"]}
+          }
+          4: {
+            "table_miss_flow": {},
+            "napps_table_groups": {"telemetry_int": ["base"]}
+          }
+          5: {
+            "table_miss_flow": {},
+            "napps_table_groups": {}
+          }
+        }
       }
     }
 
@@ -111,13 +141,26 @@ Events
 
 Subscribed
 -----------
+
   - **kytos/flow_manager.flow.added**
   - **kytos/of_core.handshake.completed**
+  - **kytos/flow_manager.flow.error**
+  - **kytos/[mef_eline|telemetry_int|coloring|of_lldp].enable_table** - Every NApp sends an event with their table settings as content.
+
+kytos/<napp_name>.enable_table
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This event is sent from other NApps with information about their table settings. It is empty in case of failure.
+
+.. code:: javascript
+  "content": {
+    "<mef_eline>": {"epl": 3}
+  }
 
 Published
 ---------
 
-kytos/multi_table.deploy_table
+kytos/multi_table.enable_table
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This event should sent before any NApp sends its first flow to be published.
@@ -130,16 +173,35 @@ This event should sent before any NApp sends its first flow to be published.
     "coloring": {"base": 0}
   }
 
-Deploying pipeline
+
+
+Endpoint API
+============
+  
+  - GET `/api/kytos/multi_table/v2/` - Get all pipelines in the database. Parameters enabled and disabled are allowed.
+
+  - POST `/api/kytos/multi_table/v2/<pipeline_id>/enable` - Enable pipeline to be applied to all switches
+
+  - POST `/api/kytos/multi_table/v2/<pipeline_id>/disable` - Disable pipeline in case of the user wants to return to the default set up.
+
+  - POST `/api/kytos/multi_table/v2/` - Add pipeline to database. Its body is similar to "pipeline.multi_table".
+
+  - DELETE `/api/kytos/multi_table/v2/<pipeline_id>` - Delete a pipeline from database. It should be disabled.
+
+Enabling pipeline
 ==================
 
-Im simple terms, deploying a pipeline will mean to modify every flow so it complies with the pipeline configuration. The process to achieve a successful deployment is as follows:
+Im simple terms, enabling a pipeline will mean to modify every flow so it complies with the pipeline configuration. The process to successfully enable a pipeline is as follows:
 
-  1. **multi_table** publishes `kytos/multi_table.deploy_table` event with pipeline content.
-  2. **multi_table** requests all flows from **flow_manager** API.
-  3. **multi_table** duplicates every flow with a different table (to achieve this, this NApp needs to be aware of every other NApp cookie to identify ownership).
-  4. The previous flows are deleted from the database
-  5. Consistency check will make sure that install/delete correctly every flow.
+  1. **multi_table** publishes `kytos/multi_table.enable_table` event with pipeline content.
+  2. Wait for all NApp to publish their own events with their respective table settings.
+  3. Disable the previous enabled pipeline, if there was any.
+  4. **multi_table** requests all flows from **flow_manager** API.
+  5. **multi_table** duplicates every flow that needs a different table (to achieve this, this NApp needs to be aware of every other NApp cookie to identify ownership).
+  6. Insert duplicated flows to the database.
+  7. Install the duplicated flows with a different table with a post request.
+  8. Delete the non-duplicated flows from the database
+  9. Delete flows that were not duplicated with a delete request.
 
 NApp Processing
 ================
@@ -148,7 +210,7 @@ An example of a process where **of_lldp** needs to set its flows to table 1 (not
 
   1. Start Kytos
   2. **multi-table** listens to `kytos/of_core.handshake.completed` to post a miss flow entry to every table in each switch.
-  3. **multi_table** publishes `kytos/multi_table.deploy_table` event with content ``{"content": {"of_lldp": {"base": 1}}}``.
+  3. **multi_table** publishes `kytos/multi_table.enable_table` event with content ``{"content": {"of_lldp": {"base": 1}}}``.
   4. **of_lldp** will listen to the event and request flows with the table assigned, 1.
 
 Dependencies
@@ -159,6 +221,6 @@ Dependencies
 
 Future plans
 =============
-  - The table system could be configurable. It is possible to have multiple pipelines with different status like `undeployed` and `deployed` where only one will should have the `deployed` status.
-  - Saving, configure and deploying a json representation of a table is suited better with a UI interface.
+  - The table system could be configurable. It is possible to have multiple pipelines with different status like `enabled` and `disabled` where only one should be `enabled` at a time.
+  - Saving, configure and enabling a json representation of a table is suited better with a UI interface.
 

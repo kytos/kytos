@@ -97,14 +97,19 @@ for previewing the affects of adding in interruptions.
 REST Endpoint ``GET /topology/v3/preview_interruption``
 -------------------------------------------------------
 
-For all know service providers,
+For all known service providers,
 previews affected if the specified interruption occurs now.
 
 Expected Input:
 
-.. code-block:: http
+.. code-block:: json
 
-    GET /topology/v3/preview_interruption?switch=<switch_id>&link=<link_id>&interface=<interface_id>&type=<interruption_type>
+    {
+        "type": <interruption type str>,
+        "switches": [<switch id>],
+        "interfaces": [<interface id>],
+        "links": [<link id>],
+    }
 
 
 Expected Response:
@@ -132,9 +137,14 @@ previews services affected if the specified interruption occurs now.
 
 Expected Input:
 
-.. code-block:: http
+.. code-block:: json
 
-    GET <preview_url>?switch=<switch_id>&link=<link_id>&interface=<interface_id>&type=<interruption_type>
+    {
+        "type": <interruption type str>,
+        "switches": [<switch id>],
+        "interfaces": [<interface id>],
+        "links": [<link id>],
+    }
 
 Expected Output:
 
@@ -153,6 +163,19 @@ Side Effects:
 Notes:
 
 - Should support multiple key-value pairs with the same key in the query parameters.
+
+Specifying Service Providers
+############################
+
+In order to specify service providers,
+a new variable will be added into ``kytos/topology``
+settings called ``SERVICE_PROVIDERS``.
+
+.. code-block:: python
+
+    SERVICE_PROVIDERS = {
+        '<service provider name>': '<url for previewing>'
+    }
 
 New Kytos Events
 ################

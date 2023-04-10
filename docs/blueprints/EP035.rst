@@ -6,7 +6,7 @@
     - Vinicius Arcanjo <vindasil AT fiu DOT edu>
 :Created: 2023-03-13
 :Kytos-Version: 2023.1
-:Status: Draft
+:Status: Accepted
 
 ***************************************
 EP035 - Kytos stats with OF table stats

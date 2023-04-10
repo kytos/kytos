@@ -137,5 +137,6 @@ Future work
 ===========
 
 - Include the calculations to get statistics from EVCs, which is currently the responsibility of Zabbix wrapper.
+- Include statistics for OF PortStats
 - Support time series stats like: number of EVCs, number of switches, number of interfaces, links, controller uptime.
 - Assess whether it is necessary to include prediction tools from the time series stats.

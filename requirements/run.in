@@ -18,3 +18,4 @@ openapi-core==0.16.6
 httpx==0.23.2
 starlette[full]==0.26.0
 uvicorn[standard]==0.21.1
+asgiref==3.6.0

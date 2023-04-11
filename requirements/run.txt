@@ -9,6 +9,8 @@ anyio==3.6.2
     #   httpcore
     #   starlette
     #   watchfiles
+asgiref==3.6.0
+    # via -r requirements/run.in
 asttokens==2.0.8
     # via stack-data
 attrs==21.4.0

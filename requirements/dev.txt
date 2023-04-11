@@ -22,6 +22,10 @@ anyio==3.6.2
     #   kytos
     #   starlette
     #   watchfiles
+asgiref==3.6.0
+    # via
+    #   -r requirements/run.txt
+    #   kytos
 astroid==2.13.5
     # via pylint
 asttokens==2.0.8

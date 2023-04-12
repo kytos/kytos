@@ -7,12 +7,12 @@
 
 :Created: 2023-05-04
 :Updated: 2023-10-04
-:Kytos-Version: 2022.3
+:Kytos-Version: 2023.1
 :Status: Draft
 
-***************************************************
+************************************************
 EP36 - Openflow multi-table pipeline processing
-***************************************************
+************************************************
 
 Abstract
 ========
@@ -22,7 +22,7 @@ This blueprint will present the requirements for the implementation of switch mu
 Motivation
 ==========
 
-Multi-table processing will optimize resources in the data plane pipeline implementation. Because we are implementing one pipeline structure to all switches, it is necessary to ensure the consistency of tables to avoid missing packets thus a NApp will take full responsability of this process.
+Multi-table processing will optimize resources in the data plane pipeline implementation. Because we are implementing one pipeline structure to all switches, it is necessary to ensure the consistency of tables to avoid missing packets thus a NApp will take full responsibility of this process.
 
 Specification
 =============
@@ -36,11 +36,12 @@ Also, a new NApp **of_multi_table** that will initially have the following respo
   - In charge of modifying and analyzing **pipelines** collection
   - The cookie prefix is **0xAD** for its posted flows.
   - Requesting flow deletions and installations on behalf of other NApps when a pipeline changes.
+  - Store cookie prefixes from NApp that publish flows.
 
 Pipeline Status: Enabled, Disabled
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The status of a pipeline dictates wheter it is applied as the current multi table system in every switch. Once a pipeline is ``enabled``, the previous one will be automatically ``disabled`` ensuring that there is always 1 or 0 (default pipeline is not counted) pipelines enabled.
+The status of a pipeline dictates whether it is applied as the current multi table system in every switch. Once a pipeline is ``enabled``, the previous one will be automatically ``disabled`` ensuring that there is always 1 or 0 (default pipeline is not counted) pipelines enabled.
 
 Default Pipeline
 ~~~~~~~~~~~~~~~~
@@ -50,7 +51,7 @@ The default pipeline is every flow in the table 0.
 Table Group
 ~~~~~~~~~~~
 
-**of_multi_table** will let know other NApp about their determined table. Since it is not neccessary to send the entire pipeline, the content of the event **kytos/multi_table.enable_table** is obtained from the pipeline key ``napps_table_groups`` value. A value example could be ``{"mef_eline": ["epl"]}`` and it means that **mef_eline** EPL flows should be installed in the table where this value came from.
+**of_multi_table** will let know other NApp about their determined table. Since it is not necessary to send the entire pipeline, the content of the event **kytos/of_multi_table.enable_table** is obtained from the pipeline key ``napps_table_groups`` value. A value example could be ``{"mef_eline": ["epl"]}`` and it means that **mef_eline** EPL flows should be installed in the table where this value came from.
 
 How the table will be assigned
 ===============================
@@ -62,7 +63,7 @@ NApps that install flows, roughly explained:
   - **coloring**: High priority flows with neighbors' colors.
   - **telemetry_int**: (Not yet implemented) 2 extra flows through **mef_eline** for TCP and UDP
 
-The system of multi-tables will be replicated accross all switches. For now we will be working with a default table (all flows in table 0).
+The system of multi-tables will be replicated across all switches. For now we will be working with a default table (all flows in table 0).
 
 Example of a multi table system in a switch:
 
@@ -156,23 +157,27 @@ kytos/<napp_name>.enable_table
 This event is sent from other NApps with information about their table settings.
 
 .. code:: javascript
+
   "content": {
     "mef_eline": {"epl": 3}
   }
 
 kytos/<napp_name>.cookie
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This event is sent from other NApps with cookie information.
 
 .. code:: javascript
+
   "content": {
-    "of_lldp": "0xac00000000000001"
+    "of_lldp": "0xAB"
   }
 
 Published
 ---------
 
-kytos/multi_table.enable_table
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+kytos/of_multi_table.enable_table
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This event should sent before any NApp sends its first flow to be published.
 
@@ -187,32 +192,30 @@ This event should sent before any NApp sends its first flow to be published.
 Endpoint API
 ============
   
-  - GET `/api/kytos/multi_table/v1/pipeline/` - Get all pipelines in the database. Parameters enabled and disabled are allowed.
+  - GET `/api/kytos/of_multi_table/v1/pipeline` - Get all pipelines in the database. Parameters enabled and disabled are allowed.
 
-  - GET `/api/kytos/multi_table/v1/pipeline/<pipeline_id>` - Get a single pipeline that matches the given pipeline id.
+  - GET `/api/kytos/of_multi_table/v1/pipeline/<pipeline_id>` - Get a single pipeline that matches the given pipeline id.
 
-  - POST `/api/kytos/multi_table/v1/pipeline/<pipeline_id>/enable` - Enable pipeline to be applied to all switches
+  - POST `/api/kytos/of_multi_table/v1/pipeline/<pipeline_id>/enable` - Enable pipeline to be applied to all switches
 
-  - POST `/api/kytos/multi_table/v1/pipeline/<pipeline_id>/disable` - Disable pipeline in case of the user wants to return to the default set up.
+  - POST `/api/kytos/of_multi_table/v1/pipeline/<pipeline_id>/disable` - Disable pipeline in case of the user wants to return to the default set up.
 
-  - POST `/api/kytos/multi_table/v1/pipeline` - Add pipeline to database. Its body is similar to "pipeline.multi_table".
+  - POST `/api/kytos/of_multi_table/v1/pipeline` - Add pipeline to database. Its body is similar to "pipeline.multi_table".
 
-  - DELETE `/api/kytos/multi_table/v1/pipeline/<pipeline_id>` - Delete only disabled pipeline from database otherwise it should prompt the user to disable the pipeline first.
+  - DELETE `/api/kytos/of_multi_table/v1/pipeline/<pipeline_id>` - Delete only disabled pipeline from database otherwise it should prompt the user to disable the pipeline first.
 
 Enabling pipeline
 ==================
 
 Im simple terms, enabling a pipeline will mean to modify every flow so it complies with the pipeline configuration. The process to successfully enable a pipeline is as follows:
 
-  1. **of_multi_table** publishes `kytos/multi_table.enable_table` event with pipeline content.
+  1. **of_multi_table** publishes `kytos/of_multi_table.enable_table` event with pipeline content.
   2. Wait for all NApp to publish their own events with their respective table settings.
   3. Disable the previous enabled pipeline, if there was any.
   4. **of_multi_table** requests all flows from **flow_manager** API.
-  5. **of_multi_table** duplicates every flow that needs a different table with NApps cookie information.
-  6. Insert duplicated flows to the database.
-  7. Install the duplicated flows with a different table with a post request.
-  8. Delete the non-duplicated flows from the database
-  9. Delete flows that were not duplicated with a delete request.
+  5. **of_multi_table** duplicates every flow that needs a different table with NApps cookie information from **kytos/<napp_name>.cookie**.
+  6. Install the duplicated flows with a different table with a post request.
+  7. Delete flows that were not duplicated with a delete request.
 
 NApp Processing
 ================
@@ -221,7 +224,7 @@ An example of a process where **of_lldp** needs to set its flows to table 1 (not
 
   1. Start Kytos
   2. **of_multi_table** listens to `kytos/of_core.handshake.completed` to post a miss flow entry to every table in each switch.
-  3. **of_multi_table** publishes `kytos/multi_table.enable_table` event with content ``{"content": {"of_lldp": {"base": 1}}}``.
+  3. **of_multi_table** publishes `kytos/of_multi_table.enable_table` event with content ``{"content": {"of_lldp": {"base": 1}}}``.
   4. **of_lldp** will listen to the event and request flows with the table assigned, 1.
 
 Dependencies

@@ -144,10 +144,6 @@ Side Effects:
 
 - None
 
-Notes:
-
-- Should support multiple key-value pairs with the same key in the query parameters.
-
 
 Endpoint: ``GET <url for previewing>``
 --------------------------------------
@@ -179,10 +175,6 @@ Expected Output:
 Side Effects:
 
 - None
-
-Notes:
-
-- Should support multiple key-value pairs with the same key in the query parameters.
 
 Specifying Service Providers
 ############################

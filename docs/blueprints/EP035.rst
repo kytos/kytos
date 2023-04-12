@@ -137,7 +137,13 @@ Expected Response:
 .. code-block:: json
 
     {
-        <provider name str>: [<service name str>],
+        <provider name str>: [
+            {
+                'id': <id>,
+                'name': <service_name>,
+                'owner': <str | null>,
+            },
+        ],
     }
 
 Side Effects:
@@ -168,7 +174,9 @@ Expected Output:
 
     [
         {
-            'id': <service name str>,
+            'id': <id>,
+            'name': <service_name>,
+            'owner': <str | null>,
         },
     ]
 

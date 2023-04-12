@@ -69,8 +69,9 @@ Example usage:
 
 .. code-block:: python3
 
+    # Adding in status_func and status_reason_func
     from kytos.core.switch import Switch
-    maintenance_switches = set()
+    maintenance_switches = {'Switch-B'}
 
     def switch_maintenance_status(switch):
         if switch.id in maintenance_switches:
@@ -85,6 +86,25 @@ Example usage:
         return set()
 
     Switch.register_status_reason_func('maintenance', switch_maintenance_reason)
+
+    # Checking the status through status_reason
+
+    switch_a = Switch('Switch-A')
+    switch_b = Switch('Switch-B')
+
+    if switch_a.status_reason:
+        assert(False)
+
+    if not switch_b.status_reason:
+        assert(False)
+
+    # Filtering out specific status reasons
+
+    if switch_a.status_reason - {'maintenance'}:
+        assert(False)
+
+    if switch_b.status_reason - {'maintenance'}:
+        assert(False)
 
 
 New Topology REST Endpoints

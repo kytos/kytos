@@ -39,17 +39,17 @@ Also, a new NApp **of_multi_table** that will initially have the following respo
   - Store cookie prefixes from NApp that publish flows.
 
 Pipeline Status: Enabled, Disabled
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------
 
 The status of a pipeline dictates whether it is applied as the current multi table system in every switch. Once a pipeline is ``enabled``, the previous one will be automatically ``disabled`` ensuring that there is always 1 or 0 (default pipeline is not counted) pipelines enabled.
 
 Default Pipeline
-~~~~~~~~~~~~~~~~
+----------------
 
 The default pipeline is every flow in the table 0.
 
 Table Group
-~~~~~~~~~~~
+-----------
 
 **of_multi_table** will let know other NApp about their determined table. Since it is not necessary to send the entire pipeline, the content of the event **kytos/of_multi_table.enable_table** is obtained from the pipeline key ``napps_table_groups`` value. A value example could be ``{"mef_eline": ["epl"]}`` and it means that **mef_eline** EPL flows should be installed in the table where this value came from.
 
@@ -71,7 +71,7 @@ Example of a multi table system in a switch:
 
     +------------------+         +------------------+         +------------------+         +------------------+         +------------------+         +------------------+
     |      table 0     |         |      table 1     |         |      table 2     |         |      table 3     |         |     table 4      |         |     table 5      |
-    |  *general users* |         |   *future use*   |         |     *mef EVPL*   |         |     *mef EVPL*   |         |      *INT*       |         |   *future use*   |
+    |  *general users* |         |   *future use*   |         |     *mef EPL*    |         |     *mef EVPL*   |         |      *INT*       |         |   *future use*   |
     | (wildcard match) |         |                  |         |                  |         |                  |         |                  |         |                  |
     |      of_lldp     |  ---->  |                  |  ---->  |   (exact match   |  ---->  |    (exact match  |  ---->  |      (exact      |  ---->  |    (wildcard)    |
     |      coloring    |  ---->  |                  |  ---->  | in_port + vlan)  |  ---->  |      in_port)    |  ---->  |       match)     |  ---->  |                  |
@@ -148,29 +148,18 @@ Subscribed
   - **kytos/flow_manager.flow.added**
   - **kytos/of_core.handshake.completed**
   - **kytos/flow_manager.flow.error**
-  - **kytos/[mef_eline|telemetry_int|coloring|of_lldp].enable_table** - Every NApp sends an event with their table settings as content.
-  - **kytos/[mef_eline|telemetry_int|coloring|of_lldp].cookie** - Every NApp sends an event with their cookie information
+  - **kytos/[mef_eline|telemetry_int|coloring|of_lldp].enable_table** - Every NApp sends an event with their table group settings and cookie prefix.
 
 kytos/<napp_name>.enable_table
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This event is sent from other NApps with information about their table settings.
+This event is sent from other NApps with information about their table settings and their cookie prefix.
 
 .. code:: javascript
 
   "content": {
-    "mef_eline": {"epl": 3}
-  }
-
-kytos/<napp_name>.cookie
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-This event is sent from other NApps with cookie information.
-
-.. code:: javascript
-
-  "content": {
-    "of_lldp": "0xAB"
+    "group_table": {"epl": 3, "evpl": 2},
+    "cookie": "0xAA"
   }
 
 Published
@@ -213,7 +202,7 @@ Im simple terms, enabling a pipeline will mean to modify every flow so it compli
   2. Wait for all NApp to publish their own events with their respective table settings.
   3. Disable the previous enabled pipeline, if there was any.
   4. **of_multi_table** requests all flows from **flow_manager** API.
-  5. **of_multi_table** duplicates every flow that needs a different table with NApps cookie information from **kytos/<napp_name>.cookie**.
+  5. **of_multi_table** duplicates every flow that needs a different table with NApps cookie prefix from **kytos/<napp_name>.enable_table**.
   6. Install the duplicated flows with a different table with a post request.
   7. Delete flows that were not duplicated with a delete request.
 

@@ -36,7 +36,6 @@ Also, a new NApp **of_multi_table** that will initially have the following respo
   - In charge of modifying and analyzing **pipelines** collection
   - The cookie prefix is **0xAD** for its posted flows.
   - Requesting flow deletions and installations on behalf of other NApps when a pipeline changes.
-  - Store cookie prefixes from NApp that publish flows.
 
 Pipeline Status: Enabled, Disabled
 ----------------------------------
@@ -52,9 +51,75 @@ Table Group
 -----------
 
 **of_multi_table** will let know other NApp about their determined table. Since it is not necessary to send the entire pipeline, the content of the event **kytos/of_multi_table.enable_table** is obtained from the pipeline key ``napps_table_groups`` value. A value example could be ``{"mef_eline": ["epl"]}`` and it means that **mef_eline** EPL flows should be installed in the table where this value came from.
+To match all the flows, "base" will be use. Additionally we already have defined table groups:
+
+Network protocol _ address
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table:: Example: "ipv6_dst"
+   :widths: 70 30
+   :header-rows: 1
+   :class: center
+
+   * - Network Protocol
+     - Address
+   * - | eth
+       | ipv4
+       | ipv6
+       | tcp
+       | udp
+     - | dst
+       | src
+
+Action
+~~~~~~
+
+.. list-table:: Example: "push_vlan"
+   :width: 150px
+   :header-rows: 1
+   :class: center
+
+   * - Action
+   * - | push_vlan
+       | pop_vlan
+
+VLAN _ groups
+~~~~~~~~~~~~~
+
+.. list-table:: Example: "vlan_vid"
+   :width: 150px
+   :header-rows: 1
+   :class: center
+
+   * - Group
+   * - | vid
+       | pcp
+
+Extra
+~~~~~
+
+Some extra matches are:
+
+  - "eth_type"
+  - "ip_proto"
+  - "in_port"
+
+Collection **flows** augmented
+==============================
+
+Extend the dictionary for each flow to have:
+
+.. code:: javascript
+
+  {
+    "owner": "mef_eline",
+    "table_group": "epl"
+  }
+
+With these options, **of_multi_table** can easily assign a new table number if needed.
 
 How the table will be assigned
-===============================
+==============================
 
 NApps that install flows, roughly explained:
 
@@ -87,6 +152,7 @@ There a couple of rules for a proper pipeline:
 
   - The table number for the next table should be always higher than the current one. This number is found as the `table_id` value in the dictionary ``{"instruction_type": "goto_table", "table_id": 1}``
   - The pipeline represents a linked list (no loops). A miss flow entry should be present in every table except in the end of the linked list which represents the end on the list.
+  - The chosen table group for each NApp should be defined (check Table Group section).
 
 Initially proposed here is a datastructured representing a linked list. 
 
@@ -126,11 +192,11 @@ Initially proposed here is a datastructured representing a linked list.
               "instructions": [{"instruction_type": "goto_table","table_id": 5}]
             },
             "napps_table_groups": {"mef_eline": ["epl"]}
-          }
+          },
           4: {
             "table_miss_flow": {},
             "napps_table_groups": {"telemetry_int": ["base"]}
-          }
+          },
           5: {
             "table_miss_flow": {},
             "napps_table_groups": {}
@@ -143,23 +209,22 @@ Events
 ======
 
 Subscribed
------------
+----------
 
   - **kytos/flow_manager.flow.added**
   - **kytos/of_core.handshake.completed**
   - **kytos/flow_manager.flow.error**
-  - **kytos/[mef_eline|telemetry_int|coloring|of_lldp].enable_table** - Every NApp sends an event with their table group settings and cookie prefix.
+  - **kytos/[mef_eline|telemetry_int|coloring|of_lldp].enable_table** - Every NApp sends an event with their table group settings.
 
 kytos/<napp_name>.enable_table
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This event is sent from other NApps with information about their table settings and their cookie prefix.
+This event is sent from other NApps with information about their table settings.
 
 .. code:: javascript
 
   "content": {
-    "group_table": {"epl": 3, "evpl": 2},
-    "cookie": "0xAA"
+    "group_table": {"evpl": 2, "epl": 3}
   }
 
 Published
@@ -199,12 +264,11 @@ Enabling pipeline
 Im simple terms, enabling a pipeline will mean to modify every flow so it complies with the pipeline configuration. The process to successfully enable a pipeline is as follows:
 
   1. **of_multi_table** publishes `kytos/of_multi_table.enable_table` event with pipeline content.
-  2. Wait for all NApp to publish their own events with their respective table settings.
-  3. Disable the previous enabled pipeline, if there was any.
-  4. **of_multi_table** requests all flows from **flow_manager** API.
-  5. **of_multi_table** duplicates every flow that needs a different table with NApps cookie prefix from **kytos/<napp_name>.enable_table**.
-  6. Install the duplicated flows with a different table with a post request.
-  7. Delete flows that were not duplicated with a delete request.
+  2. Disable the previous enabled pipeline, if there was any.
+  3. **of_multi_table** requests all flows from **flow_manager** API.
+  4. **of_multi_table** duplicates every flow that needs a different table.
+  5. Install the duplicated flows with a different table with a post request.
+  6. Delete flows that were not duplicated with a delete request.
 
 NApp Processing
 ================
@@ -214,7 +278,7 @@ An example of a process where **of_lldp** needs to set its flows to table 1 (not
   1. Start Kytos
   2. **of_multi_table** listens to `kytos/of_core.handshake.completed` to post a miss flow entry to every table in each switch.
   3. **of_multi_table** publishes `kytos/of_multi_table.enable_table` event with content ``{"content": {"of_lldp": {"base": 1}}}``.
-  4. **of_lldp** will listen to the event and request flows with the table assigned, 1.
+  4. **of_lldp** will listen to the event and from that point it will post request flows with the table assigned, 1.
 
 Dependencies
 ============
@@ -227,3 +291,10 @@ Future plans
   - The table system could be configurable. It is possible to have multiple pipelines with different status like `enabled` and `disabled` where only one should be `enabled` at a time.
   - Saving, configure and enabling a json representation of a table is suited better with a UI interface.
 
+.. raw:: html
+
+   <style>
+   .center td {
+       text-align: center;
+   }
+   </style>

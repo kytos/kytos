@@ -145,8 +145,8 @@ Initially proposed here is a datastructured representing a linked list.
         "id": "9cba7e27a33c45",
         "status": "enabled",
         "multi_table": 
-        {
-          0: {
+        [
+          {
             "table_miss_flow": {
               "priority": 123, "match": {},
               "instructions": [{"instruction_type": "goto_table", "table_id": 1}]
@@ -154,7 +154,7 @@ Initially proposed here is a datastructured representing a linked list.
             "napps_table_groups": {"coloring": ["base"],"of_lldp": ["base"]}
             "description": "Table for coloring and of_lldp",
           },
-          1: {
+          {
             "table_miss_flow": {
               "priority": 123, "match": {},
               "instructions": [{"instruction_type": "goto_table","table_id": 2}]
@@ -162,7 +162,7 @@ Initially proposed here is a datastructured representing a linked list.
             "napps_table_groups": {"flow_manager": []}
             "description": "Table for future use",
           },
-          2: {
+          {
             "table_miss_flow": {
               "priority": 123, "match": {},
               "instructions": [{"instruction_type": "goto_table","table_id": 3}]
@@ -170,7 +170,7 @@ Initially proposed here is a datastructured representing a linked list.
             "napps_table_groups": {"mef_eline": ["evpl"]}
             "description": "Table for mef_eline EVPLs",
           },
-          3: {
+          {
             "table_miss_flow": {
               "priority": 123, "match": {},
               "instructions": [{"instruction_type": "goto_table","table_id": 5}]
@@ -178,17 +178,17 @@ Initially proposed here is a datastructured representing a linked list.
             "napps_table_groups": {"mef_eline": ["epl"]}
             "description": "Table for mef_eline EPL",
           },
-          4: {
+          {
             "description": "Table for telemetry_int base",
             "table_miss_flow": {},
             "napps_table_groups": {"telemetry_int": ["base"]}
           },
-          5: {
+          {
             "description": "Table for future use",
             "table_miss_flow": {},
             "napps_table_groups": {}
           }
-        }
+        ]
       }
     }
 

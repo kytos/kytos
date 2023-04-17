@@ -147,6 +147,7 @@ Initially proposed here is a datastructured representing a linked list.
         "multi_table": 
         [
           {
+            "table_id": 0
             "table_miss_flow": {
               "priority": 123, "match": {},
               "instructions": [{"instruction_type": "goto_table", "table_id": 1}]
@@ -155,6 +156,7 @@ Initially proposed here is a datastructured representing a linked list.
             "description": "Table for coloring and of_lldp",
           },
           {
+            "table_id": 1
             "table_miss_flow": {
               "priority": 123, "match": {},
               "instructions": [{"instruction_type": "goto_table","table_id": 2}]
@@ -163,6 +165,7 @@ Initially proposed here is a datastructured representing a linked list.
             "description": "Table for future use",
           },
           {
+            "table_id": 2
             "table_miss_flow": {
               "priority": 123, "match": {},
               "instructions": [{"instruction_type": "goto_table","table_id": 3}]
@@ -171,6 +174,7 @@ Initially proposed here is a datastructured representing a linked list.
             "description": "Table for mef_eline EVPLs",
           },
           {
+            "table_id": 3
             "table_miss_flow": {
               "priority": 123, "match": {},
               "instructions": [{"instruction_type": "goto_table","table_id": 5}]
@@ -179,11 +183,13 @@ Initially proposed here is a datastructured representing a linked list.
             "description": "Table for mef_eline EPL",
           },
           {
+            "table_id": 4
             "description": "Table for telemetry_int base",
             "table_miss_flow": {},
             "napps_table_groups": {"telemetry_int": ["base"]}
           },
           {
+            "table_id": 5
             "description": "Table for future use",
             "table_miss_flow": {},
             "napps_table_groups": {}

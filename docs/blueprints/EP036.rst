@@ -53,56 +53,38 @@ Table Group
 **of_multi_table** will let know other NApp about their determined table. Since it is not necessary to send the entire pipeline, the content of the event **kytos/of_multi_table.enable_table** is obtained from the pipeline key ``napps_table_groups`` value. A value example could be ``{"mef_eline": ["epl"]}`` and it means that **mef_eline** EPL flows should be installed in the table where this value came from.
 To match all the flows, "base" will be use. Additionally we already have defined table groups:
 
-Network protocol _ address
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Flow classification
+~~~~~~~~~~~~~~~~~~~
 
-.. list-table:: Example: "ipv6_dst"
-   :widths: 70 30
+Keywords to classify flows into the tables. For example, for a table 2 to have ``{"mef_eline": ["evpl"]}``, it means that all the EVPLs that **mef_eline** installed are going to be publish into the table 2.
+Some keywords are not allowd for some NApps.
+
+.. list-table::
+   :widths: 20 50 30
    :header-rows: 1
    :class: center
 
-   * - Network Protocol
-     - Address
-   * - | eth
-       | ipv4
-       | ipv6
-       | tcp
-       | udp
-     - | dst
-       | src
-
-Action
-~~~~~~
-
-.. list-table:: Example: "push_vlan"
-   :width: 150px
-   :header-rows: 1
-   :class: center
-
-   * - Action
-   * - | push_vlan
-       | pop_vlan
-
-VLAN _ groups
-~~~~~~~~~~~~~
-
-.. list-table:: Example: "vlan_vid"
-   :width: 150px
-   :header-rows: 1
-   :class: center
-
-   * - Group
-   * - | vid
-       | pcp
-
-Extra
-~~~~~
-
-Some extra matches are:
-
-  - "eth_type"
-  - "ip_proto"
-  - "in_port"
+   * - Keyword
+     - Allowed in NApps
+     - Description
+   * - | 
+       | base
+       |
+       |
+     - | telemetry_int
+       | mef_eline
+       | of_lldp
+       | coloring
+     - | 
+       | All flows
+       |
+       |
+   * - epl
+     - mef_eline
+     - EPL, flows without a dl_vlan
+   * - evpl
+     - mef_eine
+     - EVPL, flows with dl_vlan
 
 Collection **flows** augmented
 ==============================
@@ -162,7 +144,6 @@ Initially proposed here is a datastructured representing a linked list.
       {
         "id": "9cba7e27a33c45",
         "status": "enabled",
-        "description": "First pipeline",
         "multi_table": 
         {
           0: {
@@ -171,6 +152,7 @@ Initially proposed here is a datastructured representing a linked list.
               "instructions": [{"instruction_type": "goto_table", "table_id": 1}]
             },
             "napps_table_groups": {"coloring": ["base"],"of_lldp": ["base"]}
+            "description": "Table for coloring and of_lldp",
           },
           1: {
             "table_miss_flow": {
@@ -178,6 +160,7 @@ Initially proposed here is a datastructured representing a linked list.
               "instructions": [{"instruction_type": "goto_table","table_id": 2}]
             },
             "napps_table_groups": {"flow_manager": []}
+            "description": "Table for future use",
           },
           2: {
             "table_miss_flow": {
@@ -185,6 +168,7 @@ Initially proposed here is a datastructured representing a linked list.
               "instructions": [{"instruction_type": "goto_table","table_id": 3}]
             },
             "napps_table_groups": {"mef_eline": ["evpl"]}
+            "description": "Table for mef_eline EVPLs",
           },
           3: {
             "table_miss_flow": {
@@ -192,12 +176,15 @@ Initially proposed here is a datastructured representing a linked list.
               "instructions": [{"instruction_type": "goto_table","table_id": 5}]
             },
             "napps_table_groups": {"mef_eline": ["epl"]}
+            "description": "Table for mef_eline EPL",
           },
           4: {
+            "description": "Table for telemetry_int base",
             "table_miss_flow": {},
             "napps_table_groups": {"telemetry_int": ["base"]}
           },
           5: {
+            "description": "Table for future use",
             "table_miss_flow": {},
             "napps_table_groups": {}
           }
@@ -264,11 +251,12 @@ Enabling pipeline
 Im simple terms, enabling a pipeline will mean to modify every flow so it complies with the pipeline configuration. The process to successfully enable a pipeline is as follows:
 
   1. **of_multi_table** publishes `kytos/of_multi_table.enable_table` event with pipeline content.
-  2. Disable the previous enabled pipeline, if there was any.
-  3. **of_multi_table** requests all flows from **flow_manager** API.
-  4. **of_multi_table** duplicates every flow that needs a different table.
-  5. Install the duplicated flows with a different table with a post request.
-  6. Delete flows that were not duplicated with a delete request.
+  2. Wait for all NApp to publish their own events with their respective table settings (check controller for enabled NApps).
+  3. Disable the previous enabled pipeline, if there was any.
+  4. **of_multi_table** requests all flows from **flow_manager** API.
+  5. **of_multi_table** duplicates every flow that needs a different table.
+  6. Install the duplicated flows with a different table with a post request.
+  7. Delete flows that were not duplicated with a delete request.
 
 NApp Processing
 ================

@@ -13,7 +13,6 @@ class TestElasticAPM(TestCase):
     def setUp(self):
         """setUp."""
         ElasticAPM._client = None
-        ElasticAPM._flask_apm = None
 
     @patch("kytos.core.apm.execution_context")
     def test_begin_span_decorator(self, context):
@@ -39,26 +38,17 @@ class TestElasticAPM(TestCase):
     def test_get_client(self, mock_init):
         """Test get_client."""
         assert not ElasticAPM._client
-        assert not ElasticAPM._flask_apm
         ElasticAPM.get_client()
         assert mock_init.call_count == 1
         ElasticAPM._client = MagicMock()
         ElasticAPM.get_client()
         assert mock_init.call_count == 1
 
-    @patch("kytos.core.apm.ElasticAPM._flask_apm")
-    def test_init_flask_app(self, mock_flask_apm):
-        """Test init_flask_app."""
-        assert not ElasticAPM._client
-        ElasticAPM.init_flask_app(MagicMock())
-        assert mock_flask_apm.init_app.call_count == 1
-
-    @patch("kytos.core.apm.FlaskAPM")
     @patch("kytos.core.apm.Client")
-    def test_init_client(self, mock_client, mock_flask_apm):
+    def test_init_client(self, mock_client):
         """Test init_client."""
+        mock_app = MagicMock()
         assert not ElasticAPM._client
-        assert not ElasticAPM._flask_apm
-        ElasticAPM.init_client()
+        ElasticAPM.init_client(app=mock_app)
         assert mock_client.call_count == 1
-        assert mock_flask_apm.call_count == 1
+        assert mock_app.add_middleware.call_count == 1

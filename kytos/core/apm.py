@@ -3,7 +3,7 @@ import os
 from functools import wraps
 
 from elasticapm import Client
-from elasticapm.contrib.flask import ElasticAPM as FlaskAPM
+from elasticapm.contrib.starlette import ElasticAPM as StarletteAPM
 from elasticapm.traces import execution_context
 
 from kytos.core.exceptions import KytosAPMInitException
@@ -42,7 +42,6 @@ def begin_span(func, span_type="custom"):
 class ElasticAPM:
     """ElasticAPM Client instance."""
 
-    _flask_apm: FlaskAPM = None
     _client: Client = None
 
     @classmethod
@@ -51,14 +50,6 @@ class ElasticAPM:
         if not cls._client:
             return cls.init_client(**kwargs)
         return cls._client
-
-    @classmethod
-    def init_flask_app(cls, app) -> FlaskAPM:
-        """Init Flask APM Client."""
-        if not cls._flask_apm:
-            return None
-        cls._flask_apm.init_app(app)
-        return cls._flask_apm
 
     @classmethod
     def init_client(
@@ -78,6 +69,5 @@ class ElasticAPM:
                 secret_token=secret_token,
                 **kwargs,
             )
-        if not cls._flask_apm:
-            cls._flask_apm = FlaskAPM(client=cls._client, app=app)
+            app.add_middleware(StarletteAPM, client=cls._client)
         return cls._client

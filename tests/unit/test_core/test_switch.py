@@ -6,7 +6,6 @@ from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
 from kytos.core import Controller
-from kytos.core.buffers import KytosBuffers
 from kytos.core.common import EntityStatus
 from kytos.core.config import KytosConfig
 from kytos.core.constants import FLOOD_TIMEOUT
@@ -28,9 +27,8 @@ class TestSwitch(TestCase):
 
         self.options = KytosConfig().options['daemon']
         self.controller = Controller(self.options)
-        self.controller.buffers = KytosBuffers()
         self.controller.log = Mock()
-
+        self.controller._buffers = MagicMock()
         self.switch = self.create_switch()
 
     @staticmethod

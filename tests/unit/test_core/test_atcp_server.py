@@ -81,7 +81,7 @@ class TestKytosServerProtocol:
     async def test_data_received(self):
         """Test data_received method."""
         server_protocol = KytosServerProtocol()
-        server_protocol.loop = MagicMock()
+        server_protocol._loop = MagicMock()
         server_protocol.server = MagicMock()
         server_protocol.connection = self.connection
 
@@ -98,7 +98,7 @@ class TestKytosServerProtocol:
     async def test_connection_lost(self):
         """Test connection_lost method."""
         server_protocol = KytosServerProtocol()
-        server_protocol.loop = MagicMock()
+        server_protocol._loop = MagicMock()
         server_protocol.server = MagicMock()
         server_protocol.connection = self.connection
 

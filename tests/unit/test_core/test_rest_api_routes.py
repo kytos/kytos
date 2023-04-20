@@ -1,9 +1,8 @@
 """Test kytos.core.rest_api routes."""
 import asyncio
 
-from kytos.core.rest_api import JSONResponse, Request, aget_json_or_400, get_json_or_400
-
-# TODO test other methods
+from kytos.core.rest_api import (JSONResponse, Request, aget_json_or_400,
+                                 get_body, get_json_or_400)
 
 
 async def test_new_endpoint(controller, api_client) -> None:
@@ -67,3 +66,19 @@ async def test_get_json_or_400(controller, api_client) -> None:
     response = await api_client.post(f"kytos/core/{endpoint}", json=body)
     assert response.status_code == 200
     assert response.json() == body
+
+
+async def test_get_body(controller, api_client) -> None:
+    """Test get_body (low level-ish usage for validators)."""
+    def handler(request: Request) -> JSONResponse:
+        body_bytes = get_body(request)
+        assert body_bytes == b'{"some_key": "some_value"}'
+        return JSONResponse({})
+
+    endpoint = "prefix/resource"
+    controller.api_server.register_core_endpoint(endpoint, handler,
+                                                 methods=["POST"])
+    body = {"some_key": "some_value"}
+    response = await api_client.post(f"kytos/core/{endpoint}", json=body)
+    assert response.status_code == 200
+    assert response.json() == {}

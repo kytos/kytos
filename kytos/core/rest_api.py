@@ -47,7 +47,7 @@ async def aget_json_or_400(request: Request) -> Any:
         raise HTTPException(400, detail=f"Invalid json: {str(exc)}")
 
 
-def _content_type_json_or_415(request: Request) -> Optional[str]:
+def content_type_json_or_415(request: Request) -> Optional[str]:
     """Ensures request Content-Type is application/json or raises 415."""
     content_type = request.headers.get("Content-Type")
     if content_type != "application/json":

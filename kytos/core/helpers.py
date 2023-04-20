@@ -7,16 +7,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 from threading import Thread
 
-from flask import request
-from openapi_core.contrib.flask import FlaskOpenAPIRequest
+from openapi_core.spec import Spec
 from openapi_core.spec.shortcuts import create_spec
 from openapi_core.validation.request import openapi_request_validator
+from openapi_core.validation.request.datatypes import RequestValidationResult
 from openapi_spec_validator import validate_spec
 from openapi_spec_validator.readers import read_from_filename
-from werkzeug.exceptions import BadRequest, UnsupportedMediaType
 
 from kytos.core.apm import ElasticAPM
 from kytos.core.config import KytosConfig
+from kytos.core.rest_api import (AStarletteOpenAPIRequest, HTTPException,
+                                 Request, StarletteOpenAPIRequest,
+                                 content_type_json_or_415, get_body)
 
 __all__ = ['listen_to', 'now', 'run_on_thread', 'get_time']
 
@@ -357,50 +359,93 @@ def load_spec(yml_file_path: Path):
     return create_spec(spec_dict)
 
 
+def _request_validation_result_or_400(result: RequestValidationResult) -> None:
+    """Request validation result or raise HTTP 400."""
+    if not result.errors:
+        return
+    error_response = (
+        "The request body contains invalid API data."
+    )
+    errors = result.errors[0]
+    if hasattr(errors, "schema_errors"):
+        schema_errors = errors.schema_errors[0]
+        error_log = {
+            "error_message": schema_errors.message,
+            "error_validator": schema_errors.validator,
+            "error_validator_value": schema_errors.validator_value,
+            "error_path": list(schema_errors.path),
+            "error_schema": schema_errors.schema,
+            "error_schema_path": list(schema_errors.schema_path),
+        }
+        LOG.debug(f"Invalid request (API schema): {error_log}")
+        error_response += f" {schema_errors.message} for field"
+        error_response += (
+            f" {'/'.join(map(str,schema_errors.path))}."
+        )
+    else:
+        error_response = str(errors)
+    raise HTTPException(400, detail=error_response)
+
+
+def validate_openapi_request(spec: Spec, request: Request) -> bytes:
+    """Validate a Request given an OpenAPI spec.
+
+    This function is meant to be called from a synchronous context
+    since StarletteOpenAPIRequest internally uses `asgiref.sync.AsyncToSync`
+    and its forcing not to use the current running event loop.
+    """
+    body = get_body(request)
+    if body:
+        content_type_json_or_415(request)
+    openapi_request = StarletteOpenAPIRequest(request, body)
+    result = openapi_request_validator.validate(spec, openapi_request)
+    _request_validation_result_or_400(result)
+    return body
+
+
+async def avalidate_openapi_request(
+        spec: Spec,
+        request: Request,
+) -> bytes:
+    """Async validate_openapi_request.
+
+    This function is for async routes. It also returns the request body bytes.
+    It does not try to assume that it'll have a loadable json body to work
+    seamlessly with as many type of endpoints with minimal friction.
+    You can use await aget_json_or_400(request) to get the request body.
+
+    Example:
+
+    await avalidate_openapi_request(self.spec, request)
+    body = await aget_json_or_400(request)
+    """
+    body = await request.body()
+    if body:
+        content_type_json_or_415(request)
+    openapi_request = AStarletteOpenAPIRequest(request, body)
+    result = openapi_request_validator.validate(spec, openapi_request)
+    _request_validation_result_or_400(result)
+    return body
+
+
 def validate_openapi(spec):
     """Decorator to validate a REST endpoint input.
 
     Uses the schema defined in the openapi.yml file
     to validate.
     """
-
     def validate_decorator(func):
         @functools.wraps(func)
         def wrapper_validate(*args, **kwargs):
-            try:
-                data = request.get_json()
-            except BadRequest:
-                result = "The request body is not a well-formed JSON."
-                raise BadRequest(result) from BadRequest
-            if data is None:
-                result = "The request body mimetype is not application/json."
-                raise UnsupportedMediaType(result)
-
-            openapi_request = FlaskOpenAPIRequest(request)
-            result = openapi_request_validator.validate(spec, openapi_request)
-            if result.errors:
-                error_response = (
-                    "The request body contains invalid API data."
-                )
-                errors = result.errors[0]
-                if hasattr(errors, "schema_errors"):
-                    schema_errors = errors.schema_errors[0]
-                    error_log = {
-                        "error_message": schema_errors.message,
-                        "error_validator": schema_errors.validator,
-                        "error_validator_value": schema_errors.validator_value,
-                        "error_path": list(schema_errors.path),
-                        "error_schema": schema_errors.schema,
-                        "error_schema_path": list(schema_errors.schema_path),
-                    }
-                    LOG.debug(f"Invalid request (API schema): {error_log}")
-                    error_response += f" {schema_errors.message} for field"
-                    error_response += (
-                        f" {'/'.join(map(str,schema_errors.path))}."
-                    )
-                raise BadRequest(error_response) from BadRequest
-            return func(*args, data=data, **kwargs)
-
+            request: Request = None
+            for arg in args:
+                if isinstance(arg, Request):
+                    request = arg
+                    break
+            else:
+                err = f"{func.__name__} args doesn't have a Request argument"
+                raise HTTPException(500, detail=err)
+            validate_openapi_request(spec, request)
+            return func(*args, **kwargs)
         return wrapper_validate
-
     return validate_decorator

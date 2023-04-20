@@ -5,7 +5,8 @@ from datetime import datetime
 from typing import Any, Optional
 
 from asgiref.sync import async_to_sync
-from openapi_core.contrib.starlette import StarletteOpenAPIRequest
+from openapi_core.contrib.starlette import \
+    StarletteOpenAPIRequest as _StarletteOpenAPIRequest
 from openapi_core.validation.request.datatypes import RequestParameters
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
@@ -21,6 +22,12 @@ def _json_serializer(obj):
     if isinstance(obj, datetime):
         return obj.isoformat()
     raise TypeError(f"Type {type(obj)} not serializable")
+
+
+def get_body(request: Request) -> bytes:
+    """Try to get request.body form a sync @rest route."""
+    body = async_to_sync(request.body)
+    return body()
 
 
 def get_json(request: Request) -> Any:
@@ -73,8 +80,33 @@ class JSONResponse(StarletteJSONResponse):
 
 
 # pylint: disable=super-init-not-called
-class AStarletteOpenAPIRequest(StarletteOpenAPIRequest):
+class AStarletteOpenAPIRequest(_StarletteOpenAPIRequest):
     """Async StarletteOpenAPIRequest."""
+
+    def __init__(self, request: Request, body: bytes) -> None:
+        """Constructor of AsycnStarletteOpenAPIRequest.
+
+        This constructor doesn't call super().__init__() to keep it async
+        """
+        self.request = request
+        self.parameters = RequestParameters(
+            query=self.request.query_params,
+            header=self.request.headers,
+            cookie=self.request.cookies,
+        )
+        self._body = body
+
+    @property
+    def body(self) -> Optional[str]:
+        body = self._body
+        if body is None:
+            return None
+        return body.decode("utf-8")
+
+
+# pylint: disable=super-init-not-called
+class StarletteOpenAPIRequest(_StarletteOpenAPIRequest):
+    """Sync StarletteOpenAPIRequest."""
 
     def __init__(self, request: Request, body: bytes) -> None:
         """Constructor of AsycnStarletteOpenAPIRequest.

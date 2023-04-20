@@ -1,8 +1,10 @@
 """Module with utilities to create tests."""
-from unittest.mock import Mock, create_autospec
+from unittest.mock import MagicMock, create_autospec
+
+from httpx import AsyncClient
 
 from kytos.core import Controller
-from kytos.core.buffers import KytosBuffers
+from kytos.core.auth import Auth
 from kytos.core.config import KytosConfig
 from kytos.core.connection import (Connection, ConnectionProtocol,
                                    ConnectionState)
@@ -15,9 +17,9 @@ from kytos.core.switch import Switch
 def get_controller_mock():
     """Return a controller mock."""
     options = KytosConfig().options['daemon']
+    Auth.get_user_controller = MagicMock()
     controller = Controller(options)
-    controller.buffers = KytosBuffers()
-    controller.log = Mock()
+    controller.log = MagicMock()
     return controller
 
 
@@ -76,7 +78,9 @@ def get_kytos_event_mock(name, content):
     return event
 
 
-def get_test_client(controller, napp):
-    """Return a flask api test client."""
+def get_test_client(controller, napp) -> AsyncClient:
+    """Return an async api test client."""
     controller.api_server.register_napp_endpoints(napp)
-    return controller.api_server.app.test_client()
+    app = controller.api_server.app
+    base_url = "http://127.0.0.1/api/"
+    return AsyncClient(app=app, base_url=base_url)

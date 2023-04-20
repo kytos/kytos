@@ -1,39 +1,44 @@
 """APIServer tests."""
+import asyncio
 import json
-import unittest
 import warnings
 from datetime import datetime
 # Disable not-grouped imports that conflicts with isort
-from unittest.mock import (MagicMock, Mock, patch,  # pylint: disable=C0412
-                           sentinel)
-from urllib.error import HTTPError
+from unittest.mock import MagicMock
+from urllib.error import HTTPError, URLError
 
-from kytos.core.api_server import APIServer, CustomJSONEncoder
+import pytest
+from httpx import AsyncClient, RequestError
+
+from kytos.core.api_server import APIServer
 from kytos.core.napps import rest
-
-KYTOS_CORE_API = "http://127.0.0.1:8181/api/kytos/"
-API_URI = KYTOS_CORE_API+"core"
+from kytos.core.rest_api import JSONResponse, Request
 
 
 def test_custom_encoder() -> None:
-    """Test CustomJSONEncoder."""
-    encoder = CustomJSONEncoder()
+    """Test json custom encoder."""
     some_datetime = datetime(year=2022, month=1, day=30)
-    assert encoder.default(some_datetime) == "2022-01-30T00:00:00"
+    resp = JSONResponse(some_datetime)
+    assert json.loads(resp.body.decode()) == "2022-01-30T00:00:00"
 
 
-# pylint: disable=protected-access, too-many-public-methods
-class TestAPIServer(unittest.TestCase):
+# pylint: disable=protected-access,attribute-defined-outside-init
+class TestAPIServer:
     """Test the class APIServer."""
 
-    def setUp(self):
+    def setup_method(self):
         """Instantiate a APIServer."""
-        self.api_server = APIServer('CustomName', False)
+        self.api_server = APIServer()
+        self.app = self.api_server.app
         self.napps_manager = MagicMock()
         self.api_server.server = MagicMock()
         self.api_server.napps_manager = self.napps_manager
         self.api_server.napps_dir = 'napps_dir'
         self.api_server.flask_dir = 'flask_dir'
+        self.api_server.start_api()
+        self.api_server.start_web_ui()
+        base_url = "http://127.0.0.1/api/kytos/core/"
+        self.client = AsyncClient(app=self.app, base_url=base_url)
 
     def test_deprecation_warning(self):
         """Deprecated method should suggest @rest decorator."""
@@ -41,381 +46,341 @@ class TestAPIServer(unittest.TestCase):
             warnings.simplefilter("always")  # trigger all warnings
             self.api_server.register_rest_endpoint(
                 'rule', lambda x: x, ['POST'])
-            self.assertEqual(1, len(wrngs))
+            assert 1 == len(wrngs)
             warning = wrngs[0]
-            self.assertEqual(warning.category, DeprecationWarning)
-            self.assertIn('@rest', str(warning.message))
+            assert warning.category == DeprecationWarning
+            assert '@rest' in str(warning.message)
 
     def test_run(self):
         """Test run method."""
         self.api_server.run()
+        self.api_server.server.run.assert_called_with()
 
-        self.api_server.server.run.assert_called_with(self.api_server.app,
-                                                      self.api_server.listen,
-                                                      self.api_server.port)
-
-    @patch('sys.exit')
-    def test_run_error(self, mock_exit):
+    def test_run_error(self, monkeypatch):
         """Test run method to error case."""
+        mock_exit = MagicMock()
+        monkeypatch.setattr("sys.exit", mock_exit)
         self.api_server.server.run.side_effect = OSError
         self.api_server.run()
-
         mock_exit.assert_called()
 
-    def test_shutdown_api(self):
-        """Test shutdown_api method."""
-        path = "http://localhost:8181"
-        with self.api_server.app.test_request_context(path=path):
-            self.api_server.shutdown_api()
-            self.api_server.server.stop.assert_called()
-
-    def test_shutdown_api__error(self):
-        """Test shutdown_api method to error case."""
-        path = "http://any:port"
-        with self.api_server.app.test_request_context(path=path):
-            self.api_server.shutdown_api()
-            self.api_server.server.stop.assert_not_called()
-
-    def test_status_api(self):
+    async def test_status_api(self):
         """Test status_api method."""
-        status = self.api_server.status_api()
-        self.assertEqual(status, ('{"response": "running"}', 200))
+        response = await self.client.get("status/")
+        assert response.status_code == 200
+        assert response.json() == {"response": "running"}
 
-    @patch('kytos.core.api_server.urlopen')
-    def test_stop_api_server(self, mock_urlopen):
+    def test_stop_api_server(self):
         """Test stop_api_server method."""
         self.api_server.stop_api_server()
+        assert self.api_server.server.should_exit
 
-        url = f"{API_URI}/_shutdown"
-        mock_urlopen.assert_called_with(url)
-
-    @patch('kytos.core.api_server.send_file')
-    @patch('os.path.exists', return_value=True)
-    def test_static_web_ui__success(self, *args):
+    @pytest.mark.parametrize("file_exist", [True, False])
+    async def test_static_web_ui(self, monkeypatch, file_exist):
         """Test static_web_ui method to success case."""
-        (_, mock_send_file) = args
-        self.api_server.static_web_ui('kytos', 'napp', 'filename')
+        monkeypatch.setattr("os.path.exists", lambda x: file_exist)
+        monkeypatch.setattr("kytos.core.api_server.FileResponse",
+                            lambda x: JSONResponse({}))
 
-        mock_send_file.assert_called_with('napps_dir/kytos/napp/ui/filename')
+        endpoint = f"/ui/kytos/napp/{self.api_server.napps_dir}"
+        client = AsyncClient(app=self.app, base_url="http://127.0.0.1")
+        response = await client.get(endpoint)
+        expected_status_code = {True: 200, False: 404}
+        assert expected_status_code[file_exist] == response.status_code
 
-    @patch('os.path.exists', return_value=False)
-    def test_static_web_ui__error(self, _):
-        """Test static_web_ui method to error case."""
-        resp, code = self.api_server.static_web_ui('kytos', 'napp', 'filename')
-
-        self.assertEqual(resp, '')
-        self.assertEqual(code, 404)
-
-    @patch('kytos.core.api_server.glob')
-    def test_get_ui_components(self, mock_glob):
+    async def test_get_ui_components(self, monkeypatch):
         """Test get_ui_components method."""
-        with self.api_server.app.app_context():
-            mock_glob.return_value = ['napps_dir/*/*/ui/*/*.kytos']
-            response = self.api_server.get_ui_components('all')
+        mock_glob = MagicMock()
+        mock_glob.return_value = ['napps_dir/*/*/ui/*/*.kytos']
+        monkeypatch.setattr("kytos.core.api_server.glob", mock_glob)
+        expected_json = [{'name': '*-*-*-*', 'url': 'ui/*/*/*/*.kytos'}]
 
-            expected_json = [{'name': '*-*-*-*', 'url': 'ui/*/*/*/*.kytos'}]
-            self.assertEqual(response.json, expected_json)
-            self.assertEqual(response.status_code, 200)
+        endpoint = "/ui/k-toolbar/"
+        client = AsyncClient(app=self.app, base_url="http://127.0.0.1")
+        resp = await client.get(endpoint)
+        assert resp.status_code == 200
+        assert resp.json() == expected_json
 
-    @patch('os.path')
-    @patch('kytos.core.api_server.send_file')
-    def test_web_ui__success(self, mock_send_file, ospath_mock):
+    @pytest.mark.parametrize("file_exist", [True, False])
+    async def test_web_ui(self, monkeypatch, file_exist):
         """Test web_ui method."""
-        ospath_mock.exists.return_value = True
-        self.api_server.web_ui()
+        monkeypatch.setattr("os.path.exists", lambda x: file_exist)
+        monkeypatch.setattr("kytos.core.api_server.FileResponse",
+                            lambda x: JSONResponse({}))
 
-        mock_send_file.assert_called_with('flask_dir/index.html')
+        client = AsyncClient(app=self.app, base_url="http://127.0.0.1")
+        coros = [client.get("/index.html"), client.get("/")]
+        coros = asyncio.gather(*coros)
+        responses = await coros
+        expected_status_code = {True: 200, False: 404}
+        for response in responses:
+            assert expected_status_code[file_exist] == response.status_code
 
-    @patch('os.path')
-    def test_web_ui__error(self, ospath_mock):
-        """Test web_ui method."""
-        ospath_mock.exists.return_value = False
-        _, error = self.api_server.web_ui()
-
-        self.assertEqual(error, 404)
-
-    @patch('kytos.core.api_server.urlretrieve')
-    @patch('kytos.core.api_server.urlopen')
-    @patch('zipfile.ZipFile')
-    @patch('os.path.exists')
-    @patch('os.mkdir')
-    @patch('shutil.move')
-    def test_update_web_ui(self, *args):
-        """Test update_web_ui method."""
-        (_, _, mock_exists, mock_zipfile, mock_urlopen,
-         mock_urlretrieve) = args
-        zipfile = MagicMock()
-        zip_data = MagicMock()
+    def test_unzip_backup_web_ui(self, monkeypatch) -> None:
+        """Test _unzip_backup_web_ui."""
+        mock_log, mock_shutil = MagicMock(), MagicMock()
+        mock_zipfile, zipfile = MagicMock(), MagicMock()
+        zip_data, mock_mkdir = MagicMock(), MagicMock()
         zipfile.__enter__.return_value = zip_data
         zip_data.testzip.return_value = None
         mock_zipfile.return_value = zipfile
 
-        data = json.dumps({'tag_name': '1.4.1'})
-        url_response = MagicMock()
-        response_data = MagicMock()
-        # response object
-        url_response.__enter__.return_value = response_data
-        # response data
-        response_data.readlines.return_value = [data]
+        monkeypatch.setattr("zipfile.ZipFile", mock_zipfile)
+        monkeypatch.setattr("os.path.exists", lambda x: True)
+        monkeypatch.setattr("os.mkdir", mock_mkdir)
+        monkeypatch.setattr("shutil.move", mock_shutil)
+        monkeypatch.setattr("kytos.core.api_server.LOG", mock_log)
+        package, uri = "/tmp/file", "http://localhost/some_file.zip"
+        self.api_server._unzip_backup_web_ui(package, uri)
+        assert mock_mkdir.call_count == 1
+        assert mock_shutil.call_count == 1
+        assert zip_data.extractall.call_count == 1
+        assert zip_data.close.call_count == 1
+        assert mock_log.info.call_count == 1
 
-        mock_urlopen.return_value = url_response
+    def test_unzip_backup_web_ui_error(self, monkeypatch) -> None:
+        """Test _unzip_backup_web_ui error."""
+        mock_log, mock_zipfile, zipdata = MagicMock(), MagicMock(), MagicMock()
+        mock_zipfile.__enter__.return_value = zipdata
+        monkeypatch.setattr("zipfile.ZipFile", mock_zipfile)
+        monkeypatch.setattr("kytos.core.api_server.LOG", mock_log)
+        package, uri = "/tmp/file", "http://localhost/some_file.zip"
+        with pytest.raises(ValueError) as exc:
+            self.api_server._unzip_backup_web_ui(package, uri)
+        assert "is corrupted" in str(exc)
+        assert mock_log.error.call_count == 1
 
-        mock_exists.side_effect = [False, True]
+    def test_fetch_latest_ui_tag(self, monkeypatch) -> None:
+        """Test fetch lastest ui."""
+        mock_get, mock_res, ver = MagicMock(), MagicMock(), "X.Y.Z"
+        mock_get.return_value = mock_res
+        mock_res.json.return_value = {"tag_name": ver}
+        monkeypatch.setattr("kytos.core.api_server.httpx.get", mock_get)
+        version = self.api_server._fetch_latest_ui_tag()
+        assert version == ver
+        url = 'https://api.github.com/repos/kytos-ng/' \
+              'ui/releases/latest'
+        mock_get.assert_called_with(url, timeout=10)
 
-        response = self.api_server.update_web_ui()
+    def test_fetch_latest_ui_tag_fallback(self, monkeypatch) -> None:
+        """Test fetch lastest ui fallback tag."""
+        mock_get, mock_log = MagicMock(), MagicMock()
+        mock_get.side_effect = RequestError("some error")
+        monkeypatch.setattr("kytos.core.api_server.httpx.get", mock_get)
+        monkeypatch.setattr("kytos.core.api_server.LOG", mock_log)
+        version = self.api_server._fetch_latest_ui_tag()
+        assert version == "2022.3.0"
+        assert mock_log.warning.call_count == 1
+
+    async def test_update_web_ui(self, monkeypatch):
+        """Test update_web_ui method."""
+        mock_log, mock_urlretrieve = MagicMock(), MagicMock()
+        mock_urlretrieve.return_value = ["/tmp/file"]
+        monkeypatch.setattr("os.path.exists", lambda x: False)
+        monkeypatch.setattr("kytos.core.api_server.LOG", mock_log)
+        monkeypatch.setattr("kytos.core.api_server.urlretrieve",
+                            mock_urlretrieve)
+
+        version = "2022.3.0"
+        mock_fetch = MagicMock(return_value=version)
+        self.api_server._fetch_latest_ui_tag = mock_fetch
+        self.api_server._unzip_backup_web_ui = MagicMock()
+        response = await self.client.post("web/update")
+        assert response.status_code == 200
+        assert response.json() == "Web UI was updated"
+
+        assert self.api_server._fetch_latest_ui_tag.call_count == 1
+        assert self.api_server._unzip_backup_web_ui.call_count == 1
+        assert mock_log.info.call_count == 2
 
         url = 'https://github.com/kytos-ng/ui/releases/' + \
-              'download/1.4.1/latest.zip'
+              f'download/{version}/latest.zip'
         mock_urlretrieve.assert_called_with(url)
-        self.assertEqual(response[0], 'updated the web ui')
-        self.assertEqual(response[1], 200)
 
-    @patch('kytos.core.api_server.urlretrieve')
-    @patch('kytos.core.api_server.urlopen')
-    @patch('os.path.exists')
-    def test_update_web_ui__http_error(self, *args):
-        """Test update_web_ui method to http error case."""
-        (mock_exists, mock_urlopen, mock_urlretrieve) = args
+    @pytest.mark.parametrize(
+        "err_name,exp_msg",
+        [
+            ("HTTPError", "Uri not found"),
+            ("URLError", "Error accessing"),
+        ],
+    )
+    async def test_update_web_ui_error(self, monkeypatch, err_name, exp_msg):
+        """Test update_web_ui method error.
 
-        data = json.dumps({'tag_name': '1.4.1'})
-        url_response = MagicMock()
-        response_data = MagicMock()
-        # response object
-        url_response.__enter__.return_value = response_data
-        # response data
-        response_data.readlines.return_value = [data]
+        HTTPError had issues when being initialized in the decorator args,
+        so it it's being instantiated dynamically in the test body, see:
+        https://bugs.python.org/issue45955
+        """
+        mock_log, mock_urlretrieve = MagicMock(), MagicMock()
+        http_error = HTTPError("errorx", 500, "errorx", {}, None)
+        errs = {"HTTPError": http_error, "URLError": URLError("some reason")}
+        mock_urlretrieve.side_effect = errs[err_name]
+        monkeypatch.setattr("os.path.exists", lambda x: False)
+        monkeypatch.setattr("kytos.core.api_server.LOG", mock_log)
+        monkeypatch.setattr("kytos.core.api_server.urlretrieve",
+                            mock_urlretrieve)
 
-        mock_urlopen.return_value = url_response
-        mock_urlretrieve.side_effect = HTTPError('url', 123, 'msg', 'hdrs',
-                                                 MagicMock())
+        version = "2022.3.0"
+        self.api_server._unzip_backup_web_ui = MagicMock()
+        response = await self.client.post(f"web/update/{version}")
+        assert response.status_code == 500
+        assert exp_msg in response.json()
+        assert mock_log.error.call_count == 1
 
-        mock_exists.return_value = False
+        url = 'https://github.com/kytos-ng/ui/releases/' + \
+              f'download/{version}/latest.zip'
+        mock_urlretrieve.assert_called_with(url)
 
-        response = self.api_server.update_web_ui()
-
-        expected_response = 'Uri not found https://github.com/kytos-ng/ui/' + \
-                            'releases/download/1.4.1/latest.zip.'
-        self.assertEqual(response[0], expected_response)
-        self.assertEqual(response[1], 500)
-
-    @patch('kytos.core.api_server.urlretrieve')
-    @patch('kytos.core.api_server.urlopen')
-    @patch('zipfile.ZipFile')
-    @patch('os.path.exists')
-    def test_update_web_ui__zip_error(self, *args):
-        """Test update_web_ui method to error case in zip file."""
-        # pylint: disable=W0612
-        (mock_exists, mock_zipfile, mock_urlopen, _) = args
-        zipfile = MagicMock()
-        zipfile.testzip.return_value = 'any'
-        mock_zipfile.return_value = zipfile
-
-        data = json.dumps({'tag_name': '1.4.1'})
-
-        url_response = MagicMock()
-        response_data = MagicMock()
-        # response object
-        url_response.__enter__.return_value = response_data
-        # response data
-        response_data.readlines.return_value = [data]
-
-        mock_urlopen.return_value = url_response
-
-        response = self.api_server.update_web_ui()
-
-        expected_response = 'Zip file from ' + \
-                            'https://github.com/kytos-ng/ui/releases/' + \
-                            'download/1.4.1/latest.zip is corrupted.'
-        self.assertEqual(response[0], expected_response)
-        self.assertEqual(response[1], 500)
-
-    def test_enable_napp__error_not_installed(self):
+    async def test_enable_napp__error_not_installed(self):
         """Test _enable_napp method error case when napp is not installed."""
         self.napps_manager.is_installed.return_value = False
+        resp = await self.client.get("/napps/kytos/napp/enable")
+        assert resp.status_code == 400
+        assert resp.json() == {"response": "not installed"}
 
-        resp, code = self.api_server._enable_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "not installed"}')
-        self.assertEqual(code, 400)
-
-    def test_enable_napp__error_not_enabling(self):
+    async def test_enable_napp__error_not_enabling(self):
         """Test _enable_napp method error case when napp is not enabling."""
         self.napps_manager.is_installed.return_value = True
         self.napps_manager.is_enabled.side_effect = [False, False]
+        resp = await self.client.get("napps/kytos/napp/enable")
+        assert resp.status_code == 500
+        assert resp.json() == {"response": "error"}
 
-        resp, code = self.api_server._enable_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "error"}')
-        self.assertEqual(code, 500)
-
-    def test_enable_napp__success(self):
+    async def test_enable_napp__success(self):
         """Test _enable_napp method success case."""
         self.napps_manager.is_installed.return_value = True
         self.napps_manager.is_enabled.side_effect = [False, True]
+        resp = await self.client.get("napps/kytos/napp/enable")
+        assert resp.status_code == 200
+        assert resp.json() == {"response": "enabled"}
 
-        resp, code = self.api_server._enable_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "enabled"}')
-        self.assertEqual(code, 200)
-
-    def test_disable_napp__error_not_installed(self):
+    async def test_disable_napp__error_not_installed(self):
         """Test _disable_napp method error case when napp is not installed."""
         self.napps_manager.is_installed.return_value = False
+        resp = await self.client.get("napps/kytos/napp/disable")
+        assert resp.status_code == 400
+        assert resp.json() == {"response": "not installed"}
 
-        resp, code = self.api_server._disable_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "not installed"}')
-        self.assertEqual(code, 400)
-
-    def test_disable_napp__error_not_enabling(self):
+    async def test_disable_napp__error_not_enabling(self):
         """Test _disable_napp method error case when napp is not enabling."""
         self.napps_manager.is_installed.return_value = True
         self.napps_manager.is_enabled.side_effect = [True, True]
+        resp = await self.client.get("napps/kytos/napp/disable")
+        assert resp.status_code == 500
+        assert resp.json() == {"response": "error"}
 
-        resp, code = self.api_server._disable_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "error"}')
-        self.assertEqual(code, 500)
-
-    def test_disable_napp__success(self):
+    async def test_disable_napp__success(self):
         """Test _disable_napp method success case."""
         self.napps_manager.is_installed.return_value = True
         self.napps_manager.is_enabled.side_effect = [True, False]
+        resp = await self.client.get("napps/kytos/napp/disable")
+        assert resp.status_code == 200
+        assert resp.json() == {"response": "disabled"}
 
-        resp, code = self.api_server._disable_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "disabled"}')
-        self.assertEqual(code, 200)
-
-    def test_install_napp__error_not_installing(self):
+    async def test_install_napp__error_not_installing(self):
         """Test _install_napp method error case when napp is not installing."""
         self.napps_manager.is_installed.return_value = False
         self.napps_manager.install.return_value = False
+        resp = await self.client.get("napps/kytos/napp/install")
+        assert resp.status_code == 500
+        assert resp.json() == {"response": "error"}
 
-        resp, code = self.api_server._install_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "error"}')
-        self.assertEqual(code, 500)
-
-    def test_install_napp__http_error(self):
+    async def test_install_napp__http_error(self):
         """Test _install_napp method to http error case."""
         self.napps_manager.is_installed.return_value = False
         self.napps_manager.install.side_effect = HTTPError('url', 123, 'msg',
                                                            'hdrs', MagicMock())
 
-        resp, code = self.api_server._install_napp('kytos', 'napp')
+        resp = await self.client.get("napps/kytos/napp/install")
+        assert resp.status_code == 123
+        assert resp.json() == {"response": "error"}
+        self.napps_manager.install.side_effect = None
 
-        self.assertEqual(resp, '{"response": "error"}')
-        self.assertEqual(code, 123)
-
-    def test_install_napp__success_is_installed(self):
+    async def test_install_napp__success_is_installed(self):
         """Test _install_napp method success case when napp is installed."""
         self.napps_manager.is_installed.return_value = True
+        resp = await self.client.get("napps/kytos/napp/install")
+        assert resp.status_code == 200
+        assert resp.json() == {"response": "installed"}
 
-        resp, code = self.api_server._install_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "installed"}')
-        self.assertEqual(code, 200)
-
-    def test_install_napp__success(self):
+    async def test_install_napp__success(self):
         """Test _install_napp method success case."""
         self.napps_manager.is_installed.return_value = False
         self.napps_manager.install.return_value = True
+        resp = await self.client.get("napps/kytos/napp/install")
+        assert resp.status_code == 200
+        assert resp.json() == {"response": "installed"}
 
-        resp, code = self.api_server._install_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "installed"}')
-        self.assertEqual(code, 200)
-
-    def test_uninstall_napp__error_not_uninstalling(self):
+    async def test_uninstall_napp__error_not_uninstalling(self):
         """Test _uninstall_napp method error case when napp is not
            uninstalling.
         """
         self.napps_manager.is_installed.return_value = True
         self.napps_manager.uninstall.return_value = False
+        resp = await self.client.get("napps/kytos/napp/uninstall")
+        assert resp.status_code == 500
+        assert resp.json() == {"response": "error"}
 
-        resp, code = self.api_server._uninstall_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "error"}')
-        self.assertEqual(code, 500)
-
-    def test_uninstall_napp__success_not_installed(self):
+    async def test_uninstall_napp__success_not_installed(self):
         """Test _uninstall_napp method success case when napp is not
            installed.
         """
         self.napps_manager.is_installed.return_value = False
+        resp = await self.client.get("napps/kytos/napp/uninstall")
+        assert resp.status_code == 200
+        assert resp.json() == {"response": "uninstalled"}
 
-        resp, code = self.api_server._uninstall_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "uninstalled"}')
-        self.assertEqual(code, 200)
-
-    def test_uninstall_napp__success(self):
+    async def test_uninstall_napp__success(self):
         """Test _uninstall_napp method success case."""
         self.napps_manager.is_installed.return_value = True
         self.napps_manager.uninstall.return_value = True
+        resp = await self.client.get("napps/kytos/napp/uninstall")
+        assert resp.status_code == 200
+        assert resp.json() == {"response": "uninstalled"}
 
-        resp, code = self.api_server._uninstall_napp('kytos', 'napp')
-
-        self.assertEqual(resp, '{"response": "uninstalled"}')
-        self.assertEqual(code, 200)
-
-    def test_list_enabled_napps(self):
+    async def test_list_enabled_napps(self):
         """Test _list_enabled_napps method."""
         napp = MagicMock()
-        napp.username = 'kytos'
-        napp.name = 'name'
+        napp.username = "kytos"
+        napp.name = "name"
         self.napps_manager.get_enabled_napps.return_value = [napp]
+        resp = await self.client.get("napps_enabled")
+        assert resp.status_code == 200
+        assert resp.json() == {"napps": [["kytos", "name"]]}
 
-        enabled_napps, code = self.api_server._list_enabled_napps()
-
-        self.assertEqual(enabled_napps, '{"napps": [["kytos", "name"]]}')
-        self.assertEqual(code, 200)
-
-    def test_list_installed_napps(self):
+    async def test_list_installed_napps(self):
         """Test _list_installed_napps method."""
         napp = MagicMock()
-        napp.username = 'kytos'
-        napp.name = 'name'
+        napp.username = "kytos"
+        napp.name = "name"
         self.napps_manager.get_installed_napps.return_value = [napp]
+        resp = await self.client.get("napps_installed")
+        assert resp.status_code == 200
+        assert resp.json() == {"napps": [["kytos", "name"]]}
 
-        enabled_napps, code = self.api_server._list_installed_napps()
-
-        self.assertEqual(enabled_napps, '{"napps": [["kytos", "name"]]}')
-        self.assertEqual(code, 200)
-
-    def test_get_napp_metadata__not_installed(self):
+    async def test_get_napp_metadata__not_installed(self):
         """Test _get_napp_metadata method to error case when napp is not
            installed."""
         self.napps_manager.is_installed.return_value = False
-        resp, code = self.api_server._get_napp_metadata('kytos', 'napp',
-                                                        'version')
+        resp = await self.client.get("napps/kytos/napp/metadata/version")
+        assert resp.status_code == 400
+        assert resp.json() == "NApp is not installed."
 
-        self.assertEqual(resp, 'NApp is not installed.')
-        self.assertEqual(code, 400)
-
-    def test_get_napp_metadata__invalid_key(self):
+    async def test_get_napp_metadata__invalid_key(self):
         """Test _get_napp_metadata method to error case when key is invalid."""
         self.napps_manager.is_installed.return_value = True
-        resp, code = self.api_server._get_napp_metadata('kytos', 'napp',
-                                                        'any')
+        resp = await self.client.get("napps/kytos/napp/metadata/any")
+        assert resp.status_code == 400
+        assert resp.json() == "Invalid key."
 
-        self.assertEqual(resp, 'Invalid key.')
-        self.assertEqual(code, 400)
-
-    def test_get_napp_metadata(self):
+    async def test_get_napp_metadata(self):
         """Test _get_napp_metadata method."""
-        data = '{"username": "kytos", \
-                 "name": "napp", \
-                 "version": "1.0"}'
+        value = "1.0"
         self.napps_manager.is_installed.return_value = True
-        self.napps_manager.get_napp_metadata.return_value = data
-        resp, code = self.api_server._get_napp_metadata('kytos', 'napp',
-                                                        'version')
-
-        expected_metadata = json.dumps({'version': data})
-        self.assertEqual(resp, expected_metadata)
-        self.assertEqual(code, 200)
+        self.napps_manager.get_napp_metadata.return_value = value
+        resp = await self.client.get("napps/kytos/napp/metadata/version")
+        assert resp.status_code == 200
+        assert resp.json() == {"version": value}
 
 
 class RESTNApp:  # pylint: disable=too-few-public-methods
@@ -427,126 +392,96 @@ class RESTNApp:  # pylint: disable=too-few-public-methods
         self.napp_id = 'test/MyNApp'
 
 
-class TestAPIDecorator(unittest.TestCase):
-    """@rest should have the same effect as ``Flask.route``."""
+class TestAPIDecorator:
+    """Test suite for @rest decorator."""
 
-    @classmethod
-    @patch('kytos.core.api_server.Blueprint')
-    def test_flask_call(cls, mock_blueprint):
-        """@rest params should be forwarded to Flask."""
-        rule = 'rule'
-        # Use sentinels to be sure they are not changed.
-        options = dict(param1=sentinel.val1, param2=sentinel.val2)
-
-        class MyNApp(RESTNApp):  # pylint: disable=too-few-public-methods
+    async def test_sync_route(self, controller, api_client):
+        """Test rest decorator sync route."""
+        class MyNApp(RESTNApp):
             """API decorator example usage."""
 
-            @rest(rule, **options)
-            def my_endpoint(self):
-                """Do nothing."""
-
-        blueprint = Mock()
-        mock_blueprint.return_value = blueprint
+            @rest("some_route/", methods=["POST"])
+            def some_endpoint(self, _request: Request) -> JSONResponse:
+                """Some endpoint."""
+                return JSONResponse({"some_response": "some_value"})
 
         napp = MyNApp()
-        cls._mock_api_server(napp)
-        blueprint.add_url_rule.assert_called_once_with(
-            '/api/test/MyNApp/' + rule, None, napp.my_endpoint, **options)
+        controller.api_server.register_napp_endpoints(napp)
 
-    @classmethod
-    def test_remove_napp_endpoints(cls):
-        """Test remove napp endpoints"""
-        class MyNApp:  # pylint: disable=too-few-public-methods
+        routes = ["test/MyNApp/some_route/", "test/MyNApp/some_route"]
+        coros = [api_client.post(route) for route in routes]
+        responses = await asyncio.gather(*coros)
+        for resp in responses:
+            assert resp.status_code == 200
+            assert resp.json() == {"some_response": "some_value"}
+
+        resp = await api_client.get("test/MyNApp/some_route/")
+        assert resp.status_code == 405
+
+    async def test_async_route(self, controller, api_client):
+        """Test rest decorator async route."""
+        class MyNApp(RESTNApp):
             """API decorator example usage."""
 
-            def __init__(self):
-                self.username = 'test'
-                self.name = 'MyNApp'
-                self.napp_id = 'test/MyNApp'
+            @rest("some_route/", methods=["POST"])
+            async def some_endpoint(self, _request: Request) -> JSONResponse:
+                """Some endpoint."""
+                await asyncio.sleep(0)
+                return JSONResponse({})
 
         napp = MyNApp()
-        server = cls._mock_api_server(napp)
+        controller.api_server.register_napp_endpoints(napp)
+        resp = await api_client.post("test/MyNApp/some_route/")
+        assert resp.status_code == 200
+        assert resp.json() == {}
 
-        rule = Mock()
-        rule.methods = ['GET', 'POST']
-        rule.rule.startswith.return_value = True
-        endpoint = 'username/napp_name'
-        rule.endpoint = endpoint
-
-        server.app.url_map.iter_rules.return_value = [rule]
-        server.app.view_functions.pop.return_value = rule
-        # pylint: disable=protected-access
-        server.app.url_map._rules.pop.return_value = rule
-        # pylint: enable=protected-access
-
-        server.remove_napp_endpoints(napp)
-        server.app.view_functions.pop.assert_called_once_with(endpoint)
-        # pylint: disable=protected-access
-        server.app.url_map._rules.pop.assert_called_once_with(0)
-        # pylint: enable=protected-access
-        server.app.blueprints.pop.assert_called_once_with(napp.napp_id)
-
-    @classmethod
-    @patch('kytos.core.api_server.Blueprint')
-    def test_rule_with_slash(cls, mock_blueprint):
-        """There should be no double slashes in a rule."""
+    async def test_remove_napp_endpoints(self, controller, api_client):
+        """Test remove napp endpoints."""
         class MyNApp(RESTNApp):  # pylint: disable=too-few-public-methods
             """API decorator example usage."""
 
-            @rest('/rule')
-            def my_endpoint(self):
-                """Do nothing."""
+            @rest("some_route/", methods=["POST"])
+            def some_endpoint(self, _request: Request) -> JSONResponse:
+                """Some endpoint."""
+                return JSONResponse({})
 
-        blueprint = Mock()
-        mock_blueprint.return_value = blueprint
-        cls._assert_rule_is_added(MyNApp, blueprint)
+        napp = MyNApp()
+        controller.api_server.register_napp_endpoints(napp)
+        resp = await api_client.post("test/MyNApp/some_route/")
+        assert resp.status_code == 200
 
-    @classmethod
-    @patch('kytos.core.api_server.Blueprint')
-    def test_rule_from_classmethod(cls, mock_blueprint):
-        """Use class methods as endpoints as well."""
+        controller.api_server.remove_napp_endpoints(napp)
+        resp = await api_client.post("test/MyNApp/some_route/")
+        assert resp.status_code == 404
+
+    async def test_route_from_classmethod(self, controller, api_client):
+        """Test route from classmethod."""
         class MyNApp(RESTNApp):  # pylint: disable=too-few-public-methods
             """API decorator example usage."""
 
-            @rest('/rule')
+            @rest("some_route/", methods=["POST"])
             @classmethod
-            def my_endpoint(cls):
-                """Do nothing."""
+            def some_endpoint(cls, _request: Request) -> JSONResponse:
+                """Some endpoint."""
+                return JSONResponse({})
 
-        blueprint = Mock()
-        mock_blueprint.return_value = blueprint
-        cls._assert_rule_is_added(MyNApp, blueprint)
+        napp = MyNApp()
+        controller.api_server.register_napp_endpoints(napp)
+        resp = await api_client.post("test/MyNApp/some_route/")
+        assert resp.status_code == 200
 
-    @classmethod
-    @patch('kytos.core.api_server.Blueprint')
-    def test_rule_from_staticmethod(cls, mock_blueprint):
-        """Use static methods as endpoints as well."""
+    async def test_route_from_staticmethod(self, controller, api_client):
+        """Test route from staticmethod."""
         class MyNApp(RESTNApp):  # pylint: disable=too-few-public-methods
             """API decorator example usage."""
 
-            @rest('/rule')
+            @rest("some_route/", methods=["POST"])
             @staticmethod
-            def my_endpoint():
-                """Do nothing."""
+            def some_endpoint(_request: Request) -> JSONResponse:
+                """Some endpoint."""
+                return JSONResponse({})
 
-        blueprint = Mock()
-        mock_blueprint.return_value = blueprint
-        cls._assert_rule_is_added(MyNApp, blueprint)
-
-    @classmethod
-    def _assert_rule_is_added(cls, napp_class, blueprint):
-        """Assert Flask's add_url_rule was called with the right parameters."""
-        napp = napp_class()
-        cls._mock_api_server(napp)
-        blueprint.add_url_rule.assert_called_once_with(
-            '/api/test/MyNApp/rule', None, napp.my_endpoint)
-
-    @staticmethod
-    def _mock_api_server(napp):
-        """Instantiate APIServer, mock ``.app`` and start ``napp`` API."""
-        server = APIServer('test')
-        server.app = Mock()  # Flask app
-        server.app.url_map.iter_rules.return_value = []
-
-        server.register_napp_endpoints(napp)
-        return server
+        napp = MyNApp()
+        controller.api_server.register_napp_endpoints(napp)
+        resp = await api_client.post("test/MyNApp/some_route/")
+        assert resp.status_code == 200

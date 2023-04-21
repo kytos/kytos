@@ -484,7 +484,9 @@ uvloop==0.17.0
     #   kytos
     #   uvicorn
 virtualenv==20.21.0
-    # via tox
+    # via
+    #   kytos
+    #   tox
 watchdog==2.1.9
     # via
     #   -r requirements/run.txt

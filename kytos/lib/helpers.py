@@ -19,6 +19,7 @@ def get_controller_mock():
     options = KytosConfig().options['daemon']
     Auth.get_user_controller = MagicMock()
     controller = Controller(options)
+    controller._buffers = MagicMock()
     controller.log = MagicMock()
     return controller
 

@@ -772,6 +772,7 @@ class TestControllerAsync:
     async def test_configuration_endpoint(self, controller, api_client):
         """Should return the attribute options as json."""
         expected = vars(controller.options)
+        expected.pop("jwt_secret", None)
         resp = await api_client.get("kytos/core/config")
         assert resp.status_code == 200
         assert expected == resp.json()

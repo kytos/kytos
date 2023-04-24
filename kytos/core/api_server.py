@@ -314,6 +314,7 @@ class APIServer:
             if not hasattr(inner, 'route_params'):
                 inner.route_params = []
             inner.route_params.append((rule, options))
+            inner.created_at = datetime.utcnow()
             # Return the same function, now with "route_params" attribute
             return function
         return store_route_params
@@ -362,12 +363,24 @@ class APIServer:
 
     @staticmethod
     def _get_decorated_functions(napp):
-        """Return ``napp``'s methods having the @rest decorator."""
+        """Return ``napp``'s methods having the @rest decorator.
+
+        The callables are yielded based on their decorated order (created_at),
+        this ensures deterministic routing matching order.
+        """
+        callables = []
         for name in dir(napp):
             if not name.startswith('_'):  # discarding private names
                 pub_attr = getattr(napp, name)
                 if callable(pub_attr) and hasattr(pub_attr, 'route_params'):
-                    yield pub_attr
+                    callables.append(pub_attr)
+        try:
+            callables = sorted(callables, key=lambda f: f.created_at)
+        except TypeError:
+            pass
+
+        for pub_attr in callables:
+            yield pub_attr
 
     @classmethod
     def get_absolute_rule(cls, rule, napp):

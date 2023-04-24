@@ -435,6 +435,36 @@ class TestAPIDecorator:
         assert resp.status_code == 200
         assert resp.json() == {}
 
+    async def test_route_ordering(self, controller, api_client):
+        """Test rest decorator route ordering."""
+        class MyNApp(RESTNApp):
+            """API decorator example usage."""
+
+            @rest("some_route/hello", methods=["POST"])
+            async def hello(self, _request: Request) -> JSONResponse:
+                """Hello endpoint."""
+                await asyncio.sleep(0)
+                return JSONResponse({"hello": "world"})
+
+            @rest("some_route/{some_arg}", methods=["POST"])
+            async def ahello_arg(self, request: Request) -> JSONResponse:
+                """Hello endpoint."""
+                arg = request.path_params["some_arg"]
+                await asyncio.sleep(0)
+                return JSONResponse({"hello": arg})
+
+        napp = MyNApp()
+        controller.api_server.register_napp_endpoints(napp)
+        coros = [
+            api_client.post("test/MyNApp/some_route/abc"),
+            api_client.post("test/MyNApp/some_route/hello")
+        ]
+        responses = await asyncio.gather(*coros)
+        assert responses[0].status_code == 200
+        assert responses[1].status_code == 200
+        assert responses[0].json() == {"hello": "abc"}
+        assert responses[1].json() == {"hello": "world"}
+
     async def test_remove_napp_endpoints(self, controller, api_client):
         """Test remove napp endpoints."""
         class MyNApp(RESTNApp):  # pylint: disable=too-few-public-methods

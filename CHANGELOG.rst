@@ -16,6 +16,10 @@ Changed
 - Changed ``UNI.is_valid`` to allow tags such as ``any`` and ``untagged``
 - Changed ``EntityStatus`` value from 1, 2 and 3 to ``UP``, ``DISABLED`` and ``DOWN`` respectively.
 
+Fixed
+=====
+- Unexposed ``jwt_secret`` on ``GET /api/kytos/core/config/`` endpoint
+
 
 [2022.3.1]  2023-02-17
 **********************

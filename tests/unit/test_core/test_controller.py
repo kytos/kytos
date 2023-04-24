@@ -13,6 +13,7 @@ from pyof.foundation.exceptions import PackException
 
 from kytos.core import Controller
 from kytos.core.auth import Auth
+from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 from kytos.core.events import KytosEvent
 from kytos.core.logs import LogManager
@@ -663,6 +664,7 @@ class TestControllerAsync:
 
     async def test_start_controller(self, controller, monkeypatch):
         """Test start controller."""
+        controller._buffers = KytosBuffers()
         server = MagicMock()
         monkeypatch.setattr("kytos.core.controller.KytosServer", server)
         napp = MagicMock()
@@ -671,9 +673,8 @@ class TestControllerAsync:
         controller.api_server = MagicMock()
         controller.load_napps = MagicMock()
         controller.options.napps_pre_installed = [napp]
-        assert not controller._buffers
         controller.start_controller()
-        assert controller._buffers
+        assert controller.buffers
 
         controller.server.serve_forever.assert_called()
         all_buffers = controller.buffers.get_all_buffers()
@@ -706,6 +707,7 @@ class TestControllerAsync:
 
     async def test_raw_event_handler(self, controller):
         """Test raw_event_handler async method by handling a shutdown event."""
+        controller._buffers = KytosBuffers()
         event = KytosEvent("kytos/core.shutdown")
         controller.notify_listeners = MagicMock()
         await controller.buffers.raw._queue.async_q.put(event)
@@ -715,6 +717,7 @@ class TestControllerAsync:
     async def test_msg_in_event_handler(self, controller):
         """Test msg_in_event_handler async method by handling a shutdown
            event."""
+        controller._buffers = KytosBuffers()
         event = KytosEvent("kytos/core.shutdown")
         controller.notify_listeners = MagicMock()
         await controller.buffers.msg_in._queue.async_q.put(event)
@@ -724,6 +727,7 @@ class TestControllerAsync:
     async def test_msg_out_event_handler(self, controller):
         """Test msg_out_event_handler async method by handling a common and a
            shutdown event."""
+        controller._buffers = KytosBuffers()
         controller.notify_listeners = MagicMock()
         dst = MagicMock()
         dst.state = 0
@@ -743,6 +747,7 @@ class TestControllerAsync:
 
     async def test_msg_out_event_handler_pack_exc(self, controller):
         """Test msg_out_event_handler async pack exception."""
+        controller._buffers = KytosBuffers()
         dst, msg = MagicMock(), MagicMock()
         dst.state = 0
         msg.pack.side_effect = PackException("some error")
@@ -757,6 +762,7 @@ class TestControllerAsync:
 
     async def test_app_event_handler(self, controller):
         """Test app_event_handler async method by handling a shutdown event."""
+        controller._buffers = KytosBuffers()
         event = KytosEvent("kytos/core.shutdown")
         controller.notify_listeners = MagicMock()
         await controller.buffers.app._queue.async_q.put(event)

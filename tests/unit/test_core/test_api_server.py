@@ -36,6 +36,7 @@ class TestAPIServer:
         self.api_server.napps_dir = 'napps_dir'
         self.api_server.flask_dir = 'flask_dir'
         self.api_server.start_api()
+        self.api_server.start_web_ui_static_files = MagicMock()
         self.api_server.start_web_ui()
         base_url = "http://127.0.0.1/api/kytos/core/"
         self.client = AsyncClient(app=self.app, base_url=base_url)

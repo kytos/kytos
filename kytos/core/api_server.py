@@ -128,6 +128,10 @@ class APIServer:
                              self.get_ui_components)
         self._start_endpoint(self.app, '/', self.web_ui)
         self._start_endpoint(self.app, '/index.html', self.web_ui)
+        self.start_web_ui_static_files()
+
+    def start_web_ui_static_files(self) -> None:
+        """Start Web UI static files."""
         self.app.router.mount("/", app=StaticFiles(directory=self.web_ui_dir),
                               name="dist")
 

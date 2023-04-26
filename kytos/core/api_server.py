@@ -389,14 +389,14 @@ class APIServer:
         for name in dir(napp):
             if not name.startswith('_'):  # discarding private names
                 pub_attr = getattr(napp, name)
-                if callable(pub_attr) and hasattr(pub_attr, 'route_params'):
+                if (
+                    callable(pub_attr)
+                    and hasattr(pub_attr, "route_params")
+                    and hasattr(pub_attr, "route_index")
+                    and isinstance(pub_attr.route_index, int)
+                ):
                     callables.append(pub_attr)
-        try:
-            callables = sorted(callables, key=lambda f: f.route_index)
-        except TypeError:
-            pass
-
-        for pub_attr in callables:
+        for pub_attr in sorted(callables, key=lambda f: f.route_index):
             yield pub_attr
 
     @classmethod

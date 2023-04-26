@@ -516,3 +516,8 @@ class TestAPIDecorator:
         controller.api_server.register_napp_endpoints(napp)
         resp = await api_client.post("test/MyNApp/some_route/")
         assert resp.status_code == 200
+
+    def test_get_route_index(self) -> None:
+        """Test _get_next_route_index."""
+        index = APIServer._get_next_route_index()
+        assert APIServer._get_next_route_index() == index + 1

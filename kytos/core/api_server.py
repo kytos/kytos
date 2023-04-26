@@ -36,6 +36,7 @@ class APIServer:
     DEFAULT_METHODS = ('GET',)
     _NAPP_PREFIX = "/api/{napp.username}/{napp.name}/"
     _CORE_PREFIX = "/api/kytos/core/"
+    _route_index_count = 0
 
     # pylint: disable=too-many-arguments
     def __init__(self, listen='0.0.0.0', port=8181,
@@ -81,6 +82,18 @@ class APIServer:
         return JSONResponse({"description": exc.detail,
                              "code": exc.status_code},
                             status_code=exc.status_code)
+
+    @classmethod
+    def _get_next_route_index(cls) -> int:
+        """Get next route index.
+
+        This classmethod is meant to ensure route ordering when allocating
+        an index for each route, the @rest decorator will use it. Decorated
+        routes are imported sequentially so this won't need a threading Lock.
+        """
+        index = cls._route_index_count
+        cls._route_index_count += 1
+        return index
 
     def run(self):
         """Run API Server."""
@@ -318,7 +331,7 @@ class APIServer:
             if not hasattr(inner, 'route_params'):
                 inner.route_params = []
             inner.route_params.append((rule, options))
-            inner.created_at = datetime.utcnow()
+            inner.route_index = APIServer._get_next_route_index()
             # Return the same function, now with "route_params" attribute
             return function
         return store_route_params
@@ -369,7 +382,7 @@ class APIServer:
     def _get_decorated_functions(napp):
         """Return ``napp``'s methods having the @rest decorator.
 
-        The callables are yielded based on their decorated order (created_at),
+        The callables are yielded based on their decorated order,
         this ensures deterministic routing matching order.
         """
         callables = []
@@ -379,7 +392,7 @@ class APIServer:
                 if callable(pub_attr) and hasattr(pub_attr, 'route_params'):
                     callables.append(pub_attr)
         try:
-            callables = sorted(callables, key=lambda f: f.created_at)
+            callables = sorted(callables, key=lambda f: f.route_index)
         except TypeError:
             pass
 

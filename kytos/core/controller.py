@@ -21,12 +21,14 @@ import os
 import re
 import sys
 import threading
+from asyncio import AbstractEventLoop
 from concurrent.futures import ThreadPoolExecutor
 from importlib import import_module
 from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from socket import error as SocketError
+from typing import Optional
 
 from pyof.foundation.exceptions import PackException
 
@@ -81,16 +83,18 @@ class Controller:
     # pylint: disable=too-many-instance-attributes,too-many-public-methods,
     # pylint: disable=consider-using-with,unnecessary-dunder-call
     # pylint: disable=too-many-lines
-    def __init__(self, options=None):
+    def __init__(self, options=None, loop: Optional[AbstractEventLoop] = None):
         """Init method of Controller class takes the parameters below.
 
         Args:
             options (:attr:`ParseArgs.args`): :attr:`options` attribute from an
                 instance of :class:`~kytos.core.config.KytosConfig` class.
+            loop asyncio.AbstractEventLoop
         """
         if options is None:
             options = KytosConfig().options['daemon']
 
+        self.loop = loop
         self._pool = ThreadPoolExecutor(max_workers=1)
 
         # asyncio tasks

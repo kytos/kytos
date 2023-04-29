@@ -337,11 +337,10 @@ class Auth:
         users_list = self.user_controller.get_users()
         return JSONResponse(users_list)
 
-    @staticmethod
-    def _get_request_body(request: Request) -> dict:
+    def _get_request_body(self, request: Request) -> dict:
         """Get JSON from request"""
         content_type_json_or_415(request)
-        body = get_json_or_400(request)
+        body = get_json_or_400(request, self.controller.loop)
         if not isinstance(body, dict):
             raise HTTPException(400, "Invalid payload type: {body}")
         return body

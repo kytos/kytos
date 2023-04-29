@@ -95,7 +95,7 @@ class Controller:
             options = KytosConfig().options['daemon']
 
         self.loop = loop
-        self._pool = ThreadPoolExecutor(max_workers=1)
+        # self._pool = ThreadPoolExecutor(max_workers=1)
 
         # asyncio tasks
         self._tasks = []
@@ -353,8 +353,16 @@ class Controller:
             log.debug('starting')
             # log.debug('creating tasks')
             loop = asyncio.get_running_loop()
+
+            def run() -> None:
+                fut = asyncio.run_coroutine_threadsafe(
+                    self.api_server.server.serve(), loop
+                )
+                fut.result()
+
             blocking_tasks = [
-                loop.run_in_executor(executor, self.api_server.run)
+                # loop.run_in_executor(executor, self.api_server.run)
+                loop.run_in_executor(executor, run)
             ]
             # log.debug('waiting for tasks')
             completed, pending = await asyncio.wait(blocking_tasks)
@@ -364,11 +372,13 @@ class Controller:
                       len(completed), len(pending))
 
         loop = asyncio.get_running_loop()
-        task = loop.create_task(_run_api_server_thread(self._pool))
-        task.add_done_callback(_stop_loop)
+        self.loop = loop
+        task = loop.create_task(self.api_server.server.serve())
+        # task = loop.create_task(_run_api_server_thread(self._pool))
+        # task.add_done_callback(_stop_loop)
         self._tasks.append(task)
 
-        self.log.info("ThreadPool started: %s", self._pool)
+        # self.log.info("ThreadPool started: %s", self._pool)
 
         # ASYNC TODO: ensure all threads started correctly
         # This is critical, if any of them failed starting we should exit.
@@ -531,12 +541,17 @@ class Controller:
         # ASYNC TODO: close connections
         # self.server.server_close()
 
-        self.log.info("Stopping API Server: %s", self._pool)
+        # self.log.info("Stopping API Server: %s", self._pool)
+        self.log.info("Stopping API Server")
         self.api_server.stop_api_server()
-        self.log.info("Stopping API Server threadpool: %s", self._pool)
-        self._pool.shutdown(wait=graceful, cancel_futures=True)
+        self.log.info("Stopped API Server")
+        # self.log.info("Stopping API Server threadpool: %s", self._pool)
+        # self._pool.shutdown(wait=graceful, cancel_futures=True)
         # Shutdown the TCP server and the main asyncio loop
+        self.log.info("Stopping TCP Server")
         self.server.shutdown()
+        self.log.info("Stopped TCP Server")
+        self.loop.stop()
 
     def status(self):
         """Return status of Kytos Server.

@@ -50,11 +50,13 @@ async def test_aget_json_or_400(controller, api_client) -> None:
     assert response.json() == body
 
 
-async def test_get_json_or_400(controller, api_client) -> None:
+async def test_get_json_or_400(controller, api_client, event_loop) -> None:
     """Test get_json_or_400."""
 
+    controller.loop = event_loop
+
     def handler(request: Request) -> JSONResponse:
-        body = get_json_or_400(request)
+        body = get_json_or_400(request, controller.loop)
         return JSONResponse(body)
 
     endpoint = "prefix/resource"
@@ -68,10 +70,12 @@ async def test_get_json_or_400(controller, api_client) -> None:
     assert response.json() == body
 
 
-async def test_get_body(controller, api_client) -> None:
+async def test_get_body(controller, api_client, event_loop) -> None:
     """Test get_body (low level-ish usage for validators)."""
+    controller.loop = event_loop
+
     def handler(request: Request) -> JSONResponse:
-        body_bytes = get_body(request)
+        body_bytes = get_body(request, controller.loop)
         assert body_bytes == b'{"some_key": "some_value"}'
         return JSONResponse({})
 

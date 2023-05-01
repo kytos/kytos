@@ -2,7 +2,6 @@
 import logging
 import os
 import shutil
-import sys
 import warnings
 import zipfile
 from datetime import datetime
@@ -96,19 +95,12 @@ class APIServer:
         cls._route_index_count += 1
         return index
 
-    def run(self):
-        """Run API Server."""
-        try:
-            self._run_uvicorn()
-        except (RuntimeError, ValueError, OSError) as exception:
-            msg = f"Couldn't start API Server: {exception}"
-            LOG.critical(msg)
-            sys.exit(msg)
+    async def serve(self):
+        """Start serving."""
+        await self.server.serve()
 
-    def _run_uvicorn(self) -> None:
-        self.server.run()
-
-    def _stop_uvicorn(self) -> None:
+    def stop(self):
+        """Stop serving."""
         self.server.should_exit = True
 
     def register_rest_endpoint(self, url, function, methods):
@@ -160,10 +152,6 @@ class APIServer:
     def status_api(self, _request: Request):
         """Display kytos status using the route ``/kytos/status/``."""
         return JSONResponse({"response": "running"})
-
-    def stop_api_server(self):
-        """Stop API server."""
-        self._stop_uvicorn()
 
     def static_web_ui(self,
                       request: Request) -> Union[FileResponse, JSONResponse]:

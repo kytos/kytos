@@ -10,11 +10,17 @@ Added
 =====
 - Added ``status`` to ``as_dict()`` from entities ``Interface``, ``Switch`` and ``Link``.
 - Added ``@validate_openapi`` decorator to validate OpenAPI routes
+- Added ``avalidate_openapi_request(spec, request)`` to validate OpenAPI ``async`` routes
+- ``htppx`` is now shipped as a dependency, NApps can also leverage it instead of ``requests``
+- Added ``kytos.core.rest_api`` module exposing utilities for requests handlers
 
 Changed
 =======
 - Changed ``UNI.is_valid`` to allow tags such as ``any`` and ``untagged``
 - Changed ``EntityStatus`` value from 1, 2 and 3 to ``UP``, ``DISABLED`` and ``DOWN`` respectively.
+- Replaced ``werkzeug/flask`` with ``starlette/uvicorn``
+- Updated logging.ini ``logger_api_server`` with ``level: INFO`` by default
+- Updated APM to instrument ``starlette``
 
 
 [2022.3.1]  2023-02-17

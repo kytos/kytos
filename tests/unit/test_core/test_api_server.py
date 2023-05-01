@@ -34,7 +34,7 @@ class TestAPIServer:
         self.api_server.server = MagicMock()
         self.api_server.napps_manager = self.napps_manager
         self.api_server.napps_dir = 'napps_dir'
-        self.api_server.flask_dir = 'flask_dir'
+        self.api_server.web_uir_dir = 'web_uir_dir'
         self.api_server.start_api()
         self.api_server.start_web_ui_static_files = MagicMock()
         self.api_server.start_web_ui()

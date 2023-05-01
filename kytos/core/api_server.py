@@ -56,7 +56,6 @@ class APIServer:
         self.port = port
         self.web_ui_dir = os.path.join(dirname, '../web-ui')
         self.app = Starlette(
-            debug=True,
             exception_handlers={HTTPException: self._http_exc_handler},
             middleware=[
                 Middleware(CORSMiddleware, allow_origins=["*"]),

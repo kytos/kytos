@@ -21,6 +21,8 @@ Changed
 - Replaced ``werkzeug/flask`` with ``starlette/uvicorn``
 - Updated logging.ini ``logger_api_server`` with ``level: INFO`` by default
 - Updated APM to instrument ``starlette``
+- HTTP API exceptions responses no longer include the ``"name"`` key name in the response, only ``"code"``  and ``"description"`` still remain
+- Development ``get_test_client`` now uses a ``htppx.AsyncClient`` instance
 
 
 [2022.3.1]  2023-02-17

@@ -139,6 +139,7 @@ class KytosConfig():
                         ["kytos.core.logger_decorators.queue_decorator"],
                     'listen': '0.0.0.0',
                     'port': 6653,
+                    'api_traceback_on_500': True,
                     'foreground': False,
                     'protocol_name': '',
                     'enable_entities_by_default': False,
@@ -189,6 +190,8 @@ class KytosConfig():
         options.daemon = options.daemon in ['True', True]
         options.port = int(options.port)
         options.api_port = int(options.api_port)
+        options.api_traceback_on_500 = options.api_traceback_on_500 in ['True',
+                                                                        True]
         options.protocol_name = str(options.protocol_name)
         options.token_expiration_minutes = int(options.
                                                token_expiration_minutes)

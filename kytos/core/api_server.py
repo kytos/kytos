@@ -31,7 +31,6 @@ LOG = logging.getLogger(__name__)
 class APIServer:
     """Api server used to provide Kytos Controller routes."""
 
-    #: tuple: Default Flask HTTP methods.
     DEFAULT_METHODS = ('GET',)
     _NAPP_PREFIX = "/api/{napp.username}/{napp.name}/"
     _CORE_PREFIX = "/api/kytos/core/"
@@ -39,15 +38,11 @@ class APIServer:
 
     # pylint: disable=too-many-arguments
     def __init__(self, listen='0.0.0.0', port=8181,
-                 napps_manager=None, napps_dir=None):
-        """Start a Flask+SocketIO server.
+                 napps_manager=None, napps_dir=None,
+                 response_traceback_on_500=True):
+        """APIServer.
 
         Require controller to get NApps dir and NAppsManager
-
-        Args:
-            listen (string): host name used by api server instance
-            port (int): Port number used by api server instance
-            controller(kytos.core.controller): A controller instance.
         """
         dirname = os.path.dirname(os.path.abspath(__file__))
         self.napps_manager = napps_manager
@@ -56,6 +51,7 @@ class APIServer:
         self.port = port
         self.web_ui_dir = os.path.join(dirname, '../web-ui')
         self.app = Starlette(
+            debug=response_traceback_on_500,
             exception_handlers={HTTPException: self._http_exc_handler},
             middleware=[
                 Middleware(CORSMiddleware, allow_origins=["*"]),
@@ -304,7 +300,7 @@ class APIServer:
         APIServer and NApp instances.
         """
         def store_route_params(function):
-            """Store ``Flask`` ``@route`` parameters in a method attribute.
+            """Store ``@route`` parameters in a method attribute.
 
             There can be many @route decorators in a single function.
             """

@@ -143,7 +143,9 @@ class Controller:
         #: API Server used to expose rest endpoints.
         self.api_server = APIServer(self.options.listen,
                                     self.options.api_port,
-                                    self.napps_manager, self.options.napps)
+                                    self.napps_manager,
+                                    self.options.napps,
+                                    self.options.api_traceback_on_500)
 
         self.auth = None
         self.dead_letter = DeadLetter(self)

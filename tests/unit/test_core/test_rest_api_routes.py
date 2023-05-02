@@ -50,6 +50,11 @@ async def test_aget_json_or_400(controller, api_client) -> None:
     assert response.json() == body
 
 
+def test_api_500_traceback_by_default(controller) -> None:
+    """Test api 500 traceback by default."""
+    assert controller.api_server.app.debug
+
+
 async def test_get_json_or_400(controller, api_client, event_loop) -> None:
     """Test get_json_or_400."""
 

@@ -1,6 +1,7 @@
 """Test kytos.core.rest_api routes."""
 import asyncio
 
+from kytos.core.config import KytosConfig
 from kytos.core.rest_api import (JSONResponse, Request, aget_json_or_400,
                                  get_body, get_json_or_400)
 
@@ -48,6 +49,11 @@ async def test_aget_json_or_400(controller, api_client) -> None:
     response = await api_client.post(f"kytos/core/{endpoint}", json=body)
     assert response.status_code == 200
     assert response.json() == body
+
+
+def test_api_500_traceback_by_default() -> None:
+    """Test api 500 traceback by default."""
+    assert KytosConfig().options["daemon"].api_traceback_on_500
 
 
 async def test_get_json_or_400(controller, api_client, event_loop) -> None:

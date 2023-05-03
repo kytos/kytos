@@ -45,6 +45,9 @@ connection_timeout = 130
 # Default is 8181.
 api_port = 8181
 
+# Whether to include a traceback response when a internal server error happens.
+api_traceback_on_500 = True
+
 # When a new entity (switch, interface or link) is created it is
 # administratively disabled by default. Change here to modify this behavior.
 # enable_entities_by_default = False

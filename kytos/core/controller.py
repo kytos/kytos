@@ -143,7 +143,9 @@ class Controller:
         #: API Server used to expose rest endpoints.
         self.api_server = APIServer(self.options.listen,
                                     self.options.api_port,
-                                    self.napps_manager, self.options.napps)
+                                    self.napps_manager,
+                                    self.options.napps,
+                                    self.options.api_traceback_on_500)
 
         self.auth = None
         self.dead_letter = DeadLetter(self)
@@ -175,7 +177,7 @@ class Controller:
         LogManager.decorate_logger_class(*decorators)
         LogManager.load_config_file(self.options.logging, self.options.debug)
         # pylint: disable=fixme
-        # TODO issue 371 (future PR for 2023.1)
+        # TODO issue 371
         # LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
         self._patch_core_loggers()

@@ -63,8 +63,9 @@ async def aget_json_or_400(request: Request) -> Any:
 
 def content_type_json_or_415(request: Request) -> Optional[str]:
     """Ensures request Content-Type is application/json or raises 415."""
-    content_type = request.headers.get("Content-Type")
-    if content_type != "application/json":
+    content_type = request.headers.get("Content-Type", "")
+    content_types = content_type.split(";")
+    if "application/json" not in content_types:
         err = "Expected Content-Type: application/json, " \
               f"got: {content_type}"
         raise HTTPException(415, detail=err)

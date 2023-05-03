@@ -424,7 +424,7 @@ class Controller:
             string: Json with current configurations used by kytos.
 
         """
-        return JSONResponse(self.options.__dict__)
+        return JSONResponse(KytosConfig.options_exposed(self.options.__dict__))
 
     def restart(self, graceful=True):
         """Restart Kytos SDN Controller.

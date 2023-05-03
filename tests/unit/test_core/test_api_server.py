@@ -4,7 +4,7 @@ import json
 import warnings
 from datetime import datetime
 # Disable not-grouped imports that conflicts with isort
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from urllib.error import HTTPError, URLError
 
 import pytest
@@ -34,8 +34,9 @@ class TestAPIServer:
         self.api_server.server = MagicMock()
         self.api_server.napps_manager = self.napps_manager
         self.api_server.napps_dir = 'napps_dir'
-        self.api_server.flask_dir = 'flask_dir'
+        self.api_server.web_uir_dir = 'web_uir_dir'
         self.api_server.start_api()
+        self.api_server.start_web_ui_static_files = MagicMock()
         self.api_server.start_web_ui()
         base_url = "http://127.0.0.1/api/kytos/core/"
         self.client = AsyncClient(app=self.app, base_url=base_url)
@@ -51,18 +52,11 @@ class TestAPIServer:
             assert warning.category == DeprecationWarning
             assert '@rest' in str(warning.message)
 
-    def test_run(self):
-        """Test run method."""
-        self.api_server.run()
-        self.api_server.server.run.assert_called_with()
-
-    def test_run_error(self, monkeypatch):
-        """Test run method to error case."""
-        mock_exit = MagicMock()
-        monkeypatch.setattr("sys.exit", mock_exit)
-        self.api_server.server.run.side_effect = OSError
-        self.api_server.run()
-        mock_exit.assert_called()
+    async def test_serve(self):
+        """Test serve method."""
+        self.api_server.server = AsyncMock()
+        await self.api_server.serve()
+        self.api_server.server.serve.assert_called_with()
 
     async def test_status_api(self):
         """Test status_api method."""
@@ -70,9 +64,9 @@ class TestAPIServer:
         assert response.status_code == 200
         assert response.json() == {"response": "running"}
 
-    def test_stop_api_server(self):
-        """Test stop_api_server method."""
-        self.api_server.stop_api_server()
+    def test_stop(self):
+        """Test stop method."""
+        self.api_server.stop()
         assert self.api_server.server.should_exit
 
     @pytest.mark.parametrize("file_exist", [True, False])
@@ -515,3 +509,8 @@ class TestAPIDecorator:
         controller.api_server.register_napp_endpoints(napp)
         resp = await api_client.post("test/MyNApp/some_route/")
         assert resp.status_code == 200
+
+    def test_get_route_index(self) -> None:
+        """Test _get_next_route_index."""
+        index = APIServer._get_next_route_index()
+        assert APIServer._get_next_route_index() == index + 1

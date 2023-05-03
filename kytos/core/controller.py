@@ -21,7 +21,7 @@ import os
 import re
 import sys
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from asyncio import AbstractEventLoop
 from importlib import import_module
 from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
@@ -81,23 +81,22 @@ class Controller:
     # pylint: disable=too-many-instance-attributes,too-many-public-methods,
     # pylint: disable=consider-using-with,unnecessary-dunder-call
     # pylint: disable=too-many-lines
-    def __init__(self, options=None):
+    def __init__(self, options=None, loop: AbstractEventLoop = None):
         """Init method of Controller class takes the parameters below.
 
         Args:
             options (:attr:`ParseArgs.args`): :attr:`options` attribute from an
                 instance of :class:`~kytos.core.config.KytosConfig` class.
+            loop asyncio.AbstractEventLoop
         """
         if options is None:
             options = KytosConfig().options['daemon']
 
-        self._pool = ThreadPoolExecutor(max_workers=1)
+        self.loop = loop
 
         # asyncio tasks
-        self._tasks = []
+        self._tasks: list[asyncio.Task] = []
 
-        #: dict: keep the main threads of the controller (buffers and handler)
-        self._threads = {}
         #: KytosBuffers: KytosBuffer object with Controller buffers
         self._buffers: KytosBuffers = None
         #: dict: keep track of the socket connections labeled by ``(ip, port)``
@@ -336,35 +335,8 @@ class Controller:
         self.log.info("Starting TCP server: %s", self.server)
         self.server.serve_forever()
 
-        def _stop_loop(_):
-            loop = asyncio.get_running_loop()
-            # print(_.result())
-            threads = threading.enumerate()
-            self.log.debug("%s threads before loop.stop: %s",
-                           len(threads), threads)
-            loop.stop()
-
-        async def _run_api_server_thread(executor):
-            log = logging.getLogger('kytos.core.controller.api_server_thread')
-            log.debug('starting')
-            # log.debug('creating tasks')
-            loop = asyncio.get_running_loop()
-            blocking_tasks = [
-                loop.run_in_executor(executor, self.api_server.run)
-            ]
-            # log.debug('waiting for tasks')
-            completed, pending = await asyncio.wait(blocking_tasks)
-            # results = [t.result() for t in completed]
-            # log.debug('results: {!r}'.format(results))
-            log.debug('completed: %d, pending: %d',
-                      len(completed), len(pending))
-
-        loop = asyncio.get_running_loop()
-        task = loop.create_task(_run_api_server_thread(self._pool))
-        task.add_done_callback(_stop_loop)
+        task = self.loop.create_task(self.api_server.serve())
         self._tasks.append(task)
-
-        self.log.info("ThreadPool started: %s", self._pool)
 
         # ASYNC TODO: ensure all threads started correctly
         # This is critical, if any of them failed starting we should exit.
@@ -378,15 +350,15 @@ class Controller:
 
         # Start task handlers consumers after NApps to potentially
         # avoid discarding an event if a consumer isn't ready yet
-        task = loop.create_task(self.event_handler("conn"))
+        task = self.loop.create_task(self.event_handler("conn"))
         self._tasks.append(task)
-        task = loop.create_task(self.event_handler("raw"))
+        task = self.loop.create_task(self.event_handler("raw"))
         self._tasks.append(task)
-        task = loop.create_task(self.event_handler("msg_in"))
+        task = self.loop.create_task(self.event_handler("msg_in"))
         self._tasks.append(task)
-        task = loop.create_task(self.msg_out_event_handler())
+        task = self.loop.create_task(self.msg_out_event_handler())
         self._tasks.append(task)
-        task = loop.create_task(self.event_handler("app"))
+        task = self.loop.create_task(self.event_handler("app"))
         self._tasks.append(task)
 
         self.started_at = now()
@@ -507,18 +479,8 @@ class Controller:
         # self.server.socket.shutdown()
         # self.server.socket.close()
 
-        # for thread in self._threads.values():
-        #     self.log.info("Stopping thread: %s", thread.name)
-        #     thread.join()
-
-        # for thread in self._threads.values():
-        #     while thread.is_alive():
-        #         self.log.info("Thread is alive: %s", thread.name)
-        #         pass
-
         self.started_at = None
         self.unload_napps()
-        # self.buffers = KytosBuffers()
 
         # Cancel all async tasks (event handlers and servers)
         for task in self._tasks:
@@ -527,12 +489,13 @@ class Controller:
         # ASYNC TODO: close connections
         # self.server.server_close()
 
-        self.log.info("Stopping API Server: %s", self._pool)
-        self.api_server.stop_api_server()
-        self.log.info("Stopping API Server threadpool: %s", self._pool)
-        self._pool.shutdown(wait=graceful, cancel_futures=True)
-        # Shutdown the TCP server and the main asyncio loop
+        self.log.info("Stopping API Server...")
+        self.api_server.stop()
+        self.log.info("Stopped API Server")
+        self.log.info("Stopping TCP Server...")
         self.server.shutdown()
+        self.log.info("Stopped TCP Server")
+        self.loop.stop()
 
     def status(self):
         """Return status of Kytos Server.

@@ -2,7 +2,6 @@
 import logging
 import os
 import shutil
-import sys
 import warnings
 import zipfile
 from datetime import datetime
@@ -36,6 +35,7 @@ class APIServer:
     DEFAULT_METHODS = ('GET',)
     _NAPP_PREFIX = "/api/{napp.username}/{napp.name}/"
     _CORE_PREFIX = "/api/kytos/core/"
+    _route_index_count = 0
 
     # pylint: disable=too-many-arguments
     def __init__(self, listen='0.0.0.0', port=8181,
@@ -82,19 +82,24 @@ class APIServer:
                              "code": exc.status_code},
                             status_code=exc.status_code)
 
-    def run(self):
-        """Run API Server."""
-        try:
-            self._run_uvicorn()
-        except (RuntimeError, ValueError, OSError) as exception:
-            msg = f"Couldn't start API Server: {exception}"
-            LOG.critical(msg)
-            sys.exit(msg)
+    @classmethod
+    def _get_next_route_index(cls) -> int:
+        """Get next route index.
 
-    def _run_uvicorn(self) -> None:
-        self.server.run()
+        This classmethod is meant to ensure route ordering when allocating
+        an index for each route, the @rest decorator will use it. Decorated
+        routes are imported sequentially so this won't need a threading Lock.
+        """
+        index = cls._route_index_count
+        cls._route_index_count += 1
+        return index
 
-    def _stop_uvicorn(self) -> None:
+    async def serve(self):
+        """Start serving."""
+        await self.server.serve()
+
+    def stop(self):
+        """Stop serving."""
         self.server.should_exit = True
 
     def register_rest_endpoint(self, url, function, methods):
@@ -128,6 +133,10 @@ class APIServer:
                              self.get_ui_components)
         self._start_endpoint(self.app, '/', self.web_ui)
         self._start_endpoint(self.app, '/index.html', self.web_ui)
+        self.start_web_ui_static_files()
+
+    def start_web_ui_static_files(self) -> None:
+        """Start Web UI static files."""
         self.app.router.mount("/", app=StaticFiles(directory=self.web_ui_dir),
                               name="dist")
 
@@ -142,10 +151,6 @@ class APIServer:
     def status_api(self, _request: Request):
         """Display kytos status using the route ``/kytos/status/``."""
         return JSONResponse({"response": "running"})
-
-    def stop_api_server(self):
-        """Stop API server."""
-        self._stop_uvicorn()
 
     def static_web_ui(self,
                       request: Request) -> Union[FileResponse, JSONResponse]:
@@ -314,7 +319,7 @@ class APIServer:
             if not hasattr(inner, 'route_params'):
                 inner.route_params = []
             inner.route_params.append((rule, options))
-            inner.created_at = datetime.utcnow()
+            inner.route_index = APIServer._get_next_route_index()
             # Return the same function, now with "route_params" attribute
             return function
         return store_route_params
@@ -365,21 +370,21 @@ class APIServer:
     def _get_decorated_functions(napp):
         """Return ``napp``'s methods having the @rest decorator.
 
-        The callables are yielded based on their decorated order (created_at),
+        The callables are yielded based on their decorated order,
         this ensures deterministic routing matching order.
         """
         callables = []
         for name in dir(napp):
             if not name.startswith('_'):  # discarding private names
                 pub_attr = getattr(napp, name)
-                if callable(pub_attr) and hasattr(pub_attr, 'route_params'):
+                if (
+                    callable(pub_attr)
+                    and hasattr(pub_attr, "route_params")
+                    and hasattr(pub_attr, "route_index")
+                    and isinstance(pub_attr.route_index, int)
+                ):
                     callables.append(pub_attr)
-        try:
-            callables = sorted(callables, key=lambda f: f.created_at)
-        except TypeError:
-            pass
-
-        for pub_attr in callables:
+        for pub_attr in sorted(callables, key=lambda f: f.route_index):
             yield pub_attr
 
     @classmethod

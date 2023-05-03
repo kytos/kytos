@@ -134,7 +134,7 @@ def async_main(config):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    controller = Controller(config)
+    controller = Controller(config, loop)
 
     if controller.options.debug:
         loop.set_debug(True)

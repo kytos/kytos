@@ -2,6 +2,7 @@
 import functools
 import logging
 import traceback
+from asyncio import AbstractEventLoop
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
@@ -387,14 +388,16 @@ def _request_validation_result_or_400(result: RequestValidationResult) -> None:
     raise HTTPException(400, detail=error_response)
 
 
-def validate_openapi_request(spec: Spec, request: Request) -> bytes:
+def validate_openapi_request(
+    spec: Spec, request: Request, loop: AbstractEventLoop
+) -> bytes:
     """Validate a Request given an OpenAPI spec.
 
     This function is meant to be called from a synchronous context
     since StarletteOpenAPIRequest internally uses `asgiref.sync.AsyncToSync`
     and its forcing not to use the current running event loop.
     """
-    body = get_body(request)
+    body = get_body(request, loop)
     if body:
         content_type_json_or_415(request)
     openapi_request = StarletteOpenAPIRequest(request, body)
@@ -438,14 +441,21 @@ def validate_openapi(spec):
         @functools.wraps(func)
         def wrapper_validate(*args, **kwargs):
             request: Request = None
+            napp = None
             for arg in args:
                 if isinstance(arg, Request):
                     request = arg
+                if hasattr(arg, "controller"):
+                    napp = arg
+                if request and napp:
                     break
-            else:
+            if not request:
                 err = f"{func.__name__} args doesn't have a Request argument"
-                raise HTTPException(500, detail=err)
-            validate_openapi_request(spec, request)
+                raise RuntimeError(err)
+            if not napp:
+                err = f"{func.__name__} should be a NApp method to get ev_loop"
+                raise RuntimeError(err)
+            validate_openapi_request(spec, request, napp.controller.loop)
             return func(*args, **kwargs)
         return wrapper_validate
     return validate_decorator

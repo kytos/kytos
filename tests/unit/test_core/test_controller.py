@@ -665,6 +665,7 @@ class TestControllerAsync:
     async def test_start_controller(self, controller, monkeypatch):
         """Test start controller."""
         controller._buffers = KytosBuffers()
+        controller.loop = MagicMock()
         server = MagicMock()
         monkeypatch.setattr("kytos.core.controller.KytosServer", server)
         napp = MagicMock()
@@ -679,6 +680,7 @@ class TestControllerAsync:
         controller.server.serve_forever.assert_called()
         all_buffers = controller.buffers.get_all_buffers()
         # It's expected that all buffers have a task + the api server task
+        assert controller.loop.create_task.call_count == len(all_buffers) + 1
         assert len(controller._tasks) == len(all_buffers) + 1
         controller.pre_install_napps.assert_called_with([napp])
         controller.load_napps.assert_called()
@@ -686,24 +688,23 @@ class TestControllerAsync:
 
     async def test_stop_controller(self, controller):
         """Test stop_controller method."""
+        controller.loop = MagicMock()
         api_server = MagicMock()
         napp_dir_listener = MagicMock()
-        pool = MagicMock()
         controller.server = MagicMock()
         controller.unload_napps = MagicMock()
         controller._buffers = MagicMock()
         controller.api_server = api_server
         controller.napp_dir_listener = napp_dir_listener
-        controller._pool = pool
 
         controller.stop_controller()
 
         controller.buffers.send_stop_signal.assert_called()
-        api_server.stop_api_server.assert_called()
+        api_server.stop.assert_called()
         napp_dir_listener.stop.assert_called()
-        pool.shutdown.assert_called()
         controller.unload_napps.assert_called()
         controller.server.shutdown.assert_called()
+        controller.loop.stop.assert_called()
 
     async def test_raw_event_handler(self, controller):
         """Test raw_event_handler async method by handling a shutdown event."""

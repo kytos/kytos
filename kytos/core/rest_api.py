@@ -1,10 +1,11 @@
 """Rest API utilities module."""
 # pylint: disable=self-assigning-variable
+import asyncio
 import json
+from asyncio import AbstractEventLoop
 from datetime import datetime
 from typing import Any, Optional
 
-from asgiref.sync import async_to_sync
 from openapi_core.contrib.starlette import \
     StarletteOpenAPIRequest as _StarletteOpenAPIRequest
 from openapi_core.validation.request.datatypes import RequestParameters
@@ -24,24 +25,30 @@ def _json_serializer(obj):
     raise TypeError(f"Type {type(obj)} not serializable")
 
 
-def get_body(request: Request) -> bytes:
+def get_body(
+    request: Request, loop: AbstractEventLoop, timeout: Optional[float] = None
+) -> bytes:
     """Try to get request.body form a sync @rest route."""
-    body = async_to_sync(request.body)
-    return body()
+    future = asyncio.run_coroutine_threadsafe(request.body(), loop)
+    return future.result(timeout)
 
 
-def get_json(request: Request) -> Any:
+def get_json(
+    request: Request, loop: AbstractEventLoop, timeout: Optional[float] = None
+) -> Any:
     """Try to get request.json from a sync @rest route.
     It might raise json.decoder.JSONDecodeError.
     """
-    json_body = async_to_sync(request.json)
-    return json_body()
+    future = asyncio.run_coroutine_threadsafe(request.json(), loop)
+    return future.result(timeout)
 
 
-def get_json_or_400(request: Request) -> Any:
+def get_json_or_400(
+    request: Request, loop: AbstractEventLoop, timeout: Optional[float] = None
+) -> Any:
     """Try to get request.json from a sync @rest route or HTTPException 400."""
     try:
-        return get_json(request)
+        return get_json(request, loop, timeout)
     except (json.decoder.JSONDecodeError, TypeError) as exc:
         raise HTTPException(400, detail=f"Invalid json: {str(exc)}")
 
@@ -66,6 +73,7 @@ def content_type_json_or_415(request: Request) -> Optional[str]:
 
 class JSONResponse(StarletteJSONResponse):
     """JSONResponse with custom default serializer that supports datetime."""
+
     media_type = "application/json"
 
     def render(self, content) -> bytes:

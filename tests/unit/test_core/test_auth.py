@@ -1,87 +1,55 @@
 """Test kytos.core.auth module."""
 import base64
-from unittest import TestCase
-from unittest.mock import MagicMock, Mock, patch
 
-# pylint: disable=no-name-in-module
+import pytest
+from httpx import AsyncClient
+# pylint: disable=no-name-in-module,attribute-defined-outside-init
 from pydantic import BaseModel, ValidationError
 from pymongo.errors import DuplicateKeyError
-from werkzeug.exceptions import NotFound
 
-from kytos.core import Controller
 from kytos.core.auth import Auth
-from kytos.core.buffers import KytosBuffers
-from kytos.core.config import KytosConfig
-
-KYTOS_CORE_API = "http://127.0.0.1:8181/api/kytos/"
-API_URI = KYTOS_CORE_API+"core"
+from kytos.core.rest_api import HTTPException
+from kytos.core.user import UserDoc
 
 
 # pylint: disable=unused-argument
-class TestAuth(TestCase):
+class TestAuth:
     """Auth tests."""
 
-    def setUp(self):
+    def setup_method(self):
         """Instantiate a controller and an Auth."""
-        Auth.get_user_controller = MagicMock()
-        self.patched_events = []  # {'event_name': box_object}
-        self.server_name_url = 'http://localhost:8181/api/kytos'
-        self.controller = self._get_controller_mock()
-        self.controller.start_auth()
-        self.auth = Auth(self.controller)
-        self.username, self.password = self._create_super_user()
-        self.token = self._get_token()
+        def hashing(password: bytes, _hash) -> str:
+            if password == b"password":
+                return "some_hash"
+            return "wrong_hash"
+        UserDoc.hashing = hashing
+        self.username, self.password = ("test", "password")
         self.user_data = {
             "username": "authtempuser",
             "email": "temp@kytos.io",
             "password": "password",
         }
-        self.auth_header = {"Authorization": f"Bearer {self.token}"}
 
-    def _get_controller_mock(self):
-        """Return a controller mock."""
-        options = KytosConfig().options['daemon']
-        options.jwt_secret = 'jwt_secret'
-        controller = Controller(options)
-        controller.buffers = KytosBuffers()
-        controller.log = Mock()
-        return controller
+    async def auth_headers(self, auth: Auth, api_client: AsyncClient) -> dict:
+        """Get Authorization headers with token."""
+        token = await self._get_token(auth, api_client)
+        return {"Authorization": f"Bearer {token}"}
 
-    @staticmethod
-    def get_auth_test_client(auth):
-        """Return a flask api test client."""
-        return auth.controller.api_server.app.test_client()
-
-    def _create_super_user(self):
-        """Create a superuser to integration test."""
-        username = "test"
-        password = "password"
-        return username, password
-
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    @patch('kytos.core.user.UserDoc.hashing')
-    def _get_token(self, mock_hashing=None, mock_jwt_secret=None):
+    async def _get_token(self, auth: Auth, api_client: AsyncClient) -> str:
         """Make a request to get a token to be used in tests."""
-        box = {
-            'state': 'active',
-            'hash': '',
-            # "password" digested
-            'password': 'password_mocked'
-        }
-        header = {
+        valid_header = {
             "Authorization": "Basic "
             + base64.b64encode(
                 bytes(self.username + ":" + self.password, "ascii")
             ).decode("ascii")
         }
-        self.auth.user_controller.get_user.return_value = box
-        mock_hashing.return_value = box["password"]
-        url = f"{API_URI}/auth/login/"
-        api = self.get_auth_test_client(self.auth)
-        success_response = api.open(url, method='GET', headers=header)
-
-        json_response = success_response.json
-        return json_response["token"]
+        user_dict = {"state": "active", "password": "some_hash", "hash": {}}
+        auth.user_controller.get_user.return_value = user_dict
+        endpoint = "kytos/core/auth/login"
+        resp = await api_client.get(endpoint, headers=valid_header)
+        assert resp.status_code == 200
+        token = resp.json()["token"]
+        return token
 
     def _validate_schema(self, my_dict, check_against):
         """Check if a dict respects a given schema."""
@@ -92,9 +60,7 @@ class TestAuth(TestCase):
                 return False
         return True
 
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    @patch('kytos.core.user.UserDoc.hashing')
-    def test_01_login_request(self, mock_hashing, mock_jwt_secret):
+    async def test_01_login_request(self, auth, api_client, monkeypatch):
         """Test auth login endpoint."""
         valid_header = {
             "Authorization": "Basic "
@@ -108,22 +74,19 @@ class TestAuth(TestCase):
                 bytes("nonexistent" + ":" + "nonexistent", "ascii")
             ).decode("ascii")
         }
-        url = f"{API_URI}/auth/login/"
-        api = self.get_auth_test_client(self.auth)
-        mock_hashing.return_value = 'password_mocked'
-        success_response = api.open(url, method='GET', headers=valid_header)
-        mock_hashing.return_value = 'password_incorrect'
-        error_response = api.open(url, method='GET', headers=invalid_header)
-        fail_response = api.open(url, method='GET')
-        self.auth.user_controller.get_user.return_value = {'state': ''}
-        inactive_response = api.open(url, method='GET', headers=valid_header)
-        self.assertEqual(success_response.status_code, 200)
-        self.assertEqual(error_response.status_code, 401)
-        self.assertEqual(fail_response.status_code, 400)
-        self.assertEqual(inactive_response.status_code, 401)
+        user_dict = {"state": "active", "password": "some_hash", "hash": {}}
+        auth.user_controller.get_user.return_value = user_dict
+        endpoint = "kytos/core/auth/login"
+        resp = await api_client.get(endpoint, headers=valid_header)
+        assert resp.json()["token"]
+        assert resp.status_code == 200
+        resp = await api_client.get(endpoint, headers=invalid_header)
+        assert resp.status_code == 401
+        assert "Incorrect password" in resp.text
+        resp = await api_client.get(endpoint)
+        assert "Authorization header missing" in resp.text
 
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_02_list_users_request(self, mock_jwt_secret):
+    async def test_02_list_users_request(self, auth, api_client):
         """Test auth list users endpoint."""
         invalid_header = {"Authorization": "Bearer invalidtoken"}
         schema = {"users": list}
@@ -131,152 +94,143 @@ class TestAuth(TestCase):
                         self.user_data['username'],
                         {"username": "authtempuser2"}
                     ]}
-        self.auth.user_controller.get_users.return_value = response
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/"
-        success_response = api.open(url, method='GET',
-                                    headers=self.auth_header)
-        error_response = api.open(url, method='GET', headers=invalid_header)
-        is_valid = self._validate_schema(success_response.json, schema)
+        auth.user_controller.get_users.return_value = response
+        endpoint = "kytos/core/auth/users"
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.get(endpoint, headers=headers)
+        assert resp.status_code == 200
+        assert self._validate_schema(resp.json(), schema)
+        resp = await api_client.get(endpoint, headers=invalid_header)
+        assert resp.status_code == 401
 
-        self.assertEqual(success_response.status_code, 200)
-        self.assertEqual(error_response.status_code, 401)
-        self.assertTrue(is_valid)
-
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_03_create_user_request(self, mock_jwt_secret):
+    async def test_03_create_user_request(self, auth, api_client, event_loop):
         """Test auth create user endpoint."""
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/"
-        success_response = api.open(url, method='POST', json=self.user_data,
-                                    headers=self.auth_header)
-        self.assertEqual(success_response.status_code, 201)
+        auth.controller.loop = event_loop
+        endpoint = "kytos/core/auth/users"
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.post(endpoint, json=self.user_data,
+                                     headers=headers)
+        assert resp.status_code == 201
+        assert "User successfully created" in resp.json()
 
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_03_create_user_request_conflict(self, mock_jwt_secret):
+    async def test_03_create_user_request_conflict(
+        self, auth, api_client, event_loop
+    ):
         """Test auth create user endpoint."""
-        controller = self.auth.user_controller
-        controller.create_user.side_effect = DuplicateKeyError(0)
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/"
-        error_response = api.open(url, method='POST', json=self.user_data,
-                                  headers=self.auth_header)
-        self.assertEqual(error_response.status_code, 409)
+        auth.controller.loop = event_loop
+        endpoint = "kytos/core/auth/users"
+        auth.user_controller.create_user.side_effect = DuplicateKeyError("0")
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.post(endpoint, json=self.user_data,
+                                     headers=headers)
+        assert resp.status_code == 409
+        assert "already exists" in resp.json()["description"]
 
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_03_create_user_request_bad(self, mock_jwt_secret):
+    async def test_03_create_user_request_bad(
+        self, auth, api_client, event_loop
+    ):
         """Test auth create user endpoint."""
-        controller = self.auth.user_controller
-        controller.create_user.side_effect = ValidationError('', BaseModel)
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/"
-        error_response = api.open(url, method='POST', json=self.user_data,
-                                  headers=self.auth_header)
-        self.assertEqual(error_response.status_code, 400)
+        auth.controller.loop = event_loop
+        exc = ValidationError('', BaseModel)
+        auth.user_controller.create_user.side_effect = exc
+        endpoint = "kytos/core/auth/users"
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.post(endpoint, json=self.user_data,
+                                     headers=headers)
+        assert resp.status_code == 400
 
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_04_list_user_request(self, mock_jwt_secret):
+    async def test_04_list_user_request(self, auth, api_client):
         """Test auth list user endpoint."""
         schema = {"email": str, "username": str}
-        box = self.user_data
-        self.auth.user_controller.get_user_nopw.return_value = box
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/{self.user_data.get('username')}"
-        success_response = api.open(url, method='GET',
-                                    headers=self.auth_header)
-        is_valid = self._validate_schema(success_response.json, schema)
+        auth.user_controller.get_user_nopw.return_value = self.user_data
+        endpoint = f"kytos/core/auth/users/{self.user_data['username']}"
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.get(endpoint, headers=headers)
+        assert resp.status_code == 200
+        assert self._validate_schema(resp.json(), schema)
 
-        self.assertEqual(success_response.status_code, 200)
-        self.assertTrue(is_valid)
-
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_04_list_user_request_error(self, mock_jwt_secret):
+    async def test_04_list_user_request_error(self, auth, api_client):
         """Test auth list user endpoint."""
-        self.auth.user_controller.get_user_nopw.return_value = None
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/user3"
-        error_response = api.open(url, method='GET', headers=self.auth_header)
-        self.assertEqual(error_response.status_code, 404)
+        auth.user_controller.get_user_nopw.return_value = None
+        endpoint = "kytos/core/auth/users/user3"
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.get(endpoint, headers=headers)
+        assert resp.status_code == 404
+        assert "not found" in resp.json()["description"]
 
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_05_update_user_request(self, mock_jwt_secret):
+    async def test_05_update_user_request(self, auth, api_client, event_loop):
         """Test auth update user endpoint."""
+        auth.controller.loop = event_loop
         data = {"email": "newemail_tempuser@kytos.io"}
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/{self.user_data.get('username')}"
-        success_response = api.open(url, method='PATCH', json=data,
-                                    headers=self.auth_header)
+        endpoint = f"kytos/core/auth/users/{self.user_data['username']}"
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.patch(endpoint, json=data,
+                                      headers=headers)
+        assert resp.status_code == 200
 
-        self.assertEqual(success_response.status_code, 200)
-
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_05_update_user_request_not_found(self, mock_jwt_secret):
+    async def test_05_update_user_request_not_found(self, auth, api_client,
+                                                    event_loop):
         """Test auth update user endpoint."""
-        self.auth.user_controller.update_user.return_value = {}
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/user5"
-        error_response = api.open(url, method='PATCH', json={},
-                                  headers=self.auth_header)
+        auth.controller.loop = event_loop
+        data = {"email": "newemail_tempuser@kytos.io"}
+        auth.user_controller.update_user.return_value = {}
+        endpoint = "kytos/core/auth/users/user5"
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.patch(endpoint, json=data,
+                                      headers=headers)
+        assert resp.status_code == 404
+        assert "not found" in resp.json()["description"]
 
-        self.assertEqual(error_response.status_code, 404)
-
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_05_update_user_request_bad(self, mock_jwt_secret):
+    async def test_05_update_user_request_bad(self, auth, api_client,
+                                              event_loop):
         """Test auth update user endpoint"""
-        controller = self.auth.user_controller
-        controller.update_user.side_effect = ValidationError('', BaseModel)
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/user5"
-        error_response = api.open(url, method='PATCH', json={},
-                                  headers=self.auth_header)
+        auth.controller.loop = event_loop
+        exc = ValidationError('', BaseModel)
+        auth.user_controller.update_user.side_effect = exc
+        endpoint = "kytos/core/auth/users/user5"
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.patch(endpoint, json={},
+                                      headers=headers)
+        assert resp.status_code == 400
 
-        self.assertEqual(error_response.status_code, 400)
-
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_05_update_user_request_conflict(self, mock_jwt_secret):
+    async def test_05_update_user_request_conflict(self, auth, api_client,
+                                                   event_loop):
         """Test auth update user endpoint"""
-        controller = self.auth.user_controller
-        controller.update_user.side_effect = DuplicateKeyError(0)
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/user5"
-        error_response = api.open(url, method='PATCH', json={},
-                                  headers=self.auth_header)
+        auth.controller.loop = event_loop
+        auth.user_controller.update_user.side_effect = DuplicateKeyError("0")
+        endpoint = "kytos/core/auth/users/user5"
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.patch(endpoint, json={},
+                                      headers=headers)
+        assert resp.status_code == 409
 
-        self.assertEqual(error_response.status_code, 409)
-
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_06_delete_user_request(self, mock_jwt_secret):
+    async def test_06_delete_user_request(self, auth, api_client):
         """Test auth delete user endpoint."""
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/{self.user_data.get('username')}"
-        success_response = api.open(url, method='DELETE',
-                                    headers=self.auth_header)
+        endpoint = f"kytos/core/auth/users/{self.user_data['username']}"
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.delete(endpoint, headers=headers)
+        assert resp.status_code == 200
 
-        self.assertEqual(success_response.status_code, 200)
-
-    @patch('kytos.core.auth.Auth.get_jwt_secret', return_value="abc")
-    def test_06_delete_user_request_error(self, mock_jwt_secret):
+    async def test_06_delete_user_request_error(self, auth, api_client):
         """Test auth delete user endpoint."""
-        self.auth.user_controller.delete_user.return_value = {}
-        api = self.get_auth_test_client(self.auth)
-        url = f"{API_URI}/auth/users/nonexistent"
-        success_response = api.open(url, method='DELETE',
-                                    headers=self.auth_header)
+        auth.user_controller.delete_user.return_value = {}
+        endpoint = "kytos/core/auth/users/nonexistent"
+        headers = await self.auth_headers(auth, api_client)
+        resp = await api_client.delete(endpoint, headers=headers)
+        assert resp.status_code == 404
 
-        self.assertEqual(success_response.status_code, 404)
-
-    def test_07_find_user_error(self):
-        """Test _finb_user NotFound"""
-        self.auth.user_controller.get_user.return_value = None
-        with self.assertRaises(NotFound):
+    def test_07_find_user_error(self, auth):
+        """Test _find_user not found."""
+        auth.user_controller.get_user.return_value = None
+        with pytest.raises(HTTPException):
             # pylint: disable=protected-access
-            self.auth._find_user("name")
+            auth._find_user("name")
 
-    def test_08_error_msg(self):
+    def test_08_error_msg(self, auth):
         """Test error_msg"""
         # ValidationErro mocked response
         error_list = [{'loc': ('username', ), 'msg': 'mock_msg_1'},
                       {'loc': ('email', ), 'msg': 'mock_msg_2'}]
-        actual_msg = self.auth.error_msg(error_list)
+        actual_msg = auth.error_msg(error_list)
         expected_msg = 'username: mock_msg_1; email: mock_msg_2'
-        self.assertEqual(actual_msg, expected_msg)
+        assert actual_msg == expected_msg

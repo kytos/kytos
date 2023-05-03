@@ -1,6 +1,8 @@
 """Module with main classes related to Authentication."""
 
 # pylint: disable=invalid-name
+import base64
+import binascii
 import datetime
 import getpass
 import logging
@@ -11,17 +13,16 @@ from http import HTTPStatus
 
 import jwt
 import pymongo
-from flask import jsonify, request
 from pydantic import ValidationError
 from pymongo.collection import ReturnDocument
 from pymongo.errors import AutoReconnect, DuplicateKeyError
 from pymongo.results import InsertOneResult
 from tenacity import retry_if_exception_type, stop_after_attempt, wait_random
-from werkzeug.exceptions import (BadRequest, Conflict, NotFound, Unauthorized,
-                                 UnsupportedMediaType)
 
 from kytos.core.config import KytosConfig
 from kytos.core.db import Mongo
+from kytos.core.rest_api import (HTTPException, JSONResponse, Request,
+                                 content_type_json_or_415, get_json_or_400)
 from kytos.core.retry import before_sleep, for_all_methods, retries
 from kytos.core.user import HashSubDoc, UserDoc, UserDocUpdate
 
@@ -36,6 +37,13 @@ def authenticated(func):
     def wrapper(*args, **kwargs):
         """Verify the requires of token."""
         try:
+            request: Request = None
+            for arg in args:
+                if isinstance(arg, Request):
+                    request = arg
+                    break
+            else:
+                raise ValueError("Request arg not found in the decorated func")
             content = request.headers.get("Authorization")
             if content is None:
                 raise ValueError("The attribute 'content' has an invalid "
@@ -50,7 +58,8 @@ def authenticated(func):
             jwt.exceptions.DecodeError,
         ) as exc:
             msg = f"Token not sent or expired: {exc}"
-            return jsonify({"error": msg}), HTTPStatus.UNAUTHORIZED.value
+            return JSONResponse({"error": msg},
+                                status_code=HTTPStatus.UNAUTHORIZED.value)
         return func(*args, **kwargs)
 
     return wrapper
@@ -269,80 +278,72 @@ class Auth:
             "auth/users/", self._list_users,
         )
         self.controller.api_server.register_core_endpoint(
-            "auth/users/<username>", self._list_user
+            "auth/users/{username}", self._list_user
         )
         self.controller.api_server.register_core_endpoint(
             "auth/users/", self._create_user, methods=["POST"]
         )
         self.controller.api_server.register_core_endpoint(
-            "auth/users/<username>", self._delete_user, methods=["DELETE"]
+            "auth/users/{username}", self._delete_user, methods=["DELETE"]
         )
         self.controller.api_server.register_core_endpoint(
-            "auth/users/<username>", self._update_user, methods=["PATCH"]
+            "auth/users/{username}", self._update_user, methods=["PATCH"]
         )
 
-    def _authenticate_user(self):
+    def _authenticate_user(self, request: Request) -> JSONResponse:
         """Authenticate a user using MongoDB."""
+        if "Authorization" not in request.headers:
+            raise HTTPException(400, detail="Authorization header missing")
         try:
-            username = request.authorization["username"]
-            password = request.authorization["password"].encode()
-        except TypeError as err:
-            raise BadRequest("Credentials were not sent.") from err
+            auth = request.headers["Authorization"]
+            _scheme, credentials = auth.split()
+            decoded = base64.b64decode(credentials).decode("ascii")
+            username, _, password = decoded.partition(":")
+            password = password.encode()
+        except (ValueError, TypeError, binascii.Error) as err:
+            msg = "Credentials were not correctly set."
+            raise HTTPException(400, detail=msg) from err
         user = self._find_user(username)
         if user["state"] != 'active':
-            raise Unauthorized('This user is not active')
+            raise HTTPException(401, detail='This user is not active')
         password_hashed = UserDoc.hashing(password, user["hash"])
         if user["password"] != password_hashed:
-            raise Unauthorized("Incorrect password")
+            raise HTTPException(401, detail="Incorrect password")
         time_exp = datetime.datetime.utcnow() + datetime.timedelta(
             minutes=self.token_expiration_minutes
         )
         token = self._generate_token(username, time_exp)
-        return {"token": token}, HTTPStatus.OK.value
+        return JSONResponse({"token": token})
 
     def _find_user(self, username):
         """Find a specific user using MongoDB."""
         user = self.user_controller.get_user(username)
         if not user:
-            result = f"User {username} not found"
-            raise NotFound(result)
+            raise HTTPException(404, detail=f"User {username} not found")
         return user
 
     @authenticated
-    def _list_user(self, username):
+    def _list_user(self, request: Request) -> JSONResponse:
         """List a specific user using MongoDB."""
+        username = request.path_params["username"]
         user = self.user_controller.get_user_nopw(username)
         if not user:
-            result = f"User {username} not found"
-            raise NotFound(result)
-        return user
+            raise HTTPException(404, detail=f"User {username} not found")
+        return JSONResponse(user)
 
     @authenticated
-    def _list_users(self):
+    def _list_users(self, _request: Request) -> JSONResponse:
         """List all users using MongoDB."""
         users_list = self.user_controller.get_users()
-        return users_list
+        return JSONResponse(users_list)
 
-    @staticmethod
-    def _get_request():
+    def _get_request_body(self, request: Request) -> dict:
         """Get JSON from request"""
-        try:
-            metadata = request.json
-            content_type = request.content_type
-        except BadRequest as err:
-            result = 'The request body is not a well-formed JSON.'
-            raise BadRequest(result) from err
-        if content_type is None:
-            result = 'The request body is empty.'
-            raise BadRequest(result)
-        if metadata is None:
-            if content_type != 'application/json':
-                result = ('The content type must be application/json '
-                          f'(received {content_type}).')
-            else:
-                result = 'Metadata is empty.'
-            raise UnsupportedMediaType(result)
-        return metadata
+        content_type_json_or_415(request)
+        body = get_json_or_400(request, self.controller.loop)
+        if not isinstance(body, dict):
+            raise HTTPException(400, "Invalid payload type: {body}")
+        return body
 
     @staticmethod
     def error_msg(error_list: list) -> str:
@@ -356,43 +357,45 @@ class Auth:
         return msg[:-2]
 
     @authenticated
-    def _create_user(self):
+    def _create_user(self, request: Request) -> JSONResponse:
         """Save a user using MongoDB."""
         try:
-            user_data = self._get_request()
+            user_data = self._get_request_body(request)
             self.user_controller.create_user(user_data)
         except ValidationError as err:
             msg = self.error_msg(err.errors())
-            raise BadRequest(msg) from err
+            raise HTTPException(400, msg) from err
         except DuplicateKeyError as err:
             msg = user_data.get("username") + " already exists."
-            raise Conflict(msg) from err
-        return jsonify("User successfully created"), 201
+            raise HTTPException(409, detail=msg) from err
+        return JSONResponse("User successfully created", status_code=201)
 
     @authenticated
-    def _delete_user(self, username):
+    def _delete_user(self, request: Request) -> JSONResponse:
         """Delete a user using MongoDB."""
+        username = request.path_params["username"]
         if not self.user_controller.delete_user(username):
-            raise NotFound(f"User {username} not found")
-        return jsonify(f"User {username} deleted succesfully"), 200
+            raise HTTPException(404, detail=f"User {username} not found")
+        return JSONResponse(f"User {username} deleted succesfully")
 
     @authenticated
-    def _update_user(self, username):
+    def _update_user(self, request: Request) -> JSONResponse:
         """Update user data using MongoDB."""
-        req = self._get_request()
+        body = self._get_request_body(request)
+        username = request.path_params["username"]
         allowed = ["username", "email", "password"]
         data = {}
-        for key, value in req.items():
+        for key, value in body.items():
             if key in allowed:
                 data[key] = value
         try:
             updated = self.user_controller.update_user(username, data)
         except ValidationError as err:
             msg = self.error_msg(err.errors())
-            raise BadRequest(msg) from err
+            raise HTTPException(400, detail=msg) from err
         except DuplicateKeyError as err:
             msg = username + " already exists."
-            raise Conflict from err
+            raise HTTPException(409, detail=msg) from err
         if not updated:
-            raise NotFound(f"User {username} not found")
-        return jsonify("User successfully updated"), 200
+            raise HTTPException(404, detail=f"User {username} not found")
+        return JSONResponse("User successfully updated")

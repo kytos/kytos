@@ -1,37 +1,31 @@
 """Module used to handle a API Server."""
-import json
 import logging
 import os
 import shutil
-import sys
 import warnings
 import zipfile
 from datetime import datetime
 from glob import glob
 from http import HTTPStatus
+from typing import Optional, Union
 from urllib.error import HTTPError, URLError
-from urllib.request import urlopen, urlretrieve
+from urllib.request import urlretrieve
 
-from flask import Blueprint, Flask, jsonify, request, send_file
-from flask.json import JSONEncoder
-from flask_cors import CORS
-from flask_socketio import SocketIO, join_room, leave_room
-from werkzeug.exceptions import HTTPException
+import httpx
+from starlette.applications import Starlette
+from starlette.exceptions import HTTPException
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import FileResponse
+from starlette.staticfiles import StaticFiles
+from uvicorn import Config as UvicornConfig
+from uvicorn import Server
 
 from kytos.core.auth import authenticated
 from kytos.core.config import KytosConfig
+from kytos.core.rest_api import JSONResponse, Request
 
 LOG = logging.getLogger(__name__)
-
-
-# pylint: disable=method-hidden,arguments-differ,consider-using-f-string
-class CustomJSONEncoder(JSONEncoder):
-    """CustomJSONEncoder."""
-
-    def default(self, o):
-        if isinstance(o, datetime):
-            return o.strftime("%Y-%m-%dT%H:%M:%S")
-        return JSONEncoder.default(self, o)
 
 
 class APIServer:
@@ -41,16 +35,16 @@ class APIServer:
     DEFAULT_METHODS = ('GET',)
     _NAPP_PREFIX = "/api/{napp.username}/{napp.name}/"
     _CORE_PREFIX = "/api/kytos/core/"
+    _route_index_count = 0
 
     # pylint: disable=too-many-arguments
-    def __init__(self, app_name, listen='0.0.0.0', port=8181,
+    def __init__(self, listen='0.0.0.0', port=8181,
                  napps_manager=None, napps_dir=None):
         """Start a Flask+SocketIO server.
 
         Require controller to get NApps dir and NAppsManager
 
         Args:
-            app_name(string): String representing a App Name
             listen (string): host name used by api server instance
             port (int): Port number used by api server instance
             controller(kytos.core.controller): A controller instance.
@@ -58,55 +52,55 @@ class APIServer:
         dirname = os.path.dirname(os.path.abspath(__file__))
         self.napps_manager = napps_manager
         self.napps_dir = napps_dir
-
-        self.flask_dir = os.path.join(dirname, '../web-ui')
-
         self.listen = listen
         self.port = port
-
-        self.app = Flask(app_name, root_path=self.flask_dir,
-                         static_folder="dist", static_url_path="/dist")
-        self.app.json_encoder = CustomJSONEncoder
-        self.server = SocketIO(self.app, async_mode='threading')
-        self._enable_websocket_rooms()
-        # ENABLE CROSS ORIGIN RESOURCE SHARING
-        CORS(self.app)
-
-        # Disable trailing slash
-        self.app.url_map.strict_slashes = False
+        self.web_ui_dir = os.path.join(dirname, '../web-ui')
+        self.app = Starlette(
+            exception_handlers={HTTPException: self._http_exc_handler},
+            middleware=[
+                Middleware(CORSMiddleware, allow_origins=["*"]),
+            ],
+        )
+        self.server = Server(
+            UvicornConfig(
+                self.app,
+                host=self.listen,
+                port=self.port,
+            )
+        )
 
         # Update web-ui if necessary
-        self.update_web_ui(force=False)
+        self.update_web_ui(None, force=False)
 
-        @self.app.errorhandler(HTTPException)
-        def handle_exception(exception):
-            # pylint: disable=unused-variable, invalid-name
-            """Return a json for HTTP errors.
+    async def _http_exc_handler(self, _request: Request, exc: HTTPException):
+        """HTTPException handler.
 
-            This handler allows NApps to return HTTP error messages
-            by raising a HTTPException. When raising the Exception,
-            create it with a description.
-            """
-            response = jsonify({
-                'code': exception.code,
-                'name': exception.name,
-                'description': exception.description
-            })
-            return response, exception.code
+        The response format is still partly compatible with how werkzeug used
+        to format http exceptions.
+        """
+        return JSONResponse({"description": exc.detail,
+                             "code": exc.status_code},
+                            status_code=exc.status_code)
 
-    def _enable_websocket_rooms(self):
-        socket = self.server
-        socket.on_event('join', join_room)
-        socket.on_event('leave', leave_room)
+    @classmethod
+    def _get_next_route_index(cls) -> int:
+        """Get next route index.
 
-    def run(self):
-        """Run the Flask API Server."""
-        try:
-            self.server.run(self.app, self.listen, self.port)
-        except OSError as exception:
-            msg = "Couldn't start API Server: {}".format(exception)
-            LOG.critical(msg)
-            sys.exit(msg)
+        This classmethod is meant to ensure route ordering when allocating
+        an index for each route, the @rest decorator will use it. Decorated
+        routes are imported sequentially so this won't need a threading Lock.
+        """
+        index = cls._route_index_count
+        cls._route_index_count += 1
+        return index
+
+    async def serve(self):
+        """Start serving."""
+        await self.server.serve()
+
+    def stop(self):
+        """Stop serving."""
+        self.server.should_exit = True
 
     def register_rest_endpoint(self, url, function, methods):
         """Deprecate in favor of @rest decorator."""
@@ -118,15 +112,9 @@ class APIServer:
                              methods=methods)
 
     def start_api(self):
-        """Start this APIServer instance API.
-
-        Start /api/kytos/core/_shutdown/ and status/ endpoints, web UI.
-        The '_shutdown' endpoint should not be public and is intended to
-        shutdown the APIServer.
-        """
-        self.register_core_endpoint('_shutdown/', self.shutdown_api)
+        """Start this APIServer instance API."""
         self.register_core_endpoint('status/', self.status_api)
-        self.register_core_endpoint('web/update/<version>/',
+        self.register_core_endpoint('web/update/{version}/',
                                     self.update_web_ui,
                                     methods=['POST'])
         self.register_core_endpoint('web/update/',
@@ -135,63 +123,47 @@ class APIServer:
 
         self.register_core_napp_services()
 
-        self._register_web_ui()
+    def start_web_ui(self) -> None:
+        """Start Web UI endpoints."""
+        self._start_endpoint(self.app,
+                             "/ui/{username}/{napp_name}/{filename:path}",
+                             self.static_web_ui)
+        self._start_endpoint(self.app,
+                             "/ui/{section_name}/",
+                             self.get_ui_components)
+        self._start_endpoint(self.app, '/', self.web_ui)
+        self._start_endpoint(self.app, '/index.html', self.web_ui)
+        self.start_web_ui_static_files()
 
-    def register_core_endpoint(self, rule, function, **options):
-        """Register an endpoint with the URL /api/kytos/core/<rule>.
+    def start_web_ui_static_files(self) -> None:
+        """Start Web UI static files."""
+        self.app.router.mount("/", app=StaticFiles(directory=self.web_ui_dir),
+                              name="dist")
+
+    def register_core_endpoint(self, route, function, **options):
+        """Register an endpoint with the URL /api/kytos/core/<route>.
 
         Not used by NApps, but controller.
         """
-        self._start_endpoint(self.app, self._CORE_PREFIX + rule, function,
-                             **options)
+        self._start_endpoint(self.app, f"{self._CORE_PREFIX}{route}",
+                             function, **options)
 
-    def _register_web_ui(self):
-        """Register routes to the admin-ui homepage."""
-        self.app.add_url_rule('/', self.web_ui.__name__, self.web_ui)
-        self.app.add_url_rule('/index.html', self.web_ui.__name__, self.web_ui)
-        self.app.add_url_rule('/ui/<username>/<napp_name>/<path:filename>',
-                              self.static_web_ui.__name__, self.static_web_ui)
-        self.app.add_url_rule('/ui/<path:section_name>',
-                              self.get_ui_components.__name__,
-                              self.get_ui_components)
-
-    @staticmethod
-    def status_api():
+    def status_api(self, _request: Request):
         """Display kytos status using the route ``/kytos/status/``."""
-        return '{"response": "running"}', HTTPStatus.OK.value
+        return JSONResponse({"response": "running"})
 
-    def stop_api_server(self):
-        """Send a shutdown request to stop API Server."""
-        try:
-            url = f'http://127.0.0.1:{self.port}/api/kytos/core/_shutdown'
-            with urlopen(url):
-                pass
-        except URLError:
-            pass
-
-    def shutdown_api(self):
-        """Handle requests received to shutdown the API Server.
-
-        This method must be called by kytos using the method
-        stop_api_server, otherwise this request will be ignored.
-        """
-        allowed_host = ['127.0.0.1:'+str(self.port),
-                        'localhost:'+str(self.port)]
-        if request.host not in allowed_host:
-            return "", HTTPStatus.FORBIDDEN.value
-
-        self.server.stop()
-
-        return 'API Server shutting down...', HTTPStatus.OK.value
-
-    def static_web_ui(self, username, napp_name, filename):
+    def static_web_ui(self,
+                      request: Request) -> Union[FileResponse, JSONResponse]:
         """Serve static files from installed napps."""
+        username = request.path_params["username"]
+        napp_name = request.path_params["napp_name"]
+        filename = request.path_params["filename"]
         path = f"{self.napps_dir}/{username}/{napp_name}/ui/{filename}"
         if os.path.exists(path):
-            return send_file(path)
-        return "", HTTPStatus.NOT_FOUND.value
+            return FileResponse(path)
+        return JSONResponse("", status_code=HTTPStatus.NOT_FOUND.value)
 
-    def get_ui_components(self, section_name):
+    def get_ui_components(self, request: Request) -> JSONResponse:
         """Return all napps ui components from an specific section.
 
         The component name generated will have the following structure:
@@ -204,6 +176,7 @@ class APIServer:
             str: Json with a list of all components found.
 
         """
+        section_name = request.path_params["section_name"]
         section_name = '*' if section_name == "all" else section_name
         path = f"{self.napps_dir}/*/*/ui/{section_name}/*.kytos"
         components = []
@@ -215,76 +188,95 @@ class APIServer:
             url = f'ui/{"/".join(dirs_name[-4:])}'
             component = {'name': component_name, 'url': url}
             components.append(component)
-        return jsonify(components)
+        return JSONResponse(components)
 
-    def web_ui(self):
+    def web_ui(self, _request: Request) -> Union[JSONResponse, FileResponse]:
         """Serve the index.html page for the admin-ui."""
-        index_path = f"{self.flask_dir}/index.html"
+        index_path = f"{self.web_ui_dir}/index.html"
         if os.path.exists(index_path):
-            return send_file(index_path)
-        return f"File '{index_path}' not found.", HTTPStatus.NOT_FOUND.value
+            return FileResponse(index_path)
+        return JSONResponse(f"File '{index_path}' not found.",
+                            status_code=HTTPStatus.NOT_FOUND.value)
 
-    def update_web_ui(self, version='latest', force=True):
+    def _unzip_backup_web_ui(self, package: str, uri: str) -> None:
+        """Unzip and backup web ui files.
+
+        backup the old web-ui files and create a new web-ui folder
+        if there is no path to backup, zip.extractall will
+        create the path.
+        """
+        with zipfile.ZipFile(package, 'r') as zip_ref:
+            if zip_ref.testzip() is not None:
+                LOG.error("Web update - Zip file from %s "
+                          "is corrupted.", uri)
+                raise ValueError(f'Zip file from {uri} is corrupted.')
+            if os.path.exists(self.web_ui_dir):
+                LOG.info("Web update - Performing UI backup.")
+                date = datetime.now().strftime("%Y%m%d%H%M%S")
+                shutil.move(self.web_ui_dir, f"{self.web_ui_dir}-{date}")
+                os.mkdir(self.web_ui_dir)
+            # unzip and extract files to web-ui/*
+            zip_ref.extractall(self.web_ui_dir)
+            zip_ref.close()
+
+    def _fetch_latest_ui_tag(self) -> str:
+        """Fetch latest ui tag version from GitHub."""
+        version = '2022.3.0'
+        try:
+            url = ('https://api.github.com/repos/kytos-ng/'
+                   'ui/releases/latest')
+            response = httpx.get(url, timeout=10)
+            version = response.json()['tag_name']
+        except (httpx.RequestError, KeyError):
+            msg = "Failed to fetch latest tag from GitHub, " \
+                  f"falling back to {version}"
+            LOG.warning(f"Web update - {msg}")
+        return version
+
+    def update_web_ui(self, request: Optional[Request],
+                      version='latest',
+                      force=True) -> JSONResponse:
         """Update the static files for the Web UI.
 
         Download the latest files from the UI github repository and update them
         in the ui folder.
         The repository link is currently hardcoded here.
         """
-        if version == 'latest':
-            try:
-                url = ('https://api.github.com/repos/kytos-ng/'
-                       'ui/releases/latest')
-                with urlopen(url) as response:
-                    data = response.readlines()[0]
-                    version = json.loads(data)['tag_name']
-            except URLError:
-                version = '1.4.1'
+        if not os.path.exists(self.web_ui_dir) or force:
+            if request:
+                version = request.path_params.get("version", "latest")
+            if version == 'latest':
+                version = self._fetch_latest_ui_tag()
 
-        repository = "https://github.com/kytos-ng/ui"
-        uri = repository + f"/releases/download/{version}/latest.zip"
-
-        if not os.path.exists(self.flask_dir) or force:
-            # download from github
+            repository = "https://github.com/kytos-ng/ui"
+            uri = repository + f"/releases/download/{version}/latest.zip"
             try:
                 LOG.info("Web update - Downloading UI from %s.", uri)
                 package = urlretrieve(uri)[0]
+                self._unzip_backup_web_ui(package, uri)
             except HTTPError:
                 LOG.error("Web update - Uri not found %s.", uri)
-                return (f"Uri not found {uri}.",
-                        HTTPStatus.INTERNAL_SERVER_ERROR.value)
+                return JSONResponse(
+                        f"Uri not found {uri}.",
+                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value
+                        )
             except URLError:
                 LOG.error("Web update - Error accessing URL %s.", uri)
-                return (f"Error accessing URL {uri}.",
-                        HTTPStatus.INTERNAL_SERVER_ERROR.value)
-
-            # test downloaded zip file
-            with zipfile.ZipFile(package, 'r') as zip_ref:
-                if zip_ref.testzip() is not None:
-                    LOG.error("Web update - Zip file from %s "
-                              "is corrupted.", uri)
-                    return (f'Zip file from {uri} is corrupted.',
-                            HTTPStatus.INTERNAL_SERVER_ERROR.value)
-
-                # backup the old web-ui files and create a new web-ui folder
-                # if there is no path to backup, zip.extractall will
-                # create the path.
-                if os.path.exists(self.flask_dir):
-                    LOG.info("Web update - Performing UI backup.")
-                    date = datetime.now().strftime("%Y%m%d%H%M%S")
-                    shutil.move(self.flask_dir, f"{self.flask_dir}-{date}")
-                    os.mkdir(self.flask_dir)
-
-                # unzip and extract files to web-ui/*
-                zip_ref.extractall(self.flask_dir)
-                zip_ref.close()
-
+                return JSONResponse(
+                        f"Error accessing URL {uri}.",
+                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value
+                       )
+            except ValueError as exc:
+                return JSONResponse(
+                        str(exc),
+                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value
+                       )
             LOG.info("Web update - Updated")
-            return "updated the web ui", HTTPStatus.OK.value
+            return JSONResponse("Web UI was updated")
 
         LOG.error("Web update - Web UI was not updated")
-        return ("Web ui was not updated",
-                HTTPStatus.INTERNAL_SERVER_ERROR.value)
+        return JSONResponse("Web ui was not updated",
+                            status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value)
 
     # BEGIN decorator methods
     @staticmethod
@@ -295,14 +287,16 @@ class APIServer:
 
         .. code-block:: python3
 
-           from flask.json import jsonify
+
            from kytos.core.napps import rest
+           from kytos.core.rest_api import JSONResponse, Request
 
-           @rest('sayhello/<string:name>')
-           def say_hello(name):
-               return jsonify({"data": f"Hello, {name}!"})
+           @rest("sayhello/{name}")
+           def say_hello(request: Request) -> JSONResponse:
+               name = request.path_params["name"]
+               return JSONResponse({"data": f"Hello, {name}!"})
 
-        ``@rest`` parameters are the same as Flask's ``@app.route``. You can
+        ``@rest`` parameters are the same as Starlette's ``add_route``. You can
         also add ``methods=['POST']``, for example.
 
         As we don't have the NApp instance now, we store the parameters in a
@@ -325,6 +319,7 @@ class APIServer:
             if not hasattr(inner, 'route_params'):
                 inner.route_params = []
             inner.route_params.append((rule, options))
+            inner.route_index = APIServer._get_next_route_index()
             # Return the same function, now with "route_params" attribute
             return function
         return store_route_params
@@ -357,38 +352,40 @@ class APIServer:
     def register_napp_endpoints(self, napp):
         """Add all NApp REST endpoints with @rest decorator.
 
-        We are using Flask Blueprints to register these endpoints. Blueprints
-        are essentially the Flask equivalent of Python modules and are used to
-        keep related logic and assets grouped and separated from one another.
-
         URLs will be prefixed with ``/api/{username}/{napp_name}/``.
 
         Args:
             napp (Napp): Napp instance to register new endpoints.
         """
-        # Create a Flask Blueprint for a specific NApp
-        napp_blueprint = Blueprint(napp.napp_id, __name__)
-
         # Start all endpoints for this NApp
         for function in self._get_decorated_functions(napp):
             for rule, options in function.route_params:
                 absolute_rule = self.get_absolute_rule(rule, napp)
                 if getattr(function, 'authenticated', False):
                     function = authenticated(function)
-                self._start_endpoint(napp_blueprint, absolute_rule,
+                self._start_endpoint(self.app, absolute_rule,
                                      function, **options)
-
-        # Register this Flask Blueprint in the Flask App
-        self.app.register_blueprint(napp_blueprint)
 
     @staticmethod
     def _get_decorated_functions(napp):
-        """Return ``napp``'s methods having the @rest decorator."""
+        """Return ``napp``'s methods having the @rest decorator.
+
+        The callables are yielded based on their decorated order,
+        this ensures deterministic routing matching order.
+        """
+        callables = []
         for name in dir(napp):
             if not name.startswith('_'):  # discarding private names
                 pub_attr = getattr(napp, name)
-                if callable(pub_attr) and hasattr(pub_attr, 'route_params'):
-                    yield pub_attr
+                if (
+                    callable(pub_attr)
+                    and hasattr(pub_attr, "route_params")
+                    and hasattr(pub_attr, "route_index")
+                    and isinstance(pub_attr.route_index, int)
+                ):
+                    callables.append(pub_attr)
+        for pub_attr in sorted(callables, key=lambda f: f.route_index):
+            yield pub_attr
 
     @classmethod
     def get_absolute_rule(cls, rule, napp):
@@ -403,15 +400,31 @@ class APIServer:
 
     # END decorator methods
 
-    def _start_endpoint(self, app, rule, function, **options):
-        """Start ``function``'s endpoint.
+    def _add_non_strict_slash_route(
+        self,
+        app: Starlette,
+        route: str,
+        function,
+        **options
+    ) -> None:
+        """Try to add a non strict slash route."""
+        if route == "/":
+            return
+        non_strict = route[:-1] if route.endswith("/") else f"{route}/"
+        app.router.add_route(non_strict, function, **options,
+                             include_in_schema=False)
 
-        Forward parameters to ``Flask.add_url_rule`` mimicking Flask
-        ``@route`` decorator.
-        """
-        endpoint = options.pop('endpoint', None)
-        app.add_url_rule(rule, endpoint, function, **options)
-        LOG.info('Started %s - %s', rule,
+    def _start_endpoint(
+        self,
+        app: Starlette,
+        route: str,
+        function,
+        **options
+    ):
+        """Start ``function``'s endpoint."""
+        app.router.add_route(route, function, **options)
+        self._add_non_strict_slash_route(app, route, function, **options)
+        LOG.info('Started %s - %s', route,
                  ', '.join(options.get('methods', self.DEFAULT_METHODS)))
 
     def remove_napp_endpoints(self, napp):
@@ -422,24 +435,11 @@ class APIServer:
         """
         prefix = self._NAPP_PREFIX.format(napp=napp)
         indexes = []
-        endpoints = set()
-        for index, rule in enumerate(self.app.url_map.iter_rules()):
-            if rule.rule.startswith(prefix):
-                endpoints.add(rule.endpoint)
+        for index, route in enumerate(self.app.routes):
+            if route.path.startswith(prefix):
                 indexes.append(index)
-                LOG.info('Stopped %s - %s', rule, ','.join(rule.methods))
-
-        for endpoint in endpoints:
-            self.app.view_functions.pop(endpoint)
-
         for index in reversed(indexes):
-            # pylint: disable=protected-access
-            self.app.url_map._rules.pop(index)
-            # pylint: enable=protected-access
-
-        # Remove the Flask Blueprint of this NApp from the Flask App
-        self.app.blueprints.pop(napp.napp_id)
-
+            self.app.routes.pop(index)
         LOG.info('The Rest endpoints from %s were disabled.', prefix)
 
     def register_core_napp_services(self):
@@ -449,34 +449,31 @@ class APIServer:
         It registers enable, disable, install, uninstall NApps that will
         be used by kytos-utils.
         """
-        self.register_core_endpoint("napps/<username>/<napp_name>/enable",
+        self.register_core_endpoint("napps/{username}/{napp_name}/enable",
                                     self._enable_napp)
-        self.register_core_endpoint("napps/<username>/<napp_name>/disable",
+        self.register_core_endpoint("napps/{username}/{napp_name}/disable",
                                     self._disable_napp)
-        self.register_core_endpoint("napps/<username>/<napp_name>/install",
+        self.register_core_endpoint("napps/{username}/{napp_name}/install",
                                     self._install_napp)
-        self.register_core_endpoint("napps/<username>/<napp_name>/uninstall",
+        self.register_core_endpoint("napps/{username}/{napp_name}/uninstall",
                                     self._uninstall_napp)
         self.register_core_endpoint("napps_enabled",
                                     self._list_enabled_napps)
         self.register_core_endpoint("napps_installed",
                                     self._list_installed_napps)
         self.register_core_endpoint(
-            "napps/<username>/<napp_name>/metadata/<key>",
+            "napps/{username}/{napp_name}/metadata/{key}",
             self._get_napp_metadata)
 
-    def _enable_napp(self, username, napp_name):
-        """
-        Enable an installed NApp.
+    def _enable_napp(self, request: Request) -> JSONResponse:
+        """Enable an installed NApp."""
 
-        :param username: NApps user name
-        :param napp_name: NApp name
-        :return: JSON content and return code
-        """
+        username = request.path_params["username"]
+        napp_name = request.path_params["napp_name"]
         # Check if the NApp is installed
         if not self.napps_manager.is_installed(username, napp_name):
-            return '{"response": "not installed"}', \
-                   HTTPStatus.BAD_REQUEST.value
+            return JSONResponse({"response": "not installed"},
+                                status_code=HTTPStatus.BAD_REQUEST.value)
 
         # Check if the NApp is already been enabled
         if not self.napps_manager.is_enabled(username, napp_name):
@@ -485,23 +482,21 @@ class APIServer:
         # Check if NApp is enabled
         if not self.napps_manager.is_enabled(username, napp_name):
             # If it is not enabled an admin user must check the log file
-            return '{"response": "error"}', \
-                   HTTPStatus.INTERNAL_SERVER_ERROR.value
+            status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
+            return JSONResponse({"response": "error"},
+                                status_code=status_code)
 
-        return '{"response": "enabled"}', HTTPStatus.OK.value
+        return JSONResponse({"response": "enabled"})
 
-    def _disable_napp(self, username, napp_name):
-        """
-        Disable an installed NApp.
+    def _disable_napp(self, request: Request) -> JSONResponse:
+        """Disable an installed NApp."""
 
-        :param username: NApps user name
-        :param napp_name: NApp name
-        :return: JSON content and return code
-        """
+        username = request.path_params["username"]
+        napp_name = request.path_params["napp_name"]
         # Check if the NApp is installed
         if not self.napps_manager.is_installed(username, napp_name):
-            return '{"response": "not installed"}', \
-                   HTTPStatus.BAD_REQUEST.value
+            return JSONResponse({"response": "not installed"},
+                                status_code=HTTPStatus.BAD_REQUEST.value)
 
         # Check if the NApp is enabled
         if self.napps_manager.is_enabled(username, napp_name):
@@ -510,73 +505,79 @@ class APIServer:
         # Check if NApp is still enabled
         if self.napps_manager.is_enabled(username, napp_name):
             # If it is still enabled an admin user must check the log file
-            return '{"response": "error"}', \
-                   HTTPStatus.INTERNAL_SERVER_ERROR.value
+            status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
+            return JSONResponse({"response": "error"},
+                                status_code=status_code)
 
-        return '{"response": "disabled"}', \
-               HTTPStatus.OK.value
+        return JSONResponse({"response": "disabled"})
 
-    def _install_napp(self, username, napp_name):
+    def _install_napp(self, request: Request) -> JSONResponse:
+        username = request.path_params["username"]
+        napp_name = request.path_params["napp_name"]
         # Check if the NApp is installed
         if self.napps_manager.is_installed(username, napp_name):
-            return '{"response": "installed"}', HTTPStatus.OK.value
+            return JSONResponse({"response": "installed"})
 
-        napp = "{}/{}".format(username, napp_name)
+        napp = f"{username}/{napp_name}"
 
         # Try to install and enable the napp
         try:
             if not self.napps_manager.install(napp, enable=True):
                 # If it is not installed an admin user must check the log file
-                return '{"response": "error"}', \
-                       HTTPStatus.INTERNAL_SERVER_ERROR.value
+                status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
+                return JSONResponse({"response": "error"},
+                                    status_code=status_code)
         except HTTPError as exception:
-            return '{"response": "error"}', exception.code
+            return JSONResponse({"response": "error"},
+                                status_code=exception.code)
 
-        return '{"response": "installed"}', HTTPStatus.OK.value
+        return JSONResponse({"response": "installed"})
 
-    def _uninstall_napp(self, username, napp_name):
+    def _uninstall_napp(self, request: Request) -> JSONResponse:
+        username = request.path_params["username"]
+        napp_name = request.path_params["napp_name"]
         # Check if the NApp is installed
         if self.napps_manager.is_installed(username, napp_name):
             # Try to unload/uninstall the napp
             if not self.napps_manager.uninstall(username, napp_name):
                 # If it is not uninstalled admin user must check the log file
-                return '{"response": "error"}', \
-                       HTTPStatus.INTERNAL_SERVER_ERROR.value
+                status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
+                return JSONResponse({"response": "error"},
+                                    status_code=status_code)
 
-        return '{"response": "uninstalled"}', HTTPStatus.OK.value
+        return JSONResponse({"response": "uninstalled"})
 
-    def _list_enabled_napps(self):
+    def _list_enabled_napps(self, _request: Request) -> JSONResponse:
         """Sorted list of (username, napp_name) of enabled napps."""
-        serialized_dict = json.dumps(
-                            self.napps_manager.get_enabled_napps(),
-                            default=lambda a: [a.username, a.name])
+        napps = self.napps_manager.get_enabled_napps()
+        napps = [[n.username, n.name] for n in napps]
+        return JSONResponse({"napps": napps})
 
-        return '{"napps": %s}' % serialized_dict, HTTPStatus.OK.value
-
-    def _list_installed_napps(self):
+    def _list_installed_napps(self, _request: Request) -> JSONResponse:
         """Sorted list of (username, napp_name) of installed napps."""
-        serialized_dict = json.dumps(
-                            self.napps_manager.get_installed_napps(),
-                            default=lambda a: [a.username, a.name])
+        napps = self.napps_manager.get_installed_napps()
+        napps = [[n.username, n.name] for n in napps]
+        return JSONResponse({"napps": napps})
 
-        return '{"napps": %s}' % serialized_dict, HTTPStatus.OK.value
-
-    def _get_napp_metadata(self, username, napp_name, key):
+    def _get_napp_metadata(self, request: Request) -> JSONResponse:
         """Get NApp metadata value.
 
         For safety reasons, only some keys can be retrieved:
         napp_dependencies, description, version.
 
         """
+        username = request.path_params["username"]
+        napp_name = request.path_params["napp_name"]
+        key = request.path_params["key"]
         valid_keys = ['napp_dependencies', 'description', 'version']
 
         if not self.napps_manager.is_installed(username, napp_name):
-            return "NApp is not installed.", HTTPStatus.BAD_REQUEST.value
+            return JSONResponse("NApp is not installed.",
+                                status_code=HTTPStatus.BAD_REQUEST.value)
 
         if key not in valid_keys:
-            return "Invalid key.", HTTPStatus.BAD_REQUEST.value
+            return JSONResponse("Invalid key.",
+                                status_code=HTTPStatus.BAD_REQUEST.value)
 
         data = self.napps_manager.get_napp_metadata(username, napp_name, key)
-        serialized_dict = json.dumps({key: data})
-
-        return '%s' % serialized_dict, HTTPStatus.OK.value
+        return JSONResponse({key: data})

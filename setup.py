@@ -231,7 +231,8 @@ setup(name='kytos',
           'pylint==2.15.0',
           'pycodestyle==2.10.0',
           'yala==3.2.0',
-          'tox==3.28.0'
+          'tox==3.28.0',
+          'virtualenv==20.21.0'
       ]},
       cmdclass={
           'clean': Cleaner,

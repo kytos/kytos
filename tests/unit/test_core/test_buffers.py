@@ -1,7 +1,6 @@
 """Test kytos.core.buffers module."""
 import asyncio
-from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -10,28 +9,22 @@ from kytos.core.events import KytosEvent
 
 
 @pytest.mark.parametrize("queue_name", ["msg_out", "msg_in"])
-def test_priority_queues(queue_name):
+async def test_priority_queues(queue_name):
     """Test KytosBuffers priority queues."""
     buffers = KytosBuffers()
 
     prios = [-10, 10, 0, -20]
     for prio in prios:
         queue = getattr(buffers, queue_name)
-        queue.put(KytosEvent(priority=prio))
+        await queue.aput(KytosEvent(priority=prio))
     for prio in sorted(prios):
-        assert queue.get().priority == prio
+        event = await queue.aget()
+        assert event.priority == prio
 
 
 # pylint: disable=protected-access
-class TestKytosEventBuffer(TestCase):
+class TestKytosEventBuffer:
     """KytosEventBuffer tests."""
-
-    def setUp(self):
-        """Instantiate a KytosEventBuffer."""
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
-
-        self.kytos_event_buffer = KytosEventBuffer('name')
 
     @staticmethod
     def create_event_mock(name='any'):
@@ -40,102 +33,102 @@ class TestKytosEventBuffer(TestCase):
         event.name = name
         return event
 
-    def test_put_get(self):
+    async def test_put_get(self):
         """Test put and get methods."""
+        kytos_event_buffer = KytosEventBuffer('name')
         event = self.create_event_mock()
 
-        self.kytos_event_buffer.put(event)
-        queue_event = self.kytos_event_buffer.get()
+        kytos_event_buffer.put(event)
+        queue_event = kytos_event_buffer.get()
+        assert queue_event == event
 
-        self.assertEqual(queue_event, event)
+        kytos_event_buffer._queue.close()
+        await kytos_event_buffer._queue.wait_closed()
 
-    def test_put__shutdown(self):
+    async def test_put__shutdown(self):
         """Test put method to shutdown event."""
-        event = self.create_event_mock('kytos/core.shutdown')
-        self.kytos_event_buffer.put(event)
+        kytos_event_buffer = KytosEventBuffer("name")
+        assert not kytos_event_buffer._reject_new_events
+        event = KytosEvent("kytos/core.shutdown")
+        kytos_event_buffer.put(event)
 
-        self.assertTrue(self.kytos_event_buffer._reject_new_events)
+        assert kytos_event_buffer._reject_new_events
+        kytos_event_buffer._queue.close()
+        await kytos_event_buffer._queue.wait_closed()
 
-    def test_aput(self):
+    async def test_aput(self):
         """Test aput async method."""
-        event = MagicMock()
-        event.name = 'kytos/core.shutdown'
+        event = KytosEvent("kytos/core.shutdown")
+        kytos_event_buffer = KytosEventBuffer("name")
+        await kytos_event_buffer.aput(event)
+        assert kytos_event_buffer._reject_new_events
 
-        self.loop.run_until_complete(self.kytos_event_buffer.aput(event))
+    async def test_aput_aget(self):
+        """Test aput async method."""
+        event = KytosEvent('some_event')
+        kytos_event_buffer = KytosEventBuffer("name")
+        await kytos_event_buffer.aput(event)
+        got_event = await kytos_event_buffer.aget()
+        assert got_event == event
 
-        self.assertTrue(self.kytos_event_buffer._reject_new_events)
-
-    def test_aget(self):
-        """Test aget async method."""
-        event = self.create_event_mock()
-        self.kytos_event_buffer._queue.sync_q.put(event)
-
-        expected = self.loop.run_until_complete(self.kytos_event_buffer.aget())
-
-        self.assertEqual(event, expected)
-
-    @patch('janus._SyncQueueProxy.task_done')
-    def test_task_done(self, mock_task_done):
+    async def test_task_done(self, monkeypatch):
         """Test task_done method."""
-        self.kytos_event_buffer.task_done()
-
+        mock_task_done = MagicMock()
+        monkeypatch.setattr("janus._SyncQueueProxy.task_done", mock_task_done)
+        kytos_event_buffer = KytosEventBuffer("name")
+        kytos_event_buffer.task_done()
         mock_task_done.assert_called()
 
-    @patch('janus._SyncQueueProxy.join')
-    def test_join(self, mock_join):
+    async def test_join(self, monkeypatch):
         """Test join method."""
-        self.kytos_event_buffer.join()
+        mock = MagicMock()
+        monkeypatch.setattr("janus._SyncQueueProxy.join", mock)
+        kytos_event_buffer = KytosEventBuffer("name")
+        kytos_event_buffer.join()
+        mock.assert_called()
 
-        mock_join.assert_called()
-
-    def test_qsize(self):
+    async def test_qsize(self):
         """Test qsize method to empty and with one event in query."""
-        qsize_1 = self.kytos_event_buffer.qsize()
+        kytos_event_buffer = KytosEventBuffer("name")
+        assert kytos_event_buffer.qsize() == 0
+        await kytos_event_buffer.aput(KytosEvent("some_event"))
+        assert kytos_event_buffer.qsize() == 1
 
-        event = self.create_event_mock()
-        self.kytos_event_buffer._queue.sync_q.put(event)
-
-        qsize_2 = self.kytos_event_buffer.qsize()
-
-        self.assertEqual(qsize_1, 0)
-        self.assertEqual(qsize_2, 1)
-
-    def test_empty(self):
+    async def test_empty(self):
         """Test empty method to empty and with one event in query."""
-        empty_1 = self.kytos_event_buffer.empty()
+        kytos_event_buffer = KytosEventBuffer("name")
+        assert kytos_event_buffer.empty()
+        await kytos_event_buffer.aput(KytosEvent("some_event"))
+        assert not kytos_event_buffer.empty()
 
-        event = self.create_event_mock()
-        self.kytos_event_buffer._queue.sync_q.put(event)
+    async def test_full(self):
+        """Test full method to full."""
+        kytos_event_buffer = KytosEventBuffer("name", maxsize=1)
+        assert not kytos_event_buffer.full()
+        assert kytos_event_buffer.empty()
 
-        empty_2 = self.kytos_event_buffer.empty()
-
-        self.assertTrue(empty_1)
-        self.assertFalse(empty_2)
-
-    @patch('janus._SyncQueueProxy.full')
-    def test_full(self, mock_full):
-        """Test full method to full and not full query."""
-        mock_full.side_effect = [False, True]
-
-        full_1 = self.kytos_event_buffer.full()
-        full_2 = self.kytos_event_buffer.full()
-
-        self.assertFalse(full_1)
-        self.assertTrue(full_2)
+        event = KytosEvent("some_event")
+        await kytos_event_buffer.aput(event)
+        assert kytos_event_buffer.full()
+        assert not kytos_event_buffer.empty()
+        await kytos_event_buffer.aget()
 
 
-class TestKytosBuffers(TestCase):
+class TestKytosBuffers:
     """KytosBuffers tests."""
 
-    def setUp(self):
-        """Instantiate a KytosBuffers."""
-        self.kytos_buffers = KytosBuffers()
-
-    def test_send_stop_signal(self):
+    async def test_send_stop_signal(self):
         """Test send_stop_signal method."""
-        self.kytos_buffers.send_stop_signal()
+        kytos_buffers = KytosBuffers()
+        kytos_buffers.send_stop_signal()
 
-        self.assertTrue(self.kytos_buffers.raw._reject_new_events)
-        self.assertTrue(self.kytos_buffers.msg_in._reject_new_events)
-        self.assertTrue(self.kytos_buffers.msg_out._reject_new_events)
-        self.assertTrue(self.kytos_buffers.app._reject_new_events)
+        queues_names = ["raw", "msg_in", "msg_out", "app", "conn"]
+        for name in queues_names:
+            queue = getattr(kytos_buffers, name)
+            assert queue._reject_new_events
+        coros = []
+        for name in queues_names:
+            queue = getattr(kytos_buffers, name)
+            queue._queue.close()
+            coros.append(queue._queue.wait_closed())
+        await asyncio.gather(*coros)

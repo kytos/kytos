@@ -8,13 +8,16 @@ from copy import copy
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock, call, patch
 
+import pytest
 from pyof.foundation.exceptions import PackException
 
 from kytos.core import Controller
+from kytos.core.auth import Auth
 from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 from kytos.core.events import KytosEvent
 from kytos.core.logs import LogManager
+from kytos.core.rest_api import Request
 
 
 # pylint: disable=protected-access, too-many-public-methods
@@ -26,22 +29,19 @@ class TestController(TestCase):
 
         self.options = KytosConfig().options['daemon']
         self.napps_manager = Mock()
+        Auth.get_user_controller = MagicMock()
         self.controller = Controller(self.options)
-        self.controller.buffers = KytosBuffers()
+        self.controller._buffers = MagicMock()
         self.controller.napps_manager = self.napps_manager
         self.controller.log = Mock()
         self.controller.log.getEffectiveLevel.return_value = 20
-
-    def test_configuration_endpoint(self):
-        """Should return the attribute options as json."""
-        serializable_options = vars(self.options)
-        expected = json.dumps(serializable_options)
-        actual = self.controller.configuration_endpoint()
-        self.assertEqual(expected, actual)
+        self.app = self.controller.api_server.app
+        self.base_url = "http://127.0.0.1/api/kytos/core/"
 
     @staticmethod
     @patch('kytos.core.controller.LogManager')
     @patch('kytos.core.logs.Path')
+    @pytest.mark.skip(reason="TODO issue 371 in a future PR")
     def test_websocket_log_usage(path, log_manager):
         """Assert that the web socket log is used."""
         # Save original state
@@ -231,32 +231,6 @@ class TestController(TestCase):
             pid = tmp_file.read()
             self.assertEqual(pid, b'2')
 
-    @staticmethod
-    @patch('kytos.core.controller.KytosServer')
-    @patch('kytos.core.controller.Controller.msg_out_event_handler')
-    @patch('kytos.core.controller.Controller.event_handler')
-    @patch('kytos.core.controller.Controller.load_napps')
-    @patch('kytos.core.controller.Controller.pre_install_napps')
-    def test_start_controller(*args):
-        """Test activate method."""
-        (mock_pre_install_napps, mock_load_napps, _, _, _) = args
-
-        napp = MagicMock()
-        options = KytosConfig().options['daemon']
-        options.napps_pre_installed = [napp]
-        controller = Controller(options)
-        controller.log = Mock()
-
-        controller.start_controller()
-
-        controller.server.serve_forever.assert_called()
-        all_buffers = controller.buffers.get_all_buffers()
-
-        # It's expected that all buffers have a task + the api server task
-        assert len(controller._tasks) == len(all_buffers) + 1
-        mock_pre_install_napps.assert_called_with([napp])
-        mock_load_napps.assert_called()
-
     @patch('kytos.core.controller.Controller.__init__')
     @patch('kytos.core.controller.Controller.start')
     @patch('kytos.core.controller.Controller.stop')
@@ -282,31 +256,6 @@ class TestController(TestCase):
 
         mock_stop_controller.assert_called_with(graceful)
 
-    @patch('kytos.core.controller.Controller.unload_napps')
-    @patch('kytos.core.controller.KytosBuffers')
-    def test_stop_controller(self, *args):
-        """Test stop_controller method."""
-        (_, mock_unload_napps) = args
-        server = MagicMock()
-        buffers = MagicMock()
-        api_server = MagicMock()
-        napp_dir_listener = MagicMock()
-        pool = MagicMock()
-        self.controller.server = server
-        self.controller.buffers = buffers
-        self.controller.api_server = api_server
-        self.controller.napp_dir_listener = napp_dir_listener
-        self.controller._pool = pool
-
-        self.controller.stop_controller()
-
-        buffers.send_stop_signal.assert_called()
-        api_server.stop_api_server.assert_called()
-        napp_dir_listener.stop.assert_called()
-        pool.shutdown.assert_called()
-        mock_unload_napps.assert_called()
-        server.shutdown.assert_called()
-
     def test_status(self):
         """Test status method."""
         status_1 = self.controller.status()
@@ -330,8 +279,9 @@ class TestController(TestCase):
 
     def test_metadata_endpoint(self):
         """Test metadata_endpoint method."""
-        metadata = self.controller.metadata_endpoint()
-        json_metadata = json.loads(metadata)
+        req = Request(scope={"type": "http"})
+        resp = self.controller.metadata_endpoint(req)
+        json_metadata = json.loads(resp.body.decode())
 
         expected_keys = ['__version__', '__author__', '__license__', '__url__',
                          '__description__']
@@ -673,21 +623,33 @@ class TestController(TestCase):
     @patch('kytos.core.controller.Controller.reload_napp', return_value=200)
     def test_rest_reload_napp(self, mock_reload_napp):
         """Test rest_reload_napp method."""
-        resp, code = self.controller.rest_reload_napp('kytos', 'napp')
+        req = Request(
+            scope={
+                "type": "http",
+                "path_params": {"username": "kytos", "napp_name": "napp"},
+            }
+        )
+        resp = self.controller.rest_reload_napp(req)
 
         mock_reload_napp.assert_called_with('kytos', 'napp')
-        self.assertEqual(resp, 'reloaded')
-        self.assertEqual(code, 200)
+        self.assertEqual(json.loads(resp.body.decode()), 'reloaded')
+        self.assertEqual(resp.status_code, 200)
 
     @patch('kytos.core.controller.Controller.reload_napp')
     def test_rest_reload_all_napps(self, mock_reload_napp):
         """Test rest_reload_all_napps method."""
+        req = Request(
+            scope={
+                "type": "http",
+                "path_params": {"username": "kytos", "napp_name": "napp"},
+            }
+        )
         self.controller.napps = [('kytos', 'napp')]
-        resp, code = self.controller.rest_reload_all_napps()
+        resp = self.controller.rest_reload_all_napps(req)
 
         mock_reload_napp.assert_called_with('kytos', 'napp')
-        self.assertEqual(resp, 'reloaded')
-        self.assertEqual(code, 200)
+        self.assertEqual(json.loads(resp.body.decode()), 'reloaded')
+        self.assertEqual(resp.status_code, 200)
 
     def test_init_attrs(self):
         """Test init attrs."""
@@ -700,8 +662,53 @@ class TestControllerAsync:
 
     """TestControllerAsync."""
 
+    async def test_start_controller(self, controller, monkeypatch):
+        """Test start controller."""
+        controller._buffers = KytosBuffers()
+        controller.loop = MagicMock()
+        server = MagicMock()
+        monkeypatch.setattr("kytos.core.controller.KytosServer", server)
+        napp = MagicMock()
+        controller._pool = MagicMock()
+        controller.pre_install_napps = MagicMock()
+        controller.api_server = MagicMock()
+        controller.load_napps = MagicMock()
+        controller.options.napps_pre_installed = [napp]
+        controller.start_controller()
+        assert controller.buffers
+
+        controller.server.serve_forever.assert_called()
+        all_buffers = controller.buffers.get_all_buffers()
+        # It's expected that all buffers have a task + the api server task
+        assert controller.loop.create_task.call_count == len(all_buffers) + 1
+        assert len(controller._tasks) == len(all_buffers) + 1
+        controller.pre_install_napps.assert_called_with([napp])
+        controller.load_napps.assert_called()
+        controller.api_server.start_web_ui.assert_called()
+
+    async def test_stop_controller(self, controller):
+        """Test stop_controller method."""
+        controller.loop = MagicMock()
+        api_server = MagicMock()
+        napp_dir_listener = MagicMock()
+        controller.server = MagicMock()
+        controller.unload_napps = MagicMock()
+        controller._buffers = MagicMock()
+        controller.api_server = api_server
+        controller.napp_dir_listener = napp_dir_listener
+
+        controller.stop_controller()
+
+        controller.buffers.send_stop_signal.assert_called()
+        api_server.stop.assert_called()
+        napp_dir_listener.stop.assert_called()
+        controller.unload_napps.assert_called()
+        controller.server.shutdown.assert_called()
+        controller.loop.stop.assert_called()
+
     async def test_raw_event_handler(self, controller):
         """Test raw_event_handler async method by handling a shutdown event."""
+        controller._buffers = KytosBuffers()
         event = KytosEvent("kytos/core.shutdown")
         controller.notify_listeners = MagicMock()
         await controller.buffers.raw._queue.async_q.put(event)
@@ -711,6 +718,7 @@ class TestControllerAsync:
     async def test_msg_in_event_handler(self, controller):
         """Test msg_in_event_handler async method by handling a shutdown
            event."""
+        controller._buffers = KytosBuffers()
         event = KytosEvent("kytos/core.shutdown")
         controller.notify_listeners = MagicMock()
         await controller.buffers.msg_in._queue.async_q.put(event)
@@ -720,6 +728,7 @@ class TestControllerAsync:
     async def test_msg_out_event_handler(self, controller):
         """Test msg_out_event_handler async method by handling a common and a
            shutdown event."""
+        controller._buffers = KytosBuffers()
         controller.notify_listeners = MagicMock()
         dst = MagicMock()
         dst.state = 0
@@ -739,6 +748,7 @@ class TestControllerAsync:
 
     async def test_msg_out_event_handler_pack_exc(self, controller):
         """Test msg_out_event_handler async pack exception."""
+        controller._buffers = KytosBuffers()
         dst, msg = MagicMock(), MagicMock()
         dst.state = 0
         msg.pack.side_effect = PackException("some error")
@@ -753,8 +763,16 @@ class TestControllerAsync:
 
     async def test_app_event_handler(self, controller):
         """Test app_event_handler async method by handling a shutdown event."""
+        controller._buffers = KytosBuffers()
         event = KytosEvent("kytos/core.shutdown")
         controller.notify_listeners = MagicMock()
         await controller.buffers.app._queue.async_q.put(event)
         await controller.event_handler("app")
         controller.notify_listeners.assert_called_with(event)
+
+    async def test_configuration_endpoint(self, controller, api_client):
+        """Should return the attribute options as json."""
+        expected = vars(controller.options)
+        resp = await api_client.get("kytos/core/config")
+        assert resp.status_code == 200
+        assert expected == resp.json()

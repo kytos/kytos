@@ -43,8 +43,8 @@ handlers: syslog,console
 propagate=0
 
 [logger_api_server]
-level: WARNING
-qualname: werkzeug
+level: INFO
+qualname: uvicorn
 handlers:
 
 [logger_socket]

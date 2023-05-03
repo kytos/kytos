@@ -16,13 +16,12 @@ Basic usage:
 import asyncio
 import atexit
 import importlib
-import json
 import logging
 import os
 import re
 import sys
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from asyncio import AbstractEventLoop
 from importlib import import_module
 from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
@@ -31,7 +30,7 @@ from socket import error as SocketError
 
 from pyof.foundation.exceptions import PackException
 
-from kytos.core.api_server import APIServer
+from kytos.core.api_server import APIServer, JSONResponse, Request
 from kytos.core.apm import init_apm
 from kytos.core.atcp_server import KytosServer, KytosServerProtocol
 from kytos.core.auth import Auth
@@ -82,25 +81,24 @@ class Controller:
     # pylint: disable=too-many-instance-attributes,too-many-public-methods,
     # pylint: disable=consider-using-with,unnecessary-dunder-call
     # pylint: disable=too-many-lines
-    def __init__(self, options=None):
+    def __init__(self, options=None, loop: AbstractEventLoop = None):
         """Init method of Controller class takes the parameters below.
 
         Args:
             options (:attr:`ParseArgs.args`): :attr:`options` attribute from an
                 instance of :class:`~kytos.core.config.KytosConfig` class.
+            loop asyncio.AbstractEventLoop
         """
         if options is None:
             options = KytosConfig().options['daemon']
 
-        self._pool = ThreadPoolExecutor(max_workers=1)
+        self.loop = loop
 
         # asyncio tasks
-        self._tasks = []
+        self._tasks: list[asyncio.Task] = []
 
-        #: dict: keep the main threads of the controller (buffers and handler)
-        self._threads = {}
         #: KytosBuffers: KytosBuffer object with Controller buffers
-        self.buffers: KytosBuffers = None
+        self._buffers: KytosBuffers = None
         #: dict: keep track of the socket connections labeled by ``(ip, port)``
         #:
         #: This dict stores all connections between the controller and the
@@ -143,7 +141,7 @@ class Controller:
         self.napps_manager = NAppsManager(self)
 
         #: API Server used to expose rest endpoints.
-        self.api_server = APIServer(__name__, self.options.listen,
+        self.api_server = APIServer(self.options.listen,
                                     self.options.api_port,
                                     self.napps_manager, self.options.napps)
 
@@ -176,7 +174,9 @@ class Controller:
             sys.exit(1)
         LogManager.decorate_logger_class(*decorators)
         LogManager.load_config_file(self.options.logging, self.options.debug)
-        LogManager.enable_websocket(self.api_server.server)
+        # pylint: disable=fixme
+        # TODO issue 371 (future PR for 2023.1)
+        # LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
         self._patch_core_loggers()
 
@@ -308,6 +308,14 @@ class Controller:
         pidfile.write(str(pid))
         pidfile.close()
 
+    @property
+    def buffers(self) -> KytosBuffers:
+        """KytosBuffers exposed through this property to allow lazy
+        async initiliation with an event loop running."""
+        if not self._buffers:
+            self._buffers = KytosBuffers()
+        return self._buffers
+
     def start_controller(self):
         """Start the controller.
 
@@ -316,7 +324,8 @@ class Controller:
         Load the installed apps.
         """
         self.log.info("Starting Kytos - Kytos Controller")
-        self.buffers = KytosBuffers()
+        if not self._buffers:
+            self._buffers = KytosBuffers()
         self.server = KytosServer((self.options.listen,
                                    int(self.options.port)),
                                   KytosServerProtocol,
@@ -326,35 +335,8 @@ class Controller:
         self.log.info("Starting TCP server: %s", self.server)
         self.server.serve_forever()
 
-        def _stop_loop(_):
-            loop = asyncio.get_running_loop()
-            # print(_.result())
-            threads = threading.enumerate()
-            self.log.debug("%s threads before loop.stop: %s",
-                           len(threads), threads)
-            loop.stop()
-
-        async def _run_api_server_thread(executor):
-            log = logging.getLogger('kytos.core.controller.api_server_thread')
-            log.debug('starting')
-            # log.debug('creating tasks')
-            loop = asyncio.get_running_loop()
-            blocking_tasks = [
-                loop.run_in_executor(executor, self.api_server.run)
-            ]
-            # log.debug('waiting for tasks')
-            completed, pending = await asyncio.wait(blocking_tasks)
-            # results = [t.result() for t in completed]
-            # log.debug('results: {!r}'.format(results))
-            log.debug('completed: %d, pending: %d',
-                      len(completed), len(pending))
-
-        loop = asyncio.get_running_loop()
-        task = loop.create_task(_run_api_server_thread(self._pool))
-        task.add_done_callback(_stop_loop)
+        task = self.loop.create_task(self.api_server.serve())
         self._tasks.append(task)
-
-        self.log.info("ThreadPool started: %s", self._pool)
 
         # ASYNC TODO: ensure all threads started correctly
         # This is critical, if any of them failed starting we should exit.
@@ -364,18 +346,19 @@ class Controller:
         self.napp_dir_listener.start()
         self.pre_install_napps(self.options.napps_pre_installed)
         self.load_napps()
+        self.api_server.start_web_ui()
 
         # Start task handlers consumers after NApps to potentially
         # avoid discarding an event if a consumer isn't ready yet
-        task = loop.create_task(self.event_handler("conn"))
+        task = self.loop.create_task(self.event_handler("conn"))
         self._tasks.append(task)
-        task = loop.create_task(self.event_handler("raw"))
+        task = self.loop.create_task(self.event_handler("raw"))
         self._tasks.append(task)
-        task = loop.create_task(self.event_handler("msg_in"))
+        task = self.loop.create_task(self.event_handler("msg_in"))
         self._tasks.append(task)
-        task = loop.create_task(self.msg_out_event_handler())
+        task = self.loop.create_task(self.msg_out_event_handler())
         self._tasks.append(task)
-        task = loop.create_task(self.event_handler("app"))
+        task = self.loop.create_task(self.event_handler("app"))
         self._tasks.append(task)
 
         self.started_at = now()
@@ -392,8 +375,7 @@ class Controller:
         if not self.options.apm:
             return
         try:
-            init_apm(self.options.apm, app=self.api_server.app,
-                     **kwargs)
+            init_apm(self.options.apm, app=self.api_server.app, **kwargs)
         except KytosAPMInitException as exc:
             sys.exit(f"Kytos couldn't start because of {str(exc)}")
 
@@ -411,7 +393,7 @@ class Controller:
         self.api_server.register_core_endpoint('metadata/',
                                                Controller.metadata_endpoint)
         self.api_server.register_core_endpoint(
-            'reload/<username>/<napp_name>/',
+            'reload/{username}/{napp_name}/',
             self.rest_reload_napp)
         self.api_server.register_core_endpoint('reload/all',
                                                self.rest_reload_all_napps)
@@ -422,7 +404,7 @@ class Controller:
         self.api_server.register_rest_endpoint(url, function, methods)
 
     @classmethod
-    def metadata_endpoint(cls):
+    def metadata_endpoint(cls, _request: Request) -> JSONResponse:
         """Return the Kytos metadata.
 
         Returns:
@@ -433,16 +415,16 @@ class Controller:
         with open(meta_path, encoding="utf8") as file:
             meta_file = file.read()
         metadata = dict(re.findall(r"(__[a-z]+__)\s*=\s*'([^']+)'", meta_file))
-        return json.dumps(metadata)
+        return JSONResponse(metadata)
 
-    def configuration_endpoint(self):
+    def configuration_endpoint(self, _request: Request) -> JSONResponse:
         """Return the configuration options used by Kytos.
 
         Returns:
             string: Json with current configurations used by kytos.
 
         """
-        return json.dumps(self.options.__dict__)
+        return JSONResponse(self.options.__dict__)
 
     def restart(self, graceful=True):
         """Restart Kytos SDN Controller.
@@ -497,18 +479,8 @@ class Controller:
         # self.server.socket.shutdown()
         # self.server.socket.close()
 
-        # for thread in self._threads.values():
-        #     self.log.info("Stopping thread: %s", thread.name)
-        #     thread.join()
-
-        # for thread in self._threads.values():
-        #     while thread.is_alive():
-        #         self.log.info("Thread is alive: %s", thread.name)
-        #         pass
-
         self.started_at = None
         self.unload_napps()
-        self.buffers = KytosBuffers()
 
         # Cancel all async tasks (event handlers and servers)
         for task in self._tasks:
@@ -517,12 +489,13 @@ class Controller:
         # ASYNC TODO: close connections
         # self.server.server_close()
 
-        self.log.info("Stopping API Server: %s", self._pool)
-        self.api_server.stop_api_server()
-        self.log.info("Stopping API Server threadpool: %s", self._pool)
-        self._pool.shutdown(wait=graceful, cancel_futures=True)
-        # Shutdown the TCP server and the main asyncio loop
+        self.log.info("Stopping API Server...")
+        self.api_server.stop()
+        self.log.info("Stopped API Server")
+        self.log.info("Stopping TCP Server...")
         self.server.shutdown()
+        self.log.info("Stopped TCP Server")
+        self.loop.stop()
 
     def status(self):
         """Return status of Kytos Server.
@@ -986,13 +959,17 @@ class Controller:
         self.load_napp(username, napp_name)
         return 200
 
-    def rest_reload_napp(self, username, napp_name):
+    def rest_reload_napp(self, request: Request) -> JSONResponse:
         """Request reload a NApp."""
+        username = request.path_params["username"]
+        napp_name = request.path_params["napp_name"]
         res = self.reload_napp(username, napp_name)
-        return 'reloaded', res
+        if res == 200:
+            return JSONResponse('reloaded')
+        return JSONResponse('fail to reload', status_code=res)
 
-    def rest_reload_all_napps(self):
+    def rest_reload_all_napps(self, _request: Request) -> JSONResponse:
         """Request reload all NApps."""
         for napp in self.napps:
             self.reload_napp(*napp)
-        return 'reloaded', 200
+        return JSONResponse('reloaded')

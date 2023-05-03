@@ -213,6 +213,14 @@ class KytosConfig():
 
         return options
 
+    @staticmethod
+    def options_exposed(daemon_options: dict) -> dict:
+        """Options exposed on API."""
+        options = dict(daemon_options)
+        for key in {"jwt_secret"}:
+            options.pop(key, None)
+        return options
+
 
 def _render_config_templates(templates,
                              destination=Path(__file__).parent,

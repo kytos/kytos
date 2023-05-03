@@ -1,0 +1,294 @@
+:EP: 36
+:Title: Openflow multi-table pipeline processing
+:Authors:
+    - Aldo Ortega <aortegay AT fiu DOT edu>
+    - Vinicius Arcanjo <vindasil AT fiu DOT edu>
+    - Italo Valcy <idasilva AT fiu DOT edu>
+
+:Created: 2023-05-04
+:Updated: 2023-10-04
+:Kytos-Version: 2023.1
+:Status: Draft
+
+************************************************
+EP36 - Openflow multi-table pipeline processing
+************************************************
+
+Abstract
+========
+
+This blueprint will present the requirements for the implementation of switch multi-tables through new NApp called **of_multi_table**.
+
+Motivation
+==========
+
+Multi-table processing will optimize resources in the data plane pipeline implementation. Because we are implementing one pipeline structure to all switches, it is necessary to ensure the consistency of tables to avoid missing packets thus a NApp will take full responsibility of this process.
+
+Specification
+=============
+
+Each Kytos-ng Napp that requests OpenFlow flows, must define which table will be used to install flows in a configuration attribute.
+Also, a new NApp **of_multi_table** that will initially have the following responsibilities:
+
+  - Know which table is enabled.
+  - Ensuring the existence of a reasonable table-miss flow
+  - Publish events to handle the assigned table of each NApp
+  - In charge of modifying and analyzing **pipelines** collection
+  - The cookie prefix is **0xAD** for its posted flows.
+  - Requesting flow deletions and installations on behalf of other NApps when a pipeline changes.
+
+Pipeline Status: Enabled, Disabled
+----------------------------------
+
+The status of a pipeline dictates whether it is applied as the current multi table system in every switch. Once a pipeline is ``enabled``, the previous one will be automatically ``disabled`` ensuring that there is always 1 or 0 (default pipeline is not counted) pipelines enabled.
+
+Default Pipeline
+----------------
+
+The default pipeline is every flow in the table 0.
+
+Table Group
+-----------
+
+**of_multi_table** will let know other NApp about their determined table. Since it is not necessary to send the entire pipeline, the content of the event **kytos/of_multi_table.enable_table** is obtained from the pipeline key ``napps_table_groups`` value. A value example could be ``{"mef_eline": ["epl"]}`` and it means that **mef_eline** EPL flows should be installed in the table where this value came from.
+To match all the flows, "base" will be use. Additionally we already have defined table groups:
+
+Flow classification
+~~~~~~~~~~~~~~~~~~~
+
+Keywords to classify flows into the tables. For example, for a table 2 to have ``{"mef_eline": ["evpl"]}``, it means that all the EVPLs that **mef_eline** installed are going to be publish into the table 2.
+Some keywords are not allowd for some NApps.
+
+.. list-table::
+   :widths: 20 50 30
+   :header-rows: 1
+   :class: center
+
+   * - Keyword
+     - Allowed in NApps
+     - Description
+   * - | 
+       | base
+       |
+       |
+     - | telemetry_int
+       | mef_eline
+       | of_lldp
+       | coloring
+     - | 
+       | All flows
+       |
+       |
+   * - epl
+     - mef_eline
+     - EPL, flows without a dl_vlan
+   * - evpl
+     - mef_eine
+     - EVPL, flows with dl_vlan
+
+Collection **flows** augmented
+==============================
+
+Extend the dictionary for each flow to have:
+
+.. code:: javascript
+
+  {
+    "owner": "mef_eline",
+    "table_group": "epl"
+  }
+
+With these options, **of_multi_table** can easily assign a new table number if needed.
+
+How the table will be assigned
+==============================
+
+NApps that install flows, roughly explained:
+
+  - **mef_eline**: Users create EVCs which implement flows
+  - **of_lldp**: Flows used to do link-discovery between switches.
+  - **coloring**: High priority flows with neighbors' colors.
+  - **telemetry_int**: (Not yet implemented) 2 extra flows through **mef_eline** for TCP and UDP
+
+The system of multi-tables will be replicated across all switches. For now we will be working with a default table (all flows in table 0).
+
+Example of a multi table system in a switch:
+
+  .. code:: console
+
+    +------------------+         +------------------+         +------------------+         +------------------+         +------------------+         +------------------+
+    |      table 0     |         |      table 1     |         |      table 2     |         |      table 3     |         |     table 4      |         |     table 5      |
+    |  *general users* |         |   *future use*   |         |     *mef EPL*    |         |     *mef EVPL*   |         |      *INT*       |         |   *future use*   |
+    | (wildcard match) |         |                  |         |                  |         |                  |         |                  |         |                  |
+    |      of_lldp     |  ---->  |                  |  ---->  |   (exact match   |  ---->  |    (exact match  |  ---->  |      (exact      |  ---->  |    (wildcard)    |
+    |      coloring    |  ---->  |                  |  ---->  | in_port + vlan)  |  ---->  |      in_port)    |  ---->  |       match)     |  ---->  |                  |
+    |                  |         |                  |         |                  |         |                  |         |                  |         |                  |
+    |                  |         |                  |         |                  |         |                  |         |                  |         |                  |
+    |   goto_table: 1  |         |   goto_table: 2  |         |   goto_table: 3  |         |   goto_table: 5  |         |                  |         |                  |
+    +------------------+         +------------------+         +------------------+         +------------------+         +------------------+         +------------------+
+
+New collection, **pipelines**
+=============================
+
+There a couple of rules for a proper pipeline:
+
+  - The table number for the next table should be always higher than the current one. This number is found as the `table_id` value in the dictionary ``{"instruction_type": "goto_table", "table_id": 1}``
+  - The pipeline represents a linked list (no loops). A miss flow entry should be present in every table except in the end of the linked list which represents the end on the list.
+  - The chosen table group for each NApp should be defined (check Table Group section).
+
+Initially proposed here is a datastructured representing a linked list. 
+
+  .. code:: javascript
+
+    "pipeline": {
+      {
+        "id": "9cba7e27a33c45",
+        "status": "enabled",
+        "multi_table": 
+        [
+          {
+            "table_id": 0
+            "table_miss_flow": {
+              "priority": 123, "match": {},
+              "instructions": [{"instruction_type": "goto_table", "table_id": 1}]
+            },
+            "napps_table_groups": {"coloring": ["base"],"of_lldp": ["base"]}
+            "description": "Table for coloring and of_lldp",
+          },
+          {
+            "table_id": 1
+            "table_miss_flow": {
+              "priority": 123, "match": {},
+              "instructions": [{"instruction_type": "goto_table","table_id": 2}]
+            },
+            "napps_table_groups": {"flow_manager": []}
+            "description": "Table for future use",
+          },
+          {
+            "table_id": 2
+            "table_miss_flow": {
+              "priority": 123, "match": {},
+              "instructions": [{"instruction_type": "goto_table","table_id": 3}]
+            },
+            "napps_table_groups": {"mef_eline": ["evpl"]}
+            "description": "Table for mef_eline EVPLs",
+          },
+          {
+            "table_id": 3
+            "table_miss_flow": {
+              "priority": 123, "match": {},
+              "instructions": [{"instruction_type": "goto_table","table_id": 5}]
+            },
+            "napps_table_groups": {"mef_eline": ["epl"]}
+            "description": "Table for mef_eline EPL",
+          },
+          {
+            "table_id": 4
+            "description": "Table for telemetry_int base",
+            "table_miss_flow": {},
+            "napps_table_groups": {"telemetry_int": ["base"]}
+          },
+          {
+            "table_id": 5
+            "description": "Table for future use",
+            "table_miss_flow": {},
+            "napps_table_groups": {}
+          }
+        ]
+      }
+    }
+
+Events
+======
+
+Subscribed
+----------
+
+  - **kytos/flow_manager.flow.added**
+  - **kytos/of_core.handshake.completed**
+  - **kytos/flow_manager.flow.error**
+  - **kytos/[mef_eline|telemetry_int|coloring|of_lldp].enable_table** - Every NApp sends an event with their table group settings.
+
+kytos/<napp_name>.enable_table
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This event is sent from other NApps with information about their table settings.
+
+.. code:: javascript
+
+  "content": {
+    "group_table": {"evpl": 2, "epl": 3}
+  }
+
+Published
+---------
+
+kytos/of_multi_table.enable_table
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This event should sent before any NApp sends its first flow to be published.
+
+.. code:: javascript
+
+  "content": {
+    "mef_eline": {"epl": 3, "evpl": 2},
+    "of_lldp": {"base": 0},
+    "coloring": {"base": 0}
+  }
+
+Endpoint API
+============
+  
+  - GET `/api/kytos/of_multi_table/v1/pipeline` - Get all pipelines in the database. Parameters enabled and disabled are allowed.
+
+  - GET `/api/kytos/of_multi_table/v1/pipeline/<pipeline_id>` - Get a single pipeline that matches the given pipeline id.
+
+  - POST `/api/kytos/of_multi_table/v1/pipeline/<pipeline_id>/enable` - Enable pipeline to be applied to all switches
+
+  - POST `/api/kytos/of_multi_table/v1/pipeline/<pipeline_id>/disable` - Disable pipeline in case of the user wants to return to the default set up.
+
+  - POST `/api/kytos/of_multi_table/v1/pipeline` - Add pipeline to database. Its body is similar to "pipeline.multi_table".
+
+  - DELETE `/api/kytos/of_multi_table/v1/pipeline/<pipeline_id>` - Delete only disabled pipeline from database otherwise it should prompt the user to disable the pipeline first.
+
+Enabling pipeline
+==================
+
+Im simple terms, enabling a pipeline will mean to modify every flow so it complies with the pipeline configuration. The process to successfully enable a pipeline is as follows:
+
+  1. **of_multi_table** publishes `kytos/of_multi_table.enable_table` event with pipeline content.
+  2. Wait for all NApp to publish their own events with their respective table settings (check controller for enabled NApps).
+  3. Disable the previous enabled pipeline, if there was any.
+  4. **of_multi_table** requests all flows from **flow_manager** API.
+  5. **of_multi_table** duplicates every flow that needs a different table.
+  6. Install the duplicated flows with a different table with a post request.
+  7. Delete flows that were not duplicated with a delete request.
+
+NApp Processing
+================
+
+An example of a process where **of_lldp** needs to set its flows to table 1 (not recommended since the controller needs to know about the flow traffic).
+
+  1. Start Kytos
+  2. **of_multi_table** listens to `kytos/of_core.handshake.completed` to post a miss flow entry to every table in each switch.
+  3. **of_multi_table** publishes `kytos/of_multi_table.enable_table` event with content ``{"content": {"of_lldp": {"base": 1}}}``.
+  4. **of_lldp** will listen to the event and from that point it will post request flows with the table assigned, 1.
+
+Dependencies
+============
+  - MongoDB
+  - of_core
+  - flow_manager
+
+Future plans
+=============
+  - The table system could be configurable. It is possible to have multiple pipelines with different status like `enabled` and `disabled` where only one should be `enabled` at a time.
+  - Saving, configure and enabling a json representation of a table is suited better with a UI interface.
+
+.. raw:: html
+
+   <style>
+   .center td {
+       text-align: center;
+   }
+   </style>

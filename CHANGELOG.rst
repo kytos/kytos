@@ -25,6 +25,10 @@ Changed
 - HTTP API exceptions responses no longer include the ``"name"`` key name in the response, only ``"code"``  and ``"description"`` still remain
 - Development ``get_test_client`` now uses a ``htppx.AsyncClient`` instance
 
+Fixed
+=====
+- Unexposed ``jwt_secret`` on ``GET /api/kytos/core/config/`` endpoint
+
 
 [2022.3.1]  2023-02-17
 **********************

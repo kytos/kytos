@@ -177,7 +177,7 @@ class Controller:
         LogManager.decorate_logger_class(*decorators)
         LogManager.load_config_file(self.options.logging, self.options.debug)
         # pylint: disable=fixme
-        # TODO issue 371 (future PR for 2023.1)
+        # TODO issue 371
         # LogManager.enable_websocket(self.api_server.server)
         self.log = logging.getLogger(__name__)
         self._patch_core_loggers()

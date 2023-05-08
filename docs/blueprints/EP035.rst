@@ -53,7 +53,7 @@ identify interruption causes.
 
 
 Extend ``status_funcs`` to produce a ``status_reason``
-------------------------------------------------------
+======================================================
 
 Currently, when an object is queried about its ``status``,
 the reason for that status is unknown.
@@ -107,15 +107,126 @@ Example usage:
         assert(False)
 
 
+New Kytos Events
+################
+
+The following set of event listeners are intended to be used to notify
+other NApps once a change to the status of a set of devices occurs.
+
+KytosEvent ``topology.interruptions.start``
+===========================================
+
+Notify services of an interruption starting,
+after the interruption provider has already updated the status.
+
+Expected Input:
+
+.. code-block:: python3
+
+    {
+        "type": <interruption type str>,
+        "switches": [<switch id>],
+        "interfaces": [<interface id>],
+        "links": [<link id>],
+    }
+
+Example Usage:
+
+.. code-block:: python3
+
+    # Creating events when updating status
+
+    def start_switch_maintenance(switches: set[str]):
+        affected_switches = switches - maintenance_switches
+        maintenance_switches += switches
+        controller.buffers.app.put(
+            KytosEvent(
+                name='topology.interruptions.start'
+                content={
+                    'type': 'maintenance',
+                    'switches': affected_switches,
+                }
+            )
+        )
+
+
+
+KytosEvent ``topology.interruptions.end``
+=========================================
+
+Notify services of an interruption ending,
+after the interruption provider has already updated the status.
+
+.. code-block:: python3
+
+    {
+        "type": <interruption type str>,
+        "switches": [<switch id>],
+        "interfaces": [<interface id>],
+        "links": [<link id>],
+    }
+
+Example Usage:
+
+.. code-block:: python3
+
+    # Creating events when updating status
+
+    def end_switch_maintenance(switches: set[str]):
+        affected_switches = switches & maintenance_switches
+        maintenance_switches -= switches
+        controller.buffers.app.put(
+            KytosEvent(
+                name='topology.interruptions.end'
+                content={
+                    'type': 'maintenance',
+                    'switches': affected_switches,
+    }
+            )
+        )
+
+Notes:
+
+- Upon the end of an interruption, services which had there best available paths interrupted should make an effort to reclaim interrupted paths.
+
+
 New Topology REST Endpoints
 ###########################
 
 The following set of new endpoints are intended to allow
 for previewing the affects of adding in interruptions.
 
+REST Endpoint: ``GET <url for previewing>``
+======================================
+
+For the given service provider,
+previews services affected if the specified interruption occurs now.
+
+Expected Input:
+
+.. code-block:: json
+
+    {
+        "type": <interruption type str>,
+        "switches": [<switch id>],
+        "interfaces": [<interface id>],
+        "links": [<link id>],
+    }
+
+Expected Output:
+
+.. code-block:: json
+
+    [
+        {
+            'id': <id>,
+            'name': <service_name | null>,
+            'owner': <str | null>,
+        },
+    ]
 
 REST Endpoint ``GET /topology/v3/preview_interruption``
--------------------------------------------------------
+=======================================================
 
 For all known service providers,
 previews affected if the specified interruption occurs now.
@@ -146,44 +257,6 @@ Expected Response:
         ],
     }
 
-Side Effects:
-
-- None
-
-
-Endpoint: ``GET <url for previewing>``
---------------------------------------
-
-For the given service provider,
-previews services affected if the specified interruption occurs now.
-
-Expected Input:
-
-.. code-block:: json
-
-    {
-        "type": <interruption type str>,
-        "switches": [<switch id>],
-        "interfaces": [<interface id>],
-        "links": [<link id>],
-    }
-
-Expected Output:
-
-.. code-block:: json
-
-    [
-        {
-            'id': <id>,
-            'name': <service_name>,
-            'owner': <str | null>,
-        },
-    ]
-
-Side Effects:
-
-- None
-
 Specifying Service Providers
 ############################
 
@@ -195,49 +268,6 @@ settings called ``SERVICE_PROVIDERS``.
 
     SERVICE_PROVIDERS = {
         '<service provider name>': '<url for previewing>'
-    }
-
-New Kytos Events
-################
-
-The following set of event listeners are intended to be used to notify
-other NApps when a change to the status of a set of devices occurs.
-
-KytosEvent ``topology.interruptions.start``
--------------------------------------------
-
-Notify services of an interruption starting,
-after the interruption provider has already updated the status.
-
-Expected Input:
-
-.. code-block:: python3
-
-    {
-        "type": <interruption type str>,
-        "switches": [<switch id>],
-        "interfaces": [<interface id>],
-        "links": [<link id>],
-    }
-
-Side Effects:
-
-- Notifies the other NApps of the start of the interruption on the selected devices.
-
-
-KytosEvent ``topology.interruptions.end``
------------------------------------------
-
-Notify services of an interruption ending,
-after the interruption provider has already updated the status.
-
-.. code-block:: python3
-
-    {
-        "type": <interruption type str>,
-        "switches": [<switch id>],
-        "interfaces": [<interface id>],
-        "links": [<link id>],
     }
 
 ##############

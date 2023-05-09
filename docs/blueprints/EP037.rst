@@ -199,8 +199,8 @@ for previewing the affects of adding in interruptions.
 REST Endpoint: ``GET <url for previewing>``
 ======================================
 
-For the given service provider,
-previews services affected if the specified interruption occurs now.
+Query the given service provider to
+preview services affected if the specified interruption were to occur now.
 
 Expected Input:
 
@@ -228,8 +228,8 @@ Expected Output:
 REST Endpoint ``GET /topology/v3/preview_interruption``
 =======================================================
 
-For all known service providers,
-previews affected if the specified interruption occurs now.
+Asynchronously queries all known service providers to
+preview services affected if the specified interruption were to occur now.
 
 Expected Input:
 

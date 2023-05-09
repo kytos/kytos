@@ -257,6 +257,35 @@ Expected Response:
         ],
     }
 
+REST Endpoint ``GET /topology/v3/preview_interruption/<provider name str>``
+======================================
+
+Query the given service provider to
+preview services affected if the specified interruption were to occur now.
+
+Expected Input:
+
+.. code-block:: json
+
+    {
+        "type": <interruption type str>,
+        "switches": [<switch id>],
+        "interfaces": [<interface id>],
+        "links": [<link id>],
+    }
+
+Expected Output:
+
+.. code-block:: json
+
+    [
+        {
+            'id': <id>,
+            'name': <service_name | null>,
+            'owner': <str | null>,
+        },
+    ]
+
 Specifying Service Providers
 ############################
 

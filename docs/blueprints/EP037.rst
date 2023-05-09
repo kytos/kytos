@@ -1,4 +1,4 @@
-:EP: 35
+:EP: 37
 :Title: Interruption Management
 :Authors:
     - Jeronimo Bezerra jbezerra@fiu.edu;
@@ -10,7 +10,7 @@
 :Type: Standards Track
 
 *******************************
-EP035 - Interruption Management
+EP037 - Interruption Management
 *******************************
 
 ########
@@ -181,7 +181,7 @@ Example Usage:
                 content={
                     'type': 'maintenance',
                     'switches': affected_switches,
-    }
+                }
             )
         )
 

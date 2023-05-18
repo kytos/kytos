@@ -385,9 +385,23 @@ class TestSwitch(TestCase):
         self.switch.enable()
         self.switch.activate()
         assert self.switch.is_active()
-        Switch.register_status_func("some_napp_some_func",
-                                    lambda switch: EntityStatus.DOWN)
+        Switch.register_status_func(
+            "some_napp_some_func",
+            lambda switch: EntityStatus.DOWN
+        )
+        Switch.register_status_reason_func(
+            "some_napp_some_func",
+            lambda iface: {'test_status'}
+        )
         assert self.switch.status == EntityStatus.DOWN
-        Switch.register_status_func("some_napp_some_func",
-                                    lambda iface: None)
+        assert self.switch.status_reason == {'test_status'}
+        Switch.register_status_func(
+            "some_napp_some_func",
+            lambda iface: None
+        )
+        Switch.register_status_reason_func(
+            "some_napp_some_func",
+            lambda iface: set()
+        )
         assert self.switch.status == EntityStatus.UP
+        assert self.switch.status_reason == set()

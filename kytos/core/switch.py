@@ -383,23 +383,28 @@ class Switch(GenericEntity):
             port = self.connection.port
             connection = f"{address}:{port}"
 
-        return {'id': self.id,
-                'name': self.id,
-                'dpid': self.dpid,
-                'connection': connection,
-                'ofp_version': self.ofp_version,
-                'type': 'switch',
-                'manufacturer': self.description.get('manufacturer', ''),
-                'serial': self.description.get('serial', ''),
-                'hardware': self.description.get('hardware', ''),
-                'software': self.description.get('software'),
-                'data_path': self.description.get('data_path', ''),
-                'interfaces': {i.id: i.as_dict()
-                               for i in self.interfaces.values()},
-                'metadata': self.metadata,
-                'active': self.is_active(),
-                'enabled': self.is_enabled(),
-                'status': self.status.value}
+        return {
+            'id': self.id,
+            'name': self.id,
+            'dpid': self.dpid,
+            'connection': connection,
+            'ofp_version': self.ofp_version,
+            'type': 'switch',
+            'manufacturer': self.description.get('manufacturer', ''),
+            'serial': self.description.get('serial', ''),
+            'hardware': self.description.get('hardware', ''),
+            'software': self.description.get('software'),
+            'data_path': self.description.get('data_path', ''),
+            'interfaces': {
+                i.id: i.as_dict()
+                for i in self.interfaces.values()
+            },
+            'metadata': self.metadata,
+            'active': self.is_active(),
+            'enabled': self.is_enabled(),
+            'status': self.status.value,
+            'status_reason': list(self.status_reason),
+        }
 
     def as_json(self):
         """Return JSON with switch's attributes.

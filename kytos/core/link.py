@@ -190,13 +190,16 @@ class Link(GenericEntity):
 
     def as_dict(self):
         """Return the Link as a dictionary."""
-        return {'id': self.id,
-                'endpoint_a': self.endpoint_a.as_dict(),
-                'endpoint_b': self.endpoint_b.as_dict(),
-                'metadata': self.get_metadata_as_dict(),
-                'active': self.is_active(),
-                'enabled': self.is_enabled(),
-                'status': self.status.value}
+        return {
+            'id': self.id,
+            'endpoint_a': self.endpoint_a.as_dict(),
+            'endpoint_b': self.endpoint_b.as_dict(),
+            'metadata': self.get_metadata_as_dict(),
+            'active': self.is_active(),
+            'enabled': self.is_enabled(),
+            'status': self.status.value,
+            'status_reason': list(self.status_reason),
+        }
 
     def as_json(self):
         """Return the Link as a JSON string."""

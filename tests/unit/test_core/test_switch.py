@@ -330,44 +330,30 @@ class TestSwitch(TestCase):
         self.assertIsNone(expected_ports_1)
         self.assertEqual(expected_ports_2, [1, 2, 3])
 
-    def test_as_dict(self):
-        """Test as_dict method."""
-        expected_dict = {'id': '00:00:00:00:00:00:00:01',
-                         'name': '00:00:00:00:00:00:00:01',
-                         'dpid': '00:00:00:00:00:00:00:01',
-                         'connection': 'addr:port',
-                         'ofp_version': '0x04',
-                         'type': 'switch',
-                         'manufacturer': '',
-                         'serial': '',
-                         'hardware': '',
-                         'software': None,
-                         'data_path': '',
-                         'interfaces': {},
-                         'metadata': {},
-                         'active': True,
-                         'enabled': True,
-                         'status': 'UP'}
+    def test_as_dict_as_json(self):
+        """Test as_dict and as_json method."""
+        expected_dict = {
+            'id': '00:00:00:00:00:00:00:01',
+            'name': '00:00:00:00:00:00:00:01',
+            'dpid': '00:00:00:00:00:00:00:01',
+            'connection': 'addr:port',
+            'ofp_version': '0x04',
+            'type': 'switch',
+            'manufacturer': '',
+            'serial': '',
+            'hardware': '',
+            'software': None,
+            'data_path': '',
+            'interfaces': {},
+            'metadata': {},
+            'active': True,
+            'enabled': True,
+            'status': 'UP',
+            'status_reason': []
+        }
         self.assertEqual(self.switch.as_dict(), expected_dict)
 
-    def test_as_json(self):
-        """Test as_json method."""
-        expected_json = json.dumps({'id': '00:00:00:00:00:00:00:01',
-                                    'name': '00:00:00:00:00:00:00:01',
-                                    'dpid': '00:00:00:00:00:00:00:01',
-                                    'connection': 'addr:port',
-                                    'ofp_version': '0x04',
-                                    'type': 'switch',
-                                    'manufacturer': '',
-                                    'serial': '',
-                                    'hardware': '',
-                                    'software': None,
-                                    'data_path': '',
-                                    'interfaces': {},
-                                    'metadata': {},
-                                    'active': True,
-                                    'enabled': True,
-                                    'status': 'UP'})
+        expected_json = json.dumps(expected_dict)
 
         self.assertEqual(self.switch.as_json(), expected_json)
 

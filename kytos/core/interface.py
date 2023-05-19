@@ -451,21 +451,24 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             dict: Dictionary filled with interface attributes.
 
         """
-        iface_dict = {'id': self.id,
-                      'name': self.name,
-                      'port_number': self.port_number,
-                      'mac': self.address,
-                      'switch': self.switch.dpid,
-                      'type': 'interface',
-                      'nni': self.nni,
-                      'uni': self.uni,
-                      'speed': self.speed,
-                      'metadata': self.metadata,
-                      'lldp': self.lldp,
-                      'active': self.is_active(),
-                      'enabled': self.is_enabled(),
-                      'status': self.status.value,
-                      'link': self.link.id if self.link else ""}
+        iface_dict = {
+            'id': self.id,
+            'name': self.name,
+            'port_number': self.port_number,
+            'mac': self.address,
+            'switch': self.switch.dpid,
+            'type': 'interface',
+            'nni': self.nni,
+            'uni': self.uni,
+            'speed': self.speed,
+            'metadata': self.metadata,
+            'lldp': self.lldp,
+            'active': self.is_active(),
+            'enabled': self.is_enabled(),
+            'status': self.status.value,
+            'status_reason': list(self.status_reason),
+            'link': self.link.id if self.link else ""
+        }
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()
         return iface_dict

@@ -466,8 +466,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             'active': self.is_active(),
             'enabled': self.is_enabled(),
             'status': self.status.value,
-            'status_reason': list(self.status_reason),
-            'link': self.link.id if self.link else ""
+            'status_reason': sorted(self.status_reason),
+            'link': self.link.id if self.link else "",
         }
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()

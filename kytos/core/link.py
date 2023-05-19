@@ -198,7 +198,7 @@ class Link(GenericEntity):
             'active': self.is_active(),
             'enabled': self.is_enabled(),
             'status': self.status.value,
-            'status_reason': list(self.status_reason),
+            'status_reason': sorted(self.status_reason),
         }
 
     def as_json(self):

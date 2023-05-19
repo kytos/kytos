@@ -22,6 +22,8 @@ HTTPException = HTTPException
 def _json_serializer(obj):
     if isinstance(obj, datetime):
         return obj.isoformat()
+    if isinstance(obj, set):
+        return sorted(obj)
     raise TypeError(f"Type {type(obj)} not serializable")
 
 

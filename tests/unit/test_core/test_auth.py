@@ -225,12 +225,3 @@ class TestAuth:
         with pytest.raises(HTTPException):
             # pylint: disable=protected-access
             auth._find_user("name")
-
-    def test_08_error_msg(self, auth):
-        """Test error_msg"""
-        # ValidationErro mocked response
-        error_list = [{'loc': ('username', ), 'msg': 'mock_msg_1'},
-                      {'loc': ('email', ), 'msg': 'mock_msg_2'}]
-        actual_msg = auth.error_msg(error_list)
-        expected_msg = 'username: mock_msg_1; email: mock_msg_2'
-        assert actual_msg == expected_msg

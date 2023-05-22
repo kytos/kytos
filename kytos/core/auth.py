@@ -22,7 +22,8 @@ from tenacity import retry_if_exception_type, stop_after_attempt, wait_random
 from kytos.core.config import KytosConfig
 from kytos.core.db import Mongo
 from kytos.core.rest_api import (HTTPException, JSONResponse, Request,
-                                 content_type_json_or_415, get_json_or_400)
+                                 content_type_json_or_415, error_msg,
+                                 get_json_or_400)
 from kytos.core.retry import before_sleep, for_all_methods, retries
 from kytos.core.user import HashSubDoc, UserDoc, UserDocUpdate
 
@@ -257,7 +258,7 @@ class Auth:
         try:
             self.user_controller.create_user(user)
         except ValidationError as err:
-            msg = self.error_msg(err.errors())
+            msg = error_msg(err.errors())
             return f"Error: {msg}"
         except DuplicateKeyError:
             return f"Error: {username} already exist."
@@ -345,17 +346,6 @@ class Auth:
             raise HTTPException(400, "Invalid payload type: {body}")
         return body
 
-    @staticmethod
-    def error_msg(error_list: list) -> str:
-        """Return a more request friendly error message from ValidationError"""
-        msg = ""
-        for err in error_list:
-            for value in err['loc']:
-                msg += value + ", "
-            msg = msg[:-2]
-            msg += ": " + err["msg"] + "; "
-        return msg[:-2]
-
     @authenticated
     def _create_user(self, request: Request) -> JSONResponse:
         """Save a user using MongoDB."""
@@ -363,7 +353,7 @@ class Auth:
             user_data = self._get_request_body(request)
             self.user_controller.create_user(user_data)
         except ValidationError as err:
-            msg = self.error_msg(err.errors())
+            msg = error_msg(err.errors())
             raise HTTPException(400, msg) from err
         except DuplicateKeyError as err:
             msg = user_data.get("username") + " already exists."
@@ -391,7 +381,7 @@ class Auth:
         try:
             updated = self.user_controller.update_user(username, data)
         except ValidationError as err:
-            msg = self.error_msg(err.errors())
+            msg = error_msg(err.errors())
             raise HTTPException(400, detail=msg) from err
         except DuplicateKeyError as err:
             msg = username + " already exists."

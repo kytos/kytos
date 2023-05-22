@@ -3,7 +3,7 @@ import asyncio
 
 from kytos.core.config import KytosConfig
 from kytos.core.rest_api import (JSONResponse, Request, aget_json_or_400,
-                                 get_body, get_json_or_400)
+                                 error_msg, get_body, get_json_or_400)
 
 
 async def test_new_endpoint(controller, api_client) -> None:
@@ -74,6 +74,14 @@ async def test_get_json_or_400(controller, api_client, event_loop) -> None:
     response = await api_client.post(f"kytos/core/{endpoint}", json=body)
     assert response.status_code == 200
     assert response.json() == body
+
+
+async def test_error_msg():
+    """Test error message"""
+    error_list = [{'loc': ('table_id', ), 'msg': 'mock_msg_1'}]
+    actual_msg = error_msg(error_list)
+    expected_msg = 'table_id: mock_msg_1'
+    assert actual_msg == expected_msg
 
 
 async def test_get_body(controller, api_client, event_loop) -> None:

@@ -24,6 +24,7 @@ Changed
 - Updated APM to instrument ``starlette``
 - HTTP API exceptions responses no longer include the ``"name"`` key name in the response, only ``"code"``  and ``"description"`` still remain
 - Development ``get_test_client`` now uses a ``htppx.AsyncClient`` instance
+- Moved ``error_msg()`` to ``kytos.core.rest_api`` so it can be used in any NApp
 
 Fixed
 =====

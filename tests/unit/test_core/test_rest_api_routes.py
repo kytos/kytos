@@ -78,9 +78,10 @@ async def test_get_json_or_400(controller, api_client, event_loop) -> None:
 
 async def test_error_msg():
     """Test error message"""
-    error_list = [{'loc': ('table_id', ), 'msg': 'mock_msg_1'}]
+    error_list = [{'loc': ('username', ), 'msg': 'mock_msg_1'},
+                  {'loc': ('email', ), 'msg': 'mock_msg_2'}]
     actual_msg = error_msg(error_list)
-    expected_msg = 'table_id: mock_msg_1'
+    expected_msg = 'username: mock_msg_1; email: mock_msg_2'
     assert actual_msg == expected_msg
 
 

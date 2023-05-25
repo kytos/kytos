@@ -4,8 +4,7 @@ import base64
 import pytest
 from httpx import AsyncClient
 # pylint: disable=no-name-in-module,attribute-defined-outside-init
-from pydantic import BaseModel, EmailError, ValidationError
-from pydantic.error_wrappers import ErrorWrapper
+from pydantic import BaseModel, ValidationError
 from pymongo.errors import DuplicateKeyError
 
 from kytos.core.auth import Auth
@@ -132,19 +131,12 @@ class TestAuth:
     ):
         """Test auth create user endpoint."""
         auth.controller.loop = event_loop
-        self.user_data["email"] = "wrong_email"
-        exc = ValidationError(
-            [ErrorWrapper(exc=EmailError(), loc=('email',))],
-            BaseModel
-        )
-        auth.user_controller.create_user.side_effect = exc
+        data = "wrong_json"
         endpoint = "kytos/core/auth/users"
         headers = await self.auth_headers(auth, api_client)
-        resp = await api_client.post(endpoint, json=self.user_data,
+        resp = await api_client.post(endpoint, json=data,
                                      headers=headers)
         assert resp.status_code == 400
-        description = resp.json()['description']
-        assert description == 'email: value is not a valid email address'
 
     async def test_04_list_user_request(self, auth, api_client):
         """Test auth list user endpoint."""

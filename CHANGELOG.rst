@@ -25,6 +25,7 @@ Changed
 - HTTP API exceptions responses no longer include the ``"name"`` key name in the response, only ``"code"``  and ``"description"`` still remain
 - Development ``get_test_client`` now uses a ``htppx.AsyncClient`` instance
 - Moved ``error_msg()`` to ``kytos.core.rest_api`` so it can be used in any NApp
+- ``Link`` now includes its ``id`` on its string format representation to facilitate correlating events in the logs
 
 Fixed
 =====

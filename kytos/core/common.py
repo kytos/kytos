@@ -50,6 +50,16 @@ class GenericEntity:
             return EntityStatus.DISABLED
         return EntityStatus.DOWN
 
+    @property
+    def status_reason(self):
+        """Return the reason behind the current status of the entity."""
+        reasons = set()
+        if not self.is_enabled():
+            reasons.add('disabled')
+        if not self.is_active():
+            reasons.add('deactivated')
+        return reasons
+
     def is_administrative_down(self):
         """Return True for disabled Entities."""
         return not self.is_enabled()

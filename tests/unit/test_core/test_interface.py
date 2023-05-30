@@ -301,12 +301,26 @@ class TestInterface(unittest.TestCase):
         self.iface.enable()
         self.iface.activate()
         assert self.iface.is_active()
-        Interface.register_status_func("some_napp_some_func",
-                                       lambda iface: EntityStatus.DOWN)
+        Interface.register_status_func(
+            "some_napp_some_func",
+            lambda iface: EntityStatus.DOWN
+        )
+        Interface.register_status_reason_func(
+            "some_napp_some_func",
+            lambda iface: {'test_status'}
+        )
         assert self.iface.status == EntityStatus.DOWN
-        Interface.register_status_func("some_napp_some_func",
-                                       lambda iface: None)
+        assert self.iface.status_reason == {'test_status'}
+        Interface.register_status_func(
+            "some_napp_some_func",
+            lambda iface: None
+        )
+        Interface.register_status_reason_func(
+            "some_napp_some_func",
+            lambda iface: set()
+        )
         assert self.iface.status == EntityStatus.UP
+        assert self.iface.status_reason == set()
 
 
 class TestUNI(unittest.TestCase):

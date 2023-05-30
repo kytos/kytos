@@ -1,8 +1,10 @@
 """Module with main classes related to Interfaces."""
 import json
 import logging
+import operator
 from collections import OrderedDict
 from enum import IntEnum
+from functools import reduce
 from threading import Lock
 
 from pyof.v0x01.common.phy_port import Port as PortNo01
@@ -65,6 +67,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     """Interface Class used to abstract the network interfaces."""
 
     status_funcs = OrderedDict()
+    status_reason_funcs = OrderedDict()
 
     # pylint: disable=too-many-arguments, too-many-public-methods
     def __init__(self, name, port_number, switch, address=None, state=None,
@@ -151,6 +154,24 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     def register_status_func(cls, name: str, func):
         """Register status func given its name and a callable at setup time."""
         cls.status_funcs[name] = func
+
+    @classmethod
+    def register_status_reason_func(cls, name: str, func):
+        """Register status reason func given its name
+        and a callable at setup time."""
+        cls.status_reason_funcs[name] = func
+
+    @property
+    def status_reason(self):
+        """Return the reason behind the current status of the entity."""
+        return reduce(
+            operator.or_,
+            map(
+                lambda x: x(self),
+                self.status_reason_funcs.values()
+            ),
+            super().status_reason
+        )
 
     def set_available_tags(self, iterable):
         """Set a range of VLAN tags to be used by this Interface.
@@ -430,21 +451,24 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             dict: Dictionary filled with interface attributes.
 
         """
-        iface_dict = {'id': self.id,
-                      'name': self.name,
-                      'port_number': self.port_number,
-                      'mac': self.address,
-                      'switch': self.switch.dpid,
-                      'type': 'interface',
-                      'nni': self.nni,
-                      'uni': self.uni,
-                      'speed': self.speed,
-                      'metadata': self.metadata,
-                      'lldp': self.lldp,
-                      'active': self.is_active(),
-                      'enabled': self.is_enabled(),
-                      'status': self.status.value,
-                      'link': self.link.id if self.link else ""}
+        iface_dict = {
+            'id': self.id,
+            'name': self.name,
+            'port_number': self.port_number,
+            'mac': self.address,
+            'switch': self.switch.dpid,
+            'type': 'interface',
+            'nni': self.nni,
+            'uni': self.uni,
+            'speed': self.speed,
+            'metadata': self.metadata,
+            'lldp': self.lldp,
+            'active': self.is_active(),
+            'enabled': self.is_enabled(),
+            'status': self.status.value,
+            'status_reason': sorted(self.status_reason),
+            'link': self.link.id if self.link else "",
+        }
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()
         return iface_dict

@@ -41,7 +41,7 @@ class Link(GenericEntity):
         return hash(self.id)
 
     def __repr__(self):
-        return f"Link({self.endpoint_a!r}, {self.endpoint_b!r})"
+        return f"Link({self.endpoint_a!r}, {self.endpoint_b!r}, {self.id})"
 
     @classmethod
     def register_status_func(cls, name: str, func):

@@ -131,11 +131,10 @@ class TestAuth:
     ):
         """Test auth create user endpoint."""
         auth.controller.loop = event_loop
-        exc = ValidationError('', BaseModel)
-        auth.user_controller.create_user.side_effect = exc
+        data = "wrong_json"
         endpoint = "kytos/core/auth/users"
         headers = await self.auth_headers(auth, api_client)
-        resp = await api_client.post(endpoint, json=self.user_data,
+        resp = await api_client.post(endpoint, json=data,
                                      headers=headers)
         assert resp.status_code == 400
 
@@ -225,12 +224,3 @@ class TestAuth:
         with pytest.raises(HTTPException):
             # pylint: disable=protected-access
             auth._find_user("name")
-
-    def test_08_error_msg(self, auth):
-        """Test error_msg"""
-        # ValidationErro mocked response
-        error_list = [{'loc': ('username', ), 'msg': 'mock_msg_1'},
-                      {'loc': ('email', ), 'msg': 'mock_msg_2'}]
-        actual_msg = auth.error_msg(error_list)
-        expected_msg = 'username: mock_msg_1; email: mock_msg_2'
-        assert actual_msg == expected_msg

@@ -1,9 +1,14 @@
 """Test kytos.core.rest_api routes."""
 import asyncio
+from unittest.mock import MagicMock
 
+import pytest
+from pydantic import ValidationError
+
+from kytos.core.auth import UserController
 from kytos.core.config import KytosConfig
 from kytos.core.rest_api import (JSONResponse, Request, aget_json_or_400,
-                                 get_body, get_json_or_400)
+                                 error_msg, get_body, get_json_or_400)
 
 
 async def test_new_endpoint(controller, api_client) -> None:
@@ -74,6 +79,23 @@ async def test_get_json_or_400(controller, api_client, event_loop) -> None:
     response = await api_client.post(f"kytos/core/{endpoint}", json=body)
     assert response.status_code == 200
     assert response.json() == body
+
+
+async def test_error_msg():
+    """Test error message"""
+    user = UserController(MagicMock())
+    user_data = {
+        "username": "test",
+        "password": "password",
+        "email": "test@kytos.io"
+    }
+    with pytest.raises(ValidationError) as err:
+        user.create_user(user_data)
+    actual_msg = error_msg(err.value.errors())
+    expected_msg = 'password: value should contain minimun 8 characters, ' \
+                   'at least one upper case character, at least 1 ' \
+                   'numeric character [0-9]'
+    assert actual_msg == expected_msg
 
 
 async def test_get_body(controller, api_client, event_loop) -> None:

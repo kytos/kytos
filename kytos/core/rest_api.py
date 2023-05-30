@@ -74,6 +74,17 @@ def content_type_json_or_415(request: Request) -> Optional[str]:
     return content_type
 
 
+def error_msg(error_list: list) -> str:
+    """Return a more request friendly error message from ValidationError"""
+    msg = ""
+    for err in error_list:
+        for value in err['loc']:
+            msg += str(value) + ", "
+        msg = msg[:-2]
+        msg += ": " + err["msg"] + "; "
+    return msg[:-2]
+
+
 class JSONResponse(StarletteJSONResponse):
     """JSONResponse with custom default serializer that supports datetime."""
 

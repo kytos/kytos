@@ -446,7 +446,7 @@ traitlets==5.3.0
     #   ipython
     #   kytos
     #   matplotlib-inline
-typing-extensions>=4.0.1
+typing-extensions==4.5.0
     # via
     #   -r requirements/run.txt
     #   astroid

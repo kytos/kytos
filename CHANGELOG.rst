@@ -14,6 +14,8 @@ Added
 - ``htppx`` is now shipped as a dependency, NApps can also leverage it instead of ``requests``
 - Added ``kytos.core.rest_api`` module exposing utilities for requests handlers
 - Added new kytos.conf option ``api_traceback_on_500``, which is True by default to provide a complete traceback on API responses if an internal server error ever happens
+- Added ``status_reason`` to ``Interface``, ``Switch``, and ``Link``.
+- Added ``register_status_reason_func`` to ``Interface``, ``Switch``, and ``Link``.
 
 Changed
 =======

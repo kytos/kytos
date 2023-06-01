@@ -1,10 +1,9 @@
 :EP: 37
 :Title: Interruption Management
 :Authors:
+    - David Ramirez <davramir@fiu.edu>;
+    - Vinicius Arcanjo <vindasil@fiu.edu>;
     - Jeronimo Bezerra jbezerra@fiu.edu;
-    - Arturo Quintana arquinta@fiu.edu ;
-    - Italo Valcy idasilva@fiu.edu
-    - David Ramirez <davramir@fiu.edu>
 :Issued Date: to be defined
 :Status: Draft
 :Type: Standards Track

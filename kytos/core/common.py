@@ -9,9 +9,9 @@ __all__ = ('GenericEntity',)
 class EntityStatus(Enum):
     """Enumeration of possible statuses for GenericEntity instances."""
 
-    UP = 1  # pylint: disable=invalid-name
-    DISABLED = 2
-    DOWN = 3
+    UP = "UP"
+    DISABLED = "DISABLED"
+    DOWN = "DOWN"
 
 
 class GenericEntity:
@@ -49,6 +49,16 @@ class GenericEntity:
         if self.is_administrative_down():
             return EntityStatus.DISABLED
         return EntityStatus.DOWN
+
+    @property
+    def status_reason(self):
+        """Return the reason behind the current status of the entity."""
+        reasons = set()
+        if not self.is_enabled():
+            reasons.add('disabled')
+        if not self.is_active():
+            reasons.add('deactivated')
+        return reasons
 
     def is_administrative_down(self):
         """Return True for disabled Entities."""

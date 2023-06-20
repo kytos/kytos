@@ -49,7 +49,8 @@ class TestLink(unittest.TestCase):
         """Test __repr__ method."""
         link = Link(self.iface1, self.iface2)
         expected = ("Link(Interface('interface1', 41, Switch('dpid1')), "
-                    "Interface('interface2', 42, Switch('dpid2')))")
+                    "Interface('interface2', 42, Switch('dpid2')), "
+                    f"{link.id})")
         self.assertEqual(repr(link), expected)
 
     def test_id(self):
@@ -94,8 +95,14 @@ class TestLink(unittest.TestCase):
     def test_status_funcs(self) -> None:
         """Test status_funcs."""
         # If it's enabled and active but a func returns DOWN, then DOWN
-        Link.register_status_func("some_napp_some_func",
-                                  lambda link: EntityStatus.DOWN)
+        Link.register_status_func(
+            "some_napp_some_func",
+            lambda link: EntityStatus.DOWN
+        )
+        Link.register_status_reason_func(
+            "some_napp_some_func",
+            lambda link: {'test_status'}
+        )
         for intf in (self.iface1, self.iface2):
             intf.enable()
             intf.activate()
@@ -103,34 +110,69 @@ class TestLink(unittest.TestCase):
         link.enable()
         link.activate()
         assert link.status == EntityStatus.DOWN
+        assert link.status_reason == {'test_status'}
 
         # No changes in status if it returns None
-        Link.register_status_func("some_napp_some_func",
-                                  lambda link: None)
+        Link.register_status_func(
+            "some_napp_some_func",
+            lambda link: None
+        )
+        Link.register_status_reason_func(
+            "some_napp_some_func",
+            lambda link: set()
+        )
         assert link.status == EntityStatus.UP
+        assert link.status_reason == set()
 
         # If it's deactivated then it shouldn't be able to make it go UP
         link.deactivate()
         assert link.status == EntityStatus.DOWN
-        Link.register_status_func("some_napp_some_func",
-                                  lambda link: EntityStatus.UP)
+        Link.register_status_func(
+            "some_napp_some_func",
+            lambda link: EntityStatus.UP
+        )
+        Link.register_status_reason_func(
+            "some_napp_some_func",
+            lambda link: set()
+        )
         assert link.status == EntityStatus.DOWN
+        assert link.status_reason == {'deactivated'}
         link.activate()
         assert link.status == EntityStatus.UP
+        assert link.status_reason == set()
 
         # If it's disabled, then it shouldn't be considered DOWN
         link.disable()
-        Link.register_status_func("some_napp_some_func",
-                                  lambda link: EntityStatus.DOWN)
+        Link.register_status_func(
+            "some_napp_some_func",
+            lambda link: EntityStatus.DOWN
+        )
+        Link.register_status_reason_func(
+            "some_napp_some_func",
+            lambda link: {'test_status'}
+        )
         assert link.status == EntityStatus.DISABLED
+        assert link.status_reason == {'test_status', 'disabled'}
 
     def test_multiple_status_funcs(self) -> None:
         """Test multiple status_funcs."""
         # If it's enabled and active but a func returns DOWN, then DOWN
-        Link.register_status_func("some_napp_some_func",
-                                  lambda link: None)
-        Link.register_status_func("some_napp_another_func",
-                                  lambda link: EntityStatus.DOWN)
+        Link.register_status_func(
+            "some_napp_some_func",
+            lambda link: None
+        )
+        Link.register_status_reason_func(
+            'some_napp_some_func',
+            lambda link: set()
+        )
+        Link.register_status_func(
+            "some_napp_another_func",
+            lambda link: EntityStatus.DOWN
+        )
+        Link.register_status_reason_func(
+            'some_napp_another_func',
+            lambda link: {'test_status2'}
+        )
         for intf in (self.iface1, self.iface2):
             intf.enable()
             intf.activate()
@@ -138,11 +180,19 @@ class TestLink(unittest.TestCase):
         link.enable()
         link.activate()
         assert link.status == EntityStatus.DOWN
+        assert link.status_reason == {'test_status2'}
 
         # It should be UP if the func no longer returns DOWN
-        Link.register_status_func("some_napp_another_func",
-                                  lambda link: None)
+        Link.register_status_func(
+            "some_napp_another_func",
+            lambda link: None
+        )
+        Link.register_status_reason_func(
+            'some_napp_another_func',
+            lambda link: set()
+        )
         assert link.status == EntityStatus.UP
+        assert link.status_reason == set()
 
     def test_available_tags(self):
         """Test available_tags property."""

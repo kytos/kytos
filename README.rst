@@ -137,7 +137,7 @@ How to use with Elastic APM
 
 .. code-block:: shell
 
-   $ docker-compose up -d
+   $ docker-compose -f docker-compose.yml -f docker-compose.es.yml up -d
 
 Optionally, you can also set the following environment variables:  ``ELASTIC_APM_URL``, ``ELASTIC_APM_SERVICE_NAME``, ``ELASTIC_APM_SECRET_TOKEN``.
 

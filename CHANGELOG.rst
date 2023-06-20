@@ -6,12 +6,41 @@ All notable changes to the kytos project will be documented in this file.
 UNRELEASED - Under development
 ******************************
 
+Added
+=====
+- Added ``status`` to ``as_dict()`` from entities ``Interface``, ``Switch`` and ``Link``.
+- Added ``@validate_openapi`` decorator to validate OpenAPI routes
+- Added ``avalidate_openapi_request(spec, request)`` to validate OpenAPI ``async`` routes
+- ``htppx`` is now shipped as a dependency, NApps can also leverage it instead of ``requests``
+- Added ``kytos.core.rest_api`` module exposing utilities for requests handlers
+- Added new kytos.conf option ``api_traceback_on_500``, which is True by default to provide a complete traceback on API responses if an internal server error ever happens
+- Added ``status_reason`` to ``Interface``, ``Switch``, and ``Link``.
+- Added ``register_status_reason_func`` to ``Interface``, ``Switch``, and ``Link``.
+
+Changed
+=======
+- Changed ``UNI.is_valid`` to allow tags such as ``any`` and ``untagged``
+- Changed ``EntityStatus`` value from 1, 2 and 3 to ``UP``, ``DISABLED`` and ``DOWN`` respectively.
+- Replaced ``werkzeug/flask`` with ``starlette/uvicorn``
+- Updated logging.ini ``logger_api_server`` with ``level: INFO`` by default
+- Updated APM to instrument ``starlette``
+- HTTP API exceptions responses no longer include the ``"name"`` key name in the response, only ``"code"``  and ``"description"`` still remain
+- Development ``get_test_client`` now uses a ``htppx.AsyncClient`` instance
+- Moved ``error_msg()`` to ``kytos.core.rest_api`` so it can be used in any NApp
+- ``Link`` now includes its ``id`` on its string format representation to facilitate correlating events in the logs
+
+Fixed
+=====
+- Unexposed ``jwt_secret`` on ``GET /api/kytos/core/config/`` endpoint
+
+
 [2022.3.1]  2023-02-17
 **********************
 
 Fixed
 =====
 - handled ``PackException`` to avoid crashing ``msg_out_event_handler`` coroutine
+
 
 [2022.3.0]  2022-12-15
 **********************

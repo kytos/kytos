@@ -2,6 +2,8 @@
 from unittest import TestCase
 from unittest.mock import MagicMock
 
+from httpx import AsyncClient
+
 from kytos.core.controller import Controller
 from kytos.lib.helpers import (get_connection_mock, get_controller_mock,
                                get_interface_mock, get_kytos_event_mock,
@@ -78,11 +80,10 @@ class TestHelpers(TestCase):
         napp = MagicMock()
 
         api_server = MagicMock()
-        api_server.app.test_client.return_value = 'client'
         controller = get_controller_mock()
         controller.api_server = api_server
 
         test_client = get_test_client(controller, napp)
 
         api_server.register_napp_endpoints.assert_called_with(napp)
-        self.assertEqual(test_client, 'client')
+        assert isinstance(test_client, AsyncClient)

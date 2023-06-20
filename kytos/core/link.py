@@ -4,7 +4,9 @@ Links are low level abstractions representing connections between two
 interfaces.
 """
 import json
+import operator
 from collections import OrderedDict
+from functools import reduce
 from threading import Lock
 
 from kytos.core.common import EntityStatus, GenericEntity
@@ -18,6 +20,7 @@ class Link(GenericEntity):
     """Define a link between two Endpoints."""
 
     status_funcs = OrderedDict()
+    status_reason_funcs = OrderedDict()
     _get_available_vlans_lock = Lock()
 
     def __init__(self, endpoint_a, endpoint_b):
@@ -43,7 +46,7 @@ class Link(GenericEntity):
         return hash(self.id)
 
     def __repr__(self):
-        return f"Link({self.endpoint_a!r}, {self.endpoint_b!r})"
+        return f"Link({self.endpoint_a!r}, {self.endpoint_b!r}, {self.id})"
 
     @classmethod
     def register_status_func(cls, name: str, func):
@@ -61,6 +64,24 @@ class Link(GenericEntity):
             if status_func(self) == EntityStatus.DOWN:
                 return EntityStatus.DOWN
         return state
+
+    @classmethod
+    def register_status_reason_func(cls, name: str, func):
+        """Register status reason func given its name
+        and a callable at setup time."""
+        cls.status_reason_funcs[name] = func
+
+    @property
+    def status_reason(self):
+        """Return the reason behind the current status of the entity."""
+        return reduce(
+            operator.or_,
+            map(
+                lambda x: x(self),
+                self.status_reason_funcs.values()
+            ),
+            super().status_reason
+        )
 
     def is_enabled(self):
         """Override the is_enabled method.
@@ -174,12 +195,16 @@ class Link(GenericEntity):
 
     def as_dict(self):
         """Return the Link as a dictionary."""
-        return {'id': self.id,
-                'endpoint_a': self.endpoint_a.as_dict(),
-                'endpoint_b': self.endpoint_b.as_dict(),
-                'metadata': self.get_metadata_as_dict(),
-                'active': self.is_active(),
-                'enabled': self.is_enabled()}
+        return {
+            'id': self.id,
+            'endpoint_a': self.endpoint_a.as_dict(),
+            'endpoint_b': self.endpoint_b.as_dict(),
+            'metadata': self.get_metadata_as_dict(),
+            'active': self.is_active(),
+            'enabled': self.is_enabled(),
+            'status': self.status.value,
+            'status_reason': sorted(self.status_reason),
+        }
 
     def as_json(self):
         """Return the Link as a JSON string."""

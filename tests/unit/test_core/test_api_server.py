@@ -60,9 +60,18 @@ class TestAPIServer:
 
     async def test_status_api(self):
         """Test status_api method."""
+        self.napps_manager._controller.uptime.return_value = 1
+        self.napps_manager._controller.started_at = 0.1
         response = await self.client.get("status/")
-        assert response.status_code == 200
-        assert response.json() == {"response": "running"}
+
+        assert response.status_code == 200, response.text
+        response = response.json()
+        expected = {
+            "response": "running",
+            "started_at": 0.1,
+            "uptime_seconds": 1
+        }
+        assert response == expected
 
     def test_stop(self):
         """Test stop method."""

@@ -146,7 +146,12 @@ class APIServer:
 
     def status_api(self, _request: Request):
         """Display kytos status using the route ``/kytos/status/``."""
-        return JSONResponse({"response": "running"})
+        response = {
+            "response": "running",
+            "started_at": self.napps_manager._controller.started_at,
+            "uptime_seconds": self.napps_manager._controller.uptime()
+        }
+        return JSONResponse(response)
 
     def static_web_ui(self,
                       request: Request) -> Union[FileResponse, JSONResponse]:

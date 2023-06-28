@@ -150,7 +150,7 @@ class APIServer:
         response = {
             "response": "running",
             "started_at": self.napps_manager._controller.started_at,
-            "uptime_seconds": uptime.second if uptime else 0,
+            "uptime_seconds": uptime.seconds if uptime else 0,
         }
         return JSONResponse(response)
 

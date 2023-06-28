@@ -60,8 +60,9 @@ class TestAPIServer:
 
     async def test_status_api(self):
         """Test status_api method."""
-        started_at = 1.0
-        uptime = datetime.now(timezone.utc)
+        started_at = datetime.fromtimestamp(1.0, timezone.utc)
+        now = datetime.now(timezone.utc)
+        uptime = now - started_at
         self.napps_manager._controller.uptime.return_value = uptime
         self.napps_manager._controller.started_at = started_at
         response = await self.client.get("status/")
@@ -69,8 +70,8 @@ class TestAPIServer:
         response = response.json()
         expected = {
             "response": "running",
-            "started_at": started_at,
-            "uptime_seconds": uptime.second,
+            "started_at": started_at.isoformat(),
+            "uptime_seconds": uptime.seconds,
         }
         assert response == expected
 

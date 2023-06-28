@@ -2,7 +2,7 @@
 import asyncio
 import json
 import warnings
-from datetime import datetime
+from datetime import datetime, timezone
 # Disable not-grouped imports that conflicts with isort
 from unittest.mock import AsyncMock, MagicMock
 from urllib.error import HTTPError, URLError
@@ -60,16 +60,17 @@ class TestAPIServer:
 
     async def test_status_api(self):
         """Test status_api method."""
-        self.napps_manager._controller.uptime.return_value = 1
-        self.napps_manager._controller.started_at = 0.1
+        started_at = 1.0
+        uptime = datetime.now(timezone.utc)
+        self.napps_manager._controller.uptime.return_value = uptime
+        self.napps_manager._controller.started_at = started_at
         response = await self.client.get("status/")
-
         assert response.status_code == 200, response.text
         response = response.json()
         expected = {
             "response": "running",
-            "started_at": 0.1,
-            "uptime_seconds": 1
+            "started_at": started_at,
+            "uptime_seconds": uptime.second,
         }
         assert response == expected
 

@@ -146,10 +146,11 @@ class APIServer:
 
     def status_api(self, _request: Request):
         """Display kytos status using the route ``/kytos/status/``."""
+        uptime = self.napps_manager._controller.uptime()
         response = {
             "response": "running",
             "started_at": self.napps_manager._controller.started_at,
-            "uptime_seconds": self.napps_manager._controller.uptime()
+            "uptime_seconds": uptime.second if uptime else 0,
         }
         return JSONResponse(response)
 

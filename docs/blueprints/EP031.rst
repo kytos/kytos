@@ -35,16 +35,16 @@ This blueprint has the following characteristics:
 
   1. There will be no concerns about number or location of the INT Hops switches. Currently, an INT Sink switch can only export up to 10 metadata stacked by the network. If more than 10 switches add metadata, the INT Sink will export the LAST 10 metadata added to the packet. The other will be discarded. At AmLight, the longest route planned is currently composed of 9 switches.
   2. There will be no concerns about MTU restrictions. NoviWare and Tofino support frames as large as 10KB which is more than enough. However, any legacy device in the middle must be previously identified since legacy devices usually have a MTU of up to 9,216 Bytes. The INT Source Switch adds a header of 12 Bytes plus 24 Bytes of metadata. Each INT hop in the path will add 24 bytes only.
-  3. There will be no concerns if INT Sink switches have loops for INT reports (Section III). This blueprint assumes physical loops are already deployed by the operators **during** the commissioning phase, which means, before the **Telemetry** app is deployed.
+  3. There will be no concerns if INT Sink switches have loops for INT reports (Section III). This blueprint assumes physical loops are already deployed by the operators **during** the commissioning phase, which means, before the **telemetry_int** napp is deployed.
   4. There will be no concerns about proxy ports and their mappings. These were addressed in Blueprint EP034.
-  5. There is no need for persistent data. The **mef_eline** and **flow_manager** napps will persist their entries accordingly since **telemetry** will leverage **flow_manager**.
+  5. There is no need for persistent data. The **mef_eline** and **flow_manager** napps will persist their entries accordingly since **telemetry_int** will leverage **flow_manager**.
   6. This version won't require changes to the way the **mef_eline** napp works. However, a new value will be added each EVC's metadata attribute.
-  7. This specification assumes the data plane's pipeline is ready for INT, with multiple tables, and it assumes that **mef_eline** uses table 0. **telemetry** aims to use any table with an ID higher than **mef_eline**, for instance in this document, table 2.
+  7. This specification assumes the data plane's pipeline is ready for INT, with multiple tables, and it assumes that **mef_eline** uses table 0. **telemetry_int** aims to use any table with an ID higher than **mef_eline**, for instance in this document, table 2.
 
 II. How INT works with NoviWare
 ===============================
 
-Currently, the **mef_eline** napp creates Ethernet Virtual Circuits (EVCs) using *matches* `IN_PORT` and `VLAN_VID` and actions `PUSH/POP VLAN`, `SET FIELD`, `SET_QUEUE`, and `OUTPUT`. All EVCs' flow entries have the same priority based on their type: Ethernet Private Line (EPL) or Ethernet Virtual Private Line (EVPL). Currently, INT is only supported for IPv4 traffic with TCP and UDP protocols, which means that more specific match entries will be needed to match IPv4 and TCP/UDP. Non-IPV4 or non-TCP/UDP traffic will continue using the existing flow entries created by **mef_eline**. The **telemetry** napp only adds and removes flows for INT. Any other flows created by the **mef_eline** won't be affected. Example:
+Currently, the **mef_eline** napp creates Ethernet Virtual Circuits (EVCs) using *matches* `IN_PORT` and `VLAN_VID` and actions `PUSH/POP VLAN`, `SET FIELD`, `SET_QUEUE`, and `OUTPUT`. All EVCs' flow entries have the same priority based on their type: Ethernet Private Line (EPL) or Ethernet Virtual Private Line (EVPL). Currently, INT is only supported for IPv4 traffic with TCP and UDP protocols, which means that more specific match entries will be needed to match IPv4 and TCP/UDP. Non-IPV4 or non-TCP/UDP traffic will continue using the existing flow entries created by **mef_eline**. The **telemetry_int** napp only adds and removes flows for INT. Any other flows created by the **mef_eline** won't be affected. Example:
 
 - Current by **mef_eline**:
 
@@ -53,13 +53,13 @@ Currently, the **mef_eline** napp creates Ethernet Virtual Circuits (EVCs) using
 
     - match: <in_port=10,vlan_vid=20>
 
-- New with **mef_eline** and **telemetry**:
+- New with **mef_eline** and **telemetry_int**:
 
   - 3 flows per direction
-  - priority: Higher (mef_eline + 100) (created by **telemetry**)
+  - priority: Higher (mef_eline + 100) (created by **telemetry_int**)
 
     - match: <in_port=10,vlan_vid=20,eth_type=0x800,ip_proto=6> for TCP
-  - priority: Higher (mef_eline + 100) (created by **telemetry**)
+  - priority: Higher (mef_eline + 100) (created by **telemetry_int**)
 
     - match: <in_port=10,vlan_vid=20,eth_type=0x800,ip_proto=17> for UDP
   - priority: DEFAULT (DEFAULT FOR EVPL) (originally created by **mef_eline**)
@@ -234,11 +234,11 @@ To enable INT, first a physical loop has to be deployed. For this example, on IN
 IV. How to enable INT for EVCs
 ==============================
 
-The goal for the **telemetry** app is to enable telemetry for ALL EVCs. However, it must support enabling and disabling telemetry for a single EVC or ALL EVCs. This is the approach:
+The goal for the **telemetry_int** napp is to enable telemetry for ALL EVCs. However, it must support enabling and disabling telemetry for a single EVC or ALL EVCs. This is the approach:
 
-  1 . The **telemetry** napp will start operating once **mef_eline** is loaded and EVCs and their flows are pushed to the data plane.
+  1 . The **telemetry_int** napp will start operating once **mef_eline** is loaded and EVCs and their flows are pushed to the data plane.
 
-  2. **telemetry** will listen for events *kytos/mef_eline.(redeployed_link_(up|down)|deployed)* and *kytos.mef_eline.created* issued by **mef_eline**.
+  2. **telemetry_int** will listen for events *kytos/mef_eline.(redeployed_link_(up|down)|deployed)* and *kytos.mef_eline.created* issued by **mef_eline**.
 
   3. For each EVC identified, **telemetry** will
     1. use EVC's cookie to get all flow entries created by **flow_manager** IF telemetry is not already enabled.
@@ -259,12 +259,12 @@ V. Events
 VI. REST API
 =============
 
-  - POST /telemetry/v1/evc/ body evc_ids: [] for bulk insertions, if empty, then enable all. If invalid or non-existing EVC_ID are provided, abort the entire operation with 4XX status code.
-  - POST /telemetry/v1/evc/<evc_id>: enable/create INT flows for an EVC_ID.
-  - DELETE /telemetry/v1/evc/ body evc_ids: [] for bulk removals, if empty, then remove all. If invalid or non-existing EVC_ID are provided, abort the entire operation with 4XX status code.
-  - DELETE /telemetry/v1/evc/<evc_id>: disable/remove INT flows for an EVC_ID.
-  - GET /telemetry/v1/evc list all INT-enabled EVCs.
-  - POST /telemetry/v1/consistency/ body evc_ids: []- Force the consistency routine to run for evc_id's provided. If none are provide, force for all EVCs.
+  - POST /telemetry_int/v1/evc/ body evc_ids: [] for bulk insertions, if empty, then enable all. If invalid or non-existing EVC_ID are provided, abort the entire operation with 4XX status code.
+  - POST /telemetry_int/v1/evc/<evc_id>: enable/create INT flows for an EVC_ID.
+  - DELETE /telemetry_int/v1/evc/ body evc_ids: [] for bulk removals, if empty, then remove all. If invalid or non-existing EVC_ID are provided, abort the entire operation with 4XX status code.
+  - DELETE /telemetry_int/v1/evc/<evc_id>: disable/remove INT flows for an EVC_ID.
+  - GET /telemetry_int/v1/evc list all INT-enabled EVCs.
+  - POST /telemetry_int/v1/consistency/ body evc_ids: []- Force the consistency routine to run for evc_id's provided. If none are provide, force for all EVCs.
 
 
 VII. Dependencies
@@ -278,7 +278,7 @@ VII. Dependencies
 VII. New EVC attribute
 ======================
 
-The **telemetry** napp will leverage the EVC's metadata attribute to create a new item, called `telemetry`. This new item will be a dictionary will the following values:
+The **telemetry_int** napp will leverage the EVC's metadata attribute to create a new item, called `telemetry`. This new item will be a dictionary will the following values:
 
   * "enabled": [True|False]
   * "source": dpid/name of the switch to be used as the INT Source switch (Future use).
@@ -293,17 +293,17 @@ For EVCs that have failover path pre-provisioned, INT flows will be created to o
 X. Cookies
 ==========
 
-The **telemetry** napp must use a different cookie ID to help understanding flow ownership and saving IO operations. The cookie prefix assigned to **telemetry** is 0xA8.
+The **telemetry_int** napp must use a different cookie ID to help understanding flow ownership and saving IO operations. The cookie prefix assigned to **telemetry** is 0xA8.
 
 XI. Consistency
 ===============
 
-The **telemetry** napp might deploy a routine to evaluate the consistency of the telemetry flows as performed by the **mef_eline** napp. This implementation will be defined via field experience with Kytos.
+The **telemetry_int** napp might deploy a routine to evaluate the consistency of the telemetry flows as performed by the **mef_eline** napp. This implementation will be defined via field experience with Kytos.
 
 XII. Pacing
 ===========
 
-The **telemetry** napp must wait a *settings.wait_to_deploy* interval before sending instructions to the flow_manager after EVCs are created/modified/redeployed to avoid overwhelming the switches. The goal is to create batch operations.
+The **telemetry_int** napp must wait a *settings.wait_to_deploy* interval before sending instructions to the flow_manager after EVCs are created/modified/redeployed to avoid overwhelming the switches. The goal is to create batch operations.
 
 XI. Open Questions
 ==================

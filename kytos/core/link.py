@@ -32,9 +32,14 @@ class Link(GenericEntity):
             raise KytosLinkCreationError("endpoint_a cannot be None")
         if endpoint_b is None:
             raise KytosLinkCreationError("endpoint_b cannot be None")
-        self.endpoint_a = endpoint_a
-        self.endpoint_b = endpoint_b
         self._id = LinkID(endpoint_a.id, endpoint_b.id)
+        if self._id.interfaces[0] == endpoint_b.id:
+            self.endpoint_a = endpoint_b
+            self.endpoint_b = endpoint_a
+        else:
+            self.endpoint_a = endpoint_a
+            self.endpoint_b = endpoint_b
+
         super().__init__()
 
     def __hash__(self):

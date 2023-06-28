@@ -29,6 +29,7 @@ Changed
 - Moved ``error_msg()`` to ``kytos.core.rest_api`` so it can be used in any NApp
 - ``Link`` now includes its ``id`` on its string format representation to facilitate correlating events in the logs
 - ``Link`` now have ordered endpoints. They are ordere by its ``id``
+- Updated ``status_api`` to include when the APIServer started and how much time has elapsed.
 
 Fixed
 =====

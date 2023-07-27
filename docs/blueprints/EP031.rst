@@ -238,7 +238,7 @@ The goal for the **telemetry_int** napp is to enable telemetry for ALL EVCs. How
 
   1 . The **telemetry_int** napp will start operating once **mef_eline** is loaded and EVCs and their flows are pushed to the data plane.
 
-  2. **telemetry_int** will listen for events *kytos/mef_eline.(redeployed_link_(up|down)|deployed|undeployed)* and *kytos.mef_eline.created* issued by **mef_eline**.
+  2. **telemetry_int** will listen for events *kytos/mef_eline.(redeployed_link_(up|down)|deployed|undeployed|deleted|error_redeploy_link_down|created)*
 
   3. For each EVC identified, **telemetry** will
     1. use EVC's cookie to get all flow entries created by **flow_manager** IF telemetry is not already enabled.
@@ -249,7 +249,7 @@ V. Events
 ==========
 
   1. Listening
-    1. *kytos/mef_eline.(removed|deployed|undeployed)*
+    1. *kytos/mef_eline.(redeployed_link_(up|down)|deployed|undeployed|deleted|error_redeploy_link_down|created)*
     2. *kytos.topology.updated*
 
   2. Issuing

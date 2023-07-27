@@ -264,6 +264,7 @@ VI. REST API
   - ``POST /telemetry_int/v1/evc/disable`` body evc_ids: [] for bulk removals, if empty, then remove all. If invalid or non-existing EVC_ID are provided, abort the entire operation with 4XX status code.
   - ``GET /telemetry_int/v1/evc`` list all INT-enabled EVCs.
   - ``GET /telemetry_int/v1/evc_compare`` list and compare which telemetry_int flows are still coherent with EVC metadata status
+  - ``PATCH /telemetry_int/v1/evc/redeploy`` body evc_ids: [] to force a redeploy
 
 VII. Dependencies
 =================

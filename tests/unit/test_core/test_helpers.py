@@ -3,7 +3,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from kytos.core import helpers
-from kytos.core.helpers import (alisten_to, executors,
+from kytos.core.helpers import (alisten_to, ds_executors, executors,
                                 get_thread_pool_max_workers, get_time,
                                 listen_to, load_spec, run_on_thread)
 
@@ -54,6 +54,7 @@ class TestHelpers(TestCase):
         """Test default expected executors."""
         pools = ["app", "db", "sb"]
         assert sorted(pools) == sorted(executors.keys())
+        assert not ds_executors
 
     @staticmethod
     def test_listen_to_run_on_threadpool_by_default():
@@ -70,6 +71,25 @@ class TestHelpers(TestCase):
 
         assert test({}) is None
         mock_executor.submit.assert_called()
+
+    @staticmethod
+    def test_listen_to_dynamic_single_executors():
+        """Test listen_to dynamic_single executor."""
+
+        assert len(ds_executors) == 0
+
+        @listen_to("some_event", pool="dynamic_single")
+        def some_handler(event):
+            _ = event
+
+        @listen_to("some_event", pool="dynamic_single")
+        def another_handler(event):
+            _ = event
+
+        for _ in range(2):
+            some_handler(MagicMock())
+            another_handler(MagicMock())
+        assert len(ds_executors) == 2
 
     def test_get_time__str(self):
         """Test get_time method passing a string as parameter."""

@@ -250,12 +250,7 @@ V. Events
 
   1. Listening
     1. *kytos/mef_eline.(redeployed_link_(up|down)|deployed|undeployed|deleted|error_redeploy_link_down|created)*
-    2. *kytos.topology.updated*
-
-  2. Issuing
-    1.  *kytos.telemetry.enabled*
-    2.  *kytos.telemetry.disabled*
-
+    2. *kytos/topology.link_up|link_down*
 
 VI. REST API
 =============

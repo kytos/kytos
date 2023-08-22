@@ -31,6 +31,9 @@ Changed
 - Development ``get_test_client`` now uses a ``htppx.AsyncClient`` instance
 - Moved ``error_msg()`` to ``kytos.core.rest_api`` so it can be used in any NApp
 - ``Link`` now includes its ``id`` on its string format representation to facilitate correlating events in the logs
+- ``Link`` now have ordered endpoints. They are ordere by its ``id``
+- Updated ``status_api`` to include when the APIServer started and how much time has elapsed.
+- Augmented ``listen_to`` decorator ``pool`` kwarg to support ``'dynamic_single'``. In this mode, each decorated handler will be associated with an exclusive ``ThreadPoolExecutor`` with a single worker, ensuring FIFO event processing, which can be suitable for non IO-bound handlers.
 
 Fixed
 =====

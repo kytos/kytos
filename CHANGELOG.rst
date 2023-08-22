@@ -6,6 +6,9 @@ All notable changes to the kytos project will be documented in this file.
 UNRELEASED - Under development
 ******************************
 
+[2023.1.0] - 2023-06-05
+***********************
+
 Added
 =====
 - Added ``status`` to ``as_dict()`` from entities ``Interface``, ``Switch`` and ``Link``.

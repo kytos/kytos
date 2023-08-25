@@ -39,7 +39,7 @@ This blueprint has the following characteristics:
   4. There will be no concerns about proxy ports and their mappings. These were addressed in Blueprint EP034.
   5. There is no need for persistent data. The **mef_eline** and **flow_manager** napps will persist their entries accordingly since **telemetry_int** will leverage **flow_manager**.
   6. This version won't require changes to the way the **mef_eline** napp works. However, a new value will be added each EVC's metadata attribute.
-  7. This specification assumes the data plane's pipeline is ready for INT, with multiple tables, and it assumes that **mef_eline** uses table 0. **telemetry_int** aims to use any table with an ID higher than **mef_eline**, for instance in this document, table 2.
+  7. This specification assumes the data plane's pipeline is ready for INT, with multiple tables, and it assumes that **mef_eline** uses table 0. **telemetry_int** aims to use any table with an ID higher than **mef_eline**, for instance in this document, table 2. It also assumes that this higher table should be capable of exact matching on ``in_port`` and ``dl_vlan``, including on just one of these fields, just so both EVPLs and EVPLs flows are correctly supported.
 
 II. How INT works with NoviWare
 ===============================

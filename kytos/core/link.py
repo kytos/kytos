@@ -6,6 +6,7 @@ interfaces.
 import json
 import operator
 from collections import OrderedDict
+from copy import deepcopy
 from functools import reduce
 from threading import Lock
 
@@ -13,7 +14,7 @@ from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.exceptions import (KytosLinkCreationError,
                                    KytosNoTagAvailableError)
 from kytos.core.id import LinkID
-from kytos.core.interface import TAGType
+from kytos.core.interface import TAG, Interface, TAGType
 
 
 class Link(GenericEntity):
@@ -130,56 +131,50 @@ class Link(GenericEntity):
         return [tag for tag in self.endpoint_a.available_tags if tag in
                 self.endpoint_b.available_tags]
 
-    def use_tag(self, tag):
-        """Remove a specific tag from available_tags if it is there.
-
-        Deprecated: use only the get_next_available_tag method.
-        """
-        if self.is_tag_available(tag):
-            self.endpoint_a.use_tag(tag)
-            self.endpoint_b.use_tag(tag)
-            return True
-        return False
-
     def is_tag_available(self, tag):
         """Check if a tag is available."""
         return (self.endpoint_a.is_tag_available(tag) and
                 self.endpoint_b.is_tag_available(tag))
 
-    def get_next_available_tag(self):
+    def get_next_available_tag(self, controller, tag_type: str = '1') -> TAG:
         """Return the next available tag if exists."""
         with self._get_available_vlans_lock:
             # Copy the available tags because in case of error
             # we will remove and add elements to the available_tags
-            available_tags_a = self.endpoint_a.available_tags.copy()
-            available_tags_b = self.endpoint_b.available_tags.copy()
+            available_tags_a = deepcopy(self.endpoint_a.get_available_tags())
+            available_tags_b = deepcopy(self.endpoint_b.get_available_tags())
+            intersection_tags = Interface.range_intersection(available_tags_a,
+                                                             available_tags_b)
+            for tag_range in intersection_tags:
+                for tag in range(tag_range[0], tag_range[1]+1):
+                    # Tag already in use. Try another tag.
+                    if not self.endpoint_a.use_tags([tag, tag]):
+                        continue
 
-            for tag in available_tags_a:
-                # Tag does not exist in endpoint B. Try another tag.
-                if tag not in available_tags_b:
-                    continue
+                    # Tag already in use in B. Mark the tag as available again.
+                    if not self.endpoint_b.use_tags([tag, tag]):
+                        self.endpoint_a.make_tags_available([tag, tag])
+                        continue
 
-                # Tag already in use. Try another tag.
-                if not self.endpoint_a.use_tag(tag):
-                    continue
-
-                # Tag already in use in B. Mark the tag as available again.
-                if not self.endpoint_b.use_tag(tag):
-                    self.endpoint_a.make_tag_available(tag)
-                    continue
-
-                # Tag used successfully by both endpoints. Returning.
-                return tag
+                    # Tag used successfully by both endpoints. Returning.
+                    self.endpoint_a.notify_link_available_tags(controller)
+                    self.endpoint_b.notify_link_available_tags(controller)
+                    return TAG(int(tag_type), tag)
 
             raise KytosNoTagAvailableError(self)
 
-    def make_tag_available(self, tag):
+    def make_tag_available(
+        self,
+        controller,
+        tag: int,
+        tag_type: str = '1'
+    ) -> (bool, bool):
         """Add a specific tag in available_tags."""
-        if not self.is_tag_available(tag):
-            self.endpoint_a.make_tag_available(tag)
-            self.endpoint_b.make_tag_available(tag)
-            return True
-        return False
+        result_a = self.endpoint_a.make_tags_available([tag, tag], tag_type)
+        result_b = self.endpoint_b.make_tags_available([tag, tag], tag_type)
+        self.endpoint_a.notify_link_available_tags(controller)
+        self.endpoint_b.notify_link_available_tags(controller)
+        return result_a, result_b
 
     def available_vlans(self):
         """Get all available vlans from each interface in the link."""

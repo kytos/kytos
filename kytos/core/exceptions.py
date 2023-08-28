@@ -77,6 +77,10 @@ class KytosNoTagAvailableError(Exception):
         return msg
 
 
+class KytosResizingAvailableTagError(Exception):
+    """Exception raised when available_tag cannot be resized"""
+
+
 class KytosLinkCreationError(Exception):
     """Exception thrown when the link has an empty endpoint."""
 

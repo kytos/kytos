@@ -6,6 +6,7 @@ from collections import OrderedDict
 from enum import IntEnum
 from functools import reduce
 from threading import Lock
+from typing import Optional
 
 from pyof.v0x01.common.phy_port import Port as PortNo01
 from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
@@ -13,6 +14,8 @@ from pyof.v0x04.common.port import PortFeatures as PortFeatures04
 from pyof.v0x04.common.port import PortNo as PortNo04
 
 from kytos.core.common import EntityStatus, GenericEntity
+from kytos.core.events import KytosEvent
+from kytos.core.exceptions import KytosResizingAvailableTagError
 from kytos.core.helpers import now
 from kytos.core.id import InterfaceID
 
@@ -107,8 +110,9 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self._id = InterfaceID(switch.id, port_number)
         self._custom_speed = speed
         self._tag_lock = Lock()
-        self.set_available_tags(range(1, 4096))
-
+        self.set_available_tags_tag_ranges(
+            {'1': [[1, 4095]]}, {'1': None}
+        )
         super().__init__()
 
     def __repr__(self):
@@ -173,19 +177,295 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             super().status_reason
         )
 
-    def set_available_tags(self, iterable):
+    @staticmethod
+    def range_intersection(
+        ranges_a: list[list[int]],
+        ranges_b: list[list[int]]
+    ) -> list[list[int]]:
+        """Returns the intersection between two list
+        of ranges"""
+        result = []
+        a_i, b_i = 0, 0
+
+        while a_i < len(ranges_a) and b_i < len(ranges_b):
+            fst_a, snd_a = ranges_a[a_i]
+            fst_b, snd_b = ranges_b[b_i]
+
+            # Moving forward with non-intersection
+            if snd_a < fst_b:
+                a_i += 1
+            elif snd_b < fst_a:
+                b_i += 1
+            else:
+                # Intersection
+                intersection_start = max(fst_a, fst_b)
+                intersection_end = min(snd_a, snd_b)
+                result.append([intersection_start, intersection_end])
+
+                if snd_a < snd_b:
+                    a_i += 1
+                else:
+                    b_i += 1
+        return result
+
+    def get_available_tags(self, tag_type: str = '1') -> list[list[int]]:
+        """Get available tags, if there is tag_ranges restriction
+        self.available_tags are not truly available"""
+        if self.tag_ranges[tag_type] is None:
+            return self.available_tags[tag_type]
+        return self.range_intersection(self.available_tags[tag_type],
+                                       self.tag_ranges[tag_type])
+
+    def verify_first_last_tag(
+        self,
+        tag_ranges: list[list[int, int]],
+        tag_type: str = '1'
+    ) -> Optional[str]:
+        """Verify that first tags [[1...] and last tags [[...4095]] are
+        included"""
+        available = self.available_tags[tag_type]
+
+        if available[0][0] != 1:
+            if not (tag_ranges[0][0] == 1 and
+                    tag_ranges[0][1] + 1 >= available[0][0]):
+                reason = f"There is a gap at the beginning: available_tag:"\
+                         f"{available[0]} and tag_ranges:"\
+                         f"{tag_ranges[0]}. Tags can be {[1, 4095]}."
+                return reason
+        if available[-1][1] != 4095:
+            if not (tag_ranges[-1][1] == 4095 and
+                    tag_ranges[-1][0] <= available[-1][1] + 1):
+                reason = f"There is a gap at the end: available_tag:"\
+                         f"{available[-1]} and tag_ranges:"\
+                         f"{tag_ranges[-1]}. Tags can be {[1, 4095]}."
+                return reason
+        return None
+
+    def not_applicable(
+        self,
+        tag_ranges: list[list[int, int]],
+        tag_type: str = '1'
+    ) -> Optional[str]:
+        """Check if tag_ranges can be applied when there is available
+        Returns an early False when a gap is detected
+        Simulates sliding window O(n+m)"""
+        available = self.available_tags[tag_type]
+        if not available:
+            return "Every tag is used."
+
+        error_msg = self.verify_first_last_tag(tag_ranges)
+        if error_msg:
+            return error_msg
+
+        # Corner case
+        ava_n = len(available)
+        if ava_n == 1:
+            return None
+
+        rest_n = len(tag_ranges)
+        ava_i, rest_i = 0, 0
+        while rest_i < rest_n:
+            if tag_ranges[rest_i][0] <= available[ava_i][1] + 1:
+                while ava_i + 1 < ava_n:
+                    if tag_ranges[rest_i][1] + 1 >= available[ava_i+1][0]:
+                        ava_i += 1
+                    elif tag_ranges[rest_i][1] <= available[ava_i][1]:
+                        break
+                    else:
+                        reason = f"Gap detected available_tag:"\
+                                 f"{[available[ava_i], available[ava_i+1]]}"\
+                                 f" and tag_ranges:{tag_ranges[rest_i]}."
+                        return reason
+                rest_i += 1
+            else:
+                reason = f"Gap detected available_tag:"\
+                         f"{[available[ava_i], available[ava_i+1]]} and "\
+                         f"tag_ranges:{tag_ranges[rest_i]}."
+                return reason
+        return None
+
+    def set_tag_ranges(self, tag_ranges: list[list[int]], tag_type: str):
+        """Set new restriction"""
+        with self._tag_lock:
+            reason = self.not_applicable(tag_ranges, tag_type)
+            if reason:
+                msg = f"tag_ranges: {tag_ranges} is not applicable. {reason}"
+                raise KytosResizingAvailableTagError(msg)
+            self.tag_ranges[tag_type] = tag_ranges
+
+    def remove_tag_ranges(self, tag_type: str = '1'):
+        """Remove restriction set on tag_ranges"""
+        self.tag_ranges[tag_type] = None
+
+    def get_next_available_tag(self) -> Optional[int]:
+        """Get the next available tag from the interface.
+
+        Return the next available tag if exists and remove from the
+        available tags.
+        If no tag is available return False.
+        """
+        try:
+            with self._tag_lock:
+                first_tag = self.available_tags[-1][1]
+                self.available_tags[-1][1] -= 1
+                if self.available_tags[-1][0] > self.available_tags[-1][1]:
+                    self.available_tags.pop()
+                return first_tag
+        except IndexError:
+            return False
+
+    @staticmethod
+    def find_index_remove(
+        available_tags: list[list[int]],
+        tag_range: list[int]
+    ) -> Optional[int]:
+        """Find the index of tags in available_tags to be removed"""
+        low = 0
+        high = len(available_tags)
+        while low < high:
+            mid = (low+high)//2
+            if available_tags[mid][0] <= tag_range[0]:
+                if available_tags[mid][1] >= tag_range[1]:
+                    return mid
+                low = mid + 1
+            elif available_tags[mid][0] > tag_range[0]:
+                high = mid
+        return None
+
+    def remove_tags(self, tags: list[int], tag_type: str) -> bool:
+        """Remove tags by resize available_tags
+        Returns False if nothing was remove, True otherwise"""
+        available = self.available_tags[tag_type]
+        index = self.find_index_remove(available, tags)
+        if index is None:
+            return False
+        # Resizing
+        if tags[0] == available[index][0]:
+            if tags[1] == available[index][1]:
+                available[tag_type].pop(index)
+            else:
+                available[index: index+1] = [[tags[1]+1, available[index][1]]]
+        elif tags[1] == available[index][1]:
+            available[index: index+1] = [[available[index][0], tags[0]-1]]
+        else:
+            available[index: index+1] = [
+                [available[index][0], tags[0]-1],
+                [tags[1]+1, available[index][1]]
+            ]
+        return True
+
+    def use_tags(self, tags: list[int], tag_type: str = '1') -> bool:
+        """Remove a specific tag from available_tags if it is there.
+
+        Return False in case the tags is already removed.
+        """
+        with self._tag_lock:
+            return self.remove_tags(tags, tag_type)
+
+    @staticmethod
+    def find_index_add(
+        available_tags: list[list[int]],
+        tag_range: list[int]
+    ) -> Optional[int]:
+        """Find the index of tags in available_tags to be added"""
+        if available_tags[0][0] > tag_range[1]:
+            return 0
+        low = 1
+        high = len(available_tags)
+        while low < high:
+            mid = (low+high)//2
+            if available_tags[mid][0] > tag_range[1]:
+                if available_tags[mid-1][1] < tag_range[0]:
+                    return mid
+                high = mid
+            else:
+                low = mid + 1
+        if available_tags[-1][1] < tag_range[0]:
+            return high
+        return None
+
+    def add_tags(self, tags: list[int], tag_type: str) -> bool:
+        """Add tags, return True if they were added.
+        Returns False nothing nothing was added, True otherwise
+        Ensuring that ranges are not unnecessarily divided
+        available_tag e.g [[7, 10], [20, 30], [78, 92], [100, 109], [189, 200]]
+        tags examples are in each if statement.
+        """
+        available = self.available_tags[tag_type]
+        index = self.find_index_add(available, tags)
+        if index is None:
+            return False
+        if index == 0:
+            # [1, 6]
+            if tags[1] == available[index][0] - 1:
+                available[index][0] = tags[0]
+            # [1, 2]
+            else:
+                available.insert(0, tags)
+        elif index == len(available):
+            # [201, 300]
+            if available[index-1][1] + 1 == tags[0]:
+                available[index-1][1] = tags[1]
+            # [250, 300]
+            else:
+                available.append(tags)
+        else:
+            # [11, 19]
+            if (available[index-1][1] + 1 == tags[0] and
+                    available[index][0] - 1 == tags[1]):
+                available[index-1: index+1] = [
+                    [available[index-1][0], available[index][1]]
+                ]
+            # [11, 15]
+            elif available[index-1][1] + 1 == tags[0]:
+                available[index-1][1] = tags[1]
+            # [15, 19]
+            elif available[index][0] - 1 == tags[1]:
+                available[index][0] = tags[0]
+            # [15, 15]
+            else:
+                available.insert(index, tags)
+        return True
+
+    def make_tags_available(
+        self,
+        tags: list[int],
+        tag_type: str = '1'
+    ) -> bool:
+        """Add a specific tag in available_tags."""
+        with self._tag_lock:
+            return self.add_tags(tags, tag_type)
+
+    @staticmethod
+    def tags_are_available(
+        available: list[list[int]],
+        tags: [list[int]]
+    ) -> bool:
+        """Determine if tags is in available"""
+        low = 0
+        high = len(available)
+        while low < high:
+            mid = (low+high)//2
+            if available[mid][0] <= tags[0]:
+                if available[mid][1] >= tags[1]:
+                    return True
+            elif available[mid][0] > tags[0]:
+                high = mid
+        return False
+
+    def set_available_tags_tag_ranges(
+        self,
+        available_tag: dict[str, list[list[int]]],
+        tag_ranges: dict[str, Optional[list[list[int]]]]
+    ):
         """Set a range of VLAN tags to be used by this Interface.
 
         Args:
             iterable ([int]): range of VLANs.
         """
         with self._tag_lock:
-            self.available_tags = []
-
-            for i in iterable:
-                vlan = TAGType.VLAN
-                tag = TAG(vlan, i)
-                self.available_tags.append(tag)
+            self.available_tags = available_tag
+            self.tag_ranges = tag_ranges
 
     def enable(self):
         """Enable this interface instance.
@@ -195,7 +475,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self.switch.enable()
         self._enabled = True
 
-    def use_tag(self, tag):
+    def use_tag(self, tag: int):
         """Remove a specific tag from available_tags if it is there.
 
         Return False in case the tag is already removed.
@@ -207,31 +487,14 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             return False
         return True
 
-    def is_tag_available(self, tag):
+    def is_tag_available(self, tag: int, tag_type: str = '1'):
         """Check if a tag is available."""
         with self._tag_lock:
-            return tag in self.available_tags
-
-    def get_next_available_tag(self):
-        """Get the next available tag from the interface.
-
-        Return the next available tag if exists and remove from the
-        available tags.
-        If no tag is available return False.
-        """
-        try:
-            with self._tag_lock:
-                return self.available_tags.pop()
-        except IndexError:
+            if self.find_index_remove(
+                    self.available_tags[tag_type], [tag, tag]
+            ) is not None:
+                return True
             return False
-
-    def make_tag_available(self, tag):
-        """Add a specific tag in available_tags."""
-        if not self.is_tag_available(tag) and isinstance(tag, TAG):
-            with self._tag_lock:
-                self.available_tags.append(tag)
-            return True
-        return False
 
     def get_endpoint(self, endpoint):
         """Return a tuple with existent endpoint, None otherwise.
@@ -505,6 +768,18 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         """
         return json.dumps(self.as_dict())
 
+    def notify_link_available_tags(self, controller, src_func=None):
+        """Notify link available tags"""
+        name = "kytos/core.link_available_tags"
+        content = {
+            "interface_id": self.id,
+            "available_tags": self.available_tags,
+            "tag_ranges": self.tag_ranges,
+            "src_func": src_func
+        }
+        event = KytosEvent(name=name, content=content)
+        controller.buffers.app.put(event)
+
 
 class UNI:
     """Class that represents an User-to-Network Interface."""
@@ -527,11 +802,12 @@ class UNI:
 
     def is_valid(self):
         """Check if TAG is possible for this interface TAG pool."""
+        tag = self.user_tag.value
         if self.user_tag:
-            if isinstance(self.user_tag.value, str):
+            if isinstance(tag, str):
                 return self._is_reserved_valid_tag()
-            if isinstance(self.user_tag.value, int):
-                return self.interface.is_tag_available(self.user_tag)
+            if isinstance(tag, int):
+                return self.interface.is_tag_available(tag)
         return True
 
     def as_dict(self):

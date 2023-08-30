@@ -3,6 +3,7 @@ import functools
 import logging
 import traceback
 from asyncio import AbstractEventLoop
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
@@ -40,6 +41,9 @@ def get_apm_name():
 executors = {name: ThreadPoolExecutor(max_workers=max_workers,
                                       thread_name_prefix=f"thread_pool_{name}")
              for name, max_workers in get_thread_pool_max_workers().items()}
+
+ds_executors = defaultdict(lambda: ThreadPoolExecutor(max_workers=1,
+                           thread_name_prefix="dynamic_single"))
 
 
 def listen_to(event, *events, pool=None):
@@ -179,9 +183,11 @@ def listen_to(event, *events, pool=None):
             handler_func = handler_context_apm
             kwargs = dict(apm_client=ElasticAPM.get_client())
 
-        def get_executor(pool, event, default_pool="app"):
+        def get_executor(pool, event, default_pool="app", handler=handler):
             """Get executor."""
-            if pool:
+            if pool == "dynamic_single":
+                return ds_executors[handler]
+            if pool and pool in executors:
                 return executors[pool]
             if not event:
                 return executors[default_pool]
@@ -191,8 +197,6 @@ def listen_to(event, *events, pool=None):
             core_of = "kytos/core.openflow"
             if event.name.startswith(core_of) and "sb" in executors:
                 return executors["sb"]
-            if event.name.startswith("kytos.storehouse") and "db" in executors:
-                return executors["db"]
             return executors[default_pool]
 
         def inner(*args):

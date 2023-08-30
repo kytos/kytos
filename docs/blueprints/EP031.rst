@@ -274,10 +274,10 @@ VII. New EVC attribute
 
 The **telemetry_int** napp will leverage the EVC's metadata attribute to create a new item, called `telemetry`. This new item will be a dictionary will the following values:
 
-  * "status": "enabled|disabled"
+  * "enabled": true|false
+  * "status": "UP|DOWN"
   * "status_reason": ["some_error"]
-  * "last_enabled_at": datetime of when the status was "enabled". null for never.
-  * "last_disabled_at": datetime of when the status was "disabled". null for never.
+  * "status_updated_at": utc string "%Y-%m-%dT%H:%M:%S" of when the status was updated or null if never.
 
 IX. Failover integration
 ========================

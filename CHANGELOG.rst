@@ -6,6 +6,19 @@ All notable changes to the kytos project will be documented in this file.
 UNRELEASED - Under development
 ******************************
 
+Added
+=====
+- Added ``Interface.tag_ranges`` as ``dict[str, list[list[int]]]`` as replacement for ``vlan_pool`` settings.
+- Added ``kytos/core.interface_tags`` event publication to notify any modification of ``Interface.tag_ranges`` or ``Interface.available_tags``.
+
+Changed
+=======
+- Change format for ``Interface.available_tags`` to ``dict[str, list[list[int]]]``. Storing ``tag_types`` as keys and a list of ranges for ``available_tags`` as values.
+
+Deprecated
+==========
+- Deleted ``vlan_pool`` in favor of ``Interface.tag_ranges``
+
 [2023.1.0] - 2023-06-05
 ***********************
 

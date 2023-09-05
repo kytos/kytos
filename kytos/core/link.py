@@ -14,7 +14,7 @@ from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.exceptions import (KytosLinkCreationError,
                                    KytosNoTagAvailableError)
 from kytos.core.id import LinkID
-from kytos.core.interface import TAG, Interface, TAGType
+from kytos.core.interface import Interface, TAGType
 
 
 class Link(GenericEntity):
@@ -131,20 +131,20 @@ class Link(GenericEntity):
         return [tag for tag in self.endpoint_a.available_tags if tag in
                 self.endpoint_b.available_tags]
 
-    def is_tag_available(self, tag):
+    def is_tag_available(self, tag: int, tag_type: int = 1):
         """Check if a tag is available."""
-        return (self.endpoint_a.is_tag_available(tag) and
-                self.endpoint_b.is_tag_available(tag))
+        return (self.endpoint_a.is_tag_available(tag, tag_type) and
+                self.endpoint_b.is_tag_available(tag, tag_type))
 
-    def get_next_available_tag(self, controller, tag_type: str = '1') -> TAG:
+    def get_next_available_tag(self, controller, tag_type: int = 1) -> int:
         """Return the next available tag if exists."""
         with self._get_available_vlans_lock:
             # Copy the available tags because in case of error
             # we will remove and add elements to the available_tags
-            available_tags_a = deepcopy(self.endpoint_a.get_available_tags())
-            available_tags_b = deepcopy(self.endpoint_b.get_available_tags())
-            intersection_tags = Interface.range_intersection(available_tags_a,
-                                                             available_tags_b)
+            tags_a = deepcopy(self.endpoint_a.available_tags[tag_type])
+            tags_b = deepcopy(self.endpoint_b.available_tags[tag_type])
+            intersection_tags = Interface.range_intersection(tags_a,
+                                                             tags_b)
             for tag_range in intersection_tags:
                 for tag in range(tag_range[0], tag_range[1]+1):
                     # Tag already in use. Try another tag.
@@ -157,9 +157,9 @@ class Link(GenericEntity):
                         continue
 
                     # Tag used successfully by both endpoints. Returning.
-                    self.endpoint_a.notify_link_available_tags(controller)
-                    self.endpoint_b.notify_link_available_tags(controller)
-                    return TAG(int(tag_type), tag)
+                    self.endpoint_a.notify_interface_tags(controller)
+                    self.endpoint_b.notify_interface_tags(controller)
+                    return tag
 
             raise KytosNoTagAvailableError(self)
 
@@ -167,13 +167,13 @@ class Link(GenericEntity):
         self,
         controller,
         tag: int,
-        tag_type: str = '1'
+        tag_type: int = 1
     ) -> (bool, bool):
         """Add a specific tag in available_tags."""
         result_a = self.endpoint_a.make_tags_available([tag, tag], tag_type)
         result_b = self.endpoint_b.make_tags_available([tag, tag], tag_type)
-        self.endpoint_a.notify_link_available_tags(controller)
-        self.endpoint_b.notify_link_available_tags(controller)
+        self.endpoint_a.notify_interface_tags(controller)
+        self.endpoint_b.notify_interface_tags(controller)
         return result_a, result_b
 
     def available_vlans(self):

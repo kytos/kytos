@@ -77,12 +77,16 @@ class KytosNoTagAvailableError(Exception):
         return msg
 
 
-class KytosResizingAvailableTagError(Exception):
+class KytosSetTagRangeError(Exception):
     """Exception raised when available_tag cannot be resized"""
 
 
 class KytosLinkCreationError(Exception):
     """Exception thrown when the link has an empty endpoint."""
+
+
+class KytosTagtypeNotSupported(Exception):
+    """Exception thronw when a not supported tag type is not supported"""
 
 
 # Exceptions related  to NApps

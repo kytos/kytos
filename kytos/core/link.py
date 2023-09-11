@@ -6,7 +6,6 @@ interfaces.
 import json
 import operator
 from collections import OrderedDict
-from copy import deepcopy
 from functools import reduce
 from threading import Lock
 
@@ -23,6 +22,8 @@ class Link(GenericEntity):
     status_funcs = OrderedDict()
     status_reason_funcs = OrderedDict()
     _get_available_vlans_lock = Lock()
+    endpoint_a_lock = Lock()
+    endpoint_b_lock = Lock()
 
     def __init__(self, endpoint_a, endpoint_b):
         """Create a Link instance and set its attributes.
@@ -131,35 +132,30 @@ class Link(GenericEntity):
         return [tag for tag in self.endpoint_a.available_tags if tag in
                 self.endpoint_b.available_tags]
 
-    def is_tag_available(self, tag: int, tag_type: int = 1):
+    def is_tag_available(self, tag: int, tag_type: str = 'vlan'):
         """Check if a tag is available."""
         return (self.endpoint_a.is_tag_available(tag, tag_type) and
                 self.endpoint_b.is_tag_available(tag, tag_type))
 
-    def get_next_available_tag(self, controller, tag_type: int = 1) -> int:
+    def get_next_available_tag(
+        self,
+        controller,
+        tag_type: str = 'vlan'
+    ) -> int:
         """Return the next available tag if exists."""
         with self._get_available_vlans_lock:
-            # Copy the available tags because in case of error
-            # we will remove and add elements to the available_tags
-            tags_a = deepcopy(self.endpoint_a.available_tags[tag_type])
-            tags_b = deepcopy(self.endpoint_b.available_tags[tag_type])
-            intersection_tags = Interface.range_intersection(tags_a,
-                                                             tags_b)
-            for tag_range in intersection_tags:
-                for tag in range(tag_range[0], tag_range[1]+1):
-                    # Tag already in use. Try another tag.
-                    if not self.endpoint_a.use_tags([tag, tag]):
-                        continue
-
-                    # Tag already in use in B. Mark the tag as available again.
-                    if not self.endpoint_b.use_tags([tag, tag]):
-                        self.endpoint_a.make_tags_available([tag, tag])
-                        continue
-
-                    # Tag used successfully by both endpoints. Returning.
-                    self.endpoint_a.notify_interface_tags(controller)
-                    self.endpoint_b.notify_interface_tags(controller)
-                    return tag
+            with self.endpoint_a_lock:
+                with self.endpoint_b_lock:
+                    ava_tags_a = self.endpoint_a.available_tags[tag_type]
+                    ava_tags_b = self.endpoint_b.available_tags[tag_type]
+                    tag = Interface.range_intersection(ava_tags_a,
+                                                       ava_tags_b)
+                    if tag:
+                        self.endpoint_a.use_tags([tag, tag])
+                        self.endpoint_a.notify_interface_tags(controller)
+                        self.endpoint_b.use_tags([tag, tag])
+                        self.endpoint_b.notify_interface_tags(controller)
+                        return tag
 
             raise KytosNoTagAvailableError(self)
 
@@ -167,7 +163,7 @@ class Link(GenericEntity):
         self,
         controller,
         tag: int,
-        tag_type: int = 1
+        tag_type: str = 'vlan'
     ) -> (bool, bool):
         """Add a specific tag in available_tags."""
         result_a = self.endpoint_a.make_tags_available([tag, tag], tag_type)

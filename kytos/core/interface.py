@@ -4,7 +4,7 @@ import json
 import logging
 import operator
 from collections import OrderedDict
-from enum import IntEnum
+from enum import Enum
 from functools import reduce
 from threading import Lock
 from typing import Optional
@@ -26,19 +26,19 @@ __all__ = ('Interface',)
 LOG = logging.getLogger(__name__)
 
 
-class TAGType(IntEnum):
+class TAGType(Enum):
     """Class that represents a TAG Type."""
 
-    VLAN = 1
-    VLAN_QINQ = 2
-    MPLS = 3
+    VLAN = 'vlan'
+    VLAN_QINQ = 'vlan_qinq'
+    MPLS = 'mpls'
 
 
 class TAG:
     """Class that represents a TAG."""
 
     def __init__(self, tag_type, value):
-        self.tag_type = TAGType(tag_type)
+        self.tag_type = TAGType(tag_type).value
         self.value = value
 
     def __eq__(self, other):
@@ -112,8 +112,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self._id = InterfaceID(switch.id, port_number)
         self._custom_speed = speed
         self._tag_lock = Lock()
-        self.available_tags = {1: [[1, 4095]]}
-        self.tag_ranges = {1: [[1, 4095]]}
+        self.available_tags = {'vlan': [[1, 4095]]}
+        self.tag_ranges = {'vlan': [[1, 4095]]}
         self.set_available_tags_tag_ranges(
             self.available_tags, self.tag_ranges
         )
@@ -185,12 +185,10 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     def range_intersection(
         ranges_a: list[list[int]],
         ranges_b: list[list[int]]
-    ) -> list[list[int]]:
-        """Returns the intersection between two list
+    ) -> Optional[int]:
+        """Returns an intersection tag between two list
         of ranges"""
-        result = []
         a_i, b_i = 0, 0
-
         while a_i < len(ranges_a) and b_i < len(ranges_b):
             fst_a, snd_a = ranges_a[a_i]
             fst_b, snd_b = ranges_b[b_i]
@@ -202,15 +200,10 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 b_i += 1
             else:
                 # Intersection
-                intersection_start = max(fst_a, fst_b)
-                intersection_end = min(snd_a, snd_b)
-                result.append([intersection_start, intersection_end])
+                intersection_tag = max(fst_a, fst_b)
+                return intersection_tag
 
-                if snd_a < snd_b:
-                    a_i += 1
-                else:
-                    b_i += 1
-        return result
+        return None
 
     @staticmethod
     def range_difference(
@@ -288,7 +281,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             msg = f"Missing all tags from {used_tags[used_i:used_n]}"
             raise KytosSetTagRangeError(msg)
 
-    def set_tag_ranges(self, tag_ranges: list[list[int]], tag_type: int):
+    def set_tag_ranges(self, tag_ranges: list[list[int]], tag_type: str):
         """Set new restriction"""
         if tag_type != TAGType.VLAN.value:
             msg = f"Tag type {tag_type} is not supported."
@@ -298,7 +291,10 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 self.tag_ranges[tag_type], self.available_tags[tag_type]
             )
             # Verify new tag_ranges
-            self.can_set_tag_ranges(used_tags, tag_ranges)
+            try:
+                self.can_set_tag_ranges(used_tags, tag_ranges)
+            except KytosSetTagRangeError as err:
+                raise err
             # Resizing
             new_tag_ranges = self.range_difference(
                 tag_ranges, used_tags
@@ -306,7 +302,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             self.available_tags[tag_type] = new_tag_ranges
             self.tag_ranges[tag_type] = tag_ranges
 
-    def remove_tag_ranges(self, tag_type: int):
+    def remove_tag_ranges(self, tag_type: str):
         """Set tag_ranges[tag_type] to default [[1, 4095]]"""
         if tag_type != TAGType.VLAN.value:
             msg = f"Tag type {tag_type} is not supported."
@@ -339,7 +335,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
         return None
 
-    def remove_tags(self, tags: list[int], tag_type: int) -> bool:
+    def remove_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
         """Remove tags by resize available_tags
         Returns False if nothing was remove, True otherwise"""
         available = self.available_tags[tag_type]
@@ -361,7 +357,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             ]
         return True
 
-    def use_tags(self, tags: list[int], tag_type: int = 1) -> bool:
+    def use_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
         """Remove a specific tag from available_tags if it is there.
 
         Return False in case the tags were not able to be removed.
@@ -388,7 +384,6 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         if index < len(available_tags):
             if tag_range[1] < available_tags[index][0]:
                 after = True
-        # Out of range
         else:
             after = True
 
@@ -396,13 +391,19 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             return index
         return None
 
-    def add_tags(self, tags: list[int], tag_type: int) -> bool:
+    # pylint: disable=too-many-branches
+    def add_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
         """Add tags, return True if they were added.
         Returns False nothing nothing was added, True otherwise
         Ensuring that ranges are not unnecessarily divided
         available_tag e.g [[7, 10], [20, 30], [78, 92], [100, 109], [189, 200]]
         tags examples are in each if statement.
         """
+        if not tags[0] or not tags[1]:
+            return False
+        tag_ranges = self.tag_ranges[tag_type]
+        if self.find_index_remove(tag_ranges, tags) is None:
+            return False
         available = self.available_tags[tag_type]
         index = self.find_index_add(available, tags)
         if index is None:
@@ -442,28 +443,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     def make_tags_available(
         self,
         tags: list[int],
-        tag_type: int = 1
+        tag_type: str = 'vlan'
     ) -> bool:
         """Add a specific tag in available_tags."""
         with self._tag_lock:
             return self.add_tags(tags, tag_type)
-
-    @staticmethod
-    def tags_are_available(
-        available: list[list[int]],
-        tags: [list[int]]
-    ) -> bool:
-        """Determine if tags is in available"""
-        low = 0
-        high = len(available)
-        while low < high:
-            mid = (low+high)//2
-            if available[mid][0] <= tags[0]:
-                if available[mid][1] >= tags[1]:
-                    return True
-            elif available[mid][0] > tags[0]:
-                high = mid
-        return False
 
     def set_available_tags_tag_ranges(
         self,
@@ -487,7 +471,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self.switch.enable()
         self._enabled = True
 
-    def is_tag_available(self, tag: int, tag_type: int = 1):
+    def is_tag_available(self, tag: int, tag_type: str = 'vlan'):
         """Check if a tag is available."""
         with self._tag_lock:
             if self.find_index_remove(
@@ -731,6 +715,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             'status': self.status.value,
             'status_reason': sorted(self.status_reason),
             'link': self.link.id if self.link else "",
+            'available_tags': self.available_tags,
+            'tag_ranges': self.tag_ranges,
         }
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()
@@ -771,9 +757,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     def notify_interface_tags(self, controller):
         """Notify link available tags"""
         name = "kytos/core.interface_tags"
-        content = {
-            "interface": self
-        }
+        content = {"interface": self}
         event = KytosEvent(name=name, content=content)
         controller.buffers.app.put(event)
 
@@ -799,8 +783,8 @@ class UNI:
 
     def is_valid(self):
         """Check if TAG is possible for this interface TAG pool."""
-        tag = self.user_tag.value
         if self.user_tag:
+            tag = self.user_tag.value
             if isinstance(tag, str):
                 return self._is_reserved_valid_tag()
             if isinstance(tag, int):

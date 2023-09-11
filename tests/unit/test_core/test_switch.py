@@ -61,40 +61,6 @@ class TestSwitch(TestCase):
         self.switch.connection = None
         self.assertIsNone(self.switch.ofp_version)
 
-    def test_switch_vlan_pool_default(self):
-        """Test default vlan_pool value."""
-        self.assertEqual(self.options.vlan_pool, {})
-
-    def test_switch_vlan_pool_options(self):
-        """Test switch with the example from kytos.conf."""
-        dpid = "00:00:00:00:00:00:00:01"
-        vlan_pool = {"00:00:00:00:00:00:00:01":
-                     {"1": [[1, 2], [5, 10]], "4": [[3, 4]]}}
-        self.controller.switches[dpid] = self.switch
-        self.options.vlan_pool = vlan_pool
-        self.controller.get_switch_or_create(dpid, self.switch.connection)
-
-        port_id = 1
-        intf = self.controller.switches[dpid].interfaces[port_id]
-        tag_values = [tag.value for tag in intf.available_tags]
-        self.assertEqual(tag_values, [1, 5, 6, 7, 8, 9])
-
-        port_id = 4
-        intf = self.controller.switches[dpid].interfaces[port_id]
-        tag_values = [tag.value for tag in intf.available_tags]
-        self.assertEqual(tag_values, [3])
-
-        # this port number doesn't exist yet.
-        port_7 = 7
-        intf = Interface("test", port_7, self.switch)
-        # no attr filters, so should associate as it is
-        self.controller.switches[dpid].update_interface(intf)
-        intf_obj = self.controller.switches[dpid].interfaces[port_7]
-        self.assertEqual(intf_obj, intf)
-        # assert default vlan_pool range (1, 4096)
-        tag_values = [tag.value for tag in intf_obj.available_tags]
-        self.assertEqual(tag_values, list(range(1, 4096)))
-
     def test_update_description(self):
         """Test update_description method."""
         desc = MagicMock()

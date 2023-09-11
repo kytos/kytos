@@ -123,14 +123,15 @@ class Link(GenericEntity):
         """
         return self._id
 
-    @property
-    def available_tags(self):
+    def available_tags(self, tag_type: str = 'vlan') -> list[list[int]]:
         """Return the available tags for the link.
 
         Based on the endpoint tags.
         """
-        return [tag for tag in self.endpoint_a.available_tags if tag in
-                self.endpoint_b.available_tags]
+        return Interface.range_intersection(
+            self.endpoint_a.available_tags[tag_type],
+            self.endpoint_b.available_tags[tag_type],
+        )
 
     def is_tag_available(self, tag: int, tag_type: str = 'vlan'):
         """Check if a tag is available."""
@@ -148,8 +149,8 @@ class Link(GenericEntity):
                 with self.endpoint_b_lock:
                     ava_tags_a = self.endpoint_a.available_tags[tag_type]
                     ava_tags_b = self.endpoint_b.available_tags[tag_type]
-                    tag = Interface.range_intersection(ava_tags_a,
-                                                       ava_tags_b)
+                    tag = Interface.range_intersection_first_tag(ava_tags_a,
+                                                                 ava_tags_b)
                     if tag:
                         self.endpoint_a.use_tags([tag, tag])
                         self.endpoint_a.notify_interface_tags(controller)
@@ -159,7 +160,7 @@ class Link(GenericEntity):
 
             raise KytosNoTagAvailableError(self)
 
-    def make_tag_available(
+    def make_tags_available(
         self,
         controller,
         tag: int,
@@ -181,8 +182,8 @@ class Link(GenericEntity):
     @staticmethod
     def _get_available_vlans(endpoint):
         """Return all vlans from endpoint."""
-        tags = endpoint.available_tags
-        return [tag for tag in tags if tag.tag_type == TAGType.VLAN]
+        vlans = endpoint.available_tags
+        return [vlan for vlan in vlans if vlan == TAGType.VLAN.value]
 
     def as_dict(self):
         """Return the Link as a dictionary."""

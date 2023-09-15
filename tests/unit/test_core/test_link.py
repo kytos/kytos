@@ -208,27 +208,27 @@ class TestLink():
     def test_get_next_available_tag(self, controller):
         """Test get next available tags returns different tags"""
         link = Link(self.iface1, self.iface2)
-        tag = link.get_next_available_tag(controller)
-        next_tag = link.get_next_available_tag(controller)
+        tag = link.get_next_available_tag(controller, "link_id")
+        next_tag = link.get_next_available_tag(controller, "link_id")
 
         assert tag != next_tag
 
     def test_get_tag_multiple_calls(self, controller):
         """Test get next available tags returns different tags"""
         link = Link(self.iface1, self.iface2)
-        tag = link.get_next_available_tag(controller)
-        next_tag = link.get_next_available_tag(controller)
+        tag = link.get_next_available_tag(controller, "link_id")
+        next_tag = link.get_next_available_tag(controller, "link_id")
         assert next_tag != tag
 
     def test_tag_life_cicle(self, controller):
         """Test get next available tags returns different tags"""
         link = Link(self.iface1, self.iface2)
-        tag = link.get_next_available_tag(controller)
+        tag = link.get_next_available_tag(controller, "link_id")
 
         is_available = link.is_tag_available(tag)
         assert is_available is False
 
-        link.make_tags_available(controller, tag)
+        link.make_tags_available(controller, tag, "link_id")
         is_available = link.is_tag_available(tag)
         assert is_available
 
@@ -248,10 +248,10 @@ class TestLink():
         def test_get_next_available_tag(controller):
             """Assert that get_next_available_tag() returns different tags."""
             _i.append(1)
-            tag = _link.get_next_available_tag(controller)
+            tag = _link.get_next_available_tag(controller, "link_id")
             time.sleep(0.0001)
 
-            next_tag = _link.get_next_available_tag(controller)
+            next_tag = _link.get_next_available_tag(controller, "link_id")
 
             assert tag != next_tag
 

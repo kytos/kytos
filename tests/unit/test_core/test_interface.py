@@ -330,31 +330,16 @@ class TestInterface():
         assert self.iface.make_tags_available([1, 20]) is False
         assert self.iface.make_tags_available([250, 280])
 
-    async def range_intersection_first_tag(self) -> None:
-        """Test range_intersection"""
-        tag_ranges_a = [[35, 90]]
-        tag_ranges_b = [[30, 40]]
-        found_tag = self.iface.range_intersection_first_tag(
-            tag_ranges_a, tag_ranges_b
-        )
-        assert found_tag == 35
-
-        tag_ranges_a = [[41, 90]]
-        tag_ranges_b = [[30, 40]]
-        found_tag = self.iface.range_intersection_first_tag(
-            tag_ranges_a, tag_ranges_b
-        )
-        assert found_tag is None
-
     async def range_intersection(self) -> None:
-        """Test range_intersection_first_tag"""
+        """Test range_intersection"""
         tags_a = [
             [3, 5], [7, 9], [11, 16], [21, 23], [25, 25], [27, 28], [30, 30]
         ]
         tags_b = [
             [1, 3], [6, 6], [10, 10], [12, 13], [15, 15], [17, 20], [22, 30]
         ]
-        result = self.iface.range_intersection(tags_a, tags_b)
+        iterator_result = self.iface.range_intersection(tags_a, tags_b)
+        result = list(iterator_result)
         expected = [
             [3, 3], [12, 13], [15, 15], [22, 23], [25, 25], [27, 28], [30, 30]
         ]

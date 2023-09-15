@@ -7,7 +7,7 @@ from collections import OrderedDict
 from enum import Enum
 from functools import reduce
 from threading import Lock
-from typing import Optional
+from typing import Iterator, Optional
 
 from pyof.v0x01.common.phy_port import Port as PortNo01
 from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
@@ -96,6 +96,18 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 controller and are not changed by the switch. Options
                 are: administratively down, ignore received packets, drop
                 forwarded packets, and/or do not send packet-in messages.
+
+        Attributes:
+            available_tags (dict[str, list[list[int]]]): Contains the available
+                tags integers in the current interface, the availability is
+                represented as a list of ranges. These ranges are
+                [inclusive, inclusive]. For example, [1, 5] represents
+                [1, 2, 3, 4, 5].
+            tag_ranges (dict[str, list[list[int]]]): Contains restrictions for
+                available_tags. The list of ranges is the same type as in
+                available_tags. Setting a new tag_ranges will required for
+                available_tags to be resize.
+
         """
         self.name = name
         self.port_number = int(port_number)
@@ -112,8 +124,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self._id = InterfaceID(switch.id, port_number)
         self._custom_speed = speed
         self._tag_lock = Lock()
-        self.available_tags = {'vlan': [[1, 4095]]}
-        self.tag_ranges = {'vlan': [[1, 4095]]}
+        self.available_tags = {'vlan': self.default_tag_values['vlan']}
+        self.tag_ranges = {'vlan': self.default_tag_values['vlan']}
         self.set_available_tags_tag_ranges(
             self.available_tags, self.tag_ranges
         )
@@ -181,14 +193,23 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             super().status_reason
         )
 
+    @property
+    def default_tag_values(self) -> dict[str, list[list[int]]]:
+        """Return a default list of ranges"""
+        default_values = {
+            "vlan": [[1, 4095]],
+            "vlan_qinq": [[1, 4095]],
+            "mpls": [[1, 1048575]],
+        }
+        return default_values
+
     @staticmethod
     def range_intersection(
         ranges_a: list[list[int]],
         ranges_b: list[list[int]]
-    ) -> list[list[int]]:
-        """Returns the intersection between two list
-        of ranges"""
-        result = []
+    ) -> Iterator[list[int]]:
+        """Returns an iterator of an intersection between
+        two list of ranges"""
         a_i, b_i = 0, 0
         while a_i < len(ranges_a) and b_i < len(ranges_b):
             fst_a, snd_a = ranges_a[a_i]
@@ -202,36 +223,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 # Intersection
                 intersection_start = max(fst_a, fst_b)
                 intersection_end = min(snd_a, snd_b)
-                result.append([intersection_start, intersection_end])
+                yield [intersection_start, intersection_end]
                 if snd_a < snd_b:
                     a_i += 1
                 else:
                     b_i += 1
-        return result
-
-    @staticmethod
-    def range_intersection_first_tag(
-        ranges_a: list[list[int]],
-        ranges_b: list[list[int]]
-    ) -> Optional[int]:
-        """Returns an intersection tag between two list
-        of ranges"""
-        a_i, b_i = 0, 0
-        while a_i < len(ranges_a) and b_i < len(ranges_b):
-            fst_a, snd_a = ranges_a[a_i]
-            fst_b, snd_b = ranges_b[b_i]
-
-            # Moving forward with non-intersection
-            if snd_a < fst_b:
-                a_i += 1
-            elif snd_b < fst_a:
-                b_i += 1
-            else:
-                # Intersection
-                intersection_tag = max(fst_a, fst_b)
-                return intersection_tag
-
-        return None
 
     @staticmethod
     def range_difference(
@@ -270,7 +266,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 else:
                     a_i += 1
 
-        # Append the rest of ranges_a
+        # Append last intersection and the rest of ranges_a
         while a_i < len(ranges_a):
             if update:
                 start_a, end_a = ranges_a[a_i]
@@ -340,9 +336,9 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 self.tag_ranges[tag_type], self.available_tags[tag_type]
             )
             self.available_tags[tag_type] = self.range_difference(
-                [[1, 4095]], used_tags
+                self.default_tag_values[tag_type], used_tags
             )
-            self.tag_ranges[tag_type] = [[1, 4095]]
+            self.tag_ranges[tag_type] = self.default_tag_values[tag_type]
 
     @staticmethod
     def find_index_remove(
@@ -385,14 +381,21 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             ]
         return True
 
-    def use_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
+    def use_tags(
+        self,
+        tags: list[int],
+        tag_type: str = 'vlan',
+        use_lock: bool = True,
+    ) -> bool:
         """Remove a specific tag from available_tags if it is there.
-
         Return False in case the tags were not able to be removed.
         """
-        with self._tag_lock:
+        if use_lock:
+            with self._tag_lock:
+                result = self.remove_tags(tags, tag_type)
+        else:
             result = self.remove_tags(tags, tag_type)
-            return result
+        return result
 
     @staticmethod
     def find_index_add(
@@ -471,11 +474,16 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     def make_tags_available(
         self,
         tags: list[int],
-        tag_type: str = 'vlan'
+        tag_type: str = 'vlan',
+        use_lock: bool = True,
     ) -> bool:
         """Add a specific tag in available_tags."""
-        with self._tag_lock:
-            return self.add_tags(tags, tag_type)
+        if use_lock:
+            with self._tag_lock:
+                result = self.add_tags(tags, tag_type)
+        else:
+            result = self.add_tags(tags, tag_type)
+        return result
 
     def set_available_tags_tag_ranges(
         self,
@@ -743,8 +751,6 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             'status': self.status.value,
             'status_reason': sorted(self.status_reason),
             'link': self.link.id if self.link else "",
-            'available_tags': self.available_tags,
-            'tag_ranges': self.tag_ranges,
         }
         if self.stats:
             iface_dict['stats'] = self.stats.as_dict()

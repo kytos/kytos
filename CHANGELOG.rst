@@ -17,7 +17,7 @@ Changed
 
 Deprecated
 ==========
-- Deleted ``vlan_pool`` in favor of ``Interface.tag_ranges``
+- Deleted ``vlan_pool`` from ``kytos.conf`` in favor of ``Interface.tag_ranges`` which updates from ``kytos/topology`` API endpoint, ``v3/interfaces/{intf_id}/tag_ranges``.
 
 [2023.1.0] - 2023-06-05
 ***********************

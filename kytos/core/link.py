@@ -36,11 +36,11 @@ class Link(GenericEntity):
             raise KytosLinkCreationError("endpoint_b cannot be None")
         self._id = LinkID(endpoint_a.id, endpoint_b.id)
         if self._id.interfaces[0] == endpoint_b.id:
-            self.endpoint_a = endpoint_b
-            self.endpoint_b = endpoint_a
+            self.endpoint_a: Interface = endpoint_b
+            self.endpoint_b: Interface = endpoint_a
         else:
-            self.endpoint_a = endpoint_a
-            self.endpoint_b = endpoint_b
+            self.endpoint_a: Interface = endpoint_a
+            self.endpoint_b: Interface = endpoint_b
 
         super().__init__()
 
@@ -148,18 +148,20 @@ class Link(GenericEntity):
     ) -> int:
         """Return the next available tag if exists."""
         with self._get_available_vlans_lock[link_id]:
-            with self.endpoint_a_lock:
-                with self.endpoint_b_lock:
+            with self.endpoint_a._tag_lock:
+                with self.endpoint_b._tag_lock:
                     ava_tags_a = self.endpoint_a.available_tags[tag_type]
                     ava_tags_b = self.endpoint_b.available_tags[tag_type]
                     tags = Interface.range_intersection(ava_tags_a,
                                                         ava_tags_b)
                     try:
                         tag, _ = next(tags)
-                        self.endpoint_a.use_tags([tag, tag], use_lock=False)
-                        self.endpoint_a.notify_interface_tags(controller)
-                        self.endpoint_b.use_tags([tag, tag], use_lock=False)
-                        self.endpoint_b.notify_interface_tags(controller)
+                        self.endpoint_a.use_tags(
+                            controller, [tag, tag], use_lock=False
+                        )
+                        self.endpoint_b.use_tags(
+                            controller, [tag, tag], use_lock=False
+                        )
                         return tag
                     except StopIteration:
                         raise KytosNoTagAvailableError(self)
@@ -173,16 +175,14 @@ class Link(GenericEntity):
     ) -> (bool, bool):
         """Add a specific tag in available_tags."""
         with self._get_available_vlans_lock[link_id]:
-            with self.endpoint_a_lock:
-                with self.endpoint_b_lock:
+            with self.endpoint_a._tag_lock:
+                with self.endpoint_b._tag_lock:
                     result_a = self.endpoint_a.make_tags_available(
-                        [tag, tag], tag_type, False
+                        controller, [tag, tag], tag_type, False
                     )
                     result_b = self.endpoint_b.make_tags_available(
-                        [tag, tag], tag_type, False
+                        controller, [tag, tag], tag_type, False
                     )
-                    self.endpoint_a.notify_interface_tags(controller)
-                    self.endpoint_b.notify_interface_tags(controller)
         return result_a, result_b
 
     def available_vlans(self):

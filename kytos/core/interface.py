@@ -277,34 +277,6 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
         return result
 
-    @staticmethod
-    def can_set_tag_ranges(used_tags, tag_ranges):
-        """Check if all used tags are included in tag_ranges"""
-        tag_n = len(tag_ranges)
-        used_n = len(used_tags)
-        tag_i, used_i = 0, 0
-        while tag_i < tag_n and used_i < used_n:
-            start_tag, end_tag = tag_ranges[tag_i]
-            start_used, end_used = used_tags[used_i]
-
-            if end_tag < start_used:
-                tag_i += 1
-            elif end_used < start_tag:
-                msg = f"Missing all tags from {used_tags[used_i]}"
-                raise KytosSetTagRangeError(msg)
-            else:
-                if start_tag <= start_used and end_tag >= end_used:
-                    tag_i += 1
-                    used_i += 1
-                else:
-                    msg = f"Missing tags from {used_tags[used_i]}"
-                    raise KytosSetTagRangeError(msg)
-
-        # Check if there is anything left
-        if used_i != used_n:
-            msg = f"Missing all tags from {used_tags[used_i:used_n]}"
-            raise KytosSetTagRangeError(msg)
-
     def set_tag_ranges(self, tag_ranges: list[list[int]], tag_type: str):
         """Set new restriction"""
         if tag_type != TAGType.VLAN.value:
@@ -315,10 +287,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 self.tag_ranges[tag_type], self.available_tags[tag_type]
             )
             # Verify new tag_ranges
-            try:
-                self.can_set_tag_ranges(used_tags, tag_ranges)
-            except KytosSetTagRangeError as err:
-                raise err
+            missing = self.range_difference(used_tags, tag_ranges)
+            if missing:
+                msg = f"Missing tags in tag_range: {missing}"
+                raise KytosSetTagRangeError(msg)
+
             # Resizing
             new_tag_ranges = self.range_difference(
                 tag_ranges, used_tags
@@ -371,9 +344,9 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             if tags[1] == available[index][1]:
                 available.pop(index)
             else:
-                available[index: index+1] = [[tags[1]+1, available[index][1]]]
+                available[index][0] = tags[1] + 1
         elif tags[1] == available[index][1]:
-            available[index: index+1] = [[available[index][0], tags[0]-1]]
+            available[index][1] = tags[0] - 1
         else:
             available[index: index+1] = [
                 [available[index][0], tags[0]-1],
@@ -383,58 +356,60 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
     def use_tags(
         self,
+        controller,
         tags: list[int],
         tag_type: str = 'vlan',
         use_lock: bool = True,
     ) -> bool:
         """Remove a specific tag from available_tags if it is there.
         Return False in case the tags were not able to be removed.
+
+        Args:
+            controller: Kytos controller
+            tags: List of tags, there should be 2 items in the list
+            tag_type: TAG type value
+            use_lock: Boolean to whether use a lock or not
         """
         if use_lock:
             with self._tag_lock:
                 result = self.remove_tags(tags, tag_type)
         else:
             result = self.remove_tags(tags, tag_type)
+        if result:
+            self._notify_interface_tags(controller)
         return result
 
     @staticmethod
     def find_index_add(
         available_tags: list[list[int]],
-        tag_range: list[int]
+        tags: list[int]
     ) -> Optional[int]:
-        """Find the index of tags in available_tags to be added"""
-        index = bisect.bisect_left(available_tags, tag_range)
-        previous, after = False, False
-        if index - 1 > -1:
-            if tag_range[0] > available_tags[index-1][1]:
-                previous = True
-        # Out of range
-        else:
-            previous = True
+        """Find the index of tags in available_tags to be added.
+        This method assumes that tags is within self.tag_ranges"""
+        index = bisect.bisect_left(available_tags, tags)
 
-        if index < len(available_tags):
-            if tag_range[1] < available_tags[index][0]:
-                after = True
-        else:
-            after = True
-
-        if previous and after:
+        if (index == 0 or tags[0] > available_tags[index-1][1]) and \
+           (index == len(available_tags) or
+                tags[1] < available_tags[index][0]):
             return index
         return None
 
     # pylint: disable=too-many-branches
     def add_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
         """Add tags, return True if they were added.
-        Returns False nothing nothing was added, True otherwise
+        Returns False when nothing was added, True otherwise
         Ensuring that ranges are not unnecessarily divided
         available_tag e.g [[7, 10], [20, 30], [78, 92], [100, 109], [189, 200]]
         tags examples are in each if statement.
         """
         if not tags[0] or not tags[1]:
             return False
+
+        # Check if tags is within self.tag_ranges
         tag_ranges = self.tag_ranges[tag_type]
         if self.find_index_remove(tag_ranges, tags) is None:
             return False
+
         available = self.available_tags[tag_type]
         index = self.find_index_add(available, tags)
         if index is None:
@@ -473,16 +448,26 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
     def make_tags_available(
         self,
+        controller,
         tags: list[int],
         tag_type: str = 'vlan',
         use_lock: bool = True,
     ) -> bool:
-        """Add a specific tag in available_tags."""
+        """Add a specific tag in available_tags.
+
+        Args:
+            controller: Kytos controller
+            tags: List of tags, there should be 2 items in the list
+            tag_type: TAG type value
+            use_lock: Boolean to whether use a lock or not
+        """
         if use_lock:
             with self._tag_lock:
                 result = self.add_tags(tags, tag_type)
         else:
             result = self.add_tags(tags, tag_type)
+        if result:
+            self._notify_interface_tags(controller)
         return result
 
     def set_available_tags_tag_ranges(
@@ -788,7 +773,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         """
         return json.dumps(self.as_dict())
 
-    def notify_interface_tags(self, controller):
+    def _notify_interface_tags(self, controller):
         """Notify link available tags"""
         name = "kytos/core.interface_tags"
         content = {"interface": self}

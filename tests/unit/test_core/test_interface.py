@@ -181,27 +181,25 @@ class TestInterface():
         # test upper limit
         assert self.iface.is_tag_available(max_range) is False
 
-    async def test_interface_use_tags(self):
+    async def test_interface_use_tags(self, controller):
         """Test all use_tags on Interface class."""
-
+        self.iface._notify_interface_tags = MagicMock()
         tags = [100, 200]
         # check use tag for the first time
-        is_success = self.iface.use_tags(tags)
+        is_success = self.iface.use_tags(controller, tags)
         assert is_success
+        assert self.iface._notify_interface_tags.call_count == 1
 
         # check use tag for the second time
-        is_success = self.iface.use_tags(tags)
+        is_success = self.iface.use_tags(controller, tags)
         assert is_success is False
+        assert self.iface._notify_interface_tags.call_count == 1
 
         # check use tag after returning the tag to the pool
-        self.iface.make_tags_available(tags)
-        is_success = self.iface.use_tags(tags)
+        self.iface.make_tags_available(controller, tags)
+        is_success = self.iface.use_tags(controller, tags)
         assert is_success
-
-        # Test sanity safe guard
-        none = [None, None]
-        assert self.iface.make_tags_available(none) is False
-        assert None not in self.iface.available_tags
+        assert self.iface._notify_interface_tags.call_count == 3
 
     async def test_enable(self):
         """Test enable method."""
@@ -317,20 +315,38 @@ class TestInterface():
         assert self.iface.status == EntityStatus.UP
         assert self.iface.status_reason == set()
 
-    async def test_make_tags_available(self) -> None:
+    async def test_default_tag_values(self) -> None:
+        """Test default_tag_values property"""
+        expected = {
+            "vlan": [[1, 4095]],
+            "vlan_qinq": [[1, 4095]],
+            "mpls": [[1, 1048575]],
+        }
+        assert self.iface.default_tag_values == expected
+
+    async def test_make_tags_available(self, controller) -> None:
         """Test make_tags_available"""
         available = {'vlan': [[300, 3000]]}
         tag_ranges = {'vlan': [[20, 20], [200, 3000]]}
+        self.iface._notify_interface_tags = MagicMock()
         self.iface.set_available_tags_tag_ranges(
             available, tag_ranges
         )
         assert self.iface.available_tags == available
         assert self.iface.tag_ranges == tag_ranges
 
-        assert self.iface.make_tags_available([1, 20]) is False
-        assert self.iface.make_tags_available([250, 280])
+        assert self.iface.make_tags_available(controller, [1, 20]) is False
+        assert self.iface._notify_interface_tags.call_count == 0
+        assert self.iface.make_tags_available(controller, [250, 280])
+        assert self.iface._notify_interface_tags.call_count == 1
 
-    async def range_intersection(self) -> None:
+        # Test sanity safe guard
+        none = [None, None]
+        assert self.iface.make_tags_available(controller, none) is False
+        assert None not in self.iface.available_tags
+        assert self.iface._notify_interface_tags.call_count == 1
+
+    async def test_range_intersection(self) -> None:
         """Test range_intersection"""
         tags_a = [
             [3, 5], [7, 9], [11, 16], [21, 23], [25, 25], [27, 28], [30, 30]
@@ -338,8 +354,10 @@ class TestInterface():
         tags_b = [
             [1, 3], [6, 6], [10, 10], [12, 13], [15, 15], [17, 20], [22, 30]
         ]
+        result = []
         iterator_result = self.iface.range_intersection(tags_a, tags_b)
-        result = list(iterator_result)
+        for tag_range in iterator_result:
+            result.append(tag_range)
         expected = [
             [3, 3], [12, 13], [15, 15], [22, 23], [25, 25], [27, 28], [30, 30]
         ]
@@ -353,32 +371,14 @@ class TestInterface():
         actual = self.iface.range_difference(ranges_a, ranges_b)
         assert expected == actual
 
-    async def test_can_set_tag_ranges(self) -> None:
-        """Test can_set_tag_ranges"""
-        used_tags = [[20, 35], [50, 68], [100, 3000]]
-        tag_ranges = [[20, 40], [45, 68], [100, 3000]]
-        self.iface.can_set_tag_ranges(used_tags, tag_ranges)
-
-        tag_ranges = [[45, 68], [100, 3000]]
-        with pytest.raises(KytosSetTagRangeError):
-            self.iface.can_set_tag_ranges(used_tags, tag_ranges)
-
-        tag_ranges = [[20, 40], [45, 68]]
-        with pytest.raises(KytosSetTagRangeError):
-            self.iface.can_set_tag_ranges(used_tags, tag_ranges)
-
-        tag_ranges = [[20, 40], [60, 68], [100, 3000]]
-        with pytest.raises(KytosSetTagRangeError):
-            self.iface.can_set_tag_ranges(used_tags, tag_ranges)
-
-    async def test_set_tag_ranges(self) -> None:
+    async def test_set_tag_ranges(self, controller) -> None:
         """Test set_tag_ranges"""
         tag_ranges = [[20, 20], [200, 3000]]
         with pytest.raises(KytosTagtypeNotSupported):
             self.iface.set_tag_ranges(tag_ranges, 'vlan_qinq')
 
         self.iface.set_tag_ranges(tag_ranges, 'vlan')
-        self.iface.use_tags([200, 250])
+        self.iface.use_tags(controller, [200, 250])
         self.iface.set_tag_ranges(tag_ranges, 'vlan')
         ava_expected = [[20, 20], [251, 3000]]
         assert self.iface.tag_ranges['vlan'] == tag_ranges
@@ -451,41 +451,58 @@ class TestInterface():
         assert self.iface.remove_tags([251, 399])
         assert self.iface.available_tags['vlan'] == ava_expected
         assert self.iface.remove_tags([200, 240]) is False
+        ava_expected = [[241, 250], [400, 499]]
+        assert self.iface.remove_tags([500, 3000])
+        assert self.iface.available_tags['vlan'] == ava_expected
 
     async def test_add_tags(self) -> None:
         """Test add_tags"""
-        available_tag = [[7, 10], [20, 30], [78, 92], [100, 109]]
+        available_tag = [[7, 10], [20, 30]]
         tag_ranges = [[1, 4095]]
-        self.iface.set_available_tags_tag_ranges(
-            {'vlan': available_tag}, {'vlan': tag_ranges}
-        )
-        ava_expected = [[1, 10], [20, 30], [78, 92], [100, 109]]
-        assert self.iface.add_tags([1, 6])
+        parameters = {
+            "available_tag": {'vlan': available_tag},
+            "tag_ranges": {'vlan': tag_ranges}
+        }
+        self.iface.set_available_tags_tag_ranges(**parameters)
+        ava_expected = [[4, 10], [20, 30]]
+        assert self.iface.add_tags([4, 6])
         assert self.iface.available_tags['vlan'] == ava_expected
 
-        ava_expected = [[1, 30], [78, 92], [100, 109]]
-        assert self.iface.add_tags([11, 19])
+        ava_expected = [[1, 2], [4, 10], [20, 30]]
+        assert self.iface.add_tags([1, 2])
         assert self.iface.available_tags['vlan'] == ava_expected
 
-        ava_expected = [[1, 30], [78, 92], [100, 109], [200, 240]]
-        assert self.iface.add_tags([200, 240])
+        ava_expected = [[1, 2], [4, 10], [20, 35]]
+        assert self.iface.add_tags([31, 35])
         assert self.iface.available_tags['vlan'] == ava_expected
 
-        ava_expected = [[1, 30], [40, 92], [100, 109], [200, 240]]
-        assert self.iface.add_tags([40, 77])
+        ava_expected = [[1, 2], [4, 10], [20, 35], [90, 90]]
+        assert self.iface.add_tags([90, 90])
         assert self.iface.available_tags['vlan'] == ava_expected
 
-        ava_expected = [[1, 30], [40, 98], [100, 109], [200, 240]]
-        assert self.iface.add_tags([93, 98])
+        ava_expected = [[1, 2], [4, 10], [20, 90]]
+        assert self.iface.add_tags([36, 89])
+        assert self.iface.available_tags['vlan'] == ava_expected
+
+        ava_expected = [[1, 2], [4, 12], [20, 90]]
+        assert self.iface.add_tags([11, 12])
+        assert self.iface.available_tags['vlan'] == ava_expected
+
+        ava_expected = [[1, 2], [4, 12], [17, 90]]
+        assert self.iface.add_tags([17, 19])
+        assert self.iface.available_tags['vlan'] == ava_expected
+
+        ava_expected = [[1, 2], [4, 12], [15, 15], [17, 90]]
+        assert self.iface.add_tags([15, 15])
         assert self.iface.available_tags['vlan'] == ava_expected
 
         assert self.iface.add_tags([35, 98]) is False
 
     async def test_notify_interface_tags(self, controller) -> None:
-        """Test notify_interface_tags"""
+        """Test _notify_interface_tags"""
         name = "kytos/core.interface_tags"
         content = {"interface": self.iface}
-        self.iface.notify_interface_tags(controller)
+        self.iface._notify_interface_tags(controller)
         event = controller.buffers.app.put.call_args[0][0]
         assert event.name == name
         assert event.content == content

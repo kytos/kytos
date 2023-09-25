@@ -8,6 +8,7 @@ import operator
 from collections import OrderedDict, defaultdict
 from functools import reduce
 from threading import Lock
+from typing import Union
 
 from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.exceptions import (KytosLinkCreationError,
@@ -22,8 +23,6 @@ class Link(GenericEntity):
     status_funcs = OrderedDict()
     status_reason_funcs = OrderedDict()
     _get_available_vlans_lock = defaultdict(Lock)
-    endpoint_a_lock = Lock()
-    endpoint_b_lock = Lock()
 
     def __init__(self, endpoint_a, endpoint_b):
         """Create a Link instance and set its attributes.
@@ -157,10 +156,10 @@ class Link(GenericEntity):
                     try:
                         tag, _ = next(tags)
                         self.endpoint_a.use_tags(
-                            controller, [tag, tag], use_lock=False
+                            controller, tag, use_lock=False
                         )
                         self.endpoint_b.use_tags(
-                            controller, [tag, tag], use_lock=False
+                            controller, tag, use_lock=False
                         )
                         return tag
                     except StopIteration:
@@ -169,19 +168,19 @@ class Link(GenericEntity):
     def make_tags_available(
         self,
         controller,
-        tag: int,
+        tags: Union[int, list[int]],
         link_id,
         tag_type: str = 'vlan'
-    ) -> (bool, bool):
+    ) -> tuple[bool, bool]:
         """Add a specific tag in available_tags."""
         with self._get_available_vlans_lock[link_id]:
             with self.endpoint_a._tag_lock:
                 with self.endpoint_b._tag_lock:
                     result_a = self.endpoint_a.make_tags_available(
-                        controller, [tag, tag], tag_type, False
+                        controller, tags, tag_type, False
                     )
                     result_b = self.endpoint_b.make_tags_available(
-                        controller, [tag, tag], tag_type, False
+                        controller, tags, tag_type, False
                     )
         return result_a, result_b
 

@@ -7,7 +7,7 @@ from collections import OrderedDict
 from enum import Enum
 from functools import reduce
 from threading import Lock
-from typing import Iterator, Optional
+from typing import Iterator, Optional, Union
 
 from pyof.v0x01.common.phy_port import Port as PortNo01
 from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
@@ -357,7 +357,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     def use_tags(
         self,
         controller,
-        tags: list[int],
+        tags: Union[int, list[int]],
         tag_type: str = 'vlan',
         use_lock: bool = True,
     ) -> bool:
@@ -370,6 +370,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             tag_type: TAG type value
             use_lock: Boolean to whether use a lock or not
         """
+        if isinstance(tags, int):
+            tags = [tags] * 2
         if use_lock:
             with self._tag_lock:
                 result = self.remove_tags(tags, tag_type)
@@ -449,7 +451,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     def make_tags_available(
         self,
         controller,
-        tags: list[int],
+        tags: Union[int, list[int]],
         tag_type: str = 'vlan',
         use_lock: bool = True,
     ) -> bool:
@@ -461,6 +463,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             tag_type: TAG type value
             use_lock: Boolean to whether use a lock or not
         """
+        if isinstance(tags, int):
+            tags = [tags] * 2
         if use_lock:
             with self._tag_lock:
                 result = self.add_tags(tags, tag_type)

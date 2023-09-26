@@ -101,6 +101,17 @@ class KytosNAppException(Exception):
         return self.message
 
 
+class KytosNAppSetupException(KytosNAppException):
+    """KytosNAppSetupException. """
+
+    def __init__(self, message="KytosNAppSetupException") -> None:
+        """KytosNAppSetupException."""
+        super().__init__(message=message)
+
+    def __str__(self):
+        return f"KytosNAppSetupException: {self.message}"
+
+
 class KytosNAppMissingInitArgument(KytosNAppException):
     """Exception thrown when NApp have a missing init argument."""
 

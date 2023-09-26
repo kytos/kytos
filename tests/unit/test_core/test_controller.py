@@ -16,6 +16,7 @@ from kytos.core.auth import Auth
 from kytos.core.buffers import KytosBuffers
 from kytos.core.config import KytosConfig
 from kytos.core.events import KytosEvent
+from kytos.core.exceptions import KytosNAppSetupException
 from kytos.core.logs import LogManager
 from kytos.core.rest_api import Request
 
@@ -180,6 +181,29 @@ class TestController(TestCase):
         mock_start_controller.assert_called()
         mock_db_conn_or_shutdown.assert_not_called()
         mock_init_apm_or_shutdown.assert_not_called()
+
+    @patch('kytos.core.controller.sys')
+    @patch('kytos.core.controller.Controller.init_apm_or_core_shutdown')
+    @patch('kytos.core.controller.Controller.db_conn_or_core_shutdown')
+    @patch('kytos.core.controller.Controller.start_controller')
+    @patch('kytos.core.controller.Controller.create_pidfile')
+    @patch('kytos.core.controller.Controller.enable_logs')
+    def test_start_error_broad_exception(self, *args):
+        """Test start error handling broad exception."""
+        (mock_enable_logs, mock_create_pidfile,
+         mock_start_controller, mock_db_conn_or_shutdown,
+         mock_init_apm_or_shutdown, mock_sys) = args
+        mock_start_controller.side_effect = Exception
+        self.controller.log = MagicMock()
+        self.controller.start()
+
+        mock_enable_logs.assert_called()
+        mock_create_pidfile.assert_called()
+        mock_start_controller.assert_called()
+        mock_db_conn_or_shutdown.assert_not_called()
+        mock_init_apm_or_shutdown.assert_not_called()
+        self.controller.log.exception.assert_called()
+        mock_sys.exit.assert_called()
 
     @patch('kytos.core.controller.Controller.init_apm_or_core_shutdown')
     @patch('kytos.core.controller.Controller.db_conn_or_core_shutdown')
@@ -495,7 +519,8 @@ class TestController(TestCase):
         module.Main.side_effect = Exception
         mock_import_napp.return_value = module
 
-        self.controller.load_napp('kytos', 'napp')
+        with self.assertRaises(KytosNAppSetupException):
+            self.controller.load_napp('kytos', 'napp')
 
         self.assertEqual(self.controller.napps, {})
 

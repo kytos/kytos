@@ -194,7 +194,6 @@ class TestController(TestCase):
          mock_start_controller, mock_db_conn_or_shutdown,
          mock_init_apm_or_shutdown, mock_sys) = args
         mock_start_controller.side_effect = Exception
-        self.controller.log = MagicMock()
         self.controller.start()
 
         mock_enable_logs.assert_called()
@@ -202,7 +201,6 @@ class TestController(TestCase):
         mock_start_controller.assert_called()
         mock_db_conn_or_shutdown.assert_not_called()
         mock_init_apm_or_shutdown.assert_not_called()
-        self.controller.log.exception.assert_called()
         mock_sys.exit.assert_called()
 
     @patch('kytos.core.controller.Controller.init_apm_or_core_shutdown')

@@ -21,6 +21,7 @@ import os
 import re
 import sys
 import threading
+import traceback
 from asyncio import AbstractEventLoop
 from importlib import import_module
 from importlib import reload as reload_module
@@ -40,7 +41,8 @@ from kytos.core.connection import ConnectionState
 from kytos.core.db import db_conn_wait
 from kytos.core.dead_letter import DeadLetter
 from kytos.core.events import KytosEvent
-from kytos.core.exceptions import KytosAPMInitException, KytosDBInitException
+from kytos.core.exceptions import (KytosAPMInitException, KytosDBInitException,
+                                   KytosNAppSetupException)
 from kytos.core.helpers import executors, now
 from kytos.core.interface import Interface
 from kytos.core.logs import LogManager
@@ -251,14 +253,21 @@ class Controller:
     def start(self, restart=False):
         """Create pidfile and call start_controller method."""
         self.enable_logs()
-        if self.options.database:
-            self.db_conn_or_core_shutdown()
-            self.start_auth()
-        if self.options.apm:
-            self.init_apm_or_core_shutdown()
-        if not restart:
-            self.create_pidfile()
-        self.start_controller()
+        # pylint: disable=broad-except
+        try:
+            if self.options.database:
+                self.db_conn_or_core_shutdown()
+                self.start_auth()
+            if self.options.apm:
+                self.init_apm_or_core_shutdown()
+            if not restart:
+                self.create_pidfile()
+            self.start_controller()
+        except Exception as exc:
+            exc_fmt = traceback.format_exc(chain=True)
+            message = f"Kytos couldn't start because of {str(exc)} {exc_fmt}"
+            print(message)
+            sys.exit(1)
 
     def create_pidfile(self):
         """Create a pidfile."""
@@ -852,10 +861,9 @@ class Controller:
 
         try:
             napp = napp_module.Main(controller=self)
-        except:  # noqa pylint: disable=bare-except
-            self.log.critical("NApp initialization failed: %s/%s",
-                              username, napp_name, exc_info=True)
-            return
+        except Exception as exc:  # noqa pylint: disable=bare-except
+            msg = f"NApp {username}/{napp_name} exception {str(exc)} "
+            raise KytosNAppSetupException(msg) from exc
 
         self.napps[(username, napp_name)] = napp
 
@@ -891,6 +899,8 @@ class Controller:
             except FileNotFoundError as exception:
                 self.log.error("Could not load NApp %s: %s",
                                napp.id, exception)
+                msg = f"NApp {napp.id} exception {str(exception)}"
+                raise KytosNAppSetupException(msg)
 
     def unload_napp(self, username, napp_name):
         """Unload a specific NApp.

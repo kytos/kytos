@@ -11,8 +11,11 @@ from typing import List, Optional, Tuple
 import pymongo.helpers
 from pymongo import MongoClient
 from pymongo.errors import AutoReconnect, OperationFailure
+from tenacity import (retry, retry_if_exception_type, stop_after_attempt,
+                      wait_random)
 
 from kytos.core.exceptions import KytosDBInitException
+from kytos.core.retry import before_sleep
 
 LOG = logging.getLogger(__name__)
 
@@ -88,6 +91,18 @@ class Mongo:
     db_name = os.environ.get("MONGO_DBNAME") or "napps"
 
     @classmethod
+    @retry(
+        stop=stop_after_attempt(
+            int(os.environ.get("MONGO_AUTO_RETRY_STOP_AFTER_ATTEMPT", 3))
+        ),
+        wait=wait_random(
+            min=int(os.environ.get("MONGO_AUTO_RETRY_WAIT_RANDOM_MIN", 0.1)),
+            max=int(os.environ.get("MONGO_AUTO_RETRY_WAIT_RANDOM_MAX", 1)),
+        ),
+        before_sleep=before_sleep,
+        retry=retry_if_exception_type((OperationFailure, AutoReconnect)),
+        reraise=True
+    )
     def bootstrap_index(
         cls,
         collection: str,
@@ -99,6 +114,9 @@ class Mongo:
         indexes = set()
         if "background" not in kwargs:
             kwargs["background"] = True
+        if "maxTimeMS" not in kwargs:
+            timeout_ms = int(os.environ.get("MONGO_IDX_TIMEOUTMS") or 30000)
+            kwargs["maxTimeMS"] = timeout_ms
 
         for value in db[collection].index_information().values():
             if "key" in value and isinstance(value["key"], list):

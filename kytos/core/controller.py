@@ -256,18 +256,22 @@ class Controller:
         # pylint: disable=broad-except
         try:
             if self.options.database:
-                self.db_conn_or_core_shutdown()
+                db_conn_wait(db_backend=self.options.database)
                 self.start_auth()
             if self.options.apm:
-                self.init_apm_or_core_shutdown()
+                init_apm(self.options.apm, app=self.api_server.app)
             if not restart:
                 self.create_pidfile()
             self.start_controller()
+        except (KytosDBInitException, KytosAPMInitException) as exc:
+            message = f"Kytos couldn't start because of {str(exc)}"
+            print(message)
+            sys.exit(message)
         except Exception as exc:
             exc_fmt = traceback.format_exc(chain=True)
             message = f"Kytos couldn't start because of {str(exc)} {exc_fmt}"
             print(message)
-            sys.exit(1)
+            sys.exit(message)
 
     def create_pidfile(self):
         """Create a pidfile."""
@@ -373,22 +377,6 @@ class Controller:
         self._tasks.append(task)
 
         self.started_at = now()
-
-    def db_conn_or_core_shutdown(self):
-        """Ensure db connection or core shutdown."""
-        try:
-            db_conn_wait(db_backend=self.options.database)
-        except KytosDBInitException as exc:
-            sys.exit(f"Kytos couldn't start because of {str(exc)}")
-
-    def init_apm_or_core_shutdown(self, **kwargs):
-        """Init APM instrumentation or core shutdown."""
-        if not self.options.apm:
-            return
-        try:
-            init_apm(self.options.apm, app=self.api_server.app, **kwargs)
-        except KytosAPMInitException as exc:
-            sys.exit(f"Kytos couldn't start because of {str(exc)}")
 
     def _register_endpoints(self):
         """Register all rest endpoint served by kytos.
@@ -900,7 +888,7 @@ class Controller:
                 self.log.error("Could not load NApp %s: %s",
                                napp.id, exception)
                 msg = f"NApp {napp.id} exception {str(exception)}"
-                raise KytosNAppSetupException(msg)
+                raise KytosNAppSetupException(msg) from exception
 
     def unload_napp(self, username, napp_name):
         """Unload a specific NApp.

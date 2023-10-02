@@ -3,12 +3,16 @@ This document describes Kytos-ng's team, authors, and contributors. The `AUTHORS
 Core Team
 *********
 
-- Antonio Francisco <ajoaoff AT gmail.com>
 - Italo Valcy <idasilva AT fiu DOT edu>
 - Vinicius Arcanjo <vindasil AT fiu DOT edu>
 - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 - David Ramirez <davramir AT fiu DOT edu>
 - Gretel De la Peña <gdelapea AT fiu DOT edu>
+
+Core Team Alumni
+================
+
+- Antonio Francisco <ajoaoff AT gmail.com>
 
 Team Leader
 ***********
@@ -29,3 +33,4 @@ Contributors
 - Muhammad Usman Aziz <maziz008 AT fiu DOT edu>
 - Krishna Reddy Enugala <kenugala AT fiu DOT edu>
 - Gretel De la Peña <gdelapea AT fiu DOT edu>
+- Noel Ngu <corevaluenoel AT gmail DOT com>

@@ -164,55 +164,55 @@ class TestController(TestCase):
         self.assertRaises(ValueError,
                           self.controller.toggle_debug, name="foobar")
 
-    @patch('kytos.core.controller.Controller.init_apm_or_core_shutdown')
-    @patch('kytos.core.controller.Controller.db_conn_or_core_shutdown')
+    @patch('kytos.core.controller.init_apm')
+    @patch('kytos.core.controller.db_conn_wait')
     @patch('kytos.core.controller.Controller.start_controller')
     @patch('kytos.core.controller.Controller.create_pidfile')
     @patch('kytos.core.controller.Controller.enable_logs')
     def test_start(self, *args):
         """Test start method."""
         (mock_enable_logs, mock_create_pidfile,
-         mock_start_controller, mock_db_conn_or_shutdown,
-         mock_init_apm_or_shutdown) = args
+         mock_start_controller, mock_db_conn_wait,
+         mock_init_apm) = args
         self.controller.start()
 
         mock_enable_logs.assert_called()
         mock_create_pidfile.assert_called()
         mock_start_controller.assert_called()
-        mock_db_conn_or_shutdown.assert_not_called()
-        mock_init_apm_or_shutdown.assert_not_called()
+        mock_db_conn_wait.assert_not_called()
+        mock_init_apm.assert_not_called()
 
     @patch('kytos.core.controller.sys')
-    @patch('kytos.core.controller.Controller.init_apm_or_core_shutdown')
-    @patch('kytos.core.controller.Controller.db_conn_or_core_shutdown')
+    @patch('kytos.core.controller.init_apm')
+    @patch('kytos.core.controller.db_conn_wait')
     @patch('kytos.core.controller.Controller.start_controller')
     @patch('kytos.core.controller.Controller.create_pidfile')
     @patch('kytos.core.controller.Controller.enable_logs')
     def test_start_error_broad_exception(self, *args):
         """Test start error handling broad exception."""
         (mock_enable_logs, mock_create_pidfile,
-         mock_start_controller, mock_db_conn_or_shutdown,
-         mock_init_apm_or_shutdown, mock_sys) = args
+         mock_start_controller, mock_db_conn_wait,
+         mock_init_apm, mock_sys) = args
         mock_start_controller.side_effect = Exception
         self.controller.start()
 
         mock_enable_logs.assert_called()
         mock_create_pidfile.assert_called()
         mock_start_controller.assert_called()
-        mock_db_conn_or_shutdown.assert_not_called()
-        mock_init_apm_or_shutdown.assert_not_called()
+        mock_db_conn_wait.assert_not_called()
+        mock_init_apm.assert_not_called()
         mock_sys.exit.assert_called()
 
-    @patch('kytos.core.controller.Controller.init_apm_or_core_shutdown')
-    @patch('kytos.core.controller.Controller.db_conn_or_core_shutdown')
+    @patch('kytos.core.controller.init_apm')
+    @patch('kytos.core.controller.db_conn_wait')
     @patch('kytos.core.controller.Controller.start_controller')
     @patch('kytos.core.controller.Controller.create_pidfile')
     @patch('kytos.core.controller.Controller.enable_logs')
     def test_start_with_mongodb_and_apm(self, *args):
         """Test start method with database and APM options set."""
         (mock_enable_logs, mock_create_pidfile,
-         mock_start_controller, mock_db_conn_or_shutdown,
-         mock_init_apm_or_shutdown) = args
+         mock_start_controller, mock_db_conn_wait,
+         mock_init_apm) = args
         self.controller.options.database = "mongodb"
         self.controller.options.apm = "es"
         self.controller.start()
@@ -220,21 +220,18 @@ class TestController(TestCase):
         mock_enable_logs.assert_called()
         mock_create_pidfile.assert_called()
         mock_start_controller.assert_called()
-        mock_db_conn_or_shutdown.assert_called()
-        mock_init_apm_or_shutdown.assert_called()
+        mock_db_conn_wait.assert_called()
+        mock_init_apm.assert_called()
 
     @patch('kytos.core.controller.sys.exit')
-    @patch('kytos.core.controller.Controller.start_controller')
     @patch('kytos.core.controller.Controller.create_pidfile')
     @patch('kytos.core.controller.Controller.enable_logs')
     def test_start_with_invalid_database_backend(self, *args):
         """Test start method with unsupported database backend."""
-        (mock_enable_logs, _,
-         mock_start_controller, mock_sys_exit) = args
+        (mock_enable_logs, _, mock_sys_exit) = args
         self.controller.options.database = "invalid"
         self.controller.start()
         mock_enable_logs.assert_called()
-        mock_start_controller.assert_called()
         mock_sys_exit.assert_called()
 
     @patch('os.getpid')

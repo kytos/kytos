@@ -320,7 +320,7 @@ The following requirements clarify certain details and expected behavior for ``t
 
 - Once an EVC is redeployed, ``telemetry_int`` will also redeploy accordingly. Also, to ensure fast convergence when handling link down for EVCs that have failover, it's expected that a typical query to stored flows since it's querying indexed fields will not add significant latency, this point will be observed, and we'll see if it'll perform as expected or if more optimization will be needed from ``telemetry_int`` perspective.
 
-- If a proxy port source or destination status changes to DOWN or DISABLED (or if the loop stoops being a loop) all of associated EVCs should be considered not active, similar to what has been implemented when a UNI changes its UP state. No flows should be removed. Currently, ``mef_eline`` doesn't allow an EVC to be deactivated, so this will need to be published via events, depending if an EVC also starts to use ``status`` and ``status_reason`` then interruptions can also be used.
+- If a proxy port link goes down, telemetry_int should be disabled and flows removed, falling back to mef_eline flows. Once a proxy port link goes up it should redeploy INT flows if the underlying EVC is active, otherwise it try to deploy again once a new mef_eline deployment event is received.
 
 - If an EVC is deleted or removed and it has INT enabled the flows should be removed.
 

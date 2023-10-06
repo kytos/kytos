@@ -39,7 +39,7 @@ This blueprint has the following characteristics:
   4. There will be no concerns about proxy ports and their mappings. These were addressed in Blueprint EP034.
   5. There is no need for persistent data. The **mef_eline** and **flow_manager** napps will persist their entries accordingly since **telemetry_int** will leverage **flow_manager**.
   6. This version won't require changes to the way the **mef_eline** napp works. However, a new value will be added each EVC's metadata attribute.
-  7. This specification assumes the data plane's pipeline is ready for INT, with multiple tables, and it assumes that **mef_eline** uses table 0. **telemetry_int** aims to use any table with an ID higher than **mef_eline**, for instance in this document, table 2. It also assumes that this higher table should be capable of exact matching on ``in_port`` and ``dl_vlan``, including on just one of these fields, just so both EVPLs and EPLs flows are correctly supported.
+  7. This specification assumes the data plane's pipeline is ready for INT, with multiple tables, and it assumes that **mef_eline** uses table 0 (but it will follow ``of_multi_table`` mef_eline table groups as they're set). **telemetry_int** aims to use any table with an ID higher than **mef_eline**, for instance in this document, table 2 and table 3, by default, for EVPLs and EPLs respectively.
 
 II. How INT works with NoviWare
 ===============================
@@ -71,7 +71,7 @@ This new approach requires 3x more flows to manage, so scalability and a new pip
 
 Another change NoviWare requires to support INT is new OpenFlow actions. The Kytos **NoviFlow** napp already instantiates four new OpenFlow experimenter actions: `push_int`, `add_int_metadata`, `send_report`, and `pop_int`.  The IPv4+TCP and IPv4+UDP flows need the following workflow to support INT:
 
-1. The first NoviFlow switch in the path (a.k.a. INT Source switch) needs to execute two operations: `push_int` to create the INT header and `add_int_metadata` to add a per-hop telemetry data. However, due its implementation, these actions have to be executed in different tables:
+1. The first NoviFlow switch in the path (a.k.a. INT Source switch) needs to execute two operations: `push_int` to create the INT header and `add_int_metadata` to add a per-hop telemetry data. However, due its implementation, these actions have to be executed in different tables, this example is using table 2:
 
    1. Table 0 is where `push_int` is executed
 
@@ -324,7 +324,7 @@ The following requirements clarify certain details and expected behavior for ``t
 
 - If an EVC is deleted or removed and it has INT enabled the flows should be removed.
 
-- The only supported ``table_group`` for ``of_multi_table`` will be ``base``, which represents all flows that are specified on this blueprint to be on table 2. All the other flows will follow the ``table_group`` ``mef_eline`` uses. Also, since NoviWare's INT implementation requires ``send_report`` to be executed in table 0, and ``telemetry_int`` is following ``mef_eline`` then only table 0 should be allowed on ``of_multi_table`` when setting the pipeline if ``telemetry_int`` is also being set. So, in practice, in this iteration, you'll always need to have ``telemetry_int`` on table 0 + table X, where X > 0, and by default it will be on table 2 as documented.
+- The only supported ``table_group`` for ``of_multi_table`` will be ``int_evpl`` and ``int_epl``, which represents all EVPL and EPL flows on table 2 and 3 by default respectively. All the other flows will follow the ``table_group`` ``mef_eline`` uses. Also, since NoviWare's INT implementation requires ``send_report`` to be executed in table 0, and ``telemetry_int`` is following ``mef_eline`` then only table 0 should be allowed on ``of_multi_table`` when setting the pipeline if ``telemetry_int`` is also being set. So, in practice, in this iteration, you'll always need to have ``telemetry_int`` on table 0 + table X, where X > 0, and by default it will be on table 2 as documented.
 
 XIV. Open Questions / Future Work
 =================================

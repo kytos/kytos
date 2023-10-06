@@ -324,7 +324,7 @@ The following requirements clarify certain details and expected behavior for ``t
 
 - If an EVC is deleted or removed and it has INT enabled the flows should be removed.
 
-- The only supported ``table_group`` for ``of_multi_table`` will be ``int_evpl`` and ``int_epl``, which represents all EVPL and EPL flows on table 2 and 3 by default respectively. All the other flows will follow the ``table_group`` ``mef_eline`` uses. Also, since NoviWare's INT implementation requires ``send_report`` to be executed in table 0, and ``telemetry_int`` is following ``mef_eline`` then only table 0 should be allowed on ``of_multi_table`` when setting the pipeline if ``telemetry_int`` is also being set. So, in practice, in this iteration, you'll always need to have ``telemetry_int`` on table 0 + table X, where X > 0, and by default it will be on table 2 as documented.
+- The only supported ``table_group`` for ``of_multi_table`` will be ``evpl`` and ``epl``, which represents all EVPL and EPL flows on table 2 and 3 by default respectively. All the other flows will follow the ``table_group`` ``mef_eline`` uses. Also, since NoviWare's INT implementation requires ``send_report`` to be executed in table 0, and ``telemetry_int`` is following ``mef_eline`` then only table 0 should be allowed on ``of_multi_table`` when setting the pipeline if ``telemetry_int`` is also being set. So, in practice, in this iteration, you'll always need to have ``telemetry_int`` on table 0 + table X, where X > 0, and by default it will be on table 2 as documented.
 
 XIV. Open Questions / Future Work
 =================================

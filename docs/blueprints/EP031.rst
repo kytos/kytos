@@ -5,8 +5,8 @@
     - Italo Valcy <idasilva AT fiu DOT edu>
     - Vinicius Arcanjo <vindasil AT fiu DOT edu>
 :Created: 2022-08-24
-:Updated: 2022-11-07
-:Kytos-Version: 2022.3
+:Updated: 2023-07-26
+:Kytos-Version: 2023.2
 :Status: Draft
 
 ****************************************
@@ -39,7 +39,7 @@ This blueprint has the following characteristics:
   4. There will be no concerns about proxy ports and their mappings. These were addressed in Blueprint EP034.
   5. There is no need for persistent data. The **mef_eline** and **flow_manager** napps will persist their entries accordingly since **telemetry_int** will leverage **flow_manager**.
   6. This version won't require changes to the way the **mef_eline** napp works. However, a new value will be added each EVC's metadata attribute.
-  7. This specification assumes the data plane's pipeline is ready for INT, with multiple tables, and it assumes that **mef_eline** uses table 0. **telemetry_int** aims to use any table with an ID higher than **mef_eline**, for instance in this document, table 2.
+  7. This specification assumes the data plane's pipeline is ready for INT, with multiple tables, and it assumes that **mef_eline** uses table 0 (but it will follow ``of_multi_table`` mef_eline table groups as they're set). **telemetry_int** aims to use any table with an ID higher than **mef_eline**, for instance in this document, table 2 and table 3, by default, for EVPLs and EPLs respectively.
 
 II. How INT works with NoviWare
 ===============================
@@ -71,7 +71,7 @@ This new approach requires 3x more flows to manage, so scalability and a new pip
 
 Another change NoviWare requires to support INT is new OpenFlow actions. The Kytos **NoviFlow** napp already instantiates four new OpenFlow experimenter actions: `push_int`, `add_int_metadata`, `send_report`, and `pop_int`.  The IPv4+TCP and IPv4+UDP flows need the following workflow to support INT:
 
-1. The first NoviFlow switch in the path (a.k.a. INT Source switch) needs to execute two operations: `push_int` to create the INT header and `add_int_metadata` to add a per-hop telemetry data. However, due its implementation, these actions have to be executed in different tables:
+1. The first NoviFlow switch in the path (a.k.a. INT Source switch) needs to execute two operations: `push_int` to create the INT header and `add_int_metadata` to add a per-hop telemetry data. However, due its implementation, these actions have to be executed in different tables, this example is using table 2:
 
    1. Table 0 is where `push_int` is executed
 
@@ -238,7 +238,7 @@ The goal for the **telemetry_int** napp is to enable telemetry for ALL EVCs. How
 
   1 . The **telemetry_int** napp will start operating once **mef_eline** is loaded and EVCs and their flows are pushed to the data plane.
 
-  2. **telemetry_int** will listen for events *kytos/mef_eline.(redeployed_link_(up|down)|deployed)* and *kytos.mef_eline.created* issued by **mef_eline**.
+  2. **telemetry_int** will listen for events *kytos/mef_eline.(redeployed_link_(up|down)|deployed|undeployed|deleted|error_redeploy_link_down|created)*
 
   3. For each EVC identified, **telemetry** will
     1. use EVC's cookie to get all flow entries created by **flow_manager** IF telemetry is not already enabled.
@@ -249,23 +249,17 @@ V. Events
 ==========
 
   1. Listening
-    1. *kytos/mef_eline.(removed|deployed)*
-
-  2. Issuing
-    1.  *kytos.telemetry.enabled*
-    2.  *kytos.telemetry.disabled*
-
+    1. *kytos/mef_eline.(redeployed_link_(up|down)|deployed|undeployed|deleted|error_redeploy_link_down|created)*
+    2. *kytos/topology.link_up|link_down*
 
 VI. REST API
 =============
 
-  - POST /telemetry_int/v1/evc/ body evc_ids: [] for bulk insertions, if empty, then enable all. If invalid or non-existing EVC_ID are provided, abort the entire operation with 4XX status code.
-  - POST /telemetry_int/v1/evc/<evc_id>: enable/create INT flows for an EVC_ID.
-  - DELETE /telemetry_int/v1/evc/ body evc_ids: [] for bulk removals, if empty, then remove all. If invalid or non-existing EVC_ID are provided, abort the entire operation with 4XX status code.
-  - DELETE /telemetry_int/v1/evc/<evc_id>: disable/remove INT flows for an EVC_ID.
-  - GET /telemetry_int/v1/evc list all INT-enabled EVCs.
-  - POST /telemetry_int/v1/consistency/ body evc_ids: []- Force the consistency routine to run for evc_id's provided. If none are provide, force for all EVCs.
-
+  - ``POST /telemetry_int/v1/evc/enable`` body evc_ids: [] for bulk insertions, if empty, then enable all. If invalid or non-existing EVC_ID are provided, abort the entire operation with 4XX status code.
+  - ``POST /telemetry_int/v1/evc/disable`` body evc_ids: [] for bulk removals, if empty, then remove all. If invalid or non-existing EVC_ID are provided, abort the entire operation with 4XX status code.
+  - ``GET /telemetry_int/v1/evc`` list all INT-enabled EVCs.
+  - ``GET /telemetry_int/v1/evc_compare`` list and compare which telemetry_int flows are still coherent with EVC metadata status
+  - ``PATCH /telemetry_int/v1/evc/redeploy`` body evc_ids: [] to force a redeploy
 
 VII. Dependencies
 =================
@@ -280,10 +274,10 @@ VII. New EVC attribute
 
 The **telemetry_int** napp will leverage the EVC's metadata attribute to create a new item, called `telemetry`. This new item will be a dictionary will the following values:
 
-  * "enabled": [True|False]
-  * "source": dpid/name of the switch to be used as the INT Source switch (Future use).
-  * "sink": dpid/name of the switch to be used as the INT Sink switch (Future use).
-  * "last_enabled": timestamp of when the item "enabled" changed. 0 for never.
+  * "enabled": true|false
+  * "status": "UP|DOWN"
+  * "status_reason": ["some_error"]
+  * "status_updated_at": utc string "%Y-%m-%dT%H:%M:%S" of when the status was updated or null if never.
 
 IX. Failover integration
 ========================
@@ -298,15 +292,44 @@ The **telemetry_int** napp must use a different cookie ID to help understanding 
 XI. Consistency
 ===============
 
-The **telemetry_int** napp might deploy a routine to evaluate the consistency of the telemetry flows as performed by the **mef_eline** napp. This implementation will be defined via field experience with Kytos.
+The **telemetry_int** napp will deploy a routine to evaluate the consistency of the telemetry flows as performed by the **mef_eline** napp. This implementation will be defined via field experience with Kytos. The consistency check will rely on ``sdntrace_cp`` and follow the same pattern as ``mef_eline``, except that also when trying to trace, it should test both UDP and TCP payloads, if any fails after a few attempts, then it should disable telemetry int and remove the flows for now, falling back to mef_eline flows. In the future, the consistency check process might evolve, but for now if it fails, it will fail safely falling back to mef_eline flows. As of ``sdntrace_cp`` version ``2023.1`` it still doesn't completely support ``goto_table`` neither ``instructions``, so it needs to be augmented just so ``telemetry_int`` can eventually also rely on it. 
 
 XII. Pacing
 ===========
 
 The **telemetry_int** napp must wait a *settings.wait_to_deploy* interval before sending instructions to the flow_manager after EVCs are created/modified/redeployed to avoid overwhelming the switches. The goal is to create batch operations.
 
-XI. Open Questions
-==================
+XIII. Implementation details ``v1``
+===================================
 
-  1. Who's going to monitor status of proxy ports to remove INT flows?
-  2. Error codes, for instance, flows were not instance, there is no proxy ports
+The following requirements clarify certain details and expected behavior for ``telemetry_int`` v1 that will be shipped with Kytos-ng ``2023.2``:
+
+- ``mef_eline`` EVC ``telemetry`` metadata is managed by ``telemetry_int``, **only ``telemetry_int`` is supposed to write or delete it**. If you enable or disable INT you should call ``POST /telemetry_int/v1/evc/enable`` or ``POST /telemetry_int/v1/evc/disable``  endpoints. ``telemetry_int`` will not listen for EVC metadata changes since it'll manage it.
+
+- Once ``mef_eline`` creates an EVC, it can optionally request that INT be provisioned. For this case, a ``telemetry_request: dict`` needs to be set in the metadata, currently no keys are needed, but as more options are supported in the future, they can be set. If ``telemetry_int`` can't provision ``telemetry_int``, then it'll set the ``telemetry: {"status": "disabled", "status_reason": ["<reason>"]}`` metadata, updating the status and filling out the reason accordingly.
+
+- Currently, EVCs are always bidirectional. ``telemetry_int`` v1 iteration, will also follow the bidirectional flows as described in the prior sections. In the future, when ``mef_eline`` starts to support unidirectional flows, then following the flows should be mostly seamless, this facilitates implementation and code maintenance without having to try to derive the direction of all flows and maintain a structure that ``mef_eline`` still doesn't support.
+
+- ``telemetry_int`` will require a looped link on each source sink for both intra and inter EVCs, if it's not present, then ``telemetry_int`` will not enable INT, which implies that in this v1 iteration, you'll need to always have a proxy port (check out EP033 for more information) associated with both UNIs since the EVC is bidirectional. Although the EVC is bidirectional, the looped ports are used unidirectionally for each INT source. This explicitness of always knowing that both UNIs will need a proxy port facilitates to keep track when a proxy port changes and performing a side effect.
+
+- If an UNI's proxy port value changes to another port, then ``telemetry_int`` should reinstall the specific associated EVC sink flows accordingly. Similarly, if ``proxy_port`` is removed, it should remove all associated telemetry int flows. Essentially, changing a ``proxy_port`` metadata acts like an update as far as a EVC telemetry enabled is concerned.
+
+- If any other NApp or client, end up accidentally deleting or overwriting ``telemetry`` metadata, it might result in flows being permanently installed in the database. If this ever happens, the following approaches can be used to fix it: a) ``POST /telemetry_int/v1/evc/enable`` and ``POST /telemetry_int/v1/evc/disable`` will allow a ``force`` boolean flag which will ignore if an EVC exist or not, so it'll either provision or decommission accordingly. b) It'll also expose a ``GET /telemetry_int/v1/evc_compare`` which will compare which ``telemetry_int`` flows still have the metadata enabled or not, and generate a list indicating inconsistencies, then you can use it with the option a) endpoints with ``force`` option to either enable or disable again. It will not try to auto remediate.
+
+- When configuring the proxy port, it always needs to be the lower looped interface number (which is also guaranteed by LLDP loop detection), e.g., if you have a loop between interface port number 5 and 6, you need to configure 5 as the proxy port. By this convention, the lower port will be the outgoing port for an incoming NNI traffic.
+
+- Once an EVC is redeployed, ``telemetry_int`` will also redeploy accordingly. Also, to ensure fast convergence when handling link down for EVCs that have failover, it's expected that a typical query to stored flows since it's querying indexed fields will not add significant latency, this point will be observed, and we'll see if it'll perform as expected or if more optimization will be needed from ``telemetry_int`` perspective.
+
+- If a proxy port link goes down, telemetry_int should be disabled and flows removed, falling back to mef_eline flows. Once a proxy port link goes up it should redeploy INT flows if the underlying EVC is active, otherwise it try to deploy again once a new mef_eline deployment event is received.
+
+- If an EVC is deleted or removed and it has INT enabled the flows should be removed.
+
+- The only supported ``table_group`` for ``of_multi_table`` will be ``evpl`` and ``epl``, which represents all EVPL and EPL flows on table 2 and 3 by default respectively. All the other flows will follow the ``table_group`` ``mef_eline`` uses. Also, since NoviWare's INT implementation requires ``send_report`` to be executed in table 0, and ``telemetry_int`` is following ``mef_eline`` then only table 0 should be allowed on ``of_multi_table`` when setting the pipeline if ``telemetry_int`` is also being set. So, in practice, in this iteration, you'll always need to have ``telemetry_int`` on table 0 + table X, where X > 0, and by default it will be on table 2 as documented.
+
+XIV. Open Questions / Future Work
+=================================
+
+  1. Error codes, for instance, flows were not instance, there is no proxy ports
+  2. Support QFactor (where INT is also extended to the hosts). In this case, the source and the sink should behave like a INT hop only using the `add_int_metadata` action.
+  3. Support unidirectional EVCs
+  4. Potentially support a specific different "source" and "sink"

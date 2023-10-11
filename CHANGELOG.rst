@@ -6,11 +6,20 @@ All notable changes to the kytos project will be documented in this file.
 UNRELEASED - Under development
 ******************************
 
+Added
+=====
+- Added ``Interface.tag_ranges`` as ``dict[str, list[list[int]]]`` as replacement for ``vlan_pool`` settings.
+- Added ``kytos/core.interface_tags`` event publication to notify any modification of ``Interface.tag_ranges`` or ``Interface.available_tags``.
+
 Changed
 =======
 - Parametrized default ``maxTimeMS`` when creating an index via ``Mongo.boostrap_index`` via environment variable ``MONGO_IDX_TIMEOUTMS=30000``. The retries parameters reuse the same environment variables ``MONGO_AUTO_RETRY_STOP_AFTER_ATTEMPT=3``, ``MONGO_AUTO_RETRY_WAIT_RANDOM_MIN=0.1``, ``MONGO_AUTO_RETRY_WAIT_RANDOM_MAX=1`` that NApps controllers have been using.
 - ``kytosd`` process will exit if a NApp raises an exception during its ``setup()`` execution.
+- Change format for ``Interface.available_tags`` to ``dict[str, list[list[int]]]``. Storing ``tag_types`` as keys and a list of ranges for ``available_tags`` as values.
 
+Deprecated
+==========
+- Deleted ``vlan_pool`` from ``kytos.conf`` in favor of ``Interface.tag_ranges`` which updates from ``kytos/topology`` API endpoint, ``v3/interfaces/{intf_id}/tag_ranges``.
 
 [2023.1.0] - 2023-06-05
 ***********************

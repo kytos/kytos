@@ -5,15 +5,16 @@ interfaces.
 """
 import json
 import operator
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from functools import reduce
 from threading import Lock
+from typing import Union
 
 from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.exceptions import (KytosLinkCreationError,
                                    KytosNoTagAvailableError)
 from kytos.core.id import LinkID
-from kytos.core.interface import TAGType
+from kytos.core.interface import Interface, TAGType
 
 
 class Link(GenericEntity):
@@ -21,7 +22,7 @@ class Link(GenericEntity):
 
     status_funcs = OrderedDict()
     status_reason_funcs = OrderedDict()
-    _get_available_vlans_lock = Lock()
+    _get_available_vlans_lock = defaultdict(Lock)
 
     def __init__(self, endpoint_a, endpoint_b):
         """Create a Link instance and set its attributes.
@@ -34,11 +35,11 @@ class Link(GenericEntity):
             raise KytosLinkCreationError("endpoint_b cannot be None")
         self._id = LinkID(endpoint_a.id, endpoint_b.id)
         if self._id.interfaces[0] == endpoint_b.id:
-            self.endpoint_a = endpoint_b
-            self.endpoint_b = endpoint_a
+            self.endpoint_a: Interface = endpoint_b
+            self.endpoint_b: Interface = endpoint_a
         else:
-            self.endpoint_a = endpoint_a
-            self.endpoint_b = endpoint_b
+            self.endpoint_a: Interface = endpoint_a
+            self.endpoint_b: Interface = endpoint_b
 
         super().__init__()
 
@@ -121,65 +122,67 @@ class Link(GenericEntity):
         """
         return self._id
 
-    @property
-    def available_tags(self):
+    def available_tags(self, tag_type: str = 'vlan') -> list[list[int]]:
         """Return the available tags for the link.
 
         Based on the endpoint tags.
         """
-        return [tag for tag in self.endpoint_a.available_tags if tag in
-                self.endpoint_b.available_tags]
+        tag_iterator = Interface.range_intersection(
+            self.endpoint_a.available_tags[tag_type],
+            self.endpoint_b.available_tags[tag_type],
+        )
+        available_tags = list(tag_iterator)
+        return available_tags
 
-    def use_tag(self, tag):
-        """Remove a specific tag from available_tags if it is there.
-
-        Deprecated: use only the get_next_available_tag method.
-        """
-        if self.is_tag_available(tag):
-            self.endpoint_a.use_tag(tag)
-            self.endpoint_b.use_tag(tag)
-            return True
-        return False
-
-    def is_tag_available(self, tag):
+    def is_tag_available(self, tag: int, tag_type: str = 'vlan'):
         """Check if a tag is available."""
-        return (self.endpoint_a.is_tag_available(tag) and
-                self.endpoint_b.is_tag_available(tag))
+        return (self.endpoint_a.is_tag_available(tag, tag_type) and
+                self.endpoint_b.is_tag_available(tag, tag_type))
 
-    def get_next_available_tag(self):
+    def get_next_available_tag(
+        self,
+        controller,
+        link_id,
+        tag_type: str = 'vlan'
+    ) -> int:
         """Return the next available tag if exists."""
-        with self._get_available_vlans_lock:
-            # Copy the available tags because in case of error
-            # we will remove and add elements to the available_tags
-            available_tags_a = self.endpoint_a.available_tags.copy()
-            available_tags_b = self.endpoint_b.available_tags.copy()
+        with self._get_available_vlans_lock[link_id]:
+            with self.endpoint_a._tag_lock:
+                with self.endpoint_b._tag_lock:
+                    ava_tags_a = self.endpoint_a.available_tags[tag_type]
+                    ava_tags_b = self.endpoint_b.available_tags[tag_type]
+                    tags = Interface.range_intersection(ava_tags_a,
+                                                        ava_tags_b)
+                    try:
+                        tag, _ = next(tags)
+                        self.endpoint_a.use_tags(
+                            controller, tag, use_lock=False
+                        )
+                        self.endpoint_b.use_tags(
+                            controller, tag, use_lock=False
+                        )
+                        return tag
+                    except StopIteration:
+                        raise KytosNoTagAvailableError(self)
 
-            for tag in available_tags_a:
-                # Tag does not exist in endpoint B. Try another tag.
-                if tag not in available_tags_b:
-                    continue
-
-                # Tag already in use. Try another tag.
-                if not self.endpoint_a.use_tag(tag):
-                    continue
-
-                # Tag already in use in B. Mark the tag as available again.
-                if not self.endpoint_b.use_tag(tag):
-                    self.endpoint_a.make_tag_available(tag)
-                    continue
-
-                # Tag used successfully by both endpoints. Returning.
-                return tag
-
-            raise KytosNoTagAvailableError(self)
-
-    def make_tag_available(self, tag):
+    def make_tags_available(
+        self,
+        controller,
+        tags: Union[int, list[int]],
+        link_id,
+        tag_type: str = 'vlan'
+    ) -> tuple[bool, bool]:
         """Add a specific tag in available_tags."""
-        if not self.is_tag_available(tag):
-            self.endpoint_a.make_tag_available(tag)
-            self.endpoint_b.make_tag_available(tag)
-            return True
-        return False
+        with self._get_available_vlans_lock[link_id]:
+            with self.endpoint_a._tag_lock:
+                with self.endpoint_b._tag_lock:
+                    result_a = self.endpoint_a.make_tags_available(
+                        controller, tags, tag_type, False
+                    )
+                    result_b = self.endpoint_b.make_tags_available(
+                        controller, tags, tag_type, False
+                    )
+        return result_a, result_b
 
     def available_vlans(self):
         """Get all available vlans from each interface in the link."""
@@ -190,8 +193,8 @@ class Link(GenericEntity):
     @staticmethod
     def _get_available_vlans(endpoint):
         """Return all vlans from endpoint."""
-        tags = endpoint.available_tags
-        return [tag for tag in tags if tag.tag_type == TAGType.VLAN]
+        vlans = endpoint.available_tags
+        return [vlan for vlan in vlans if vlan == TAGType.VLAN.value]
 
     def as_dict(self):
         """Return the Link as a dictionary."""

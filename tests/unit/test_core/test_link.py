@@ -1,12 +1,13 @@
 """Link tests."""
 import logging
 import time
-import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
+
+import pytest
 
 from kytos.core.common import EntityStatus
 from kytos.core.exceptions import KytosLinkCreationError
-from kytos.core.interface import TAG, Interface, TAGType
+from kytos.core.interface import Interface, TAGType
 from kytos.core.link import Link
 from kytos.core.switch import Switch
 
@@ -14,10 +15,11 @@ logging.basicConfig(level=logging.CRITICAL)
 
 
 # pylint: disable=protected-access,too-many-public-methods
-class TestLink(unittest.TestCase):
+# pylint: disable=attribute-defined-outside-init
+class TestLink():
     """Test Links."""
 
-    def setUp(self):
+    def setup_method(self):
         """Create interface objects."""
         self.switch1 = self._get_v0x04_switch('dpid1')
         self.iface1 = Interface('interface1', 41, self.switch1)
@@ -42,8 +44,8 @@ class TestLink(unittest.TestCase):
 
         link_3 = Link(iface3, iface4)
 
-        self.assertTrue(link_1 == link_2)
-        self.assertFalse(link_1 == link_3)
+        assert link_1 == link_2
+        assert (link_1 == link_3) is False
 
     def test__repr__(self):
         """Test __repr__ method."""
@@ -51,7 +53,7 @@ class TestLink(unittest.TestCase):
         expected = ("Link(Interface('interface1', 41, Switch('dpid1')), "
                     "Interface('interface2', 42, Switch('dpid2')), "
                     f"{link.id})")
-        self.assertEqual(repr(link), expected)
+        assert repr(link) == expected
 
     def test_id(self):
         """Test id property."""
@@ -67,30 +69,30 @@ class TestLink(unittest.TestCase):
 
             ids.append(link.id)
 
-        self.assertEqual(ids[0], ids[1])
-        self.assertEqual(ids[2], ids[3])
-        self.assertNotEqual(ids[0], ids[2])
+        assert ids[0] == ids[1]
+        assert ids[2] == ids[3]
+        assert ids[0] != ids[2]
 
     def test_init(self):
         """Test normal Link initialization."""
         link = Link(self.iface1, self.iface2)
-        self.assertIsInstance(link, Link)
-        self.assertIs(link.is_active(), True)
-        self.assertIs(link.is_enabled(), False)
+        assert isinstance(link, Link)
+        assert link.is_active()
+        assert link.is_enabled() is False
 
     def test_init_with_null_endpoints(self):
         """Test initialization with None as endpoints."""
-        with self.assertRaises(KytosLinkCreationError):
+        with pytest.raises(KytosLinkCreationError):
             Link(self.iface1, None)
 
-        with self.assertRaises(KytosLinkCreationError):
+        with pytest.raises(KytosLinkCreationError):
             Link(None, self.iface2)
 
     def test_link_id(self):
         """Test equality of links with the same values in different order."""
         link1 = Link(self.iface1, self.iface2)
         link2 = Link(self.iface2, self.iface1)
-        self.assertEqual(link1.id, link2.id)
+        assert link1.id == link2.id
 
     def test_status_funcs(self) -> None:
         """Test status_funcs."""
@@ -197,109 +199,63 @@ class TestLink(unittest.TestCase):
     def test_available_tags(self):
         """Test available_tags property."""
         link = Link(self.iface1, self.iface2)
-        tag_1 = Mock(tag_type=TAGType.VLAN)
-        tag_2 = Mock(tag_type=TAGType.VLAN)
-        tag_3 = Mock(tag_type=TAGType.VLAN_QINQ)
-        tag_4 = Mock(tag_type=TAGType.MPLS)
-        link.endpoint_a.available_tags = [tag_1, tag_2, tag_3, tag_4]
-        link.endpoint_b.available_tags = [tag_2, tag_3, tag_4]
+        link.endpoint_a.available_tags['vlan'] = [[1, 100]]
+        link.endpoint_b.available_tags['vlan'] = [[50, 200]]
 
-        self.assertEqual(link.available_tags, [tag_2, tag_3, tag_4])
+        vlans = link.available_tags()
+        assert vlans == [[50, 100]]
 
-    @patch('kytos.core.interface.Interface.is_tag_available')
-    def test_use_tag__success(self, mock_is_tag_available):
-        """Test use_tag method to success case."""
-        mock_is_tag_available.side_effect = [True, True]
-        link = Link(self.iface1, self.iface2)
-
-        result = link.use_tag(Mock())
-        self.assertTrue(result)
-
-    @patch('kytos.core.interface.Interface.is_tag_available')
-    def test_use_tag__error(self, mock_is_tag_available):
-        """Test use_tag method to error case."""
-        mock_is_tag_available.side_effect = [True, False]
-        link = Link(self.iface1, self.iface2)
-
-        result = link.use_tag(Mock())
-        self.assertFalse(result)
-
-    def test_make_tag_available__success(self):
-        """Test make_tag_available method to success case."""
-        link = Link(self.iface1, self.iface2)
-        self.assertEqual(self.iface1.available_tags[-1],
-                         self.iface2.available_tags[-1])
-        next_value = self.iface1.available_tags[-1].value + 1
-        tag = TAG(TAGType.VLAN, next_value)
-        result = link.make_tag_available(tag)
-        self.assertTrue(result)
-        self.assertTrue(tag in self.iface1.available_tags)
-        self.assertTrue(tag in self.iface2.available_tags)
-
-    def test_make_tag_available__error(self):
-        """Test make_tag_available method to error case."""
-        link = Link(self.iface1, self.iface2)
-        result = link.make_tag_available(self.iface1.available_tags[0])
-        self.assertFalse(result)
-
-    def test_get_next_available_tag(self):
+    def test_get_next_available_tag(self, controller):
         """Test get next available tags returns different tags"""
         link = Link(self.iface1, self.iface2)
-        tag = link.get_next_available_tag()
-        next_tag = link.get_next_available_tag()
+        tag = link.get_next_available_tag(controller, "link_id")
+        next_tag = link.get_next_available_tag(controller, "link_id")
 
-        self.assertNotEqual(tag, next_tag)
+        assert tag != next_tag
 
-    def test_get_tag_multiple_calls(self):
+    def test_get_tag_multiple_calls(self, controller):
         """Test get next available tags returns different tags"""
         link = Link(self.iface1, self.iface2)
-        tag = link.get_next_available_tag()
-        next_tag = link.get_next_available_tag()
-        self.assertNotEqual(next_tag.value, tag.value)
+        tag = link.get_next_available_tag(controller, "link_id")
+        next_tag = link.get_next_available_tag(controller, "link_id")
+        assert next_tag != tag
 
-    def test_next_tag_with_use_tags(self):
-        """Test get next availabe tags returns different tags"""
-        link = Link(self.iface1, self.iface2)
-        tag = link.get_next_available_tag()
-        is_available = link.is_tag_available(tag)
-        self.assertFalse(is_available)
-        link.use_tag(tag)
-
-    def test_tag_life_cicle(self):
+    def test_tag_life_cicle(self, controller):
         """Test get next available tags returns different tags"""
         link = Link(self.iface1, self.iface2)
-        tag = link.get_next_available_tag()
+        tag = link.get_next_available_tag(controller, "link_id")
 
         is_available = link.is_tag_available(tag)
-        self.assertFalse(is_available)
+        assert is_available is False
 
-        link.make_tag_available(tag)
+        link.make_tags_available(controller, tag, "link_id")
         is_available = link.is_tag_available(tag)
-        self.assertTrue(is_available)
+        assert is_available
 
-    def test_concurrent_get_next_tag(self):
+    def test_concurrent_get_next_tag(self, controller):
         """Test get next available tags in concurrent execution"""
         # pylint: disable=import-outside-toplevel
         from tests.helper import test_concurrently
         _link = Link(self.iface1, self.iface2)
 
         _i = []
-        _initial_size = len(_link.endpoint_a.available_tags)
+        available_tags = _link.endpoint_a.available_tags['vlan']
+        _initial_size = 0
+        for i, j in available_tags:
+            _initial_size += j - i + 1
 
         @test_concurrently(20)
-        def test_get_next_available_tag():
+        def test_get_next_available_tag(controller):
             """Assert that get_next_available_tag() returns different tags."""
             _i.append(1)
-            tag = _link.get_next_available_tag()
+            tag = _link.get_next_available_tag(controller, "link_id")
             time.sleep(0.0001)
-            _link.use_tag(tag)
 
-            next_tag = _link.get_next_available_tag()
-            _link.use_tag(next_tag)
+            next_tag = _link.get_next_available_tag(controller, "link_id")
 
-            self.assertNotEqual(tag, next_tag)
+            assert tag != next_tag
 
-        test_get_next_available_tag()
+        test_get_next_available_tag(controller)
 
         # sleep not needed because test_concurrently waits for all threads
         # to finish before returning.
@@ -307,29 +263,25 @@ class TestLink(unittest.TestCase):
 
         # Check if after the 20th iteration we have 40 tags
         # It happens because we get 2 tags for every iteration
-        self.assertEqual(_initial_size,
-                         len(_link.endpoint_a.available_tags) + 40)
+        available_tags = _link.endpoint_a.available_tags['vlan']
+        _final_size = 0
+        for i, j in available_tags:
+            _final_size += j - i + 1
+        assert _initial_size == _final_size + 40
 
     def test_available_vlans(self):
         """Test available_vlans method."""
         link = Link(self.iface1, self.iface2)
-        tag_1 = Mock(tag_type=TAGType.VLAN)
-        tag_2 = Mock(tag_type=TAGType.VLAN)
-        tag_3 = Mock(tag_type=TAGType.VLAN_QINQ)
-        tag_4 = Mock(tag_type=TAGType.MPLS)
-        link.endpoint_a.available_tags = [tag_1, tag_2, tag_3, tag_4]
-        link.endpoint_b.available_tags = [tag_2, tag_3, tag_4]
+        link.endpoint_a.available_tags[TAGType.MPLS.value] = [[1, 100]]
+        link.endpoint_b.available_tags[TAGType.MPLS.value] = [[50, 200]]
 
         vlans = link.available_vlans()
-        self.assertEqual(vlans, [tag_2])
+        assert vlans == [TAGType.VLAN.value]
 
     def test_get_available_vlans(self):
         """Test _get_available_vlans method."""
         link = Link(self.iface1, self.iface2)
-        tag_1 = Mock(tag_type=TAGType.VLAN)
-        tag_2 = Mock(tag_type=TAGType.VLAN_QINQ)
-        tag_3 = Mock(tag_type=TAGType.MPLS)
-        link.endpoint_a.available_tags = [tag_1, tag_2, tag_3]
-
+        link.endpoint_a.available_tags[TAGType.VLAN_QINQ.value] = [[1, 1]]
+        link.endpoint_a.available_tags[TAGType.MPLS.value] = [[1, 1]]
         vlans = link._get_available_vlans(link.endpoint_a)
-        self.assertEqual(vlans, [tag_1])
+        assert vlans == [TAGType.VLAN.value]

@@ -44,7 +44,6 @@ from kytos.core.events import KytosEvent
 from kytos.core.exceptions import (KytosAPMInitException, KytosDBInitException,
                                    KytosNAppSetupException)
 from kytos.core.helpers import executors, now
-from kytos.core.interface import Interface
 from kytos.core.logs import LogManager
 from kytos.core.napps.base import NApp
 from kytos.core.napps.manager import NAppsManager
@@ -675,8 +674,6 @@ class Controller:
                 event_name += 'new'
             else:
                 event_name += 'reconnected'
-
-            self.set_switch_options(dpid=dpid)
             event = KytosEvent(name=event_name, content={'switch': switch})
 
             if connection:
@@ -689,37 +686,6 @@ class Controller:
             self.buffers.app.put(event)
 
             return switch
-
-    def set_switch_options(self, dpid):
-        """Update the switch settings based on kytos.conf options.
-
-        Args:
-            dpid (str): dpid used to identify a switch.
-
-        """
-        switch = self.switches.get(dpid)
-        if not switch:
-            return
-
-        vlan_pool = {}
-        vlan_pool = self.options.vlan_pool
-        if not vlan_pool:
-            return
-
-        if vlan_pool.get(dpid):
-            self.log.info("Loading vlan_pool configuration for dpid %s", dpid)
-            for intf_num, port_list in vlan_pool[dpid].items():
-                if not switch.interfaces.get((intf_num)):
-                    vlan_ids = set()
-                    for vlan_range in port_list:
-                        (vlan_begin, vlan_end) = (vlan_range[0:2])
-                        for vlan_id in range(vlan_begin, vlan_end):
-                            vlan_ids.add(vlan_id)
-                    intf_num = int(intf_num)
-                    intf = Interface(name=intf_num, port_number=intf_num,
-                                     switch=switch)
-                    intf.set_available_tags(vlan_ids)
-                    switch.update_interface(intf)
 
     def create_or_update_connection(self, connection):
         """Update a connection.

@@ -33,6 +33,10 @@ class KytosBuffers:
 
         :attr:`app`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
         sent to NApps.
+
+        :attr:`meta`: :class:`~kytos.core.buffers.KytosEventBuffer` with
+        core related events sent to NApps. This is meant for general core
+        control events.
         """
 
         self._pool_max_workers = get_thread_pool_max_workers()
@@ -54,6 +58,7 @@ class KytosBuffers:
             "app",
             queue=Queue(maxsize=self._get_maxsize("app")),
         )
+        self.meta = KytosEventBuffer("meta")
 
         buffer_conf = KytosConfig().options['daemon'].event_buffer_conf
 

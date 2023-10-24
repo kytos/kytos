@@ -148,8 +148,9 @@ class KytosNAppException(Exception):
 class KytosNAppSetupException(KytosNAppException):
     """KytosNAppSetupException. """
 
-    def __init__(self, message="KytosNAppSetupException") -> None:
+    def __init__(self, message="KytosNAppSetupException", from_exc=None):
         """KytosNAppSetupException."""
+        self.from_exc = from_exc
         super().__init__(message=message)
 
     def __str__(self):

@@ -370,6 +370,8 @@ class Controller:
         self._tasks.append(task)
         task = self.loop.create_task(self.event_handler("app"))
         self._tasks.append(task)
+        task = self.loop.create_task(self.event_handler("meta"))
+        self._tasks.append(task)
 
         self.started_at = now()
 
@@ -569,7 +571,7 @@ class Controller:
             f"kytos/core.{event.destination.protocol.name}.connection.error"
         error_msg = f"Connection state: {event.destination.state}"
         event.content["exception"] = error_msg
-        await self.buffers.app.aput(event)
+        await self.buffers.conn.aput(event)
 
     async def msg_out_event_handler(self):
         """Handle msg_out events.
@@ -679,7 +681,7 @@ class Controller:
                 if old_connection is not connection:
                     self.remove_connection(old_connection)
 
-            self.buffers.app.put(event)
+            self.buffers.conn.put(event)
 
             return switch
 
@@ -813,7 +815,7 @@ class Controller:
             napp = napp_module.Main(controller=self)
         except Exception as exc:  # noqa pylint: disable=bare-except
             msg = f"NApp {username}/{napp_name} exception {str(exc)} "
-            raise KytosNAppSetupException(msg) from exc
+            raise KytosNAppSetupException(msg, from_exc=exc) from exc
 
         self.napps[(username, napp_name)] = napp
 
@@ -846,11 +848,11 @@ class Controller:
             try:
                 self.log.info("Loading NApp %s", napp.id)
                 self.load_napp(napp.username, napp.name)
-            except FileNotFoundError as exception:
+            except FileNotFoundError as exc:
                 self.log.error("Could not load NApp %s: %s",
-                               napp.id, exception)
-                msg = f"NApp {napp.id} exception {str(exception)}"
-                raise KytosNAppSetupException(msg) from exception
+                               napp.id, exc)
+                msg = f"NApp {napp.id} exception {str(exc)}"
+                raise KytosNAppSetupException(msg, from_exc=exc) from exc
 
     def unload_napp(self, username, napp_name):
         """Unload a specific NApp.

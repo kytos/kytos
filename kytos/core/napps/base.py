@@ -263,7 +263,7 @@ class KytosNApp(Thread, metaclass=ABCMeta):
         """Inform this NApp has been loaded."""
         name = f'{self.username}/{self.name}.loaded'
         event = KytosEvent(name=name, content={})
-        self.controller.buffers.app.put(event)
+        self.controller.buffers.meta.put(event)
 
     # all listeners receive event
     def _shutdown_handler(self, event):  # pylint: disable=unused-argument

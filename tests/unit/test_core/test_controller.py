@@ -6,7 +6,7 @@ import tempfile
 import warnings
 from copy import copy
 from unittest import TestCase
-from unittest.mock import MagicMock, Mock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
 
 import pytest
 from pyof.foundation.exceptions import PackException
@@ -362,15 +362,20 @@ class TestController(TestCase):
         dpid = '00:00:00:00:00:00:00:01'
         switch = MagicMock(dpid=dpid)
         self.controller.switches = {dpid: switch}
+        self.controller.buffers.conn = MagicMock()
 
         connection = MagicMock()
         resp_switch = self.controller.get_switch_or_create(dpid, connection)
 
         self.assertEqual(resp_switch, switch)
+        self.controller.buffers.conn.put.assert_called()
+        ev_name = "kytos/core.switch.reconnected"
+        assert self.controller.buffers.conn.put.call_args[0][0].name == ev_name
 
     def test_get_switch_or_create__not_exists(self):
         """Test status_api method when switch does not exist."""
         self.controller.switches = {}
+        self.controller.buffers.conn = MagicMock()
 
         dpid = '00:00:00:00:00:00:00:01'
         connection = MagicMock()
@@ -378,6 +383,9 @@ class TestController(TestCase):
 
         expected_switches = {'00:00:00:00:00:00:00:01': switch}
         self.assertEqual(self.controller.switches, expected_switches)
+        self.controller.buffers.conn.put.assert_called()
+        ev_name = "kytos/core.switch.new"
+        assert self.controller.buffers.conn.put.call_args[0][0].name == ev_name
 
     def test_create_or_update_connection(self):
         """Test create_or_update_connection method."""
@@ -797,3 +805,9 @@ class TestControllerAsync:
         resp = await api_client.get("kytos/core/config")
         assert resp.status_code == 200
         assert expected == resp.json()
+
+    async def test_publish_connection_error(self, controller):
+        """Test publish_connection_error."""
+        controller.buffers.conn.aput = AsyncMock()
+        await controller.publish_connection_error(MagicMock())
+        controller.buffers.conn.aput.assert_called()

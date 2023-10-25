@@ -127,9 +127,9 @@ def stop_controller_sys_exit(controller, config, shell_task=None):
             pass
 
     try:
-        with open(config.pidfile, "r") as f:
-            pid = int(f.read().strip())
-            os.kill(pid, signal.SIGTERM.value)
+        with open(config.pidfile, "r", encoding="utf8") as file:
+            pid = int(file.read().strip())
+            os.kill(pid, signal.SIGTERM)
     except (FileNotFoundError, OSError):
         pass
 

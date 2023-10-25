@@ -94,10 +94,10 @@ class TestKytosd(TestCase):
 
     @patch("builtins.open", create=True)
     @patch('kytos.core.kytosd.os')
-    def test_stop_controller_sys_exit(self, mock_os, mock_open) -> None:
+    def test_stop_controller_sys_exit(self, mock_os, _mock_open) -> None:
         """Test stop the controller sys exit."""
         controller, config = MagicMock(), MagicMock()
         stop_controller_sys_exit(controller, config)
         controller.stop.assert_called()
         mock_os.kill.assert_called()
-        assert mock_os.kill.call_args[0][1] == signal.SIGTERM.value
+        assert mock_os.kill.call_args[0][1] == signal.SIGTERM

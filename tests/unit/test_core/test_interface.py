@@ -9,6 +9,8 @@ from pyof.v0x04.common.port import PortFeatures
 
 from kytos.core.common import EntityStatus
 from kytos.core.exceptions import (KytosSetTagRangeError,
+                                   KytosTagsAreNotAvailable,
+                                   KytosTagsNotInTagRanges,
                                    KytosTagtypeNotSupported)
 from kytos.core.interface import TAG, UNI, Interface
 from kytos.core.switch import Switch
@@ -186,19 +188,25 @@ class TestInterface():
         self.iface._notify_interface_tags = MagicMock()
         tags = [100, 200]
         # check use tag for the first time
-        is_success = self.iface.use_tags(controller, tags)
-        assert is_success
+        self.iface.use_tags(controller, tags)
         assert self.iface._notify_interface_tags.call_count == 1
 
         # check use tag for the second time
-        is_success = self.iface.use_tags(controller, tags)
-        assert is_success is False
+        with pytest.raises(KytosTagsAreNotAvailable):
+            self.iface.use_tags(controller, tags)
         assert self.iface._notify_interface_tags.call_count == 1
 
-        # check use tag after returning the tag to the pool
-        self.iface.make_tags_available(controller, tags)
-        is_success = self.iface.use_tags(controller, tags)
-        assert is_success
+        # check use tag after returning the tag to the pool as list
+        self.iface.make_tags_available(controller, [tags])
+        self.iface.use_tags(controller, [tags])
+        assert self.iface._notify_interface_tags.call_count == 3
+
+        with pytest.raises(KytosTagsAreNotAvailable):
+            self.iface.use_tags(controller, [tags])
+        assert self.iface._notify_interface_tags.call_count == 3
+
+        with pytest.raises(KytosTagsAreNotAvailable):
+            self.iface.use_tags(controller, [tags], use_lock=False)
         assert self.iface._notify_interface_tags.call_count == 3
 
     async def test_enable(self):
@@ -335,41 +343,24 @@ class TestInterface():
         assert self.iface.available_tags == available
         assert self.iface.tag_ranges == tag_ranges
 
-        assert self.iface.make_tags_available(controller, [1, 20]) is False
+        with pytest.raises(KytosTagsNotInTagRanges):
+            self.iface.make_tags_available(controller, [1, 20])
         assert self.iface._notify_interface_tags.call_count == 0
-        assert self.iface.make_tags_available(controller, [250, 280])
+
+        with pytest.raises(KytosTagsNotInTagRanges):
+            self.iface.make_tags_available(controller, [[1, 20]])
+        assert self.iface._notify_interface_tags.call_count == 0
+
+        assert not self.iface.make_tags_available(controller, [250, 280])
         assert self.iface._notify_interface_tags.call_count == 1
+
+        with pytest.raises(KytosTagsNotInTagRanges):
+            self.iface.make_tags_available(controller, [1, 1], use_lock=False)
 
         # Test sanity safe guard
         none = [None, None]
-        assert self.iface.make_tags_available(controller, none) is False
-        assert None not in self.iface.available_tags
-        assert self.iface._notify_interface_tags.call_count == 1
-
-    async def test_range_intersection(self) -> None:
-        """Test range_intersection"""
-        tags_a = [
-            [3, 5], [7, 9], [11, 16], [21, 23], [25, 25], [27, 28], [30, 30]
-        ]
-        tags_b = [
-            [1, 3], [6, 6], [10, 10], [12, 13], [15, 15], [17, 20], [22, 30]
-        ]
-        result = []
-        iterator_result = self.iface.range_intersection(tags_a, tags_b)
-        for tag_range in iterator_result:
-            result.append(tag_range)
-        expected = [
-            [3, 3], [12, 13], [15, 15], [22, 23], [25, 25], [27, 28], [30, 30]
-        ]
-        assert result == expected
-
-    async def test_range_difference(self) -> None:
-        """Test range_difference"""
-        ranges_a = [[2, 3], [7, 10], [12, 12], [14, 14], [17, 19], [25, 27]]
-        ranges_b = [[1, 1], [4, 5], [8, 9], [11, 14], [18, 21], [23, 26]]
-        expected = [[2, 3], [7, 7], [10, 10], [17, 17], [27, 27]]
-        actual = self.iface.range_difference(ranges_a, ranges_b)
-        assert expected == actual
+        assert self.iface.make_tags_available(controller, none) == [none]
+        assert self.iface._notify_interface_tags.call_count == 2
 
     async def test_set_tag_ranges(self, controller) -> None:
         """Test set_tag_ranges"""
@@ -400,39 +391,6 @@ class TestInterface():
         self.iface.remove_tag_ranges('vlan')
         default = [[1, 4095]]
         assert self.iface.tag_ranges['vlan'] == default
-
-    async def test_find_index_remove(self) -> None:
-        """Test find_index_remove"""
-        tag_ranges = [[20, 20], [200, 3000]]
-        self.iface.set_tag_ranges(tag_ranges, 'vlan')
-        assert self.iface.tag_ranges['vlan'] == tag_ranges
-        index = self.iface.find_index_remove(tag_ranges, [20, 20])
-        assert index == 0
-        index = self.iface.find_index_remove(tag_ranges, [10, 15])
-        assert index is None
-        index = self.iface.find_index_remove(tag_ranges, [190, 201])
-        assert index is None
-        index = self.iface.find_index_remove(tag_ranges, [200, 250])
-        assert index == 1
-
-        tag_ranges = [[200, 3000]]
-        self.iface.set_tag_ranges(tag_ranges, 'vlan')
-        assert self.iface.tag_ranges['vlan'] == tag_ranges
-        index = self.iface.find_index_remove(tag_ranges, [200, 250])
-        assert index == 0
-
-    async def test_find_index_add(self) -> None:
-        """Test find_index_add"""
-        tag_ranges = [[20, 20], [200, 3000]]
-        self.iface.set_tag_ranges(tag_ranges, 'vlan')
-        assert self.iface.tag_ranges['vlan'] == tag_ranges
-
-        index = self.iface.find_index_add(tag_ranges, [10, 15])
-        assert index == 0
-        index = self.iface.find_index_add(tag_ranges, [3004, 4000])
-        assert index == 2
-        index = self.iface.find_index_add(tag_ranges, [50, 202])
-        assert index is None
 
     async def test_remove_tags(self) -> None:
         """Test remove_tags"""

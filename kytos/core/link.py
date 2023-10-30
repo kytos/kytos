@@ -12,9 +12,11 @@ from typing import Union
 
 from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.exceptions import (KytosLinkCreationError,
-                                   KytosNoTagAvailableError)
+                                   KytosNoTagAvailableError,
+                                   KytosTagsNotInTagRanges)
 from kytos.core.id import LinkID
 from kytos.core.interface import Interface, TAGType
+from kytos.core.tag_ranges import range_intersection
 
 
 class Link(GenericEntity):
@@ -127,7 +129,7 @@ class Link(GenericEntity):
 
         Based on the endpoint tags.
         """
-        tag_iterator = Interface.range_intersection(
+        tag_iterator = range_intersection(
             self.endpoint_a.available_tags[tag_type],
             self.endpoint_b.available_tags[tag_type],
         )
@@ -151,8 +153,8 @@ class Link(GenericEntity):
                 with self.endpoint_b._tag_lock:
                     ava_tags_a = self.endpoint_a.available_tags[tag_type]
                     ava_tags_b = self.endpoint_b.available_tags[tag_type]
-                    tags = Interface.range_intersection(ava_tags_a,
-                                                        ava_tags_b)
+                    tags = range_intersection(ava_tags_a,
+                                              ava_tags_b)
                     try:
                         tag, _ = next(tags)
                         self.endpoint_a.use_tags(
@@ -171,18 +173,21 @@ class Link(GenericEntity):
         tags: Union[int, list[int]],
         link_id,
         tag_type: str = 'vlan'
-    ) -> tuple[bool, bool]:
+    ) -> tuple[list[list[int]], list[list[int]]]:
         """Add a specific tag in available_tags."""
         with self._get_available_vlans_lock[link_id]:
             with self.endpoint_a._tag_lock:
                 with self.endpoint_b._tag_lock:
-                    result_a = self.endpoint_a.make_tags_available(
-                        controller, tags, tag_type, False
-                    )
-                    result_b = self.endpoint_b.make_tags_available(
-                        controller, tags, tag_type, False
-                    )
-        return result_a, result_b
+                    try:
+                        conflict_a = self.endpoint_a.make_tags_available(
+                            controller, tags, tag_type, False
+                        )
+                        conflict_b = self.endpoint_b.make_tags_available(
+                            controller, tags, tag_type, False
+                        )
+                    except KytosTagsNotInTagRanges as err:
+                        raise err
+        return conflict_a, conflict_b
 
     def available_vlans(self):
         """Get all available vlans from each interface in the link."""

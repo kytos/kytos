@@ -86,7 +86,33 @@ class KytosLinkCreationError(Exception):
 
 
 class KytosTagtypeNotSupported(Exception):
-    """Exception thronw when a not supported tag type is not supported"""
+    """Exception thrown when a not supported tag type is not supported"""
+
+
+class KytosTagsNotInTagRanges(Exception):
+    """Exception thrown when a tag is outside of tag ranges"""
+    def __init__(self, conflict: list[list[int]]) -> None:
+        super().__init__()
+        self.conflict = conflict
+
+    def __repr__(self):
+        return f"The tags {self.conflict} are outside tag_ranges"
+
+    def __str__(self) -> str:
+        return f"The tags {self.conflict} are outside tag_ranges"
+
+
+class KytosTagsAreNotAvailable(Exception):
+    """Exception thrown when a tag is not available."""
+    def __init__(self, conflict: list[list[int]]) -> None:
+        super().__init__()
+        self.conflict = conflict
+
+    def __repr__(self):
+        return f"The tags {self.conflict} are not available."
+
+    def __str__(self) -> str:
+        return f"The tags {self.conflict} are not available."
 
 
 # Exceptions related  to NApps

@@ -310,11 +310,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 if result is False:
                     self.available_tags[tag_type] = available_copy
                     conflict = range_difference(tags, available_copy)
-                    raise KytosTagsAreNotAvailable(conflict)
+                    raise KytosTagsAreNotAvailable(conflict, self._id)
         else:
             result = self.remove_tags(tags, tag_type)
             if result is False:
-                raise KytosTagsAreNotAvailable([tags])
+                raise KytosTagsAreNotAvailable([tags], self._id)
 
     # pylint: disable=too-many-branches
     def add_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
@@ -330,7 +330,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         # Check if tags is within self.tag_ranges
         tag_ranges = self.tag_ranges[tag_type]
         if find_index_remove(tag_ranges, tags) is None:
-            raise KytosTagsNotInTagRanges([tags])
+            raise KytosTagsNotInTagRanges([tags], self._id)
 
         available = self.available_tags[tag_type]
         index = find_index_add(available, tags)
@@ -413,7 +413,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         if isinstance(tags[0], list):
             diff = range_difference(tags, self.tag_ranges[tag_type])
             if diff:
-                raise KytosTagsNotInTagRanges(diff)
+                raise KytosTagsNotInTagRanges(diff, self._id)
             available_tags = self.available_tags[tag_type]
             new_tags, conflict = range_addition(tags, available_tags)
             self.available_tags[tag_type] = new_tags

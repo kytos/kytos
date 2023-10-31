@@ -1,8 +1,10 @@
 """Test kytos.core.kytosd module."""
+import signal
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from kytos.core.kytosd import _create_pid_dir, async_main, main, start_shell
+from kytos.core.kytosd import (_create_pid_dir, async_main, main, start_shell,
+                               stop_controller_sys_exit)
 
 
 class TestKytosd(TestCase):
@@ -89,3 +91,13 @@ class TestKytosd(TestCase):
         async_main(MagicMock())
 
         event_loop.call_soon.assert_called_with(controller.start)
+
+    @patch("builtins.open", create=True)
+    @patch('kytos.core.kytosd.os')
+    def test_stop_controller_sys_exit(self, mock_os, _mock_open) -> None:
+        """Test stop the controller sys exit."""
+        controller, config = MagicMock(), MagicMock()
+        stop_controller_sys_exit(controller, config)
+        controller.stop.assert_called()
+        mock_os.kill.assert_called()
+        assert mock_os.kill.call_args[0][1] == signal.SIGTERM

@@ -17,6 +17,10 @@ Changed
 - ``kytosd`` process will exit if a NApp raises an exception during its ``setup()`` execution.
 - Change format for ``Interface.available_tags`` to ``dict[str, list[list[int]]]``. Storing ``tag_types`` as keys and a list of ranges for ``available_tags`` as values.
 
+Fixed
+=====
+- Avoid ``kytosd`` hanging its termination when handling ``SystemExit`` with SIGTERM
+
 Deprecated
 ==========
 - Deleted ``vlan_pool`` from ``kytos.conf`` in favor of ``Interface.tag_ranges`` which updates from ``kytos/topology`` API endpoint, ``v3/interfaces/{intf_id}/tag_ranges``.

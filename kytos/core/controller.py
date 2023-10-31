@@ -170,11 +170,9 @@ class Controller:
         try:
             decorators = [self._resolve(deco) for deco in decorators]
         except ModuleNotFoundError as err:
-            print(f'Failed to resolve decorator module: {err.name}')
-            sys.exit(1)
+            sys.exit(f'Failed to resolve decorator module: {err.name}')
         except AttributeError:
-            print(f'Failed to resolve decorator name: {decorators}')
-            sys.exit(1)
+            sys.exit(f'Failed to resolve decorator name: {decorators}')
         LogManager.decorate_logger_class(*decorators)
         LogManager.load_config_file(self.options.logging, self.options.debug)
         # pylint: disable=fixme
@@ -264,12 +262,10 @@ class Controller:
             self.start_controller()
         except (KytosDBInitException, KytosAPMInitException) as exc:
             message = f"Kytos couldn't start because of {str(exc)}"
-            print(message)
             sys.exit(message)
         except Exception as exc:
             exc_fmt = traceback.format_exc(chain=True)
             message = f"Kytos couldn't start because of {str(exc)} {exc_fmt}"
-            print(message)
             sys.exit(message)
 
     def create_pidfile(self):

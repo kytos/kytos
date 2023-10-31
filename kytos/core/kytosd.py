@@ -117,6 +117,23 @@ def stop_controller(controller, shell_task=None):
         shell_task.cancel()
 
 
+def stop_controller_sys_exit(controller, config, shell_task=None):
+    """Stop the controller while handling sys exit."""
+    controller.stop()
+    if shell_task:
+        try:
+            shell_task.cancel()
+        except asyncio.CancelledError:
+            pass
+
+    try:
+        with open(config.pidfile, "r", encoding="utf8") as file:
+            pid = int(file.read().strip())
+            os.kill(pid, signal.SIGTERM)
+    except (FileNotFoundError, OSError):
+        pass
+
+
 async def start_shell_async(controller, executor):
     """Run the shell inside a thread and stop controller when done."""
     _start_shell = functools.partial(start_shell, controller)
@@ -153,7 +170,10 @@ def async_main(config):
     try:
         loop.run_forever()
     except SystemExit as exc:
-        controller.log.error(exc)
-        controller.log.info("Shutting down Kytos...")
+        print(exc)
+        print("Shutting down Kytos...")
+        loop.remove_signal_handler(signal.SIGINT)
+        loop.remove_signal_handler(signal.SIGTERM)
+        stop_controller_sys_exit(controller, config, shell_task)
     finally:
         loop.close()

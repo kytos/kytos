@@ -1,7 +1,63 @@
 """Test kytos.core.tag_ranges"""
+import pytest
+
+from kytos.core.exceptions import KytosInvalidRanges
 from kytos.core.tag_ranges import (find_index_add, find_index_remove,
+                                   get_tag_ranges, map_singular_values,
                                    range_addition, range_difference,
                                    range_intersection)
+
+
+def test_map_singular_values():
+    """Test map_singular_values"""
+    mock_tag = 201
+    result = map_singular_values(mock_tag)
+    assert result == [201, 201]
+    mock_tag = [201]
+    result = map_singular_values(mock_tag)
+    assert result == [201, 201]
+
+
+def test_get_tag_ranges():
+    """Test _get_tag_ranges"""
+    mock_ranges = [100, [150], [200, 3000]]
+    result = get_tag_ranges(mock_ranges)
+    assert result == [[100, 100], [150, 150], [200, 3000]]
+
+    # Empty
+    mock_ranges = []
+    with pytest.raises(KytosInvalidRanges):
+        get_tag_ranges(mock_ranges)
+
+    # Range not ordered
+    mock_ranges = [[20, 19]]
+    with pytest.raises(KytosInvalidRanges):
+        get_tag_ranges(mock_ranges)
+
+    # Ranges not ordered
+    mock_ranges = [[20, 50], [30, 3000]]
+    with pytest.raises(KytosInvalidRanges):
+        get_tag_ranges(mock_ranges)
+
+    # Unnecessary partition
+    mock_ranges = [[20, 50], [51, 3000]]
+    with pytest.raises(KytosInvalidRanges):
+        get_tag_ranges(mock_ranges)
+
+    # Repeated tag
+    mock_ranges = [[20, 50], [50, 3000]]
+    with pytest.raises(KytosInvalidRanges):
+        get_tag_ranges(mock_ranges)
+
+    # Over 4095
+    mock_ranges = [[20, 50], [52, 4096]]
+    with pytest.raises(KytosInvalidRanges):
+        get_tag_ranges(mock_ranges)
+
+    # Under 1
+    mock_ranges = [[0, 50], [52, 3000]]
+    with pytest.raises(KytosInvalidRanges):
+        get_tag_ranges(mock_ranges)
 
 
 def test_range_intersection():

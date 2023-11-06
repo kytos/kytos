@@ -41,7 +41,7 @@ class TAGType(Enum):
 class TAG:
     """Class that represents a TAG."""
 
-    def __init__(self, tag_type, value):
+    def __init__(self, tag_type: str, value: int):
         self.tag_type = TAGType(tag_type).value
         self.value = value
 
@@ -70,6 +70,22 @@ class TAG:
 
     def __repr__(self):
         return f"TAG({self.tag_type!r}, {self.value!r})"
+
+
+# pylint: disable=super-init-not-called
+class TAGRange(TAG):
+    """Class that represents an User-to-Network Interface with
+     a tag value as a list."""
+
+    def __init__(
+        self,
+        tag_type: str,
+        value: list[list[int]],
+        mask_list: list[str, int]
+    ):
+        self.tag_type = TAGType(tag_type).value
+        self.value = value
+        self.mask_list = mask_list
 
 
 class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
@@ -740,7 +756,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 class UNI:
     """Class that represents an User-to-Network Interface."""
 
-    def __init__(self, interface, user_tag=None):
+    def __init__(
+        self,
+        interface: Interface,
+        user_tag: Union[None, TAG, TAGRange]
+    ):
         self.user_tag = user_tag
         self.interface = interface
 

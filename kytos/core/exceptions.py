@@ -121,6 +121,19 @@ class KytosTagsAreNotAvailable(Exception):
                f" in {self.intf_id}"
 
 
+class KytosInvalidRanges(Exception):
+    """Exception thrown when a tag is not available."""
+    def __init__(self, message: str) -> None:
+        super().__init__()
+        self.message = message
+
+    def __repr__(self):
+        return f"KytosInvalidRanges {self.message}"
+
+    def __str__(self) -> str:
+        return f"KytosInvalidRanges {self.message}"
+
+
 # Exceptions related  to NApps
 
 

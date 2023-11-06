@@ -1,6 +1,56 @@
 """Methods for list of ranges [inclusive, inclusive]"""
 import bisect
-from typing import Iterator, Optional
+from typing import Iterator, Optional, Union
+
+from kytos.core.exceptions import KytosInvalidRanges
+
+
+def map_singular_values(tag_range: Union[int, list[int]]):
+    """Change integer or singular interger list to
+    list[int, int] when necessary"""
+    if isinstance(tag_range, int):
+        tag_range = [tag_range] * 2
+    elif len(tag_range) == 1:
+        tag_range = [tag_range[0]] * 2
+    return tag_range
+
+
+def get_tag_ranges(ranges: list[list[int]]):
+    """Get tag_ranges and check validity:
+    - It should be ordered
+    - Not unnecessary partition (eg. [[10,20],[20,30]])
+    - Singular intergers are changed to ranges (eg. [10] to [[10, 10]])
+    The ranges are understood as [inclusive, inclusive]"""
+    if len(ranges) < 1:
+        msg = "tag_ranges is empty"
+        raise KytosInvalidRanges(msg)
+    last_tag = 0
+    ranges_n = len(ranges)
+    for i in range(0, ranges_n):
+        ranges[i] = map_singular_values(ranges[i])
+        if ranges[i][0] > ranges[i][1]:
+            msg = f"The range {ranges[i]} is not ordered"
+            raise KytosInvalidRanges(msg)
+        if last_tag and last_tag > ranges[i][0]:
+            msg = f"tag_ranges is not ordered. {last_tag}"\
+                     f" is higher than {ranges[i][0]}"
+            raise KytosInvalidRanges(msg)
+        if last_tag and last_tag == ranges[i][0] - 1:
+            msg = f"tag_ranges has an unnecessary partition. "\
+                     f"{last_tag} is before to {ranges[i][0]}"
+            raise KytosInvalidRanges(msg)
+        if last_tag and last_tag == ranges[i][0]:
+            msg = f"tag_ranges has repetition. {ranges[i-1]}"\
+                     f" have same values as {ranges[i]}"
+            raise KytosInvalidRanges(msg)
+        last_tag = ranges[i][1]
+    if ranges[-1][1] > 4095:
+        msg = "Maximum value for tag_ranges is 4095"
+        raise KytosInvalidRanges(msg)
+    if ranges[0][0] < 1:
+        msg = "Minimum value for tag_ranges is 1"
+        raise KytosInvalidRanges(msg)
+    return ranges
 
 
 def range_intersection(

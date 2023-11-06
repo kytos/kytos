@@ -87,6 +87,11 @@ def range_difference(
     This method simulates difference of sets. E.g.:
     [[10, 15]] - [[4, 11], [14, 45]] = [[12, 13]]
     """
+    #print(f"RANGES -> {ranges_a} - {ranges_b}")
+    if not ranges_a:
+        return []
+    if not ranges_b:
+        return ranges_a
     result = []
     a_i, b_i = 0, 0
     update = True
@@ -130,6 +135,10 @@ def range_addition(
     """Addition between two ranges.
      Simulates the addition between two sets.
      Return[adittion product, intersection]"""
+    if not ranges_b:
+        return ranges_a
+    if not ranges_a:
+        return ranges_b
     result = []
     conflict = []
     a_i = b_i = 0

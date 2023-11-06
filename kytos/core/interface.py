@@ -297,6 +297,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             tag_type: TAG type value
             use_lock: Boolean to whether use a lock or not
         """
+        if not tags:
+            return
         if isinstance(tags, int):
             tags = [tags] * 2
         if use_lock:
@@ -402,6 +404,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         Return:
             conflict: Return any values that were not added.
         """
+        if not tags:
+            return
         if isinstance(tags, int):
             tags = [tags] * 2
         if isinstance(tags[0], int) and tags[0] != tags[1]:

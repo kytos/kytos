@@ -370,7 +370,6 @@ class TestInterface():
 
         self.iface.set_tag_ranges(tag_ranges, 'vlan')
         self.iface.use_tags(controller, [200, 250])
-        self.iface.set_tag_ranges(tag_ranges, 'vlan')
         ava_expected = [[20, 20], [251, 3000]]
         assert self.iface.tag_ranges['vlan'] == tag_ranges
         assert self.iface.available_tags['vlan'] == ava_expected

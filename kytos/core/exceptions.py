@@ -85,8 +85,28 @@ class KytosLinkCreationError(Exception):
     """Exception thrown when the link has an empty endpoint."""
 
 
-class KytosTagtypeNotSupported(Exception):
+class KytosTagError(Exception):
+    """Exception to catch an error when setting tag type or value."""
+    def __init__(self, msg: str) -> None:
+        self.msg = msg
+
+    def __str__(self) -> str:
+        return f"{self.msg}"
+
+    def __repr__(self) -> str:
+        return f"{self.msg}"
+
+
+class KytosTagtypeNotSupported(KytosTagError):
     """Exception thrown when a not supported tag type is not supported"""
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"KytosTagtypeNotSupported, {msg}")
+
+
+class KytosInvalidTagRanges(KytosTagError):
+    """Exception thrown when a list of ranges is invalid."""
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"KytosInvalidTagRanges, {msg}")
 
 
 class KytosTagsNotInTagRanges(Exception):
@@ -119,19 +139,6 @@ class KytosTagsAreNotAvailable(Exception):
     def __str__(self) -> str:
         return f"The tags {self.conflict} are not available."\
                f" in {self.intf_id}"
-
-
-class KytosInvalidRanges(Exception):
-    """Exception thrown when a tag is not available."""
-    def __init__(self, message: str) -> None:
-        super().__init__()
-        self.message = message
-
-    def __repr__(self):
-        return f"KytosInvalidRanges {self.message}"
-
-    def __str__(self) -> str:
-        return f"KytosInvalidRanges {self.message}"
 
 
 # Exceptions related  to NApps

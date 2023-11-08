@@ -12,8 +12,7 @@ from typing import Union
 
 from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.exceptions import (KytosLinkCreationError,
-                                   KytosNoTagAvailableError,
-                                   KytosTagsNotInTagRanges)
+                                   KytosNoTagAvailableError)
 from kytos.core.id import LinkID
 from kytos.core.interface import Interface, TAGType
 from kytos.core.tag_ranges import range_intersection
@@ -170,7 +169,7 @@ class Link(GenericEntity):
     def make_tags_available(
         self,
         controller,
-        tags: Union[int, list[int]],
+        tags: Union[int, list[int], list[list[int]]],
         link_id,
         tag_type: str = 'vlan'
     ) -> tuple[list[list[int]], list[list[int]]]:
@@ -178,15 +177,12 @@ class Link(GenericEntity):
         with self._get_available_vlans_lock[link_id]:
             with self.endpoint_a._tag_lock:
                 with self.endpoint_b._tag_lock:
-                    try:
-                        conflict_a = self.endpoint_a.make_tags_available(
-                            controller, tags, tag_type, False
-                        )
-                        conflict_b = self.endpoint_b.make_tags_available(
-                            controller, tags, tag_type, False
-                        )
-                    except KytosTagsNotInTagRanges as err:
-                        raise err
+                    conflict_a = self.endpoint_a.make_tags_available(
+                        controller, tags, tag_type, False
+                    )
+                    conflict_b = self.endpoint_b.make_tags_available(
+                        controller, tags, tag_type, False
+                    )
         return conflict_a, conflict_b
 
     def available_vlans(self):

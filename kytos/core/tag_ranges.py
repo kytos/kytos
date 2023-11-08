@@ -1,8 +1,10 @@
 """Methods for list of ranges [inclusive, inclusive]"""
+# pylint: disable=too-many-branches
 import bisect
+from copy import deepcopy
 from typing import Iterator, Optional, Union
 
-from kytos.core.exceptions import KytosInvalidRanges
+from kytos.core.exceptions import KytosInvalidTagRanges
 
 
 def map_singular_values(tag_range: Union[int, list[int]]):
@@ -23,33 +25,33 @@ def get_tag_ranges(ranges: list[list[int]]):
     The ranges are understood as [inclusive, inclusive]"""
     if len(ranges) < 1:
         msg = "tag_ranges is empty"
-        raise KytosInvalidRanges(msg)
+        raise KytosInvalidTagRanges(msg)
     last_tag = 0
     ranges_n = len(ranges)
     for i in range(0, ranges_n):
         ranges[i] = map_singular_values(ranges[i])
         if ranges[i][0] > ranges[i][1]:
             msg = f"The range {ranges[i]} is not ordered"
-            raise KytosInvalidRanges(msg)
+            raise KytosInvalidTagRanges(msg)
         if last_tag and last_tag > ranges[i][0]:
             msg = f"tag_ranges is not ordered. {last_tag}"\
                      f" is higher than {ranges[i][0]}"
-            raise KytosInvalidRanges(msg)
+            raise KytosInvalidTagRanges(msg)
         if last_tag and last_tag == ranges[i][0] - 1:
             msg = f"tag_ranges has an unnecessary partition. "\
                      f"{last_tag} is before to {ranges[i][0]}"
-            raise KytosInvalidRanges(msg)
+            raise KytosInvalidTagRanges(msg)
         if last_tag and last_tag == ranges[i][0]:
             msg = f"tag_ranges has repetition. {ranges[i-1]}"\
                      f" have same values as {ranges[i]}"
-            raise KytosInvalidRanges(msg)
+            raise KytosInvalidTagRanges(msg)
         last_tag = ranges[i][1]
     if ranges[-1][1] > 4095:
         msg = "Maximum value for tag_ranges is 4095"
-        raise KytosInvalidRanges(msg)
+        raise KytosInvalidTagRanges(msg)
     if ranges[0][0] < 1:
         msg = "Minimum value for tag_ranges is 1"
-        raise KytosInvalidRanges(msg)
+        raise KytosInvalidTagRanges(msg)
     return ranges
 
 
@@ -87,11 +89,10 @@ def range_difference(
     This method simulates difference of sets. E.g.:
     [[10, 15]] - [[4, 11], [14, 45]] = [[12, 13]]
     """
-    #print(f"RANGES -> {ranges_a} - {ranges_b}")
     if not ranges_a:
         return []
     if not ranges_b:
-        return ranges_a
+        return deepcopy(ranges_a)
     result = []
     a_i, b_i = 0, 0
     update = True
@@ -136,9 +137,9 @@ def range_addition(
      Simulates the addition between two sets.
      Return[adittion product, intersection]"""
     if not ranges_b:
-        return ranges_a
+        return deepcopy(ranges_a)
     if not ranges_a:
-        return ranges_b
+        return deepcopy(ranges_b)
     result = []
     conflict = []
     a_i = b_i = 0

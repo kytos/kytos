@@ -81,7 +81,7 @@ class TAGRange(TAG):
         self,
         tag_type: str,
         value: list[list[int]],
-        mask_list: list[str, int]
+        mask_list: Optional[list[str, int]] = None
     ):
         self.tag_type = TAGType(tag_type).value
         self.value = value
@@ -215,7 +215,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
 
     @property
     def default_tag_values(self) -> dict[str, list[list[int]]]:
-        """Return a default list of ranges"""
+        """Return a default list of ranges. Applicable to
+        available_tags and tag_ranges."""
         default_values = {
             "vlan": [[1, 4095]],
             "vlan_qinq": [[1, 4095]],
@@ -224,7 +225,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         return default_values
 
     def set_tag_ranges(self, tag_ranges: list[list[int]], tag_type: str):
-        """Set new restriction"""
+        """Set new restriction, tag_ranges."""
         if tag_type != TAGType.VLAN.value:
             msg = f"Tag type {tag_type} is not supported."
             raise KytosTagtypeNotSupported(msg)
@@ -239,14 +240,14 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 raise KytosSetTagRangeError(msg)
 
             # Resizing
-            new_tag_ranges = range_difference(
+            new_available_tags = range_difference(
                 tag_ranges, used_tags
             )
-            self.available_tags[tag_type] = new_tag_ranges
+            self.available_tags[tag_type] = new_available_tags
             self.tag_ranges[tag_type] = tag_ranges
 
     def remove_tag_ranges(self, tag_type: str):
-        """Set tag_ranges[tag_type] to default [[1, 4095]]"""
+        """Set tag_ranges[tag_type] to default value"""
         if tag_type != TAGType.VLAN.value:
             msg = f"Tag type {tag_type} is not supported."
             raise KytosTagtypeNotSupported(msg)
@@ -260,7 +261,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             self.tag_ranges[tag_type] = self.default_tag_values[tag_type]
 
     def remove_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
-        """Remove tags by resize available_tags
+        """Remove tags by resizing available_tags
         Returns False if nothing was remove, True otherwise"""
         available = self.available_tags[tag_type]
         index = find_index_remove(available, tags)
@@ -289,29 +290,27 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         use_lock: bool = True,
     ):
         """Remove a specific tag from available_tags if it is there.
-        Return False in case the tags were not able to be removed.
+        Exception raised in case the tags were not able to be removed.
 
         Args:
             controller: Kytos controller
-            tags: List of tags, there should be 2 items in the list
+            tags: value to be removed, multiple types for compatibility:
+                (int): Single tag
+                (list[int]): Single range of tags
+                (list[list[int]]): List of ranges of tags
             tag_type: TAG type value
             use_lock: Boolean to whether use a lock or not
+
+        Exceptions:
+            KytosTagsAreNotAvailable from _use_tags()
         """
-        if not tags:
-            return
         if isinstance(tags, int):
             tags = [tags] * 2
         if use_lock:
             with self._tag_lock:
-                try:
-                    self._use_tags(tags, tag_type)
-                except KytosTagsAreNotAvailable as err:
-                    raise err
-        else:
-            try:
                 self._use_tags(tags, tag_type)
-            except KytosTagsAreNotAvailable as err:
-                raise err
+        else:
+            self._use_tags(tags, tag_type)
 
         self._notify_interface_tags(controller)
 
@@ -320,7 +319,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         tags: Union[list[int], list[list[int]]],
         tag_type: str
     ):
-        """Manage available_tags deletion changes"""
+        """Manage available_tags deletion changes."""
         if isinstance(tags[0], list):
             available_copy = deepcopy(self.available_tags[tag_type])
             for tag_range in tags:
@@ -393,34 +392,33 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         tag_type: str = 'vlan',
         use_lock: bool = True,
     ) -> list[list[int]]:
-        """Add a specific tag in available_tags.
+        """Add a tags in available_tags.
 
         Args:
             controller: Kytos controller
-            tags: List of tags, there should be 2 items in the list
+            tags: value to be added, multiple types for compatibility:
+                (int): Single tag
+                (list[int]): Single range of tags
+                (list[list[int]]): List of ranges of tags
             tag_type: TAG type value
             use_lock: Boolean to whether use a lock or not
 
         Return:
             conflict: Return any values that were not added.
+
+        Exeptions:
+            KytosTagsNotInTagRanges from _make_tags_available()
         """
-        if not tags:
-            return
         if isinstance(tags, int):
             tags = [tags] * 2
-        if isinstance(tags[0], int) and tags[0] != tags[1]:
-            tags = [tags[0], tags[1]]
+        if (isinstance(tags, list) and len(tags) == 2 and
+                isinstance(tags[0], int) and tags[0] != tags[1]):
+            tags = [tags]
         if use_lock:
             with self._tag_lock:
-                try:
-                    conflict = self._make_tags_available(tags, tag_type)
-                except KytosTagsNotInTagRanges as err:
-                    raise err
-        else:
-            try:
                 conflict = self._make_tags_available(tags, tag_type)
-            except KytosTagsNotInTagRanges as err:
-                raise err
+        else:
+            conflict = self._make_tags_available(tags, tag_type)
         self._notify_interface_tags(controller)
         return conflict
 
@@ -429,7 +427,11 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         tags: Union[list[int], list[list[int]]],
         tag_type: str,
     ) -> list[list[int]]:
-        """Manage available_tags adittion changes"""
+        """Manage available_tags adittion changes
+
+        Exceptions:
+            KytosTagsNotInTagRanges from add_tags()
+        """
         if isinstance(tags[0], list):
             diff = range_difference(tags, self.tag_ranges[tag_type])
             if diff:
@@ -438,10 +440,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             new_tags, conflict = range_addition(tags, available_tags)
             self.available_tags[tag_type] = new_tags
             return conflict
-        try:
-            result = self.add_tags(tags, tag_type)
-        except KytosTagsNotInTagRanges as err:
-            raise err
+        result = self.add_tags(tags, tag_type)
         if result is False:
             return [tags]
         return []
@@ -449,12 +448,13 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     def set_available_tags_tag_ranges(
         self,
         available_tag: dict[str, list[list[int]]],
-        tag_ranges: dict[str, Optional[list[list[int]]]]
+        tag_ranges: dict[str, list[list[int]]]
     ):
         """Set a range of VLAN tags to be used by this Interface.
 
         Args:
-            iterable ([int]): range of VLANs.
+            available_tag: Available tags from each tag type
+            tag_ranges: Restriction for each type of available tag
         """
         with self._tag_lock:
             self.available_tags = available_tag

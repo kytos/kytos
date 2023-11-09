@@ -87,6 +87,14 @@ class TAGRange(TAG):
         self.value = value
         self.mask_list = mask_list
 
+    def as_dict(self):
+        """Return a dictionary representating a tag range object."""
+        return {
+            'tag_type': self.tag_type,
+            'value': self.value,
+            'mask_list': self.mask_list
+        }
+
 
 class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     """Interface Class used to abstract the network interfaces."""

@@ -22,9 +22,10 @@ def get_tag_ranges(ranges: list[list[int]]):
     - It should be ordered
     - Not unnecessary partition (eg. [[10,20],[20,30]])
     - Singular intergers are changed to ranges (eg. [10] to [[10, 10]])
+
     The ranges are understood as [inclusive, inclusive]"""
     if len(ranges) < 1:
-        msg = "tag_ranges is empty"
+        msg = "Tag range is empty"
         raise KytosInvalidTagRanges(msg)
     last_tag = 0
     ranges_n = len(ranges)
@@ -34,23 +35,23 @@ def get_tag_ranges(ranges: list[list[int]]):
             msg = f"The range {ranges[i]} is not ordered"
             raise KytosInvalidTagRanges(msg)
         if last_tag and last_tag > ranges[i][0]:
-            msg = f"tag_ranges is not ordered. {last_tag}"\
+            msg = f"Tag ranges are not ordered. {last_tag}"\
                      f" is higher than {ranges[i][0]}"
             raise KytosInvalidTagRanges(msg)
         if last_tag and last_tag == ranges[i][0] - 1:
-            msg = f"tag_ranges has an unnecessary partition. "\
+            msg = f"Tag ranges have an unnecessary partition. "\
                      f"{last_tag} is before to {ranges[i][0]}"
             raise KytosInvalidTagRanges(msg)
         if last_tag and last_tag == ranges[i][0]:
-            msg = f"tag_ranges has repetition. {ranges[i-1]}"\
+            msg = f"Tag ranges have repetition. {ranges[i-1]}"\
                      f" have same values as {ranges[i]}"
             raise KytosInvalidTagRanges(msg)
         last_tag = ranges[i][1]
     if ranges[-1][1] > 4095:
-        msg = "Maximum value for tag_ranges is 4095"
+        msg = "Maximum value for a tag is 4095"
         raise KytosInvalidTagRanges(msg)
     if ranges[0][0] < 1:
-        msg = "Minimum value for tag_ranges is 1"
+        msg = "Minimum value for a tag is 1"
         raise KytosInvalidTagRanges(msg)
     return ranges
 
@@ -137,9 +138,9 @@ def range_addition(
      Simulates the addition between two sets.
      Return[adittion product, intersection]"""
     if not ranges_b:
-        return deepcopy(ranges_a)
+        return deepcopy(ranges_a), []
     if not ranges_a:
-        return deepcopy(ranges_b)
+        return deepcopy(ranges_b), []
     result = []
     conflict = []
     a_i = b_i = 0

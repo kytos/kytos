@@ -77,10 +77,6 @@ class KytosNoTagAvailableError(Exception):
         return msg
 
 
-class KytosSetTagRangeError(Exception):
-    """Exception raised when available_tag cannot be resized"""
-
-
 class KytosLinkCreationError(Exception):
     """Exception thrown when the link has an empty endpoint."""
 
@@ -107,6 +103,12 @@ class KytosInvalidTagRanges(KytosTagError):
     """Exception thrown when a list of ranges is invalid."""
     def __init__(self, msg: str) -> None:
         super().__init__(f"KytosInvalidTagRanges, {msg}")
+
+
+class KytosSetTagRangeError(KytosTagError):
+    """Exception raised when available_tag cannot be resized"""
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"KytosSetTagRangeError, {msg}")
 
 
 class KytosTagsNotInTagRanges(Exception):

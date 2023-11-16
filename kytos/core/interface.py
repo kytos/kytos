@@ -16,14 +16,16 @@ from pyof.v0x04.common.port import PortNo as PortNo04
 
 from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.events import KytosEvent
-from kytos.core.exceptions import (KytosSetTagRangeError,
+from kytos.core.exceptions import (KytosInvalidTagRanges,
+                                   KytosSetTagRangeError,
                                    KytosTagsAreNotAvailable,
                                    KytosTagsNotInTagRanges,
                                    KytosTagtypeNotSupported)
 from kytos.core.helpers import now
 from kytos.core.id import InterfaceID
 from kytos.core.tag_ranges import (find_index_add, find_index_remove,
-                                   range_addition, range_difference)
+                                   get_tag_ranges, range_addition,
+                                   range_difference)
 
 __all__ = ('Interface',)
 
@@ -272,6 +274,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         """Remove tags by resizing available_tags
         Returns False if nothing was remove, True otherwise"""
         available = self.available_tags[tag_type]
+        if not available:
+            return False
         index = find_index_remove(available, tags)
         if index is None:
             return False
@@ -296,6 +300,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         tags: Union[int, list[int], list[list[int]]],
         tag_type: str = 'vlan',
         use_lock: bool = True,
+        check_order: bool = True,
     ):
         """Remove a specific tag from available_tags if it is there.
         Exception raised in case the tags were not able to be removed.
@@ -314,6 +319,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         """
         if isinstance(tags, int):
             tags = [tags] * 2
+        elif check_order:
+            tags = self.get_verified_tags(tags)
         if use_lock:
             with self._tag_lock:
                 self._use_tags(tags, tag_type)
@@ -358,6 +365,10 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             raise KytosTagsNotInTagRanges([tags], self._id)
 
         available = self.available_tags[tag_type]
+        if not available:
+            self.available_tags[tag_type] = [tags]
+            return True
+
         index = find_index_add(available, tags)
         if index is None:
             return False
@@ -399,6 +410,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         tags: Union[int, list[int], list[list[int]]],
         tag_type: str = 'vlan',
         use_lock: bool = True,
+        check_order: bool = True,
     ) -> list[list[int]]:
         """Add a tags in available_tags.
 
@@ -419,8 +431,9 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         """
         if isinstance(tags, int):
             tags = [tags] * 2
-        if (isinstance(tags, list) and len(tags) == 2 and
-                isinstance(tags[0], int) and tags[0] != tags[1]):
+        elif check_order:
+            tags = self.get_verified_tags(tags)
+        if isinstance(tags[0], int) and tags[0] != tags[1]:
             tags = [tags]
         if use_lock:
             with self._tag_lock:
@@ -452,6 +465,23 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         if result is False:
             return [tags]
         return []
+
+    @staticmethod
+    def get_verified_tags(
+        tags: Union[list[int], list[list[int]]]
+    ) -> Union[list[int], list[list[int]]]:
+        """Return tags which values are validated to be correct."""
+        if isinstance(tags, list) and isinstance(tags[0], int):
+            if len(tags) == 1:
+                return [tags[0], tags[0]]
+            if len(tags) == 2 and tags[0] > tags[1]:
+                raise KytosInvalidTagRanges(f"Range out of order {tags}")
+            if len(tags) > 2:
+                raise KytosInvalidTagRanges(f"Range have 2 values {tags}")
+            return tags
+        if isinstance(tags, list) and isinstance(tags[0], list):
+            return get_tag_ranges(tags)
+        raise KytosInvalidTagRanges(f"Value type not recognized {tags}")
 
     def set_available_tags_tag_ranges(
         self,

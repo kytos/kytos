@@ -61,7 +61,7 @@ def range_intersection(
     ranges_b: list[list[int]]
 ) -> Iterator[list[int]]:
     """Returns an iterator of an intersection between
-    two list of ranges"""
+    two validated list of ranges"""
     a_i, b_i = 0, 0
     while a_i < len(ranges_a) and b_i < len(ranges_b):
         fst_a, snd_a = ranges_a[a_i]
@@ -83,10 +83,11 @@ def range_intersection(
 
 
 def range_difference(
-    ranges_a: list[list[int]],
-    ranges_b: list[list[int]]
+    ranges_a: list[Optional[list[int]]],
+    ranges_b: list[Optional[list[int]]]
 ) -> list[list[int]]:
-    """The operation is (ranges_a - ranges_b).
+    """The operation is two validated list of ranges
+     (ranges_a - ranges_b).
     This method simulates difference of sets. E.g.:
     [[10, 15]] - [[4, 11], [14, 45]] = [[12, 13]]
     """
@@ -131,10 +132,10 @@ def range_difference(
 
 
 def range_addition(
-    ranges_a: list[list[int]],
-    ranges_b: list[list[int]]
+    ranges_a: list[Optional[list[int]]],
+    ranges_b: list[Optional[list[int]]]
 ) -> tuple[list[list[int]], list[list[int]]]:
-    """Addition between two ranges.
+    """Addition between two validated list of ranges.
      Simulates the addition between two sets.
      Return[adittion product, intersection]"""
     if not ranges_b:

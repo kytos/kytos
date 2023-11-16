@@ -2,13 +2,14 @@
 # pylint: disable=attribute-defined-outside-init
 import logging
 import pickle
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from pyof.v0x04.common.port import PortFeatures
 
 from kytos.core.common import EntityStatus
-from kytos.core.exceptions import (KytosSetTagRangeError,
+from kytos.core.exceptions import (KytosInvalidTagRanges,
+                                   KytosSetTagRangeError,
                                    KytosTagsAreNotAvailable,
                                    KytosTagsNotInTagRanges,
                                    KytosTagtypeNotSupported)
@@ -357,10 +358,7 @@ class TestInterface():
         with pytest.raises(KytosTagsNotInTagRanges):
             self.iface.make_tags_available(controller, [1, 1], use_lock=False)
 
-        # Test sanity safe guard
-        none = [None, None]
-        assert self.iface.make_tags_available(controller, none) == [none]
-        assert self.iface._notify_interface_tags.call_count == 2
+        assert self.iface.make_tags_available(controller, 300) == [[300, 300]]
 
     async def test_set_tag_ranges(self, controller) -> None:
         """Test set_tag_ranges"""
@@ -412,6 +410,18 @@ class TestInterface():
         assert self.iface.remove_tags([500, 3000])
         assert self.iface.available_tags['vlan'] == ava_expected
 
+    async def test_remove_tags_empty(self) -> None:
+        """Test remove_tags when available_tags is empty"""
+        available_tag = []
+        tag_ranges = [[1, 4095]]
+        parameters = {
+            "available_tag": {'vlan': available_tag},
+            "tag_ranges": {'vlan': tag_ranges}
+        }
+        self.iface.set_available_tags_tag_ranges(**parameters)
+        assert self.iface.remove_tags([4, 6]) is False
+        assert self.iface.available_tags['vlan'] == []
+
     async def test_add_tags(self) -> None:
         """Test add_tags"""
         available_tag = [[7, 10], [20, 30]]
@@ -455,6 +465,18 @@ class TestInterface():
 
         assert self.iface.add_tags([35, 98]) is False
 
+    async def test_add_tags_empty(self) -> None:
+        """Test add_tags when available_tags is empty"""
+        available_tag = []
+        tag_ranges = [[1, 4095]]
+        parameters = {
+            "available_tag": {'vlan': available_tag},
+            "tag_ranges": {'vlan': tag_ranges}
+        }
+        self.iface.set_available_tags_tag_ranges(**parameters)
+        assert self.iface.add_tags([4, 6])
+        assert self.iface.available_tags['vlan'] == [[4, 6]]
+
     async def test_notify_interface_tags(self, controller) -> None:
         """Test _notify_interface_tags"""
         name = "kytos/core.interface_tags"
@@ -463,6 +485,29 @@ class TestInterface():
         event = controller.buffers.app.put.call_args[0][0]
         assert event.name == name
         assert event.content == content
+
+    @patch("kytos.core.interface.get_tag_ranges")
+    async def test_get_verified_tags(self, mock_get_tag_ranges) -> None:
+        """Test get_verified_tags"""
+
+        result = Interface.get_verified_tags([1, 2])
+        assert result == [1, 2]
+
+        result = Interface.get_verified_tags([4])
+        assert result == [4, 4]
+
+        result = Interface.get_verified_tags([[1, 2], [4, 5]])
+        assert mock_get_tag_ranges.call_count == 1
+        assert mock_get_tag_ranges.call_args[0][0] == [[1, 2], [4, 5]]
+
+        with pytest.raises(KytosInvalidTagRanges):
+            Interface.get_verified_tags("a")
+
+        with pytest.raises(KytosInvalidTagRanges):
+            Interface.get_verified_tags([1, 2, 3])
+
+        with pytest.raises(KytosInvalidTagRanges):
+            Interface.get_verified_tags([5, 2])
 
 
 class TestUNI():

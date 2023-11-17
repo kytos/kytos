@@ -171,17 +171,18 @@ class Link(GenericEntity):
         controller,
         tags: Union[int, list[int], list[list[int]]],
         link_id,
-        tag_type: str = 'vlan'
+        tag_type: str = 'vlan',
+        check_order: bool = True,
     ) -> tuple[list[list[int]], list[list[int]]]:
         """Add a specific tag in available_tags."""
         with self._get_available_vlans_lock[link_id]:
             with self.endpoint_a._tag_lock:
                 with self.endpoint_b._tag_lock:
                     conflict_a = self.endpoint_a.make_tags_available(
-                        controller, tags, tag_type, False
+                        controller, tags, tag_type, False, check_order
                     )
                     conflict_b = self.endpoint_b.make_tags_available(
-                        controller, tags, tag_type, False
+                        controller, tags, tag_type, False, check_order
                     )
         return conflict_a, conflict_b
 

@@ -2,14 +2,13 @@
 # pylint: disable=attribute-defined-outside-init
 import logging
 import pickle
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock
 
 import pytest
 from pyof.v0x04.common.port import PortFeatures
 
 from kytos.core.common import EntityStatus
-from kytos.core.exceptions import (KytosInvalidTagRanges,
-                                   KytosSetTagRangeError,
+from kytos.core.exceptions import (KytosSetTagRangeError,
                                    KytosTagsAreNotAvailable,
                                    KytosTagsNotInTagRanges,
                                    KytosTagtypeNotSupported)
@@ -390,28 +389,28 @@ class TestInterface():
         assert self.iface.tag_ranges['vlan'] == default
 
     async def test_remove_tags(self) -> None:
-        """Test remove_tags"""
+        """Test _remove_tags"""
         available_tag = [[20, 20], [200, 3000]]
         tag_ranges = [[1, 4095]]
         self.iface.set_available_tags_tag_ranges(
             {'vlan': available_tag}, {'vlan': tag_ranges}
         )
         ava_expected = [[20, 20], [241, 3000]]
-        assert self.iface.remove_tags([200, 240])
+        assert self.iface._remove_tags([200, 240])
         assert self.iface.available_tags['vlan'] == ava_expected
         ava_expected = [[241, 3000]]
-        assert self.iface.remove_tags([20, 20])
+        assert self.iface._remove_tags([20, 20])
         assert self.iface.available_tags['vlan'] == ava_expected
         ava_expected = [[241, 250], [400, 3000]]
-        assert self.iface.remove_tags([251, 399])
+        assert self.iface._remove_tags([251, 399])
         assert self.iface.available_tags['vlan'] == ava_expected
-        assert self.iface.remove_tags([200, 240]) is False
+        assert self.iface._remove_tags([200, 240]) is False
         ava_expected = [[241, 250], [400, 499]]
-        assert self.iface.remove_tags([500, 3000])
+        assert self.iface._remove_tags([500, 3000])
         assert self.iface.available_tags['vlan'] == ava_expected
 
     async def test_remove_tags_empty(self) -> None:
-        """Test remove_tags when available_tags is empty"""
+        """Test _remove_tags when available_tags is empty"""
         available_tag = []
         tag_ranges = [[1, 4095]]
         parameters = {
@@ -419,11 +418,11 @@ class TestInterface():
             "tag_ranges": {'vlan': tag_ranges}
         }
         self.iface.set_available_tags_tag_ranges(**parameters)
-        assert self.iface.remove_tags([4, 6]) is False
+        assert self.iface._remove_tags([4, 6]) is False
         assert self.iface.available_tags['vlan'] == []
 
     async def test_add_tags(self) -> None:
-        """Test add_tags"""
+        """Test _add_tags"""
         available_tag = [[7, 10], [20, 30]]
         tag_ranges = [[1, 4095]]
         parameters = {
@@ -432,41 +431,41 @@ class TestInterface():
         }
         self.iface.set_available_tags_tag_ranges(**parameters)
         ava_expected = [[4, 10], [20, 30]]
-        assert self.iface.add_tags([4, 6])
+        assert self.iface._add_tags([4, 6])
         assert self.iface.available_tags['vlan'] == ava_expected
 
         ava_expected = [[1, 2], [4, 10], [20, 30]]
-        assert self.iface.add_tags([1, 2])
+        assert self.iface._add_tags([1, 2])
         assert self.iface.available_tags['vlan'] == ava_expected
 
         ava_expected = [[1, 2], [4, 10], [20, 35]]
-        assert self.iface.add_tags([31, 35])
+        assert self.iface._add_tags([31, 35])
         assert self.iface.available_tags['vlan'] == ava_expected
 
         ava_expected = [[1, 2], [4, 10], [20, 35], [90, 90]]
-        assert self.iface.add_tags([90, 90])
+        assert self.iface._add_tags([90, 90])
         assert self.iface.available_tags['vlan'] == ava_expected
 
         ava_expected = [[1, 2], [4, 10], [20, 90]]
-        assert self.iface.add_tags([36, 89])
+        assert self.iface._add_tags([36, 89])
         assert self.iface.available_tags['vlan'] == ava_expected
 
         ava_expected = [[1, 2], [4, 12], [20, 90]]
-        assert self.iface.add_tags([11, 12])
+        assert self.iface._add_tags([11, 12])
         assert self.iface.available_tags['vlan'] == ava_expected
 
         ava_expected = [[1, 2], [4, 12], [17, 90]]
-        assert self.iface.add_tags([17, 19])
+        assert self.iface._add_tags([17, 19])
         assert self.iface.available_tags['vlan'] == ava_expected
 
         ava_expected = [[1, 2], [4, 12], [15, 15], [17, 90]]
-        assert self.iface.add_tags([15, 15])
+        assert self.iface._add_tags([15, 15])
         assert self.iface.available_tags['vlan'] == ava_expected
 
-        assert self.iface.add_tags([35, 98]) is False
+        assert self.iface._add_tags([35, 98]) is False
 
     async def test_add_tags_empty(self) -> None:
-        """Test add_tags when available_tags is empty"""
+        """Test _add_tags when available_tags is empty"""
         available_tag = []
         tag_ranges = [[1, 4095]]
         parameters = {
@@ -474,7 +473,7 @@ class TestInterface():
             "tag_ranges": {'vlan': tag_ranges}
         }
         self.iface.set_available_tags_tag_ranges(**parameters)
-        assert self.iface.add_tags([4, 6])
+        assert self.iface._add_tags([4, 6])
         assert self.iface.available_tags['vlan'] == [[4, 6]]
 
     async def test_notify_interface_tags(self, controller) -> None:
@@ -485,29 +484,6 @@ class TestInterface():
         event = controller.buffers.app.put.call_args[0][0]
         assert event.name == name
         assert event.content == content
-
-    @patch("kytos.core.interface.get_tag_ranges")
-    async def test_get_verified_tags(self, mock_get_tag_ranges) -> None:
-        """Test get_verified_tags"""
-
-        result = Interface.get_verified_tags([1, 2])
-        assert result == [1, 2]
-
-        result = Interface.get_verified_tags([4])
-        assert result == [4, 4]
-
-        result = Interface.get_verified_tags([[1, 2], [4, 5]])
-        assert mock_get_tag_ranges.call_count == 1
-        assert mock_get_tag_ranges.call_args[0][0] == [[1, 2], [4, 5]]
-
-        with pytest.raises(KytosInvalidTagRanges):
-            Interface.get_verified_tags("a")
-
-        with pytest.raises(KytosInvalidTagRanges):
-            Interface.get_verified_tags([1, 2, 3])
-
-        with pytest.raises(KytosInvalidTagRanges):
-            Interface.get_verified_tags([5, 2])
 
 
 class TestUNI():

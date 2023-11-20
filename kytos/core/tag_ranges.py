@@ -56,12 +56,36 @@ def get_tag_ranges(ranges: list[list[int]]):
     return ranges
 
 
+def get_validated_tags(
+    tags: Union[list[int], list[list[int]]]
+) -> Union[list[int], list[list[int]]]:
+    """Return tags which values are validated to be correct."""
+    if isinstance(tags, list) and isinstance(tags[0], int):
+        if len(tags) == 1:
+            return [tags[0], tags[0]]
+        if len(tags) == 2 and tags[0] > tags[1]:
+            raise KytosInvalidTagRanges(f"Range out of order {tags}")
+        if len(tags) > 2:
+            raise KytosInvalidTagRanges(f"Range must have 2 values {tags}")
+        return tags
+    if isinstance(tags, list) and isinstance(tags[0], list):
+        return get_tag_ranges(tags)
+    raise KytosInvalidTagRanges(f"Value type not recognized {tags}")
+
+
 def range_intersection(
     ranges_a: list[list[int]],
     ranges_b: list[list[int]]
 ) -> Iterator[list[int]]:
     """Returns an iterator of an intersection between
-    two validated list of ranges"""
+    two validated list of ranges.
+    
+    Necessities:
+        The lists from argument need to be ordered and validated.
+        E.g. [[1, 2], [4, 60]]
+        Use get_tag_ranges() for list[list[int]] or
+            get_validated_tags() for also list[int]
+    """
     a_i, b_i = 0, 0
     while a_i < len(ranges_a) and b_i < len(ranges_b):
         fst_a, snd_a = ranges_a[a_i]
@@ -88,8 +112,13 @@ def range_difference(
 ) -> list[list[int]]:
     """The operation is two validated list of ranges
      (ranges_a - ranges_b).
-    This method simulates difference of sets. E.g.:
-    [[10, 15]] - [[4, 11], [14, 45]] = [[12, 13]]
+    This method simulates difference of sets.
+
+    Necessities:
+        The lists from argument need to be ordered and validated.
+        E.g. [[1, 2], [4, 60]]
+        Use get_tag_ranges() for list[list[int]] or
+            get_validated_tags() for also list[int]
     """
     if not ranges_a:
         return []
@@ -137,7 +166,14 @@ def range_addition(
 ) -> tuple[list[list[int]], list[list[int]]]:
     """Addition between two validated list of ranges.
      Simulates the addition between two sets.
-     Return[adittion product, intersection]"""
+     Return[adittion product, intersection]
+
+     Necessities:
+        The lists from argument need to be ordered and validated.
+        E.g. [[1, 2], [4, 60]]
+        Use get_tag_ranges() for list[list[int]] or
+            get_validated_tags() for also list[int]
+     """
     if not ranges_b:
         return deepcopy(ranges_a), []
     if not ranges_a:

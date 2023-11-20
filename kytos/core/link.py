@@ -157,10 +157,10 @@ class Link(GenericEntity):
                     try:
                         tag, _ = next(tags)
                         self.endpoint_a.use_tags(
-                            controller, tag, use_lock=False
+                            controller, tag, use_lock=False, check_order=False
                         )
                         self.endpoint_b.use_tags(
-                            controller, tag, use_lock=False
+                            controller, tag, use_lock=False, check_order=False
                         )
                         return tag
                     except StopIteration:
@@ -179,10 +179,12 @@ class Link(GenericEntity):
             with self.endpoint_a._tag_lock:
                 with self.endpoint_b._tag_lock:
                     conflict_a = self.endpoint_a.make_tags_available(
-                        controller, tags, tag_type, False, check_order
+                        controller, tags, tag_type, use_lock=False,
+                        check_order=check_order
                     )
                     conflict_b = self.endpoint_b.make_tags_available(
-                        controller, tags, tag_type, False, check_order
+                        controller, tags, tag_type, use_lock=False,
+                        check_order=check_order
                     )
         return conflict_a, conflict_b
 

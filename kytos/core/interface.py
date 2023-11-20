@@ -7,7 +7,7 @@ from copy import deepcopy
 from enum import Enum
 from functools import reduce
 from threading import Lock
-from typing import Optional, Union
+from typing import Union
 
 from pyof.v0x01.common.phy_port import Port as PortNo01
 from pyof.v0x01.common.phy_port import PortFeatures as PortFeatures01
@@ -16,15 +16,14 @@ from pyof.v0x04.common.port import PortNo as PortNo04
 
 from kytos.core.common import EntityStatus, GenericEntity
 from kytos.core.events import KytosEvent
-from kytos.core.exceptions import (KytosInvalidTagRanges,
-                                   KytosSetTagRangeError,
+from kytos.core.exceptions import (KytosSetTagRangeError,
                                    KytosTagsAreNotAvailable,
                                    KytosTagsNotInTagRanges,
                                    KytosTagtypeNotSupported)
 from kytos.core.helpers import now
 from kytos.core.id import InterfaceID
 from kytos.core.tag_ranges import (find_index_add, find_index_remove,
-                                   get_tag_ranges, range_addition,
+                                   get_validated_tags, range_addition,
                                    range_difference)
 
 __all__ = ('Interface',)
@@ -79,11 +78,12 @@ class TAGRange(TAG):
     """Class that represents an User-to-Network Interface with
      a tag value as a list."""
 
+    # pylint: disable=dangerous-default-value
     def __init__(
         self,
         tag_type: str,
         value: list[list[int]],
-        mask_list: Optional[list[str, int]] = None
+        mask_list: list[Union[str, int]] = []
     ):
         self.tag_type = TAGType(tag_type).value
         self.value = value
@@ -270,7 +270,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             )
             self.tag_ranges[tag_type] = self.default_tag_values[tag_type]
 
-    def remove_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
+    def _remove_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
         """Remove tags by resizing available_tags
         Returns False if nothing was remove, True otherwise"""
         available = self.available_tags[tag_type]
@@ -313,6 +313,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 (list[list[int]]): List of ranges of tags
             tag_type: TAG type value
             use_lock: Boolean to whether use a lock or not
+            check_order: Boolean to whether validate tags(list). Check order,
+                type and length. Set to false when invocated internally.
 
         Exceptions:
             KytosTagsAreNotAvailable from _use_tags()
@@ -320,7 +322,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         if isinstance(tags, int):
             tags = [tags] * 2
         elif check_order:
-            tags = self.get_verified_tags(tags)
+            tags = get_validated_tags(tags)
         if use_lock:
             with self._tag_lock:
                 self._use_tags(tags, tag_type)
@@ -338,18 +340,18 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         if isinstance(tags[0], list):
             available_copy = deepcopy(self.available_tags[tag_type])
             for tag_range in tags:
-                result = self.remove_tags(tag_range, tag_type)
+                result = self._remove_tags(tag_range, tag_type)
                 if result is False:
                     self.available_tags[tag_type] = available_copy
                     conflict = range_difference(tags, available_copy)
                     raise KytosTagsAreNotAvailable(conflict, self._id)
         else:
-            result = self.remove_tags(tags, tag_type)
+            result = self._remove_tags(tags, tag_type)
             if result is False:
                 raise KytosTagsAreNotAvailable([tags], self._id)
 
     # pylint: disable=too-many-branches
-    def add_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
+    def _add_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
         """Add tags, return True if they were added.
         Returns False when nothing was added, True otherwise
         Ensuring that ranges are not unnecessarily divided
@@ -422,6 +424,8 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
                 (list[list[int]]): List of ranges of tags
             tag_type: TAG type value
             use_lock: Boolean to whether use a lock or not
+            check_order: Boolean to whether validate tags(list). Check order,
+                type and length. Set to false when invocated internally.
 
         Return:
             conflict: Return any values that were not added.
@@ -432,7 +436,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         if isinstance(tags, int):
             tags = [tags] * 2
         elif check_order:
-            tags = self.get_verified_tags(tags)
+            tags = get_validated_tags(tags)
         if isinstance(tags[0], int) and tags[0] != tags[1]:
             tags = [tags]
         if use_lock:
@@ -451,7 +455,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         """Manage available_tags adittion changes
 
         Exceptions:
-            KytosTagsNotInTagRanges from add_tags()
+            KytosTagsNotInTagRanges from _add_tags()
         """
         if isinstance(tags[0], list):
             diff = range_difference(tags, self.tag_ranges[tag_type])
@@ -461,27 +465,10 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             new_tags, conflict = range_addition(tags, available_tags)
             self.available_tags[tag_type] = new_tags
             return conflict
-        result = self.add_tags(tags, tag_type)
+        result = self._add_tags(tags, tag_type)
         if result is False:
             return [tags]
         return []
-
-    @staticmethod
-    def get_verified_tags(
-        tags: Union[list[int], list[list[int]]]
-    ) -> Union[list[int], list[list[int]]]:
-        """Return tags which values are validated to be correct."""
-        if isinstance(tags, list) and isinstance(tags[0], int):
-            if len(tags) == 1:
-                return [tags[0], tags[0]]
-            if len(tags) == 2 and tags[0] > tags[1]:
-                raise KytosInvalidTagRanges(f"Range out of order {tags}")
-            if len(tags) > 2:
-                raise KytosInvalidTagRanges(f"Range have 2 values {tags}")
-            return tags
-        if isinstance(tags, list) and isinstance(tags[0], list):
-            return get_tag_ranges(tags)
-        raise KytosInvalidTagRanges(f"Value type not recognized {tags}")
 
     def set_available_tags_tag_ranges(
         self,

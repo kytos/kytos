@@ -79,7 +79,7 @@ def range_intersection(
 ) -> Iterator[list[int]]:
     """Returns an iterator of an intersection between
     two validated list of ranges.
-    
+
     Necessities:
         The lists from argument need to be ordered and validated.
         E.g. [[1, 2], [4, 60]]

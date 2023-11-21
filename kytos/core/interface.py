@@ -78,7 +78,6 @@ class TAGRange(TAG):
     """Class that represents an User-to-Network Interface with
      a tag value as a list."""
 
-    # pylint: disable=dangerous-default-value
     def __init__(
         self,
         tag_type: str,

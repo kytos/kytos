@@ -10,12 +10,15 @@ Added
 =====
 - Added ``Interface.tag_ranges`` as ``dict[str, list[list[int]]]`` as replacement for ``vlan_pool`` settings.
 - Added ``kytos/core.interface_tags`` event publication to notify any modification of ``Interface.tag_ranges`` or ``Interface.available_tags``.
+- Added ``TAGRange`` class which is used when a ``UNI`` has a tag as a list of ranges.
+- Added ``KytosTagError`` exception that cover other exceptions ``KytosTagtypeNotSupported``, ``KytosInvalidTagRanges``, ``KytosSetTagRangeError``, ``KytosTagsNotInTagRanges`` and ``KytosTagsAreNotAvailable`` all of which are related to TAGs.
 
 Changed
 =======
 - Parametrized default ``maxTimeMS`` when creating an index via ``Mongo.boostrap_index`` via environment variable ``MONGO_IDX_TIMEOUTMS=30000``. The retries parameters reuse the same environment variables ``MONGO_AUTO_RETRY_STOP_AFTER_ATTEMPT=3``, ``MONGO_AUTO_RETRY_WAIT_RANDOM_MIN=0.1``, ``MONGO_AUTO_RETRY_WAIT_RANDOM_MAX=1`` that NApps controllers have been using.
 - ``kytosd`` process will exit if a NApp raises an exception during its ``setup()`` execution.
 - Change format for ``Interface.available_tags`` to ``dict[str, list[list[int]]]``. Storing ``tag_types`` as keys and a list of ranges for ``available_tags`` as values.
+- ``Interface.use_tags`` and ``Interface.make_tags_available`` are compatible with list of ranges.
 
 Deprecated
 ==========

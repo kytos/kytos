@@ -83,11 +83,11 @@ class TAGRange(TAG):
         self,
         tag_type: str,
         value: list[list[int]],
-        mask_list: list[Union[str, int]] = []
+        mask_list: list[Union[str, int]] = None
     ):
         self.tag_type = TAGType(tag_type).value
         self.value = value
-        self.mask_list = mask_list
+        self.mask_list = mask_list or []
 
     def as_dict(self):
         """Return a dictionary representating a tag range object."""

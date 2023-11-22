@@ -15,6 +15,7 @@ from kytos.core.exceptions import (KytosLinkCreationError,
                                    KytosNoTagAvailableError)
 from kytos.core.id import LinkID
 from kytos.core.interface import Interface, TAGType
+from kytos.core.tag_ranges import range_intersection
 
 
 class Link(GenericEntity):
@@ -127,7 +128,7 @@ class Link(GenericEntity):
 
         Based on the endpoint tags.
         """
-        tag_iterator = Interface.range_intersection(
+        tag_iterator = range_intersection(
             self.endpoint_a.available_tags[tag_type],
             self.endpoint_b.available_tags[tag_type],
         )
@@ -151,15 +152,15 @@ class Link(GenericEntity):
                 with self.endpoint_b._tag_lock:
                     ava_tags_a = self.endpoint_a.available_tags[tag_type]
                     ava_tags_b = self.endpoint_b.available_tags[tag_type]
-                    tags = Interface.range_intersection(ava_tags_a,
-                                                        ava_tags_b)
+                    tags = range_intersection(ava_tags_a,
+                                              ava_tags_b)
                     try:
                         tag, _ = next(tags)
                         self.endpoint_a.use_tags(
-                            controller, tag, use_lock=False
+                            controller, tag, use_lock=False, check_order=False
                         )
                         self.endpoint_b.use_tags(
-                            controller, tag, use_lock=False
+                            controller, tag, use_lock=False, check_order=False
                         )
                         return tag
                     except StopIteration:
@@ -168,21 +169,24 @@ class Link(GenericEntity):
     def make_tags_available(
         self,
         controller,
-        tags: Union[int, list[int]],
+        tags: Union[int, list[int], list[list[int]]],
         link_id,
-        tag_type: str = 'vlan'
-    ) -> tuple[bool, bool]:
+        tag_type: str = 'vlan',
+        check_order: bool = True,
+    ) -> tuple[list[list[int]], list[list[int]]]:
         """Add a specific tag in available_tags."""
         with self._get_available_vlans_lock[link_id]:
             with self.endpoint_a._tag_lock:
                 with self.endpoint_b._tag_lock:
-                    result_a = self.endpoint_a.make_tags_available(
-                        controller, tags, tag_type, False
+                    conflict_a = self.endpoint_a.make_tags_available(
+                        controller, tags, tag_type, use_lock=False,
+                        check_order=check_order
                     )
-                    result_b = self.endpoint_b.make_tags_available(
-                        controller, tags, tag_type, False
+                    conflict_b = self.endpoint_b.make_tags_available(
+                        controller, tags, tag_type, use_lock=False,
+                        check_order=check_order
                     )
-        return result_a, result_b
+        return conflict_a, conflict_b
 
     def available_vlans(self):
         """Get all available vlans from each interface in the link."""

@@ -77,16 +77,52 @@ class KytosNoTagAvailableError(Exception):
         return msg
 
 
-class KytosSetTagRangeError(Exception):
-    """Exception raised when available_tag cannot be resized"""
-
-
 class KytosLinkCreationError(Exception):
     """Exception thrown when the link has an empty endpoint."""
 
 
-class KytosTagtypeNotSupported(Exception):
-    """Exception thronw when a not supported tag type is not supported"""
+class KytosTagError(Exception):
+    """Exception to catch an error when setting tag type or value."""
+    def __init__(self, msg: str) -> None:
+        self.msg = msg
+
+    def __str__(self) -> str:
+        return f"{self.msg}"
+
+    def __repr__(self) -> str:
+        return f"{self.msg}"
+
+
+class KytosTagtypeNotSupported(KytosTagError):
+    """Exception thrown when a not supported tag type is not supported"""
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"KytosTagtypeNotSupported, {msg}")
+
+
+class KytosInvalidTagRanges(KytosTagError):
+    """Exception thrown when a list of ranges is invalid."""
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"KytosInvalidTagRanges, {msg}")
+
+
+class KytosSetTagRangeError(KytosTagError):
+    """Exception raised when available_tag cannot be resized"""
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"KytosSetTagRangeError, {msg}")
+
+
+class KytosTagsNotInTagRanges(KytosTagError):
+    """Exception thrown when a tag is outside of tag ranges"""
+    def __init__(self, conflict: list[list[int]], intf_id: str) -> None:
+        msg = f"The tags {conflict} are outside tag_ranges in {intf_id}"
+        super().__init__(f"KytosSetTagRangeError, {msg}")
+
+
+class KytosTagsAreNotAvailable(KytosTagError):
+    """Exception thrown when a tag is not available."""
+    def __init__(self, conflict: list[list[int]], intf_id: str) -> None:
+        msg = f"The tags {conflict} are not available in {intf_id}"
+        super().__init__(f"KytosSetTagRangeError, {msg}")
 
 
 # Exceptions related  to NApps

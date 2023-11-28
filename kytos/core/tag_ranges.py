@@ -7,6 +7,24 @@ from typing import Iterator, Optional, Union
 from kytos.core.exceptions import KytosInvalidTagRanges
 
 
+def get_special_tag_range(tag_range: list[str], default) -> list[str]:
+    """Get special_tag_range and check values"""
+    # Find duplicated
+    if len(tag_range) != len(set(tag_range)):
+        msg = "There are duplicated values in the range."
+        raise KytosInvalidTagRanges(msg)
+
+    # Find invalid tag
+    default_set = set(default)
+    for tag in tag_range:
+        try:
+            default_set.remove(tag)
+        except KeyError:
+            msg = f"The tag {tag} is not supported"
+            raise KytosInvalidTagRanges(msg)
+    return tag_range
+
+
 def map_singular_values(tag_range: Union[int, list[int]]):
     """Change integer or singular interger list to
     list[int, int] when necessary"""

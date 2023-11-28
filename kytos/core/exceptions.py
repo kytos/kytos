@@ -114,22 +114,15 @@ class KytosSetTagRangeError(KytosTagError):
 class KytosTagsNotInTagRanges(KytosTagError):
     """Exception thrown when tags are outside of tag ranges"""
     def __init__(self, conflict: list[list[int]], intf_id: str) -> None:
-        msg = f"The tags {conflict} are outside tag_ranges in {intf_id}"
-        super().__init__(f"KytosSetTagRangeError, {msg}")
+        msg = f"The tags {conflict} are outside tag ranges in {intf_id}"
+        super().__init__(f"KytosTagsNotInTagRanges, {msg}")
 
 
 class KytosTagsAreNotAvailable(KytosTagError):
     """Exception thrown when tags are not available."""
     def __init__(self, conflict: list[list[int]], intf_id: str) -> None:
         msg = f"The tags {conflict} are not available in {intf_id}"
-        super().__init__(f"KytosSetTagRangeError, {msg}")
-
-
-class KytosSpecialTagNotAvailable(KytosTagError):
-    """Exception thrown when an special tag is not available."""
-    def __init__(self, conflict: str, intf_id: str) -> None:
-        msg = f"The special tag '{conflict}' is not available in {intf_id}"
-        super().__init__(f"KytosSetTagRangeError, {msg}")
+        super().__init__(f"KytosTagsAreNotAvailable, {msg}")
 
 
 # Exceptions related  to NApps

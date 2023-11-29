@@ -3,9 +3,28 @@ import pytest
 
 from kytos.core.exceptions import KytosInvalidTagRanges
 from kytos.core.tag_ranges import (find_index_add, find_index_remove,
-                                   get_tag_ranges, get_validated_tags,
-                                   map_singular_values, range_addition,
-                                   range_difference, range_intersection)
+                                   get_special_tags, get_tag_ranges,
+                                   get_validated_tags, map_singular_values,
+                                   range_addition, range_difference,
+                                   range_intersection)
+
+
+def test_get_special_tags():
+    """Test get_special_tags"""
+
+    # "even_tags" is an hypotetical future special vlan
+    default = ["untagged", "any", "even_tags"]
+
+    tag_range = ["any", "any"]
+    with pytest.raises(KytosInvalidTagRanges):
+        get_special_tags(tag_range, default)
+
+    tag_range = ["untagged", "any"]
+    assert get_special_tags(tag_range, default) == tag_range
+
+    tag_range = ["untagged", "error"]
+    with pytest.raises(KytosInvalidTagRanges):
+        get_special_tags(tag_range, default)
 
 
 def test_map_singular_values():
@@ -147,6 +166,11 @@ def test_range_addition():
     result = range_addition(ranges_a, ranges_b)
     assert expected_add == result[0]
     assert expected_intersection == result[1]
+
+    empty_range = []
+    other_range = [[1, 100], [200, 400]]
+    assert range_addition(empty_range, other_range) == (other_range, [])
+    assert range_addition(other_range, empty_range) == (other_range, [])
 
 
 async def test_get_validated_tags() -> None:

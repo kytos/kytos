@@ -23,7 +23,7 @@ from kytos.core.exceptions import (KytosSetTagRangeError,
 from kytos.core.helpers import now
 from kytos.core.id import InterfaceID
 from kytos.core.tag_ranges import (find_index_add, find_index_remove,
-                                   get_special_tag_range, get_validated_tags,
+                                   get_special_tags, get_validated_tags,
                                    range_addition, range_difference)
 
 __all__ = ('Interface',)
@@ -156,10 +156,10 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self.available_tags = {'vlan': self.default_tag_values['vlan']}
         self.tag_ranges = {'vlan': self.default_tag_values['vlan']}
         self.special_available_tags = {'vlan': self.default_special_tags}
-        self.special_tag_range = {'vlan': self.default_special_tags}
+        self.special_tags = {'vlan': self.default_special_tags}
         self.set_available_tags_tag_ranges(
             self.available_tags, self.tag_ranges,
-            self.special_available_tags, self.special_tag_range
+            self.special_available_tags, self.special_tags
         )
         super().__init__()
 
@@ -239,7 +239,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
     @property
     def default_special_tags(self) -> list[str]:
         """Reurn a default list of special tags. Applicable to
-         special_available_tags and special_tag_range."""
+         special_available_tags and special_tags."""
         return ["untagged", "any"]
 
     def set_tag_ranges(self, tag_ranges: list[list[int]], tag_type: str):
@@ -278,21 +278,21 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             )
             self.tag_ranges[tag_type] = self.default_tag_values[tag_type]
 
-    def set_special_tag_ranges(
+    def set_special_tagss(
         self,
-        special_tag_range: list[str],
-        tag_type: str
+        tag_type: str,
+        special_tags: list[str],
     ):
-        """Set new restriction, special_tag_range"""
-        # Verify values in special_tag_range
-        tag_range = get_special_tag_range(
-            special_tag_range, self.default_special_tags
+        """Set new restriction, special_tags"""
+        # Verify values in special_tags
+        tag_range = get_special_tags(
+            special_tags, self.default_special_tags
         )
 
         if tag_type != TAGType.VLAN.value:
             msg = f"Tag type {tag_type} is not supported."
             raise KytosTagtypeNotSupported(msg)
-        old_special_set = set(self.special_tag_range[tag_type])
+        old_special_set = set(self.special_tags[tag_type])
 
         for tag in self.special_available_tags[tag_type]:
             old_special_set.remove(tag)  # Get special used tags
@@ -310,7 +310,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         self.special_available_tags[tag_type] = list(
             new_special_available - old_special_set
         )
-        self.special_tag_range[tag_type] = tag_range
+        self.special_tags[tag_type] = tag_range
 
     def _remove_tags(self, tags: list[int], tag_type: str = 'vlan') -> bool:
         """Remove tags by resizing available_tags
@@ -362,18 +362,23 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         Exceptions:
             KytosTagsAreNotAvailable from _use_tags()
         """
-        if tag_type != TAGType.VLAN.value:
-            msg = f"Tag type {tag_type} is not supported."
-            raise KytosTagtypeNotSupported(msg)
         if isinstance(tags, int):
             tags = [tags] * 2
         elif check_order and not isinstance(tags, str):
             tags = get_validated_tags(tags)
         if use_lock:
             with self._tag_lock:
-                self._use_tags(tags, tag_type)
+                try:
+                    self._use_tags(tags, tag_type)
+                except KeyError as err:
+                    msg = f"Tag type {err.args[0]} is not supported"
+                    raise KytosTagtypeNotSupported(msg)
         else:
-            self._use_tags(tags, tag_type)
+            try:
+                self._use_tags(tags, tag_type)
+            except KeyError as err:
+                msg = f"Tag type {err.args[0]} is not supported"
+                raise KytosTagtypeNotSupported(msg)
 
         self._notify_interface_tags(controller)
 
@@ -485,9 +490,6 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         Exeptions:
             KytosTagsNotInTagRanges from _make_tags_available()
         """
-        if tag_type != TAGType.VLAN.value:
-            msg = f"Tag type {tag_type} is not supported."
-            raise KytosTagtypeNotSupported(msg)
         if isinstance(tags, int):
             tags = [tags] * 2
         elif check_order and not isinstance(tags, str):
@@ -496,9 +498,17 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             tags = [tags]
         if use_lock:
             with self._tag_lock:
-                conflict = self._make_tags_available(tags, tag_type)
+                try:
+                    conflict = self._make_tags_available(tags, tag_type)
+                except KeyError as err:
+                    msg = f"Tag type {err.args[0]} is not supported"
+                    raise KytosTagtypeNotSupported(msg)
         else:
-            conflict = self._make_tags_available(tags, tag_type)
+            try:
+                conflict = self._make_tags_available(tags, tag_type)
+            except KeyError as err:
+                msg = f"Tag type {err.args[0]} is not supported"
+                raise KytosTagtypeNotSupported(msg)
         self._notify_interface_tags(controller)
         return conflict
 
@@ -525,7 +535,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             if result is False:
                 return [tags]
         if isinstance(tags, str):
-            if tags not in self.special_tag_range[tag_type]:
+            if tags not in self.special_tags[tag_type]:
                 raise KytosTagsNotInTagRanges(tags, self._id)
             if tags not in self.special_available_tags[tag_type]:
                 self.special_available_tags[tag_type].append(tags)
@@ -538,7 +548,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
         available_tag: dict[str, list[list[int]]],
         tag_ranges: dict[str, list[list[int]]],
         special_available_tags: dict[str, list[str]],
-        special_tag_range: dict[str, list[str]]
+        special_tags: dict[str, list[str]]
     ):
         """Set a range of VLAN tags to be used by this Interface.
 
@@ -550,7 +560,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             self.available_tags = available_tag
             self.tag_ranges = tag_ranges
             self.special_available_tags = special_available_tags
-            self.special_tag_range = special_tag_range
+            self.special_tags = special_tags
 
     def enable(self):
         """Enable this interface instance.

@@ -7,8 +7,8 @@ from typing import Iterator, Optional, Union
 from kytos.core.exceptions import KytosInvalidTagRanges
 
 
-def get_special_tag_range(tag_range: list[str], default) -> list[str]:
-    """Get special_tag_range and check values"""
+def get_special_tags(tag_range: list[str], default) -> list[str]:
+    """Get special_tags and check values"""
     # Find duplicated
     if len(tag_range) != len(set(tag_range)):
         msg = "There are duplicated values in the range."

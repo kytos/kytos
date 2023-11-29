@@ -158,24 +158,24 @@ class TestInterface():
         default_available = {'vlan': [[1, 4095]]}
         default_tag_ranges = {'vlan': [[1, 4095]]}
         default_special_vlans = {'vlan': ["untagged", "any"]}
-        default_special_tag_range = {'vlan': ["untagged", "any"]}
+        default_special_tags = {'vlan': ["untagged", "any"]}
         assert self.iface.available_tags == default_available
         assert self.iface.tag_ranges == default_tag_ranges
         assert self.iface.special_available_tags == default_special_vlans
-        assert self.iface.special_tag_range == default_special_tag_range
+        assert self.iface.special_tags == default_special_tags
 
         custom_available = {'vlan': [[10, 200], [210, 4095]]}
         custom_tag_ranges = {'vlan': [[1, 100], [200, 4095]]}
         custom_special_vlans = {'vlan': ["any"]}
-        custom_special_tag_range = {'vlan': ["any"]}
+        custom_special_tags = {'vlan': ["any"]}
         self.iface.set_available_tags_tag_ranges(
             custom_available, custom_tag_ranges,
-            custom_special_vlans, custom_special_tag_range
+            custom_special_vlans, custom_special_tags
         )
         assert self.iface.available_tags == custom_available
         assert self.iface.tag_ranges == custom_tag_ranges
         assert self.iface.special_available_tags == custom_special_vlans
-        assert self.iface.special_tag_range == custom_special_tag_range
+        assert self.iface.special_tags == custom_special_tags
 
     async def test_interface_is_tag_available(self):
         """Test is_tag_available on Interface class."""
@@ -346,11 +346,11 @@ class TestInterface():
         available = {'vlan': [[300, 3000]]}
         tag_ranges = {'vlan': [[20, 20], [200, 3000]]}
         special_available_tags = {'vlan': []}
-        special_tag_range = {'vlan': ["any"]}
+        special_tags = {'vlan': ["any"]}
         self.iface._notify_interface_tags = MagicMock()
         self.iface.set_available_tags_tag_ranges(
             available, tag_ranges,
-            special_available_tags, special_tag_range
+            special_available_tags, special_tags
         )
         assert self.iface.available_tags == available
         assert self.iface.tag_ranges == tag_ranges
@@ -439,7 +439,7 @@ class TestInterface():
             "available_tag": {'vlan': available_tag},
             "tag_ranges": {'vlan': tag_ranges},
             "special_available_tags": {'vlan': ["untagged", "any"]},
-            "special_tag_range": {'vlan': ["untagged", "any"]}
+            "special_tags": {'vlan': ["untagged", "any"]}
         }
         self.iface.set_available_tags_tag_ranges(**parameters)
         assert self.iface._remove_tags([4, 6]) is False
@@ -453,7 +453,7 @@ class TestInterface():
             "available_tag": {'vlan': available_tag},
             "tag_ranges": {'vlan': tag_ranges},
             "special_available_tags": {'vlan': ["untagged", "any"]},
-            "special_tag_range": {'vlan': ["untagged", "any"]}
+            "special_tags": {'vlan': ["untagged", "any"]}
         }
         self.iface.set_available_tags_tag_ranges(**parameters)
         ava_expected = [[4, 10], [20, 30]]
@@ -498,7 +498,7 @@ class TestInterface():
             "available_tag": {'vlan': available_tag},
             "tag_ranges": {'vlan': tag_ranges},
             "special_available_tags": {'vlan': ["untagged", "any"]},
-            "special_tag_range": {'vlan': ["untagged", "any"]}
+            "special_tags": {'vlan': ["untagged", "any"]}
         }
         self.iface.set_available_tags_tag_ranges(**parameters)
         assert self.iface._add_tags([4, 6])

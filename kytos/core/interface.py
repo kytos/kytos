@@ -278,7 +278,7 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             )
             self.tag_ranges[tag_type] = self.default_tag_values[tag_type]
 
-    def set_special_tagss(
+    def set_special_tags(
         self,
         tag_type: str,
         special_tags: list[str],

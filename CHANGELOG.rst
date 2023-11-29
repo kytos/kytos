@@ -12,6 +12,7 @@ Added
 - Added ``kytos/core.interface_tags`` event publication to notify any modification of ``Interface.tag_ranges`` or ``Interface.available_tags``.
 - Added ``TAGRange`` class which is used when a ``UNI`` has a tag as a list of ranges.
 - Added ``KytosTagError`` exception that cover other exceptions ``KytosTagtypeNotSupported``, ``KytosInvalidTagRanges``, ``KytosSetTagRangeError``, ``KytosTagsNotInTagRanges`` and ``KytosTagsAreNotAvailable`` all of which are related to TAGs.
+- Added ``special_available_tags`` which stores `"untagged"` and `"any"` if they can be used from an Interface.
 
 Changed
 =======

@@ -407,6 +407,24 @@ class TestInterface():
         default = [[1, 4095]]
         assert self.iface.tag_ranges['vlan'] == default
 
+    def test_set_special_tags(self) -> None:
+        """Test set_special_tags"""
+        self.iface.special_available_tags["vlan"] = ["untagged"]
+        tag_type = "error"
+        special_tags = ["untagged", "any"]
+        with pytest.raises(KytosTagtypeNotSupported):
+            self.iface.set_special_tags(tag_type, special_tags)
+
+        tag_type = "vlan"
+        special_tags = ["untagged"]
+        with pytest.raises(KytosSetTagRangeError):
+            self.iface.set_special_tags(tag_type, special_tags)
+
+        special_tags = ["any"]
+        self.iface.set_special_tags(tag_type, special_tags)
+        assert self.iface.special_available_tags["vlan"] == []
+        assert self.iface.special_tags["vlan"] == ["any"]
+
     async def test_remove_tags(self) -> None:
         """Test _remove_tags"""
         available_tag = [[20, 20], [200, 3000]]

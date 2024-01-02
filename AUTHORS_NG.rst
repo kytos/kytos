@@ -7,12 +7,12 @@ Core Team
 - Vinicius Arcanjo <vindasil AT fiu DOT edu>
 - Rogerio Motitsuki <rogerio.motitsuki AT gmail DOT com>
 - David Ramirez <davramir AT fiu DOT edu>
-- Gretel De la Peña <gdelapea AT fiu DOT edu>
 
 Core Team Alumni
 ================
 
 - Antonio Francisco <ajoaoff AT gmail.com>
+- Gretel De la Peña <gdelapea AT fiu DOT edu>
 
 Team Leader
 ***********
@@ -34,3 +34,4 @@ Contributors
 - Krishna Reddy Enugala <kenugala AT fiu DOT edu>
 - Gretel De la Peña <gdelapea AT fiu DOT edu>
 - Noel Ngu <corevaluenoel AT gmail DOT com>
+- Heriberto Luna < hluna006 AT fiu DOT edu >

@@ -6,8 +6,8 @@
     - Vinicius Arcanjo <vindasil AT fiu DOT edu>
 :Created: 2022-08-24
 :Updated: 2023-07-26
-:Kytos-Version: 2023.2
-:Status: Draft
+:Kytos-Version: 2024.1
+:Status: Accepted
 
 ****************************************
 EP031 - Telemetry-enabled EVCs

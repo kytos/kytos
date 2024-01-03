@@ -5,7 +5,7 @@
     - Vinicius Arcanjo <vindasil@fiu.edu>;
     - Jeronimo Bezerra jbezerra@fiu.edu;
 :Issued Date: to be defined
-:Status: Draft
+:Status: Accepted
 :Type: Standards Track
 
 *******************************

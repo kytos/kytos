@@ -531,6 +531,18 @@ class TestInterface():
         assert event.name == name
         assert event.content == content
 
+    def test_all_tags_available(self) -> None:
+        """Test all_tags_available"""
+        self.iface.available_tags = {"vlan": [[1, 1000]]}
+        self.iface.tag_ranges = {"vlan": [[1, 20], [22, 1000]]}
+        self.iface.special_available_tags = {"vlan": []}
+        self.iface.special_tags = {"vlan": ["any"]}
+        assert self.iface.all_tags_available() is False
+
+        self.iface.tag_ranges = {"vlan": [[1, 1000]]}
+        self.iface.special_available_tags = {"vlan": ["any"]}
+        assert self.iface.all_tags_available()
+
 
 class TestUNI():
     """UNI tests."""

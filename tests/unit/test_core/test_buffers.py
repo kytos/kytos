@@ -3,6 +3,7 @@ import asyncio
 from unittest.mock import MagicMock
 
 import pytest
+from janus import Queue
 
 from kytos.core.buffers import KytosBuffers, KytosEventBuffer
 from kytos.core.events import KytosEvent
@@ -103,7 +104,7 @@ class TestKytosEventBuffer:
 
     async def test_full(self):
         """Test full method to full."""
-        kytos_event_buffer = KytosEventBuffer("name", maxsize=1)
+        kytos_event_buffer = KytosEventBuffer("name", queue=Queue(maxsize=1))
         assert not kytos_event_buffer.full()
         assert kytos_event_buffer.empty()
 

@@ -23,11 +23,13 @@ import sys
 import threading
 import traceback
 from asyncio import AbstractEventLoop
+from collections import Counter, defaultdict
 from importlib import import_module
 from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from socket import error as SocketError
+from queue import Full
 
 from pyof.foundation.exceptions import PackException
 
@@ -266,7 +268,8 @@ class Controller:
         except Exception as exc:
             exc_fmt = traceback.format_exc(chain=True)
             message = f"Kytos couldn't start because of {str(exc)} {exc_fmt}"
-            sys.exit(message)
+            counter = self._full_queue_counter()
+            sys.exit(self._try_to_fmt_traceback_msg(message, counter))
 
     def create_pidfile(self):
         """Create a pidfile."""
@@ -815,7 +818,7 @@ class Controller:
             napp = napp_module.Main(controller=self)
         except Exception as exc:  # noqa pylint: disable=bare-except
             msg = f"NApp {username}/{napp_name} exception {str(exc)} "
-            raise KytosNAppSetupException(msg, from_exc=exc) from exc
+            raise KytosNAppSetupException(msg) from exc
 
         self.napps[(username, napp_name)] = napp
 
@@ -852,7 +855,7 @@ class Controller:
                 self.log.error("Could not load NApp %s: %s",
                                napp.id, exc)
                 msg = f"NApp {napp.id} exception {str(exc)}"
-                raise KytosNAppSetupException(msg, from_exc=exc) from exc
+                raise KytosNAppSetupException(msg) from exc
 
     def unload_napp(self, username, napp_name):
         """Unload a specific NApp.
@@ -937,3 +940,23 @@ class Controller:
         for napp in self.napps:
             self.reload_napp(*napp)
         return JSONResponse('reloaded')
+
+    def _full_queue_counter(self) -> Counter:
+        """Generate full queue stats counter."""
+        buffer_counter = defaultdict(Counter)
+        for buffer in self.buffers.get_all_buffers():
+            if not buffer.full():
+                continue
+            while not buffer.empty():
+                event = buffer.get()
+                buffer_counter[buffer.name][event.name] += 1
+        return buffer_counter
+
+    def _try_to_fmt_traceback_msg(self, message: str, counter: Counter) -> str:
+        """Try to fmt traceback message."""
+        if counter:
+            counter = dict(counter)
+            message = (
+                f"{message}\nFull KytosEventBuffers counters: {counter}"
+            )
+        return message

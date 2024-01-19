@@ -695,6 +695,15 @@ class TestController(TestCase):
         assert msg in fmt_msg
         assert "counters" in fmt_msg
 
+    def test_config_default_maxsize_multiplier(self) -> None:
+        """Test KytosConfig default maxsize multiplier."""
+        event_buffer_conf = self.controller.options.event_buffer_conf
+        assert event_buffer_conf
+        queues = event_buffer_conf.values()
+        assert queues
+        for queue in queues:
+            assert queue["queue"]["maxsize_multiplier"] == 2
+
 
 class TestControllerAsync:
 

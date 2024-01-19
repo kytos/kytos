@@ -29,7 +29,6 @@ from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from socket import error as SocketError
-from queue import Full
 
 from pyof.foundation.exceptions import PackException
 

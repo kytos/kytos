@@ -169,18 +169,34 @@ class KytosConfig():
             'apm': '',
             'connection_timeout': 130,
             'debug': False,
-            'event_buffer_conf': {
-                'msg_out': {
-                    'queue': {
-                        'type': 'priority',
-                        'maxsize': 'threadpool_sb',
-                    },
+            "event_buffer_conf": {
+                "msg_out": {
+                    "queue": {
+                        "type": "priority",
+                        "maxsize": "threadpool_sb",
+                        "maxsize_multiplier": 2,
+                    }
                 },
-                'msg_in': {
-                    'queue': {
-                        'type': 'priority',
-                        'maxsize': 'threadpool_sb',
-                    },
+                "msg_in": {
+                    "queue": {
+                        "type": "priority",
+                        "maxsize": "threadpool_sb",
+                        "maxsize_multiplier": 2,
+                    }
+                },
+                "raw": {
+                    "queue": {
+                        "type": "queue",
+                        "maxsize": "threadpool_sb",
+                        "maxsize_multiplier": 2,
+                    }
+                },
+                "app": {
+                    "queue": {
+                        "type": "queue",
+                        "maxsize": "threadpool_app",
+                        "maxsize_multiplier": 2,
+                    }
                 },
             },
         }

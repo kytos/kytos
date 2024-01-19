@@ -13,6 +13,7 @@ Added
 - Added ``TAGRange`` class which is used when a ``UNI`` has a tag as a list of ranges.
 - Added ``KytosTagError`` exception that cover other exceptions ``KytosTagtypeNotSupported``, ``KytosInvalidTagRanges``, ``KytosSetTagRangeError``, ``KytosTagsNotInTagRanges`` and ``KytosTagsAreNotAvailable`` all of which are related to TAGs.
 - Added ``special_available_tags`` which stores `"untagged"` and `"any"` if they can be used from an Interface.
+- Added ``maxsize_multiplier`` on ``event_buffer_conf``, which will multiply the ``maxsize`` value of the queue. By default, all KytosEventBuffer who use a bounded queue will have ``maxsize_multiplier: 2``. This default is reasonable to work out of the box with kytos-ng core NApps. But, if you have other NApps who tend to produce too many events you might want to either increase the size of the queue with and/or increase the number of max workers in the thread pool if the event handler is running on a thread pool. Typically, you'll want to first start adjusting the number of workers in the thread pool.
 
 Changed
 =======
@@ -20,6 +21,7 @@ Changed
 - ``kytosd`` process will exit if a NApp raises an exception during its ``setup()`` execution.
 - Change format for ``Interface.available_tags`` to ``dict[str, list[list[int]]]``. Storing ``tag_types`` as keys and a list of ranges for ``available_tags`` as values.
 - ``Interface.use_tags`` and ``Interface.make_tags_available`` are compatible with list of ranges.
+- ``KytosEventBuffer`'s ``put`` method  timeout now accepts a timeout argument. NApps who publish events during ``setup()`` should set ``timeout=1`` without handling the exception, so if within 1 second the event can't be put in the queue, then the NApp will fail to start, which would imply that during initialization either the queue size is too small or the NApp is misbehaving sending too many events.
 
 Fixed
 =====

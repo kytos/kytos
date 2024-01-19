@@ -4,14 +4,14 @@ import logging
 import sys
 import tempfile
 import warnings
-from copy import copy
 from collections import Counter
+from copy import copy
 from unittest import TestCase
 from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
 
 import pytest
-from pyof.foundation.exceptions import PackException
 from janus import Queue
+from pyof.foundation.exceptions import PackException
 
 from kytos.core import Controller
 from kytos.core.auth import Auth

@@ -5,15 +5,17 @@ import sys
 import tempfile
 import warnings
 from copy import copy
+from collections import Counter
 from unittest import TestCase
 from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
 
 import pytest
 from pyof.foundation.exceptions import PackException
+from janus import Queue
 
 from kytos.core import Controller
 from kytos.core.auth import Auth
-from kytos.core.buffers import KytosBuffers
+from kytos.core.buffers import KytosBuffers, KytosEventBuffer
 from kytos.core.config import KytosConfig
 from kytos.core.events import KytosEvent
 from kytos.core.exceptions import KytosNAppSetupException
@@ -685,6 +687,14 @@ class TestController(TestCase):
         assert self.controller.auth
         assert self.controller.dead_letter
 
+    def test_try_to_fmt_traceback_msg(self) -> None:
+        """Test test_try_to_fmt_traceback_msg."""
+        counter = Counter(range(5))
+        msg = "some traceback msg"
+        fmt_msg = self.controller._try_to_fmt_traceback_msg(msg, counter)
+        assert msg in fmt_msg
+        assert "counters" in fmt_msg
+
 
 class TestControllerAsync:
 
@@ -811,3 +821,18 @@ class TestControllerAsync:
         controller.buffers.conn.aput = AsyncMock()
         await controller.publish_connection_error(MagicMock())
         controller.buffers.conn.aput.assert_called()
+
+    async def test_full_queue_counter(self, controller) -> None:
+        """Test full queue counter."""
+        maxsize = 2
+        queue = Queue(maxsize=maxsize)
+        buffer = KytosEventBuffer("app", queue)
+        for i in range(maxsize):
+            await buffer.aput(KytosEvent(str(i)))
+        assert buffer.full()
+        controller._buffers.get_all_buffers.return_value = [buffer]
+        counter = controller._full_queue_counter()
+        assert counter
+        assert len(counter["app"]) == maxsize
+        queue.close()
+        await queue.wait_closed()

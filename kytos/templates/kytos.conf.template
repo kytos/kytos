@@ -79,19 +79,6 @@ thread_pool_max_workers = {"sb": 256, "db": 256, "app": 512}
 # Valid queue types are:
 # - queue: Default queue class provided by janus
 # - priority: PriorityQueue class provided by janus
-# Valid Mixins are:
-# - put_rate_limit: Sets the rate limit on async put requests into the buffer
-# - get_rate_limit: Sets the rate limit on async get requests from the buffer
-# For rate limit mixins, there are a few configurable parameters:
-# - strategy: Strategy to use for rate limiting
-# - limit: the amount of requests allowed for a given time period.
-# - identifier: list of identifiers to use for determining rate limit
-# Available strategies include:
-# - moving_window
-# - fixed_window
-# - elastic window
-# Available rate limit storage types:
-# - memory
 
 event_buffer_conf =
     {

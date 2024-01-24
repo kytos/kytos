@@ -1,12 +1,7 @@
 """Kytos Buffer Classes, based on Python Queue."""
 import logging
 
-from janus import PriorityQueue, Queue
-
-from kytos.core.events import KytosEvent
-from kytos.core.helpers import get_thread_pool_max_workers
-
-__all__ = ('KytosBuffers', )
+from janus import Queue
 
 LOG = logging.getLogger(__name__)
 
@@ -14,8 +9,7 @@ LOG = logging.getLogger(__name__)
 class KytosEventBuffer:
     """KytosEventBuffer represents a queue to store a set of KytosEvents."""
 
-    def __init__(self, name, event_base_class=None, maxsize=0,
-                 queue_cls=Queue):
+    def __init__(self, name, queue: Queue = None):
         """Contructor of KytosEventBuffer receive the parameters below.
 
         Args:
@@ -25,8 +19,7 @@ class KytosEventBuffer:
             queue_cls (class): queue class from janus
         """
         self.name = name
-        self._event_base_class = event_base_class
-        self._queue = queue_cls(maxsize=maxsize)
+        self._queue = queue if queue is not None else Queue()
         self._reject_new_events = False
 
     def put(self, event):
@@ -121,55 +114,3 @@ class KytosEventBuffer:
     def full(self):
         """Return True if KytosEventBuffer is full of KytosEvent."""
         return self._queue.sync_q.full()
-
-
-class KytosBuffers:
-    """Set of KytosEventBuffer used in Kytos."""
-
-    def __init__(self):
-        """Build four KytosEventBuffers.
-
-        :attr:`conn`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
-        received from connection events.
-
-        :attr:`raw`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
-        received from network.
-
-        :attr:`msg_in`: :class:`~kytos.core.buffers.KytosEventBuffer` with
-        events to be received.
-
-        :attr:`msg_out`: :class:`~kytos.core.buffers.KytosEventBuffer` with
-        events to be sent.
-
-        :attr:`app`: :class:`~kytos.core.buffers.KytosEventBuffer` with events
-        sent to NApps.
-        """
-        self._pool_max_workers = get_thread_pool_max_workers()
-        self.conn = KytosEventBuffer("conn")
-        self.raw = KytosEventBuffer("raw", maxsize=self._get_maxsize("sb"))
-        self.msg_in = KytosEventBuffer("msg_in",
-                                       maxsize=self._get_maxsize("sb"),
-                                       queue_cls=PriorityQueue)
-        self.msg_out = KytosEventBuffer("msg_out",
-                                        maxsize=self._get_maxsize("sb"),
-                                        queue_cls=PriorityQueue)
-        self.app = KytosEventBuffer("app", maxsize=self._get_maxsize("app"))
-
-    def get_all_buffers(self):
-        """Get all KytosEventBuffer instances."""
-        return [
-            event_buffer for event_buffer in self.__dict__.values()
-            if isinstance(event_buffer, KytosEventBuffer)
-        ]
-
-    def _get_maxsize(self, queue_name):
-        """Get queue maxsize if it's been set."""
-        return self._pool_max_workers.get(queue_name, 0)
-
-    def send_stop_signal(self):
-        """Send a ``kytos/core.shutdown`` event to each buffer."""
-        LOG.info('Stop signal received by Kytos buffers.')
-        LOG.info('Sending KytosShutdownEvent to all apps.')
-        event = KytosEvent(name='kytos/core.shutdown')
-        for buffer in self.get_all_buffers():
-            buffer.put(event)

@@ -174,3 +174,203 @@ class TestBufferFromConfig:
             'Unique value 2'
         )
 
+
+class TestProcessQueue:
+    """Tests for process_queue"""
+
+    def test_defaults(self, monkeypatch):
+        """Tests creating a queue from default values"""
+        input_config = {}
+
+        mock_queue_cls = MagicMock()
+        mock_queue = MagicMock()
+        mock_queue_cls.return_value = mock_queue
+
+        mock_priority_queue_cls = MagicMock()
+        mock_priority_queue = MagicMock()
+        mock_priority_queue_cls.return_value = mock_priority_queue
+
+        monkeypatch.setattr(
+            "kytos.core.buffers.factory.queue_classes",
+            {
+                "queue": mock_queue_cls,
+                "priority": mock_priority_queue_cls,
+            }
+        )
+
+        result_queue = factory.process_queue(input_config)
+
+        assert result_queue == mock_queue
+
+        mock_queue_cls.assert_called_once_with(maxsize=0)
+
+    def test_set_type(self, monkeypatch):
+        """Tests creating a queue with a specified type"""
+        input_config = {
+            'type': 'priority'
+        }
+
+        mock_queue_cls = MagicMock()
+        mock_queue = MagicMock()
+        mock_queue_cls.return_value = mock_queue
+
+        mock_priority_queue_cls = MagicMock()
+        mock_priority_queue = MagicMock()
+        mock_priority_queue_cls.return_value = mock_priority_queue
+
+        monkeypatch.setattr(
+            "kytos.core.buffers.factory.queue_classes",
+            {
+                "queue": mock_queue_cls,
+                "priority": mock_priority_queue_cls,
+            }
+        )
+
+        result_queue = factory.process_queue(input_config)
+
+        assert result_queue == mock_priority_queue
+
+        mock_priority_queue_cls.assert_called_once_with(maxsize=0)
+
+    def test_set_size(self, monkeypatch):
+        """Tests creating a queue with a given maxsize"""
+        maxsize = 39
+        input_config = {
+            'maxsize': maxsize,
+        }
+
+        mock_queue_cls = MagicMock()
+        mock_queue = MagicMock()
+        mock_queue_cls.return_value = mock_queue
+
+        mock_priority_queue_cls = MagicMock()
+        mock_priority_queue = MagicMock()
+        mock_priority_queue_cls.return_value = mock_priority_queue
+
+        monkeypatch.setattr(
+            "kytos.core.buffers.factory.queue_classes",
+            {
+                "queue": mock_queue_cls,
+                "priority": mock_priority_queue_cls,
+            }
+        )
+
+        result_queue = factory.process_queue(input_config)
+
+        assert result_queue == mock_queue
+
+        mock_queue_cls.assert_called_once_with(maxsize=maxsize)
+
+    def test_set_size_threadpool(self, monkeypatch):
+        """Tests creating a queue with a threadpool determined maxsize"""
+        maxsize = 'threadpool_test'
+        expected_size = 39
+        input_config = {
+            'maxsize': maxsize,
+        }
+
+        mock_queue_cls = MagicMock()
+        mock_queue = MagicMock()
+        mock_queue_cls.return_value = mock_queue
+
+        mock_priority_queue_cls = MagicMock()
+        mock_priority_queue = MagicMock()
+        mock_priority_queue_cls.return_value = mock_priority_queue
+
+        mock_get_threadpool_max = MagicMock()
+        mock_get_threadpool_max.return_value = {
+            'test': expected_size,
+        }
+
+        monkeypatch.setattr(
+            "kytos.core.buffers.factory.queue_classes",
+            {
+                "queue": mock_queue_cls,
+                "priority": mock_priority_queue_cls,
+            }
+        )
+
+        monkeypatch.setattr(
+            "kytos.core.buffers.factory.get_thread_pool_max_workers",
+            mock_get_threadpool_max
+        )
+
+        result_queue = factory.process_queue(input_config)
+
+        assert result_queue == mock_queue
+
+        mock_queue_cls.assert_called_once_with(maxsize=expected_size)
+
+    def test_set_size_bad_threadpool(self, monkeypatch):
+        """Tests creating a queue with a non existant threadpool for maxsize"""
+        maxsize = 'threadpool_test2'
+        not_expected_size = 39
+        input_config = {
+            'maxsize': maxsize,
+        }
+
+        mock_queue_cls = MagicMock()
+        mock_queue = MagicMock()
+        mock_queue_cls.return_value = mock_queue
+
+        mock_priority_queue_cls = MagicMock()
+        mock_priority_queue = MagicMock()
+        mock_priority_queue_cls.return_value = mock_priority_queue
+
+        mock_get_threadpool_max = MagicMock()
+        mock_get_threadpool_max.return_value = {
+            'test': not_expected_size,
+        }
+
+        monkeypatch.setattr(
+            "kytos.core.buffers.factory.queue_classes",
+            {
+                "queue": mock_queue_cls,
+                "priority": mock_priority_queue_cls,
+            }
+        )
+
+        monkeypatch.setattr(
+            "kytos.core.buffers.factory.get_thread_pool_max_workers",
+            mock_get_threadpool_max
+        )
+
+        result_queue = factory.process_queue(input_config)
+
+        assert result_queue == mock_queue
+
+        mock_queue_cls.assert_called_once_with(maxsize=0)
+
+    def test_set_size_bad_str(self, monkeypatch):
+        """Tests creating a queue with an invalid string"""
+        maxsize = 'bad string'
+        input_config = {
+            'maxsize': maxsize,
+        }
+
+        mock_queue_cls = MagicMock()
+        mock_queue = MagicMock()
+        mock_queue_cls.return_value = mock_queue
+
+        mock_priority_queue_cls = MagicMock()
+        mock_priority_queue = MagicMock()
+        mock_priority_queue_cls.return_value = mock_priority_queue
+
+        mock_get_threadpool_max = MagicMock()
+        mock_get_threadpool_max.return_value = {}
+
+        monkeypatch.setattr(
+            "kytos.core.buffers.factory.queue_classes",
+            {
+                "queue": mock_queue_cls,
+                "priority": mock_priority_queue_cls,
+            }
+        )
+
+        monkeypatch.setattr(
+            "kytos.core.buffers.factory.get_thread_pool_max_workers",
+            mock_get_threadpool_max
+        )
+
+        with pytest.raises(TypeError):
+            factory.process_queue(input_config)

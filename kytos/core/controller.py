@@ -850,11 +850,11 @@ class Controller:
             try:
                 self.log.info("Loading NApp %s", napp.id)
                 self.load_napp(napp.username, napp.name)
-            except FileNotFoundError as exc:
+            except FileNotFoundError as exception:
                 self.log.error("Could not load NApp %s: %s",
-                               napp.id, exc)
-                msg = f"NApp {napp.id} exception {str(exc)}"
-                raise KytosNAppSetupException(msg) from exc
+                               napp.id, exception)
+                msg = f"NApp {napp.id} exception {str(exception)}"
+                raise KytosNAppSetupException(msg) from exception
 
     def unload_napp(self, username, napp_name):
         """Unload a specific NApp.

@@ -18,6 +18,7 @@ def process_queue(config: dict) -> Queue:
     """
     queue_type = queue_classes[config.get('type', 'queue')]
     queue_size = config.get('maxsize', 0)
+    queue_size_multiplier = config.get('maxsize_multiplier', 1)
     if isinstance(queue_size, str):
         if queue_size.startswith('threadpool_'):
             threadpool = queue_size[len('threadpool_'):]
@@ -27,7 +28,7 @@ def process_queue(config: dict) -> Queue:
                 'Expected int or str formatted '
                 'as "threadpool_{threadpool_name}"'
             )
-    return queue_type(maxsize=queue_size)
+    return queue_type(maxsize=queue_size * queue_size_multiplier)
 
 
 extension_processors = {}

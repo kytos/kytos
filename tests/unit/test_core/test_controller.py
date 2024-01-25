@@ -4,16 +4,18 @@ import logging
 import sys
 import tempfile
 import warnings
+from collections import Counter
 from copy import copy
 from unittest import TestCase
-from unittest.mock import MagicMock, Mock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
 
 import pytest
+from janus import Queue
 from pyof.foundation.exceptions import PackException
 
 from kytos.core import Controller
 from kytos.core.auth import Auth
-from kytos.core.buffers import KytosBuffers
+from kytos.core.buffers import KytosBuffers, KytosEventBuffer
 from kytos.core.config import KytosConfig
 from kytos.core.events import KytosEvent
 from kytos.core.exceptions import KytosNAppSetupException
@@ -362,15 +364,20 @@ class TestController(TestCase):
         dpid = '00:00:00:00:00:00:00:01'
         switch = MagicMock(dpid=dpid)
         self.controller.switches = {dpid: switch}
+        self.controller.buffers.conn = MagicMock()
 
         connection = MagicMock()
         resp_switch = self.controller.get_switch_or_create(dpid, connection)
 
         self.assertEqual(resp_switch, switch)
+        self.controller.buffers.conn.put.assert_called()
+        ev_name = "kytos/core.switch.reconnected"
+        assert self.controller.buffers.conn.put.call_args[0][0].name == ev_name
 
     def test_get_switch_or_create__not_exists(self):
         """Test status_api method when switch does not exist."""
         self.controller.switches = {}
+        self.controller.buffers.conn = MagicMock()
 
         dpid = '00:00:00:00:00:00:00:01'
         connection = MagicMock()
@@ -378,6 +385,9 @@ class TestController(TestCase):
 
         expected_switches = {'00:00:00:00:00:00:00:01': switch}
         self.assertEqual(self.controller.switches, expected_switches)
+        self.controller.buffers.conn.put.assert_called()
+        ev_name = "kytos/core.switch.new"
+        assert self.controller.buffers.conn.put.call_args[0][0].name == ev_name
 
     def test_create_or_update_connection(self):
         """Test create_or_update_connection method."""
@@ -677,6 +687,23 @@ class TestController(TestCase):
         assert self.controller.auth
         assert self.controller.dead_letter
 
+    def test_try_to_fmt_traceback_msg(self) -> None:
+        """Test test_try_to_fmt_traceback_msg."""
+        counter = Counter(range(5))
+        msg = "some traceback msg"
+        fmt_msg = self.controller._try_to_fmt_traceback_msg(msg, counter)
+        assert msg in fmt_msg
+        assert "counters" in fmt_msg
+
+    def test_config_default_maxsize_multiplier(self) -> None:
+        """Test KytosConfig default maxsize multiplier."""
+        event_buffer_conf = self.controller.options.event_buffer_conf
+        assert event_buffer_conf
+        queues = event_buffer_conf.values()
+        assert queues
+        for queue in queues:
+            assert queue["queue"]["maxsize_multiplier"] == 2
+
 
 class TestControllerAsync:
 
@@ -797,3 +824,24 @@ class TestControllerAsync:
         resp = await api_client.get("kytos/core/config")
         assert resp.status_code == 200
         assert expected == resp.json()
+
+    async def test_publish_connection_error(self, controller):
+        """Test publish_connection_error."""
+        controller.buffers.conn.aput = AsyncMock()
+        await controller.publish_connection_error(MagicMock())
+        controller.buffers.conn.aput.assert_called()
+
+    async def test_full_queue_counter(self, controller) -> None:
+        """Test full queue counter."""
+        maxsize = 2
+        queue = Queue(maxsize=maxsize)
+        buffer = KytosEventBuffer("app", queue)
+        for i in range(maxsize):
+            await buffer.aput(KytosEvent(str(i)))
+        assert buffer.full()
+        controller._buffers.get_all_buffers.return_value = [buffer]
+        counter = controller._full_queue_counter()
+        assert counter
+        assert len(counter["app"]) == maxsize
+        queue.close()
+        await queue.wait_closed()

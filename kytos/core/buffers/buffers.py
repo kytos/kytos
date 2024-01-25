@@ -1,5 +1,6 @@
 """Kytos Buffer Classes, based on Python Queue."""
 import logging
+from typing import Optional
 
 from janus import Queue
 
@@ -22,7 +23,7 @@ class KytosEventBuffer:
         self._queue = queue if queue is not None else Queue()
         self._reject_new_events = False
 
-    def put(self, event):
+    def put(self, event, timeout: Optional[float] = None):
         """Insert an event in KytosEventBuffer if reject_new_events is False.
 
         Reject new events is True when a kytos/core.shutdown message was
@@ -31,9 +32,12 @@ class KytosEventBuffer:
         Args:
             event (:class:`~kytos.core.events.KytosEvent`):
                 KytosEvent sent to queue.
+            timeout: Block if necessary until a free slot is available.
+            If 'timeout' is a non-negative number, it blocks at most 'timeout'
+            seconds and raises an Full exception if no free slot was available.
         """
         if not self._reject_new_events:
-            self._queue.sync_q.put(event)
+            self._queue.sync_q.put(event, timeout=timeout)
             LOG.debug('[buffer: %s] Added: %s', self.name, event.name)
 
         if event.name == "kytos/core.shutdown":

@@ -23,6 +23,7 @@ import sys
 import threading
 import traceback
 from asyncio import AbstractEventLoop
+from collections import Counter, defaultdict
 from importlib import import_module
 from importlib import reload as reload_module
 from importlib.util import module_from_spec, spec_from_file_location
@@ -266,7 +267,8 @@ class Controller:
         except Exception as exc:
             exc_fmt = traceback.format_exc(chain=True)
             message = f"Kytos couldn't start because of {str(exc)} {exc_fmt}"
-            sys.exit(message)
+            counter = self._full_queue_counter()
+            sys.exit(self._try_to_fmt_traceback_msg(message, counter))
 
     def create_pidfile(self):
         """Create a pidfile."""
@@ -369,6 +371,8 @@ class Controller:
         task = self.loop.create_task(self.msg_out_event_handler())
         self._tasks.append(task)
         task = self.loop.create_task(self.event_handler("app"))
+        self._tasks.append(task)
+        task = self.loop.create_task(self.event_handler("meta"))
         self._tasks.append(task)
 
         self.started_at = now()
@@ -569,7 +573,7 @@ class Controller:
             f"kytos/core.{event.destination.protocol.name}.connection.error"
         error_msg = f"Connection state: {event.destination.state}"
         event.content["exception"] = error_msg
-        await self.buffers.app.aput(event)
+        await self.buffers.conn.aput(event)
 
     async def msg_out_event_handler(self):
         """Handle msg_out events.
@@ -679,7 +683,7 @@ class Controller:
                 if old_connection is not connection:
                     self.remove_connection(old_connection)
 
-            self.buffers.app.put(event)
+            self.buffers.conn.put(event)
 
             return switch
 
@@ -935,3 +939,23 @@ class Controller:
         for napp in self.napps:
             self.reload_napp(*napp)
         return JSONResponse('reloaded')
+
+    def _full_queue_counter(self) -> Counter:
+        """Generate full queue stats counter."""
+        buffer_counter = defaultdict(Counter)
+        for buffer in self.buffers.get_all_buffers():
+            if not buffer.full():
+                continue
+            while not buffer.empty():
+                event = buffer.get()
+                buffer_counter[buffer.name][event.name] += 1
+        return buffer_counter
+
+    def _try_to_fmt_traceback_msg(self, message: str, counter: Counter) -> str:
+        """Try to fmt traceback message."""
+        if counter:
+            counter = dict(counter)
+            message = (
+                f"{message}\nFull KytosEventBuffers counters: {counter}"
+            )
+        return message

@@ -27,6 +27,7 @@ Changed
 Fixed
 =====
 - Avoid ``kytosd`` hanging its termination when handling ``SystemExit`` with SIGTERM
+- Enabling an interface does not longer enables its switch
 
 Deprecated
 ==========

@@ -139,38 +139,45 @@ class QueueMonitorWindow:
     def _try_to_log_stats(self) -> list[QueueData]:
         """Try to log stats."""
         self._popleft_passed_records()
-        records = []
-        if (
+
+        sub_records: list[QueueData] = []
+        if not (
             self.deque
             and len(self.deque) >= self.min_hits
             and self._last_logged + timedelta(seconds=self.delta_secs) <= now()
         ):
-            first = self.deque.popleft()
+            return sub_records
+
+        first = self.deque.popleft()
+        cur = first
+        minv, maxv, size_acc, count = first.size, first.size, first.size, 1
+
+        if self.log_at_most_n > 0:
+            sub_records.append(first)
+
+        while (
+            self.deque
+            and (self.deque[0].created_at - first.created_at).seconds
+            <= self.delta_secs
+        ):
+            cur = self.deque.popleft()
+            minv = min(minv, cur.size)
+            maxv = max(maxv, cur.size)
+            count += 1
+
             if self.log_at_most_n > 0:
-                records.append(first)
-            cur = first
-            minv, maxv, size_acc, count = first.size, first.size, first.size, 1
-            while (
-                self.deque
-                and (self.deque[0].created_at - first.created_at).seconds
-                <= self.delta_secs
-            ):
-                cur = self.deque.popleft()
-                minv = min(minv, cur.size)
-                maxv = max(maxv, cur.size)
-                count += 1
-                if self.log_at_most_n > 0:
-                    records.append(first)
-            avg = size_acc / count
-            self._last_logged = cur.created_at
-            msg = (
-                f"{self.name}, counted: {count}, "
-                f"min size: {minv}, max size: {maxv}, avg: {avg}, "
-                f"first at: {first.created_at}, last at: {cur.created_at},"
-                f" delta seconds: {self.delta_secs}, min_hits: {self.min_hits}"
-            )
-            LOG.warning(msg)
-        return records
+                sub_records.append(first)
+
+        avg = size_acc / count
+        self._last_logged = cur.created_at
+        msg = (
+            f"{self.name}, counted: {count}, "
+            f"min size: {minv}, max size: {maxv}, avg: {avg}, "
+            f"first at: {first.created_at}, last at: {cur.created_at},"
+            f" delta seconds: {self.delta_secs}, min_hits: {self.min_hits}"
+        )
+        LOG.warning(msg)
+        return sub_records
 
     def _popleft_passed_records(self) -> None:
         """Pop left passed records."""

@@ -2,6 +2,7 @@ from kytos.core.queue_monitor import QueueMonitorWindow, QueueData
 from kytos.core.exceptions import KytosCoreException
 from kytos.core.helpers import now
 from datetime import timedelta
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -59,7 +60,7 @@ class TestQueueMonitor:
         )
         n_records = 5
         for _ in range(n_records):
-            dt = (now() - timedelta(seconds=delta_secs + 1))
+            dt = now() - timedelta(seconds=delta_secs + 1)
             assert qmon._try_to_append(QueueData(size=256, created_at=dt))
         assert len(qmon.deque) == n_records
         qmon._popleft_passed_records()
@@ -71,3 +72,28 @@ class TestQueueMonitor:
         assert len(qmon.deque) == n_records
         qmon._popleft_passed_records()
         assert len(qmon.deque) == n_records
+
+    @pytest.mark.parametrize(
+        "log_at_most_n, gen_n_records, expected_log_count",
+        [(5, 5, 5), (5, 10, 5), (5, 3, 3), (0, 10, 0)],
+    )
+    def test_try_to_log_at_most_n_records(
+        self, monkeypatch, log_at_most_n, gen_n_records, expected_log_count
+    ) -> None:
+        """Test try_to_log_at_most_n_records."""
+        log_mock = MagicMock()
+        monkeypatch.setattr("kytos.core.queue_monitor.LOG", log_mock)
+        qmon = QueueMonitorWindow(
+            "app",
+            min_hits=2,
+            delta_secs=10,
+            min_size_threshold=128,
+            qsize_func=lambda: 1,
+            log_at_most_n=log_at_most_n,
+        )
+        qmon._try_to_log_at_most_n_records([])
+        assert not log_mock.call_count
+
+        records = [QueueData(size=129) for _ in range(gen_n_records)]
+        qmon._try_to_log_at_most_n_records(records)
+        assert log_mock.warning.call_count == expected_log_count

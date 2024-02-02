@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import asyncio
 import logging
 import math
@@ -8,7 +9,7 @@ from collections import deque
 from uuid import uuid4
 from pydantic.dataclasses import dataclass
 from pydantic import Field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from kytos.core.exceptions import KytosCoreException
 from kytos.core.helpers import now
 
@@ -16,8 +17,8 @@ LOG = logging.getLogger(__name__)
 
 
 @dataclass
-class QueueData:
-    """QueueData Record."""
+class QueueRecord:
+    """QueueRecord."""
 
     size: int
     id: str = Field(default_factory=lambda: uuid4())
@@ -44,11 +45,7 @@ class QueueMonitorWindow:
         self.qsize_func = qsize_func
         self.log_at_most_n = log_at_most_n
 
-        self.deque: deque[QueueData] = deque()
-        self._default_last_logged = datetime(
-            year=1970, month=1, day=1, tzinfo=timezone.utc
-        )
-        self._last_logged: datetime = self._default_last_logged
+        self.deque: deque[QueueRecord] = deque()
         self._tasks: set[asyncio.Task] = set()
         self._sampling_freq_secs = 1
         self._validate()
@@ -63,25 +60,15 @@ class QueueMonitorWindow:
         for attr in positive_attrs:
             val = getattr(self, attr)
             if val < 0:
-                raise KytosCoreException(
-                    f"{attr}: {val} must be positive"
-                )
+                raise KytosCoreException(f"{attr}: {val} must be positive")
         ratio = self.min_hits / self.delta_secs
         if ratio > 1:
-            raise KytosCoreException(
-                f"min_hits/delta_secs: {ratio} must be <= 1 "
-            )
+            raise KytosCoreException(f"min_hits/delta_secs: {ratio} must be <= 1")
 
     def __repr__(self) -> str:
         """Repr."""
-        last_logged = (
-            self._last_logged
-            if self._last_logged != self._default_last_logged
-            else None
-        )
         return (
             f"QueueMonitor(name={self.name}, len={len(self.deque)}, "
-            f"last_logged={last_logged}, "
             f"min_hits={self.min_hits}, "
             f"min_size_threshold={self.min_size_threshold}, "
             f"delta_secs={self.delta_secs})"
@@ -103,14 +90,15 @@ class QueueMonitorWindow:
         """Keep sampling."""
         try:
             while True:
-                self._try_to_append(QueueData(size=self.qsize_func()))
-                records = self._try_to_log_stats()
-                self._try_to_log_at_most_n_records(records)
+                self._try_to_append(QueueRecord(size=self.qsize_func()))
+                if records := self._get_records():
+                    self._log_queue_stats(records)
+                    self._log_at_most_n_records(records)
                 await asyncio.sleep(self._sampling_freq_secs)
         except asyncio.CancelledError:
             pass
 
-    def _try_to_append(self, queue_data: QueueData) -> Optional[QueueData]:
+    def _try_to_append(self, queue_data: QueueRecord) -> Optional[QueueRecord]:
         """Try to append."""
         if queue_data.size < self.min_size_threshold:
             return None
@@ -118,8 +106,29 @@ class QueueMonitorWindow:
         self.deque.append(queue_data)
         return queue_data
 
-    def _try_to_log_at_most_n_records(self, records: list[QueueData]) -> None:
-        """Try to log at most n records."""
+    def _log_queue_stats(self, records: list[QueueRecord]) -> None:
+        """Log queue stats."""
+        if not records:
+            return
+
+        min_size, max_size, size_acc = records[0].size, records[0].size, 0
+        for rec in records:
+            min_size = min(min_size, rec.size)
+            max_size = max(max_size, rec.size)
+            size_acc += rec.size
+        avg = size_acc / len(records)
+
+        first_at, last_at = records[0].created_at, records[-1].created_at
+        msg = (
+            f"{self.name}, counted: {len(records)}, "
+            f"min_size: {min_size}, max_size: {max_size}, avg: {avg}, "
+            f"first at: {first_at}, last at: {last_at}, "
+            f"delta seconds: {self.delta_secs}, min_hits: {self.min_hits}"
+        )
+        LOG.warning(msg)
+
+    def _log_at_most_n_records(self, records: list[QueueRecord]) -> None:
+        """Log at most n records."""
         if self.log_at_most_n <= 0 or not records:
             return
 
@@ -136,51 +145,29 @@ class QueueMonitorWindow:
             )
             LOG.warning(msg)
 
-    def _try_to_log_stats(self) -> list[QueueData]:
-        """Try to log stats."""
+    def _get_records(self) -> list[QueueRecord]:
+        """Get records."""
         self._popleft_passed_records()
-
-        sub_records: list[QueueData] = []
-        if not (
+        records: list[QueueRecord] = []
+        if (
             self.deque
             and len(self.deque) >= self.min_hits
-            and self._last_logged + timedelta(seconds=self.delta_secs) <= now()
+            and (now() - self.deque[0].created_at).seconds <= self.delta_secs
         ):
-            return sub_records
-
-        first = self.deque.popleft()
-        cur = first
-        minv, maxv, size_acc, count = first.size, first.size, first.size, 1
-
-        if self.log_at_most_n > 0:
-            sub_records.append(first)
-
-        while (
-            self.deque
-            and (self.deque[0].created_at - first.created_at).seconds
-            <= self.delta_secs
-        ):
-            cur = self.deque.popleft()
-            minv = min(minv, cur.size)
-            maxv = max(maxv, cur.size)
-            count += 1
-
-            if self.log_at_most_n > 0:
-                sub_records.append(first)
-
-        avg = size_acc / count
-        self._last_logged = cur.created_at
-        msg = (
-            f"{self.name}, counted: {count}, "
-            f"min size: {minv}, max size: {maxv}, avg: {avg}, "
-            f"first at: {first.created_at}, last at: {cur.created_at},"
-            f" delta seconds: {self.delta_secs}, min_hits: {self.min_hits}"
-        )
-        LOG.warning(msg)
-        return sub_records
+            first = self.deque.popleft()
+            records.append(first)
+            while (
+                self.deque
+                and (self.deque[0].created_at - first.created_at).seconds
+                <= self.delta_secs
+            ):
+                records.append(self.deque.popleft())
+        return records
 
     def _popleft_passed_records(self) -> None:
         """Pop left passed records."""
-        delta = self.delta_secs
-        while self.deque and (now() - self.deque[0].created_at).seconds > delta:
+        while (
+            self.deque
+            and (now() - self.deque[0].created_at).seconds > self.delta_secs
+        ):
             self.deque.popleft()

@@ -32,6 +32,7 @@ from socket import error as SocketError
 
 from pyof.foundation.exceptions import PackException
 
+from kytos.core.queue_monitor import QueueMonitorWindow
 from kytos.core.api_server import APIServer, JSONResponse, Request
 from kytos.core.apm import init_apm
 from kytos.core.atcp_server import KytosServer, KytosServerProtocol
@@ -152,6 +153,7 @@ class Controller:
         self.auth = None
         self.dead_letter = DeadLetter(self)
         self._alisten_tasks = set()
+        self.qmonitors: list[QueueMonitorWindow] = []
 
         self._register_endpoints()
         #: Adding the napps 'enabled' directory into the PATH
@@ -270,6 +272,24 @@ class Controller:
             counter = self._full_queue_counter()
             sys.exit(self._try_to_fmt_traceback_msg(message, counter))
 
+    def start_queue_monitors(self) -> None:
+        """Start QueueMonitorWindows."""
+        for data in self.options.event_buffer_monitors:
+            for qmon in QueueMonitorWindow.from_buffer_config(self, **data):
+                self.qmonitors.append(qmon)
+        for data in self.options.thread_pool_queue_monitors:
+            for qmon in QueueMonitorWindow.from_threadpool_config(**data):
+                self.qmonitors.append(qmon)
+        for qmonitor in self.qmonitors:
+            self.log.info(f"Starting {qmonitor}...")
+            qmonitor.start()
+
+    def stop_queue_monitors(self) -> None:
+        """Stop QueueMonitorWindows."""
+        for qmonitor in self.qmonitors:
+            self.log.info(f"Stopping {qmonitor}...")
+            qmonitor.stop()
+
     def create_pidfile(self):
         """Create a pidfile."""
         pid = os.getpid()
@@ -375,6 +395,7 @@ class Controller:
         task = self.loop.create_task(self.event_handler("meta"))
         self._tasks.append(task)
 
+        self.start_queue_monitors()
         self.started_at = now()
 
     def _register_endpoints(self):
@@ -487,6 +508,7 @@ class Controller:
         # ASYNC TODO: close connections
         # self.server.server_close()
 
+        self.stop_queue_monitors()
         self.log.info("Stopping API Server...")
         self.api_server.stop()
         self.log.info("Stopped API Server")

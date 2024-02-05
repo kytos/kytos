@@ -120,11 +120,11 @@ class TestQueueMonitor:
         avg = sum(rec_sizes) / len(rec_sizes)
         expected = (
             f"{qmon.name}, counted: {len(records)}, "
-            f"min_size: {min_size}, "
-            f"max_size: {max_size}, "
-            f"avg: {avg}, first at: {str(records[0].created_at)}, "
+            f"min/avg/max size: {min_size}/{avg}/{max_size}, "
+            f"first at: {str(records[0].created_at)}, "
             f"last at: {str(records[-1].created_at)}, "
-            f"delta seconds: {qmon.delta_secs}, min_hits: {qmon.min_hits}"
+            f"delta secs: {qmon.delta_secs}, min_hits: {qmon.min_hits}, "
+            f"min_size_threshold: {qmon.min_size_threshold}"
         )
         log_mock.warning.assert_called_with(expected)
 

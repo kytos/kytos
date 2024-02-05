@@ -166,7 +166,7 @@ class TestQueueMonitor:
 
         # old elements are expected to be discarded, resulting in no records
         for _ in range(n_records):
-            created_at = now() + timedelta(seconds=delta_secs + 1)
+            created_at = now() - timedelta(seconds=delta_secs + 1)
             assert qmon._try_to_append(QueueRecord(size=256, created_at=created_at))
         assert len(qmon.deque) == n_records
         records = qmon._get_records()
@@ -206,3 +206,49 @@ class TestQueueMonitor:
         # no records are expected now since n_records 2 < min_hits 3
         records = qmon._get_records()
         assert not len(records)
+
+    def test_create_from_buffer_config(self) -> None:
+        """Test create from buffer config."""
+        data = {
+            "min_hits": 5,
+            "delta_secs": 20,
+            "min_queue_full_percent": 80,
+            "log_at_most_n": 0,
+            "buffers": ["app", "raw", "msg_in", "msg_out"],
+        }
+        controller = MagicMock()
+        for name in data["buffers"]:
+            buffer_mock = MagicMock()
+            buffer_mock._queue.maxsize = 1024
+            setattr(controller.buffers, name, buffer_mock)
+        qmons = QueueMonitorWindow.from_buffer_config(controller, **data)
+        assert len(qmons) == len(data["buffers"])
+        for qmon in qmons:
+            assert qmon.min_size_threshold == int(1024 * 80 / 100)
+            assert qmon.min_hits == 5
+            assert qmon.delta_secs == 20
+            assert not qmon.log_at_most_n
+
+    def test_create_from_threadpool_config(self, monkeypatch) -> None:
+        """Test create from threadpool config."""
+        data = {
+            "min_hits": 5,
+            "delta_secs": 20,
+            "min_queue_full_percent": 200,
+            "log_at_most_n": 0,
+            "queues": ["app", "sb", "db"],
+        }
+        executors = {}
+        for name in data["queues"]:
+            mock = MagicMock()
+            mock._max_workers = 1024
+            executors[name] = mock
+            monkeypatch.setattr("kytos.core.queue_monitor.executors",
+                                executors)
+        qmons = QueueMonitorWindow.from_threadpool_config(**data)
+        assert len(qmons) == len(data["queues"])
+        for qmon in qmons:
+            assert qmon.min_size_threshold == int(1024 * 200 / 100)
+            assert qmon.min_hits == 5
+            assert qmon.delta_secs == 20
+            assert not qmon.log_at_most_n

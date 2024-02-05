@@ -199,6 +199,24 @@ class KytosConfig():
                     }
                 },
             },
+            "thread_pool_queue_monitors": [
+              {
+                "min_hits": 5,
+                "delta_secs": 5,
+                "min_queue_full_percent": 150,
+                "log_at_most_n": 0,
+                "queues": ["sb", "app", "db"]
+              }
+            ],
+            "event_buffer_monitors": [
+              {
+                "min_hits": 5,
+                "delta_secs": 5,
+                "min_queue_full_percent": 100,
+                "log_at_most_n": 0,
+                "buffers": ["msg_in", "msg_out", "raw", "app"]
+              }
+            ]
         }
 
         options, argv = self.conf_parser.parse_known_args()
@@ -260,6 +278,12 @@ class KytosConfig():
         )
         options.event_buffer_conf = _parse_json(
             options.event_buffer_conf
+        )
+        options.event_buffer_monitors = _parse_json(
+            options.event_buffer_monitors
+        )
+        options.thread_pool_queue_monitors = _parse_json(
+            options.thread_pool_queue_monitors
         )
 
         return options

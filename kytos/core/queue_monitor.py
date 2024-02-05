@@ -123,9 +123,10 @@ class QueueMonitorWindow:
         first_at, last_at = records[0].created_at, records[-1].created_at
         msg = (
             f"{self.name}, counted: {len(records)}, "
-            f"min_size: {min_size}, max_size: {max_size}, avg: {avg}, "
+            f"min/avg/max size: {min_size}/{avg}/{max_size}, "
             f"first at: {first_at}, last at: {last_at}, "
-            f"delta seconds: {self.delta_secs}, min_hits: {self.min_hits}"
+            f"delta secs: {self.delta_secs}, min_hits: {self.min_hits}, "
+            f"min_size_threshold: {self.min_size_threshold}"
         )
         LOG.warning(msg)
 

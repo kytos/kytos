@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import asyncio
 import logging
@@ -9,9 +10,10 @@ from collections import deque
 from uuid import uuid4
 from pydantic.dataclasses import dataclass
 from pydantic import Field
-from datetime import datetime, timedelta
+from datetime import datetime
 from kytos.core.exceptions import KytosCoreException
 from kytos.core.helpers import now
+from kytos.core.helpers import executors
 
 LOG = logging.getLogger(__name__)
 
@@ -63,20 +65,19 @@ class QueueMonitorWindow:
                 raise KytosCoreException(f"{attr}: {val} must be positive")
         ratio = self.min_hits / self.delta_secs
         if ratio > 1:
-            raise KytosCoreException(f"min_hits/delta_secs: {ratio} must be <= 1")
+            msg = f"min_hits/delta_secs: {ratio} must be <= 1"
+            raise KytosCoreException(msg)
 
     def __repr__(self) -> str:
         """Repr."""
         return (
-            f"QueueMonitor(name={self.name}, len={len(self.deque)}, "
-            f"min_hits={self.min_hits}, "
-            f"min_size_threshold={self.min_size_threshold}, "
+            f"QueueMonitor({self.name}, min_hits={self.min_hits}, "
+            f"min_size={self.min_size_threshold}, "
             f"delta_secs={self.delta_secs})"
         )
 
     def start(self) -> None:
         """Start sampling."""
-        LOG.info(f"Starting {self}")
         task = asyncio.create_task(self._keep_sampling())
         self._tasks.add(task)
         task.add_done_callback(self._tasks.discard)
@@ -90,7 +91,8 @@ class QueueMonitorWindow:
         """Keep sampling."""
         try:
             while True:
-                self._try_to_append(QueueRecord(size=self.qsize_func()))
+                record = QueueRecord(size=self.qsize_func())
+                self._try_to_append(record)
                 if records := self._get_records():
                     self._log_queue_stats(records)
                     self._log_at_most_n_records(records)
@@ -171,3 +173,58 @@ class QueueMonitorWindow:
             and (now() - self.deque[0].created_at).seconds > self.delta_secs
         ):
             self.deque.popleft()
+
+    @staticmethod
+    def from_buffer_config(
+        controller,
+        min_hits: int,
+        delta_secs: int,
+        min_queue_full_percent: int,
+        log_at_most_n: int,
+        buffers: list[str],
+    ) -> list[QueueMonitorWindow]:
+        """From buffer dict config."""
+        qmonitors = []
+        for name in buffers:
+            buffer = getattr(controller.buffers, name)
+            max_size = buffer._queue.maxsize
+            qmonitors.append(
+                QueueMonitorWindow(
+                    name=buffer.name,
+                    min_hits=min_hits,
+                    delta_secs=delta_secs,
+                    min_size_threshold=max(
+                        int(max_size * (min_queue_full_percent / 100)), 1
+                    ),
+                    qsize_func=buffer.qsize,
+                    log_at_most_n=log_at_most_n,
+                )
+            )
+        return qmonitors
+
+    @staticmethod
+    def from_threadpool_config(
+        min_hits: int,
+        delta_secs: int,
+        min_queue_full_percent: int,
+        log_at_most_n: int,
+        queues: list[str],
+    ) -> list[QueueMonitorWindow]:
+        """From threadpool dict config."""
+        qmonitors = []
+        for name in queues:
+            executor = executors[name]
+            max_size = executor._max_workers
+            qmonitors.append(
+                QueueMonitorWindow(
+                    name=f"threadpool_{name}",
+                    min_hits=min_hits,
+                    delta_secs=delta_secs,
+                    min_size_threshold=max(
+                        int(max_size * (min_queue_full_percent / 100)), 1
+                    ),
+                    qsize_func=executor._work_queue.qsize,
+                    log_at_most_n=log_at_most_n,
+                )
+            )
+        return qmonitors

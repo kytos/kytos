@@ -12,6 +12,8 @@ from urllib.error import HTTPError, URLError
 from urllib.request import urlretrieve
 
 import httpx
+from anyio.lowlevel import RunVar
+from anyio import CapacityLimiter
 from starlette.applications import Starlette
 from starlette.exceptions import HTTPException
 from starlette.middleware import Middleware
@@ -23,6 +25,7 @@ from uvicorn import Server
 
 from kytos.core.auth import authenticated
 from kytos.core.config import KytosConfig
+from kytos.core.helpers import get_thread_pool_max_workers
 from kytos.core.rest_api import JSONResponse, Request
 
 LOG = logging.getLogger(__name__)
@@ -57,11 +60,24 @@ class APIServer:
                 Middleware(CORSMiddleware, allow_origins=["*"]),
             ],
         )
+        api_threadpool_size = get_thread_pool_max_workers().get('api', 40)
+        
+        concurrency_limit = KytosConfig().options["daemon"].api_concurrency_limit
+        if concurrency_limit == 'threadpool':
+            concurrency_limit = api_threadpool_size
+
+        @self.app.on_event("startup")
+        def _app_startup_func():
+            RunVar("_default_thread_limiter").set(
+                CapacityLimiter(api_threadpool_size)
+            )
+
         self.server = Server(
             UvicornConfig(
                 self.app,
                 host=self.listen,
                 port=self.port,
+                limit_concurrency=concurrency_limit
             )
         )
 

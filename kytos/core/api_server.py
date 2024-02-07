@@ -60,7 +60,7 @@ class APIServer:
                 Middleware(CORSMiddleware, allow_origins=["*"]),
             ],
         )
-        api_threadpool_size = get_thread_pool_max_workers().get('api', 40)
+        api_threadpool_size = get_thread_pool_max_workers().get('api', 160)
         
         concurrency_limit = KytosConfig().options["daemon"].api_concurrency_limit
         if concurrency_limit == 'threadpool':

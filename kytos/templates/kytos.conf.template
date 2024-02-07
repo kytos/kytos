@@ -73,7 +73,7 @@ jwt_secret = {{ jwt_secret }}
 # - app: it's meant for general NApps event, it's default pool if no other one has been specified
 # - db: it can be used by for higher priority db related tasks (need to be parametrized on decorator)
 # - api: Not used by events, but instead API requests.
-thread_pool_max_workers = {"sb": 256, "db": 256, "app": 512, "api": 80}
+thread_pool_max_workers = {"sb": 256, "db": 256, "app": 512, "api": 160}
 
 # Configuration for KytosEventBuffers
 # Valid event buffers are "msg_in", "msg_out", "app", "conn", and "raw".

@@ -16,7 +16,7 @@ class TestDb:
     """TestDB."""
 
     def setup_method(self):
-        """setUp."""
+        """setup_method"""
         self.client = MagicMock()
         Mongo.client = self.client
 

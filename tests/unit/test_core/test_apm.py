@@ -11,7 +11,7 @@ class TestElasticAPM:
     """TestElasticAPM."""
 
     def setup_method(self):
-        """setUp."""
+        """setup_method."""
         ElasticAPM._client = None
 
     @patch("kytos.core.apm.execution_context")

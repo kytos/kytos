@@ -1,5 +1,4 @@
 """kytos.core.napps tests."""
-import unittest
 from unittest.mock import MagicMock, patch
 
 from kytos.core import Controller
@@ -8,10 +7,10 @@ from kytos.core.napps import NAppsManager
 
 
 # pylint: disable=protected-access, too-many-public-methods
-class TestNAppsManager(unittest.TestCase):
+class TestNAppsManager:
     """NAppsManager tests."""
 
-    def setUp(self):
+    def setup_method(self):
         """Execute steps before each tests."""
         self.options = KytosConfig().options['daemon']
         self.controller = Controller(self.options)
@@ -67,7 +66,7 @@ class TestNAppsManager(unittest.TestCase):
         self.napps_manager._installed_path = self.get_path(['json'])
         installed = self.napps_manager.install(uri, False)
 
-        self.assertTrue(installed)
+        assert installed
 
     @patch('shutil.rmtree')
     @patch('shutil.move')
@@ -90,7 +89,7 @@ class TestNAppsManager(unittest.TestCase):
         self.napps_manager._installed_path = self.get_path(['json'])
         installed = self.napps_manager.install(uri, True)
 
-        self.assertTrue(installed)
+        assert installed
         mock_enable.assert_called_with('kytos', 'napp')
 
     @patch('kytos.core.napps.NApp.create_from_uri')
@@ -105,7 +104,7 @@ class TestNAppsManager(unittest.TestCase):
         uri = 'file://any/kytos/napp:1.0'
         installed = self.napps_manager.install(uri, False)
 
-        self.assertFalse(installed)
+        assert not installed
 
     @patch('kytos.core.napps.NAppsManager.is_installed', return_value=True)
     @patch('kytos.core.napps.manager.NewNAppManager')
@@ -117,7 +116,7 @@ class TestNAppsManager(unittest.TestCase):
         self.napps_manager._installed_path = self.get_path(['json'])
         uninstalled = self.napps_manager.uninstall('kytos', 'napp')
 
-        self.assertTrue(uninstalled)
+        assert uninstalled
 
     @patch('kytos.core.napps.NAppsManager.is_installed', return_value=False)
     @patch('kytos.core.napps.manager.NewNAppManager')
@@ -128,14 +127,14 @@ class TestNAppsManager(unittest.TestCase):
 
         uninstalled = self.napps_manager.uninstall('kytos', 'napp')
 
-        self.assertTrue(uninstalled)
+        assert uninstalled
 
     @patch('kytos.core.napps.NAppsManager.is_enabled', return_value=True)
     def test_uninstall__enabled(self, _):
         """Test uninstall method when napp is enabled."""
         uninstalled = self.napps_manager.uninstall('kytos', 'napp')
 
-        self.assertFalse(uninstalled)
+        assert not uninstalled
 
     @patch('kytos.core.napps.manager.NewNAppManager')
     def test_enable(self, mock_new_napp_manager):
@@ -152,7 +151,7 @@ class TestNAppsManager(unittest.TestCase):
 
         enabled = self.napps_manager.enable('kytos', 'napp')
 
-        self.assertTrue(enabled)
+        assert enabled
 
     @patch('kytos.core.napps.manager.NewNAppManager')
     def test_disable(self, mock_new_napp_manager):
@@ -163,7 +162,7 @@ class TestNAppsManager(unittest.TestCase):
 
         disabled = self.napps_manager.disable('kytos', 'napp')
 
-        self.assertTrue(disabled)
+        assert disabled
 
     @patch('kytos.core.napps.NAppsManager.enable')
     @patch('kytos.core.napps.NAppsManager.get_disabled_napps')
@@ -201,7 +200,7 @@ class TestNAppsManager(unittest.TestCase):
         is_enabled = self.napps_manager.is_enabled('kytos', 'napp')
 
         mock_create_from_uri.assert_called_with('kytos/napp')
-        self.assertTrue(is_enabled)
+        assert is_enabled
 
     @patch('kytos.core.napps.NApp.create_from_uri')
     @patch('kytos.core.napps.NAppsManager.get_installed_napps')
@@ -215,15 +214,15 @@ class TestNAppsManager(unittest.TestCase):
         is_installed = self.napps_manager.is_installed('kytos', 'napp')
 
         mock_create_from_uri.assert_called_with('kytos/napp')
-        self.assertTrue(is_installed)
+        assert is_installed
 
     def test_get_napp_fullname_from_uri(self):
         """Test get_napp_fullname_from_uri method."""
         uri = 'file://any/kytos/napp:1.0'
         username, name = self.napps_manager.get_napp_fullname_from_uri(uri)
 
-        self.assertEqual(username, 'kytos')
-        self.assertEqual(name, 'napp')
+        assert username == 'kytos'
+        assert name == 'napp'
 
     @patch('kytos.core.napps.NApp.create_from_json')
     def test_get_all_napps(self, mock_create_from_json):
@@ -237,7 +236,7 @@ class TestNAppsManager(unittest.TestCase):
         self.napps_manager._installed_path = self.get_path([json1])
         napps = self.napps_manager.get_all_napps()
 
-        self.assertEqual(napps, [napp])
+        assert napps == [napp]
 
     @patch('kytos.core.napps.NApp.create_from_json')
     def test_get_enabled_napps(self, mock_create_from_json):
@@ -249,8 +248,8 @@ class TestNAppsManager(unittest.TestCase):
         self.napps_manager._enabled_path = self.get_path([MagicMock()])
         napps = self.napps_manager.get_enabled_napps()
 
-        self.assertEqual(napps, [napp])
-        self.assertTrue(napp.enabled)
+        assert napps == [napp]
+        assert napp.enabled
 
     @patch('kytos.core.napps.NApp.create_from_json')
     def test_get_disabled_napps(self, mock_create_from_json):
@@ -267,7 +266,7 @@ class TestNAppsManager(unittest.TestCase):
         self.napps_manager._enabled_path = self.get_path([MagicMock()])
         napps = self.napps_manager.get_disabled_napps()
 
-        self.assertEqual(napps, [napp_2])
+        assert napps == [napp_2]
 
     @patch('kytos.core.napps.NApp.create_from_json')
     def test_get_installed_napps(self, mock_create_from_json):
@@ -278,7 +277,7 @@ class TestNAppsManager(unittest.TestCase):
         self.napps_manager._installed_path = self.get_path([MagicMock()])
         napps = self.napps_manager.get_installed_napps()
 
-        self.assertEqual(napps, [napp])
+        assert napps == [napp]
 
     @patch('pathlib.Path.open')
     def test_get_napp_metadata__success(self, mock_open):
@@ -291,13 +290,13 @@ class TestNAppsManager(unittest.TestCase):
 
         meta = self.napps_manager.get_napp_metadata('kytos', 'napp', 'version')
 
-        self.assertEqual(meta, '1.0')
+        assert meta == '1.0'
 
     def test_get_napp_metadata__error(self):
         """Test get_napp_metadata method to error case."""
         meta = self.napps_manager.get_napp_metadata('kytos', 'napp', 'key')
 
-        self.assertEqual(meta, '')
+        assert not meta
 
     def test_get_napps_from_path__error(self):
         """Test get_napps_from_path method to error case."""
@@ -305,7 +304,7 @@ class TestNAppsManager(unittest.TestCase):
         path.exists.return_value = False
         napps = self.napps_manager.get_napps_from_path(path)
 
-        self.assertEqual(napps, [])
+        assert not napps
 
     @patch('kytos.core.napps.NApp.create_from_json')
     def test_get_napps_from_path__success(self, mock_create_from_json):
@@ -316,7 +315,7 @@ class TestNAppsManager(unittest.TestCase):
         path = self.get_path([MagicMock()])
         napps = self.napps_manager.get_napps_from_path(path)
 
-        self.assertEqual(napps, [napp])
+        assert napps == [napp]
 
     def test_create_module(self):
         """Test _create_module method."""
@@ -342,4 +341,4 @@ class TestNAppsManager(unittest.TestCase):
         napp = self.get_napp_mock()
         folder = self.napps_manager._find_napp(napp)
 
-        self.assertEqual(folder, 'parent')
+        assert folder == 'parent'

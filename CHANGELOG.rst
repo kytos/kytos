@@ -15,6 +15,7 @@ Added
 - Added ``special_available_tags`` which stores `"untagged"` and `"any"` if they can be used from an Interface.
 - Added ``maxsize_multiplier`` on ``event_buffer_conf``, which will multiply the ``maxsize`` value of the queue. By default, all KytosEventBuffer who use a bounded queue will have ``maxsize_multiplier: 2``. This default is reasonable to work out of the box with kytos-ng core NApps. But, if you have other NApps who tend to produce too many events you might want to either increase the size of the queue with and/or increase the number of max workers in the thread pool if the event handler is running on a thread pool. Typically, you'll want to first start adjusting the number of workers in the thread pool.
 - Introduced a new ``meta`` on ``KytosBuffers``, which is meant for general core control events.
+- Added ``thread_pool_queue_monitors`` and ``event_buffer_monitors`` on kytos.conf. By default, it'll detect and log full queue usage over 5 secs on event thread pools and on kytos event buffers. These alerts are for providing basic visibility per second about queues usage, which these alerts you can try to understand if indeed you have way too many events or if you need to increase the number of thread pool workers depending on the scalability and workload you have.
 
 Changed
 =======

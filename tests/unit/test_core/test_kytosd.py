@@ -1,13 +1,12 @@
 """Test kytos.core.kytosd module."""
 import signal
-from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from kytos.core.kytosd import (_create_pid_dir, async_main, main, start_shell,
                                stop_controller_sys_exit)
 
 
-class TestKytosd(TestCase):
+class TestKytosd:
     """Kytosd tests."""
 
     @staticmethod

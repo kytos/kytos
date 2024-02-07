@@ -2,8 +2,8 @@
 UserDocUpdate have been indirectly tested in test_user_controller.py"""
 
 from datetime import datetime
-from unittest import TestCase
 
+import pytest
 from pydantic import ValidationError
 
 from kytos.core.user import DocumentBaseModel, HashSubDoc, UserDoc
@@ -19,10 +19,10 @@ def test_document_base_model_dict():
     assert "_id" not in model.dict(exclude={"_id"})
 
 
-class TestUserDoc(TestCase):
+class TestUserDoc:
     """Test UserDoc"""
 
-    def setUp(self):
+    def setup_method(self):
         """Initiate values for UserDoc testing"""
         self.user_data = {
             "username": "Test123-_",
@@ -40,29 +40,29 @@ class TestUserDoc(TestCase):
         }
         user_doc = UserDoc(**self.user_data).dict()
         user_hash = user_doc["hash"]
-        self.assertEqual(user_doc["username"], self.user_data["username"])
-        self.assertEqual(user_doc["email"], self.user_data["email"])
-        self.assertIsNotNone(user_hash["salt"])
-        self.assertEqual(user_hash["n"], correct_hash["n"])
-        self.assertEqual(user_hash["r"], correct_hash["r"])
-        self.assertEqual(user_hash["p"], correct_hash["p"])
+        assert user_doc["username"] == self.user_data["username"]
+        assert user_doc["email"] == self.user_data["email"]
+        assert user_hash["salt"] is not None
+        assert user_hash["n"] == correct_hash["n"]
+        assert user_hash["r"] == correct_hash["r"]
+        assert user_hash["p"] == correct_hash["p"]
 
     def test_user_doc_dict_user_error(self):
         """Test UserDoc user validation error"""
         self.user_data['username'] = "Test_error_@"
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             UserDoc(**self.user_data)
 
     def test_user_doc_dict_pw_error(self):
         """Test UserDoc password validation error"""
         self.user_data['password'] = 'password_error'
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             UserDoc(**self.user_data)
 
     def test_user_doc_dict_email_error(self):
         """Test UserDoc email validation error"""
         self.user_data['email'] = 'test_error'
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             UserDoc(**self.user_data)
 
     def test_user_doc_projection(self):
@@ -79,7 +79,7 @@ class TestUserDoc(TestCase):
             'deleted_at': 1
         }
         actual_dict = UserDoc.projection()
-        self.assertEqual(expected_dict, actual_dict)
+        assert expected_dict == actual_dict
 
     def test_user_doc_projection_nopw(self):
         """Test Userdoc projection without password"""
@@ -93,11 +93,11 @@ class TestUserDoc(TestCase):
             'deleted_at': 1
         }
         actual_dict = UserDoc.projection_nopw()
-        self.assertEqual(expected_dict, actual_dict)
+        assert expected_dict == actual_dict
 
     def test_user_doc_hashing(self):
         """Test UserDoc hashing of password"""
         user_doc = UserDoc(**self.user_data).dict()
         pwd_hashed = UserDoc.hashing("Password123".encode(),
                                      user_doc["hash"])
-        self.assertEqual(user_doc["password"], pwd_hashed)
+        assert user_doc["password"] == pwd_hashed

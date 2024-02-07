@@ -1,9 +1,9 @@
 """Test kytos.core.db module."""
 # pylint: disable=invalid-name
 
-from unittest import TestCase
 from unittest.mock import MagicMock, call, patch
 
+import pytest
 from pymongo.errors import OperationFailure
 
 from kytos.core.db import (Mongo, _log_pymongo_thread_traceback,
@@ -12,10 +12,10 @@ from kytos.core.db import mongo_client as _mongo_client
 from kytos.core.exceptions import KytosDBInitException
 
 
-class TestDb(TestCase):
+class TestDb:
     """TestDB."""
 
-    def setUp(self):
+    def setup_method(self):
         """setUp."""
         self.client = MagicMock()
         Mongo.client = self.client
@@ -66,7 +66,7 @@ class TestDb(TestCase):
         mongo_client = MagicMock(return_value=client)
         client.db.command.side_effect = OperationFailure("err")
         retries = 2
-        with self.assertRaises(KytosDBInitException):
+        with pytest.raises(KytosDBInitException):
             _mongo_conn_wait(mongo_client, retries=retries)
         assert mongo_client.call_count == retries
         mock_sleep.assert_called()
@@ -80,7 +80,7 @@ class TestDb(TestCase):
 
     def test_db_conn_wait_unsupported_backend(self) -> None:
         """test db_conn_wait unsupported backend."""
-        with self.assertRaises(KytosDBInitException):
+        with pytest.raises(KytosDBInitException):
             db_conn_wait("invalid")
 
     def test_boostrap_index(self) -> None:

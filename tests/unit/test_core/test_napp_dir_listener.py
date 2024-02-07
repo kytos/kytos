@@ -1,14 +1,13 @@
 """Test kytos.core.napps.napps_dir_listener module."""
-from unittest import TestCase
 from unittest.mock import Mock
 
 from kytos.core.napps.napp_dir_listener import NAppDirListener
 
 
-class TestNAppDirListener(TestCase):
+class TestNAppDirListener:
     """NAppDirListener tests."""
 
-    def setUp(self):
+    def setup_method(self):
         """Method executed before each test."""
         self.controller = Mock()
         self.controller.options.napps = '/tmp'

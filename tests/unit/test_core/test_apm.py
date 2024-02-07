@@ -1,16 +1,16 @@
 """Test kytos.core.cpm module."""
-
-from unittest import TestCase
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from kytos.core.apm import ElasticAPM, begin_span, init_apm
 from kytos.core.exceptions import KytosAPMInitException
 
 
-class TestElasticAPM(TestCase):
+class TestElasticAPM:
     """TestElasticAPM."""
 
-    def setUp(self):
+    def setup_method(self):
         """setUp."""
         ElasticAPM._client = None
 
@@ -30,7 +30,7 @@ class TestElasticAPM(TestCase):
         init_apm("es")
         assert mock_init.call_count == 1
 
-        with self.assertRaises(KytosAPMInitException):
+        with pytest.raises(KytosAPMInitException):
             init_apm("unknown_apm")
         assert mock_init.call_count == 1
 

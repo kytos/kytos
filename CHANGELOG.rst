@@ -6,6 +6,11 @@ All notable changes to the kytos project will be documented in this file.
 UNRELEASED - Under development
 ******************************
 
+General Information
+===================
+
+- ``kytos.conf.template`` has changed you might want to regenerate ``kytos.conf`` if you want to set non default values
+
 Added
 =====
 - Added ``Interface.tag_ranges`` as ``dict[str, list[list[int]]]`` as replacement for ``vlan_pool`` settings.

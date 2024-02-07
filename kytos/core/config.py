@@ -262,7 +262,9 @@ class KytosConfig():
         options.event_buffer_conf = _parse_json(
             options.event_buffer_conf
         )
-        options.api_concurrency_limit = _parse_json(options.api_concurrency_limit)
+        options.api_concurrency_limit = _parse_json(
+            options.api_concurrency_limit
+        )
 
         return options
 

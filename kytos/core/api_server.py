@@ -12,8 +12,8 @@ from urllib.error import HTTPError, URLError
 from urllib.request import urlretrieve
 
 import httpx
-from anyio.lowlevel import RunVar
 from anyio import CapacityLimiter
+from anyio.lowlevel import RunVar
 from starlette.applications import Starlette
 from starlette.exceptions import HTTPException
 from starlette.middleware import Middleware
@@ -60,9 +60,11 @@ class APIServer:
                 Middleware(CORSMiddleware, allow_origins=["*"]),
             ],
         )
+        kytos_conf = KytosConfig().options["daemon"]
+
         api_threadpool_size = get_thread_pool_max_workers().get('api', 160)
-        
-        concurrency_limit = KytosConfig().options["daemon"].api_concurrency_limit
+
+        concurrency_limit = kytos_conf.api_concurrency_limit
         if concurrency_limit == 'threadpool':
             concurrency_limit = api_threadpool_size
 

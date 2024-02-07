@@ -32,7 +32,6 @@ from socket import error as SocketError
 
 from pyof.foundation.exceptions import PackException
 
-from kytos.core.queue_monitor import QueueMonitorWindow
 from kytos.core.api_server import APIServer, JSONResponse, Request
 from kytos.core.apm import init_apm
 from kytos.core.atcp_server import KytosServer, KytosServerProtocol
@@ -50,6 +49,7 @@ from kytos.core.logs import LogManager
 from kytos.core.napps.base import NApp
 from kytos.core.napps.manager import NAppsManager
 from kytos.core.napps.napp_dir_listener import NAppDirListener
+from kytos.core.queue_monitor import QueueMonitorWindow
 from kytos.core.switch import Switch
 
 __all__ = ('Controller',)

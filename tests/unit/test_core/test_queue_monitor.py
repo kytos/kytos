@@ -1,10 +1,11 @@
-from kytos.core.queue_monitor import QueueMonitorWindow, QueueRecord
-from kytos.core.exceptions import KytosCoreException
-from kytos.core.helpers import now
 from datetime import timedelta
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+
+from kytos.core.exceptions import KytosCoreException
+from kytos.core.helpers import now
+from kytos.core.queue_monitor import QueueMonitorWindow, QueueRecord
 
 
 class TestQueueMonitor:

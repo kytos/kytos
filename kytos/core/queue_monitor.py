@@ -1,19 +1,20 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+"""queue monitor."""
+
 from __future__ import annotations
 
 import asyncio
 import logging
 import math
-from typing import Callable, Optional
 from collections import deque
-from uuid import uuid4
-from pydantic.dataclasses import dataclass
-from pydantic import Field
 from datetime import datetime
+from typing import Callable, Optional
+from uuid import uuid4
+
+from pydantic import Field
+from pydantic.dataclasses import dataclass
+
 from kytos.core.exceptions import KytosCoreException
-from kytos.core.helpers import now
-from kytos.core.helpers import executors
+from kytos.core.helpers import executors, now
 
 LOG = logging.getLogger(__name__)
 

@@ -15,6 +15,7 @@ from pydantic.dataclasses import dataclass
 
 from kytos.core.exceptions import KytosCoreException
 from kytos.core.helpers import executors, now
+from datetime import timezone
 
 LOG = logging.getLogger(__name__)
 
@@ -51,6 +52,9 @@ class QueueMonitorWindow:
         self.deque: deque[QueueRecord] = deque()
         self._tasks: set[asyncio.Task] = set()
         self._sampling_freq_secs = 1
+        self._default_last_counted_at = datetime(year=1970, month=1,
+                                                 day=1, tzinfo=timezone.utc)
+        self._last_counted_at = self._default_last_counted_at
         self._validate()
 
     def _validate(self) -> None:
@@ -157,6 +161,7 @@ class QueueMonitorWindow:
             self.deque
             and len(self.deque) >= self.min_hits
             and (now() - self.deque[0].created_at).seconds <= self.delta_secs
+            and (now() - self._last_counted_at).seconds >= self.delta_secs
         ):
             first = self.deque.popleft()
             records.append(first)
@@ -166,6 +171,7 @@ class QueueMonitorWindow:
                 <= self.delta_secs
             ):
                 records.append(self.deque.popleft())
+            self._last_counted_at = records[-1].created_at
         return records
 
     def _popleft_passed_records(self) -> None:

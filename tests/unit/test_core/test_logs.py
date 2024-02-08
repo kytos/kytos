@@ -3,24 +3,23 @@ import importlib
 import logging
 from copy import copy
 from inspect import FrameInfo
-from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from kytos.core import logs
 from kytos.core.logs import LogManager, NAppLog
 
 
-class LogTester(TestCase):
+class LogTester:
     """Common code to test loggers."""
 
-    def setUp(self):
+    def setup_method(self):
         """Backup original handlers."""
         self._patcher = None
         self._logger = None
         # If we don't copy, it'll be a reference to a list that will be changed
         self._handlers_bak = copy(logging.getLogger().handlers)
 
-    def tearDown(self):
+    def teardown_method(self):
         """Undo mocking, restore handlers."""
         if self._patcher:
             self._patcher.stop()
@@ -40,8 +39,8 @@ class LogTester(TestCase):
         Search through all log messages since ``_mock_logger`` was called.
         """
         msgs = [call[1][0] for call in self._logger.mock_calls]
-        self.assertTrue(any(string in msg for msg in msgs),
-                        f'Message "{string}" not in {msgs}.')
+        assert any(string in msg for msg in msgs), \
+               f'Message "{string}" not in {msgs}.'
 
 
 class TestLogManager(LogTester):
@@ -51,7 +50,7 @@ class TestLogManager(LogTester):
         """Handler should be added to root logger."""
         handler = Mock()
         LogManager.add_handler(handler)
-        self.assertIn(handler, logging.root.handlers)
+        assert handler in logging.root.handlers
 
     @staticmethod
     @patch('kytos.core.logs.LogManager._PARSER')
@@ -78,7 +77,7 @@ class TestLogManager(LogTester):
         """A stream should be used in a handler added to the root logger."""
         socket = Mock()
         handler = LogManager.enable_websocket(socket)
-        self.assertIn(handler, logging.root.handlers)
+        assert handler in logging.root.handlers
 
     @staticmethod
     def test_parent_handler_usage():
@@ -175,7 +174,7 @@ class TestLogManager(LogTester):
         logger.setLevel(logging.ERROR)
         with patch.object(handler, 'emit'):
             logger.error('lorem ipsum %s', msg)
-            self.assertEqual(0, handler.emit.call_count)
+            assert 0 == handler.emit.call_count
 
     @staticmethod
     def test_old_handler_filter():
@@ -211,24 +210,22 @@ class TestLogManager(LogTester):
 
         LogManager.decorate_logger_class(lambda arg: DummyWrapper)
 
-        self.assertEqual(logging.Logger.manager.loggerClass,
-                         DummyWrapper)
+        assert logging.Logger.manager.loggerClass == DummyWrapper
 
-        self.assertIsInstance(logging.root,
-                              DummyWrapper)
+        assert isinstance(logging.root, DummyWrapper)
 
 
 class TestNAppLog(LogTester):
     """Test the log used by NApps."""
 
-    def setUp(self):
+    def setup_method(self):
         """Initialize variables."""
-        super().setUp()
+        super().setup_method()
         self._inspect_patcher = None
 
-    def tearDown(self):
+    def teardown_method(self):
         """Undo mocking."""
-        super().tearDown()
+        super().teardown_method()
         if self._inspect_patcher:
             self._inspect_patcher.stop()
 
@@ -245,11 +242,11 @@ class TestNAppLog(LogTester):
         self._set_filename('/napps/username/name/main.py')
         expected_logger_name = 'kytos.napps.username/name'
         napp_logger = NAppLog()
-        self.assertEqual(expected_logger_name, napp_logger.name)
+        assert expected_logger_name == napp_logger.name
 
     def test_napp_id_not_found(self):
         """If NApp ID is not found, should use root logger."""
         self._set_filename('not/an/expected/NApp/path.py')
         root_logger = logging.getLogger("kytos.napps")
         napp_logger = NAppLog()
-        self.assertEqual(root_logger.name, napp_logger.name)
+        assert root_logger.name == napp_logger.name

@@ -3,7 +3,7 @@ import base64
 
 import pytest
 from httpx import AsyncClient
-# pylint: disable=no-name-in-module,attribute-defined-outside-init
+# pylint: disable=no-name-in-module
 from pydantic import BaseModel, ValidationError
 from pymongo.errors import DuplicateKeyError
 

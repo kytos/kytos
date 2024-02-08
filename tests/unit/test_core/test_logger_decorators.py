@@ -1,6 +1,5 @@
 """Test the decorators for the loggers"""
 from logging.handlers import QueueHandler
-from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
 from kytos.core.logger_decorators import (apm_decorator, queue_decorator,
@@ -37,10 +36,10 @@ for method_name in ['debug', 'info', 'warning', 'error',
             MagicMock(__name__=method_name, __module__='logging'))
 
 
-class RootDecoratorTest(TestCase):
+class TestRootDecorator:
     """Test the root logger decorator"""
 
-    def setUp(self):
+    def setup_method(self):
         """Create decorated class for tests"""
         self.decorated_class = root_decorator(DummyLoggerClass)
 
@@ -48,17 +47,14 @@ class RootDecoratorTest(TestCase):
         """Test class initialization"""
         level = 5
         logger = self.decorated_class(level)
-        self.assertEqual(logger.name, 'root')
-        self.assertEqual(logger.level, level)
-
-    def tearDown(self):
-        pass
+        assert logger.name == 'root'
+        assert logger.level == level
 
 
-class QueueDecoratorTest(TestCase):
+class TestQueueDecorator:
     """Test the queue logger decorator"""
 
-    def setUp(self):
+    def setup_method(self):
         """Create decorated class for tests"""
         self.decorated_class = queue_decorator(DummyLoggerClass)
 
@@ -67,11 +63,11 @@ class QueueDecoratorTest(TestCase):
         name = 'test'
         level = 4
         logger = self.decorated_class(name, level)
-        self.assertEqual(logger.name, name)
-        self.assertEqual(logger.level, level)
-        self.assertEqual(len(logger.handlers), 1)
-        self.assertIsInstance(logger.handlers[0], QueueHandler)
-        self.assertFalse(logger.hasHandlers())
+        assert logger.name == name
+        assert logger.level == level
+        assert len(logger.handlers) == 1
+        assert isinstance(logger.handlers[0], QueueHandler)
+        assert not logger.hasHandlers()
 
     def test_add_remove_handler(self):
         """Test adding and removing handlers"""
@@ -81,27 +77,24 @@ class QueueDecoratorTest(TestCase):
         handler_mock = Mock()
         # Add 1 handler then remove
         logger.addHandler(handler_mock)
-        self.assertTrue(logger.hasHandlers())
-        self.assertEqual(len(logger.handlers), 1)
+        assert logger.hasHandlers()
+        assert len(logger.handlers) == 1
         logger.removeHandler(handler_mock)
-        self.assertFalse(logger.hasHandlers())
-        self.assertEqual(len(logger.handlers), 1)
+        assert not logger.hasHandlers()
+        assert len(logger.handlers) == 1
 
         # Add 1 handler twice, then remove
         logger.addHandler(handler_mock)
         logger.addHandler(handler_mock)
-        self.assertTrue(logger.hasHandlers())
+        assert logger.hasHandlers()
         logger.removeHandler(handler_mock)
-        self.assertFalse(logger.hasHandlers())
-
-    def tearDown(self):
-        pass
+        assert not logger.hasHandlers()
 
 
-class APMDecoratorTest(TestCase):
+class TestAPMDecorator:
     """Test the APM logger decorator"""
 
-    def setUp(self):
+    def setup_method(self):
         """Create decorated class for tests"""
         self.decorated_class = apm_decorator(DummyLoggerClass)
 
@@ -116,8 +109,8 @@ class APMDecoratorTest(TestCase):
         name = 'test'
         level = 3
         logger = self.decorated_class(name, level)
-        self.assertEqual(logger.name, name)
-        self.assertEqual(logger.level, level)
+        assert logger.name == name
+        assert logger.level == level
 
         log_module = 'logging'
         log_methods = ['debug', 'info', 'warning', 'error',

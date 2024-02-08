@@ -1,5 +1,4 @@
 """Interface tests."""
-# pylint: disable=attribute-defined-outside-init
 import logging
 import pickle
 from unittest.mock import MagicMock, Mock

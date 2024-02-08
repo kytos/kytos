@@ -6,7 +6,6 @@ import tempfile
 import warnings
 from collections import Counter
 from copy import copy
-from unittest import TestCase
 from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
 
 import pytest
@@ -24,10 +23,10 @@ from kytos.core.rest_api import Request
 
 
 # pylint: disable=protected-access, too-many-public-methods
-class TestController(TestCase):
+class TestController:
     """Controller tests."""
 
-    def setUp(self):
+    def setup_method(self):
         """Instantiate a controller."""
 
         self.options = KytosConfig().options['daemon']
@@ -97,10 +96,10 @@ class TestController(TestCase):
         with warnings.catch_warnings(record=True) as wrngs:
             warnings.simplefilter("always")  # trigger all warnings
             self.controller.register_rest_endpoint('x', lambda x: x, ['GET'])
-            self.assertEqual(1, len(wrngs))
+            assert 1 == len(wrngs)
             warning = wrngs[0]
-            self.assertEqual(warning.category, DeprecationWarning)
-            self.assertIn('@rest', str(warning.message))
+            assert warning.category == DeprecationWarning
+            assert '@rest' in str(warning.message)
 
     def test_loggers(self):
         """Test that all controller loggers are under kytos
@@ -108,7 +107,7 @@ class TestController(TestCase):
         """
         loggers = self.controller.loggers()
         for logger in loggers:
-            self.assertTrue(logger.name.startswith("kytos"))
+            assert logger.name.startswith("kytos")
 
     def test_debug_on(self):
         """Test the enable debug feature."""
@@ -129,9 +128,9 @@ class TestController(TestCase):
             # Check if all kytos.core loggers are in DEBUG mode.
             # All the rest must remain the same.
             if logger.name.startswith("kytos.core"):
-                self.assertTrue(logger.getEffectiveLevel(), logging.DEBUG)
+                assert logger.getEffectiveLevel(), logging.DEBUG
             else:
-                self.assertTrue(logger.getEffectiveLevel(), logging.CRITICAL)
+                assert logger.getEffectiveLevel(), logging.CRITICAL
 
     def test_debug_off(self):
         """Test the disable debug feature"""
@@ -141,7 +140,7 @@ class TestController(TestCase):
         self.controller.toggle_debug("kytos.core")
         loggers = self.controller.loggers()
         for logger in loggers:
-            self.assertTrue(logger.getEffectiveLevel(), logging.CRITICAL)
+            assert logger.getEffectiveLevel(), logging.CRITICAL
 
     @patch.object(LogManager, 'load_config_file')
     def test_debug_no_name(self, mock_load_config_file):
@@ -163,8 +162,8 @@ class TestController(TestCase):
 
     def test_debug_wrong_name(self):
         """Test the enable debug logger with wrong name."""
-        self.assertRaises(ValueError,
-                          self.controller.toggle_debug, name="foobar")
+        pytest.raises(ValueError,
+                      self.controller.toggle_debug, name="foobar")
 
     @patch('kytos.core.controller.init_apm')
     @patch('kytos.core.controller.db_conn_wait')
@@ -250,7 +249,7 @@ class TestController(TestCase):
             self.controller.create_pidfile()
 
             pid = tmp_file.read()
-            self.assertEqual(pid, b'2')
+            assert pid == b'2'
 
     @patch('kytos.core.controller.Controller.__init__')
     @patch('kytos.core.controller.Controller.start')
@@ -283,8 +282,8 @@ class TestController(TestCase):
         self.controller.started_at = 1
         status_2 = self.controller.status()
 
-        self.assertEqual(status_1, 'Stopped')
-        self.assertEqual(status_2, 'Running since 1')
+        assert status_1 == 'Stopped'
+        assert status_2 == 'Running since 1'
 
     @patch('kytos.core.controller.now')
     def test_uptime(self, mock_now):
@@ -295,8 +294,8 @@ class TestController(TestCase):
         self.controller.started_at = 1
         uptime_2 = self.controller.uptime()
 
-        self.assertEqual(uptime_1, 0)
-        self.assertEqual(uptime_2, 10)
+        assert uptime_1 == 0
+        assert uptime_2 == 10
 
     def test_metadata_endpoint(self):
         """Test metadata_endpoint method."""
@@ -306,7 +305,7 @@ class TestController(TestCase):
 
         expected_keys = ['__version__', '__author__', '__license__', '__url__',
                          '__description__']
-        self.assertEqual(list(json_metadata.keys()), expected_keys)
+        assert list(json_metadata.keys()) == expected_keys
 
     def test_notify_listeners(self):
         """Test notify_listeners method."""
@@ -323,7 +322,7 @@ class TestController(TestCase):
         """Test get_interface_by_id method when interface does not exist."""
         resp_interface = self.controller.get_interface_by_id(None)
 
-        self.assertIsNone(resp_interface)
+        assert resp_interface is None
 
     def test_get_interface_by_id__not_switch(self):
         """Test get_interface_by_id method when switch does not exist."""
@@ -335,7 +334,7 @@ class TestController(TestCase):
         interface_id = '00:00:00:00:00:00:00:01:123'
         resp_interface = self.controller.get_interface_by_id(interface_id)
 
-        self.assertIsNone(resp_interface)
+        assert resp_interface is None
 
     def test_get_interface_by_id(self):
         """Test get_interface_by_id method."""
@@ -347,7 +346,7 @@ class TestController(TestCase):
         interface_id = '00:00:00:00:00:00:00:01:123'
         resp_interface = self.controller.get_interface_by_id(interface_id)
 
-        self.assertEqual(resp_interface, interface)
+        assert resp_interface == interface
 
     def test_get_switch_by_dpid(self):
         """Test get_switch_by_dpid method."""
@@ -357,7 +356,7 @@ class TestController(TestCase):
 
         resp_switch = self.controller.get_switch_by_dpid(dpid)
 
-        self.assertEqual(resp_switch, switch)
+        assert resp_switch == switch
 
     def test_get_switch_or_create__exists(self):
         """Test status_api method when switch exists."""
@@ -369,7 +368,7 @@ class TestController(TestCase):
         connection = MagicMock()
         resp_switch = self.controller.get_switch_or_create(dpid, connection)
 
-        self.assertEqual(resp_switch, switch)
+        assert resp_switch == switch
         self.controller.buffers.conn.put.assert_called()
         ev_name = "kytos/core.switch.reconnected"
         assert self.controller.buffers.conn.put.call_args[0][0].name == ev_name
@@ -384,7 +383,7 @@ class TestController(TestCase):
         switch = self.controller.get_switch_or_create(dpid, connection)
 
         expected_switches = {'00:00:00:00:00:00:00:01': switch}
-        self.assertEqual(self.controller.switches, expected_switches)
+        assert self.controller.switches == expected_switches
         self.controller.buffers.conn.put.assert_called()
         ev_name = "kytos/core.switch.new"
         assert self.controller.buffers.conn.put.call_args[0][0].name == ev_name
@@ -397,7 +396,7 @@ class TestController(TestCase):
         connection.id = '123'
         self.controller.create_or_update_connection(connection)
 
-        self.assertEqual(self.controller.connections, {'123': connection})
+        assert self.controller.connections == {'123': connection}
 
     def test_get_connection_by_id(self):
         """Test get_connection_by_id method."""
@@ -407,7 +406,7 @@ class TestController(TestCase):
 
         resp_connection = self.controller.get_connection_by_id('123')
 
-        self.assertEqual(resp_connection, connection)
+        assert resp_connection == connection
 
     def test_remove_connection(self):
         """Test remove_connection method."""
@@ -417,7 +416,7 @@ class TestController(TestCase):
 
         self.controller.remove_connection(connection)
 
-        self.assertEqual(self.controller.connections, {})
+        assert not self.controller.connections
 
     def test_remove_switch(self):
         """Test remove_switch method."""
@@ -427,7 +426,7 @@ class TestController(TestCase):
 
         self.controller.remove_switch(switch)
 
-        self.assertEqual(self.controller.switches, {})
+        assert not self.controller.switches
 
     def test_remove_switch__error(self):
         """Test remove_switch method to error case."""
@@ -439,7 +438,7 @@ class TestController(TestCase):
 
         self.controller.remove_switch(switch_2)
 
-        self.assertEqual(self.controller.switches, {switch_1.dpid: switch_1})
+        assert self.controller.switches == {switch_1.dpid: switch_1}
 
     def test_new_connection(self):
         """Test new_connection method."""
@@ -451,7 +450,7 @@ class TestController(TestCase):
         event.source = connection
         self.controller.new_connection(event)
 
-        self.assertEqual(self.controller.connections, {'123': connection})
+        assert self.controller.connections == {'123': connection}
 
     def test_add_new_switch(self):
         """Test add_new_switch method."""
@@ -462,7 +461,7 @@ class TestController(TestCase):
         self.controller.add_new_switch(switch)
 
         expected_switches = {'00:00:00:00:00:00:00:01': switch}
-        self.assertEqual(self.controller.switches, expected_switches)
+        assert self.controller.switches == expected_switches
 
     @patch('kytos.core.controller.module_from_spec')
     @patch('kytos.core.controller.spec_from_file_location')
@@ -478,7 +477,7 @@ class TestController(TestCase):
         self.controller.options.napps = 'napps'
         self.controller._import_napp('kytos', 'napp')
 
-        self.assertEqual(sys.modules[napp_spec.name], napp_module)
+        assert sys.modules[napp_spec.name] == napp_module
         mock_spec_from_file.assert_called_with('napps.kytos.napp.main',
                                                'napps/kytos/napp/main.py')
         napp_spec.loader.exec_module.assert_called_with(napp_module)
@@ -490,7 +489,7 @@ class TestController(TestCase):
 
         self.controller.load_napp('kytos', 'napp')
 
-        self.assertEqual(self.controller.napps, {('kytos', 'napp'): napp})
+        assert self.controller.napps == {('kytos', 'napp'): napp}
 
     @patch('kytos.core.controller.Controller._import_napp')
     def test_load_napp__module_not_found(self, mock_import_napp):
@@ -500,7 +499,7 @@ class TestController(TestCase):
 
         self.controller.load_napp('kytos', 'napp')
 
-        self.assertEqual(self.controller.napps, {})
+        assert not self.controller.napps
 
     @patch('kytos.core.controller.Controller._import_napp')
     def test_load_napp__file_not_found(self, mock_import_napp):
@@ -510,7 +509,7 @@ class TestController(TestCase):
 
         self.controller.load_napp('kytos', 'napp')
 
-        self.assertEqual(self.controller.napps, {})
+        assert not self.controller.napps
 
     @patch('kytos.core.api_server.APIServer.register_napp_endpoints')
     @patch('kytos.core.controller.Controller._import_napp')
@@ -524,10 +523,10 @@ class TestController(TestCase):
         module.Main.side_effect = Exception
         mock_import_napp.return_value = module
 
-        with self.assertRaises(KytosNAppSetupException):
+        with pytest.raises(KytosNAppSetupException):
             self.controller.load_napp('kytos', 'napp')
 
-        self.assertEqual(self.controller.napps, {})
+        assert not self.controller.napps
 
     @patch('kytos.core.api_server.APIServer.register_napp_endpoints')
     @patch('kytos.core.controller.Controller._import_napp')
@@ -543,7 +542,7 @@ class TestController(TestCase):
 
         self.controller.load_napp('kytos', 'napp')
 
-        self.assertEqual(self.controller.napps, {('kytos', 'napp'): napp})
+        assert self.controller.napps == {('kytos', 'napp'): napp}
         napp.start.assert_called()
         mock_register.assert_called_with(napp)
 
@@ -595,7 +594,7 @@ class TestController(TestCase):
         """Test reload_napp_module method when module is not found."""
         mock_import_module.side_effect = ModuleNotFoundError
 
-        with self.assertRaises(ModuleNotFoundError):
+        with pytest.raises(ModuleNotFoundError):
             self.controller.reload_napp_module('kytos', 'napp', 'napp_file')
 
     @patch('kytos.core.controller.reload_module')
@@ -607,7 +606,7 @@ class TestController(TestCase):
         mock_import_module.return_value = napp_module
         mock_reload_module.side_effect = ImportError
 
-        with self.assertRaises(ImportError):
+        with pytest.raises(ImportError):
             self.controller.reload_napp_module('kytos', 'napp', 'napp_file')
 
     @patch('kytos.core.controller.reload_module')
@@ -637,7 +636,7 @@ class TestController(TestCase):
                  call('kytos', 'napp', 'main')]
         mock_reload_napp_module.assert_has_calls(calls)
         mock_load.assert_called_with('kytos', 'napp')
-        self.assertEqual(code, 200)
+        assert code == 200
 
     @patch('kytos.core.controller.Controller.unload_napp')
     @patch('kytos.core.controller.Controller.reload_napp_module')
@@ -648,7 +647,7 @@ class TestController(TestCase):
 
         code = self.controller.reload_napp('kytos', 'napp')
 
-        self.assertEqual(code, 400)
+        assert code == 400
 
     @patch('kytos.core.controller.Controller.reload_napp', return_value=200)
     def test_rest_reload_napp(self, mock_reload_napp):
@@ -662,8 +661,8 @@ class TestController(TestCase):
         resp = self.controller.rest_reload_napp(req)
 
         mock_reload_napp.assert_called_with('kytos', 'napp')
-        self.assertEqual(json.loads(resp.body.decode()), 'reloaded')
-        self.assertEqual(resp.status_code, 200)
+        assert json.loads(resp.body.decode()) == 'reloaded'
+        assert resp.status_code == 200
 
     @patch('kytos.core.controller.Controller.reload_napp')
     def test_rest_reload_all_napps(self, mock_reload_napp):
@@ -678,8 +677,8 @@ class TestController(TestCase):
         resp = self.controller.rest_reload_all_napps(req)
 
         mock_reload_napp.assert_called_with('kytos', 'napp')
-        self.assertEqual(json.loads(resp.body.decode()), 'reloaded')
-        self.assertEqual(resp.status_code, 200)
+        assert json.loads(resp.body.decode()) == 'reloaded'
+        assert resp.status_code == 200
 
     def test_init_attrs(self):
         """Test init attrs."""

@@ -15,7 +15,6 @@ logging.basicConfig(level=logging.CRITICAL)
 
 
 # pylint: disable=protected-access,too-many-public-methods
-# pylint: disable=attribute-defined-outside-init
 class TestLink():
     """Test Links."""
 

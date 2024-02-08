@@ -1,4 +1,5 @@
 """queue monitor."""
+# pylint: disable=invalid-name, unnecessary-lambda
 
 from __future__ import annotations
 
@@ -6,7 +7,7 @@ import asyncio
 import logging
 import math
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Callable, Optional
 from uuid import uuid4
 
@@ -15,7 +16,6 @@ from pydantic.dataclasses import dataclass
 
 from kytos.core.exceptions import KytosCoreException
 from kytos.core.helpers import executors, now
-from datetime import timezone
 
 LOG = logging.getLogger(__name__)
 

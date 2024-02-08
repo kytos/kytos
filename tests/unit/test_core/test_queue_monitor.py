@@ -1,3 +1,5 @@
+"""test queue_monitor."""
+
 from datetime import timedelta
 from unittest.mock import AsyncMock, MagicMock
 
@@ -62,7 +64,8 @@ class TestQueueMonitor:
         n_records = 5
         for _ in range(n_records):
             created_at = now() - timedelta(seconds=delta_secs + 1)
-            assert qmon._try_to_append(QueueRecord(size=256, created_at=created_at))
+            assert qmon._try_to_append(QueueRecord(size=256,
+                                                   created_at=created_at))
         assert len(qmon.deque) == n_records
         qmon._popleft_passed_records()
         assert not qmon.deque
@@ -168,10 +171,11 @@ class TestQueueMonitor:
         # old elements are expected to be discarded, resulting in no records
         for _ in range(n_records):
             created_at = now() - timedelta(seconds=delta_secs + 1)
-            assert qmon._try_to_append(QueueRecord(size=256, created_at=created_at))
+            assert qmon._try_to_append(QueueRecord(size=256,
+                                                   created_at=created_at))
         assert len(qmon.deque) == n_records
         records = qmon._get_records()
-        assert not len(records)
+        assert not records
         assert not qmon.deque
 
     def test_get_records_partial(self) -> None:
@@ -195,7 +199,7 @@ class TestQueueMonitor:
         # only 5 out of these 10 records are expected, given delta_secs = 5
         records = qmon._get_records()
         assert len(records) == 5
-        assert not len(qmon.deque)
+        assert not qmon.deque
 
         n_records = 2
         for i in range(n_records, 0, -1):
@@ -206,7 +210,7 @@ class TestQueueMonitor:
 
         # no records are expected now since n_records 2 < min_hits 3
         records = qmon._get_records()
-        assert not len(records)
+        assert not records
 
     def test_create_from_buffer_config(self) -> None:
         """Test create from buffer config."""

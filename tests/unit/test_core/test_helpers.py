@@ -51,7 +51,7 @@ class TestHelpers:
     @staticmethod
     def test_default_executors():
         """Test default expected executors."""
-        pools = ["app", "db", "sb"]
+        pools = ["api", "app", "db", "sb"]
         assert sorted(pools) == sorted(executors.keys())
         assert not ds_executors
 

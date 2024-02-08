@@ -22,7 +22,7 @@ def test_custom_encoder() -> None:
     assert json.loads(resp.body.decode()) == "2022-01-30T00:00:00"
 
 
-# pylint: disable=protected-access,attribute-defined-outside-init
+# pylint: disable=protected-access
 class TestAPIServer:
     """Test the class APIServer."""
 

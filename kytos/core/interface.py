@@ -569,14 +569,6 @@ class Interface(GenericEntity):  # pylint: disable=too-many-instance-attributes
             self.special_available_tags = special_available_tags
             self.special_tags = special_tags
 
-    def enable(self):
-        """Enable this interface instance.
-
-        Also enable the switch instance this interface is attached to.
-        """
-        self.switch.enable()
-        self._enabled = True
-
     def is_tag_available(self, tag: int, tag_type: str = 'vlan'):
         """Check if a tag is available."""
         with self._tag_lock:

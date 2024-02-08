@@ -2,8 +2,9 @@
 import json
 from datetime import datetime, timezone
 from socket import error as SocketError
-from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 from kytos.core import Controller
 from kytos.core.common import EntityStatus
@@ -19,10 +20,10 @@ def get_date():
 
 
 # pylint: disable=protected-access, too-many-public-methods
-class TestSwitch(TestCase):
+class TestSwitch:
     """Switch tests."""
 
-    def setUp(self):
+    def setup_method(self):
         """Instantiate a controller."""
 
         self.options = KytosConfig().options['daemon']
@@ -46,20 +47,20 @@ class TestSwitch(TestCase):
     def test_repr(self):
         """Test repr() output."""
         expected_repr = "Switch('00:00:00:00:00:00:00:01')"
-        self.assertEqual(repr(self.switch), expected_repr)
+        assert repr(self.switch) == expected_repr
 
     def test_id(self):
         """Test id property."""
-        self.assertEqual(self.switch.id, '00:00:00:00:00:00:00:01')
+        assert self.switch.id == '00:00:00:00:00:00:00:01'
 
     def test_ofp_version(self):
         """Test ofp_version property."""
-        self.assertEqual(self.switch.ofp_version, '0x04')
+        assert self.switch.ofp_version == '0x04'
 
     def test_ofp_version__none(self):
         """Test ofp_version property when connection is none."""
         self.switch.connection = None
-        self.assertIsNone(self.switch.ofp_version)
+        assert self.switch.ofp_version is None
 
     def test_update_description(self):
         """Test update_description method."""
@@ -72,11 +73,11 @@ class TestSwitch(TestCase):
 
         self.switch.update_description(desc)
 
-        self.assertEqual(self.switch.description['manufacturer'], 'mfr_desc')
-        self.assertEqual(self.switch.description['hardware'], 'hw_desc')
-        self.assertEqual(self.switch.description['software'], 'sw_desc')
-        self.assertEqual(self.switch.description['serial'], 'serial_num')
-        self.assertEqual(self.switch.description['data_path'], 'dp_desc')
+        assert self.switch.description['manufacturer'] == 'mfr_desc'
+        assert self.switch.description['hardware'] == 'hw_desc'
+        assert self.switch.description['software'] == 'sw_desc'
+        assert self.switch.description['serial'] == 'serial_num'
+        assert self.switch.description['data_path'] == 'dp_desc'
 
     def test_disable(self):
         """Test disable method."""
@@ -86,13 +87,13 @@ class TestSwitch(TestCase):
         self.switch.disable()
 
         intf.disable.assert_called()
-        self.assertFalse(self.switch._enabled)
+        assert not self.switch._enabled
 
     def test_disconnect(self):
         """Test disconnect method."""
         self.switch.disconnect()
 
-        self.assertIsNone(self.switch.connection)
+        assert self.switch.connection is None
 
     def test_get_interface_by_port_no(self):
         """Test get_interface_by_port_no method."""
@@ -103,8 +104,8 @@ class TestSwitch(TestCase):
         expected_interface_1 = self.switch.get_interface_by_port_no('1')
         expected_interface_2 = self.switch.get_interface_by_port_no('3')
 
-        self.assertEqual(expected_interface_1, interface_1)
-        self.assertIsNone(expected_interface_2)
+        assert expected_interface_1 == interface_1
+        assert expected_interface_2 is None
 
     def test_update_or_create_interface_case1(self):
         """Test update_or_create_interface method."""
@@ -113,7 +114,7 @@ class TestSwitch(TestCase):
         self.switch.interfaces = {2: interface_1}
 
         self.switch.update_or_create_interface(2, name='new_interface_2')
-        self.assertEqual(self.switch.interfaces[2].name, 'new_interface_2')
+        assert self.switch.interfaces[2].name == 'new_interface_2'
 
     def test_update_or_create_interface_case2(self):
         """Test update_or_create_interface method."""
@@ -122,8 +123,8 @@ class TestSwitch(TestCase):
         self.switch.interfaces = {2: interface_1}
 
         self.switch.update_or_create_interface(3, name='new_interface_3')
-        self.assertEqual(self.switch.interfaces[2].name, 'interface_2')
-        self.assertEqual(self.switch.interfaces[3].name, 'new_interface_3')
+        assert self.switch.interfaces[2].name == 'interface_2'
+        assert self.switch.interfaces[3].name == 'new_interface_3'
 
     def test_update_or_create_interface_case3(self):
         """Test update_or_create_interface method."""
@@ -132,8 +133,8 @@ class TestSwitch(TestCase):
         self.switch.interfaces = {2: interface_1}
 
         self.switch.update_or_create_interface(3, name='new_interface_3')
-        self.assertEqual(self.switch.interfaces[2].name, 'interface_2')
-        self.assertEqual(self.switch.interfaces[3].name, 'new_interface_3')
+        assert self.switch.interfaces[2].name == 'interface_2'
+        assert self.switch.interfaces[3].name == 'new_interface_3'
 
     def test_get_flow_by_id(self):
         """Test get_flow_by_id method."""
@@ -144,8 +145,8 @@ class TestSwitch(TestCase):
         expected_flow_1 = self.switch.get_flow_by_id('1')
         expected_flow_2 = self.switch.get_flow_by_id('3')
 
-        self.assertEqual(expected_flow_1, flow_1)
-        self.assertIsNone(expected_flow_2)
+        assert expected_flow_1 == flow_1
+        assert expected_flow_2 is None
 
     def test_is_connected__true(self):
         """Test is_connected method."""
@@ -154,13 +155,13 @@ class TestSwitch(TestCase):
         connection.is_established.return_value = True
         self.switch.connection = connection
 
-        self.assertTrue(self.switch.is_connected())
+        assert self.switch.is_connected()
 
     def test_is_connected__not_connection(self):
         """Test is_connected method when connection does not exist."""
         self.switch.connection = None
 
-        self.assertFalse(self.switch.is_connected())
+        assert not self.switch.is_connected()
 
     def test_is_connected__not_alive(self):
         """Test is_connected method when switch has connection timeout."""
@@ -170,29 +171,29 @@ class TestSwitch(TestCase):
         self.switch.connection = connection
         self.switch.lastseen = datetime(1, 1, 1, 0, 0, 0, 0, timezone.utc)
 
-        self.assertFalse(self.switch.is_connected())
+        assert not self.switch.is_connected()
 
     def test_is_active(self):
         """Test is_active method."""
         self.switch.is_connected = MagicMock()
         self.switch.is_connected.return_value = True
-        self.assertTrue(self.switch.is_active())
+        assert self.switch.is_active()
         self.switch.is_connected.return_value = False
-        self.assertFalse(self.switch.is_active())
+        assert not self.switch.is_active()
 
     def test_update_connection(self):
         """Test update_connection method."""
         connection = MagicMock()
         self.switch.update_connection(connection)
 
-        self.assertEqual(self.switch.connection, connection)
-        self.assertEqual(self.switch.connection.switch, self.switch)
+        assert self.switch.connection == connection
+        assert self.switch.connection.switch == self.switch
 
     def test_update_features(self):
         """Test update_features method."""
         self.switch.update_features('features')
 
-        self.assertEqual(self.switch.features, 'features')
+        assert self.switch.features == 'features'
 
     def test_send(self):
         """Test send method."""
@@ -204,7 +205,7 @@ class TestSwitch(TestCase):
         """Test send method to error case."""
         self.switch.connection.send.side_effect = SocketError
 
-        with self.assertRaises(SocketError):
+        with pytest.raises(SocketError):
             self.switch.send(b'data')
 
     @patch('kytos.core.switch.now', return_value=get_date())
@@ -212,14 +213,14 @@ class TestSwitch(TestCase):
         """Test update_lastseen method."""
         self.switch.update_lastseen()
 
-        self.assertEqual(self.switch.lastseen, mock_now.return_value)
+        assert self.switch.lastseen == mock_now.return_value
 
     def test_update_interface(self):
         """Test update_interface method."""
         interface = MagicMock(port_number=1)
         self.switch.update_interface(interface)
 
-        self.assertEqual(self.switch.interfaces[1], interface)
+        assert self.switch.interfaces[1] == interface
 
     def test_remove_interface(self):
         """Test remove_interface method."""
@@ -228,7 +229,7 @@ class TestSwitch(TestCase):
 
         self.switch.remove_interface(intf)
 
-        self.assertEqual(self.switch.interfaces, {})
+        assert not self.switch.interfaces
 
     def test_update_mac_table(self):
         """Test update_mac_table method."""
@@ -236,7 +237,7 @@ class TestSwitch(TestCase):
         self.switch.update_mac_table(mac, 1)
         self.switch.update_mac_table(mac, 2)
 
-        self.assertEqual(self.switch.mac2port[mac.value], {1, 2})
+        assert self.switch.mac2port[mac.value] == {1, 2}
 
     def test_last_flood(self):
         """Test last_flood method."""
@@ -246,7 +247,7 @@ class TestSwitch(TestCase):
 
         last_flood = self.switch.last_flood(ethernet_frame)
 
-        self.assertEqual(last_flood, 'timestamp')
+        assert last_flood == 'timestamp'
 
     def test_last_flood__error(self):
         """Test last_flood method to error case."""
@@ -255,7 +256,7 @@ class TestSwitch(TestCase):
 
         last_flood = self.switch.last_flood(ethernet_frame)
 
-        self.assertIsNone(last_flood)
+        assert last_flood is None
 
     @patch('kytos.core.switch.now', return_value=get_date())
     def test_should_flood(self, _):
@@ -270,8 +271,8 @@ class TestSwitch(TestCase):
         should_flood_1 = self.switch.should_flood(ethernet_frame)
         should_flood_2 = self.switch.should_flood(ethernet_frame)
 
-        self.assertTrue(should_flood_1)
-        self.assertFalse(should_flood_2)
+        assert should_flood_1
+        assert not should_flood_2
 
     @patch('kytos.core.switch.now', return_value=get_date())
     def test_update_flood_table(self, mock_now):
@@ -281,8 +282,7 @@ class TestSwitch(TestCase):
 
         self.switch.update_flood_table(ethernet_frame)
 
-        self.assertEqual(self.switch.flood_table['hash'],
-                         mock_now.return_value)
+        assert self.switch.flood_table['hash'] == mock_now.return_value
 
     def test_where_is_mac(self):
         """Test where_is_mac method."""
@@ -293,8 +293,8 @@ class TestSwitch(TestCase):
         self.switch.mac2port['00:00:00:00:00:00'] = set([1, 2, 3])
         expected_ports_2 = self.switch.where_is_mac(mac)
 
-        self.assertIsNone(expected_ports_1)
-        self.assertEqual(expected_ports_2, [1, 2, 3])
+        assert expected_ports_1 is None
+        assert expected_ports_2 == [1, 2, 3]
 
     def test_as_dict_as_json(self):
         """Test as_dict and as_json method."""
@@ -317,20 +317,19 @@ class TestSwitch(TestCase):
             'status': 'UP',
             'status_reason': []
         }
-        self.assertEqual(self.switch.as_dict(), expected_dict)
+        assert self.switch.as_dict() == expected_dict
 
         expected_json = json.dumps(expected_dict)
 
-        self.assertEqual(self.switch.as_json(), expected_json)
+        assert self.switch.as_json() == expected_json
 
     def test_switch_initial_lastseen(self):
         """Test lastseen attribute initialization."""
         connection = MagicMock()
         connection.protocol.version = 0x04
         switch = Switch('00:00:00:00:00:00:00:01', connection)
-        self.assertEqual(switch.is_active(), False)
-        self.assertEqual(switch.lastseen,
-                         datetime(1, 1, 1, 0, 0, 0, 0, timezone.utc))
+        assert switch.is_active() is False
+        assert switch.lastseen == datetime(1, 1, 1, 0, 0, 0, 0, timezone.utc)
 
     def test_status_funcs(self) -> None:
         """Test status_funcs."""

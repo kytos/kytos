@@ -1,5 +1,4 @@
 """Interface tests."""
-# pylint: disable=attribute-defined-outside-init
 import logging
 import pickle
 from unittest.mock import MagicMock, Mock
@@ -217,15 +216,6 @@ class TestInterface():
 
         self.iface.use_tags(controller, "untagged")
         assert "untagged" not in self.iface.special_available_tags["vlan"]
-
-    async def test_enable(self):
-        """Test enable method."""
-        self.iface.switch = MagicMock()
-
-        self.iface.enable()
-
-        self.iface.switch.enable.assert_called()
-        assert self.iface._enabled
 
     async def test_get_endpoint(self):
         """Test get_endpoint method."""

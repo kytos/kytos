@@ -15,6 +15,8 @@ Added
 - Added ``special_available_tags`` which stores `"untagged"` and `"any"` if they can be used from an Interface.
 - Added ``maxsize_multiplier`` on ``event_buffer_conf``, which will multiply the ``maxsize`` value of the queue. By default, all KytosEventBuffer who use a bounded queue will have ``maxsize_multiplier: 2``. This default is reasonable to work out of the box with kytos-ng core NApps. But, if you have other NApps who tend to produce too many events you might want to either increase the size of the queue with and/or increase the number of max workers in the thread pool if the event handler is running on a thread pool. Typically, you'll want to first start adjusting the number of workers in the thread pool.
 - Introduced a new ``meta`` on ``KytosBuffers``, which is meant for general core control events.
+- Added ``api`` threadpool. This is used by the ASGI server to handle requests to non async endpoints.
+- Added in configuration option ``api_concurrency_limit``, specifies the max number of concurrent API requests before rejecting the request.
 - Added ``thread_pool_queue_monitors`` and ``event_buffer_monitors`` on kytos.conf. By default, it'll detect and log full queue usage over 5 secs on event thread pools and on kytos event buffers. These alerts are for providing basic visibility per second about queues usage, which these alerts you can try to understand if indeed you have way too many events or if you need to increase the number of thread pool workers depending on the scalability and workload you have.
 
 Changed
@@ -28,10 +30,16 @@ Changed
 Fixed
 =====
 - Avoid ``kytosd`` hanging its termination when handling ``SystemExit`` with SIGTERM
+- Enabling an interface does not longer enables its switch
 
 Deprecated
 ==========
 - Deleted ``vlan_pool`` from ``kytos.conf`` in favor of ``Interface.tag_ranges`` which updates from ``kytos/topology`` API endpoint, ``v3/interfaces/{intf_id}/tag_ranges``.
+
+General Information
+===================
+- ``kytos.conf.template`` has changed you might want to regenerate ``kytos.conf`` if you want to set non default values
+
 
 [2023.1.0] - 2023-06-05
 ***********************

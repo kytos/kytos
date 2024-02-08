@@ -1,5 +1,4 @@
 """Test kytos.core.helpers module."""
-from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from kytos.core import helpers
@@ -33,7 +32,7 @@ def test_load_spec(monkeypatch, minimal_openapi_spec_dict) -> None:
     assert spec.accessor.lookup == minimal_openapi_spec_dict
 
 
-class TestHelpers(TestCase):
+class TestHelpers:
     """Test the helpers methods."""
 
     @staticmethod
@@ -52,7 +51,7 @@ class TestHelpers(TestCase):
     @staticmethod
     def test_default_executors():
         """Test default expected executors."""
-        pools = ["app", "db", "sb"]
+        pools = ["api", "app", "db", "sb"]
         assert sorted(pools) == sorted(executors.keys())
         assert not ds_executors
 
@@ -95,12 +94,12 @@ class TestHelpers(TestCase):
         """Test get_time method passing a string as parameter."""
         date = get_time("2000-01-01T00:30:00")
 
-        self.assertEqual(date.year, 2000)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
-        self.assertEqual(date.hour, 0)
-        self.assertEqual(date.minute, 30)
-        self.assertEqual(date.second, 0)
+        assert date.year == 2000
+        assert date.month == 1
+        assert date.day == 1
+        assert date.hour == 0
+        assert date.minute == 30
+        assert date.second == 0
 
     def test_get_time__dict(self):
         """Test get_time method passing a dict as parameter."""
@@ -111,15 +110,15 @@ class TestHelpers(TestCase):
                          "minute": 30,
                          "second": 00})
 
-        self.assertEqual(date.year, 2000)
-        self.assertEqual(date.month, 1)
-        self.assertEqual(date.day, 1)
-        self.assertEqual(date.hour, 0)
-        self.assertEqual(date.minute, 30)
-        self.assertEqual(date.second, 0)
+        assert date.year == 2000
+        assert date.month == 1
+        assert date.day == 1
+        assert date.hour == 0
+        assert date.minute == 30
+        assert date.second == 0
 
     def test_get_time__none(self):
         """Test get_time method by not passing a parameter."""
         date = get_time()
 
-        self.assertIsNone(date)
+        assert date is None

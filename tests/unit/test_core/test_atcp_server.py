@@ -16,7 +16,6 @@ class TestKytosServer:
 
     def setup_method(self):
         """Start new asyncio loop and a test TCP server."""
-        # pylint: disable=attribute-defined-outside-init
         self._test_address = ('127.0.0.1', 4138)
 
     async def test_connection_to_server(self):
@@ -73,7 +72,6 @@ class TestKytosServerProtocol:
 
     def setup_method(self):
         """Instantiate a KytosServerProtocol."""
-        # pylint: disable=attribute-defined-outside-init
         self.connection = MagicMock()
         self.connection.address = 'addr'
         self.connection.port = 123

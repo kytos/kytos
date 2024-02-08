@@ -1,14 +1,13 @@
 """kytos.core.napps tests."""
-import unittest
 from unittest.mock import MagicMock, patch
 
 from kytos.core.napps import KytosNApp, NApp
 
 
-class TestNapp(unittest.TestCase):
+class TestNapp:
     """NApp tests."""
 
-    def setUp(self):
+    def setup_method(self):
         """Execute steps before each tests."""
         self.napp = NApp(username='kytos', name='napp', version='1.0',
                          repository='any')
@@ -17,49 +16,49 @@ class TestNapp(unittest.TestCase):
 
     def test__str__(self):
         """Test __str__ method."""
-        self.assertEqual(str(self.napp), 'kytos/napp')
+        assert str(self.napp) == 'kytos/napp'
 
     def test__repr__(self):
         """Test __repr__ method."""
-        self.assertEqual(repr(self.napp), 'NApp(kytos/napp)')
+        assert repr(self.napp) == 'NApp(kytos/napp)'
 
     def test_id(self):
         """Test id property."""
-        self.assertEqual(self.napp.id, 'kytos/napp')
+        assert self.napp.id == 'kytos/napp'
 
     @patch('kytos.core.napps.NApp._has_valid_repository', return_value=True)
     def test_uri(self, _):
         """Test uri property."""
-        self.assertEqual(self.napp.uri, 'any/kytos/napp-1.0')
+        assert self.napp.uri == 'any/kytos/napp-1.0'
 
     @patch('kytos.core.napps.NApp._has_valid_repository', return_value=False)
     def test_uri__false(self, _):
         """Test uri property when repository is invalid."""
-        self.assertEqual(self.napp.uri, '')
+        assert not self.napp.uri
 
     def test_package_url(self):
         """Test package_url property."""
-        self.assertEqual(self.napp.package_url, 'any/kytos/napp-1.0.napp')
+        assert self.napp.package_url == 'any/kytos/napp-1.0.napp'
 
     @patch('kytos.core.napps.NApp._has_valid_repository', return_value=False)
     def test_package_url__none(self, _):
         """Test package_url property when uri does not exist."""
-        self.assertEqual(self.napp.package_url, '')
+        assert not self.napp.package_url
 
     def test_create_from_uri(self):
         """Test create_from_uri method."""
         napp = NApp.create_from_uri('file://any/kytos/napp:1.0')
 
-        self.assertEqual(napp.username, 'kytos')
-        self.assertEqual(napp.name, 'napp')
-        self.assertEqual(napp.version, '1.0')
-        self.assertEqual(napp.repository, 'file://any')
+        assert napp.username == 'kytos'
+        assert napp.name == 'napp'
+        assert napp.version == '1.0'
+        assert napp.repository == 'file://any'
 
     def test_create_from_uri__not(self):
         """Test create_from_uri method when uri does not match."""
         napp = NApp.create_from_uri('')
 
-        self.assertIsNone(napp)
+        assert napp is None
 
     @patch('builtins.open')
     def test_create_from_json(self, mock_open):
@@ -73,10 +72,10 @@ class TestNapp(unittest.TestCase):
         mock_open.return_value.__enter__.return_value = data_file
         napp = NApp.create_from_json('filename')
 
-        self.assertEqual(napp.username, 'kytos')
-        self.assertEqual(napp.name, 'napp')
-        self.assertEqual(napp.version, '1.0')
-        self.assertEqual(napp.repository, 'any')
+        assert napp.username == 'kytos'
+        assert napp.name == 'napp'
+        assert napp.version == '1.0'
+        assert napp.repository == 'any'
 
     def test_create_from_dict(self):
         """Test create_from_dict method."""
@@ -84,15 +83,15 @@ class TestNapp(unittest.TestCase):
                 'repository': 'any'}
         napp = NApp.create_from_dict(data)
 
-        self.assertEqual(napp.username, 'kytos')
-        self.assertEqual(napp.name, 'napp')
-        self.assertEqual(napp.version, '1.0')
-        self.assertEqual(napp.repository, 'any')
+        assert napp.username == 'kytos'
+        assert napp.name == 'napp'
+        assert napp.version == '1.0'
+        assert napp.repository == 'any'
 
     def test_match(self):
         """Test match method."""
         for pattern in ['kytos/napp', 'desc', 'tag1', 'tag2']:
-            self.assertTrue(self.napp.match(pattern))
+            assert self.napp.match(pattern)
 
     @patch('os.mkdir')
     @patch('tarfile.open')
@@ -115,14 +114,14 @@ class TestNapp(unittest.TestCase):
         mock_mkdir.assert_called_with('/tmp/kytos-napp-stem-123')
         tar.extractall.assert_called_with('/tmp/kytos-napp-stem-123')
         repo_file.write.assert_called_with('any\n')
-        self.assertEqual(str(extracted), '/tmp/kytos-napp-stem-123')
+        assert str(extracted) == '/tmp/kytos-napp-stem-123'
 
     @patch('kytos.core.napps.NApp._has_valid_repository', return_value=False)
     def test_download__none(self, _):
         """Test download method when package_url does not exist."""
         extracted = self.napp.download()
 
-        self.assertIsNone(extracted)
+        assert extracted is None
 
 
 # pylint: disable=no-member
@@ -140,15 +139,15 @@ class KytosNAppChild(KytosNApp):
 
 
 # pylint: disable=protected-access
-class TestKytosNApp(unittest.TestCase):
+class TestKytosNApp:
     """KytosNApp tests."""
 
     # pylint: disable=arguments-differ
     @patch('kytos.core.napps.base.Event')
     @patch('builtins.open')
-    def setUp(self, *args):
+    def setup_method(self, *args):
         """Execute steps before each tests."""
-        (mock_open, mock_event) = args
+        (_, mock_open, mock_event) = args
         self.event = MagicMock()
         mock_event.return_value = self.event
 
@@ -166,7 +165,7 @@ class TestKytosNApp(unittest.TestCase):
 
     def test_napp_id(self):
         """Test napp_id property."""
-        self.assertEqual(self.kytos_napp.napp_id, 'kytos/napp')
+        assert self.kytos_napp.napp_id == 'kytos/napp'
 
     @patch('builtins.open')
     def test_load_json(self, mock_open):
@@ -181,10 +180,10 @@ class TestKytosNApp(unittest.TestCase):
 
         self.kytos_napp._load_json()
 
-        self.assertEqual(self.kytos_napp.username, 'kytos')
-        self.assertEqual(self.kytos_napp.name, 'napp')
-        self.assertEqual(self.kytos_napp.version, '1.0')
-        self.assertEqual(self.kytos_napp.repository, 'any')
+        assert self.kytos_napp.username == 'kytos'
+        assert self.kytos_napp.name == 'napp'
+        assert self.kytos_napp.version == '1.0'
+        assert self.kytos_napp.repository == 'any'
 
     def test_execute_as_loop_and_run(self):
         """Test execute_as_loop and run methods."""
@@ -193,7 +192,7 @@ class TestKytosNApp(unittest.TestCase):
 
         self.kytos_napp.run()
 
-        self.assertEqual(self.kytos_napp.execute.call_count, 2)
+        assert self.kytos_napp.execute.call_count == 2
 
     def test_shutdown_handler(self):
         """Test _shutdown_handler method."""

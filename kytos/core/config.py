@@ -158,6 +158,7 @@ class KytosConfig():
             'listen': '0.0.0.0',
             'port': 6653,
             'api_traceback_on_500': True,
+            'api_concurrency_limit': 'threadpool',
             'foreground': False,
             'protocol_name': '',
             'enable_entities_by_default': False,
@@ -284,6 +285,9 @@ class KytosConfig():
         )
         options.thread_pool_queue_monitors = _parse_json(
             options.thread_pool_queue_monitors
+        )
+        options.api_concurrency_limit = _parse_json(
+            options.api_concurrency_limit
         )
 
         return options

@@ -732,6 +732,12 @@ class TestControllerAsync:
         controller.load_napps.assert_called()
         controller.api_server.start_web_ui.assert_called()
 
+        # These monitors are expected by default
+        expected_buffer_qmons = ["msg_in", "msg_out", "raw", "app"]
+        expected_tp_qmons = ["sb", "app", "db"]
+        expected_len = len(expected_tp_qmons) + len(expected_buffer_qmons)
+        assert len(controller.qmonitors) == expected_len
+
     async def test_stop_controller(self, controller):
         """Test stop_controller method."""
         controller.loop = MagicMock()
@@ -742,6 +748,7 @@ class TestControllerAsync:
         controller._buffers = MagicMock()
         controller.api_server = api_server
         controller.napp_dir_listener = napp_dir_listener
+        controller.stop_queue_monitors = MagicMock()
 
         controller.stop_controller()
 
@@ -751,6 +758,7 @@ class TestControllerAsync:
         controller.unload_napps.assert_called()
         controller.server.shutdown.assert_called()
         controller.loop.stop.assert_called()
+        controller.stop_queue_monitors.assert_called()
 
     async def test_raw_event_handler(self, controller):
         """Test raw_event_handler async method by handling a shutdown event."""

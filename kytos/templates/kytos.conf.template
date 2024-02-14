@@ -75,6 +75,35 @@ jwt_secret = {{ jwt_secret }}
 # - api: Not used by events, but instead API requests.
 thread_pool_max_workers = {"sb": 256, "db": 256, "app": 512, "api": 160}
 
+# Queue monitors are for detecting and alerting certain queuing thresholds over a delta time.
+# Each queue size will be sampled every second. min_hits / delta_secs needs to be <= 1
+# hits/seconds is measured as a fixed window if the sampled rate is over min_hits/second, it'll log the records at the end of each window
+# You can also set log_at_most_n > 0 if you'd like to have extra information about the sampled "n" hits
+
+# The queue size is the internal of the thread pool, it's unbounded, if it's queuing too much you might try to want to increase the number of thread pools workers
+thread_pool_queue_monitors =
+  [
+    {
+      "min_hits": 5,
+      "delta_secs": 5,
+      "min_queue_full_percent": 100,
+      "log_at_most_n": 0,
+      "queues": ["sb", "app", "db"]
+    }
+  ]
+
+# The queue size is derived frome each buffer queue
+event_buffer_monitors =
+  [
+    {
+      "min_hits": 5,
+      "delta_secs": 5,
+      "min_queue_full_percent": 100,
+      "log_at_most_n": 0,
+      "buffers": ["msg_in", "msg_out", "raw", "app"]
+    }
+  ]
+
 # Configuration for KytosEventBuffers
 # Valid event buffers are "msg_in", "msg_out", "app", "conn", and "raw".
 # Valid queue types are:

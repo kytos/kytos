@@ -6,11 +6,6 @@ All notable changes to the kytos project will be documented in this file.
 UNRELEASED - Under development
 ******************************
 
-General Information
-===================
-
-- ``kytos.conf.template`` has changed you might want to regenerate ``kytos.conf`` if you want to set non default values
-
 Added
 =====
 - Added ``Interface.tag_ranges`` as ``dict[str, list[list[int]]]`` as replacement for ``vlan_pool`` settings.
@@ -22,6 +17,7 @@ Added
 - Introduced a new ``meta`` on ``KytosBuffers``, which is meant for general core control events.
 - Added ``api`` threadpool. This is used by the ASGI server to handle requests to non async endpoints.
 - Added in configuration option ``api_concurrency_limit``, specifies the max number of concurrent API requests before rejecting the request.
+- Added ``thread_pool_queue_monitors`` and ``event_buffer_monitors`` on kytos.conf. By default, it'll detect and log full queue usage over 5 secs on event thread pools and on kytos event buffers. These alerts are for providing basic visibility per second about queues usage, which these alerts you can try to understand if indeed you have way too many events or if you need to increase the number of thread pool workers depending on the scalability and workload you have.
 
 Changed
 =======
@@ -39,6 +35,11 @@ Fixed
 Deprecated
 ==========
 - Deleted ``vlan_pool`` from ``kytos.conf`` in favor of ``Interface.tag_ranges`` which updates from ``kytos/topology`` API endpoint, ``v3/interfaces/{intf_id}/tag_ranges``.
+
+General Information
+===================
+- ``kytos.conf.template`` has changed you might want to regenerate ``kytos.conf`` if you want to set non default values
+
 
 [2023.1.0] - 2023-06-05
 ***********************
